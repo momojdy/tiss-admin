@@ -96,10 +96,6 @@ export function ContentScreen() {
               byteSize: file.size!, altText: { en: String(values.alt || '') },
               status: String(values.status) as 'draft' | 'published' | 'archived',
             });
-            if (values.reason && String(values.reason).trim().length >= 3) {
-              const { error: auditError } = await supabase.from('wantiss_admin_audit_log').select('id').limit(0);
-              if (auditError) setError('Asset uploaded, but audit visibility is restricted.');
-            }
             await reload(); toast('Asset uploaded with ID ' + id + '.');
           } catch (e) { return e instanceof Error ? e.message : 'Asset upload failed.'; }
           finally { setBusy(false); }
@@ -132,7 +128,7 @@ export function ContentScreen() {
 
   return (
     <ScrollView contentContainerStyle={{ padding: 16, paddingBottom: 36, gap: 14 }}>
-      <Heading title="Content & assets" subtitle="Manage shared published content and private media." />
+      <Heading title="Content & assets" sub="Manage shared published content and private media." />
       {error ? <Card><Txt size={12} color={c.or}>{error}</Txt></Card> : null}
       <View style={{ flexDirection: 'row', flexWrap: 'wrap', gap: 8 }}>
         <OutlineBtn primary onPress={newContent} disabled={busy}>New content version</OutlineBtn>
