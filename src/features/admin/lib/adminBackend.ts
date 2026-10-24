@@ -88,15 +88,15 @@ export async function reviewBusinessApplication(id: string, status: 'approved' |
 export async function saveCmsVersion(input: {
   key: string; locale: string; payload: Record<string, unknown>; status?: CmsStatus;
 }) {
-  const { data, error } = await supabase.rpc('wantiss_admin_upsert_cms_version', {
-    p_content_key: input.key, p_locale: input.locale, p_payload: input.payload, p_status: input.status || 'draft',
+  const { data, error } = await supabase.rpc('wantiss_admin_save_cms_draft', {
+    p_content_key: input.key, p_locale: input.locale, p_payload: input.payload,
   });
   if (error) throw new Error(error.code === '42501' ? 'You do not have permission to save this content state.' : error.message);
   return String(data);
 }
 export async function uploadCmsAsset(input: {
   key: string; uri: string; fileName: string; contentType: string; byteSize: number;
-  altText?: Record<string, string>; status?: CmsStatus;
+  altText?: Record<string, string>; status?: 'draft';
 }) {
   if (!['image/jpeg', 'image/png', 'image/webp', 'image/gif', 'video/mp4'].includes(input.contentType)) {
     throw new Error('This asset type is not supported.');
@@ -113,13 +113,35 @@ export async function uploadCmsAsset(input: {
     contentType: input.contentType, upsert: false,
   });
   if (uploadError) throw new Error(uploadError.message);
-  const { data, error } = await supabase.rpc('wantiss_admin_register_cms_asset', {
+  const { data, error } = await supabase.rpc('wantiss_admin_upsert_asset', {
     p_asset_key: input.key, p_storage_path: path, p_content_type: input.contentType,
-    p_byte_size: input.byteSize, p_alt_text: input.altText || {}, p_status: input.status || 'draft',
+    p_byte_size: input.byteSize, p_alt_text: input.altText || {}, p_status: 'draft',
   });
   if (error) {
     await supabase.storage.from('wantiss-cms-assets').remove([path]);
     throw new Error(error.code === '42501' ? 'You do not have permission to publish or upload this asset.' : error.message);
   }
   return String(data);
+}
+
+export async function listCmsAssets() {
+  const { data, error } = await supabase.rpc('wantiss_admin_list_cms_assets');
+  if (error) throw new Error(error.code === '42501' ? 'You do not have permission to view assets.' : 'Assets are unavailable.');
+  return data || [];
+}
+export async function publishCmsVersion(id: string) {
+  const { error } = await supabase.rpc('wantiss_admin_publish_cms_version', { p_content_id: id });
+  if (error) throw new Error(error.code === '42501' ? 'Publishing requires content.publish manage permission.' : error.message);
+}
+export async function archiveCmsVersion(id: string) {
+  const { error } = await supabase.rpc('wantiss_admin_archive_cms_version', { p_content_id: id });
+  if (error) throw new Error(error.code === '42501' ? 'Archiving requires content.archive manage permission.' : error.message);
+}
+export async function publishCmsAsset(id: string) {
+  const { error } = await supabase.rpc('wantiss_admin_set_cms_asset_status', { p_asset_id: id, p_status: 'published' });
+  if (error) throw new Error(error.code === '42501' ? 'Publishing requires content.assets manage permission.' : error.message);
+}
+export async function archiveCmsAsset(id: string) {
+  const { error } = await supabase.rpc('wantiss_admin_set_cms_asset_status', { p_asset_id: id, p_status: 'archived' });
+  if (error) throw new Error(error.code === '42501' ? 'Archiving requires content.archive manage permission.' : error.message);
 }
