@@ -1,6 +1,7 @@
 import { loadAdminDomain, listStaff } from './adminBackend';
 import { supabase } from './supabase';
 import { db, bump } from '../state/db';
+import { GRANTS, REQUESTS } from '../state/grants';
 import type { Account, Application, ServiceRow, StaffMember, SupportCase, Transaction } from '../data/types';
 
 const str = (v: unknown) => v == null ? '' : String(v);
@@ -9,6 +10,7 @@ const num = (v: unknown) => Number(v || 0);
 
 function clearDemoRecords() {
   db.APPS = []; db.INV = []; db.SVC = []; db.STAFF = []; db.CASES = []; db.NS = [];
+  db.ROLES = {}; db.RR = {}; GRANTS.splice(0, GRANTS.length); REQUESTS.splice(0, REQUESTS.length);
   db.CUST = []; db.BN = []; db.PRM = []; db.ANN = []; db.MEDIA = []; db.CH = []; db.AUD = [];
   db.SET = []; db.PAYO = []; db.RECO = []; db.ACC = []; db.PCS = []; db.PZS = []; db.WINS = [];
   db.PSUB = []; db.CSUBS = []; db.STG = []; db.GM = []; db.GD = []; db.GN = [];
