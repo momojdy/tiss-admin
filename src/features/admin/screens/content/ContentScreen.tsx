@@ -34,9 +34,8 @@ export function ContentScreen() {
     setError('');
     const [contentResult, assetResult] = await Promise.all([
       supabase.from('wantiss_cms_content').select('id,content_key,locale,version,status,payload,updated_at').order('updated_at', { ascending: false }).limit(300),
-      listCmsAssets(),
+      listCmsAssets().catch((error) => error instanceof Error ? error : new Error('Assets are unavailable.')),
     ]);
-    if (contentResult.error && contentResult.error.code !== '42501') setError('Content records are unavailable. Check the CMS migration and permission grants.');
     if (contentResult.error) setError(contentResult.error.code === '42501' ? 'You do not have permission to view content.' : 'Content records are unavailable. Check the CMS migration and permission grants.');
     if (assetResult instanceof Error) setError(assetResult.message);
     setContent(contentResult.data || []);
@@ -146,7 +145,8 @@ export function ContentScreen() {
           key: row.id, main: row.content_key + ' · ' + row.locale + ' · v' + row.version,
           sub: row.status + ' · updated ' + new Date(row.updated_at).toLocaleString(),
           right: <View style={{ flexDirection: 'row', gap: 4, flexWrap: 'wrap' }}>
-            {row.status !== 'published' ? <OutlineBtn onPress={() => cloneStatus(row, 'published')}>Publish</OutlineBtn> : null}
+            <OutlineBtn onPress={() => Alert.alert('Preview · ' + row.content_key, JSON.stringify(row.payload, null, 2))}>Preview</OutlineBtn>
+            {row.status === 'draft' ? <OutlineBtn onPress={() => cloneStatus(row, 'published')}>Publish</OutlineBtn> : null}
             {row.status !== 'archived' ? <OutlineBtn onPress={() => cloneStatus(row, 'archived')}>Archive</OutlineBtn> : null}
             {row.status !== 'draft' ? <Pill>{row.status}</Pill> : null}
           </View>,
