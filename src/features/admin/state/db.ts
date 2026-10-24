@@ -28,7 +28,7 @@ export const authDb: Record<string, AuthRecord> = clone(authSeed);
 /** The clock. The prototype's other demo data (applications, restrictions...) is dated around 2026-10-17, so the demo keeps that
  *  day. Set USE_REAL_CLOCK = true when you connect the backend: every date rule then follows the device's local date
  *  (read once at app start) and the demo grants and requests move with it. */
-export const USE_REAL_CLOCK = false;
+export const USE_REAL_CLOCK = true;
 export const DEMO_DAY = '2026-10-17';
 export const TODAY = USE_REAL_CLOCK ? realToday() : DEMO_DAY;
 export const TABS = ['Overview', 'Operations', 'Ecosystem', 'Content', 'Finance', 'Analytics', 'People'] as const;
