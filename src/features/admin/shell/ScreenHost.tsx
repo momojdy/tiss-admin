@@ -1,5 +1,5 @@
 import { ReactNode, useEffect, useRef } from 'react';
-import { ScrollView, View } from 'react-native';
+import { ScrollView, type ScrollViewInstance, View } from 'react-native';
 import { secLv, SCREEN_SECTION } from '../state/access';
 import { useDb } from '../state/db';
 import { useRequestAccess } from '../overlays/GrantDrawers';
@@ -48,7 +48,7 @@ function NotPorted({ id }: { id: ScreenId }) {
 export function ScreenHost() {
   useDb();
   const { screen, navKey, keepScroll } = useNav();
-  const ref = useRef<ScrollView>(null);
+  const ref = useRef<ScrollViewInstance>(null);
   useEffect(() => { if (!keepScroll) ref.current?.scrollTo({ y: 0, animated: false }); }, [navKey, keepScroll]);
   const allowed = SCREEN_SECTION[screen] === 0 || secLv(SCREEN_SECTION[screen]) > 0;
   const render = SCREENS[screen];
