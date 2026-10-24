@@ -1,4 +1,4 @@
-import { loadAdminDomain, listStaff } from './adminBackend';
+import { loadAdminDomain, listStaff, listAccountRestrictions } from './adminBackend';
 import { supabase } from './supabase';
 import { db, bump } from '../state/db';
 import { GRANTS, REQUESTS } from '../state/grants';
@@ -18,7 +18,7 @@ function clearDemoRecords() {
 
 export async function hydrateAdminState() {
   clearDemoRecords();
-  const [applications, businesses, transactions, profiles, support, staff, audit] = await Promise.all([
+  const [applications, businesses, transactions, profiles, support, staff, audit, restrictions] = await Promise.all([
     loadAdminDomain('operations').catch(() => []),
     loadAdminDomain('ecosystem').catch(() => []),
     loadAdminDomain('finance').catch(() => []),
@@ -26,6 +26,7 @@ export async function hydrateAdminState() {
     loadAdminDomain('support').catch(() => []),
     listStaff().catch(() => []),
     supabase.rpc('wantiss_admin_audit_read').then(({ data, error }) => error ? [] : (data || [])),
+    listAccountRestrictions().catch(() => []),
   ]);
 
   db.APPS = applications.map((x): Application => ({
@@ -51,6 +52,15 @@ export async function hydrateAdminState() {
     id: str(x.id), n: str(x.full_name || x.email || 'Account'), type: x.role === 'vendor' ? 'Vendor' : x.role === 'seller' ? 'Seller' : 'Customer',
     svc: [], orders: 0, wallet: 0, listings: 0, r: [], hist: [], appeal: 0, paused: 0,
   }));
+
+  db.ACC.forEach(account => {
+    account.r = restrictions.filter(r => r.target_user_id === account.id && (!r.ends_at || Date.parse(r.ends_at) > Date.now())).map(r => ({
+      id: r.id, kind: r.kind, scope: r.scope, reason: r.reason, notes: r.notes,
+      start: r.starts_at.slice(0, 10), end: r.ends_at ? r.ends_at.slice(0, 10) : '',
+      by: r.created_by, notified: r.notify_user ? 1 : 0,
+    }));
+    account.paused = account.r.some(r => r.kind === 'Suspension' && (r.scope === 'all' || r.scope === 'Entire Wantiss account')) ? 1 : 0;
+  });
 
   db.CASES = support.map((x): SupportCase => ({
     id: str(x.id), t: str(x.subject), svc: 'Support', pri: 'Normal', o: str(x.email), st: str(x.status), msgs: [[str(x.created_at), str(x.message)]],
