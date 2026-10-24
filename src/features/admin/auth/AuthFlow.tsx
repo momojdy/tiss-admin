@@ -2,7 +2,7 @@ import { useEffect, useState } from 'react';
 import { KeyboardAvoidingView, Platform, Pressable, ScrollView, View } from 'react-native';
 import { LinearGradient } from 'expo-linear-gradient';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
-import * as Linking from 'expo-linking';
+import { Linking } from 'react-native';
 import { useTheme } from '../theme/ThemeContext';
 import { Pill } from '../ui/Controls';
 import { Txt } from '../ui/Txt';
@@ -90,15 +90,15 @@ export function AuthFlow({ notice, noticeBad, onDone }: Props) {
         await supabase.auth.signOut();
         throw new Error('This account has no staff invitation. Ask a Super Admin to invite you.');
       }
-      if (staff.invited_at && data.user.user_metadata?.wantiss_invite_accepted !== true) {
-        setView('invite');
-        message('Invitation verified. Set a password to activate your staff access.');
-        return;
-      }
       if (staff.status !== 'active' || (staff.invitation_expires_at && Date.parse(staff.invitation_expires_at) <= Date.now())) {
         await supabase.auth.signOut();
         setView('blocked');
         throw new Error(staff.status === 'suspended' ? 'Your staff access is suspended. Contact a Super Admin.' : staff.status === 'revoked' ? 'Your staff access has been revoked.' : 'This invitation expired. Ask a Super Admin to send a new invitation.');
+      }
+      if (staff.invited_at && data.user.user_metadata?.wantiss_invite_accepted !== true) {
+        setView('invite');
+        message('Invitation verified. Set a password to activate your staff access.');
+        return;
       }
       session.who = staff.display_name;
       session.view = staff.display_name;
