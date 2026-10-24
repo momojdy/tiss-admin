@@ -31,7 +31,7 @@ export function AuthFlow({ notice, noticeBad, onDone }: Props) {
 
   useEffect(() => {
     let active = true;
-    const consumeAuthLink = async (rawUrl: string | null) => {
+    const consumeAuthLink = async (rawUrl: string | null | undefined) => {
       if (!rawUrl || !active) return;
       try {
         const parsed = new URL(rawUrl);
