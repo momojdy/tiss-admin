@@ -18,7 +18,7 @@ import { useToast } from '../ui/Toast';
 import { Txt } from '../ui/Txt';
 import { useTheme } from '../theme/ThemeContext';
 import { useNav } from '../shell/Nav';
-import { inviteStaff as inviteStaffBackend, setStaffStatus as setStaffStatusBackend, grantStaffPermission as grantStaffPermissionBackend, revokeStaffPermission as revokeStaffPermissionBackend, listPermissionGrants } from '../lib/adminBackend';
+import { inviteStaff as inviteStaffBackend, setStaffStatus as setStaffStatusBackend, grantStaffPermission as grantStaffPermissionBackend, revokeStaffPermission as revokeStaffPermissionBackend, listPermissionGrants, applyAccountRestriction as applyAccountRestrictionBackend, liftAccountRestriction as liftAccountRestrictionBackend, updateAccountRestriction as updateAccountRestrictionBackend } from '../lib/adminBackend';
 import { hydrateAdminState } from '../lib/hydrateAdminState';
 import { StaffGrants } from './GrantDrawers';
 import { drawers, useOpen } from './registry';
@@ -296,10 +296,24 @@ export function AccountDrawer({ id, close }: { id: string; close: () => void }) 
         ...(ban ? [{ id: 'cf', label: 'Type BAN to confirm', type: 'text' as const, required: true }] : []),
       ],
       buttons: [{ label: ban ? 'Ban account' : 'Apply', key: 's', primary: true }],
-      onSubmit: (_k, v) => {
-        const er = restrictAccount(a, kind, { reason: String(v.rs), notes: String(v.nt), scope: String(v.sc), start: String(v.st), end: String(v.en ?? ''), notify: !!v.nf, confirm: String(v.cf ?? '') }, { susp: canSusp, ban: canBan });
-        if (er) return er;
-        done((ban ? 'Banned · ' : 'Paused · ') + a.n);
+      onSubmit: async (_k, v) => {
+        if (!(ban ? canBan : canSusp)) return 'You do not have permission for this action.';
+        if (ban && String(v.cf ?? '') !== 'BAN') return 'Type BAN in capitals to confirm.';
+        if (!a.id) return 'This account is not linked to a Supabase user.';
+        const start = String(v.st || '');
+        const end = String(v.en ?? '');
+        if (!start || (!ban && end && end < start)) return 'The restriction dates are invalid.';
+        try {
+          await applyAccountRestrictionBackend({
+            userId: a.id, kind, scope: v.sc === 'Entire Wantiss account' ? 'all' : String(v.sc),
+            reason: String(v.rs), notes: String(v.nt ?? ''),
+            startsAt: new Date(start + 'T00:00:00.000Z').toISOString(),
+            endsAt: !ban && end ? new Date(end + 'T23:59:59.999Z').toISOString() : null,
+            notifyUser: !!v.nf,
+          });
+          await hydrateAdminState();
+          done((ban ? 'Banned · ' : 'Paused · ') + a.n);
+        } catch (e) { return e instanceof Error ? e.message : 'The restriction could not be saved.'; }
       },
     });
   };
@@ -311,12 +325,26 @@ export function AccountDrawer({ id, close }: { id: string; close: () => void }) 
     form({ title: (r.kind === 'Ban' ? 'Reinstate ' : 'Lift suspension · ') + a.n, sub: r.kind === 'Ban' ? 'Reinstating a banned account is recorded and needs Super Admin approval.' : 'Access returns for: ' + scopeTxt(r) + '.',
       fields: [{ id: 'nt', label: 'Reason for reinstating', type: 'textarea', required: true }, { id: 'nf', label: 'Notify the account holder', type: 'check', value: true }],
       buttons: [{ label: r.kind === 'Ban' ? 'Reinstate account' : 'Lift suspension', key: 's', primary: true }],
-      onSubmit: (_k, x) => { liftRestriction(a, r, String(x.nt), !!x.nf); done('Reinstated · ' + a.n); } });
+      onSubmit: async (_k, x) => {
+        try {
+          await liftAccountRestrictionBackend(r.id, String(x.nt));
+          await hydrateAdminState();
+          done('Reinstated · ' + a.n);
+        } catch (e) { return e instanceof Error ? e.message : 'The restriction could not be lifted.'; }
+      } });
   };
   const editSusp = (r: Restriction) => form({ title: 'Edit suspension · ' + a.n, sub: 'Scope: ' + scopeTxt(r) + '. Started ' + r.start + '.',
     fields: [{ id: 'en', label: 'New end date (empty keeps it until lifted)', type: 'date', value: r.end }, { id: 'nt', label: 'Reason for the change', type: 'textarea', required: true }],
     buttons: [{ label: 'Save changes', key: 's', primary: true }],
-    onSubmit: (_k, x) => { const er = editSuspension(a, r, String(x.en), String(x.nt)); if (er) return er; done('Suspension updated'); } });
+    onSubmit: async (_k, x) => {
+      const end = String(x.en || '');
+      if (end && end < r.start) return 'The end date cannot be before the start date.';
+      try {
+        await updateAccountRestrictionBackend(r.id, end ? new Date(end + 'T23:59:59.999Z').toISOString() : null, String(x.nt));
+        await hydrateAdminState();
+        done('Suspension updated');
+      } catch (e) { return e instanceof Error ? e.message : 'The suspension could not be updated.'; }
+    } });
   const uphold = () => form({ title: 'Uphold ban · ' + a.n, sub: 'The ban stays in force and the appeal is closed.', fields: [{ id: 'nt', label: 'Decision note', type: 'textarea', required: true }],
     buttons: [{ label: 'Uphold ban', key: 's', primary: true }], onSubmit: (_k, x) => { upholdBan(a, String(x.nt)); done('Ban upheld'); } });
 
