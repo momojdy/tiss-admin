@@ -26,14 +26,14 @@ export function AuthFlow({ notice, noticeBad, onDone }: Props) {
   const [bad, setBad] = useState(!!noticeBad);
   const [busy, setBusy] = useState(false);
 
+  const message = (text: string, isBad = false) => { setNoticeText(text); setBad(isBad); };
+
   useEffect(() => {
     const { data: listener } = supabase.auth.onAuthStateChange((event) => {
       if (event === 'PASSWORD_RECOVERY') { setView('reset'); message('Choose a new password from your verified reset link.'); }
     });
     return () => listener.subscription.unsubscribe();
   }, []);
-
-  const message = (text: string, isBad = false) => { setNoticeText(text); setBad(isBad); };
   const signIn = async () => {
     const e = email.trim().toLowerCase();
     if (!emailOk(e) || !password) return message('Enter your work email and password.', true);
