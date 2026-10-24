@@ -82,7 +82,7 @@ export function AuthFlow({ notice, noticeBad, onDone }: Props) {
       }
       const { data: staff, error: staffError } = await supabase
         .from('wantiss_admin_staff')
-        .select('user_id,display_name,status,role,invitation_expires_at')
+        .select('user_id,display_name,status,role,invitation_expires_at,invited_at')
         .eq('user_id', data.user.id)
         .maybeSingle();
       if (staffError) throw new Error('Staff access could not be verified. Try again later.');
