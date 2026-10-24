@@ -16,6 +16,10 @@ export const session = {
 };
 
 export const RIGHTS = db.RIGHTS;
+let serverGrants: { permission_key: string; access_level: string; expires_at: string | null; revoked_at: string | null }[] = [];
+export const setServerGrants = (rows: typeof serverGrants) => { serverGrants = rows; };
+const levelRank = (level: string) => level === 'manage' ? 3 : level === 'edit' ? 2 : level === 'view' ? 1 : 0;
+const permissionLevel = (key: string) => serverGrants.filter(g => g.permission_key === key && !g.revoked_at && (!g.expires_at || Date.parse(g.expires_at) > Date.now())).reduce((n, g) => Math.max(n, levelRank(g.access_level)), 0);
 export const LN = ['None', 'View', 'Edit'];
 
 export const nm = (s: StaffMember): StaffMember => {
@@ -49,8 +53,14 @@ export const staffByName = (n: string) => db.STAFF.find((s) => s.n === n);
 /** The staff member the interface currently follows. */
 export const me = (): StaffMember => staffByName(session.view) || db.STAFF[0];
 export const realMe = (): StaffMember | undefined => (session.who ? staffByName(session.who) : undefined);
-export const hasRight = (r: string) => acs(me()).rights.includes(r);
-export const secLv = (i: number) => acs(me()).lv[i];
+export const hasRight = (r: string) => session.userId ? session.status === 'active' && (session.role === 'super_admin' || permissionLevel(r.toLowerCase().replace(/[^a-z0-9]+/g, '.')) >= 1) : acs(me()).rights.includes(r);
+export const secLv = (i: number) => {
+  if (!session.userId) return acs(me()).lv[i] ?? 0;
+  if (session.status !== 'active') return 0;
+  if (session.role === 'super_admin') return 2;
+  const key = String(db.SEC[i] || '').toLowerCase().replace(/[^a-z0-9]+/g, '.').replace(/^\\.|\\.$/g, '');
+  return Math.min(2, permissionLevel(key));
+};
 
 export const lastSuperAdmin = (n: string) => {
   const sa = db.STAFF.filter((s) => s.st === 'Active' && s.role === 'Super Admin');
