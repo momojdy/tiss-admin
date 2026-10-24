@@ -43,13 +43,6 @@ export function AuthFlow({ notice, noticeBad, onDone }: Props) {
         if (tokenHash && (type === 'invite' || type === 'recovery' || type === 'signup' || type === 'email')) {
           const { error } = await supabase.auth.verifyOtp({ token_hash: tokenHash, type: type as 'invite' | 'recovery' | 'signup' | 'email' });
           if (error) throw error;
-        } else {
-          const accessToken = hash.get('access_token') || query.get('access_token');
-          const refreshToken = hash.get('refresh_token') || query.get('refresh_token');
-          if (accessToken && refreshToken) {
-            const { error } = await supabase.auth.setSession({ access_token: accessToken, refresh_token: refreshToken });
-            if (error) throw error;
-          }
         }
         if (!active) return;
         if (type === 'invite' || parsed.pathname.includes('accept-invite')) {
