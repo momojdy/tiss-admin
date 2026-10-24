@@ -12,6 +12,7 @@ import { EcosystemScreen } from '../screens/ecosystem/EcosystemScreen';
 import { ServiceHubScreen } from '../screens/ecosystem/ServiceHubScreen';
 import { FinanceScreen } from '../screens/finance/FinanceScreen';
 import { PeopleScreen } from '../screens/people/PeopleScreen';
+import { ContentScreen } from '../screens/content/ContentScreen';
 
 /** Screens ported so far. The rest show a clear "not ported yet" card (see README). */
 const SCREENS: Partial<Record<ScreenId, () => ReactNode>> = {
@@ -20,6 +21,7 @@ const SCREENS: Partial<Record<ScreenId, () => ReactNode>> = {
   hub: () => <ServiceHubScreen />,
   finance: () => <FinanceScreen />,
   people: () => <PeopleScreen />,
+  content: () => <ContentScreen />,
 };
 
 function NoAccess({ sec }: { sec: number }) {
