@@ -42,6 +42,7 @@ function AuthGate() {
   useEffect(() => {
     let mounted = true;
     const restore = async () => {
+      if (session.who) return;
       const { data } = await supabase.auth.getSession();
       if (!mounted || !data.session) return;
       const { data: staff, error } = await supabase.from('wantiss_admin_staff').select('user_id,display_name,status,role,invitation_expires_at').eq('user_id', data.session.user.id).maybeSingle();
@@ -50,6 +51,9 @@ function AuthGate() {
       session.who = staff.display_name; session.view = staff.display_name; session.last = Date.now(); session.userId = staff.user_id; session.email = data.session.user.email || null; session.role = staff.role; session.status = staff.status; const { data: grants } = await supabase.from('wantiss_admin_permission_grants').select('permission_key,access_level,expires_at,revoked_at').eq('staff_user_id', data.session.user.id); setServerGrants(grants || []); await hydrateAdminState(); bump();
     };
     void restore();
+    const { data: authListener } = supabase.auth.onAuthStateChange((event) => {
+      if (event === 'SIGNED_IN') void Promise.resolve().then(restore);
+    });
     const t = setInterval(() => {
       if (!session.who) return;
       expireStaff();
@@ -62,7 +66,7 @@ function AuthGate() {
         bump();
       }
     }, 30000);
-    return () => { mounted = false; clearInterval(t); };
+    return () => { mounted = false; clearInterval(t); authListener.subscription.unsubscribe(); };
   }, []);
   if (!session.who) return <AuthFlow notice={notice} noticeBad onDone={() => setNotice(undefined)} />;
   return <Frame />;
