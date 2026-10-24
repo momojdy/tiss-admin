@@ -28,7 +28,7 @@ AppState.addEventListener('change', state => {
   else supabase.auth.stopAutoRefresh();
 });
 
-const handleAuthUrl = async (incoming: string | null) => {
+const handleAuthUrl = async (incoming: string | null | undefined) => {
   if (!incoming) return;
   try {
     const parsed = new URL(incoming);
