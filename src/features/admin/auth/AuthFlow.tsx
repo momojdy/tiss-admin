@@ -10,6 +10,7 @@ import { emailOk, passwordError } from './authLogic';
 import { supabase } from '../lib/supabase';
 import { session, setServerGrants } from '../state/access';
 import { bump } from '../state/db';
+import { hydrateAdminState } from '../lib/hydrateAdminState';
 
 type View_ = 'in' | 'forgot' | 'sent' | 'reset' | 'blocked';
 interface Props { notice?: string; noticeBad?: boolean; onDone: () => void }
@@ -68,6 +69,7 @@ export function AuthFlow({ notice, noticeBad, onDone }: Props) {
       session.status = staff.status;
       const { data: grants } = await supabase.from('wantiss_admin_permission_grants').select('permission_key,access_level,expires_at,revoked_at').eq('staff_user_id', data.user.id);
       setServerGrants(grants || []);
+      await hydrateAdminState();
       bump();
       onDone();
     } catch (err) {
