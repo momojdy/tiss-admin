@@ -13,7 +13,7 @@ import { session, setServerGrants } from '../state/access';
 import { bump } from '../state/db';
 import { hydrateAdminState } from '../lib/hydrateAdminState';
 
-type View_ = 'in' | 'forgot' | 'sent' | 'reset' | 'invite' | 'blocked';
+type View_ = 'in' | 'forgot' | 'sent' | 'reset' | 'invite' | 'bootstrap' | 'blocked';
 interface Props { notice?: string; noticeBad?: boolean; onDone: () => void }
 
 export function AuthFlow({ notice, noticeBad, onDone }: Props) {
@@ -23,6 +23,7 @@ export function AuthFlow({ notice, noticeBad, onDone }: Props) {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [confirm, setConfirm] = useState('');
+  const [bootstrapSecret, setBootstrapSecret] = useState('');
   const [noticeText, setNoticeText] = useState(notice || '');
   const [bad, setBad] = useState(!!noticeBad);
   const [busy, setBusy] = useState(false);
@@ -97,8 +98,9 @@ export function AuthFlow({ notice, noticeBad, onDone }: Props) {
         .maybeSingle();
       if (staffError) throw new Error('Staff access could not be verified. Try again later.');
       if (!staff) {
-        await supabase.auth.signOut();
-        throw new Error('This account has no staff invitation. Ask a Super Admin to invite you.');
+        setView('bootstrap');
+        message('No staff administrator exists yet. The first Super Admin must use the one-time bootstrap secret.');
+        return;
       }
       if (staff.status !== 'active' || (staff.invitation_expires_at && Date.parse(staff.invitation_expires_at) <= Date.now())) {
         await supabase.auth.signOut();
@@ -124,6 +126,23 @@ export function AuthFlow({ notice, noticeBad, onDone }: Props) {
       onDone();
     } catch (err) {
       message(err instanceof Error ? err.message : 'Unable to sign in. Try again.', true);
+    } finally { setBusy(false); }
+  };
+  const bootstrapFirstAdmin = async () => {
+    if (!bootstrapSecret.trim()) return message('Enter the one-time bootstrap secret configured in Supabase.', true);
+    setBusy(true);
+    try {
+      const { data, error } = await supabase.functions.invoke('wantiss-admin-bootstrap', {
+        body: {},
+        headers: { 'x-wantiss-bootstrap-secret': bootstrapSecret.trim() },
+      });
+      if (error || data?.error) throw new Error('Bootstrap failed. Verify the one-time secret and your confirmed Supabase Auth account.');
+      setBootstrapSecret('');
+      setView('in');
+      message('First Super Admin created. Sign in again to load your access.');
+      await signIn();
+    } catch (e) {
+      message(e instanceof Error ? e.message : 'Bootstrap failed. Verify the one-time secret and your confirmed account.', true);
     } finally { setBusy(false); }
   };
   const sendReset = async () => {
@@ -180,6 +199,14 @@ export function AuthFlow({ notice, noticeBad, onDone }: Props) {
               <View style={{ alignItems: 'flex-end', marginBottom: 6 }}><LinkText label="Forgot password?" onPress={() => { setView('forgot'); message(''); }} /></View>
               <PrimaryButton label="Sign in" onPress={signIn} busy={busy} busyLabel="Signing in…" />
               <View style={{ marginTop: 14 }}><NoticeBox>Staff accounts are created by a Super Admin invitation. Self-registration is disabled.</NoticeBox></View>
+            </>}
+            {view === 'bootstrap' && <>
+              <Txt size={22.1} lh={1.08}>{'Initialize staff\nadministration'}</Txt>
+              <Txt size={13} mut style={{ marginTop: 6, marginBottom: 14 }}>This one-time step is available only while no staff records exist. It requires a verified Supabase Auth account and the secret configured in the Supabase Edge Function.</Txt>
+              {noticeText ? <NoticeBox bad={bad}>{noticeText}</NoticeBox> : null}
+              <AuthField label="One-time bootstrap secret" value={bootstrapSecret} onChangeText={setBootstrapSecret} error={undefined} password autoCapitalize="none" autoCorrect={false} />
+              <PrimaryButton label="Create first Super Admin" onPress={bootstrapFirstAdmin} busy={busy} busyLabel="Initializing…" />
+              <SecondaryButton label="Back to sign in" onPress={() => { setView('in'); setBootstrapSecret(''); message(''); void supabase.auth.signOut(); }} />
             </>}
             {view === 'forgot' && <>
               <Txt size={22.1} lh={1.08}>{'Reset your\npassword'}</Txt>
