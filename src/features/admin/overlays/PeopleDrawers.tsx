@@ -58,22 +58,22 @@ export function StaffDrawer({ id, close }: { id: string; close: () => void }) {
   const suspend = () => form({ title: 'Suspend access · ' + id, sub: 'The role and permissions are kept so access can be restored. Active sessions end now.',
     fields: [{ id: 'r', label: 'Reason', type: 'select', options: ['Security concern', 'Under investigation', 'Leave of absence', 'Other'], required: true }, { id: 'nt', label: 'Internal note', type: 'textarea' }, { id: 'en', label: 'Restore automatically on (optional, YYYY-MM-DD)', type: 'date' }],
     buttons: [{ label: 'Suspend access', key: 's', primary: true }],
-    onSubmit: (_k, v) => { const er = suspendStaff(id, String(v.r), String(v.nt), String(v.en)); if (er) return er; reopen('staff', id); toast('Access suspended. Active sessions ended.'); } });
+    onSubmit: async (_k, v) => { if (!s.userId) return 'This staff record is not linked to Supabase Auth.'; await setStaffStatusBackend(s.userId, 'suspended', [String(v.r), String(v.nt)].filter(Boolean).join(': ')); await hydrateAdminState(); reopen('staff', id); toast('Access suspended. Active sessions ended.'); } });
   const restore = () => form({ title: 'Restore access · ' + id, sub: 'Their previous role and permissions return.',
     fields: [{ id: 'nt', label: 'Reason', type: 'textarea', required: true }], buttons: [{ label: 'Restore access', key: 's', primary: true }],
-    onSubmit: (_k, v) => { restoreStaff(id, String(v.nt)); reopen('staff', id); toast('Access restored'); } });
+    onSubmit: async (_k, v) => { if (!s.userId) return 'This staff record is not linked to Supabase Auth.'; await setStaffStatusBackend(s.userId, 'active', String(v.nt)); await hydrateAdminState(); reopen('staff', id); toast('Access restored'); } });
   const revoke = () => form({ title: 'Revoke all access · ' + id,
     sub: 'Removes the role and every individual grant, and ends active sessions. Their customer account, orders and audit records are kept. Open applications become Unassigned.',
     fields: [{ id: 'r', label: 'Reason', type: 'select', options: ['Left the company', 'Security breach', 'Role ended', 'Other'], required: true }, { id: 'nt', label: 'Internal note', type: 'textarea', required: true }, { id: 'cf', label: 'Type REVOKE to confirm', type: 'text', required: true }],
     buttons: [{ label: 'Revoke all access', key: 's', primary: true }],
-    onSubmit: (_k, v) => { const er = revokeStaff(id, String(v.r), String(v.nt), String(v.cf)); if (er) return er; reopen('staff', id); toast('All staff access revoked. Records kept.'); } });
+    onSubmit: async (_k, v) => { if (String(v.cf) !== 'REVOKE') return 'Type REVOKE to confirm.'; if (!s.userId) return 'This staff record is not linked to Supabase Auth.'; await setStaffStatusBackend(s.userId, 'revoked', [String(v.r), String(v.nt)].join(': ')); await hydrateAdminState(); reopen('staff', id); toast('All staff access revoked. Records kept.'); } });
   const reinstate = () => form({ title: 'Reinstate · ' + id, sub: 'Starts with the role template only. No old individual grants return.',
     fields: [{ id: 'ro', label: 'Role template', type: 'select', options: Object.keys(db.ROLES), required: true }, { id: 'nt', label: 'Reason', type: 'textarea', required: true }],
     buttons: [{ label: 'Reinstate staff', key: 's', primary: true }],
-    onSubmit: (_k, v) => { reinstateStaff(id, String(v.ro), String(v.nt)); reopen('staff', id); toast('Reinstated as ' + v.ro); } });
-  const resend = () => { resendInvite(id); close(); bump(); toast('Invitation resent to ' + id); };
+    onSubmit: async (_k, v) => { if (!s.userId) return 'This staff record is not linked to Supabase Auth.'; await setStaffStatusBackend(s.userId, 'active', String(v.nt) + ' · role remains server-assigned'); await hydrateAdminState(); reopen('staff', id); toast('Staff access restored.'); } });
+  const resend = () => toast('Ask a Super Admin to resend the invitation after verifying the email address.');
   const cancel = () => form({ title: 'Cancel invitation', sub: id + ' will no longer be able to join.', fields: [], buttons: [{ label: 'Cancel invitation', key: 's', primary: true }],
-    onSubmit: () => { cancelInvite(id); reopen('staff', id); toast('Invitation cancelled'); } });
+    onSubmit: async () => { if (!s.userId) return 'This invitation is not linked to Supabase Auth.'; await setStaffStatusBackend(s.userId, 'revoked', 'Invitation cancelled by Super Admin'); await hydrateAdminState(); reopen('staff', id); toast('Invitation cancelled'); } });
 
   const P = REQ.permissions;
   let actions: React.ReactNode = null;
