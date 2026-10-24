@@ -189,7 +189,7 @@ function EditAccessSheet({ name, onClose, onSaved }: { name: string; onClose: ()
       <Field spec={{ id: 'until', label: 'Expires on (optional, YYYY-MM-DD)', type: 'date' }} value={until} onChange={(v) => setUntil(String(v))} />
       <Field spec={{ id: 'why', label: 'Reason', type: 'textarea', required: true }} value={why} onChange={(v) => { setWhy(String(v)); setError(''); }} />
       {error ? <Txt size={12} color={c.or} style={{ marginVertical: 8 }}>{error}</Txt> : null}
-      <OutlineBtn primary onPress={() => { void save(); }} disabled={busy}>Grant access</OutlineBtn>
+      <OutlineBtn primary onPress={() => { void save(); }}>Grant access</OutlineBtn>
       <Txt size={13} weight={500} style={{ marginTop: 16, marginBottom: 6 }}>Existing grants</Txt>
       <ListRows empty="No individual grants." rows={grants.map(g => ({
         key: g.id,
