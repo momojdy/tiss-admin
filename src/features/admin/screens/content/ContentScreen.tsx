@@ -131,7 +131,7 @@ export function ContentScreen() {
       <Heading title="Content & assets" sub="Manage shared published content and private media." />
       {error ? <Card><Txt size={12} color={c.or}>{error}</Txt></Card> : null}
       <View style={{ flexDirection: 'row', flexWrap: 'wrap', gap: 8 }}>
-        <OutlineBtn primary onPress={newContent} disabled={busy}>New content version</OutlineBtn>
+        <OutlineBtn primary onPress={() => { newContent(); }}>New content version</OutlineBtn>
         <OutlineBtn onPress={() => { void pickAsset(); }} disabled={busy}>Upload asset</OutlineBtn>
         <OutlineBtn onPress={() => { void reload(); }} disabled={busy}>Refresh</OutlineBtn>
       </View>
