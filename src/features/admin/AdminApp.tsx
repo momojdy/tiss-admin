@@ -17,6 +17,7 @@ import { idleExpired, leaveApp, sessionStillValid, touch } from './auth/authLogi
 import { session, expireStaff, setServerGrants } from './state/access';
 import { bump, useDb } from './state/db';
 import { supabase } from './lib/supabase';
+import { hydrateAdminState } from './lib/hydrateAdminState';
 import './overlays/ApplicationDrawers';
 import './overlays/TransactionDrawers';
 import './overlays/PeopleDrawers';
@@ -46,7 +47,7 @@ function AuthGate() {
       const { data: staff, error } = await supabase.from('wantiss_admin_staff').select('user_id,display_name,status,role').eq('user_id', data.session.user.id).maybeSingle();
       if (!mounted) return;
       if (error || !staff || staff.status !== 'active' || !data.session.user.email_confirmed_at) { await supabase.auth.signOut(); return; }
-      session.who = staff.display_name; session.view = staff.display_name; session.last = Date.now(); session.userId = staff.user_id; session.email = data.session.user.email || null; session.role = staff.role; session.status = staff.status; const { data: grants } = await supabase.from('wantiss_admin_permission_grants').select('permission_key,access_level,expires_at,revoked_at').eq('staff_user_id', data.session.user.id); setServerGrants(grants || []); bump();
+      session.who = staff.display_name; session.view = staff.display_name; session.last = Date.now(); session.userId = staff.user_id; session.email = data.session.user.email || null; session.role = staff.role; session.status = staff.status; const { data: grants } = await supabase.from('wantiss_admin_permission_grants').select('permission_key,access_level,expires_at,revoked_at').eq('staff_user_id', data.session.user.id); setServerGrants(grants || []); await hydrateAdminState(); bump();
     };
     void restore();
     const t = setInterval(() => {
