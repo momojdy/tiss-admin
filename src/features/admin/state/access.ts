@@ -9,6 +9,10 @@ export const session = {
   /** name the interface currently follows (differs from `who` while previewing) */
   view: 'momo',
   last: Date.now(),
+  userId: null as string | null,
+  email: null as string | null,
+  role: null as string | null,
+  status: null as string | null,
 };
 
 export const RIGHTS = db.RIGHTS;
