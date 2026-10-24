@@ -1,0 +1,19 @@
+{
+ "GRANTS": [
+  {"id":"G-0001","who":"Staff A","kind":"section","sec":4,"right":"","level":1,"item":"Q3 refund report","why":"Reconcile two escalated refund cases","start":"2026-10-14","end":"2026-10-21","by":"momo","reqId":"AR-0001","st":"Active","closed":"","closedBy":"","closeNote":""},
+  {"id":"G-0002","who":"Staff B","kind":"section","sec":1,"right":"","level":2,"item":"Application queue backlog","why":"Clearing the backlog until the new reviewer starts","start":"2026-10-05","end":"","by":"momo","reqId":"AR-0002","st":"Active","closed":"","closedBy":"","closeNote":""},
+  {"id":"G-0003","who":"Staff C","kind":"right","sec":-1,"right":"Issue refunds","level":1,"item":"Refund WP-0015","why":"Customer waiting on a double charge","start":"2026-10-10","end":"2026-10-15","by":"momo","reqId":"AR-0003","st":"Expired","closed":"2026-10-15","closedBy":"System","closeNote":"Reached its end date"},
+  {"id":"G-0004","who":"Staff D","kind":"section","sec":5,"right":"","level":2,"item":"Conversion dashboard","why":"Prepare the monthly funnel review","start":"2026-10-12","end":"2026-10-30","by":"momo","reqId":"AR-0004","st":"Revoked","closed":"2026-10-15","closedBy":"momo","closeNote":"Project paused"},
+  {"id":"G-0005","who":"Staff A","kind":"right","sec":-1,"right":"Export data","level":1,"item":"Weekly partner list","why":"Send the list to the partnerships team","start":"2026-10-16","end":"2026-10-18","by":"momo","reqId":"AR-0005","st":"Active","closed":"","closedBy":"","closeNote":""}
+ ],
+ "REQUESTS": [
+  {"id":"AR-0001","by":"Staff A","kind":"section","sec":4,"right":"","level":1,"item":"Q3 refund report","why":"Reconcile two escalated refund cases","ask":"1 week","when":"2026-10-14","st":"Approved","decidedBy":"momo","decidedWhen":"2026-10-14","note":"","grantId":"G-0001"},
+  {"id":"AR-0002","by":"Staff B","kind":"section","sec":1,"right":"","level":2,"item":"Application queue backlog","why":"Clearing the backlog until the new reviewer starts","ask":"Not sure","when":"2026-10-05","st":"Approved","decidedBy":"momo","decidedWhen":"2026-10-05","note":"Permanent for now, review in a month","grantId":"G-0002"},
+  {"id":"AR-0003","by":"Staff C","kind":"right","sec":-1,"right":"Issue refunds","level":1,"item":"Refund WP-0015","why":"Customer waiting on a double charge","ask":"3 days","when":"2026-10-10","st":"Approved","decidedBy":"momo","decidedWhen":"2026-10-10","note":"","grantId":"G-0003"},
+  {"id":"AR-0004","by":"Staff D","kind":"section","sec":5,"right":"","level":2,"item":"Conversion dashboard","why":"Prepare the monthly funnel review","ask":"2 weeks","when":"2026-10-12","st":"Approved","decidedBy":"momo","decidedWhen":"2026-10-12","note":"","grantId":"G-0004"},
+  {"id":"AR-0005","by":"Staff A","kind":"right","sec":-1,"right":"Export data","level":1,"item":"Weekly partner list","why":"Send the list to the partnerships team","ask":"1 day","when":"2026-10-16","st":"Approved","decidedBy":"momo","decidedWhen":"2026-10-16","note":"","grantId":"G-0005"},
+  {"id":"AR-0006","by":"Staff C","kind":"section","sec":4,"right":"","level":1,"item":"Payout hold list","why":"A customer is asking about a held payout","ask":"3 days","when":"2026-10-17","st":"Pending","decidedBy":"","decidedWhen":"","note":"","grantId":""},
+  {"id":"AR-0007","by":"Staff B","kind":"right","sec":-1,"right":"Ban accounts","level":1,"item":"Seller account W-2041","why":"Repeated policy violations","ask":"1 day","when":"2026-10-09","st":"Declined","decidedBy":"momo","decidedWhen":"2026-10-09","note":"Ban decisions stay with Super Admin","grantId":""},
+  {"id":"AR-0008","by":"Staff A","kind":"section","sec":3,"right":"","level":2,"item":"Homepage banner copy","why":"Fix a typo in the live banner","ask":"1 week","when":"2026-10-17","st":"Pending","decidedBy":"","decidedWhen":"","note":"","grantId":""}
+ ]
+}

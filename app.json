@@ -1,0 +1,12 @@
+{
+  "expo": {
+    "name": "Wantiss Admin",
+    "slug": "wantiss-admin",
+    "version": "0.9.0",
+    "orientation": "portrait",
+    "userInterfaceStyle": "automatic",
+    "newArchEnabled": true,
+    "ios": { "supportsTablet": false },
+    "android": { "adaptiveIcon": { "backgroundColor": "#eef0e4" } }
+  }
+}
