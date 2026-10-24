@@ -47,7 +47,7 @@ export function AuthFlow({ notice, noticeBad, onDone }: Props) {
       }
       const { data: staff, error: staffError } = await supabase
         .from('wantiss_admin_staff')
-        .select('user_id,display_name,status,role')
+        .select('user_id,display_name,status,role,invitation_expires_at')
         .eq('user_id', data.user.id)
         .maybeSingle();
       if (staffError) throw new Error('Staff access could not be verified. Try again later.');
@@ -55,10 +55,10 @@ export function AuthFlow({ notice, noticeBad, onDone }: Props) {
         await supabase.auth.signOut();
         throw new Error('This account has no staff invitation. Ask a Super Admin to invite you.');
       }
-      if (staff.status !== 'active') {
+      if (staff.status !== 'active' || (staff.invitation_expires_at && Date.parse(staff.invitation_expires_at) <= Date.now())) {
         await supabase.auth.signOut();
         setView('blocked');
-        throw new Error(staff.status === 'suspended' ? 'Your staff access is suspended. Contact a Super Admin.' : 'Your staff access has been revoked.');
+        throw new Error(staff.status === 'suspended' ? 'Your staff access is suspended. Contact a Super Admin.' : staff.status === 'revoked' ? 'Your staff access has been revoked.' : 'This invitation expired. Ask a Super Admin to send a new invitation.');
       }
       session.who = staff.display_name;
       session.view = staff.display_name;
