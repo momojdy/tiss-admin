@@ -184,3 +184,10 @@ export async function liftAccountRestriction(restrictionId: string, reason: stri
   });
   if (error) throw new Error(error.code === '42501' ? 'You do not have permission to lift account restrictions.' : error.message);
 }
+
+export async function updateAccountRestriction(restrictionId: string, endsAt: string | null, reason: string) {
+  const { error } = await supabase.rpc('wantiss_admin_update_account_restriction', {
+    p_restriction_id: restrictionId, p_ends_at: endsAt, p_reason: reason,
+  });
+  if (error) throw new Error(error.code === '42501' ? 'You do not have permission to edit account restrictions.' : error.message);
+}
