@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import { KeyboardAvoidingView, Platform, Pressable, ScrollView, View } from 'react-native';
 import { LinearGradient } from 'expo-linear-gradient';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
@@ -24,6 +24,13 @@ export function AuthFlow({ notice, noticeBad, onDone }: Props) {
   const [noticeText, setNoticeText] = useState(notice || '');
   const [bad, setBad] = useState(!!noticeBad);
   const [busy, setBusy] = useState(false);
+
+  useEffect(() => {
+    const { data: listener } = supabase.auth.onAuthStateChange((event) => {
+      if (event === 'PASSWORD_RECOVERY') { setView('reset'); message('Choose a new password from your verified reset link.'); }
+    });
+    return () => listener.subscription.unsubscribe();
+  }, []);
 
   const message = (text: string, isBad = false) => { setNoticeText(text); setBad(isBad); };
   const signIn = async () => {
