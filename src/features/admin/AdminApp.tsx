@@ -16,6 +16,7 @@ import { AuthFlow } from './auth/AuthFlow';
 import { idleExpired, leaveApp, sessionStillValid, touch } from './auth/authLogic';
 import { session, expireStaff } from './state/access';
 import { bump, useDb } from './state/db';
+import { supabase } from './lib/supabase';
 import './overlays/ApplicationDrawers';
 import './overlays/TransactionDrawers';
 import './overlays/PeopleDrawers';
@@ -38,14 +39,29 @@ function AuthGate() {
   useDb();
   const [notice, setNotice] = useState<string | undefined>();
   useEffect(() => {
+    let mounted = true;
+    const restore = async () => {
+      const { data } = await supabase.auth.getSession();
+      if (!mounted || !data.session) return;
+      const { data: staff, error } = await supabase.from('wantiss_admin_staff').select('user_id,display_name,status,role').eq('user_id', data.session.user.id).maybeSingle();
+      if (!mounted) return;
+      if (error || !staff || staff.status !== 'active' || !data.session.user.email_confirmed_at) { await supabase.auth.signOut(); return; }
+      session.who = staff.display_name; session.view = staff.display_name; session.last = Date.now(); session.userId = staff.user_id; session.email = data.session.user.email || null; session.role = staff.role; session.status = staff.status; bump();
+    };
+    void restore();
     const t = setInterval(() => {
       if (!session.who) return;
       expireStaff();
       if (idleExpired()) { leaveApp(); setNotice('You were signed out after 30 minutes of inactivity.'); }
       else if (!sessionStillValid()) { leaveApp(); setNotice('Your access changed. Please sign in again.'); }
-      else bump();
+      else {
+        void supabase.from('wantiss_admin_staff').select('status').eq('user_id', session.userId || '').maybeSingle().then(({ data }) => {
+          if (!data || data.status !== 'active') { leaveApp(); setNotice('Your access changed. Please sign in again.'); }
+        });
+        bump();
+      }
     }, 30000);
-    return () => clearInterval(t);
+    return () => { mounted = false; clearInterval(t); };
   }, []);
   if (!session.who) return <AuthFlow notice={notice} noticeBad onDone={() => setNotice(undefined)} />;
   return <Frame />;
