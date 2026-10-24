@@ -51,7 +51,7 @@ export function ContentScreen() {
       { id: 'key', label: 'Content key', type: 'text', required: true, placeholder: 'goodies.home.hero' },
       { id: 'locale', label: 'Locale', type: 'select', options: ['en', 'fr', 'ht', 'es', 'zh'], value: 'en', required: true },
       { id: 'payload', label: 'Content payload (JSON)', type: 'textarea', required: true, value: '{}' },
-      { id: 'status', label: 'Initial status', type: 'select', options: ['draft', 'published', 'archived'], value: 'draft', required: true },
+      { id: 'status', label: 'Initial status', type: 'select', options: ['draft', 'published'], value: 'draft', required: true },
     ],
     buttons: [{ label: 'Save version', key: 'save', primary: true }],
     onSubmit: async (_key, values) => {
@@ -107,8 +107,8 @@ export function ContentScreen() {
   };
 
   const setAssetStatus = async (asset: AssetRow, status: 'draft' | 'published' | 'archived') => {
-    const { error: rpcError } = await supabase.rpc('wantiss_admin_set_asset_status', {
-      p_asset_id: asset.id, p_status: status, p_reason: 'Status changed in CMS asset manager',
+    const { error: rpcError } = await supabase.rpc('wantiss_admin_set_cms_asset_status', {
+      p_asset_id: asset.id, p_status: status,
     });
     if (rpcError) { setError(rpcError.code === '42501' ? 'You do not have permission to change this asset status.' : rpcError.message); return; }
     await reload(); toast('Asset status changed to ' + status + '.');
