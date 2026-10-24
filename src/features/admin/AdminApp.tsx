@@ -14,7 +14,7 @@ import { AccountSheet } from './shell/AccountSheet';
 import { NotificationsSheet } from './shell/NotificationsSheet';
 import { AuthFlow } from './auth/AuthFlow';
 import { idleExpired, leaveApp, sessionStillValid, touch } from './auth/authLogic';
-import { session, expireStaff } from './state/access';
+import { session, expireStaff, setServerGrants } from './state/access';
 import { bump, useDb } from './state/db';
 import { supabase } from './lib/supabase';
 import './overlays/ApplicationDrawers';
@@ -46,7 +46,7 @@ function AuthGate() {
       const { data: staff, error } = await supabase.from('wantiss_admin_staff').select('user_id,display_name,status,role').eq('user_id', data.session.user.id).maybeSingle();
       if (!mounted) return;
       if (error || !staff || staff.status !== 'active' || !data.session.user.email_confirmed_at) { await supabase.auth.signOut(); return; }
-      session.who = staff.display_name; session.view = staff.display_name; session.last = Date.now(); session.userId = staff.user_id; session.email = data.session.user.email || null; session.role = staff.role; session.status = staff.status; bump();
+      session.who = staff.display_name; session.view = staff.display_name; session.last = Date.now(); session.userId = staff.user_id; session.email = data.session.user.email || null; session.role = staff.role; session.status = staff.status; const { data: grants } = await supabase.from('wantiss_admin_permission_grants').select('permission_key,access_level,expires_at,revoked_at').eq('staff_user_id', data.session.user.id); setServerGrants(grants || []); bump();
     };
     void restore();
     const t = setInterval(() => {
