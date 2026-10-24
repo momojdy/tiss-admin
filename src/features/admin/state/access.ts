@@ -39,6 +39,13 @@ export const effOf = (role: string, ov: StaffMember['ov'], st: string) => {
 };
 /** Effective access = role template + individual overrides + every live approved grant (a grant only ever adds access). */
 export const acs = (s: StaffMember) => {
+  if (session.userId) {
+    if (session.status !== 'active') return { lv: db.SEC.map(() => 0), rights: [] as string[] };
+    if (session.role === 'super_admin') return { lv: db.SEC.map(() => 2), rights: [...RIGHTS] };
+    const lv = db.SEC.map(section => Math.min(2, permissionLevel(section.toLowerCase().replace(/[^a-z0-9]+/g, '.').replace(/^\\.|\\.$/g, ''))));
+    const rights = RIGHTS.filter(right => permissionLevel(right.toLowerCase().replace(/[^a-z0-9]+/g, '.')) > 0);
+    return { lv, rights };
+  }
   nm(s);
   const e = effOf(s.role, s.ov, s.st);
   if (s.st === 'Active') {
