@@ -5,7 +5,7 @@ import { acs, can, effOf, expireStaff, LN, needs, nm, RIGHTS, session, staffByNa
 import { liveGrantsFor } from '../state/grants';
 import { REQ, useGuard } from '../state/requirements';
 import {
-  ACC_TONE, accById, accStatus, accStatusLabel, cancelInvite, createRole, editSuspension, expireAccounts, inviteCode, inviteEmail, inviteStaff, liftRestriction, markAppeal,
+  ACC_TONE, accById, accStatus, accStatusLabel, cancelInvite, createRole, editSuspension, expireAccounts, inviteCode, inviteEmail, liftRestriction, markAppeal,
   openItems, reinstateStaff, resendInvite, restoreStaff, restrictAccount, RESTRICT_REASONS, revokeStaff, saveRoleTemplate, saveStaffAccess, scopeTxt, STAFF_TONE, suspendStaff,
   svcNames, upholdBan, type AccessEdit, type RightChoice,
 } from '../state/people';
@@ -18,6 +18,8 @@ import { useToast } from '../ui/Toast';
 import { Txt } from '../ui/Txt';
 import { useTheme } from '../theme/ThemeContext';
 import { useNav } from '../shell/Nav';
+import { inviteStaff as inviteStaffBackend, setStaffStatus as setStaffStatusBackend, grantStaffPermission as grantStaffPermissionBackend, revokeStaffPermission as revokeStaffPermissionBackend } from '../lib/adminBackend';
+import { hydrateAdminState } from '../lib/hydrateAdminState';
 import { StaffGrants } from './GrantDrawers';
 import { drawers, useOpen } from './registry';
 import type { Restriction } from '../data/types';
@@ -189,18 +191,25 @@ function EditAccessSheet({ name, onClose, onSaved }: { name: string; onClose: ()
 
 export function useInvite() {
   const form = useForm();
-  const nav = useNav();
   const toast = useToast();
   const { closeAll } = useOverlay();
-  return () => form({ title: 'Invite staff', sub: 'The invitation lists the sections this role can open. The person creates their own password.',
-    fields: [{ id: 'n', label: 'Name', type: 'text', required: true }, { id: 'e', label: 'Email', type: 'email', required: true }, { id: 'r', label: 'Role', type: 'select', options: Object.keys(db.ROLES), required: true }],
+  return () => form({
+    title: 'Invite staff',
+    sub: 'A real invitation email will be sent through Supabase Auth. Staff access remains subject to backend permissions.',
+    fields: [
+      { id: 'n', label: 'Name', type: 'text', required: true },
+      { id: 'e', label: 'Work email', type: 'email', required: true },
+      { id: 'r', label: 'Reason for access', type: 'textarea', required: true },
+    ],
     buttons: [{ label: 'Send invitation', key: 's', primary: true }],
-    onSubmit: (_k, v) => {
-      if (!can(needs('Manage permissions'))) return 'This needs the “Manage permissions” right.';
-      const res = inviteStaff(String(v.n), String(v.e), String(v.r));
-      if (!res.ok) return res.error;
-      closeAll(); nav.go('people', { ps: 'Invitations' }); toast('Invitation sent to ' + res.email);
-    } });
+    onSubmit: async (_k, v) => {
+      if (session.role !== 'super_admin' && !can(needs('staff.manage'))) return 'This requires staff management permission.';
+      await inviteStaffBackend(String(v.e), String(v.n), String(v.r));
+      await hydrateAdminState();
+      closeAll();
+      toast('Invitation email sent to ' + String(v.e).trim().toLowerCase());
+    },
+  });
 }
 
 export function useRoleEditor() {
