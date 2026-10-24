@@ -55,9 +55,10 @@ export function AuthFlow({ notice, noticeBad, onDone }: Props) {
       session.who = staff.display_name;
       session.view = staff.display_name;
       session.last = Date.now();
-      (session as typeof session & { userId?: string; email?: string; role?: string }).userId = data.user.id;
-      (session as typeof session & { userId?: string; email?: string; role?: string }).email = data.user.email || e;
-      (session as typeof session & { userId?: string; email?: string; role?: string }).role = staff.role;
+      session.userId = data.user.id;
+      session.email = data.user.email || e;
+      session.role = staff.role;
+      session.status = staff.status;
       bump();
       onDone();
     } catch (err) {
