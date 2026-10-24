@@ -2,6 +2,7 @@ import { useEffect, useState } from 'react';
 import { KeyboardAvoidingView, Platform, Pressable, ScrollView, View } from 'react-native';
 import { LinearGradient } from 'expo-linear-gradient';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
+import * as Linking from 'expo-linking';
 import { useTheme } from '../theme/ThemeContext';
 import { Pill } from '../ui/Controls';
 import { Txt } from '../ui/Txt';
@@ -12,7 +13,7 @@ import { session, setServerGrants } from '../state/access';
 import { bump } from '../state/db';
 import { hydrateAdminState } from '../lib/hydrateAdminState';
 
-type View_ = 'in' | 'forgot' | 'sent' | 'reset' | 'blocked';
+type View_ = 'in' | 'forgot' | 'sent' | 'reset' | 'invite' | 'blocked';
 interface Props { notice?: string; noticeBad?: boolean; onDone: () => void }
 
 export function AuthFlow({ notice, noticeBad, onDone }: Props) {
@@ -29,10 +30,44 @@ export function AuthFlow({ notice, noticeBad, onDone }: Props) {
   const message = (text: string, isBad = false) => { setNoticeText(text); setBad(isBad); };
 
   useEffect(() => {
+    let active = true;
+    const consumeAuthLink = async (rawUrl: string | null) => {
+      if (!rawUrl || !active) return;
+      try {
+        const parsed = new URL(rawUrl);
+        const query = parsed.searchParams;
+        const hash = new URLSearchParams(parsed.hash.replace(/^#/, ''));
+        const type = query.get('type') || hash.get('type') || '';
+        const tokenHash = query.get('token_hash');
+        if (tokenHash && (type === 'invite' || type === 'recovery' || type === 'signup' || type === 'email')) {
+          const { error } = await supabase.auth.verifyOtp({ token_hash: tokenHash, type: type as 'invite' | 'recovery' | 'signup' | 'email' });
+          if (error) throw error;
+        } else {
+          const accessToken = hash.get('access_token') || query.get('access_token');
+          const refreshToken = hash.get('refresh_token') || query.get('refresh_token');
+          if (accessToken && refreshToken) {
+            const { error } = await supabase.auth.setSession({ access_token: accessToken, refresh_token: refreshToken });
+            if (error) throw error;
+          }
+        }
+        if (!active) return;
+        if (type === 'invite' || parsed.pathname.includes('accept-invite')) {
+          setView('invite');
+          message('Invitation verified. Set a password to activate your staff access.');
+        } else if (type === 'recovery' || parsed.pathname.includes('reset-password')) {
+          setView('reset');
+          message('Choose a new password from your verified reset link.');
+        }
+      } catch {
+        if (active) message('This verification link is invalid or expired. Request a new email.', true);
+      }
+    };
+    void Linking.getInitialURL().then(consumeAuthLink);
+    const linkSubscription = Linking.addEventListener('url', ({ url }) => { void consumeAuthLink(url); });
     const { data: listener } = supabase.auth.onAuthStateChange((event) => {
       if (event === 'PASSWORD_RECOVERY') { setView('reset'); message('Choose a new password from your verified reset link.'); }
     });
-    return () => listener.subscription.unsubscribe();
+    return () => { active = false; linkSubscription.remove(); listener.subscription.unsubscribe(); };
   }, []);
   const signIn = async () => {
     const e = email.trim().toLowerCase();
@@ -54,6 +89,11 @@ export function AuthFlow({ notice, noticeBad, onDone }: Props) {
       if (!staff) {
         await supabase.auth.signOut();
         throw new Error('This account has no staff invitation. Ask a Super Admin to invite you.');
+      }
+      if (staff.invited_at && data.user.user_metadata?.wantiss_invite_accepted !== true) {
+        setView('invite');
+        message('Invitation verified. Set a password to activate your staff access.');
+        return;
       }
       if (staff.status !== 'active' || (staff.invitation_expires_at && Date.parse(staff.invitation_expires_at) <= Date.now())) {
         await supabase.auth.signOut();
@@ -95,10 +135,12 @@ export function AuthFlow({ notice, noticeBad, onDone }: Props) {
     if (password !== confirm) return message('Passwords do not match.', true);
     setBusy(true);
     try {
-      const { error } = await supabase.auth.updateUser({ password });
+      const { error } = view === 'invite'
+        ? await supabase.auth.updateUser({ password, data: { wantiss_invite_accepted: true } })
+        : await supabase.auth.updateUser({ password });
       if (error) throw error;
       setPassword(''); setConfirm(''); setView('in');
-      message('Password updated. Sign in with your new password.');
+      message(view === 'invite' ? 'Invitation accepted. Sign in with your new password.' : 'Password updated. Sign in with your new password.');
     } catch {
       message('The reset link is invalid or expired. Request a new password-reset email.', true);
     } finally { setBusy(false); }
@@ -136,6 +178,15 @@ export function AuthFlow({ notice, noticeBad, onDone }: Props) {
               <Txt size={22.1} lh={1.08}>{'Check your\nemail'}</Txt>
               <Txt size={13} mut style={{ marginTop: 6, marginBottom: 14 }}>Use the password-reset link sent to your work email. If the email does not arrive, check spam or ask an administrator to verify your account.</Txt>
               <SecondaryButton label="Back to sign in" onPress={() => { setView('in'); message(''); }} />
+            </>}
+            {view === 'invite' && <>
+              <Txt size={22.1} lh={1.08}>{'Accept your\\ninvitation'}</Txt>
+              <Txt size={13} mut style={{ marginTop: 6, marginBottom: 14 }}>Create a secure password for your Wantiss staff account.</Txt>
+              {noticeText ? <NoticeBox bad={bad}>{noticeText}</NoticeBox> : null}
+              <AuthField label="New password" value={password} onChangeText={setPassword} error={undefined} password textContentType="newPassword" />
+              <PasswordChecklist value={password} />
+              <AuthField label="Confirm password" value={confirm} onChangeText={setConfirm} error={undefined} password textContentType="newPassword" />
+              <PrimaryButton label="Accept invitation" onPress={savePassword} busy={busy} busyLabel="Activating…" />
             </>}
             {view === 'reset' && <>
               <Txt size={22.1} lh={1.08}>{'Choose a new\npassword'}</Txt>
