@@ -145,3 +145,42 @@ export async function archiveCmsAsset(id: string) {
   const { error } = await supabase.rpc('wantiss_admin_set_cms_asset_status', { p_asset_id: id, p_status: 'archived' });
   if (error) throw new Error(error.code === '42501' ? 'Archiving requires content.archive manage permission.' : error.message);
 }
+
+export interface AdminAccountRestriction {
+  id: string;
+  target_user_id: string;
+  kind: 'Suspension' | 'Ban';
+  scope: string;
+  reason: string;
+  notes: string;
+  starts_at: string;
+  ends_at: string | null;
+  created_by: string;
+  notify_user: boolean;
+  status: 'active' | 'lifted';
+}
+export async function listAccountRestrictions(): Promise<AdminAccountRestriction[]> {
+  const { data, error } = await supabase.from('wantiss_admin_account_restrictions')
+    .select('id,target_user_id,kind,scope,reason,notes,starts_at,ends_at,created_by,notify_user,status')
+    .eq('status', 'active').order('created_at', { ascending: false });
+  if (error) throw new Error('Account restrictions are unavailable.');
+  return data || [];
+}
+export async function applyAccountRestriction(input: {
+  userId: string; kind: 'Suspension' | 'Ban'; scope: string; reason: string; notes: string;
+  startsAt: string; endsAt?: string | null; notifyUser: boolean;
+}) {
+  const { data, error } = await supabase.rpc('wantiss_admin_apply_account_restriction', {
+    p_user_id: input.userId, p_kind: input.kind, p_scope: input.scope, p_reason: input.reason,
+    p_notes: input.notes, p_starts_at: input.startsAt, p_ends_at: input.endsAt || null,
+    p_notify_user: input.notifyUser,
+  });
+  if (error) throw new Error(error.code === '42501' ? 'You do not have permission to restrict accounts.' : error.message);
+  return String(data);
+}
+export async function liftAccountRestriction(restrictionId: string, reason: string) {
+  const { error } = await supabase.rpc('wantiss_admin_lift_account_restriction', {
+    p_restriction_id: restrictionId, p_reason: reason,
+  });
+  if (error) throw new Error(error.code === '42501' ? 'You do not have permission to lift account restrictions.' : error.message);
+}
