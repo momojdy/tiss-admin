@@ -191,3 +191,44 @@ export async function updateAccountRestriction(restrictionId: string, endsAt: st
   });
   if (error) throw new Error(error.code === '42501' ? 'You do not have permission to edit account restrictions.' : error.message);
 }
+
+export interface AdminFinancialAction {
+  id: string;
+  action_type: 'wallet_adjustment' | 'refund_request';
+  transaction_id: string | null;
+  target_user_id: string;
+  direction: 'credit' | 'debit' | null;
+  amount: number;
+  reason: string;
+  status: 'pending' | 'approved' | 'rejected' | 'pending_provider';
+  requested_by: string;
+  reviewed_by: string | null;
+  reviewed_at: string | null;
+  created_at: string;
+  metadata: Record<string, unknown>;
+}
+export async function listFinancialActions(): Promise<AdminFinancialAction[]> {
+  const { data, error } = await supabase.from('wantiss_admin_financial_actions')
+    .select('id,action_type,transaction_id,target_user_id,direction,amount,reason,status,requested_by,reviewed_by,reviewed_at,created_at,metadata')
+    .order('created_at', { ascending: false }).limit(300);
+  if (error) throw new Error('Financial action requests are unavailable.');
+  return data || [];
+}
+export async function requestFinancialAction(input: {
+  actionType: 'wallet_adjustment' | 'refund_request'; transactionId?: string | null;
+  targetUserId: string; amount: number; direction?: 'credit' | 'debit' | null; reason: string;
+}) {
+  const { data, error } = await supabase.rpc('wantiss_admin_request_financial_action', {
+    p_action_type: input.actionType, p_transaction_id: input.transactionId || null,
+    p_target_user_id: input.targetUserId, p_amount: input.amount,
+    p_direction: input.direction || null, p_reason: input.reason,
+  });
+  if (error) throw new Error(error.code === '42501' ? 'You do not have permission to request this financial action.' : error.message);
+  return String(data);
+}
+export async function reviewFinancialAction(id: string, decision: 'approve' | 'reject', reason: string) {
+  const { error } = await supabase.rpc('wantiss_admin_review_financial_action', {
+    p_action_id: id, p_decision: decision, p_reason: reason,
+  });
+  if (error) throw new Error(error.code === '42501' ? 'You do not have permission to review financial actions.' : error.message);
+}
