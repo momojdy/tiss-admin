@@ -63,6 +63,16 @@ export function AuthFlow({ notice, noticeBad, onDone }: Props) {
       }
     };
     void Linking.getInitialURL().then(consumeAuthLink);
+    void supabase.auth.getSession().then(async ({ data }) => {
+      const user = data.session?.user;
+      if (!active || !user?.email_confirmed_at || user.user_metadata?.wantiss_invite_accepted === true) return;
+      const { data: pendingInvite } = await supabase.from('wantiss_admin_staff')
+        .select('invited_at,invitation_expires_at').eq('user_id', user.id).maybeSingle();
+      if (active && pendingInvite?.invited_at && (!pendingInvite.invitation_expires_at || Date.parse(pendingInvite.invitation_expires_at) > Date.now())) {
+        setView('invite');
+        message('Invitation verified. Set a password to activate your staff access.');
+      }
+    });
     const linkSubscription = Linking.addEventListener('url', ({ url }) => { void consumeAuthLink(url); });
     const { data: listener } = supabase.auth.onAuthStateChange((event) => {
       if (event === 'PASSWORD_RECOVERY') { setView('reset'); message('Choose a new password from your verified reset link.'); }
