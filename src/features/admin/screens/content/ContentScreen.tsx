@@ -51,7 +51,7 @@ export function ContentScreen() {
       { id: 'key', label: 'Content key', type: 'text', required: true, placeholder: 'goodies.home.hero' },
       { id: 'locale', label: 'Locale', type: 'select', options: ['en', 'fr', 'ht', 'es', 'zh'], value: 'en', required: true },
       { id: 'payload', label: 'Content payload (JSON)', type: 'textarea', required: true, value: '{}' },
-      { id: 'status', label: 'Initial status', type: 'select', options: ['draft'], value: 'draft', required: true },
+      { id: 'status', label: 'Initial status', type: 'select', options: ['draft', 'published', 'archived'], value: 'draft', required: true },
     ],
     buttons: [{ label: 'Save version', key: 'save', primary: true }],
     onSubmit: async (_key, values) => {
@@ -84,7 +84,7 @@ export function ContentScreen() {
         fields: [
           { id: 'key', label: 'Asset key', type: 'text', required: true, value: file.name.replace(/\\.[^.]+$/, '').toLowerCase().replace(/[^a-z0-9]+/g, '.') },
           { id: 'alt', label: 'Alt text (English)', type: 'text' },
-          { id: 'status', label: 'Initial status', type: 'select', options: ['draft'], value: 'draft', required: true },
+          { id: 'status', label: 'Initial status', type: 'select', options: ['draft', 'published'], value: 'draft', required: true },
           { id: 'reason', label: 'Reason', type: 'textarea', required: true },
         ],
         buttons: [{ label: 'Upload asset', key: 'upload', primary: true }],
