@@ -113,7 +113,7 @@ export async function uploadCmsAsset(input: {
     contentType: input.contentType, upsert: false,
   });
   if (uploadError) throw new Error(uploadError.message);
-  const { data, error } = await supabase.rpc('wantiss_admin_upsert_asset', {
+  const { data, error } = await supabase.rpc('wantiss_admin_register_cms_asset', {
     p_asset_key: input.key, p_storage_path: path, p_content_type: input.contentType,
     p_byte_size: input.byteSize, p_alt_text: input.altText || {}, p_status: input.status || 'draft',
   });
