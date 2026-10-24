@@ -1,3 +1,4 @@
+import { supabase } from '../lib/supabase';
 import { authDb, aud, bump, db, TODAY } from '../state/db';
 import { acs, nm, session, staffByName } from '../state/access';
 import type { StaffMember } from '../data/types';
@@ -64,15 +65,13 @@ export function enterApp(s: StaffMember) {
 }
 export function leaveApp() {
   const w = session.who;
-  session.who = null; session.view = 'momo';
+  void supabase.auth.signOut();
+  session.who = null; session.view = 'momo'; session.userId = null; session.email = null; session.role = null; session.status = null;
   if (w) aud('Signed out · ' + w, w);
   bump();
 }
 /** Signed-in person lost access (suspended or revoked) while using the app. */
-export const sessionStillValid = () => {
-  const s = session.who ? staffByName(session.who) : undefined;
-  return !!s && s.st === 'Active';
-};
+export const sessionStillValid = () => !!session.userId && session.status === 'active';
 export const touch = () => { session.last = Date.now(); };
 export const idleExpired = () => !!session.who && Date.now() - session.last > AUTH_CONFIG.idleMs;
 
