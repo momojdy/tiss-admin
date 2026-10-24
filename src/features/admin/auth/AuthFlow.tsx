@@ -135,12 +135,18 @@ export function AuthFlow({ notice, noticeBad, onDone }: Props) {
     if (password !== confirm) return message('Passwords do not match.', true);
     setBusy(true);
     try {
-      const { error } = view === 'invite'
-        ? await supabase.auth.updateUser({ password, data: { wantiss_invite_accepted: true } })
-        : await supabase.auth.updateUser({ password });
+      const acceptingInvite = view === 'invite';
+      const { error } = await supabase.auth.updateUser({ password });
       if (error) throw error;
+      if (acceptingInvite) {
+        const { error: acceptError } = await supabase.rpc('wantiss_admin_accept_invitation');
+        if (acceptError) throw acceptError;
+        const { error: metadataError } = await supabase.auth.updateUser({ data: { wantiss_invite_accepted: true } });
+        if (metadataError) throw metadataError;
+      }
       setPassword(''); setConfirm(''); setView('in');
-      message(view === 'invite' ? 'Invitation accepted. Sign in with your new password.' : 'Password updated. Sign in with your new password.');
+      await supabase.auth.signOut();
+      message(acceptingInvite ? 'Invitation accepted. Sign in with your new password.' : 'Password updated. Sign in with your new password.');
     } catch {
       message('The reset link is invalid or expired. Request a new password-reset email.', true);
     } finally { setBusy(false); }
