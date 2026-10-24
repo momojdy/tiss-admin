@@ -11,7 +11,7 @@ export interface FieldSpec {
 export interface FormButton { label: string; key: string; primary?: boolean }
 export type FormValues = Record<string, string | boolean>;
 /** Return a message to show an error and keep the form open; return nothing to close it. */
-export type FormSubmit = (key: string, values: FormValues) => string | void;
+export type FormSubmit = (key: string, values: FormValues) => string | void | Promise<string | void>;
 
 export interface FormConfig { title: string; fields: FieldSpec[]; buttons: FormButton[]; sub?: string; onSubmit?: FormSubmit }
 
@@ -81,7 +81,9 @@ export function FormSheet({ title, fields, buttons, sub, onSubmit, onClose }: Fo
     return v;
   });
   const [err, setErr] = useState('');
-  const press = (b: FormButton) => {
+  const [busy, setBusy] = useState(false);
+  const press = async (b: FormButton) => {
+    if (busy) return;
     const out: FormValues = {};
     let e = '';
     fields.forEach((f, i) => {
@@ -90,7 +92,12 @@ export function FormSheet({ title, fields, buttons, sub, onSubmit, onClose }: Fo
       // drafts (keys starting with 'd') only require the first field, as in the HTML
       if (!e && f.required && (!b.key.startsWith('d') || i === 0) && !out[f.id]) e = `${f.label} is required.`;
     });
-    if (!e && onSubmit) e = onSubmit(b.key, out) || '';
+    if (!e && onSubmit) {
+      setBusy(true);
+      try { e = (await onSubmit(b.key, out)) || ''; }
+      catch (error) { e = error instanceof Error ? error.message : 'The operation failed. Try again.'; }
+      finally { setBusy(false); }
+    }
     if (e) { setErr(e); return; }
     onClose();
   };
@@ -102,7 +109,7 @@ export function FormSheet({ title, fields, buttons, sub, onSubmit, onClose }: Fo
       <View style={{ flexDirection: 'row', gap: 8, marginTop: 10 }}>
         <Pressable onPress={onClose} accessibilityRole="button" style={{ flex: 1, alignItems: 'center', padding: 11, borderRadius: 99, borderWidth: 1, borderColor: c.bd }}><Txt size={10.1}>Cancel</Txt></Pressable>
         {buttons.map((b) => (
-          <Pressable key={b.key} onPress={() => press(b)} accessibilityRole="button" style={{ flex: 1, alignItems: 'center', padding: 11, borderRadius: 99, borderWidth: b.primary ? 0 : 1, borderColor: c.bd, backgroundColor: b.primary ? c.ink : 'transparent' }}>
+          <Pressable key={b.key} onPress={() => { void press(b); }} disabled={busy} accessibilityRole="button" style={{ flex: 1, alignItems: 'center', padding: 11, borderRadius: 99, borderWidth: b.primary ? 0 : 1, borderColor: c.bd, backgroundColor: b.primary ? c.ink : 'transparent', opacity: busy ? 0.6 : 1 }}>
             <Txt size={10.1} color={b.primary ? c.on : c.ink}>{b.label}</Txt>
           </Pressable>
         ))}
