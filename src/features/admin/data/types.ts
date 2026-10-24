@@ -22,7 +22,7 @@ export interface Announcement { id: string; t: string; aud: string; st: string; 
 
 export interface HistoryEntry { when: string; by: string; action: string; txt: string; note: string; internal?: string }
 export interface StaffMember {
-  n: string; role: string; last: string; st: 'Active' | 'Suspended' | 'Revoked' | 'Invited' | 'Cancelled';
+  userId?: string; n: string; role: string; last: string; st: 'Active' | 'Suspended' | 'Revoked' | 'Invited' | 'Cancelled';
   x: number; ov: { sec: Record<number, number>; rights: Record<string, number> }; scope: string[]; hist: HistoryEntry[];
   until: string; susEnd: string; prevRole?: string;
 }
