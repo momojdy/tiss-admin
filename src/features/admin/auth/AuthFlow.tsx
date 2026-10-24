@@ -8,7 +8,7 @@ import { Txt } from '../ui/Txt';
 import { AuthField, BigBadge, LinkText, NoticeBox, PasswordChecklist, PrimaryButton, SecondaryButton } from './AuthFields';
 import { emailOk, passwordError } from './authLogic';
 import { supabase } from '../lib/supabase';
-import { session } from '../state/access';
+import { session, setServerGrants } from '../state/access';
 import { bump } from '../state/db';
 
 type View_ = 'in' | 'forgot' | 'sent' | 'reset' | 'blocked';
@@ -59,6 +59,8 @@ export function AuthFlow({ notice, noticeBad, onDone }: Props) {
       session.email = data.user.email || e;
       session.role = staff.role;
       session.status = staff.status;
+      const { data: grants } = await supabase.from('wantiss_admin_permission_grants').select('permission_key,access_level,expires_at,revoked_at').eq('staff_user_id', data.user.id);
+      setServerGrants(grants || []);
       bump();
       onDone();
     } catch (err) {
