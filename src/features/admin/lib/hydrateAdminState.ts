@@ -55,7 +55,7 @@ export async function hydrateAdminState() {
   }));
 
   db.STAFF = staff.map((x): StaffMember => ({
-    n: str(x.display_name), role: x.role === 'super_admin' ? 'Super Admin' : 'Staff',
+    userId: str(x.user_id), n: str(x.display_name), role: x.role === 'super_admin' ? 'Super Admin' : 'Staff',
     last: '', st: x.status === 'active' ? 'Active' : x.status === 'suspended' ? 'Suspended' : 'Revoked',
     x: 0, ov: { sec: {}, rights: {} }, scope: [], hist: [], until: '', susEnd: '',
   }));
