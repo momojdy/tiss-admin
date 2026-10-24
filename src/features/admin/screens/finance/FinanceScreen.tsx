@@ -1,3 +1,4 @@
+import React, { useEffect, useState } from 'react';
 import { View } from 'react-native';
 import { bump, db, mny, ui, useDb } from '../../state/db';
 import { can, session } from '../../state/access';
@@ -14,6 +15,7 @@ import { LineChart } from '../../ui/Charts';
 import { useToast } from '../../ui/Toast';
 import { Txt } from '../../ui/Txt';
 import { useTheme } from '../../theme/ThemeContext';
+import { listFinancialActions, requestFinancialAction, reviewFinancialAction, type AdminFinancialAction } from '../../lib/adminBackend';
 
 const sum = (a: { a: number }[]) => a.reduce((n, x) => n + x.a, 0);
 
@@ -30,21 +32,51 @@ export function FinanceScreen() {
   const guard = useGuard();
   const toast = useToast();
   const { c } = useTheme();
+  const [financialActions, setFinancialActions] = useState<AdminFinancialAction[]>([]);
+  const refreshFinancialActions = async () => { try { setFinancialActions(await listFinancialActions()); } catch { setFinancialActions([]); } };
+  useEffect(() => { void refreshFinancialActions(); }, [ui.fv]);
   const set = (k: string, v: unknown) => { ui[k] = v; bump(); };
   const cs = db.INV.filter((x) => x.s === 'Completed'), ps = db.INV.filter((x) => x.s === 'Pending'), fl = db.INV.filter((x) => x.s === 'Failed');
 
   const manual = () => form({ title: 'Manual adjustment', fields: [
     { id: 'l', label: 'Linked transaction', type: 'select', options: db.INV.map((x) => x.id), required: true },
-    { id: 't', label: 'Type', type: 'select', options: ['Credit', 'Debit', 'Fee', 'Correction'], required: true },
+    { id: 't', label: 'Direction', type: 'select', options: ['Credit', 'Debit'], required: true },
     { id: 'a', label: 'Amount ($)', type: 'number', required: true }, { id: 'r', label: 'Reason', type: 'textarea', required: true }],
     buttons: [{ label: 'Record adjustment', key: 's', primary: true }], sub: 'This adds a new entry for review. The original transaction is never edited.',
-    onSubmit: (_k, v) => {
+    onSubmit: async (_k, v) => {
       if (!(+v.a > 0)) return 'Enter an amount above zero.';
-      const o = db.INV.find((x) => x.id === v.l)!;
-      db.INV.unshift({ id: 'ADJ-' + (100 + db.INV.length), f: 'Adjustment · ' + v.t, u: o.u, d: 'Oct 17', n: 'Today', a: +v.a, s: 'Pending', ref: 0, rq: 0, log: [['Oct 17', 'Payment pending']] });
-      aud('Adjustment recorded · ' + v.l, session.view); bump(); toast('Adjustment recorded as pending review');
+      const o = db.INV.find((x) => x.id === v.l);
+      if (!o || !o.u) return 'Select a real transaction with a target user.';
+      try {
+        await requestFinancialAction({
+          actionType: 'wallet_adjustment', transactionId: o.id, targetUserId: o.u,
+          amount: +v.a, direction: String(v.t).toLowerCase() as 'credit' | 'debit', reason: String(v.r),
+        });
+        await refreshFinancialActions();
+        toast('Adjustment request saved for review. The wallet has not changed yet.');
+      } catch (e) { return e instanceof Error ? e.message : 'Adjustment request could not be saved.'; }
     } });
 
+  const reviewAction = (action: AdminFinancialAction) => form({
+    title: action.action_type === 'refund_request' ? 'Review refund request' : 'Review wallet adjustment',
+    sub: action.action_type === 'refund_request' ? 'Approval queues this request for payment-provider processing. No money moves here.' : 'Approval changes the wallet balance and writes a ledger entry.',
+    fields: [{ id: 'reason', label: 'Review reason', type: 'textarea', required: true }],
+    buttons: [{ label: 'Approve', key: 'approve', primary: true }, { label: 'Reject', key: 'reject' }],
+    onSubmit: async (key, values) => {
+      try {
+        await reviewFinancialAction(action.id, key === 'approve' ? 'approve' : 'reject', String(values.reason));
+        await refreshFinancialActions();
+        toast(key === 'approve' ? (action.action_type === 'refund_request' ? 'Refund queued for provider processing.' : 'Wallet adjustment approved.') : 'Financial request rejected.');
+      } catch (e) { return e instanceof Error ? e.message : 'Financial action could not be reviewed.'; }
+    },
+  });
+  const actionRows = financialActions.map((action) => ({
+    key: action.id,
+    main: (action.action_type === 'refund_request' ? 'Refund request' : 'Wallet adjustment') + ' · ' + mny(action.amount),
+    sub: action.target_user_id + ' · ' + action.reason,
+    right: right(action.status === 'pending_provider' ? 'Provider action required' : action.status, '›'),
+    onPress: () => { if (action.status === 'pending') reviewAction(action); },
+  }));
   const txTable = () => {
     const r = txRows();
     return r.length ? (
@@ -58,6 +90,10 @@ export function FinanceScreen() {
   if (ui.fv === 'Transactions') {
     body = (
       <>
+        <Card>
+          <CardTitle title="Financial action requests" right={can(...REQ.money) ? <Btn onPress={() => void refreshFinancialActions()}>Refresh</Btn> : undefined} />
+          {actionRows.length ? <ListRows rows={actionRows} /> : <Txt size={12} mut align="center" style={{ paddingVertical: 12 }}>No financial action requests.</Txt>}
+        </Card>
         <Card>
           <CardTitle title="Wallet volume" right={['6M', '12M'].map((m) => <Pill key={m} on={ui.fm === m} onPress={() => set('fm', m)}>{m}</Pill>)} />
           <LineChart vals={ui.fm === '6M' ? [30, 60, 45, 12, 5, 35, 125] : [20, 40, 55, 70, 50, 80, 95, 60, 75, 90, 110, 125]} color={c.gr} max={200} dash />
