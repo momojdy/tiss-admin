@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import { Pressable, Switch, View } from 'react-native';
 import { bump, db, mny, TODAY, useDb } from '../state/db';
 import { acs, can, effOf, expireStaff, LN, needs, nm, RIGHTS, session, staffByName } from '../state/access';
@@ -18,7 +18,7 @@ import { useToast } from '../ui/Toast';
 import { Txt } from '../ui/Txt';
 import { useTheme } from '../theme/ThemeContext';
 import { useNav } from '../shell/Nav';
-import { inviteStaff as inviteStaffBackend, setStaffStatus as setStaffStatusBackend, grantStaffPermission as grantStaffPermissionBackend, revokeStaffPermission as revokeStaffPermissionBackend } from '../lib/adminBackend';
+import { inviteStaff as inviteStaffBackend, setStaffStatus as setStaffStatusBackend, grantStaffPermission as grantStaffPermissionBackend, revokeStaffPermission as revokeStaffPermissionBackend, listPermissionGrants } from '../lib/adminBackend';
 import { hydrateAdminState } from '../lib/hydrateAdminState';
 import { StaffGrants } from './GrantDrawers';
 import { drawers, useOpen } from './registry';
@@ -124,62 +124,81 @@ const RIGHT_KEYS: RightChoice[] = ['role', 'grant', 'remove'];
 
 function EditAccessSheet({ name, onClose, onSaved }: { name: string; onClose: () => void; onSaved: () => void }) {
   const { c } = useTheme();
-  const s = staffByName(name)!;
-  const roles = Object.keys(db.ROLES);
-  const [role, setRole] = useState(s.role);
-  const [reset, setReset] = useState(true);
-  const t0 = db.ROLES[role] || db.SEC.map(() => 0);
-  const [sec, setSec] = useState<Record<number, number>>(() => Object.fromEntries(db.SEC.map((_x, i) => [i, s.ov.sec[i] !== undefined ? s.ov.sec[i] : (db.ROLES[s.role] || [])[i] ?? 0])));
-  const [rights, setRights] = useState<Record<string, RightChoice>>(() => Object.fromEntries(RIGHTS.map((r) => [r, s.ov.rights[r] === 1 ? 'grant' : s.ov.rights[r] === -1 ? 'remove' : 'role'])));
-  const [all, setAll] = useState(!s.scope.length);
-  const [svc, setSvc] = useState<string[]>(s.scope);
-  const [until, setUntil] = useState(s.until);
+  const staff = staffByName(name);
+  const [grants, setGrants] = useState<Awaited<ReturnType<typeof listPermissionGrants>>>([]);
+  const [permission, setPermission] = useState(db.SEC[1] || 'operations');
+  const [level, setLevel] = useState('view');
+  const [until, setUntil] = useState('');
   const [why, setWhy] = useState('');
-  const [err, setErr] = useState('');
-  const base = db.RR[role] || [];
+  const [error, setError] = useState('');
+  const [busy, setBusy] = useState(false);
 
-  const changeRole = (r: string) => {
-    setRole(r);
-    // with "remove individual grants" on, show the new role's own levels
-    if (reset) { const t = db.ROLES[r] || []; setSec(Object.fromEntries(db.SEC.map((_x, i) => [i, t[i] ?? 0]))); setRights(Object.fromEntries(RIGHTS.map((x) => [x, 'role']))); }
+  const permissionOptions = [...new Set([...db.SEC, ...RIGHTS])];
+  const permissionKey = (label: string) => {
+    const known: Record<string, string> = {
+      'Manage permissions': 'staff.manage',
+      'Manage content': 'content.manage',
+      'Publish content': 'content.publish',
+      'Archive content': 'content.archive',
+      'Manage assets': 'content.assets',
+      'Read audit log': 'audit.read',
+    };
+    return known[label] || label.toLowerCase().replace(/[^a-z0-9]+/g, '.').replace(/^\\.|\\.$/g, '');
   };
-  const save = () => {
-    const e: AccessEdit = { role, resetOverrides: reset, sec, rights, allServices: all, services: svc, until: until.trim(), why };
-    const er = saveStaffAccess(name, e);
-    if (er) { setErr(er); return; }
-    onClose(); onSaved();
+
+  const refresh = async () => {
+    if (!staff?.userId) return;
+    try { setGrants(await listPermissionGrants(staff.userId)); }
+    catch (e) { setError(e instanceof Error ? e.message : 'Could not load grants.'); }
   };
-  const sub = (txt: string) => <Txt size={12} weight={500} style={{ marginTop: 14, marginBottom: 2 }}>{txt}</Txt>;
+  useEffect(() => { void refresh(); }, [staff?.userId]);
+
+  const save = async () => {
+    if (!staff?.userId) return setError('This staff record is not linked to Supabase Auth.');
+    if (why.trim().length < 3) return setError('Enter a reason for this grant.');
+    setBusy(true); setError('');
+    try {
+      await grantStaffPermissionBackend({
+        userId: staff.userId, permissionKey: permissionKey(permission),
+        level: level as 'view' | 'edit' | 'manage', reason: why.trim(),
+        expiresAt: until.trim() ? new Date(until + 'T23:59:59').toISOString() : null,
+      });
+      setWhy(''); setUntil('');
+      await refresh();
+      onSaved();
+    } catch (e) {
+      setError(e instanceof Error ? e.message : 'Could not grant access.');
+    } finally { setBusy(false); }
+  };
+
+  const revoke = async (grantId: string) => {
+    setBusy(true); setError('');
+    try {
+      await revokeStaffPermissionBackend(grantId, 'Revoked by Super Admin from staff access editor');
+      await refresh();
+      onSaved();
+    } catch (e) { setError(e instanceof Error ? e.message : 'Could not revoke access.'); }
+    finally { setBusy(false); }
+  };
 
   return (
-    <DialogCard title={'Edit access · ' + name} onClose={onClose} maxHeight="94%">
-      <Field spec={{ id: 'role', label: 'Role template', type: 'select', options: roles }} value={role} onChange={(v) => changeRole(String(v))} />
-      <Field spec={{ id: 'reset', label: 'If the role changes, remove individual grants', type: 'check' }} value={reset} onChange={(v) => setReset(!!v)} />
-      {sub('Sections')}
-      {db.SEC.map((x, i) => (
-        <Field key={x} spec={{ id: 's' + i, label: x + ' (role: ' + LN[t0[i] ?? 0] + ')', type: 'select', options: LN }} value={LN[sec[i] ?? 0]} onChange={(v) => setSec((p) => ({ ...p, [i]: LN.indexOf(String(v)) }))} />
-      ))}
-      {sub('Special rights')}
-      {RIGHTS.map((r) => {
-        const opts = RIGHT_OPTS(base.includes(r));
-        return <Field key={r} spec={{ id: r, label: r, type: 'select', options: opts }} value={opts[RIGHT_KEYS.indexOf(rights[r])]} onChange={(v) => setRights((p) => ({ ...p, [r]: RIGHT_KEYS[opts.indexOf(String(v))] }))} />;
-      })}
-      {sub('Service scope')}
-      <View style={{ flexDirection: 'row', alignItems: 'center', gap: 8, marginBottom: 6 }}>
-        <Switch value={all} onValueChange={setAll} trackColor={{ true: c.gr, false: c.inset }} accessibilityLabel="All services" />
-        <Txt size={12}>All services</Txt>
-      </View>
-      {!all ? (
-        <View style={{ flexDirection: 'row', flexWrap: 'wrap', gap: 6 }}>
-          {svcNames().map((x) => <Pill key={x} on={svc.includes(x)} onPress={() => setSvc((p) => (p.includes(x) ? p.filter((y) => y !== x) : [...p, x]))}>{x}</Pill>)}
-        </View>
-      ) : null}
-      <Field spec={{ id: 'until', label: 'Temporary grants end on (optional)', type: 'date' }} value={until} onChange={(v) => setUntil(String(v))} />
-      <Field spec={{ id: 'why', label: 'Reason', type: 'textarea', required: true }} value={why} onChange={(v) => { setWhy(String(v)); setErr(''); }} />
-      <View style={{ minHeight: 16, marginVertical: 4 }} accessibilityLiveRegion="polite">{err ? <Txt size={12} color={c.or}>{err}</Txt> : null}</View>
-      <View style={{ flexDirection: 'row', gap: 8, marginTop: 6 }}>
-        <Pressable onPress={onClose} accessibilityRole="button" style={{ flex: 1, alignItems: 'center', padding: 11, borderRadius: 99, borderWidth: 1, borderColor: c.bd }}><Txt size={10.1}>Cancel</Txt></Pressable>
-        <Pressable onPress={save} accessibilityRole="button" style={{ flex: 1, alignItems: 'center', padding: 11, borderRadius: 99, backgroundColor: c.ink }}><Txt size={10.1} color={c.on}>Save changes</Txt></Pressable>
+    <DialogCard title={'Individual access · ' + name} onClose={onClose} maxHeight="94%">
+      <Txt size={12} mut lh={1.4}>Grants are enforced by Supabase on every protected request. Expired and revoked grants stop authorizing access without relying on this screen.</Txt>
+      <Field spec={{ id: 'permission', label: 'Feature or permission', type: 'select', options: permissionOptions }} value={permission} onChange={(v) => setPermission(String(v))} />
+      <Field spec={{ id: 'level', label: 'Access level', type: 'select', options: ['view', 'edit', 'manage'] }} value={level} onChange={(v) => setLevel(String(v))} />
+      <Field spec={{ id: 'until', label: 'Expires on (optional, YYYY-MM-DD)', type: 'date' }} value={until} onChange={(v) => setUntil(String(v))} />
+      <Field spec={{ id: 'why', label: 'Reason', type: 'textarea', required: true }} value={why} onChange={(v) => { setWhy(String(v)); setError(''); }} />
+      {error ? <Txt size={12} color={c.or} style={{ marginVertical: 8 }}>{error}</Txt> : null}
+      <OutlineBtn primary onPress={() => { void save(); }} disabled={busy}>Grant access</OutlineBtn>
+      <Txt size={13} weight={500} style={{ marginTop: 16, marginBottom: 6 }}>Existing grants</Txt>
+      <ListRows empty="No individual grants." rows={grants.map(g => ({
+        key: g.id,
+        main: g.permission_key + ' · ' + g.access_level,
+        sub: (g.revoked_at ? 'Revoked' : g.expires_at && Date.parse(g.expires_at) <= Date.now() ? 'Expired' : 'Active') + (g.expires_at ? ' · until ' + new Date(g.expires_at).toLocaleDateString() : ' · no expiry') + ' · ' + g.reason,
+        right: !g.revoked_at && (!g.expires_at || Date.parse(g.expires_at) > Date.now()) ? <OutlineBtn onPress={() => { void revoke(g.id); }} disabled={busy}>Revoke</OutlineBtn> : null,
+      }))} />
+      <View style={{ flexDirection: 'row', gap: 8, marginTop: 12 }}>
+        <OutlineBtn onPress={onClose}>Close</OutlineBtn>
       </View>
     </DialogCard>
   );
