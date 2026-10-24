@@ -54,10 +54,10 @@ export function Btn({ children, onPress, style, disabled }: { children: string; 
 }
 
 /** `.ob`: outlined action button; `primary` is the filled `.ob.k` variant. */
-export function OutlineBtn({ children, onPress, primary, style }: { children: string; onPress?: () => void; primary?: boolean; style?: StyleProp<ViewStyle> }) {
+export function OutlineBtn({ children, onPress, primary, style, disabled }: { children: string; onPress?: () => void; primary?: boolean; style?: StyleProp<ViewStyle>; disabled?: boolean }) {
   const { c } = useTheme();
   return (
-    <Pressable onPress={onPress} accessibilityRole="button" style={[{ paddingVertical: 8, paddingHorizontal: 13, borderRadius: 99, borderWidth: 1, borderColor: c.bd, backgroundColor: primary ? c.ink : c.card, marginRight: 6, marginBottom: 6 }, style]}>
+    <Pressable onPress={onPress} disabled={disabled} accessibilityRole="button" style={[{ paddingVertical: 8, paddingHorizontal: 13, borderRadius: 99, borderWidth: 1, borderColor: c.bd, backgroundColor: primary ? c.ink : c.card, marginRight: 6, marginBottom: 6, opacity: disabled ? 0.5 : 1 }, style]}>
       <Txt size={10.1} color={primary ? c.on : c.ink}>{children}</Txt>
     </Pressable>
   );
