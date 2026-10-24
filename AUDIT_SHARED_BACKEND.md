@@ -33,7 +33,7 @@ Reviewed repository package manifests, application entry points, admin authentic
 - Performance advisor reports nine unindexed foreign keys and 32 RLS policies with auth initialization-plan warnings.
 - Migration history includes duplicate names and repeated feature fixes. Reconcile migration history and repository migration files before further production schema work.
 
-## Required implementation sequence
+## Baseline follow-up\n\n- Consumer branch now fails fast if `EXPO_PUBLIC_SUPABASE_URL` is missing or differs from `https://ycbirmgppwavorwudlrv.supabase.co`. The actual runtime-injected URL is still unverified until launched in its configured environment.\n- Consumer branch contains a draft admin/CMS migration and `supabase/ADMIN_CMS_BOOTSTRAP.md` runbook. The migration is not applied to production and must be reviewed/tested after reconciling duplicate/unrecorded Goodies migrations.\n- The migration proposal uses a one-time token-hash bootstrap tied to the authenticated `auth.uid()`, server-side Super Admin-only staff/grant RPCs, append-only audit triggers, versioned CMS statuses, and a private CMS asset bucket. Admin Auth/RPC integration and app workflows remain unimplemented.\n\n## Required implementation sequence
 
 1. Add an additive admin authorization/CMS schema with RLS and a controlled first-super-admin bootstrap. Never bootstrap from a client-supplied email.
 2. Replace local admin password/MFA logic with Supabase Auth. Link staff access to `auth.users.id`; enforce status, role, per-permission overrides, expiry and revocation server-side.
