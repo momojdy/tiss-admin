@@ -54,6 +54,7 @@ function AuthGate() {
     void restore();
     const { data: authListener } = supabase.auth.onAuthStateChange((event) => {
       if (event === 'SIGNED_IN') void Promise.resolve().then(restore);
+      if (event === 'SIGNED_OUT' && session.who) { leaveApp(); setNotice('Your Supabase session ended. Please sign in again.'); }
     });
     const t = setInterval(() => {
       if (!session.who) return;
@@ -61,10 +62,24 @@ function AuthGate() {
       if (idleExpired()) { leaveApp(); setNotice('You were signed out after 30 minutes of inactivity.'); }
       else if (!sessionStillValid()) { leaveApp(); setNotice('Your access changed. Please sign in again.'); }
       else {
-        void supabase.from('wantiss_admin_staff').select('status').eq('user_id', session.userId || '').maybeSingle().then(({ data }) => {
-          if (!data || data.status !== 'active') { leaveApp(); setNotice('Your access changed. Please sign in again.'); }
-        });
-        bump();
+        void (async () => {
+          const { data: auth } = await supabase.auth.getUser();
+          if (!auth.user || !auth.user.email_confirmed_at) { leaveApp(); setNotice('Your Supabase session ended. Please sign in again.'); return; }
+          const { data: staff, error } = await supabase.from('wantiss_admin_staff')
+            .select('status,role,invitation_expires_at,invited_at')
+            .eq('user_id', session.userId || '').maybeSingle();
+          if (error || !staff || staff.status !== 'active' ||
+              (staff.invitation_expires_at && Date.parse(staff.invitation_expires_at) <= Date.now()) ||
+              (staff.invited_at && auth.user.user_metadata?.wantiss_invite_accepted !== true)) {
+            leaveApp(); setNotice('Your access changed. Please sign in again.'); return;
+          }
+          session.role = staff.role;
+          session.status = staff.status;
+          const { data: grants, error: grantError } = await supabase.from('wantiss_admin_permission_grants')
+            .select('permission_key,access_level,expires_at,revoked_at').eq('staff_user_id', session.userId || '');
+          if (!grantError) setServerGrants(grants || []);
+          bump();
+        })();
       }
     }, 30000);
     return () => { mounted = false; clearInterval(t); authListener.subscription.unsubscribe(); };
