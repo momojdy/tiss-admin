@@ -1,6 +1,5 @@
 import { useSyncExternalStore } from 'react';
 import seed from '../data/seed.json';
-import authSeed from '../data/authSeed.json';
 import { realToday } from '../lib/dates';
 import type {
   Account, Announcement, Application, AuthRecord, Banner, Notice, Payout, Promotion, Reco, ServiceRow, Settlement, StaffMember, SupportCase, Transaction,
@@ -23,7 +22,7 @@ export const db = clone(seed) as unknown as {
 };
 
 /** Demo credentials for the sign-in prototype. Replace with Supabase Auth later. */
-export const authDb: Record<string, AuthRecord> = clone(authSeed);
+export const authDb: Record<string, AuthRecord> = {};
 
 /** The clock. The prototype's other demo data (applications, restrictions...) is dated around 2026-10-17, so the demo keeps that
  *  day. Set USE_REAL_CLOCK = true when you connect the backend: every date rule then follows the device's local date
