@@ -12,6 +12,8 @@ import { useToast } from '../ui/Toast';
 import { Txt } from '../ui/Txt';
 import { useTheme } from '../theme/ThemeContext';
 import { shareText } from '../lib/csv';
+import { reviewBusinessApplication } from '../lib/adminBackend';
+import { hydrateAdminState } from '../lib/hydrateAdminState';
 import { drawers, useOpen } from './registry';
 import { useNav } from '../shell/Nav';
 import { STATUS_TONE } from '../theme/tokens';
@@ -48,14 +50,14 @@ export function ApplicationDrawer({ id, close }: { id: string; close: () => void
     if (bad.length) { form({ title: 'Cannot approve yet', fields: [], buttons: [], sub: 'Verify these first: ' + bad.map((x) => x[0] + ' (' + x[1] + ')').join(', ') + '.' }); return; }
     form({ title: 'Approve ' + a.n, fields: [{ id: 'n', label: 'Note (optional)', type: 'textarea' }], buttons: [{ label: 'Approve', key: 's', primary: true }],
       sub: `Service: ${a.s}. Result: Approved. The business can publish listings in this service.`,
-      onSubmit: () => { a.st = 3; finish(a, 'Approved by ' + session.view, 'Approved · ' + a.n); } });
+      onSubmit: async (_k, v) => { await reviewBusinessApplication(a.id, 'approved', String(v.n || '')); a.st = 3; finish(a, 'Approved by ' + session.view, 'Approved · ' + a.n); void hydrateAdminState().catch(() => undefined); } });
   };
   const reject = () => form({ title: 'Reject ' + a.n, fields: [
     { id: 'r', label: 'Reason', type: 'select', options: ['Documents invalid', 'Out of scope', 'Fraud risk', 'Other'], required: true },
     { id: 'm', label: 'Message to applicant', type: 'textarea', required: true },
     { id: 'f', label: 'Final rejection (applicant cannot resubmit)', type: 'check' }],
     buttons: [{ label: 'Reject', key: 's', primary: true }], sub: 'The applicant is notified with your message.',
-    onSubmit: (_k, v) => { a.st = 4; finish(a, (v.f ? 'Rejected (final) · ' : 'Rejected · ') + v.r, 'Rejected · ' + a.n); } });
+    onSubmit: async (_k, v) => { await reviewBusinessApplication(a.id, 'rejected', String(v.r) + ': ' + String(v.m)); a.st = 4; finish(a, (v.f ? 'Rejected (final) · ' : 'Rejected · ') + v.r, 'Rejected · ' + a.n); void hydrateAdminState().catch(() => undefined); } });
   const requestInfo = () => form({ title: 'Request information', fields: [
     { id: 'd', label: 'Requirement', type: 'select', options: NM, required: true, value: (a.d.find((x) => x[1] !== 'verified') ?? [NM[0]])[0] },
     { id: 'm', label: 'What needs to change', type: 'textarea', required: true }, { id: 'due', label: 'Reply by', type: 'date', required: true }],
