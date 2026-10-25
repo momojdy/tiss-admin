@@ -85,6 +85,14 @@ export async function reviewBusinessApplication(id: string, status: 'approved' |
   });
   if (error) throw new Error(error.code === '42501' ? 'You do not have permission to review applications.' : error.message);
 }
+export type BusinessVerification = 'pending' | 'verified' | 'restricted';
+/** Marks a business verified, pending or restricted. Anything but verified also unpublishes its Goodies store. The server checks the operations permission and writes the audit entry. */
+export async function setBusinessVerification(businessId: string, status: BusinessVerification, reason: string) {
+  const { error } = await supabase.rpc('wantiss_admin_set_business_verification', {
+    p_business: businessId, p_status: status, p_reason: reason,
+  });
+  if (error) throw new Error(error.code === '42501' ? 'You do not have permission to verify businesses.' : error.message);
+}
 export async function saveCmsVersion(input: {
   key: string; locale: string; payload: Record<string, unknown>; status?: CmsStatus;
 }) {
