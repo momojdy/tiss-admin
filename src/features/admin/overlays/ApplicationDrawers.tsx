@@ -4,7 +4,7 @@ import { aud, bump, db, useDb } from '../state/db';
 import { can, session } from '../state/access';
 import { REQ, useGuard } from '../state/requirements';
 import { Card, Section } from '../ui/Card';
-import { ButtonRow, OutlineBtn, Pill, StatusPill } from '../ui/Controls';
+import { ButtonRow, OutlineBtn, Pill, Row, StatusPill } from '../ui/Controls';
 import { useForm } from '../ui/FormSheet';
 import { KeyValue, ListRows } from '../ui/Lists';
 import { DrawerBody, useOverlay } from '../ui/Overlay';
