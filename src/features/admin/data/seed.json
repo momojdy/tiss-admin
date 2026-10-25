@@ -1,1 +1,2860 @@
-{"APPS":[{"id":"AP-1042","n":"Maison Léon Bakery","s":"Goodies","st":0,"age":3,"o":"momo","d":[["Business licence","verified"],["Tax ID","pending"],["Owner ID","pending"]],"hold":0,"esc":0,"due":"","notes":[],"log":[["Oct 14","Application submitted"]]},{"id":"AP-1043","n":"Ti Bèl Rentals","s":"Rideza","st":0,"age":2,"o":"Unassigned","d":[["Business licence","verified"],["Tax ID","expired"],["Owner ID","pending"]],"hold":0,"esc":0,"due":"","notes":[],"log":[["Oct 15","Application submitted"]]},{"id":"AP-1044","n":"Kay Fresh Market","s":"Goodies","st":0,"age":1,"o":"Staff A","d":[["Business licence","verified"],["Tax ID","verified"],["Owner ID","pending"]],"hold":0,"esc":0,"due":"","notes":[],"log":[["Oct 16","Application submitted"]]},{"id":"AP-1045","n":"Villa Soleil","s":"Stays","st":0,"age":0,"o":"momo","d":[["Business licence","verified"],["Tax ID","pending"],["Owner ID","pending"]],"hold":0,"esc":0,"due":"","notes":[],"log":[["Oct 17","Application submitted"]]},{"id":"AP-1046","n":"Lakou Events","s":"Gatherz","st":0,"age":1,"o":"Unassigned","d":[["Business licence","pending"],["Tax ID","verified"],["Owner ID","pending"]],"hold":0,"esc":0,"due":"","notes":[],"log":[["Oct 16","Application submitted"]]},{"id":"AP-1047","n":"Pwoche Print","s":"Arts & Litts","st":0,"age":0,"o":"Staff B","d":[["Business licence","pending"],["Tax ID","pending"],["Owner ID","pending"]],"hold":0,"esc":0,"due":"","notes":[],"log":[["Oct 17","Application submitted"]]},{"id":"AP-1048","n":"Lakay Transport","s":"Woulib","st":1,"age":1,"o":"momo","d":[["Business licence","verified"],["Tax ID","verified"],["Owner ID","verified"]],"hold":0,"esc":0,"due":"","notes":[],"log":[["Oct 16","Application submitted"]]},{"id":"AP-1049","n":"Pwoche Grocery","s":"Goodies","st":1,"age":1,"o":"Staff A","d":[["Business licence","verified"],["Tax ID","verified"],["Owner ID","verified"]],"hold":0,"esc":0,"due":"","notes":[],"log":[["Oct 16","Application submitted"]]},{"id":"AP-1050","n":"Blue Door Hostel","s":"Stays","st":1,"age":0,"o":"momo","d":[["Business licence","verified"],["Tax ID","verified"],["Owner ID","pending"]],"hold":0,"esc":0,"due":"","notes":[],"log":[["Oct 17","Application submitted"]]},{"id":"AP-1051","n":"Haiti Cargo Hub","s":"Konsoliss","st":1,"age":1,"o":"Staff B","d":[["Business licence","verified"],["Tax ID","verified"],["Owner ID","pending"]],"hold":0,"esc":0,"due":"","notes":[],"log":[["Oct 16","Application submitted"]]},{"id":"AP-1052","n":"Zenith Auctions","s":"Bidz","st":1,"age":1,"o":"Staff A","d":[["Business licence","verified"],["Tax ID","pending"],["Owner ID","verified"]],"hold":0,"esc":0,"due":"","notes":[],"log":[["Oct 16","Application submitted"]]},{"id":"AP-1053","n":"Mari Beauty","s":"Glowz","st":2,"age":1,"o":"Staff A","d":[["Business licence","verified"],["Tax ID","rejected"],["Owner ID","verified"]],"hold":0,"esc":0,"due":"","notes":[],"log":[["Oct 16","Application submitted"]]},{"id":"AP-1054","n":"Kay Property Group","s":"Habita","st":2,"age":4,"o":"Staff B","d":[["Business licence","verified"],["Tax ID","verified"],["Owner ID","missing"]],"hold":0,"esc":0,"due":"","notes":[],"log":[["Oct 13","Application submitted"]]},{"id":"AP-1055","n":"Rapid Top","s":"Top up","st":2,"age":1,"o":"momo","d":[["Business licence","missing"],["Tax ID","verified"],["Owner ID","verified"]],"hold":0,"esc":0,"due":"","notes":[],"log":[["Oct 16","Application submitted"]]},{"id":"AP-1056","n":"Sunrise Tours","s":"Flyz","st":3,"age":0,"o":"momo","d":[["Business licence","verified"],["Tax ID","verified"],["Owner ID","verified"]],"hold":0,"esc":0,"due":"","notes":[],"log":[["Oct 17","Application submitted"]]},{"id":"AP-1057","n":"Tèt Ansanm Deals","s":"Dealz","st":3,"age":1,"o":"Staff A","d":[["Business licence","verified"],["Tax ID","verified"],["Owner ID","verified"]],"hold":0,"esc":0,"due":"","notes":[],"log":[["Oct 16","Application submitted"]]},{"id":"AP-1058","n":"Pa Bliye Gifts","s":"Goodies","st":3,"age":2,"o":"momo","d":[["Business licence","verified"],["Tax ID","verified"],["Owner ID","verified"]],"hold":0,"esc":0,"due":"","notes":[],"log":[["Oct 15","Application submitted"]]},{"id":"AP-1059","n":"Quick Shop","s":"Globiz","st":4,"age":3,"o":"Staff B","d":[["Business licence","rejected"],["Tax ID","verified"],["Owner ID","verified"]],"hold":0,"esc":0,"due":"","notes":[],"log":[["Oct 14","Application submitted"]]}],"INV":[{"id":"WP-0021","f":"Stays booking","u":"Jean Baptiste","d":"Oct 16","n":"Today","a":180,"s":"Completed","ref":0,"rq":90,"log":[["Oct 16","Payment completed"]]},{"id":"WP-0020","f":"Top up","u":"Marie Léon","d":"Oct 15","n":"Today","a":50,"s":"Failed","ref":0,"rq":0,"log":[["Oct 15","Payment failed"]]},{"id":"WP-0019","f":"Goodies order","u":"Pierre Louis","d":"Oct 15","n":"Today","a":24.5,"s":"Pending","ref":0,"rq":0,"log":[["Oct 15","Payment pending"]]},{"id":"WP-0018","f":"Konsoliss booking","u":"Nadège Joseph","d":"Oct 14","n":"Yesterday","a":640,"s":"Completed","ref":0,"rq":0,"log":[["Oct 14","Payment completed"]]},{"id":"WP-0017","f":"Woulib ride","u":"Rose Charles","d":"Oct 14","n":"Yesterday","a":12,"s":"Completed","ref":0,"rq":0,"log":[["Oct 14","Payment completed"]]},{"id":"WP-0016","f":"Flyz ticket","u":"Wilner Pierre","d":"Oct 13","n":"2 days ago","a":412,"s":"Pending","ref":0,"rq":0,"log":[["Oct 13","Payment pending"]]},{"id":"WP-0015","f":"Stays refund","u":"Jean Baptiste","d":"Oct 12","n":"3 days ago","a":90,"s":"Refunded","ref":0,"rq":0,"log":[["Oct 12","Payment refunded"]]},{"id":"WP-0014","f":"Frenzies entry","u":"Kervens Paul","d":"Oct 12","n":"3 days ago","a":5,"s":"Completed","ref":0,"rq":0,"log":[["Oct 12","Payment completed"]]},{"id":"WP-0013","f":"Potssy ticket","u":"Esther Dorvil","d":"Oct 11","n":"4 days ago","a":10,"s":"Completed","ref":0,"rq":0,"log":[["Oct 11","Payment completed"]]},{"id":"WP-0012","f":"Goodies order","u":"Pierre Louis","d":"Oct 11","n":"4 days ago","a":36,"s":"Failed","ref":0,"rq":0,"log":[["Oct 11","Payment failed"]]},{"id":"WP-0011","f":"Rideza rental","u":"Carl Henri","d":"Oct 10","n":"5 days ago","a":220,"s":"Completed","ref":0,"rq":0,"log":[["Oct 10","Payment completed"]]},{"id":"WP-0010","f":"Top up","u":"Rose Charles","d":"Oct 10","n":"5 days ago","a":20,"s":"Completed","ref":0,"rq":0,"log":[["Oct 10","Payment completed"]]}],"SVC":[["Goodies","Marketplace","142","6",82,"Active",1,"#f6cfc2"],["Stays","Hourly and overnight","38","3",74,"Active",1,"#d6e6d9"],["Arts & Litts","Arts and literature","21","2",66,"Active",0,"#f6cfc2"],["Top up","Top-ups","318","4",88,"Active",0,"#d6e6d9"],["Woulib","Rides and delivery","210","2",91,"Active",0,"#d6e6d9"],["Flyz","Flights","19","1",58,"Active",0,"#d6e6d9"],["Streamz","Active service","96","1",79,"Active",0,"#f6cfc2"],["Dealz","Active service","54","2",72,"Active",0,"#d6e6d9"],["Services","Active service","33","3",63,"Active",0,"#f6cfc2"],["Habita","Active service","17","5",55,"Active",0,"#d6e6d9"],["Gatherz","Active service","26","2",69,"Active",0,"#f6cfc2"],["Bidz","Active service","41","3",70,"Active",0,"#d6e6d9"],["Globiz","Overseas shopping","64","3",71,"Active",0,"#f6cfc2"],["Rideza","Vehicle rentals","12","4",48,"Active",0,"#d6e6d9"],["Glowz","Active service","29","2",67,"Active",0,"#f6cfc2"],["Potssy","Raffles and lotteries","88","4",77,"Active",0,"#d6e6d9"],["Konsoliss","Container shipping","27","5",66,"Active",0,"#7a5543"],["Frenzies","PvP mini-games","530","0",95,"Active",0,"#d6e6d9"],["Prezo","Pre-order","–","Launch",40,"Pre-order",0,"#f6cfc2"]],"MOD":{"Goodies":"Overview|Home content|Categories|Builder library|Ingredient requests|Promotions|Fees and rules|Restricted goods|Text and notifications|Support and legal|Merchants|Product review|Orders|Analytics","Stays":"Overview|Properties|Property approvals|Units and rooms|Availability|Bookings|Pricing and rules|Promotions|Support|Analytics|Settings","Arts & Litts":"Overview|Catalog|Categories|Creators and sellers|Submissions and approvals|Promotions|Support|Analytics","Top up":"Overview|Top-up transactions|Providers and catalog|Failed transactions|Reversals and refunds|Customer issues|Analytics|Settings","Woulib":"Overview|Service activity|Providers and drivers|Vehicles and delivery resources|Trips and requests|Issues|Documents|Promotions|Analytics","Flyz":"Overview|Flight content|Booking records|Providers and suppliers|Cancellations and refunds|Customer issues|Promotions|Analytics","Streamz":"Overview|Content catalog|Categories|Media and assets|Publishing|Featured content|Reports and issues|Analytics|Settings","Dealz":"Overview|Deals|Deal submissions|Categories|Merchants and providers|Campaigns|Redemptions|Issues|Analytics","Services":"Overview|Service catalog|Categories|Providers|Submissions and approvals|Requests and bookings|Documents|Promotions|Support|Analytics","Habita":"Overview|Property listings|Owners and agents|Listing approvals|Inquiries|Documents|Promotions|Support|Analytics","Gatherz":"Overview|Events|Venues and organizers|Submissions and approvals|Scheduling|Participation|Promotions|Support|Analytics","Bidz":"Overview|Listings|Sellers|Auction records|Bids|Disputes|Approvals|Support|Analytics","Globiz":"Overview|Shopping catalog|Orders|Supplier information|Shipment tracking|Issues|Promotions|Analytics","Rideza":"Overview|Vehicle listings|Owners and providers|Vehicle documents|Availability|Rentals and bookings|Pricing and rules|Issues|Analytics","Glowz":"Overview|Catalog and listings|Providers|Submissions and approvals|Appointments and requests|Promotions|Support|Analytics","Potssy":"Overview|Raffles and lotteries|Campaign approvals|Prizes|Tickets and entries|Draws and results|Winners and claims|Payments and refunds|Reports and analytics|Complaints and settings","Konsoliss":"Overview|Requests and shipments|Container records|Providers|Documents|Quotes and bookings|Shipment status|Issues|Analytics","Frenzies":"Overview|Game catalog|Availability|Participation records|Player reports|Disputes and incidents|Promotions|Analytics","Prezo":"Overview|Pre-order items|Submissions and providers|Availability and schedule|Orders and requests|Customer issues|Launch readiness|Analytics"},"STAFF":[{"n":"momo","role":"Super Admin","last":"Now","st":"Active","x":2,"ov":{"sec":{},"rights":{}},"scope":[],"hist":[{"when":"2026-09-01","by":"System","action":"Created","txt":"Super Admin","note":""}],"until":"","susEnd":""},{"n":"Staff A","role":"Review staff","last":"1 h ago","st":"Active","x":1,"ov":{"sec":{},"rights":{}},"scope":[],"hist":[],"until":"","susEnd":""},{"n":"Staff B","role":"Content manager","last":"3 h ago","st":"Active","x":3,"ov":{"sec":{},"rights":{}},"scope":[],"hist":[],"until":"","susEnd":""},{"n":"Staff C","role":"Customer support","last":"Today","st":"Active","x":4,"ov":{"sec":{},"rights":{}},"scope":[],"hist":[],"until":"","susEnd":""},{"n":"Staff D","role":"Finance","last":"Yesterday","st":"Active","x":0,"ov":{"sec":{},"rights":{}},"scope":[],"hist":[],"until":"","susEnd":""},{"n":"Staff E","role":"Review staff","last":"Not yet","st":"Invited","x":0,"ov":{"sec":{},"rights":{}},"scope":[],"hist":[],"until":"","susEnd":""}],"ROLES":{"Super Admin":[2,2,2,2,2,2,2,2],"Review staff":[1,2,0,0,0,0,1,0],"Content manager":[1,0,1,2,0,0,0,0],"Customer support":[1,1,0,0,0,0,1,0],"Finance":[1,0,0,0,2,1,0,0]},"RR":{"Super Admin":["Approve submissions","Publish content","Issue refunds","Pause accounts","Ban accounts","Export data","Manage settings","Manage permissions"],"Review staff":["Approve submissions","Pause accounts"],"Content manager":[],"Customer support":["Pause accounts"],"Finance":["Issue refunds","Export data"]},"SEC":["Overview","Operations","Ecosystem","Content","Finance","Analytics","People","Settings"],"LV":["None","View","Edit"],"CASES":[{"id":"#2041","t":"Woulib trip issue","svc":"Woulib","pri":"High","o":"Unassigned","st":"Escalated","msgs":[["Customer","The driver never arrived."],["Agent","Checking the trip record."]]},{"id":"#2040","t":"Top up not credited","svc":"Top up","pri":"Normal","o":"Staff C","st":"Open","msgs":[["Customer","My balance was not updated."]]}],"NS":[{"t":"Top up failed · WP-0020","w":"2d ago","f":"crit unread","d":"inv","v":"WP-0020"},{"t":"Application over 48h · Maison Léon Bakery","w":"3d ago","f":"unread mine","d":"app","v":"AP-1042"},{"t":"Tax ID expired · Ti Bèl Rentals","w":"today","f":"crit unread","d":"doc","v":"AP-1043:1"},{"t":"Refund request · WP-0021","w":"1d ago","f":"mine unread","d":"rfd","v":"WP-0021"},{"t":"Banner expiring · Top up bonus","w":"in 2 days","f":"unread","d":"gp","v":"3|cs=Banners"},{"t":"Support case #2041 escalated","w":"today","f":"crit unread mine","d":"case","v":"#2041"}],"CUST":[["Jean Baptiste","Active","Mar 2026"],["Marie Léon","Active","Apr 2026"],["Pierre Louis","Active","Jan 2026"],["Nadège Joseph","Active","Feb 2026"],["Rose Charles","Active","May 2026"],["Esther Dorvil","Suspended","Jun 2026"]],"BN":[{"id":"BN-1","t":"Stays hero banner","svc":"Stays","pl":"Home hero","st":"Live","from":"2026-10-01","to":"2026-11-30"},{"id":"BN-2","t":"Goodies weekend deal","svc":"Goodies","pl":"Home card","st":"Scheduled","from":"2026-10-24","to":"2026-10-27"},{"id":"BN-3","t":"Popular destinations","svc":"Stays","pl":"Collection","st":"In review","from":"2026-10-28","to":"2026-12-31"},{"id":"BN-4","t":"Top up bonus","svc":"Top up","pl":"Wallet card","st":"Live","from":"2026-10-05","to":"2026-10-19"},{"id":"BN-5","t":"Category icons","svc":"Goodies","pl":"Category","st":"Live","from":"2026-09-01","to":"2026-12-31"},{"id":"BN-6","t":"Container promo","svc":"Konsoliss","pl":"Home hero","st":"Live","from":"2026-10-10","to":"2026-12-31"},{"id":"BN-7","t":"Raffle spotlight","svc":"Potssy","pl":"Home card","st":"Draft","from":"","to":""}],"PRM":[{"id":"PR-1","n":"Weekend deal","svc":"Goodies","fund":"Vendor","inc":"15% off","st":"Scheduled","from":"2026-10-24","to":"2026-10-27"},{"id":"PR-2","n":"Top up bonus","svc":"Top up","fund":"Platform","inc":"5% cashback","st":"Live","from":"2026-10-05","to":"2026-10-19"},{"id":"PR-3","n":"Night offer","svc":"Stays","fund":"Vendor","inc":"Hourly discount","st":"Draft","from":"","to":""},{"id":"PR-4","n":"Streak bonus","svc":"Frenzies","fund":"Platform","inc":"Bonus points","st":"Live","from":"2026-10-01","to":"2026-10-19"}],"ANN":[{"id":"AN-1","t":"Scheduled maintenance","aud":"All customers","st":"Scheduled","when":"2026-10-20"},{"id":"AN-2","t":"New: Prezo pre-orders","aud":"All customers","st":"Draft","when":""}],"MEDIA":[["stays-hero.jpg",["Stays hero banner"]],["weekend-deal.png",["Goodies weekend deal"]],["category-icons.png",["Category icons"]],["topup-bonus.png",["Top up bonus"]],["container.jpg",["Container promo"]],["unused-banner.png",[]]],"CH":[["Today","Stays hero banner published · Staff B"],["Yesterday","Top up bonus scheduled · Staff B"],["2d ago","Category icons updated · Staff B"]],"AUD":[["Application approved · Pa Bliye Gifts","momo","today"],["Banner published · Stays hero","Staff B","yesterday"],["Refund requested · WP-0015","Staff D","2d ago"],["Role changed · Staff C","momo","3d ago"]],"SET":[["Settlement ST-201","Goodies merchants","Oct 1–15",1240.5,"Open"],["Settlement ST-202","Stays hosts","Oct 1–15",980,"Paid"],["Settlement ST-203","Woulib drivers","Oct 1–15",415.25,"Discrepancy"]],"PAYO":[["Payout PO-31","Pwoche Grocery",310,"Pending"],["Payout PO-30","Lakay Transport",415.25,"Failed"],["Payout PO-29","Blue Door Hostel",640,"Paid"]],"RECO":[{"id":"RC-1","t":"Amount mismatch · WP-0018","a":640,"b":620,"st":"Open"},{"id":"RC-2","t":"Unmatched settlement · ST-203","a":415.25,"b":0,"st":"Open"}],"ACC":[{"id":"C-100","n":"Jean Baptiste","type":"Customer","svc":[],"orders":2,"wallet":20,"listings":0,"r":[],"hist":[],"appeal":0,"paused":0},{"id":"C-101","n":"Marie Léon","type":"Customer","svc":[],"orders":3,"wallet":33,"listings":0,"r":[],"hist":[],"appeal":0,"paused":0},{"id":"C-102","n":"Pierre Louis","type":"Customer","svc":[],"orders":4,"wallet":46,"listings":0,"r":[],"hist":[],"appeal":0,"paused":0},{"id":"C-103","n":"Nadège Joseph","type":"Customer","svc":[],"orders":2,"wallet":59,"listings":0,"r":[],"hist":[],"appeal":0,"paused":0},{"id":"C-104","n":"Rose Charles","type":"Customer","svc":[],"orders":3,"wallet":72,"listings":0,"r":[],"hist":[],"appeal":0,"paused":0},{"id":"C-105","n":"Esther Dorvil","type":"Customer","svc":[],"orders":4,"wallet":85,"listings":0,"r":[{"id":"R-lghsj","kind":"Suspension","scope":"all","reason":"Missing verification documents","notes":"Asked for ID twice, no reply.","start":"2026-10-10","end":"2026-10-20","by":"Staff C","notified":1}],"hist":[{"when":"2026-10-17","by":"Staff C","action":"Suspended","txt":"Missing verification documents · until 2026-10-20","internal":"Asked for ID twice, no reply."}],"appeal":0,"paused":0},{"id":"B-200","n":"Maison Léon Bakery","type":"Seller","svc":["Goodies"],"orders":3,"wallet":100,"listings":4,"r":[],"hist":[],"appeal":0,"paused":0},{"id":"B-201","n":"Ti Bèl Rentals","type":"Vendor","svc":["Rideza"],"orders":4,"wallet":137,"listings":5,"r":[],"hist":[],"appeal":0,"paused":0},{"id":"B-202","n":"Kay Fresh Market","type":"Seller","svc":["Goodies"],"orders":5,"wallet":174,"listings":6,"r":[],"hist":[],"appeal":0,"paused":0},{"id":"B-203","n":"Villa Soleil","type":"Vendor","svc":["Stays"],"orders":6,"wallet":211,"listings":7,"r":[],"hist":[],"appeal":0,"paused":0},{"id":"B-204","n":"Lakou Events","type":"Vendor","svc":["Gatherz"],"orders":7,"wallet":248,"listings":8,"r":[],"hist":[],"appeal":0,"paused":0},{"id":"B-205","n":"Pwoche Print","type":"Seller","svc":["Arts & Litts"],"orders":3,"wallet":285,"listings":9,"r":[],"hist":[],"appeal":0,"paused":0},{"id":"B-206","n":"Lakay Transport","type":"Vendor","svc":["Woulib"],"orders":4,"wallet":322,"listings":10,"r":[],"hist":[],"appeal":0,"paused":0},{"id":"B-207","n":"Pwoche Grocery","type":"Seller","svc":["Goodies"],"orders":5,"wallet":359,"listings":11,"r":[],"hist":[],"appeal":0,"paused":0},{"id":"B-208","n":"Blue Door Hostel","type":"Vendor","svc":["Stays"],"orders":6,"wallet":396,"listings":12,"r":[],"hist":[],"appeal":0,"paused":0},{"id":"B-209","n":"Haiti Cargo Hub","type":"Vendor","svc":["Konsoliss"],"orders":7,"wallet":433,"listings":4,"r":[],"hist":[],"appeal":0,"paused":0},{"id":"B-210","n":"Zenith Auctions","type":"Seller","svc":["Bidz"],"orders":3,"wallet":470,"listings":5,"r":[],"hist":[],"appeal":0,"paused":0},{"id":"B-211","n":"Mari Beauty","type":"Vendor","svc":["Glowz"],"orders":4,"wallet":507,"listings":6,"r":[],"hist":[],"appeal":0,"paused":0},{"id":"B-212","n":"Kay Property Group","type":"Vendor","svc":["Habita"],"orders":5,"wallet":544,"listings":7,"r":[],"hist":[],"appeal":0,"paused":0},{"id":"B-213","n":"Rapid Top","type":"Vendor","svc":["Top up"],"orders":6,"wallet":581,"listings":8,"r":[],"hist":[],"appeal":0,"paused":0},{"id":"B-214","n":"Sunrise Tours","type":"Vendor","svc":["Flyz"],"orders":7,"wallet":618,"listings":9,"r":[],"hist":[],"appeal":0,"paused":0},{"id":"B-215","n":"Tèt Ansanm Deals","type":"Seller","svc":["Dealz"],"orders":3,"wallet":655,"listings":10,"r":[],"hist":[],"appeal":0,"paused":0},{"id":"B-216","n":"Pa Bliye Gifts","type":"Seller","svc":["Goodies"],"orders":4,"wallet":692,"listings":11,"r":[],"hist":[],"appeal":0,"paused":0},{"id":"B-299","n":"Fake Deals Co","type":"Seller","svc":["Dealz"],"orders":1,"wallet":60,"listings":7,"r":[{"id":"R-r88ck","kind":"Ban","scope":"all","reason":"Confirmed fraud","notes":"Three chargebacks and fake listings.","start":"2026-09-28","end":"","by":"momo","notified":1}],"hist":[{"when":"2026-10-17","by":"momo","action":"Banned","txt":"Confirmed fraud","internal":"Three chargebacks and fake listings."},{"when":"2026-10-17","by":"Seller","action":"Appeal received","txt":"Seller asked for a review","internal":""}],"appeal":1,"paused":7}],"PCS":[{"id":"PT-01","t":"Weekend raffle","org":"Pwoche Grocery","price":5,"limit":500,"sold":312,"st":"Live","start":"2026-10-10","end":"2026-10-24","draw":"2026-10-25","inv":[]},{"id":"PT-02","t":"Car raffle","org":"Zenith Auctions","price":20,"limit":2000,"sold":0,"st":"In review","start":"2026-11-01","end":"2026-11-30","draw":"2026-12-01","inv":[]},{"id":"PT-03","t":"Phone raffle","org":"Rapid Top","price":2,"limit":800,"sold":800,"st":"Completed","start":"2026-09-20","end":"2026-10-05","draw":"2026-10-06","inv":[],"res":{"no":"03-0412","u":"Rose Charles","seed":"demo-7f3a","when":"Oct 6"}},{"id":"PT-04","t":"Community lottery","org":"Lakou Events","price":1,"limit":5000,"sold":140,"st":"Paused","start":"2026-10-01","end":"2026-11-15","draw":"2026-11-16","inv":[]},{"id":"PT-05","t":"Holiday draw","org":"Tèt Ansanm Deals","price":10,"limit":1000,"sold":0,"st":"Draft","start":"","end":"","draw":"","inv":[]}],"PZS":[{"id":"PZ-1","c":"PT-01","n":"Gift basket","qty":1,"val":150,"sp":"Pwoche Grocery","ship":"Not applicable"},{"id":"PZ-2","c":"PT-02","n":"Used car","qty":1,"val":6000,"sp":"Zenith Auctions","ship":"Not applicable"},{"id":"PZ-3","c":"PT-03","n":"Smartphone","qty":1,"val":300,"sp":"Rapid Top","ship":"Awaiting winner"}],"WINS":[{"id":"WN-1","c":"PT-03","n":"Rose Charles","prize":"Smartphone","st":"Notified","dl":"Oct 20"}],"PSUB":["Overview","Raffles","Approvals","Prizes","Tickets","Draws","Winners","Payments","Complaints","Reports","Settings"],"POTMAP":{"Overview":"Overview","Raffles and lotteries":"Raffles","Campaign approvals":"Approvals","Prizes":"Prizes","Tickets and entries":"Tickets","Draws and results":"Draws","Winners and claims":"Winners","Payments and refunds":"Payments","Reports and analytics":"Reports","Complaints and settings":"Complaints"},"SETD":{"Appearance":[["mode","Theme","select",["Light","Dark","System"],0,"Light"],["dens","Table density","select",["Comfortable","Compact"],0,"Comfortable"],["land","Landing page","select",["Overview","Operations","Ecosystem","Content","Finance","Analytics","People"],0,"Overview"]],"Platform":[["lang","Default language","select",["English","Français","Kreyòl","Español","简体中文"],0,"English"],["cur","Display currency","select",["USD","HTG"],0,"USD"],["reg","Supported regions","text","",0,"Haiti, diaspora"]],"Notifications":[["push","Push notifications","check","",0,1],["mail","Email notifications","check","",0,1],["crit","Critical alerts only after hours","check","",0,0]],"Documents and requirements":[["exp","Warn before document expiry (days)","number","min=\"1\"",1,30],["rev","Require a second reviewer for licences","check","",0,0]],"Workflows":[["sla","Review target (hours)","number","min=\"1\"",1,48],["asg","Auto-assign new applications","check","",0,0]],"Finance":[["conf","Require confirmation for refunds","check","",0,1],["lim","Refund approval limit ($)","number","min=\"0\"",1,200]],"Team and access":[["mfa","Require MFA for staff","check","",0,1],["sess","Session length (minutes)","number","min=\"5\"",1,30]],"Help and information":[["sup","Support contact","text","",0,"support@wantiss.example"]]},"CSUBS":["Overview","Media","Banners","Promotions","Announcements","Calendar","Approvals","History","Editor"],"WST":{"cat":["Active","Paused","Pending review"],"rec":["Completed","Pending","Cancelled"],"prv":["Approved","Pending","Suspended"],"apr":["Pending review"],"iss":["Open","Escalated","Resolved"],"doc":["pending","verified","expired","rejected"],"cnt":["Live","Scheduled","Draft"]},"PRVP":["Maison Léon","Ti Bèl Co","Kay Fresh","Lakay Group","Pwoche Shop","Zenith Ltd"],"STG":["Submitted","In review","Needs info","Approved","Rejected"],"DW":{"v":"verified","p":"pending","r":"rejected","m":"missing","e":"expired"},"GM":["Nov","Dec","Jan","Feb","Mar","Apr","May","Jun","Jul","Aug","Sep","Oct"],"GD":[[95,0,3],[3,25,15],[45,33,0],[110,0,0],[30,17,8],[88,0,12],[30,13,8],[20,5,12],[62,45,6],[30,32,0],[58,38,5],[78,42,0]],"GN":[0,0,1,1,1,3,3,2,2,1,2,4],"AD":{"7D":{"v":[62,80,74,95,88,110,102],"m":150,"l":["Mon","Tue","Wed","Thu","Fri","Sat","Sun"],"big":"5,420","sm":"transactions this week · <b style=\"color:var(--ink)\">3</b> of 7 days at target"},"30D":{"v":[60,85,70,100,92,118,96,125,108,130],"m":150,"l":["Sep 18","Sep 21","Sep 24","Sep 27","Sep 30","Oct 3","Oct 6","Oct 9","Oct 12","Oct 15"],"big":"21,340","sm":"transactions in 30 days · <b style=\"color:var(--ink)\">6</b> of 10 checkpoints at target"},"90D":{"v":[70,55,85,92,78,100,88,112,96,120,108,126],"m":150,"l":["Jul 18","Jul 25","Aug 1","Aug 8","Aug 15","Aug 22","Aug 29","Sep 5","Sep 12","Sep 19","Sep 26","Oct 3"],"big":"58,910","sm":"transactions in 90 days · <b style=\"color:var(--ink)\">7</b> of 12 weeks at target"},"1Y":{"v":[100,55,85,112,62,102,72,48,125,82,112,116],"m":200,"l":["Nov","Dec","Jan","Feb","Mar","Apr","May","Jun","Jul","Aug","Sep","Oct"],"big":"214,880","sm":"transactions in 12 months · <b style=\"color:var(--ink)\">4</b> of 12 at target"}},"SPAL":{"Goodies":"Goodies brand","Stays":"Stays brand","Flyz":"Flyz brand","Konsoliss":"Konsoliss brand"},"TPL":{"Goodies":[["Shop by category","tile",["Restaurants","Bakery","Beverages","Drugstore","Fresh produce","Groceries"]],["Today's deals","card",["Fresh mangoes","Bakery box","Weekend basket"]]],"Stays":[["Popular destinations","card",["Pétion-Ville","Jacmel","Cap-Haïtien"]],["Hourly stays","card",["2 hours","4 hours","Overnight"]]],"Potssy":[["Active raffles","card",["Weekend raffle","Car raffle","Phone raffle"]],["How it works","text",["Pick a raffle","Buy tickets","Watch the draw"]]],"Konsoliss":[["Container space","card",["40ft container","Half CBM","Full CBM"]],["How it works","tile",["Book","Load","Ship","Receive","Pick up"]]],"Flyz":[["Popular routes","card",["PAP to Miami","PAP to Montréal","PAP to Paris"]],["Offers","card",["Weekend fare","Student fare","Group fare"]]],"Woulib":[["Choose a service","tile",["Ride","Delivery"]],["Recent places","card",["Pétion-Ville","Delmas","Airport"]]],"Frenzies":[["Play now","card",["Rock Paper Scissors","Load Lock Ship","Koridò"]],["Tournaments","card",["$1 tournament","$5 tournament","Weekly cup"]]],"Top up":[["Top up amounts","tile",["$2","$5","$10","$20","$50"]],["Offers","card",["Bonus credit","Data pack","Weekend bonus"]]]},"CTA":{"Goodies":"Start shopping","Stays":"Find a stay","Potssy":"Buy tickets","Konsoliss":"Book space","Flyz":"Search flights","Woulib":"Request a ride","Frenzies":"Play now","Top up":"Top up now","Prezo":"Notify me"},"FLOWT":{"Goodies":"Checkout","Stays":"Book your stay","Potssy":"Buy tickets","Konsoliss":"Book space","Flyz":"Book flight","Woulib":"Request ride","Top up":"Confirm top up","Rideza":"Book rental","Gatherz":"Reserve a spot","Habita":"Send inquiry"},"GK":["Wantiss brand","Goodies brand","Stays brand","Flyz brand","Konsoliss brand","Wallet sage","Sunset","Night","Ivory"],"VOC":{"Goodies":["Fresh mangoes","Pikliz jar","Bakery box","Cold drinks pack","Plantain chips","Haitian coffee"],"Stays":["Villa Soleil","Blue Door Hostel","Hourly room · Pétion-Ville","Beach cottage","City studio","Mountain lodge"],"Arts & Litts":["Poetry collection","Canvas painting","Short story anthology","Sculpture","Zine issue 4","Photo series"],"Top up":["Credit $10","Data pack $5","Credit $25","Data pack $2","Credit $50","Bundle $15"],"Woulib":["Ride · Delmas to Pétion-Ville","Delivery · parcel","Ride · airport","Delivery · groceries","Ride · downtown","Delivery · documents"],"Flyz":["PAP to Miami","PAP to Montréal","PAP to Paris","Cap-Haïtien to PAP","PAP to New York","PAP to Santo Domingo"],"Dealz":["2-for-1 meal","Weekend discount","Flash sale","Coupon pack","Bundle offer","Loyalty deal"],"Habita":["2-bed apartment","Studio","Family house","Office space","Land plot","Villa"],"Gatherz":["Community concert","Art fair","Food festival","Tech meetup","Sports day","Book launch"],"Bidz":["Vintage radio","Painting lot","Laptop","Bicycle","Guitar","Watch"],"Globiz":["Order · Amazon","Order · eBay","Order · Temu","Order · SHEIN","Order · Amazon","Order · eBay"],"Rideza":["Toyota Corolla","Honda Civic","Suzuki Jimny","Hyundai Tucson","Nissan Sentra","Kia Rio"],"Potssy":["Weekend raffle","Cash lottery","Car raffle","Phone raffle","Holiday draw","Community raffle"],"Konsoliss":["40ft container slot","0.5 CBM booking","1 CBM booking","Warehouse receipt","Sourcing request","Shipment to Haiti"],"Frenzies":["Rock Paper Scissors","Load Lock Ship","Koridò","Tournament $1","Tournament $5","Live challenge"]},"GMAP":{"Overview":"Overview","Home content":"Home","Categories":"Categories","Builder library":"Library","Ingredient requests":"Requests","Promotions":"Promos","Fees and rules":"Fees","Restricted goods":"Restricted","Text and notifications":"Texts","Support and legal":"Support"},"CATIDS":[["restaurants","Restaurant","🍽️"],["produce","Fresh produce","🥭"],["beverages","Beverages","🥤"],["bakery","Bakery & desserts","🥐"],["meat","Meat & seafood","🥩"],["groceries","Groceries","🛒"],["haitian","Haitian products","🇭🇹"],["care","Personal care","🧴"],["drugstore","Drugstore","💊"]],"RIGHTS":["Approve submissions","Publish content","Issue refunds","Pause accounts","Ban accounts","Export data","Manage settings","Manage permissions"],"reasons":["Suspected fraud under investigation","Repeated policy violations","Missing verification documents","Serious abuse","Other"]}
+{
+  "APPS": [
+    {
+      "id": "AP-1042",
+      "n": "Maison Léon Bakery",
+      "s": "Goodies",
+      "st": 0,
+      "age": 3,
+      "o": "momo",
+      "d": [
+        [
+          "Business licence",
+          "verified"
+        ],
+        [
+          "Tax ID",
+          "pending"
+        ],
+        [
+          "Owner ID",
+          "pending"
+        ]
+      ],
+      "hold": 0,
+      "esc": 0,
+      "due": "",
+      "notes": [],
+      "log": [
+        [
+          "Oct 14",
+          "Application submitted"
+        ]
+      ]
+    },
+    {
+      "id": "AP-1043",
+      "n": "Ti Bèl Rentals",
+      "s": "Rideza",
+      "st": 0,
+      "age": 2,
+      "o": "Unassigned",
+      "d": [
+        [
+          "Business licence",
+          "verified"
+        ],
+        [
+          "Tax ID",
+          "expired"
+        ],
+        [
+          "Owner ID",
+          "pending"
+        ]
+      ],
+      "hold": 0,
+      "esc": 0,
+      "due": "",
+      "notes": [],
+      "log": [
+        [
+          "Oct 15",
+          "Application submitted"
+        ]
+      ]
+    },
+    {
+      "id": "AP-1044",
+      "n": "Kay Fresh Market",
+      "s": "Goodies",
+      "st": 0,
+      "age": 1,
+      "o": "Staff A",
+      "d": [
+        [
+          "Business licence",
+          "verified"
+        ],
+        [
+          "Tax ID",
+          "verified"
+        ],
+        [
+          "Owner ID",
+          "pending"
+        ]
+      ],
+      "hold": 0,
+      "esc": 0,
+      "due": "",
+      "notes": [],
+      "log": [
+        [
+          "Oct 16",
+          "Application submitted"
+        ]
+      ]
+    },
+    {
+      "id": "AP-1045",
+      "n": "Villa Soleil",
+      "s": "Stays",
+      "st": 0,
+      "age": 0,
+      "o": "momo",
+      "d": [
+        [
+          "Business licence",
+          "verified"
+        ],
+        [
+          "Tax ID",
+          "pending"
+        ],
+        [
+          "Owner ID",
+          "pending"
+        ]
+      ],
+      "hold": 0,
+      "esc": 0,
+      "due": "",
+      "notes": [],
+      "log": [
+        [
+          "Oct 17",
+          "Application submitted"
+        ]
+      ]
+    },
+    {
+      "id": "AP-1046",
+      "n": "Lakou Events",
+      "s": "Gatherz",
+      "st": 0,
+      "age": 1,
+      "o": "Unassigned",
+      "d": [
+        [
+          "Business licence",
+          "pending"
+        ],
+        [
+          "Tax ID",
+          "verified"
+        ],
+        [
+          "Owner ID",
+          "pending"
+        ]
+      ],
+      "hold": 0,
+      "esc": 0,
+      "due": "",
+      "notes": [],
+      "log": [
+        [
+          "Oct 16",
+          "Application submitted"
+        ]
+      ]
+    },
+    {
+      "id": "AP-1047",
+      "n": "Pwoche Print",
+      "s": "Arts & Litts",
+      "st": 0,
+      "age": 0,
+      "o": "Staff B",
+      "d": [
+        [
+          "Business licence",
+          "pending"
+        ],
+        [
+          "Tax ID",
+          "pending"
+        ],
+        [
+          "Owner ID",
+          "pending"
+        ]
+      ],
+      "hold": 0,
+      "esc": 0,
+      "due": "",
+      "notes": [],
+      "log": [
+        [
+          "Oct 17",
+          "Application submitted"
+        ]
+      ]
+    },
+    {
+      "id": "AP-1048",
+      "n": "Lakay Transport",
+      "s": "Woulib",
+      "st": 1,
+      "age": 1,
+      "o": "momo",
+      "d": [
+        [
+          "Business licence",
+          "verified"
+        ],
+        [
+          "Tax ID",
+          "verified"
+        ],
+        [
+          "Owner ID",
+          "verified"
+        ]
+      ],
+      "hold": 0,
+      "esc": 0,
+      "due": "",
+      "notes": [],
+      "log": [
+        [
+          "Oct 16",
+          "Application submitted"
+        ]
+      ]
+    },
+    {
+      "id": "AP-1049",
+      "n": "Pwoche Grocery",
+      "s": "Goodies",
+      "st": 1,
+      "age": 1,
+      "o": "Staff A",
+      "d": [
+        [
+          "Business licence",
+          "verified"
+        ],
+        [
+          "Tax ID",
+          "verified"
+        ],
+        [
+          "Owner ID",
+          "verified"
+        ]
+      ],
+      "hold": 0,
+      "esc": 0,
+      "due": "",
+      "notes": [],
+      "log": [
+        [
+          "Oct 16",
+          "Application submitted"
+        ]
+      ]
+    },
+    {
+      "id": "AP-1050",
+      "n": "Blue Door Hostel",
+      "s": "Stays",
+      "st": 1,
+      "age": 0,
+      "o": "momo",
+      "d": [
+        [
+          "Business licence",
+          "verified"
+        ],
+        [
+          "Tax ID",
+          "verified"
+        ],
+        [
+          "Owner ID",
+          "pending"
+        ]
+      ],
+      "hold": 0,
+      "esc": 0,
+      "due": "",
+      "notes": [],
+      "log": [
+        [
+          "Oct 17",
+          "Application submitted"
+        ]
+      ]
+    },
+    {
+      "id": "AP-1051",
+      "n": "Haiti Cargo Hub",
+      "s": "Konsoliss",
+      "st": 1,
+      "age": 1,
+      "o": "Staff B",
+      "d": [
+        [
+          "Business licence",
+          "verified"
+        ],
+        [
+          "Tax ID",
+          "verified"
+        ],
+        [
+          "Owner ID",
+          "pending"
+        ]
+      ],
+      "hold": 0,
+      "esc": 0,
+      "due": "",
+      "notes": [],
+      "log": [
+        [
+          "Oct 16",
+          "Application submitted"
+        ]
+      ]
+    },
+    {
+      "id": "AP-1052",
+      "n": "Zenith Auctions",
+      "s": "Bidz",
+      "st": 1,
+      "age": 1,
+      "o": "Staff A",
+      "d": [
+        [
+          "Business licence",
+          "verified"
+        ],
+        [
+          "Tax ID",
+          "pending"
+        ],
+        [
+          "Owner ID",
+          "verified"
+        ]
+      ],
+      "hold": 0,
+      "esc": 0,
+      "due": "",
+      "notes": [],
+      "log": [
+        [
+          "Oct 16",
+          "Application submitted"
+        ]
+      ]
+    },
+    {
+      "id": "AP-1053",
+      "n": "Mari Beauty",
+      "s": "Glowz",
+      "st": 2,
+      "age": 1,
+      "o": "Staff A",
+      "d": [
+        [
+          "Business licence",
+          "verified"
+        ],
+        [
+          "Tax ID",
+          "rejected"
+        ],
+        [
+          "Owner ID",
+          "verified"
+        ]
+      ],
+      "hold": 0,
+      "esc": 0,
+      "due": "",
+      "notes": [],
+      "log": [
+        [
+          "Oct 16",
+          "Application submitted"
+        ]
+      ]
+    },
+    {
+      "id": "AP-1054",
+      "n": "Kay Property Group",
+      "s": "Habita",
+      "st": 2,
+      "age": 4,
+      "o": "Staff B",
+      "d": [
+        [
+          "Business licence",
+          "verified"
+        ],
+        [
+          "Tax ID",
+          "verified"
+        ],
+        [
+          "Owner ID",
+          "missing"
+        ]
+      ],
+      "hold": 0,
+      "esc": 0,
+      "due": "",
+      "notes": [],
+      "log": [
+        [
+          "Oct 13",
+          "Application submitted"
+        ]
+      ]
+    },
+    {
+      "id": "AP-1055",
+      "n": "Rapid Top",
+      "s": "Top up",
+      "st": 2,
+      "age": 1,
+      "o": "momo",
+      "d": [
+        [
+          "Business licence",
+          "missing"
+        ],
+        [
+          "Tax ID",
+          "verified"
+        ],
+        [
+          "Owner ID",
+          "verified"
+        ]
+      ],
+      "hold": 0,
+      "esc": 0,
+      "due": "",
+      "notes": [],
+      "log": [
+        [
+          "Oct 16",
+          "Application submitted"
+        ]
+      ]
+    },
+    {
+      "id": "AP-1056",
+      "n": "Sunrise Tours",
+      "s": "Flyz",
+      "st": 3,
+      "age": 0,
+      "o": "momo",
+      "d": [
+        [
+          "Business licence",
+          "verified"
+        ],
+        [
+          "Tax ID",
+          "verified"
+        ],
+        [
+          "Owner ID",
+          "verified"
+        ]
+      ],
+      "hold": 0,
+      "esc": 0,
+      "due": "",
+      "notes": [],
+      "log": [
+        [
+          "Oct 17",
+          "Application submitted"
+        ]
+      ]
+    },
+    {
+      "id": "AP-1057",
+      "n": "Tèt Ansanm Deals",
+      "s": "Dealz",
+      "st": 3,
+      "age": 1,
+      "o": "Staff A",
+      "d": [
+        [
+          "Business licence",
+          "verified"
+        ],
+        [
+          "Tax ID",
+          "verified"
+        ],
+        [
+          "Owner ID",
+          "verified"
+        ]
+      ],
+      "hold": 0,
+      "esc": 0,
+      "due": "",
+      "notes": [],
+      "log": [
+        [
+          "Oct 16",
+          "Application submitted"
+        ]
+      ]
+    },
+    {
+      "id": "AP-1058",
+      "n": "Pa Bliye Gifts",
+      "s": "Goodies",
+      "st": 3,
+      "age": 2,
+      "o": "momo",
+      "d": [
+        [
+          "Business licence",
+          "verified"
+        ],
+        [
+          "Tax ID",
+          "verified"
+        ],
+        [
+          "Owner ID",
+          "verified"
+        ]
+      ],
+      "hold": 0,
+      "esc": 0,
+      "due": "",
+      "notes": [],
+      "log": [
+        [
+          "Oct 15",
+          "Application submitted"
+        ]
+      ]
+    },
+    {
+      "id": "AP-1059",
+      "n": "Quick Shop",
+      "s": "Globiz",
+      "st": 4,
+      "age": 3,
+      "o": "Staff B",
+      "d": [
+        [
+          "Business licence",
+          "rejected"
+        ],
+        [
+          "Tax ID",
+          "verified"
+        ],
+        [
+          "Owner ID",
+          "verified"
+        ]
+      ],
+      "hold": 0,
+      "esc": 0,
+      "due": "",
+      "notes": [],
+      "log": [
+        [
+          "Oct 14",
+          "Application submitted"
+        ]
+      ]
+    }
+  ],
+  "INV": [
+    {
+      "id": "WP-0021",
+      "f": "Stays booking",
+      "u": "Jean Baptiste",
+      "d": "Oct 16",
+      "n": "Today",
+      "a": 180,
+      "s": "Completed",
+      "ref": 0,
+      "rq": 90,
+      "log": [
+        [
+          "Oct 16",
+          "Payment completed"
+        ]
+      ]
+    },
+    {
+      "id": "WP-0020",
+      "f": "Top up",
+      "u": "Marie Léon",
+      "d": "Oct 15",
+      "n": "Today",
+      "a": 50,
+      "s": "Failed",
+      "ref": 0,
+      "rq": 0,
+      "log": [
+        [
+          "Oct 15",
+          "Payment failed"
+        ]
+      ]
+    },
+    {
+      "id": "WP-0019",
+      "f": "Goodies order",
+      "u": "Pierre Louis",
+      "d": "Oct 15",
+      "n": "Today",
+      "a": 24.5,
+      "s": "Pending",
+      "ref": 0,
+      "rq": 0,
+      "log": [
+        [
+          "Oct 15",
+          "Payment pending"
+        ]
+      ]
+    },
+    {
+      "id": "WP-0018",
+      "f": "Konsoliss booking",
+      "u": "Nadège Joseph",
+      "d": "Oct 14",
+      "n": "Yesterday",
+      "a": 640,
+      "s": "Completed",
+      "ref": 0,
+      "rq": 0,
+      "log": [
+        [
+          "Oct 14",
+          "Payment completed"
+        ]
+      ]
+    },
+    {
+      "id": "WP-0017",
+      "f": "Woulib ride",
+      "u": "Rose Charles",
+      "d": "Oct 14",
+      "n": "Yesterday",
+      "a": 12,
+      "s": "Completed",
+      "ref": 0,
+      "rq": 0,
+      "log": [
+        [
+          "Oct 14",
+          "Payment completed"
+        ]
+      ]
+    },
+    {
+      "id": "WP-0016",
+      "f": "Flyz ticket",
+      "u": "Wilner Pierre",
+      "d": "Oct 13",
+      "n": "2 days ago",
+      "a": 412,
+      "s": "Pending",
+      "ref": 0,
+      "rq": 0,
+      "log": [
+        [
+          "Oct 13",
+          "Payment pending"
+        ]
+      ]
+    },
+    {
+      "id": "WP-0015",
+      "f": "Stays refund",
+      "u": "Jean Baptiste",
+      "d": "Oct 12",
+      "n": "3 days ago",
+      "a": 90,
+      "s": "Refunded",
+      "ref": 0,
+      "rq": 0,
+      "log": [
+        [
+          "Oct 12",
+          "Payment refunded"
+        ]
+      ]
+    },
+    {
+      "id": "WP-0014",
+      "f": "Frenzies entry",
+      "u": "Kervens Paul",
+      "d": "Oct 12",
+      "n": "3 days ago",
+      "a": 5,
+      "s": "Completed",
+      "ref": 0,
+      "rq": 0,
+      "log": [
+        [
+          "Oct 12",
+          "Payment completed"
+        ]
+      ]
+    },
+    {
+      "id": "WP-0013",
+      "f": "Potssy ticket",
+      "u": "Esther Dorvil",
+      "d": "Oct 11",
+      "n": "4 days ago",
+      "a": 10,
+      "s": "Completed",
+      "ref": 0,
+      "rq": 0,
+      "log": [
+        [
+          "Oct 11",
+          "Payment completed"
+        ]
+      ]
+    },
+    {
+      "id": "WP-0012",
+      "f": "Goodies order",
+      "u": "Pierre Louis",
+      "d": "Oct 11",
+      "n": "4 days ago",
+      "a": 36,
+      "s": "Failed",
+      "ref": 0,
+      "rq": 0,
+      "log": [
+        [
+          "Oct 11",
+          "Payment failed"
+        ]
+      ]
+    },
+    {
+      "id": "WP-0011",
+      "f": "Rideza rental",
+      "u": "Carl Henri",
+      "d": "Oct 10",
+      "n": "5 days ago",
+      "a": 220,
+      "s": "Completed",
+      "ref": 0,
+      "rq": 0,
+      "log": [
+        [
+          "Oct 10",
+          "Payment completed"
+        ]
+      ]
+    },
+    {
+      "id": "WP-0010",
+      "f": "Top up",
+      "u": "Rose Charles",
+      "d": "Oct 10",
+      "n": "5 days ago",
+      "a": 20,
+      "s": "Completed",
+      "ref": 0,
+      "rq": 0,
+      "log": [
+        [
+          "Oct 10",
+          "Payment completed"
+        ]
+      ]
+    }
+  ],
+  "SVC": [
+    [
+      "Goodies",
+      "Marketplace",
+      "142",
+      "6",
+      82,
+      "Active",
+      1,
+      "#f6cfc2"
+    ],
+    [
+      "Stays",
+      "Hourly and overnight",
+      "38",
+      "3",
+      74,
+      "Active",
+      1,
+      "#d6e6d9"
+    ],
+    [
+      "Arts & Litts",
+      "Arts and literature",
+      "21",
+      "2",
+      66,
+      "Active",
+      0,
+      "#f6cfc2"
+    ],
+    [
+      "Top up",
+      "Top-ups",
+      "318",
+      "4",
+      88,
+      "Active",
+      0,
+      "#d6e6d9"
+    ],
+    [
+      "Woulib",
+      "Rides and delivery",
+      "210",
+      "2",
+      91,
+      "Active",
+      0,
+      "#d6e6d9"
+    ],
+    [
+      "Flyz",
+      "Flights",
+      "19",
+      "1",
+      58,
+      "Active",
+      0,
+      "#d6e6d9"
+    ],
+    [
+      "Streamz",
+      "Active service",
+      "96",
+      "1",
+      79,
+      "Active",
+      0,
+      "#f6cfc2"
+    ],
+    [
+      "Dealz",
+      "Active service",
+      "54",
+      "2",
+      72,
+      "Active",
+      0,
+      "#d6e6d9"
+    ],
+    [
+      "Services",
+      "Active service",
+      "33",
+      "3",
+      63,
+      "Active",
+      0,
+      "#f6cfc2"
+    ],
+    [
+      "Habita",
+      "Active service",
+      "17",
+      "5",
+      55,
+      "Active",
+      0,
+      "#d6e6d9"
+    ],
+    [
+      "Gatherz",
+      "Active service",
+      "26",
+      "2",
+      69,
+      "Active",
+      0,
+      "#f6cfc2"
+    ],
+    [
+      "Bidz",
+      "Active service",
+      "41",
+      "3",
+      70,
+      "Active",
+      0,
+      "#d6e6d9"
+    ],
+    [
+      "Globiz",
+      "Overseas shopping",
+      "64",
+      "3",
+      71,
+      "Active",
+      0,
+      "#f6cfc2"
+    ],
+    [
+      "Rideza",
+      "Vehicle rentals",
+      "12",
+      "4",
+      48,
+      "Active",
+      0,
+      "#d6e6d9"
+    ],
+    [
+      "Glowz",
+      "Active service",
+      "29",
+      "2",
+      67,
+      "Active",
+      0,
+      "#f6cfc2"
+    ],
+    [
+      "Potssy",
+      "Raffles and lotteries",
+      "88",
+      "4",
+      77,
+      "Active",
+      0,
+      "#d6e6d9"
+    ],
+    [
+      "Konsoliss",
+      "Container shipping",
+      "27",
+      "5",
+      66,
+      "Active",
+      0,
+      "#7a5543"
+    ],
+    [
+      "Frenzies",
+      "PvP mini-games",
+      "530",
+      "0",
+      95,
+      "Active",
+      0,
+      "#d6e6d9"
+    ],
+    [
+      "Prezo",
+      "Pre-order",
+      "–",
+      "Launch",
+      40,
+      "Pre-order",
+      0,
+      "#f6cfc2"
+    ]
+  ],
+  "MOD": {
+    "Goodies": "Overview|Home content|Categories|Builder library|Ingredient requests|Promotions|Fees and rules|Restricted goods|Text and notifications|Support and legal|Merchants|Product review|Orders|Analytics",
+    "Stays": "Overview|Properties|Property approvals|Units and rooms|Availability|Bookings|Pricing and rules|Promotions|Support|Analytics|Settings",
+    "Arts & Litts": "Overview|Catalog|Categories|Creators and sellers|Submissions and approvals|Promotions|Support|Analytics",
+    "Top up": "Overview|Top-up transactions|Providers and catalog|Failed transactions|Reversals and refunds|Customer issues|Analytics|Settings",
+    "Woulib": "Overview|Service activity|Providers and drivers|Vehicles and delivery resources|Trips and requests|Issues|Documents|Promotions|Analytics",
+    "Flyz": "Overview|Flight content|Booking records|Providers and suppliers|Cancellations and refunds|Customer issues|Promotions|Analytics",
+    "Streamz": "Overview|Content catalog|Categories|Media and assets|Publishing|Featured content|Reports and issues|Analytics|Settings",
+    "Dealz": "Overview|Deals|Deal submissions|Categories|Merchants and providers|Campaigns|Redemptions|Issues|Analytics",
+    "Services": "Overview|Service catalog|Categories|Providers|Submissions and approvals|Requests and bookings|Documents|Promotions|Support|Analytics",
+    "Habita": "Overview|Property listings|Owners and agents|Listing approvals|Inquiries|Documents|Promotions|Support|Analytics",
+    "Gatherz": "Overview|Events|Venues and organizers|Submissions and approvals|Scheduling|Participation|Promotions|Support|Analytics",
+    "Bidz": "Overview|Listings|Sellers|Auction records|Bids|Disputes|Approvals|Support|Analytics",
+    "Globiz": "Overview|Shopping catalog|Orders|Supplier information|Shipment tracking|Issues|Promotions|Analytics",
+    "Rideza": "Overview|Vehicle listings|Owners and providers|Vehicle documents|Availability|Rentals and bookings|Pricing and rules|Issues|Analytics",
+    "Glowz": "Overview|Catalog and listings|Providers|Submissions and approvals|Appointments and requests|Promotions|Support|Analytics",
+    "Potssy": "Overview|Raffles and lotteries|Campaign approvals|Prizes|Tickets and entries|Draws and results|Winners and claims|Payments and refunds|Reports and analytics|Complaints and settings",
+    "Konsoliss": "Overview|Requests and shipments|Container records|Providers|Documents|Quotes and bookings|Shipment status|Issues|Analytics",
+    "Frenzies": "Overview|Game catalog|Availability|Participation records|Player reports|Disputes and incidents|Promotions|Analytics",
+    "Prezo": "Overview|Pre-order items|Submissions and providers|Availability and schedule|Orders and requests|Customer issues|Launch readiness|Analytics"
+  },
+  "STAFF": [],
+  "ROLES": {
+    "Super Admin": [
+      2,
+      2,
+      2,
+      2,
+      2,
+      2,
+      2,
+      2
+    ],
+    "Review staff": [
+      1,
+      2,
+      0,
+      0,
+      0,
+      0,
+      1,
+      0
+    ],
+    "Content manager": [
+      1,
+      0,
+      1,
+      2,
+      0,
+      0,
+      0,
+      0
+    ],
+    "Customer support": [
+      1,
+      1,
+      0,
+      0,
+      0,
+      0,
+      1,
+      0
+    ],
+    "Finance": [
+      1,
+      0,
+      0,
+      0,
+      2,
+      1,
+      0,
+      0
+    ]
+  },
+  "RR": {
+    "Super Admin": [
+      "Approve submissions",
+      "Publish content",
+      "Issue refunds",
+      "Pause accounts",
+      "Ban accounts",
+      "Export data",
+      "Manage settings",
+      "Manage permissions"
+    ],
+    "Review staff": [
+      "Approve submissions",
+      "Pause accounts"
+    ],
+    "Content manager": [],
+    "Customer support": [
+      "Pause accounts"
+    ],
+    "Finance": [
+      "Issue refunds",
+      "Export data"
+    ]
+  },
+  "SEC": [
+    "Overview",
+    "Operations",
+    "Ecosystem",
+    "Content",
+    "Finance",
+    "Analytics",
+    "People",
+    "Settings"
+  ],
+  "LV": [
+    "None",
+    "View",
+    "Edit"
+  ],
+  "CASES": [
+    {
+      "id": "#2041",
+      "t": "Woulib trip issue",
+      "svc": "Woulib",
+      "pri": "High",
+      "o": "Unassigned",
+      "st": "Escalated",
+      "msgs": [
+        [
+          "Customer",
+          "The driver never arrived."
+        ],
+        [
+          "Agent",
+          "Checking the trip record."
+        ]
+      ]
+    },
+    {
+      "id": "#2040",
+      "t": "Top up not credited",
+      "svc": "Top up",
+      "pri": "Normal",
+      "o": "Staff C",
+      "st": "Open",
+      "msgs": [
+        [
+          "Customer",
+          "My balance was not updated."
+        ]
+      ]
+    }
+  ],
+  "NS": [
+    {
+      "t": "Top up failed · WP-0020",
+      "w": "2d ago",
+      "f": "crit unread",
+      "d": "inv",
+      "v": "WP-0020"
+    },
+    {
+      "t": "Application over 48h · Maison Léon Bakery",
+      "w": "3d ago",
+      "f": "unread mine",
+      "d": "app",
+      "v": "AP-1042"
+    },
+    {
+      "t": "Tax ID expired · Ti Bèl Rentals",
+      "w": "today",
+      "f": "crit unread",
+      "d": "doc",
+      "v": "AP-1043:1"
+    },
+    {
+      "t": "Refund request · WP-0021",
+      "w": "1d ago",
+      "f": "mine unread",
+      "d": "rfd",
+      "v": "WP-0021"
+    },
+    {
+      "t": "Banner expiring · Top up bonus",
+      "w": "in 2 days",
+      "f": "unread",
+      "d": "gp",
+      "v": "3|cs=Banners"
+    },
+    {
+      "t": "Support case #2041 escalated",
+      "w": "today",
+      "f": "crit unread mine",
+      "d": "case",
+      "v": "#2041"
+    }
+  ],
+  "CUST": [
+    [
+      "Jean Baptiste",
+      "Active",
+      "Mar 2026"
+    ],
+    [
+      "Marie Léon",
+      "Active",
+      "Apr 2026"
+    ],
+    [
+      "Pierre Louis",
+      "Active",
+      "Jan 2026"
+    ],
+    [
+      "Nadège Joseph",
+      "Active",
+      "Feb 2026"
+    ],
+    [
+      "Rose Charles",
+      "Active",
+      "May 2026"
+    ],
+    [
+      "Esther Dorvil",
+      "Suspended",
+      "Jun 2026"
+    ]
+  ],
+  "BN": [
+    {
+      "id": "BN-1",
+      "t": "Stays hero banner",
+      "svc": "Stays",
+      "pl": "Home hero",
+      "st": "Live",
+      "from": "2026-10-01",
+      "to": "2026-11-30"
+    },
+    {
+      "id": "BN-2",
+      "t": "Goodies weekend deal",
+      "svc": "Goodies",
+      "pl": "Home card",
+      "st": "Scheduled",
+      "from": "2026-10-24",
+      "to": "2026-10-27"
+    },
+    {
+      "id": "BN-3",
+      "t": "Popular destinations",
+      "svc": "Stays",
+      "pl": "Collection",
+      "st": "In review",
+      "from": "2026-10-28",
+      "to": "2026-12-31"
+    },
+    {
+      "id": "BN-4",
+      "t": "Top up bonus",
+      "svc": "Top up",
+      "pl": "Wallet card",
+      "st": "Live",
+      "from": "2026-10-05",
+      "to": "2026-10-19"
+    },
+    {
+      "id": "BN-5",
+      "t": "Category icons",
+      "svc": "Goodies",
+      "pl": "Category",
+      "st": "Live",
+      "from": "2026-09-01",
+      "to": "2026-12-31"
+    },
+    {
+      "id": "BN-6",
+      "t": "Container promo",
+      "svc": "Konsoliss",
+      "pl": "Home hero",
+      "st": "Live",
+      "from": "2026-10-10",
+      "to": "2026-12-31"
+    },
+    {
+      "id": "BN-7",
+      "t": "Raffle spotlight",
+      "svc": "Potssy",
+      "pl": "Home card",
+      "st": "Draft",
+      "from": "",
+      "to": ""
+    }
+  ],
+  "PRM": [
+    {
+      "id": "PR-1",
+      "n": "Weekend deal",
+      "svc": "Goodies",
+      "fund": "Vendor",
+      "inc": "15% off",
+      "st": "Scheduled",
+      "from": "2026-10-24",
+      "to": "2026-10-27"
+    },
+    {
+      "id": "PR-2",
+      "n": "Top up bonus",
+      "svc": "Top up",
+      "fund": "Platform",
+      "inc": "5% cashback",
+      "st": "Live",
+      "from": "2026-10-05",
+      "to": "2026-10-19"
+    },
+    {
+      "id": "PR-3",
+      "n": "Night offer",
+      "svc": "Stays",
+      "fund": "Vendor",
+      "inc": "Hourly discount",
+      "st": "Draft",
+      "from": "",
+      "to": ""
+    },
+    {
+      "id": "PR-4",
+      "n": "Streak bonus",
+      "svc": "Frenzies",
+      "fund": "Platform",
+      "inc": "Bonus points",
+      "st": "Live",
+      "from": "2026-10-01",
+      "to": "2026-10-19"
+    }
+  ],
+  "ANN": [
+    {
+      "id": "AN-1",
+      "t": "Scheduled maintenance",
+      "aud": "All customers",
+      "st": "Scheduled",
+      "when": "2026-10-20"
+    },
+    {
+      "id": "AN-2",
+      "t": "New: Prezo pre-orders",
+      "aud": "All customers",
+      "st": "Draft",
+      "when": ""
+    }
+  ],
+  "MEDIA": [
+    [
+      "stays-hero.jpg",
+      [
+        "Stays hero banner"
+      ]
+    ],
+    [
+      "weekend-deal.png",
+      [
+        "Goodies weekend deal"
+      ]
+    ],
+    [
+      "category-icons.png",
+      [
+        "Category icons"
+      ]
+    ],
+    [
+      "topup-bonus.png",
+      [
+        "Top up bonus"
+      ]
+    ],
+    [
+      "container.jpg",
+      [
+        "Container promo"
+      ]
+    ],
+    [
+      "unused-banner.png",
+      []
+    ]
+  ],
+  "CH": [
+    [
+      "Today",
+      "Stays hero banner published · Staff B"
+    ],
+    [
+      "Yesterday",
+      "Top up bonus scheduled · Staff B"
+    ],
+    [
+      "2d ago",
+      "Category icons updated · Staff B"
+    ]
+  ],
+  "AUD": [
+    [
+      "Application approved · Pa Bliye Gifts",
+      "momo",
+      "today"
+    ],
+    [
+      "Banner published · Stays hero",
+      "Staff B",
+      "yesterday"
+    ],
+    [
+      "Refund requested · WP-0015",
+      "Staff D",
+      "2d ago"
+    ],
+    [
+      "Role changed · Staff C",
+      "momo",
+      "3d ago"
+    ]
+  ],
+  "SET": [
+    [
+      "Settlement ST-201",
+      "Goodies merchants",
+      "Oct 1–15",
+      1240.5,
+      "Open"
+    ],
+    [
+      "Settlement ST-202",
+      "Stays hosts",
+      "Oct 1–15",
+      980,
+      "Paid"
+    ],
+    [
+      "Settlement ST-203",
+      "Woulib drivers",
+      "Oct 1–15",
+      415.25,
+      "Discrepancy"
+    ]
+  ],
+  "PAYO": [
+    [
+      "Payout PO-31",
+      "Pwoche Grocery",
+      310,
+      "Pending"
+    ],
+    [
+      "Payout PO-30",
+      "Lakay Transport",
+      415.25,
+      "Failed"
+    ],
+    [
+      "Payout PO-29",
+      "Blue Door Hostel",
+      640,
+      "Paid"
+    ]
+  ],
+  "RECO": [
+    {
+      "id": "RC-1",
+      "t": "Amount mismatch · WP-0018",
+      "a": 640,
+      "b": 620,
+      "st": "Open"
+    },
+    {
+      "id": "RC-2",
+      "t": "Unmatched settlement · ST-203",
+      "a": 415.25,
+      "b": 0,
+      "st": "Open"
+    }
+  ],
+  "ACC": [
+    {
+      "id": "C-100",
+      "n": "Jean Baptiste",
+      "type": "Customer",
+      "svc": [],
+      "orders": 2,
+      "wallet": 20,
+      "listings": 0,
+      "r": [],
+      "hist": [],
+      "appeal": 0,
+      "paused": 0
+    },
+    {
+      "id": "C-101",
+      "n": "Marie Léon",
+      "type": "Customer",
+      "svc": [],
+      "orders": 3,
+      "wallet": 33,
+      "listings": 0,
+      "r": [],
+      "hist": [],
+      "appeal": 0,
+      "paused": 0
+    },
+    {
+      "id": "C-102",
+      "n": "Pierre Louis",
+      "type": "Customer",
+      "svc": [],
+      "orders": 4,
+      "wallet": 46,
+      "listings": 0,
+      "r": [],
+      "hist": [],
+      "appeal": 0,
+      "paused": 0
+    },
+    {
+      "id": "C-103",
+      "n": "Nadège Joseph",
+      "type": "Customer",
+      "svc": [],
+      "orders": 2,
+      "wallet": 59,
+      "listings": 0,
+      "r": [],
+      "hist": [],
+      "appeal": 0,
+      "paused": 0
+    },
+    {
+      "id": "C-104",
+      "n": "Rose Charles",
+      "type": "Customer",
+      "svc": [],
+      "orders": 3,
+      "wallet": 72,
+      "listings": 0,
+      "r": [],
+      "hist": [],
+      "appeal": 0,
+      "paused": 0
+    },
+    {
+      "id": "C-105",
+      "n": "Esther Dorvil",
+      "type": "Customer",
+      "svc": [],
+      "orders": 4,
+      "wallet": 85,
+      "listings": 0,
+      "r": [
+        {
+          "id": "R-lghsj",
+          "kind": "Suspension",
+          "scope": "all",
+          "reason": "Missing verification documents",
+          "notes": "Asked for ID twice, no reply.",
+          "start": "2026-10-10",
+          "end": "2026-10-20",
+          "by": "Staff C",
+          "notified": 1
+        }
+      ],
+      "hist": [
+        {
+          "when": "2026-10-17",
+          "by": "Staff C",
+          "action": "Suspended",
+          "txt": "Missing verification documents · until 2026-10-20",
+          "internal": "Asked for ID twice, no reply."
+        }
+      ],
+      "appeal": 0,
+      "paused": 0
+    },
+    {
+      "id": "B-200",
+      "n": "Maison Léon Bakery",
+      "type": "Seller",
+      "svc": [
+        "Goodies"
+      ],
+      "orders": 3,
+      "wallet": 100,
+      "listings": 4,
+      "r": [],
+      "hist": [],
+      "appeal": 0,
+      "paused": 0
+    },
+    {
+      "id": "B-201",
+      "n": "Ti Bèl Rentals",
+      "type": "Vendor",
+      "svc": [
+        "Rideza"
+      ],
+      "orders": 4,
+      "wallet": 137,
+      "listings": 5,
+      "r": [],
+      "hist": [],
+      "appeal": 0,
+      "paused": 0
+    },
+    {
+      "id": "B-202",
+      "n": "Kay Fresh Market",
+      "type": "Seller",
+      "svc": [
+        "Goodies"
+      ],
+      "orders": 5,
+      "wallet": 174,
+      "listings": 6,
+      "r": [],
+      "hist": [],
+      "appeal": 0,
+      "paused": 0
+    },
+    {
+      "id": "B-203",
+      "n": "Villa Soleil",
+      "type": "Vendor",
+      "svc": [
+        "Stays"
+      ],
+      "orders": 6,
+      "wallet": 211,
+      "listings": 7,
+      "r": [],
+      "hist": [],
+      "appeal": 0,
+      "paused": 0
+    },
+    {
+      "id": "B-204",
+      "n": "Lakou Events",
+      "type": "Vendor",
+      "svc": [
+        "Gatherz"
+      ],
+      "orders": 7,
+      "wallet": 248,
+      "listings": 8,
+      "r": [],
+      "hist": [],
+      "appeal": 0,
+      "paused": 0
+    },
+    {
+      "id": "B-205",
+      "n": "Pwoche Print",
+      "type": "Seller",
+      "svc": [
+        "Arts & Litts"
+      ],
+      "orders": 3,
+      "wallet": 285,
+      "listings": 9,
+      "r": [],
+      "hist": [],
+      "appeal": 0,
+      "paused": 0
+    },
+    {
+      "id": "B-206",
+      "n": "Lakay Transport",
+      "type": "Vendor",
+      "svc": [
+        "Woulib"
+      ],
+      "orders": 4,
+      "wallet": 322,
+      "listings": 10,
+      "r": [],
+      "hist": [],
+      "appeal": 0,
+      "paused": 0
+    },
+    {
+      "id": "B-207",
+      "n": "Pwoche Grocery",
+      "type": "Seller",
+      "svc": [
+        "Goodies"
+      ],
+      "orders": 5,
+      "wallet": 359,
+      "listings": 11,
+      "r": [],
+      "hist": [],
+      "appeal": 0,
+      "paused": 0
+    },
+    {
+      "id": "B-208",
+      "n": "Blue Door Hostel",
+      "type": "Vendor",
+      "svc": [
+        "Stays"
+      ],
+      "orders": 6,
+      "wallet": 396,
+      "listings": 12,
+      "r": [],
+      "hist": [],
+      "appeal": 0,
+      "paused": 0
+    },
+    {
+      "id": "B-209",
+      "n": "Haiti Cargo Hub",
+      "type": "Vendor",
+      "svc": [
+        "Konsoliss"
+      ],
+      "orders": 7,
+      "wallet": 433,
+      "listings": 4,
+      "r": [],
+      "hist": [],
+      "appeal": 0,
+      "paused": 0
+    },
+    {
+      "id": "B-210",
+      "n": "Zenith Auctions",
+      "type": "Seller",
+      "svc": [
+        "Bidz"
+      ],
+      "orders": 3,
+      "wallet": 470,
+      "listings": 5,
+      "r": [],
+      "hist": [],
+      "appeal": 0,
+      "paused": 0
+    },
+    {
+      "id": "B-211",
+      "n": "Mari Beauty",
+      "type": "Vendor",
+      "svc": [
+        "Glowz"
+      ],
+      "orders": 4,
+      "wallet": 507,
+      "listings": 6,
+      "r": [],
+      "hist": [],
+      "appeal": 0,
+      "paused": 0
+    },
+    {
+      "id": "B-212",
+      "n": "Kay Property Group",
+      "type": "Vendor",
+      "svc": [
+        "Habita"
+      ],
+      "orders": 5,
+      "wallet": 544,
+      "listings": 7,
+      "r": [],
+      "hist": [],
+      "appeal": 0,
+      "paused": 0
+    },
+    {
+      "id": "B-213",
+      "n": "Rapid Top",
+      "type": "Vendor",
+      "svc": [
+        "Top up"
+      ],
+      "orders": 6,
+      "wallet": 581,
+      "listings": 8,
+      "r": [],
+      "hist": [],
+      "appeal": 0,
+      "paused": 0
+    },
+    {
+      "id": "B-214",
+      "n": "Sunrise Tours",
+      "type": "Vendor",
+      "svc": [
+        "Flyz"
+      ],
+      "orders": 7,
+      "wallet": 618,
+      "listings": 9,
+      "r": [],
+      "hist": [],
+      "appeal": 0,
+      "paused": 0
+    },
+    {
+      "id": "B-215",
+      "n": "Tèt Ansanm Deals",
+      "type": "Seller",
+      "svc": [
+        "Dealz"
+      ],
+      "orders": 3,
+      "wallet": 655,
+      "listings": 10,
+      "r": [],
+      "hist": [],
+      "appeal": 0,
+      "paused": 0
+    },
+    {
+      "id": "B-216",
+      "n": "Pa Bliye Gifts",
+      "type": "Seller",
+      "svc": [
+        "Goodies"
+      ],
+      "orders": 4,
+      "wallet": 692,
+      "listings": 11,
+      "r": [],
+      "hist": [],
+      "appeal": 0,
+      "paused": 0
+    },
+    {
+      "id": "B-299",
+      "n": "Fake Deals Co",
+      "type": "Seller",
+      "svc": [
+        "Dealz"
+      ],
+      "orders": 1,
+      "wallet": 60,
+      "listings": 7,
+      "r": [
+        {
+          "id": "R-r88ck",
+          "kind": "Ban",
+          "scope": "all",
+          "reason": "Confirmed fraud",
+          "notes": "Three chargebacks and fake listings.",
+          "start": "2026-09-28",
+          "end": "",
+          "by": "momo",
+          "notified": 1
+        }
+      ],
+      "hist": [
+        {
+          "when": "2026-10-17",
+          "by": "momo",
+          "action": "Banned",
+          "txt": "Confirmed fraud",
+          "internal": "Three chargebacks and fake listings."
+        },
+        {
+          "when": "2026-10-17",
+          "by": "Seller",
+          "action": "Appeal received",
+          "txt": "Seller asked for a review",
+          "internal": ""
+        }
+      ],
+      "appeal": 1,
+      "paused": 7
+    }
+  ],
+  "PCS": [
+    {
+      "id": "PT-01",
+      "t": "Weekend raffle",
+      "org": "Pwoche Grocery",
+      "price": 5,
+      "limit": 500,
+      "sold": 312,
+      "st": "Live",
+      "start": "2026-10-10",
+      "end": "2026-10-24",
+      "draw": "2026-10-25",
+      "inv": []
+    },
+    {
+      "id": "PT-02",
+      "t": "Car raffle",
+      "org": "Zenith Auctions",
+      "price": 20,
+      "limit": 2000,
+      "sold": 0,
+      "st": "In review",
+      "start": "2026-11-01",
+      "end": "2026-11-30",
+      "draw": "2026-12-01",
+      "inv": []
+    },
+    {
+      "id": "PT-03",
+      "t": "Phone raffle",
+      "org": "Rapid Top",
+      "price": 2,
+      "limit": 800,
+      "sold": 800,
+      "st": "Completed",
+      "start": "2026-09-20",
+      "end": "2026-10-05",
+      "draw": "2026-10-06",
+      "inv": [],
+      "res": {
+        "no": "03-0412",
+        "u": "Rose Charles",
+        "seed": "demo-7f3a",
+        "when": "Oct 6"
+      }
+    },
+    {
+      "id": "PT-04",
+      "t": "Community lottery",
+      "org": "Lakou Events",
+      "price": 1,
+      "limit": 5000,
+      "sold": 140,
+      "st": "Paused",
+      "start": "2026-10-01",
+      "end": "2026-11-15",
+      "draw": "2026-11-16",
+      "inv": []
+    },
+    {
+      "id": "PT-05",
+      "t": "Holiday draw",
+      "org": "Tèt Ansanm Deals",
+      "price": 10,
+      "limit": 1000,
+      "sold": 0,
+      "st": "Draft",
+      "start": "",
+      "end": "",
+      "draw": "",
+      "inv": []
+    }
+  ],
+  "PZS": [
+    {
+      "id": "PZ-1",
+      "c": "PT-01",
+      "n": "Gift basket",
+      "qty": 1,
+      "val": 150,
+      "sp": "Pwoche Grocery",
+      "ship": "Not applicable"
+    },
+    {
+      "id": "PZ-2",
+      "c": "PT-02",
+      "n": "Used car",
+      "qty": 1,
+      "val": 6000,
+      "sp": "Zenith Auctions",
+      "ship": "Not applicable"
+    },
+    {
+      "id": "PZ-3",
+      "c": "PT-03",
+      "n": "Smartphone",
+      "qty": 1,
+      "val": 300,
+      "sp": "Rapid Top",
+      "ship": "Awaiting winner"
+    }
+  ],
+  "WINS": [
+    {
+      "id": "WN-1",
+      "c": "PT-03",
+      "n": "Rose Charles",
+      "prize": "Smartphone",
+      "st": "Notified",
+      "dl": "Oct 20"
+    }
+  ],
+  "PSUB": [
+    "Overview",
+    "Raffles",
+    "Approvals",
+    "Prizes",
+    "Tickets",
+    "Draws",
+    "Winners",
+    "Payments",
+    "Complaints",
+    "Reports",
+    "Settings"
+  ],
+  "POTMAP": {
+    "Overview": "Overview",
+    "Raffles and lotteries": "Raffles",
+    "Campaign approvals": "Approvals",
+    "Prizes": "Prizes",
+    "Tickets and entries": "Tickets",
+    "Draws and results": "Draws",
+    "Winners and claims": "Winners",
+    "Payments and refunds": "Payments",
+    "Reports and analytics": "Reports",
+    "Complaints and settings": "Complaints"
+  },
+  "SETD": {
+    "Appearance": [
+      [
+        "mode",
+        "Theme",
+        "select",
+        [
+          "Light",
+          "Dark",
+          "System"
+        ],
+        0,
+        "Light"
+      ],
+      [
+        "dens",
+        "Table density",
+        "select",
+        [
+          "Comfortable",
+          "Compact"
+        ],
+        0,
+        "Comfortable"
+      ],
+      [
+        "land",
+        "Landing page",
+        "select",
+        [
+          "Overview",
+          "Operations",
+          "Ecosystem",
+          "Content",
+          "Finance",
+          "Analytics",
+          "People"
+        ],
+        0,
+        "Overview"
+      ]
+    ],
+    "Platform": [
+      [
+        "lang",
+        "Default language",
+        "select",
+        [
+          "English",
+          "Français",
+          "Kreyòl",
+          "Español",
+          "简体中文"
+        ],
+        0,
+        "English"
+      ],
+      [
+        "cur",
+        "Display currency",
+        "select",
+        [
+          "USD",
+          "HTG"
+        ],
+        0,
+        "USD"
+      ],
+      [
+        "reg",
+        "Supported regions",
+        "text",
+        "",
+        0,
+        "Haiti, diaspora"
+      ]
+    ],
+    "Notifications": [
+      [
+        "push",
+        "Push notifications",
+        "check",
+        "",
+        0,
+        1
+      ],
+      [
+        "mail",
+        "Email notifications",
+        "check",
+        "",
+        0,
+        1
+      ],
+      [
+        "crit",
+        "Critical alerts only after hours",
+        "check",
+        "",
+        0,
+        0
+      ]
+    ],
+    "Documents and requirements": [
+      [
+        "exp",
+        "Warn before document expiry (days)",
+        "number",
+        "min=\"1\"",
+        1,
+        30
+      ],
+      [
+        "rev",
+        "Require a second reviewer for licences",
+        "check",
+        "",
+        0,
+        0
+      ]
+    ],
+    "Workflows": [
+      [
+        "sla",
+        "Review target (hours)",
+        "number",
+        "min=\"1\"",
+        1,
+        48
+      ],
+      [
+        "asg",
+        "Auto-assign new applications",
+        "check",
+        "",
+        0,
+        0
+      ]
+    ],
+    "Finance": [
+      [
+        "conf",
+        "Require confirmation for refunds",
+        "check",
+        "",
+        0,
+        1
+      ],
+      [
+        "lim",
+        "Refund approval limit ($)",
+        "number",
+        "min=\"0\"",
+        1,
+        200
+      ]
+    ],
+    "Team and access": [
+      [
+        "mfa",
+        "Require MFA for staff",
+        "check",
+        "",
+        0,
+        1
+      ],
+      [
+        "sess",
+        "Session length (minutes)",
+        "number",
+        "min=\"5\"",
+        1,
+        30
+      ]
+    ],
+    "Help and information": [
+      [
+        "sup",
+        "Support contact",
+        "text",
+        "",
+        0,
+        "support@wantiss.example"
+      ]
+    ]
+  },
+  "CSUBS": [
+    "Overview",
+    "Media",
+    "Banners",
+    "Promotions",
+    "Announcements",
+    "Calendar",
+    "Approvals",
+    "History",
+    "Editor"
+  ],
+  "WST": {
+    "cat": [
+      "Active",
+      "Paused",
+      "Pending review"
+    ],
+    "rec": [
+      "Completed",
+      "Pending",
+      "Cancelled"
+    ],
+    "prv": [
+      "Approved",
+      "Pending",
+      "Suspended"
+    ],
+    "apr": [
+      "Pending review"
+    ],
+    "iss": [
+      "Open",
+      "Escalated",
+      "Resolved"
+    ],
+    "doc": [
+      "pending",
+      "verified",
+      "expired",
+      "rejected"
+    ],
+    "cnt": [
+      "Live",
+      "Scheduled",
+      "Draft"
+    ]
+  },
+  "PRVP": [
+    "Maison Léon",
+    "Ti Bèl Co",
+    "Kay Fresh",
+    "Lakay Group",
+    "Pwoche Shop",
+    "Zenith Ltd"
+  ],
+  "STG": [
+    "Submitted",
+    "In review",
+    "Needs info",
+    "Approved",
+    "Rejected"
+  ],
+  "DW": {
+    "v": "verified",
+    "p": "pending",
+    "r": "rejected",
+    "m": "missing",
+    "e": "expired"
+  },
+  "GM": [
+    "Nov",
+    "Dec",
+    "Jan",
+    "Feb",
+    "Mar",
+    "Apr",
+    "May",
+    "Jun",
+    "Jul",
+    "Aug",
+    "Sep",
+    "Oct"
+  ],
+  "GD": [
+    [
+      95,
+      0,
+      3
+    ],
+    [
+      3,
+      25,
+      15
+    ],
+    [
+      45,
+      33,
+      0
+    ],
+    [
+      110,
+      0,
+      0
+    ],
+    [
+      30,
+      17,
+      8
+    ],
+    [
+      88,
+      0,
+      12
+    ],
+    [
+      30,
+      13,
+      8
+    ],
+    [
+      20,
+      5,
+      12
+    ],
+    [
+      62,
+      45,
+      6
+    ],
+    [
+      30,
+      32,
+      0
+    ],
+    [
+      58,
+      38,
+      5
+    ],
+    [
+      78,
+      42,
+      0
+    ]
+  ],
+  "GN": [
+    0,
+    0,
+    1,
+    1,
+    1,
+    3,
+    3,
+    2,
+    2,
+    1,
+    2,
+    4
+  ],
+  "AD": {
+    "7D": {
+      "v": [
+        62,
+        80,
+        74,
+        95,
+        88,
+        110,
+        102
+      ],
+      "m": 150,
+      "l": [
+        "Mon",
+        "Tue",
+        "Wed",
+        "Thu",
+        "Fri",
+        "Sat",
+        "Sun"
+      ],
+      "big": "5,420",
+      "sm": "transactions this week · <b style=\"color:var(--ink)\">3</b> of 7 days at target"
+    },
+    "30D": {
+      "v": [
+        60,
+        85,
+        70,
+        100,
+        92,
+        118,
+        96,
+        125,
+        108,
+        130
+      ],
+      "m": 150,
+      "l": [
+        "Sep 18",
+        "Sep 21",
+        "Sep 24",
+        "Sep 27",
+        "Sep 30",
+        "Oct 3",
+        "Oct 6",
+        "Oct 9",
+        "Oct 12",
+        "Oct 15"
+      ],
+      "big": "21,340",
+      "sm": "transactions in 30 days · <b style=\"color:var(--ink)\">6</b> of 10 checkpoints at target"
+    },
+    "90D": {
+      "v": [
+        70,
+        55,
+        85,
+        92,
+        78,
+        100,
+        88,
+        112,
+        96,
+        120,
+        108,
+        126
+      ],
+      "m": 150,
+      "l": [
+        "Jul 18",
+        "Jul 25",
+        "Aug 1",
+        "Aug 8",
+        "Aug 15",
+        "Aug 22",
+        "Aug 29",
+        "Sep 5",
+        "Sep 12",
+        "Sep 19",
+        "Sep 26",
+        "Oct 3"
+      ],
+      "big": "58,910",
+      "sm": "transactions in 90 days · <b style=\"color:var(--ink)\">7</b> of 12 weeks at target"
+    },
+    "1Y": {
+      "v": [
+        100,
+        55,
+        85,
+        112,
+        62,
+        102,
+        72,
+        48,
+        125,
+        82,
+        112,
+        116
+      ],
+      "m": 200,
+      "l": [
+        "Nov",
+        "Dec",
+        "Jan",
+        "Feb",
+        "Mar",
+        "Apr",
+        "May",
+        "Jun",
+        "Jul",
+        "Aug",
+        "Sep",
+        "Oct"
+      ],
+      "big": "214,880",
+      "sm": "transactions in 12 months · <b style=\"color:var(--ink)\">4</b> of 12 at target"
+    }
+  },
+  "SPAL": {
+    "Goodies": "Goodies brand",
+    "Stays": "Stays brand",
+    "Flyz": "Flyz brand",
+    "Konsoliss": "Konsoliss brand"
+  },
+  "TPL": {
+    "Goodies": [
+      [
+        "Shop by category",
+        "tile",
+        [
+          "Restaurants",
+          "Bakery",
+          "Beverages",
+          "Drugstore",
+          "Fresh produce",
+          "Groceries"
+        ]
+      ],
+      [
+        "Today's deals",
+        "card",
+        [
+          "Fresh mangoes",
+          "Bakery box",
+          "Weekend basket"
+        ]
+      ]
+    ],
+    "Stays": [
+      [
+        "Popular destinations",
+        "card",
+        [
+          "Pétion-Ville",
+          "Jacmel",
+          "Cap-Haïtien"
+        ]
+      ],
+      [
+        "Hourly stays",
+        "card",
+        [
+          "2 hours",
+          "4 hours",
+          "Overnight"
+        ]
+      ]
+    ],
+    "Potssy": [
+      [
+        "Active raffles",
+        "card",
+        [
+          "Weekend raffle",
+          "Car raffle",
+          "Phone raffle"
+        ]
+      ],
+      [
+        "How it works",
+        "text",
+        [
+          "Pick a raffle",
+          "Buy tickets",
+          "Watch the draw"
+        ]
+      ]
+    ],
+    "Konsoliss": [
+      [
+        "Container space",
+        "card",
+        [
+          "40ft container",
+          "Half CBM",
+          "Full CBM"
+        ]
+      ],
+      [
+        "How it works",
+        "tile",
+        [
+          "Book",
+          "Load",
+          "Ship",
+          "Receive",
+          "Pick up"
+        ]
+      ]
+    ],
+    "Flyz": [
+      [
+        "Popular routes",
+        "card",
+        [
+          "PAP to Miami",
+          "PAP to Montréal",
+          "PAP to Paris"
+        ]
+      ],
+      [
+        "Offers",
+        "card",
+        [
+          "Weekend fare",
+          "Student fare",
+          "Group fare"
+        ]
+      ]
+    ],
+    "Woulib": [
+      [
+        "Choose a service",
+        "tile",
+        [
+          "Ride",
+          "Delivery"
+        ]
+      ],
+      [
+        "Recent places",
+        "card",
+        [
+          "Pétion-Ville",
+          "Delmas",
+          "Airport"
+        ]
+      ]
+    ],
+    "Frenzies": [
+      [
+        "Play now",
+        "card",
+        [
+          "Rock Paper Scissors",
+          "Load Lock Ship",
+          "Koridò"
+        ]
+      ],
+      [
+        "Tournaments",
+        "card",
+        [
+          "$1 tournament",
+          "$5 tournament",
+          "Weekly cup"
+        ]
+      ]
+    ],
+    "Top up": [
+      [
+        "Top up amounts",
+        "tile",
+        [
+          "$2",
+          "$5",
+          "$10",
+          "$20",
+          "$50"
+        ]
+      ],
+      [
+        "Offers",
+        "card",
+        [
+          "Bonus credit",
+          "Data pack",
+          "Weekend bonus"
+        ]
+      ]
+    ]
+  },
+  "CTA": {
+    "Goodies": "Start shopping",
+    "Stays": "Find a stay",
+    "Potssy": "Buy tickets",
+    "Konsoliss": "Book space",
+    "Flyz": "Search flights",
+    "Woulib": "Request a ride",
+    "Frenzies": "Play now",
+    "Top up": "Top up now",
+    "Prezo": "Notify me"
+  },
+  "FLOWT": {
+    "Goodies": "Checkout",
+    "Stays": "Book your stay",
+    "Potssy": "Buy tickets",
+    "Konsoliss": "Book space",
+    "Flyz": "Book flight",
+    "Woulib": "Request ride",
+    "Top up": "Confirm top up",
+    "Rideza": "Book rental",
+    "Gatherz": "Reserve a spot",
+    "Habita": "Send inquiry"
+  },
+  "GK": [
+    "Wantiss brand",
+    "Goodies brand",
+    "Stays brand",
+    "Flyz brand",
+    "Konsoliss brand",
+    "Wallet sage",
+    "Sunset",
+    "Night",
+    "Ivory"
+  ],
+  "VOC": {
+    "Goodies": [
+      "Fresh mangoes",
+      "Pikliz jar",
+      "Bakery box",
+      "Cold drinks pack",
+      "Plantain chips",
+      "Haitian coffee"
+    ],
+    "Stays": [
+      "Villa Soleil",
+      "Blue Door Hostel",
+      "Hourly room · Pétion-Ville",
+      "Beach cottage",
+      "City studio",
+      "Mountain lodge"
+    ],
+    "Arts & Litts": [
+      "Poetry collection",
+      "Canvas painting",
+      "Short story anthology",
+      "Sculpture",
+      "Zine issue 4",
+      "Photo series"
+    ],
+    "Top up": [
+      "Credit $10",
+      "Data pack $5",
+      "Credit $25",
+      "Data pack $2",
+      "Credit $50",
+      "Bundle $15"
+    ],
+    "Woulib": [
+      "Ride · Delmas to Pétion-Ville",
+      "Delivery · parcel",
+      "Ride · airport",
+      "Delivery · groceries",
+      "Ride · downtown",
+      "Delivery · documents"
+    ],
+    "Flyz": [
+      "PAP to Miami",
+      "PAP to Montréal",
+      "PAP to Paris",
+      "Cap-Haïtien to PAP",
+      "PAP to New York",
+      "PAP to Santo Domingo"
+    ],
+    "Dealz": [
+      "2-for-1 meal",
+      "Weekend discount",
+      "Flash sale",
+      "Coupon pack",
+      "Bundle offer",
+      "Loyalty deal"
+    ],
+    "Habita": [
+      "2-bed apartment",
+      "Studio",
+      "Family house",
+      "Office space",
+      "Land plot",
+      "Villa"
+    ],
+    "Gatherz": [
+      "Community concert",
+      "Art fair",
+      "Food festival",
+      "Tech meetup",
+      "Sports day",
+      "Book launch"
+    ],
+    "Bidz": [
+      "Vintage radio",
+      "Painting lot",
+      "Laptop",
+      "Bicycle",
+      "Guitar",
+      "Watch"
+    ],
+    "Globiz": [
+      "Order · Amazon",
+      "Order · eBay",
+      "Order · Temu",
+      "Order · SHEIN",
+      "Order · Amazon",
+      "Order · eBay"
+    ],
+    "Rideza": [
+      "Toyota Corolla",
+      "Honda Civic",
+      "Suzuki Jimny",
+      "Hyundai Tucson",
+      "Nissan Sentra",
+      "Kia Rio"
+    ],
+    "Potssy": [
+      "Weekend raffle",
+      "Cash lottery",
+      "Car raffle",
+      "Phone raffle",
+      "Holiday draw",
+      "Community raffle"
+    ],
+    "Konsoliss": [
+      "40ft container slot",
+      "0.5 CBM booking",
+      "1 CBM booking",
+      "Warehouse receipt",
+      "Sourcing request",
+      "Shipment to Haiti"
+    ],
+    "Frenzies": [
+      "Rock Paper Scissors",
+      "Load Lock Ship",
+      "Koridò",
+      "Tournament $1",
+      "Tournament $5",
+      "Live challenge"
+    ]
+  },
+  "GMAP": {
+    "Overview": "Overview",
+    "Home content": "Home",
+    "Categories": "Categories",
+    "Builder library": "Library",
+    "Ingredient requests": "Requests",
+    "Promotions": "Promos",
+    "Fees and rules": "Fees",
+    "Restricted goods": "Restricted",
+    "Text and notifications": "Texts",
+    "Support and legal": "Support"
+  },
+  "CATIDS": [
+    [
+      "restaurants",
+      "Restaurant",
+      "🍽️"
+    ],
+    [
+      "produce",
+      "Fresh produce",
+      "🥭"
+    ],
+    [
+      "beverages",
+      "Beverages",
+      "🥤"
+    ],
+    [
+      "bakery",
+      "Bakery & desserts",
+      "🥐"
+    ],
+    [
+      "meat",
+      "Meat & seafood",
+      "🥩"
+    ],
+    [
+      "groceries",
+      "Groceries",
+      "🛒"
+    ],
+    [
+      "haitian",
+      "Haitian products",
+      "🇭🇹"
+    ],
+    [
+      "care",
+      "Personal care",
+      "🧴"
+    ],
+    [
+      "drugstore",
+      "Drugstore",
+      "💊"
+    ]
+  ],
+  "RIGHTS": [
+    "Approve submissions",
+    "Publish content",
+    "Issue refunds",
+    "Pause accounts",
+    "Ban accounts",
+    "Export data",
+    "Manage settings",
+    "Manage permissions"
+  ],
+  "reasons": [
+    "Suspected fraud under investigation",
+    "Repeated policy violations",
+    "Missing verification documents",
+    "Serious abuse",
+    "Other"
+  ]
+}
