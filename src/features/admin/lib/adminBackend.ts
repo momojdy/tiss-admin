@@ -79,9 +79,9 @@ export async function loadAdminDomain(domain: AdminDomain): Promise<Record<strin
   if (error) throw new Error(error.code === '42501' ? 'You do not have permission to view this data.' : 'Admin data is unavailable.');
   return Array.isArray(data?.items) ? data.items : [];
 }
-export async function reviewBusinessApplication(id: string, status: 'approved' | 'rejected' | 'pending', note: string) {
+export async function reviewBusinessApplication(id: string, status: 'approved' | 'rejected' | 'pending', note: string, finalRejection = false) {
   const { error } = await supabase.rpc('wantiss_admin_review_business_application', {
-    p_application_id: id, p_status: status, p_review_note: note,
+    p_application_id: id, p_status: status, p_review_note: note, p_final_rejection: finalRejection,
   });
   if (error) throw new Error(error.code === '42501' ? 'You do not have permission to review applications.' : error.message);
 }
