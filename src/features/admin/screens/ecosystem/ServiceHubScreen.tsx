@@ -54,7 +54,11 @@ export function ServiceHubScreen() {
         <Pill onPress={() => go('ecosystem')}>‹ Back</Pill>
         <Txt size={10.6} mut>{'Ecosystem › ' + c[0]}</Txt>
       </Row>
-      <Heading title={c[0] + '\nService hub'} kpis={[
+      <Heading title={c[0] + '\nService hub'} kpis={bizId ? [
+        { icon: '▥', value: c[2] === '1' ? 'Live' : 'Not live', label: 'Goodies store' },
+        { icon: '▤', value: verification === 'verified' ? 'Verified' : verification === 'restricted' ? 'Restricted' : 'Pending', label: 'Verification' },
+        { icon: '◔', value: c[6] ? 'Ready' : 'Not set up', label: 'Payouts' },
+      ] : [
         { icon: '▥', value: c[2], label: pre ? 'Status' : 'Orders today', onPress: () => openModule(c[0], 'Overview') },
         { icon: '▤', value: c[3], label: pre ? 'Phase' : 'Pending items', onPress: () => openModule(c[0], 'Overview') },
         { icon: '◔', value: c[4] + '%', label: pre ? 'Launch readiness' : 'Health score', onPress: () => openModule(c[0], 'Overview') },

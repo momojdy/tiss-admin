@@ -13,7 +13,7 @@ function clearDemoRecords() {
   db.ROLES = {}; db.RR = {}; GRANTS.splice(0, GRANTS.length); REQUESTS.splice(0, REQUESTS.length);
   db.CUST = []; db.BN = []; db.PRM = []; db.ANN = []; db.MEDIA = []; db.CH = []; db.AUD = [];
   db.SET = []; db.PAYO = []; db.RECO = []; db.ACC = []; db.PCS = []; db.PZS = []; db.WINS = [];
-  db.PSUB = []; db.CSUBS = []; db.STG = []; db.GM = []; db.GD = []; db.GN = [];
+  db.PSUB = []; db.CSUBS = []; db.GM = []; db.GD = []; db.GN = [];
 }
 
 export async function hydrateAdminState() {
