@@ -43,11 +43,11 @@ export function ApplicationDrawer({ id, close }: { id: string; close: () => void
   const nav = useNav();
   if (!a) return null;
   const closed = a.st >= 3;
-  const status = db.STG[a.st] + (a.hold ? ' · on hold' : '') + (a.esc ? ' · escalated' : '');
+  const status = (db.STG[a.st] || a.s || 'Pending review') + (a.hold ? ' · on hold' : '') + (a.esc ? ' · escalated' : '');
 
   const approve = () => {
     const bad = a.d.filter((x) => x[1] !== 'verified');
-    if (bad.length) { form({ title: 'Cannot approve yet', fields: [], buttons: [], sub: 'Verify these first: ' + bad.map((x) => x[0] + ' (' + x[1] + ')').join(', ') + '.' }); return; }
+    if (a.d.length !== 3 || bad.length) { form({ title: 'Cannot approve yet', fields: [], buttons: [], sub: a.d.length !== 3 ? 'The application documents are not loaded from the server. Approval is blocked until all three required documents are available and verified.' : 'Verify these first: ' + bad.map((x) => x[0] + ' (' + x[1] + ')').join(', ') + '.' }); return; }
     form({ title: 'Approve ' + a.n, fields: [{ id: 'n', label: 'Note (optional)', type: 'textarea' }], buttons: [{ label: 'Approve', key: 's', primary: true }],
       sub: `Service: ${a.s}. Result: Approved. The business can publish listings in this service.`,
       onSubmit: async (_k, v) => { await reviewBusinessApplication(a.id, 'approved', String(v.n || '')); a.st = 3; finish(a, 'Approved by ' + session.view, 'Approved · ' + a.n); void hydrateAdminState().catch(() => undefined); } });
@@ -88,7 +88,7 @@ export function ApplicationDrawer({ id, close }: { id: string; close: () => void
   return (
     <DrawerBody title={a.n} onClose={close} actions={actions}>
       <View style={{ flexDirection: 'row', alignItems: 'center', gap: 7, marginTop: 4, marginBottom: 8, flexWrap: 'wrap' }}>
-        <StatusPill label={status} tone={STATUS_TONE[db.STG[a.st]]} />
+        <StatusPill label={status} tone={STATUS_TONE[db.STG[a.st] || a.s] || STATUS_TONE.pending} />
         <Txt size={10.6} mut>{a.id + ' · ' + a.s}</Txt>
       </View>
       <KeyValue rows={[['Waiting', a.age + ' day' + (a.age === 1 ? '' : 's')], ['Owner', a.o], ['Due', a.due || 'Not set'], ['Documents', docsText(a) + ' verified']]} />
