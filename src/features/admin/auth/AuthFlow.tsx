@@ -195,7 +195,7 @@ export function AuthFlow({ notice, noticeBad, onDone }: Props) {
               <SecondaryButton label="Back to sign in" onPress={() => { setView('in'); message(''); }} />
             </>}
             {view === 'invite' && <>
-              <Txt size={22.1} lh={1.08}>{'Accept your\\ninvitation'}</Txt>
+              <Txt size={22.1} lh={1.08}>{'Accept your\ninvitation'}</Txt>
               <Txt size={13} mut style={{ marginTop: 6, marginBottom: 14 }}>Create a secure password for your Wantiss staff account.</Txt>
               {noticeText ? <NoticeBox bad={bad}>{noticeText}</NoticeBox> : null}
               <AuthField label="New password" value={password} onChangeText={setPassword} error={undefined} password textContentType="newPassword" />
