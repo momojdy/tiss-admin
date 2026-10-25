@@ -120,7 +120,7 @@ export function ApplicationDrawer({ id, close }: { id: string; close: () => void
           <Card key={doc.id} style={{ marginBottom: 8 }}>
             <Row>
               <View style={{ flex: 1 }}>
-                <Txt size={12.5} weight={700}>{doc.document_type === 'business_licence' ? 'Business licence' : doc.document_type === 'tax_id' ? 'Tax ID' : 'Owner ID'}</Txt>
+                <Txt size={12.5} weight={600}>{doc.document_type === 'business_licence' ? 'Business licence' : doc.document_type === 'tax_id' ? 'Tax ID' : 'Owner ID'}</Txt>
                 <Txt size={10.5} mut>Submitted {new Date(doc.submitted_at).toLocaleDateString()}</Txt>
                 {doc.review_note ? <Txt size={11} mut>{doc.review_note}</Txt> : null}
               </View>
