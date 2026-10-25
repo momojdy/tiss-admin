@@ -85,6 +85,38 @@ export async function reviewBusinessApplication(id: string, status: 'approved' |
   });
   if (error) throw new Error(error.code === '42501' ? 'You do not have permission to review applications.' : error.message);
 }
+
+export type BusinessApplicationDocumentStatus = 'pending' | 'verified' | 'rejected' | 'missing';
+export interface BusinessApplicationDocument {
+  id: string;
+  application_id: string;
+  document_type: 'business_licence' | 'tax_id' | 'owner_id';
+  storage_path: string;
+  status: BusinessApplicationDocumentStatus;
+  review_note: string | null;
+  submitted_at: string;
+  reviewed_at: string | null;
+}
+export async function listBusinessApplicationDocuments(applicationId: string): Promise<BusinessApplicationDocument[]> {
+  const { data, error } = await supabase.from('business_application_documents')
+    .select('id,application_id,document_type,storage_path,status,review_note,submitted_at,reviewed_at')
+    .eq('application_id', applicationId).order('submitted_at', { ascending: false });
+  if (error) throw new Error(error.message || 'Application documents are unavailable.');
+  return (data || []) as BusinessApplicationDocument[];
+}
+export async function setBusinessApplicationDocumentStatus(
+  documentId: string, status: Exclude<BusinessApplicationDocumentStatus, 'pending'>, reason = '',
+) {
+  const { error } = await supabase.rpc('wantiss_admin_set_application_document_status', {
+    p_document_id: documentId, p_status: status, p_review_note: reason || null,
+  });
+  if (error) throw new Error(error.code === '42501' ? 'You do not have permission to review documents.' : error.message);
+}
+export async function getBusinessApplicationDocumentUrl(storagePath: string): Promise<string> {
+  const { data, error } = await supabase.storage.from('business-application-documents').createSignedUrl(storagePath, 60);
+  if (error || !data?.signedUrl) throw new Error(error?.message || 'The document could not be opened.');
+  return data.signedUrl;
+}
 export type BusinessVerification = 'pending' | 'verified' | 'restricted';
 /** Marks a business verified, pending or restricted. Anything but verified also unpublishes its Goodies store. The server checks the operations permission and writes the audit entry. */
 export async function setBusinessVerification(businessId: string, status: BusinessVerification, reason: string) {
