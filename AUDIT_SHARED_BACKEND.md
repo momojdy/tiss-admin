@@ -1,49 +1,40 @@
-# Wantiss shared-backend audit
+# Tiss Admin shared-backend audit
 
-Audit date: 2026-10-24
+Audit date: 2026-10-26
+Shared Supabase project: `ycbirmgppwavorwudlrv`
 
-## Scope and evidence
+## Current implementation
 
-Reviewed repository package manifests, application entry points, admin authentication and state stores, Goodies content provider, Supabase project metadata, public schema, migrations, storage buckets/policies, Edge Function inventory, and current Supabase security/performance advisor output.
+- `src/features/admin/lib/supabase.ts` configures Supabase Auth using `EXPO_PUBLIC_SUPABASE_URL` and `EXPO_PUBLIC_SUPABASE_PUBLISHABLE_KEY`, persists sessions with AsyncStorage, and handles auth deep links.
+- `AuthFlow` uses Supabase password authentication, requires confirmed email, validates the linked `wantiss_admin_staff` row and invitation status, loads server permission grants, and hydrates backend data.
+- `AuthGate` restores sessions and periodically rechecks staff status, email confirmation, invitation expiry, idle timeout and permission grants.
+- `adminBackend.ts` calls the shared dashboard snapshot RPC, staff Edge Function, business application/document RPCs, CMS RPCs, account restriction RPCs, and financial request/refund workflows.
+- `hydrateAdminState.ts` maps server snapshot results into the existing in-memory UI model. The UI model itself is not the database: a screen showing no rows can reflect a denied/failed snapshot because some hydration calls intentionally catch errors.
+- The customer app, vendor Business Space and admin app use the same Supabase project and shared records for Goodies orders, business verification, published content, wallet and financial operations where those backend contracts are implemented.
 
-## Tiss Tiss Beta
+## Authorization contract
 
-- Expo React Native app, package version 1.10.0, uses `@supabase/supabase-js` and configures `src/lib/supabase.ts` from `EXPO_PUBLIC_SUPABASE_URL` and `EXPO_PUBLIC_SUPABASE_PUBLISHABLE_KEY`.
-- Supabase auth persists sessions with AsyncStorage and starts/stops token refresh with app lifecycle.
-- Goodies is not a live catalogue/content integration. `src/features/Goodies/store.ts` builds stores, inventory, availability, pricing, addresses, notifications and wallet state from local seeds and generated values. It includes a demo guest profile, demo wallet balance, demo notifications, and random vendor visibility (`Math.random()`).
-- `src/features/Goodies/content.ts` uses device AsyncStorage for imported admin export JSON and falls back to seed data. This is not shared backend publishing.
-- Existing Supabase configuration is not proof that every feature is backed by Supabase.
+- Identity is `auth.users.id`; editable user metadata or email text alone must never confer staff privileges.
+- Staff access requires an active `wantiss_admin_staff` record.
+- Permission grants use server-checked levels, expiry and revocation.
+- Financial changes, refunds, business verification, document status, CMS publishing and staff-management actions must use narrow server-side operations with trusted audit logging.
+- Client-side permissions only shape the UI; database/RPC/Edge Function checks must independently enforce every operation.
 
-## Tiss Admin
+## Known gaps and required checks
 
-- Package version 0.12.0 has no Supabase client dependency or backend configuration.
-- `src/features/admin/state/db.ts` clones `seed.json` and `authSeed.json` into in-memory state. Changes are lost on restart.
-- `src/features/admin/auth/authLogic.ts` compares local credentials, uses a fixed MFA code, and derives staff emails from local seed records.
-- Staff roles, status, grants, temporary access, notifications and audit history are client-side state. Client-only checks cannot securely enforce authorization.
-- `README.md` identifies Overview, Analytics, Content, Customer page editor, Business detail, service workspaces, Potssy, Goodies, and search/quick-create/settings panels as not ported.
-- README notes the app has not been rendered on a device. Neither app was launched locally as part of this remote audit.
+- `wantiss-admin-bootstrap` is still deployed. After confirming the intended Super Admin is functional, delete the Edge Function and its `WANTISS_SUPER_ADMIN_BOOTSTRAP_SECRET` manually.
+- Leaked-password protection remains disabled in Supabase Auth and must be enabled in the dashboard.
+- The public SECURITY DEFINER inventory still needs a complete function-by-function review. Two unguarded mutation helpers were restricted to `service_role` by forward-only migrations and verified in the live catalog; this does not replace the remaining review.
+- Migration history has duplicate versions and drift. Reconcile only on a disposable branch. Never delete `schema_migrations` rows or replay old migrations on production.
+- CMS asset upload/publish, business-document review, staff permission boundaries, finance/refund outcomes and admin-to-customer visibility still need controlled end-to-end tests.
+- A real business must be verified and its Goodies store/products published through the admin app before the customer flow can be accepted as live.
+- The consumer repository's Expo Doctor check currently fails due to dependency-version mismatches; fix and verify build compatibility before release.
 
-## Supabase
+## Release verification
 
-- Project `Wantiss`, ref `ycbirmgppwavorwudlrv`, region `us-east-1`, status `ACTIVE_HEALTHY`.
-- Existing schema includes profiles, notifications, vendor fulfillment, wallet, Stayz and other feature tables, but no admin staff, admin permission, CMS content or admin asset metadata tables were found.
-- 50 public tables have policies; 98 public policies were reported. `public.account_modes` has RLS enabled with no policy, denying API access by default until an intentional policy is added.
-- Storage currently has private `flyz-moments` and public `wallet-avatars` buckets. No admin-managed CMS asset bucket was found.
-- Security advisor reports six functions with mutable search paths and 45 SECURITY DEFINER functions executable by `anon`. Review each against intended anonymous use before changing permissions; a blanket revoke may break legitimate flows.
-- Performance advisor reports nine unindexed foreign keys and 32 RLS policies with auth initialization-plan warnings.
-- Migration history includes duplicate names and repeated feature fixes. Reconcile migration history and repository migration files before further production schema work.
-
-## Baseline follow-up\n\n- Consumer branch now fails fast if `EXPO_PUBLIC_SUPABASE_URL` is missing or differs from `https://ycbirmgppwavorwudlrv.supabase.co`. The actual runtime-injected URL is still unverified until launched in its configured environment.\n- Consumer branch contains a draft admin/CMS migration and `supabase/ADMIN_CMS_BOOTSTRAP.md` runbook. The migration is not applied to production and must be reviewed/tested after reconciling duplicate/unrecorded Goodies migrations.\n- The migration proposal uses a one-time token-hash bootstrap tied to the authenticated `auth.uid()`, server-side Super Admin-only staff/grant RPCs, append-only audit triggers, versioned CMS statuses, and a private CMS asset bucket. Admin Auth/RPC integration and app workflows remain unimplemented.\n\n## Required implementation sequence
-
-1. Add an additive admin authorization/CMS schema with RLS and a controlled first-super-admin bootstrap. Never bootstrap from a client-supplied email.
-2. Replace local admin password/MFA logic with Supabase Auth. Link staff access to `auth.users.id`; enforce status, role, per-permission overrides, expiry and revocation server-side.
-3. Persist staff actions and audit permission changes and administrative mutations.
-4. Add protected asset storage and versioned CMS drafts/published content. Public clients may read published content only; authorized staff may edit/publish.
-5. Connect Goodies and other app content to the shared CMS with loading, empty and error states. Remove demo catalogue, wallet and business values from production paths.
-6. Port and test missing admin screens and workflows from the existing HTML spec.
-7. Add CI for both apps, install dependencies, run TypeScript checks and Expo validation/export, then test end-to-end flows against a non-production Supabase environment.
-8. Re-run Supabase advisors and test staff privilege boundaries before merging or promoting to production.
-
-## Verification limits
-
-Repository source, Supabase metadata, and advisor output were inspected remotely. Neither app was launched in a local simulator/device, no end-to-end test was executed, and no production schema changes were made as part of this audit. Do not describe the apps as connected until implementation and tests are complete.
+1. Test sign-in, sign-out, invitation acceptance, reset links, session expiry and staff revocation.
+2. Test Super Admin and restricted staff against server-side permission boundaries.
+3. Test business verification and document review, including unpublishing when verification is removed.
+4. Test Goodies publication, customer visibility, order acceptance/decline, cancellation, stock and refunds.
+5. Test wallet reads and financial operations against real backend records and audit history.
+6. Verify production build configuration and complete device smoke tests. Source integration alone is not proof of release readiness.
