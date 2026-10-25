@@ -67,9 +67,9 @@ export function ServiceHubScreen() {
       {bizId ? (
         <Section title="Business verification" right={<StatusPill label={verification} />}>
           <Txt size={12} mut lh={1.4}>{VERIFY_COPY[verification]}</Txt>
-          {can(...REQ.ecosystem) ? (
+          {can(...REQ.review) ? (
             <ButtonRow>
-              {verification !== 'verified' ? <OutlineBtn primary onPress={guard(REQ.ecosystem, () => changeVerification('verified', 'Verify', 'Verify business'))}>Verify business</OutlineBtn> : null}
+              {verification !== 'verified' ? <OutlineBtn primary onPress={guard(REQ.review, () => changeVerification('verified', 'Verify', 'Verify business'))}>Verify business</OutlineBtn> : null}
               {verification === 'verified' ? <OutlineBtn onPress={guard(REQ.ecosystem, () => changeVerification('pending', 'Withdraw verification for', 'Withdraw'))}>Withdraw verification</OutlineBtn> : null}
               {verification !== 'restricted' ? <OutlineBtn onPress={guard(REQ.ecosystem, () => changeVerification('restricted', 'Restrict', 'Restrict'))}>Restrict business</OutlineBtn> : null}
             </ButtonRow>
