@@ -3,8 +3,7 @@ import { authDb, aud, bump, db, TODAY } from '../state/db';
 import { acs, nm, session, staffByName } from '../state/access';
 import type { StaffMember } from '../data/types';
 
-/** Prototype values. Real sign-in, MFA and reset links come from Supabase Auth later. */
-export const AUTH_CONFIG = { demoPassword: 'Wantiss#2026', demoCode: '123456', idleMs: 30 * 60 * 1000, lockMs: 30000, maxAttempts: 5, linkMs: 30 * 60 * 1000 };
+export const AUTH_CONFIG = { idleMs: 30 * 60 * 1000, lockMs: 30000, maxAttempts: 5, linkMs: 30 * 60 * 1000 };
 
 export const emailOk = (e: string) => /^[^\s@]+@[^\s@]+\.[^\s@]{2,}$/.test(e);
 export const maskEmail = (e: string) => e.replace(/^(.).*(@.*)$/, '$1•••$2');
@@ -54,7 +53,7 @@ export function checkCredentials(emailRaw: string, pw: string): SignInResult {
   return { kind: 'mfa', staff: s! };
 }
 
-export const codeOk = (code: string) => code === AUTH_CONFIG.demoCode;
+export const codeOk = (_code: string) => false;
 
 /** Finishes sign in: the interface now follows this person. */
 export function enterApp(s: StaffMember) {
@@ -124,6 +123,5 @@ export function applyReset(t: ResetToken, pw: string, pw2: string): { ok: boolea
   return { ok: true };
 }
 
-/** Demo helper: staff that can sign in, for the prototype helper chips. */
-export const demoAccounts = () => db.STAFF.filter((s) => authDb[s.n]?.pw).map((s) => ({ name: s.n, role: s.role, status: s.st, email: authDb[s.n].email!, pw: authDb[s.n].pw! }));
+export const demoAccounts = () => [] as { name: string; role: string; status: string; email: string; pw: string }[];
 export const effectiveAccess = acs;
