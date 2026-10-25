@@ -93,7 +93,7 @@ export function ApplicationDrawer({ id, close }: { id: string; close: () => void
       </View>
       <KeyValue rows={[['Waiting', a.age + ' day' + (a.age === 1 ? '' : 's')], ['Owner', a.o], ['Due', a.due || 'Not set'], ['Documents', docsText(a) + ' verified']]} />
       <Section title="Requirements">
-        <ListRows rows={a.d.map((x, i) => ({ main: x[0], right: <View style={{ flexDirection: 'row', alignItems: 'center', gap: 4 }}><StatusPill label={x[1]} /><Txt size={10.1}>›</Txt></View>, onPress: () => open('doc', id + ':' + i) }))} />
+        <ListRows empty={a.d.length === 0 ? "No document records are available from the server yet. Approval stays blocked until the required documents are submitted and verified." : "No documents."} rows={a.d.map((x, i) => ({ main: x[0], right: <View style={{ flexDirection: 'row', alignItems: 'center', gap: 4 }}><StatusPill label={x[1]} /><Txt size={10.1}>›</Txt></View>, onPress: () => open('doc', id + ':' + i) }))} />
       </Section>
       <Section title="Review timeline">
         <ListRows rows={a.log.slice().reverse().map((l) => ({ main: l[1], right: l[0] }))} />
