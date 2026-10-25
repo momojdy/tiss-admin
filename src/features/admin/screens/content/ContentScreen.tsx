@@ -1,5 +1,5 @@
 import { useCallback, useEffect, useState } from 'react';
-import { Alert, ScrollView, View } from 'react-native';
+import { Alert, ScrollView, TextInput, View } from 'react-native';
 import * as DocumentPicker from 'expo-document-picker';
 import { supabase } from '../../lib/supabase';
 import { archiveCmsAsset, archiveCmsVersion, listCmsAssets, publishCmsAsset, publishCmsVersion, saveCmsVersion, uploadCmsAsset } from '../../lib/adminBackend';
@@ -11,6 +11,7 @@ import { Field, useForm } from '../../ui/FormSheet';
 import { Txt } from '../../ui/Txt';
 import { useTheme } from '../../theme/ThemeContext';
 import { useToast } from '../../ui/Toast';
+import { GoodiesPhonePreview } from './GoodiesPhonePreview';
 
 type ContentRow = {
   id: string; content_key: string; locale: string; version: number; status: 'draft' | 'published' | 'archived';
@@ -29,6 +30,12 @@ export function ContentScreen() {
   const [assets, setAssets] = useState<AssetRow[]>([]);
   const [error, setError] = useState('');
   const [busy, setBusy] = useState(false);
+  const [editingDraft, setEditingDraft] = useState<ContentRow | null>(null);
+  const [draftJson, setDraftJson] = useState('');
+  const [draftJsonError, setDraftJsonError] = useState('');
+  const [previewRow, setPreviewRow] = useState<ContentRow | null>(null);
+  const [savingDraft, setSavingDraft] = useState(false);
+  const previewPayload = (() => { try { return editingDraft ? JSON.parse(draftJson) : previewRow?.payload; } catch { return null; } })();
 
   const reload = useCallback(async () => {
     setError('');
@@ -140,12 +147,35 @@ export function ContentScreen() {
         <OutlineBtn onPress={() => { void pickAsset(); }} disabled={busy}>Upload asset</OutlineBtn>
         <OutlineBtn onPress={() => { void reload(); }} disabled={busy}>Refresh</OutlineBtn>
       </View>
+      {(editingDraft || previewRow) ? <Section title={editingDraft ? 'Goodies draft editor · unsaved changes preview live' : 'Goodies customer phone preview'}>
+        {editingDraft ? <>
+          <Txt size={12} color={c.mut}>Editing {editingDraft.content_key} · v{editingDraft.version}. Changes stay in this editor until you save a new draft. Nothing is published automatically.</Txt>
+          <TextInput value={draftJson} onChangeText={(value) => { setDraftJson(value); setDraftJsonError(''); }} multiline autoCapitalize="none" autoCorrect={false} spellCheck={false} style={{ minHeight: 170, maxHeight: 300, textAlignVertical: 'top', borderWidth: 1, borderColor: c.bd, borderRadius: 12, padding: 10, color: c.ink, backgroundColor: c.card, fontSize: 12, fontFamily: 'monospace' }} />
+          {draftJsonError ? <Txt size={12} color={c.or}>{draftJsonError}</Txt> : null}
+          <View style={{ flexDirection: 'row', gap: 8, marginVertical: 8 }}>
+            <OutlineBtn onPress={() => { setEditingDraft(null); setPreviewRow(null); }}>Close preview</OutlineBtn>
+            <OutlineBtn primary disabled={savingDraft || busy} onPress={() => {
+              let parsed: Record<string, unknown>;
+              try { parsed = JSON.parse(draftJson); } catch { setDraftJsonError('Draft must be valid JSON before it can be saved.'); return; }
+              if (!parsed || Array.isArray(parsed) || typeof parsed !== 'object') { setDraftJsonError('Draft must be a JSON object.'); return; }
+              setSavingDraft(true);
+              void saveCmsVersion({ key: editingDraft.content_key, locale: editingDraft.locale, payload: parsed, status: 'draft' })
+                .then(async () => { await reload(); toast('A new draft version was saved. It is not published.'); setEditingDraft(null); setPreviewRow(null); })
+                .catch((e) => setDraftJsonError(e instanceof Error ? e.message : 'Draft could not be saved.'))
+                .finally(() => setSavingDraft(false));
+            }}>Save draft only</OutlineBtn>
+          </View>
+        </> : <View style={{ marginBottom: 8 }}><OutlineBtn onPress={() => setPreviewRow(null)}>Close preview</OutlineBtn></View>}
+        {previewPayload && previewRow?.content_key.toLowerCase().includes('goodies') ? <GoodiesPhonePreview payload={previewPayload} /> :
+          <Card><Txt size={12} color={c.or}>{previewPayload ? 'This record is not a Goodies v5 customer-content payload, so the Goodies phone renderer cannot display it.' : 'The JSON is invalid. Fix it to refresh the preview.'}</Txt></Card>}
+      </Section> : null}
       <Section title={'Content versions · ' + content.length}>
         <ListRows empty="No content versions are available for your permissions." rows={content.map(row => ({
           key: row.id, main: row.content_key + ' · ' + row.locale + ' · v' + row.version,
           sub: row.status + ' · updated ' + new Date(row.updated_at).toLocaleString(),
           right: <View style={{ flexDirection: 'row', gap: 4, flexWrap: 'wrap' }}>
-            <OutlineBtn onPress={() => Alert.alert('Preview · ' + row.content_key, JSON.stringify(row.payload, null, 2))}>Preview</OutlineBtn>
+            <OutlineBtn onPress={() => { setPreviewRow(row); setEditingDraft(null); }}>Phone preview</OutlineBtn>
+            {row.status === 'draft' ? <OutlineBtn onPress={() => { setEditingDraft(row); setDraftJson(JSON.stringify(row.payload, null, 2)); setDraftJsonError(''); setPreviewRow(row); }}>Edit draft</OutlineBtn> : null}
             {row.status === 'draft' ? <OutlineBtn onPress={() => cloneStatus(row, 'published')}>Publish</OutlineBtn> : null}
             {row.status !== 'archived' ? <OutlineBtn onPress={() => cloneStatus(row, 'archived')}>Archive</OutlineBtn> : null}
             {row.status !== 'draft' ? <Pill>{row.status}</Pill> : null}
