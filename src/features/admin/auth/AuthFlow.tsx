@@ -173,10 +173,8 @@ export function AuthFlow({ notice, noticeBad, onDone }: Props) {
               <Txt size={13} mut lh={1.45} style={{ marginTop: 6, marginBottom: 14 }}>Use your verified Wantiss work email. Access is checked by the server.</Txt>
               {(noticeText || notice) ? <NoticeBox bad={bad}>{noticeText || notice}</NoticeBox> : null}
               <AuthField label="Work email" value={email} onChangeText={(value) => { setEmail(value); setPassword(''); }} error={undefined} placeholder="Wantiss.app@gmail.com" keyboardType="email-address" autoCapitalize="none" autoCorrect={false} textContentType="username" autoComplete="email" />
-              {email.trim().toLowerCase() === 'wantiss.app@gmail.com' && emailOk(email.trim().toLowerCase()) ? <>
-                <AuthField label="Password" value={password} onChangeText={setPassword} error={undefined} password textContentType="password" autoComplete="password" onSubmitEditing={signIn} />
-                <View style={{ alignItems: 'flex-end', marginBottom: 6 }}><LinkText label="Forgot password?" onPress={() => { setView('forgot'); message(''); }} /></View>
-              </> : null}
+              <AuthField label="Password" value={password} onChangeText={setPassword} error={undefined} password textContentType="password" autoComplete="password" onSubmitEditing={signIn} />
+              <View style={{ alignItems: 'flex-end', marginBottom: 6 }}><LinkText label="Forgot password?" onPress={() => { setView('forgot'); message(''); }} /></View>
               <PrimaryButton label="Sign in" onPress={signIn} busy={busy} busyLabel="Signing in…" />
               <View style={{ marginTop: 14 }}><NoticeBox>Staff accounts are created by a Super Admin invitation. Self-registration is disabled.</NoticeBox></View>
             </>}
