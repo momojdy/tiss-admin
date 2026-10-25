@@ -1,5 +1,5 @@
-import { useState } from 'react';
-import { Pressable, View } from 'react-native';
+import { useEffect, useState } from 'react';
+import { Linking, Pressable, View } from 'react-native';
 import { aud, bump, db, useDb } from '../state/db';
 import { can, session } from '../state/access';
 import { REQ, useGuard } from '../state/requirements';
@@ -12,7 +12,7 @@ import { useToast } from '../ui/Toast';
 import { Txt } from '../ui/Txt';
 import { useTheme } from '../theme/ThemeContext';
 import { shareText } from '../lib/csv';
-import { reviewBusinessApplication } from '../lib/adminBackend';
+import { getBusinessApplicationDocumentUrl, listBusinessApplicationDocuments, reviewBusinessApplication, setBusinessApplicationDocumentStatus, type BusinessApplicationDocument } from '../lib/adminBackend';
 import { hydrateAdminState } from '../lib/hydrateAdminState';
 import { drawers, useOpen } from './registry';
 import { useNav } from '../shell/Nav';
@@ -41,13 +41,33 @@ export function ApplicationDrawer({ id, close }: { id: string; close: () => void
   const { closeAll } = useOverlay();
   const finish = useFinish();
   const nav = useNav();
+  const [serverDocs, setServerDocs] = useState<BusinessApplicationDocument[]>([]);
+  const [docsLoading, setDocsLoading] = useState(true);
+  const [docsError, setDocsError] = useState('');
+  useEffect(() => {
+    let alive = true;
+    setDocsLoading(true); setDocsError('');
+    listBusinessApplicationDocuments(id).then((docs) => { if (alive) setServerDocs(docs); })
+      .catch((error) => { if (alive) setDocsError(error instanceof Error ? error.message : 'Documents could not be loaded.'); })
+      .finally(() => { if (alive) setDocsLoading(false); });
+    return () => { alive = false; };
+  }, [id]);
+  const reloadServerDocs = async () => {
+    setDocsLoading(true); setDocsError('');
+    try { setServerDocs(await listBusinessApplicationDocuments(id)); }
+    catch (error) { setDocsError(error instanceof Error ? error.message : 'Documents could not be loaded.'); }
+    finally { setDocsLoading(false); }
+  };
   if (!a) return null;
   const closed = a.st >= 3;
   const status = (db.STG[a.st] || a.s || 'Pending review') + (a.hold ? ' · on hold' : '') + (a.esc ? ' · escalated' : '');
 
   const approve = () => {
-    const bad = a.d.filter((x) => x[1] !== 'verified');
-    if (a.d.length !== 3 || bad.length) { form({ title: 'Cannot approve yet', fields: [], buttons: [], sub: a.d.length !== 3 ? 'The application documents are not loaded from the server. Approval is blocked until all three required documents are available and verified.' : 'Verify these first: ' + bad.map((x) => x[0] + ' (' + x[1] + ')').join(', ') + '.' }); return; }
+    const requiredDocs: [BusinessApplicationDocument['document_type'], string][] = [
+      ['business_licence', 'Business licence'], ['tax_id', 'Tax ID'], ['owner_id', 'Owner ID'],
+    ];
+    const bad = requiredDocs.filter(([type]) => !serverDocs.some((doc) => doc.document_type === type && doc.status === 'verified'));
+    if (docsLoading || docsError || bad.length) { form({ title: 'Cannot approve yet', fields: [], buttons: [], sub: docsLoading ? 'Loading server documents. Try again in a moment.' : docsError ? 'The server document list could not be verified. Approval is blocked until the server can be checked.' : 'Upload and verify these required documents first: ' + bad.map((x) => x[1]).join(', ') + '.' }); return; }
     form({ title: 'Approve ' + a.n, fields: [{ id: 'n', label: 'Note (optional)', type: 'textarea' }], buttons: [{ label: 'Approve', key: 's', primary: true }],
       sub: `Service: ${a.s}. Result: Approved. The business can publish listings in this service.`,
       onSubmit: async (_k, v) => { await reviewBusinessApplication(a.id, 'approved', String(v.n || '')); a.st = 3; finish(a, 'Approved by ' + session.view, 'Approved · ' + a.n); void hydrateAdminState().catch(() => undefined); } });
@@ -94,6 +114,39 @@ export function ApplicationDrawer({ id, close }: { id: string; close: () => void
       <KeyValue rows={[['Waiting', a.age + ' day' + (a.age === 1 ? '' : 's')], ['Owner', a.o], ['Due', a.due || 'Not set'], ['Documents', docsText(a) + ' verified']]} />
       <Section title="Requirements">
         <ListRows empty={a.d.length === 0 ? "No document records are available from the server yet. Approval stays blocked until the required documents are submitted and verified." : "No documents."} rows={a.d.map((x, i) => ({ main: x[0], right: <View style={{ flexDirection: 'row', alignItems: 'center', gap: 4 }}><StatusPill label={x[1]} /><Txt size={10.1}>›</Txt></View>, onPress: () => open('doc', id + ':' + i) }))} />
+      </Section>
+      <Section title="Server-submitted documents">
+        {docsLoading ? <Txt size={12} mut>Loading application documents…</Txt> : docsError ? <Txt size={12} color="#B42318">{docsError}</Txt> : serverDocs.length ? serverDocs.map((doc) => (
+          <Card key={doc.id} style={{ marginBottom: 8 }}>
+            <Row>
+              <View style={{ flex: 1 }}>
+                <Txt size={12.5} weight={700}>{doc.document_type === 'business_licence' ? 'Business licence' : doc.document_type === 'tax_id' ? 'Tax ID' : 'Owner ID'}</Txt>
+                <Txt size={10.5} mut>Submitted {new Date(doc.submitted_at).toLocaleDateString()}</Txt>
+                {doc.review_note ? <Txt size={11} mut>{doc.review_note}</Txt> : null}
+              </View>
+              <StatusPill label={doc.status} />
+            </Row>
+            <ButtonRow>
+              <OutlineBtn onPress={async () => {
+                try { const url = await getBusinessApplicationDocumentUrl(doc.storage_path); await Linking.openURL(url); }
+                catch (error) { toast(error instanceof Error ? error.message : 'Could not open document.'); }
+              }}>View file</OutlineBtn>
+              {edit && doc.status !== 'verified' ? <OutlineBtn primary onPress={async () => {
+                try { await setBusinessApplicationDocumentStatus(doc.id, 'verified'); await reloadServerDocs(); toast('Document verified'); }
+                catch (error) { toast(error instanceof Error ? error.message : 'Could not verify document.'); }
+              }}>Verify</OutlineBtn> : null}
+              {edit ? <OutlineBtn onPress={() => form({
+                title: 'Request replacement document',
+                fields: [{ id: 'r', label: 'Reason (required)', type: 'textarea', required: true, maxLength: 1000 }],
+                buttons: [{ label: 'Request replacement', key: 's', primary: true }],
+                onSubmit: async (_k, v) => {
+                  await setBusinessApplicationDocumentStatus(doc.id, 'rejected', String(v.r));
+                  await reloadServerDocs(); toast('Replacement requested');
+                },
+              })}>Request replacement</OutlineBtn> : null}
+            </ButtonRow>
+          </Card>
+        )) : <Txt size={12} mut>No application documents have been submitted. Approval remains blocked until the business licence, tax ID, and owner ID are uploaded and verified.</Txt>}
       </Section>
       <Section title="Review timeline">
         <ListRows rows={a.log.slice().reverse().map((l) => ({ main: l[1], right: l[0] }))} />
