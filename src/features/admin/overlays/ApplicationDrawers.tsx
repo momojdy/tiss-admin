@@ -57,7 +57,7 @@ export function ApplicationDrawer({ id, close }: { id: string; close: () => void
     { id: 'm', label: 'Message to applicant', type: 'textarea', required: true },
     { id: 'f', label: 'Final rejection (applicant cannot resubmit)', type: 'check' }],
     buttons: [{ label: 'Reject', key: 's', primary: true }], sub: 'The applicant is notified with your message.',
-    onSubmit: async (_k, v) => { await reviewBusinessApplication(a.id, 'rejected', String(v.r) + ': ' + String(v.m)); a.st = 4; finish(a, (v.f ? 'Rejected (final) · ' : 'Rejected · ') + v.r, 'Rejected · ' + a.n); void hydrateAdminState().catch(() => undefined); } });
+    onSubmit: async (_k, v) => { await reviewBusinessApplication(a.id, 'rejected', String(v.r) + ': ' + String(v.m), !!v.f); a.st = 4; finish(a, (v.f ? 'Rejected (final) · ' : 'Rejected · ') + v.r, 'Rejected · ' + a.n); void hydrateAdminState().catch(() => undefined); } });
   const requestInfo = () => form({ title: 'Request information', fields: [
     { id: 'd', label: 'Requirement', type: 'select', options: NM, required: true, value: (a.d.find((x) => x[1] !== 'verified') ?? [NM[0]])[0] },
     { id: 'm', label: 'What needs to change', type: 'textarea', required: true }, { id: 'due', label: 'Reply by', type: 'date', required: true }],
