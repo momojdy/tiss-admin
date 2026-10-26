@@ -4,13 +4,13 @@
 **Target reviewed:** `momojdy/tiss-admin`, default branch `main`  
 **Scope:** source-level comparison. No live-device screenshot comparison has been performed in this audit.
 
-## Global shell and navigation
+## Global shell and navigation — baseline at audit start
 
 - **HTML reference:** compact account/header area, floating/collapsible vertical dock with seven actions (collapse, Search, Quick create, Alerts, Operations, Export, Settings), seven primary sections (Overview, Operations, Ecosystem, Content, Finance, Analytics, People), blurred overlays/drawers, light/dark/system appearance.
 - **React Native:** account/search/notification header and horizontally scrolling section pills. Search is passed as an empty callback in `AdminApp.tsx`; there is no Quick create, dock export or Settings action in the shell. Navigation and overlays use separate components, which is a good base for restoring parity.
 - **Difference:** the navigation model, access point for global actions, and visual hierarchy are materially different. Restore the HTML dock/action model without replacing the existing authentication and access checks.
 
-## Screen-by-screen
+## Screen-by-screen baseline (before restoration commits)
 
 | HTML section/surface | Current React Native implementation | Difference / missing work |
 |---|---|---|
@@ -29,7 +29,7 @@
 | Settings | Account sheet exists; no global Settings panel/screen. | HTML Settings covers Appearance, Platform, Ecosystem, Notifications, Documents and requirements, Workflows, Finance, Team and access, and Help and information. RN needs settings UI and persisted/authorized behavior, not a cosmetic placeholder. |
 | Overlays | RN has shared dialog/drawer provider and separate drawer modules. | Reusable foundation exists, but several HTML actions and drawers are absent; overlay sizes/entry points/close behavior require device verification. |
 
-## Design tokens and dimensions
+## Design tokens and dimensions — measured from the HTML source
 
 - RN uses Outfit font assets and HTML-derived palette tokens in `theme/tokens.ts`; this is directionally aligned with the source.
 - The HTML uses CSS variables, responsive CSS layout, compact cards, an expandable dock and responsive grid/table layouts. React Native uses explicit style objects and some fixed widths/paddings. Identical token names do **not** guarantee identical typography metrics, wrapping, card height, spacing or overlay geometry.
@@ -46,3 +46,37 @@
 ## Important boundary
 
 This is a source-level audit. It does not prove Supabase schema/RLS correctness, production readiness, or pixel parity. The HTML contains demo/in-memory interactions as well as interface definitions; real-money, staff, publish, refund and access actions must remain connected to their authorized server-side workflows rather than blindly copying demo behavior.
+
+
+### HTML source measurements
+
+These values are read directly from the original HTML CSS, not estimated from screenshots:
+
+- Main frame: 512 × 910 CSS px, max-width 100vw, max-height 100%, corner radius 26 px. At viewport widths ≤520 px it becomes full width/full dynamic viewport height with no corner radius.
+- Main scrolling surface: padding 14 px top, 10 px right, 90 px bottom, 57 px left. When the dock is collapsed, left padding changes to 28 px. Safe-area top/bottom padding is added.
+- Main section heading: Outfit 22.1 px, weight 400, line-height 1.08, letter spacing −0.2 px.
+- Tabs: 11.8 px type, 7 px × 11 px padding, 2 px gap, 14 px top/bottom margins, pill radius.
+- KPI row: 10 px gap, 10 px top and 14 px bottom margins; KPI value 14.7 px, label 9.5 px, icon 30 px (36 px on mobile).
+- Cards: translucent background, 22 px radius, 12 px padding, 10 px bottom margin, border rgba(0,0,0,.07) in light mode, shadow 0 8px 24px rgba(60,50,30,.07).
+- Small action cards: 16 px radius, 9 px padding, 112 px minimum height. Service tiles: 20 px radius, 10 px padding.
+- Expanded dock: 37 px wide, left offset 9 px, 15 px gap, 12 px vertical padding; collapsed dock: 16 × 72 px, flush to the left edge.
+- Dialog: 26 px radius and 16 px padding. Drawer: 318 px wide, max-width 100%, full height.
+- Palette: ink #161a17; green #2f5d4e; orange #d1481d; yellow #f2c94c; light background gradient #f6e4d2 → #eef0e4 → #e1ecdc; light card rgba(251,250,245,.84). Font family is Outfit 300/400/500/600.
+
+### Restoration commits after the baseline audit
+
+- Added this audit document and registered React Native Overview and Analytics screens.
+- Added a collapsible global dock for Search, Quick create, Alerts, Operations, Export and Settings; wired header branding and the global search overlay.
+- Added permission-aware search across applications, transactions, services, staff, customers, content and accounts.
+- Added Quick create forms. Banner/promotion/announcement actions save private CMS drafts; staff invitations use the protected server function.
+- Added a Settings drawer with the HTML categories and appearance controls. At present, non-personal settings save locally only because a verified server-side settings endpoint is not present; they do not change production behavior.
+- Added a dedicated Goodies workspace with the HTML module names, data-backed sections and draft staging, plus a shared module-driven service workspace.
+- Changed the shell to one scrolling surface and aligned tab/dock/content insets more closely with the HTML. Removed the nested Content scroll view.
+
+### Remaining parity and verification work
+
+- The HTML Content Studio has separate Banners, Promotions, Announcements, Calendar, Approvals, History, Media and customer-page Editor surfaces. The RN Content screen still primarily manages CMS versions/assets; these separate workflows are not yet fully ported.
+- Goodies merchants, product review, orders and analytics now have entry points, but several rely on the current admin snapshot/seed or link to existing workspaces. They are not a substitute for dedicated server-backed Goodies APIs.
+- The service workspace is a shared data-driven shell, not yet a bespoke port of every service-specific HTML module.
+- Business detail and the standalone customer-page editor still fall through to the not-ported screen.
+- No Expo Go screenshots or device interaction pass has been performed by this audit. CI typecheck is being used to catch source errors; visual parity and runtime behavior still require on-device verification.
