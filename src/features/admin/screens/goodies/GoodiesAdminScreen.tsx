@@ -16,8 +16,9 @@ import { ListRows } from '../../ui/Lists';
 import { Txt } from '../../ui/Txt';
 
 const data = goodiesSeed as any;
-const moduleMap: Record<string, string> = { Overview: 'Overview', 'Home content': 'Home', Categories: 'Categories', 'Builder library': 'Library', 'Ingredient requests': 'Requests', Promotions: 'Promos', 'Fees and rules': 'Fees', 'Restricted goods': 'Restricted', 'Text and notifications': 'Texts', 'Support and legal': 'Support', Merchants: 'Merchants', 'Product review': 'Product review', Orders: 'Orders', Analytics: 'Analytics' };
-const modules = (db.MOD.Goodies || Object.keys(db.GMAP).join('|')).split('|');
+const moduleMap: Record<string, string> = { Overview: 'Overview', 'Products and catalog': 'Library', Categories: 'Categories', Merchants: 'Merchants', 'Product review': 'Product review', Orders: 'Orders', Promotions: 'Promos', Support: 'Support', Analytics: 'Analytics', Settings: 'Settings' };
+// Keep the module names and order identical to MOD.Goodies in the uploaded HTML source.
+const modules = ['Overview', 'Products and catalog', 'Categories', 'Merchants', 'Product review', 'Orders', 'Promotions', 'Support', 'Analytics', 'Settings'];
 const languages = ['en', 'fr', 'ht', 'es', 'zh'];
 
 function englishValue(record: any, field: string) {
@@ -173,19 +174,28 @@ export function GoodiesAdminScreen() {
           <Section title="Goodies health">
             <ListRows rows={[
               { key: 'promos', main: 'Live promotions', sub: 'Customer-facing offers', right: String(counts.promos), onPress: () => setModule('Promotions') },
-              { key: 'missing', main: 'Missing translations', sub: 'English, French, Haitian Creole, Spanish and Chinese', right: String(counts.missing), onPress: () => setModule('Text and notifications') },
-              { key: 'assets', main: 'Assets without uploaded images', sub: 'Builder library completeness', right: String(data.lib.filter((item: any) => !item.img).length), onPress: () => setModule('Builder library') },
-              { key: 'restricted', main: 'Restricted-goods rules', sub: 'Review service requirements', right: String((data.rg.prohibited || []).length), onPress: () => setModule('Restricted goods') },
+              { key: 'missing', main: 'Missing translations', sub: 'English, French, Haitian Creole, Spanish and Chinese', right: String(counts.missing), onPress: () => setModule('Products and catalog') },
+              { key: 'assets', main: 'Assets without uploaded images', sub: 'Builder library completeness', right: String(data.lib.filter((item: any) => !item.img).length), onPress: () => setModule('Products and catalog') },
+              { key: 'restricted', main: 'Restricted-goods rules', sub: 'Review service requirements', right: String((data.rg.prohibited || []).length), onPress: () => setModule('Settings') },
             ]} />
           </Section>
           <Section title="Needs review">
             <ListRows rows={[
-              { key: 'req', main: 'Ingredient requests', sub: 'Review vendor-submitted ingredients', right: String(counts.requests), onPress: () => setModule('Ingredient requests') },
+              { key: 'req', main: 'Ingredient requests', sub: 'Review vendor-submitted ingredients', right: String(counts.requests), onPress: () => setModule('Product review') },
               { key: 'library', main: 'Builder library', sub: 'Manage ingredients, extras and product assets', right: String(data.lib.length), onPress: () => setModule('Builder library') },
-              { key: 'content', main: 'Customer home content', sub: 'Modes, promotions, labels and category order', right: 'Open ›', onPress: () => setModule('Home content') },
+              { key: 'content', main: 'Customer home content', sub: 'Modes, promotions, labels and category order', right: 'Open ›', onPress: () => setModule('Products and catalog') },
             ]} />
           </Section>
         </>
+      ) : moduleLabel === 'Settings' ? (
+        <Section title="Goodies settings">
+          <Txt size={11} mut lh={1.4}>These settings require an authorized server-side configuration endpoint before they can change production behavior. This screen is read-only; no local or demo toggle is presented as a live platform setting.</Txt>
+          <ListRows rows={[
+            { key: 'fees', main: 'Fees and rules', sub: 'Review proposed fees in the Products and catalog workspace only when the server-backed workflow is available.', right: 'Read-only' },
+            { key: 'restricted', main: 'Restricted goods', sub: 'Current seed data is a reference only; production enforcement must remain server-side.', right: 'Read-only' },
+            { key: 'publish', main: 'Publishing permissions', sub: 'CMS drafts remain private until an authorized server-side publish action succeeds.', right: 'Protected' },
+          ]} />
+        </Section>
       ) : moduleLabel === 'Analytics' ? (
         <Section title="Goodies analytics">
           <ListRows rows={[
