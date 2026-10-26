@@ -204,7 +204,7 @@ export function GoodiesAdminScreen() {
       ) : moduleLabel === 'Analytics' ? (
         <Section title="Goodies analytics">
           <ListRows rows={[
-            { key: 'orders', main: 'Goodies transactions in current snapshot', right: '—', onPress: () => go('finance', { fv: 'Transactions' }) },
+            { key: 'orders', main: 'Goodies transactions', right: '—', onPress: () => go('finance', { fv: 'Transactions' }) },
             { key: 'promos', main: 'Live Goodies promotions', right: '—', onPress: () => setModule('Promotions') },
             { key: 'catalog', main: 'Builder library items', right: '—', onPress: () => setModule('Products and catalog') },
             { key: 'requests', main: 'Ingredient requests awaiting review', right: '—', onPress: () => setModule('Product review') },
@@ -230,7 +230,7 @@ export function GoodiesAdminScreen() {
       )}
       <Card style={{ marginTop: 2 }}>
         <Txt size={10.1} weight={500}>Publishing boundary</Txt>
-        <Txt size={9.5} mut lh={1.4}>This workspace is connected to the existing CMS draft API. The HTML-aligned Goodies workspace is retained. Live catalog, orders, merchant, product-review, configuration and analytics records must come from authorized Goodies endpoints; fixture records are not used here.</Txt>
+        <Txt size={9.5} mut lh={1.4}>The HTML-aligned Goodies workspace is retained. Live catalog, orders, merchant, product-review, configuration and analytics records must come from authorized Goodies endpoints; fixture records are not used here.</Txt>
       </Card>
     </View>
   );
@@ -295,16 +295,16 @@ export function GoodiesAdminScreen() {
           ]} />
           <Section title="Goodies health">
             <ListRows rows={[
-              { key: 'promos', main: 'Live promotions', sub: 'Customer-facing offers', right: String(counts.promos), onPress: () => setModule('Promotions') },
-              { key: 'missing', main: 'Missing translations', sub: 'English, French, Haitian Creole, Spanish and Chinese', right: String(counts.missing), onPress: () => setModule('Products and catalog') },
-              { key: 'assets', main: 'Assets without uploaded images', sub: 'Builder library completeness', right: String(data.lib.filter((item: any) => !item.img).length), onPress: () => setModule('Products and catalog') },
+              { key: 'promos', main: 'Live promotions', sub: 'Customer-facing offers', right: '—', onPress: () => setModule('Promotions') },
+              { key: 'missing', main: 'Missing translations', sub: 'English, French, Haitian Creole, Spanish and Chinese', right: '—', onPress: () => setModule('Products and catalog') },
+              { key: 'assets', main: 'Assets without uploaded images', sub: 'Builder library completeness', right: '—', onPress: () => setModule('Products and catalog') },
               { key: 'restricted', main: 'Restricted-goods rules', sub: 'Review service requirements', right: String((data.rg.prohibited || []).length), onPress: () => setModule('Settings') },
             ]} />
           </Section>
           <Section title="Needs review">
             <ListRows rows={[
-              { key: 'req', main: 'Ingredient requests', sub: 'Review vendor-submitted ingredients', right: String(counts.requests), onPress: () => setModule('Product review') },
-              { key: 'library', main: 'Builder library', sub: 'Manage ingredients, extras and product assets', right: String(data.lib.length), onPress: () => setModule('Products and catalog') },
+              { key: 'req', main: 'Ingredient requests', sub: 'Review vendor-submitted ingredients', right: '—', onPress: () => setModule('Product review') },
+              { key: 'library', main: 'Builder library', sub: 'Manage ingredients, extras and product assets', right: '—', onPress: () => setModule('Products and catalog') },
               { key: 'content', main: 'Customer home content', sub: 'Modes, promotions, labels and category order', right: 'Open ›', onPress: () => setModule('Products and catalog') },
             ]} />
           </Section>
@@ -321,16 +321,16 @@ export function GoodiesAdminScreen() {
       ) : moduleLabel === 'Analytics' ? (
         <Section title="Goodies analytics">
           <ListRows rows={[
-            { key: 'orders', main: 'Goodies transactions in current snapshot', right: String(db.INV.filter((tx) => tx.f.toLowerCase().includes('goodies')).length), onPress: () => go('finance', { fv: 'Transactions' }) },
-            { key: 'promos', main: 'Live Goodies promotions', right: String(data.promos.filter((item: any) => item.st === 'Live').length), onPress: () => setModule('Promotions') },
-            { key: 'catalog', main: 'Builder library items', right: String(data.lib.length), onPress: () => setModule('Products and catalog') },
-            { key: 'requests', main: 'Ingredient requests awaiting review', right: String(counts.requests), onPress: () => setModule('Product review') },
+            { key: 'orders', main: 'Goodies transactions in current snapshot', right: '—', onPress: () => go('finance', { fv: 'Transactions' }) },
+            { key: 'promos', main: 'Live Goodies promotions', right: '—', onPress: () => setModule('Promotions') },
+            { key: 'catalog', main: 'Builder library items', right: '—', onPress: () => setModule('Products and catalog') },
+            { key: 'requests', main: 'Ingredient requests awaiting review', right: '—', onPress: () => setModule('Product review') },
           ]} />
           <Txt size={9.5} mut style={{ marginTop: 8 }}>Order, conversion and revenue analytics need a dedicated Goodies server snapshot; this view does not fabricate those metrics.</Txt>
         </Section>
       ) : moduleLabel === 'Fees' ? (
         <Section title="Fees and rules">
-          <Txt size={10.1} mut style={{ marginBottom: 8 }}>Values below come from the HTML-aligned Goodies seed. Tap a row to stage a private change request.</Txt>
+          <Txt size={10.1} mut style={{ marginBottom: 8 }}>No live fee/rule snapshot is connected. Sample values are not shown as production configuration.</Txt>
           <ListRows rows={visible.map((item) => ({ key: item.id, main: item._title, sub: item._sub, right: 'Edit ›', onPress: () => onItem(item) }))} />
         </Section>
       ) : (
