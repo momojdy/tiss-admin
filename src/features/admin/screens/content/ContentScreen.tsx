@@ -165,6 +165,7 @@ export function ContentScreen() {
         try {
           await saveCmsVersion({ key: 'admin.' + kind + '.' + id, locale: 'en', payload: { ...payload, proposed_only: true, change_reason: reason }, status: 'draft' });
           await reload();
+          ui.cs = 'CMS versions'; bump();
           toast('Private draft saved. Live content has not changed.');
         } catch (error) {
           return error instanceof Error ? error.message : 'Draft could not be saved.';
@@ -192,7 +193,7 @@ export function ContentScreen() {
         if (values.from && values.to && String(values.to) < String(values.from)) return 'End date cannot be before start date.';
         try {
           await saveCmsVersion({ key: 'admin.banner.' + banner.id, locale: 'en', payload: { id: banner.id, type: 'banner', title, service: values.service, placement: values.placement, start_date: values.from, end_date: values.to, proposed_only: true }, status: 'draft' });
-          await reload(); toast('Banner change saved as a private draft.');
+          await reload(); ui.cs = 'CMS versions'; bump(); toast('Banner change saved as a private draft.');
         } catch (error) { return error instanceof Error ? error.message : 'Banner draft could not be saved.'; }
       },
     });
@@ -217,7 +218,7 @@ export function ContentScreen() {
         if (String(values.to || '') < String(values.from || '')) return 'End date cannot be before start date.';
         try {
           await saveCmsVersion({ key: 'admin.promotion.' + promotion.id, locale: 'en', payload: { id: promotion.id, type: 'promotion', ...values, proposed_only: true }, status: 'draft' });
-          await reload(); toast('Promotion change saved as a private draft.');
+          await reload(); ui.cs = 'CMS versions'; bump(); toast('Promotion change saved as a private draft.');
         } catch (error) { return error instanceof Error ? error.message : 'Promotion draft could not be saved.'; }
       },
     });
@@ -237,7 +238,7 @@ export function ContentScreen() {
       onSubmit: async (_key, values) => {
         try {
           await saveCmsVersion({ key: 'admin.announcement.' + announcement.id, locale: 'en', payload: { id: announcement.id, type: 'announcement', title: values.title, audience: values.audience, schedule_date: values.date, proposed_only: true }, status: 'draft' });
-          await reload(); toast('Announcement change saved as a private draft.');
+          await reload(); ui.cs = 'CMS versions'; bump(); toast('Announcement change saved as a private draft.');
         } catch (error) { return error instanceof Error ? error.message : 'Announcement draft could not be saved.'; }
       },
     });
