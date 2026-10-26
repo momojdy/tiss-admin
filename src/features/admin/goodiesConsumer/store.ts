@@ -242,8 +242,11 @@ export async function load() {
       // Keep cached state visible if the wallet/card service is temporarily unavailable.
     }
   }
-  try {const t = await AsyncStorage.getItem('goodies-theme'); if (t === 'light' || t === 'dark') S.theme = t;} catch (e) {}
-  try {const l = await AsyncStorage.getItem('goodies-lang'); if (l) S.lang = l;} catch (e) {}
+  // Admin preview must not read or reuse customer-device preferences.
+  if (!previewOnly) {
+    try {const t = await AsyncStorage.getItem('goodies-theme'); if (t === 'light' || t === 'dark') S.theme = t;} catch (e) {}
+    try {const l = await AsyncStorage.getItem('goodies-lang'); if (l) S.lang = l;} catch (e) {}
+  }
   /* The catalog must be loaded before the cart, favorites and orders are checked against it. */
   await refreshLiveSchedules();
   /* sanitise exactly like v24 */
