@@ -157,8 +157,8 @@ export function CustomerPageEditorScreen() {
     if (!items.some((item) => item.label.toLowerCase() === label.toLowerCase())) items.push({ label, key });
     return items;
   }, []);
-  const activeFeature = featureOptions.find((item) => item.key === activePageKey) || featureOptions.find((item) => item.key === pageKey) || featureOptions[0];
   const activePageKey = pageKeys.includes(pageKey) ? pageKey : pageKeys[0] || '';
+  const activeFeature = featureOptions.find((item) => item.key === activePageKey) || featureOptions.find((item) => item.key === pageKey) || featureOptions[0];
   const page = activePageKey ? previewPayload?.pages?.[activePageKey] : null;
   const elements = page?.els && typeof page.els === 'object' ? page.els : {};
   const elementIds: string[] = (Array.isArray(page?.order) ? page.order : Object.keys(elements)).filter((id: string) => Boolean(elements[id]));
