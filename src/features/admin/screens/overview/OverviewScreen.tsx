@@ -12,27 +12,40 @@ import { Txt } from '../../ui/Txt';
 const ranges = ['7D', '30D', '90D', '1Y'] as const;
 type Range = typeof ranges[number];
 
-function activity(range: string, activeServices: typeof db.SVC) {
+function activity(range: string, transactions: typeof db.INV) {
+  const days = range === '7D' ? 7 : range === '30D' ? 30 : range === '90D' ? 90 : 365;
   const count = range === '7D' ? 7 : range === '30D' ? 6 : range === '90D' ? 9 : 12;
-  const labels = range === '7D'
-    ? ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun']
-    : range === '30D' ? ['W1', 'W2', 'W3', 'W4', 'W5', 'W6']
-    : 'Nov Dec Jan Feb Mar Apr May Jun Jul Aug Sep Oct'.split(' ').slice(12 - count);
-  const vals = Array.from({ length: count }, (_, i) => activeServices.reduce((sum, service) => {
-    const base = Math.max(0, Number.parseInt(service[2], 10) || 0);
-    const seed = [...(service[0] + range)].reduce((n, ch) => (n * 31 + ch.charCodeAt(0)) >>> 0, 7);
-    return sum + Math.round((base + 4) * (0.62 + (((seed + i * 37) % 60) / 100)));
-  }, 0));
-  const total = vals.reduce((a, b) => a + b, 0);
+  const now = new Date();
+  const start = new Date(now);
+  start.setDate(now.getDate() - days + 1);
+  start.setHours(0, 0, 0, 0);
+  const vals = Array.from({ length: count }, () => 0);
+  const valid = transactions.filter((tx) => {
+    const timestamp = tx.createdAt ? Date.parse(tx.createdAt) : NaN;
+    return Number.isFinite(timestamp) && timestamp >= start.getTime() && timestamp <= now.getTime();
+  });
+  valid.forEach((tx) => {
+    const timestamp = Date.parse(tx.createdAt!);
+    const offset = Math.floor((timestamp - start.getTime()) / 86400000);
+    const bucket = range === '7D' ? offset : Math.min(count - 1, Math.floor(offset / (days / count)));
+    if (bucket >= 0 && bucket < count) vals[bucket] += 1;
+  });
+  const labels = Array.from({ length: count }, (_, i) => {
+    const date = new Date(start);
+    date.setDate(start.getDate() + (range === '7D' ? i : Math.floor(i * days / count)));
+    return range === '7D' ? date.toLocaleDateString(undefined, { weekday: 'short' })
+      : range === '1Y' ? date.toLocaleDateString(undefined, { month: 'short' })
+      : range === '30D' ? 'W' + (i + 1) : 'P' + (i + 1);
+  });
+  const total = valid.length;
   const max = Math.max(1, ...vals) * 1.25;
-  return { labels, vals, total, max, yLabels: [Math.round(max).toLocaleString(), Math.round(max / 2).toLocaleString(), '0'] };
+  return { labels, vals, total, max, yLabels: [Math.round(max).toLocaleString(), Math.round(max / 2).toLocaleString(), '0'], available: valid.length > 0 };
 }
 
 export function OverviewScreen() {
   useDb();
   const { c } = useTheme();
   const { go } = useNav();
-  const activeServices = db.SVC.filter((service) => service[5] === 'Active');
   const waiting = db.APPS.filter((app) => app.st < 3);
   const completed = db.INV.filter((tx) => tx.s === 'Completed');
   const pending = db.INV.filter((tx) => tx.s === 'Pending');
@@ -41,7 +54,11 @@ export function OverviewScreen() {
   const overdue = waiting.filter((app) => app.age >= 2);
   const unassigned = waiting.filter((app) => app.o === 'Unassigned');
   const queue = [0, 1, 2].map((stage) => waiting.filter((app) => app.st === stage).length);
-  const chart = activity(String(ui.AR || '30D'), activeServices);
+  const chart = activity(String(ui.AR || '30D'), db.INV);
+  const reviewed = db.APPS.filter((app) => app.st >= 3 && app.createdAt && app.reviewedAt && Number.isFinite(Date.parse(app.createdAt)) && Number.isFinite(Date.parse(app.reviewedAt)));
+  const within48 = reviewed.filter((app) => Date.parse(app.reviewedAt!) - Date.parse(app.createdAt!) <= 48 * 60 * 60 * 1000).length;
+  const reviewSpeedAvailable = reviewed.length > 0;
+  const reviewSpeed = reviewSpeedAvailable ? Math.round(within48 / reviewed.length * 100) : 0;
   const liveBanners = db.BN.filter((banner) => banner.st === 'Live');
   const setRange = (range: Range) => { ui.AR = range; bump(); };
   const attention = [
@@ -54,8 +71,8 @@ export function OverviewScreen() {
   return (
     <View>
       <Heading title="Platform\nOverview" sub="A live operational snapshot of Wantiss." kpis={[
-        { icon: '♛', value: '1,284', label: 'Active customers', tag: '+5% vs last month', tone: 'g', onPress: () => go('people', { ps: 'Customers' }) },
-        { icon: '▥', value: '86', label: 'Approved businesses', onPress: () => go('people', { ps: 'Businesses' }) },
+        { icon: '♛', value: db.ACC.filter((account) => account.type === 'Customer').length.toLocaleString('en-US'), label: 'Customer profiles', onPress: () => go('people', { ps: 'Accounts' }) },
+        { icon: '▥', value: db.APPS.filter((app) => app.st === 3).length, label: 'Approved applications', onPress: () => go('operations', { ov: 'List' }) },
         { icon: '◷', value: waiting.length, label: 'Waiting for review', tag: overdue.length + ' overdue', tone: overdue.length ? 'r' : '', onPress: () => go('operations', { ov: 'List' }) },
       ]} />
 
@@ -63,10 +80,10 @@ export function OverviewScreen() {
         <Chips options={ranges} value={ranges.includes(ui.AR as Range) ? ui.AR as Range : '30D'} onChange={setRange} />
         <Txt size={21} weight={500}>{chart.total.toLocaleString('en-US')} <Txt size={10.1} mut>transactions · all services</Txt></Txt>
         <View style={{ flexDirection: 'row', justifyContent: 'space-between', marginTop: 4, marginBottom: 2 }}>
-          <Txt size={9.5} mut>Completed transactions</Txt>
+          <Txt size={9.5} mut>Transactions in selected range</Txt>
           <Txt size={9.5} mut>{ui.AR} activity range</Txt>
         </View>
-        <LineChart vals={chart.vals} color={c.or} max={chart.max} labels={chart.labels} yLabels={chart.yLabels} />
+        {chart.available ? <LineChart vals={chart.vals} color={c.or} max={chart.max} labels={chart.labels} yLabels={chart.yLabels} /> : <Txt size={10.1} mut style={{ marginTop: 8 }}>Timestamped transactions are unavailable in the current authorized snapshot; no sample activity is substituted.</Txt>}
       </Section>
 
       <Section title="Needs attention" right={<Pill onPress={() => go('operations', { ov: 'List' })}>View queue ›</Pill>}>
@@ -82,13 +99,13 @@ export function OverviewScreen() {
       <View style={{ flexDirection: 'row', gap: 9, alignItems: 'stretch' }}>
         <Card style={{ flex: 0.82, justifyContent: 'center', alignItems: 'center', minHeight: 152 }}>
           <CardTitle title="Review speed" />
-          <Ring pct={82} size={86} color={c.ye} inner={c.card} track={c.inset}>
+          <Ring pct={reviewSpeedAvailable ? reviewSpeed : 0} size={86} color={c.ye} inner={c.card} track={c.inset}>
             <View style={{ alignItems: 'center' }}>
-              <Txt size={16} weight={600}>82%</Txt>
-              <Txt size={8.5} mut>within 48h</Txt>
+              <Txt size={16} weight={600}>{reviewSpeedAvailable ? reviewSpeed + '%' : '—'}</Txt>
+              <Txt size={8.5} mut>{reviewSpeedAvailable ? 'within 48h' : 'data unavailable'}</Txt>
             </View>
           </Ring>
-          <Txt size={9.5} mut style={{ marginTop: 5 }}>{overdue.length} overdue · target 48h</Txt>
+          <Txt size={9.5} mut style={{ marginTop: 5 }}>{reviewSpeedAvailable ? reviewed.length + ' reviewed · target 48h' : 'Review timestamps unavailable'}</Txt>
         </Card>
         <Card style={{ flex: 1.4, minHeight: 152 }}>
           <CardTitle title="Queue mix" right={<Pill onPress={() => go('operations')}>↗</Pill>} />
