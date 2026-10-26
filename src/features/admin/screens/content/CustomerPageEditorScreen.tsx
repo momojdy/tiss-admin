@@ -12,7 +12,7 @@ import { Heading } from '../../ui/Heading';
 import { ListRows } from '../../ui/Lists';
 import { OutlineBtn, Pill, StatusPill } from '../../ui/Controls';
 import { Txt } from '../../ui/Txt';
-import { CustomerPagePreview } from './CustomerPagePreview';
+import { CustomerPagePreview, type CustomerPreviewMode, type CustomerPreviewView } from './CustomerPagePreview';
 
 type ContentRow = {
   id: string;
@@ -49,7 +49,10 @@ export function CustomerPageEditorScreen() {
   const [selected, setSelected] = useState<ContentRow | null>(null);
   const [json, setJson] = useState('');
   const [pageKey, setPageKey] = useState('home');
+  const [pageStack, setPageStack] = useState<string[]>([]);
   const [elementKey, setElementKey] = useState('');
+  const [editorMode, setEditorMode] = useState<CustomerPreviewMode>('Edit');
+  const [viewMode, setViewMode] = useState<CustomerPreviewView>('Draft');
   const [error, setError] = useState('');
   const [loading, setLoading] = useState(false);
   const [saving, setSaving] = useState(false);
@@ -83,11 +86,18 @@ export function CustomerPageEditorScreen() {
     setSelected(row);
     setJson(JSON.stringify(row.payload, null, 2));
     setPageKey('home');
+    setPageStack([]);
     setElementKey('');
+    setViewMode('Draft');
+    setEditorMode('Edit');
     setError('');
   };
 
   const startBlankDraft = () => {
+    if (!can(...REQ.content)) {
+      setError('Content edit access is required to create a page draft.');
+      return;
+    }
     const payload = starterModel();
     setSelected({
       id: 'local-new', content_key: CONTENT_KEY, locale: 'en', version: 0,
@@ -95,11 +105,15 @@ export function CustomerPageEditorScreen() {
     });
     setJson(JSON.stringify(payload, null, 2));
     setPageKey('home');
+    setPageStack([]);
     setElementKey('');
+    setViewMode('Draft');
+    setEditorMode('Edit');
     setError('');
   };
 
   const mutatePayload = (change: (model: Record<string, any>) => void) => {
+    if (viewMode !== 'Draft' || editorMode !== 'Edit' || !can(...REQ.content)) return;
     try {
       const model = JSON.parse(json);
       if (!model || Array.isArray(model) || typeof model !== 'object') throw new Error();
@@ -118,13 +132,16 @@ export function CustomerPageEditorScreen() {
     } catch { return null; }
   };
 
-  const preview = parsePayload();
-  const pageKeys = preview?.pages && typeof preview.pages === 'object' ? Object.keys(preview.pages) : [];
+  const parsedDraft = parsePayload();
+  const publishedRow = rows.find((row) => row.status === 'published' && row.content_key === (selected?.content_key || CONTENT_KEY) && row.locale === (selected?.locale || 'en'));
+  const previewPayload = viewMode === 'Published' ? (publishedRow?.payload || (selected?.status === 'published' ? selected.payload : null) || { pages: {} }) : (parsedDraft || selected?.payload || starterModel());
+  const pageKeys = previewPayload?.pages && typeof previewPayload.pages === 'object' ? Object.keys(previewPayload.pages) : [];
   const activePageKey = pageKeys.includes(pageKey) ? pageKey : pageKeys[0] || '';
-  const page = activePageKey ? preview?.pages?.[activePageKey] : null;
+  const page = activePageKey ? previewPayload?.pages?.[activePageKey] : null;
   const elements = page?.els && typeof page.els === 'object' ? page.els : {};
   const elementIds: string[] = (Array.isArray(page?.order) ? page.order : Object.keys(elements)).filter((id: string) => Boolean(elements[id]));
   const element = elementKey && elements[elementKey] ? elements[elementKey] : null;
+  const editable = viewMode === 'Draft' && editorMode === 'Edit' && Boolean(selected) && can(...REQ.content);
 
   const updatePageTitle = (value: string) => mutatePayload((model) => { model.pages[activePageKey].title = value; });
   const updateElement = (field: string, value: string) => mutatePayload((model) => {
@@ -161,13 +178,28 @@ export function CustomerPageEditorScreen() {
     while (model.pages[id]) { n += 1; id = 'page-' + n; }
     model.pages[id] = { title: 'New page ' + n, order: [], els: {} };
     setPageKey(id);
+    setPageStack([]);
     setElementKey('');
   });
 
+  const navigatePhone = (nextPage: string) => {
+    if (viewMode === 'Draft' && editorMode === 'Edit') return;
+    if (!previewPayload?.pages?.[nextPage]) return;
+    setPageStack((current) => [...current, activePageKey]);
+    setPageKey(nextPage);
+    setElementKey('');
+  };
+  const backPhone = () => {
+    const previous = pageStack[pageStack.length - 1];
+    if (!previous) return;
+    setPageStack((current) => current.slice(0, -1));
+    setPageKey(previous);
+  };
+
   const createDraft = async () => {
     if (!selected) return;
-    if (!can(...REQ.content)) {
-      setError('Content edit access is required to create a page draft.');
+    if (viewMode !== 'Draft' || !can(...REQ.content)) {
+      setError('Content edit access is required to save a private page draft.');
       return;
     }
     setSaving(true);
@@ -197,33 +229,49 @@ export function CustomerPageEditorScreen() {
       <View style={{ flexDirection: 'row', alignItems: 'center', flexWrap: 'wrap', gap: 8, marginBottom: 4 }}>
         <OutlineBtn onPress={() => go('content', { cs: 'Editor' })}>‹ Content Studio</OutlineBtn>
         <OutlineBtn onPress={() => { void reload(); }} disabled={loading}>Refresh</OutlineBtn>
-        <OutlineBtn onPress={startBlankDraft}>Start blank draft</OutlineBtn>
+        <OutlineBtn onPress={startBlankDraft} disabled={!can(...REQ.content)}>Start blank draft</OutlineBtn>
       </View>
-      <Heading title="Customer page editor" sub="Edit pages, elements, visibility, order and text. Save through the existing Supabase CMS draft RPC; this editor never publishes directly." />
+      <Heading title="Customer page editor" sub="The phone stays visible while you edit. Draft changes are private until saved; previewing or navigating the phone never publishes content." />
       {error ? <Card><Txt size={11.5} color={c.or}>{error}</Txt></Card> : null}
-      <Section title={'Customer page versions · ' + rows.length}>
-        <ListRows empty={loading ? 'Loading customer page versions…' : 'No customer page-builder drafts are available. Start a blank draft to begin.'} rows={rows.map((row) => ({
-          key: row.id,
-          main: row.content_key + ' · v' + row.version,
-          sub: row.locale + ' · updated ' + new Date(row.updated_at).toLocaleString(),
-          right: <View style={{ alignItems: 'flex-end', gap: 4 }}><StatusPill label={row.status} small /><Txt size={9.5} mut>{selected?.id === row.id ? 'Selected' : 'Open ›'}</Txt></View>,
-          onPress: () => openRow(row),
-        }))} />
+
+      <Section title="Live customer phone preview" right={<View style={{ flexDirection: 'row', flexWrap: 'wrap', gap: 5 }}>
+        <OutlineBtn primary={viewMode === 'Draft'} onPress={() => { setViewMode('Draft'); setPageStack([]); setPageKey('home'); }}>Draft</OutlineBtn>
+        <OutlineBtn primary={viewMode === 'Published'} onPress={() => { setViewMode('Published'); setEditorMode('Preview'); setPageStack([]); setPageKey('home'); setElementKey(''); }}>Published</OutlineBtn>
+        <OutlineBtn primary={editorMode === 'Edit'} disabled={viewMode === 'Published' || !can(...REQ.content)} onPress={() => { setEditorMode('Edit'); setPageStack([]); }}>Edit</OutlineBtn>
+        <OutlineBtn primary={editorMode === 'Preview'} onPress={() => { setEditorMode('Preview'); setPageStack([]); }}>Preview</OutlineBtn>
+      </View>}>
+        <View style={{ alignItems: 'center', paddingVertical: 6 }}>
+          {viewMode === 'Published' && !publishedRow && selected?.status !== 'published' ? <Txt size={10.5} color={c.or} style={{ marginBottom: 8 }}>No published version was found for this locale. This is an empty published view, not a draft preview.</Txt> : null}
+          {!selected && viewMode === 'Draft' ? <Txt size={10.5} mut style={{ marginBottom: 8 }}>Starter preview · select a version or start a blank draft to edit it.</Txt> : null}
+          {selected && viewMode === 'Draft' ? <Txt size={10.5} mut style={{ marginBottom: 8, textAlign: 'center' }}>{editorMode === 'Edit' ? 'Edit mode: tap an element to select it. Changes stay in the draft.' : 'Preview mode: tap linked elements or the bottom navigation to move through customer pages.'}</Txt> : null}
+          <CustomerPagePreview
+            payload={previewPayload}
+            pageKey={activePageKey}
+            mode={viewMode === 'Published' ? 'Preview' : editorMode}
+            view={viewMode}
+            selectedElementKey={elementKey}
+            pageStack={pageStack}
+            onSelectElement={(id) => { if (editable) setElementKey(id); }}
+            onNavigate={navigatePhone}
+            onBack={backPhone}
+          />
+        </View>
       </Section>
-      {selected ? (
+
+      {selected && viewMode === 'Draft' && editorMode === 'Edit' ? (
         <>
           <Section title="Page and element structure">
             {pageKeys.length ? (
               <>
-                <Txt size={10.1} mut>Select a page, then an element. These controls update the draft JSON and remain private until saved.</Txt>
+                <Txt size={10.1} mut>Select a page, then an element. Changes update the phone above immediately and remain private until saved.</Txt>
                 <View style={{ flexDirection: 'row', flexWrap: 'wrap', gap: 6, marginTop: 8 }}>
-                  {pageKeys.map((key) => <Pill key={key} on={activePageKey === key} onPress={() => { setPageKey(key); setElementKey(''); }}>{String(preview?.pages?.[key]?.title || key)}</Pill>)}
-                  <OutlineBtn onPress={addPage}>+ Add page</OutlineBtn>
+                  {pageKeys.map((key) => <Pill key={key} on={activePageKey === key} onPress={() => { setPageKey(key); setPageStack([]); setElementKey(''); }}>{String(previewPayload?.pages?.[key]?.title || key)}</Pill>)}
+                  <OutlineBtn onPress={addPage} disabled={!editable}>+ Add page</OutlineBtn>
                 </View>
                 {page ? (
                   <>
                     <Txt size={10.1} weight={500} style={{ marginTop: 10 }}>Page title</Txt>
-                    <TextInput value={String(page.title || '')} onChangeText={updatePageTitle} style={fieldStyle} placeholder="Page title" />
+                    <TextInput value={String(page.title || '')} onChangeText={updatePageTitle} editable={editable} style={fieldStyle} placeholder="Page title" />
                     <ListRows empty="This page has no elements yet." rows={elementIds.map((id) => ({
                       key: id,
                       main: String(elements[id]?.title || elements[id]?.label || id),
@@ -237,31 +285,28 @@ export function CustomerPageEditorScreen() {
                         <Txt size={9.5} mut style={{ marginTop: 2 }}>Type: {String(element.t || 'text')} · {element.vis ? 'Visible' : 'Hidden'}</Txt>
                         {(['title', 'sub', 'label', 'btn', 'dest'] as const).map((field) => (
                           <View key={field}>
-                            <Txt size={9.5} mut>{field === 'dest' ? 'Destination (preview only)' : field[0].toUpperCase() + field.slice(1)}</Txt>
-                            <TextInput value={String(element[field] ?? '')} onChangeText={(value) => updateElement(field, value)} style={fieldStyle} placeholder={'Enter ' + field} />
+                            <Txt size={9.5} mut>{field === 'dest' ? 'Destination' : field[0].toUpperCase() + field.slice(1)}</Txt>
+                            <TextInput value={String(element[field] ?? '')} onChangeText={(value) => updateElement(field, value)} editable={editable} style={fieldStyle} placeholder={'Enter ' + field} />
                           </View>
                         ))}
                         <View style={{ flexDirection: 'row', flexWrap: 'wrap', gap: 6 }}>
-                          <OutlineBtn onPress={() => moveElement(-1)}>Move up</OutlineBtn>
-                          <OutlineBtn onPress={() => moveElement(1)}>Move down</OutlineBtn>
-                          <OutlineBtn onPress={toggleElement}>{element.vis ? 'Hide element' : 'Show element'}</OutlineBtn>
+                          <OutlineBtn onPress={() => moveElement(-1)} disabled={!editable}>Move up</OutlineBtn>
+                          <OutlineBtn onPress={() => moveElement(1)} disabled={!editable}>Move down</OutlineBtn>
+                          <OutlineBtn onPress={toggleElement} disabled={!editable}>{element.vis ? 'Hide element' : 'Show element'}</OutlineBtn>
                         </View>
                       </View>
                     ) : null}
                     <View style={{ flexDirection: 'row', flexWrap: 'wrap', gap: 6, marginTop: 8 }}>
-                      <OutlineBtn onPress={() => addElement('text')}>+ Text block</OutlineBtn>
-                      <OutlineBtn onPress={() => addElement('card')}>+ Card</OutlineBtn>
+                      <OutlineBtn onPress={() => addElement('text')} disabled={!editable}>+ Text block</OutlineBtn>
+                      <OutlineBtn onPress={() => addElement('card')} disabled={!editable}>+ Card</OutlineBtn>
                     </View>
                   </>
                 ) : null}
               </>
             ) : <Txt size={10.1} mut>This draft does not contain a pages object. Correct the JSON model below or start a blank page-builder draft.</Txt>}
           </Section>
-          <Section title="Customer page preview">
-            {preview && activePageKey ? <CustomerPagePreview payload={preview} pageKey={activePageKey} /> : <Txt size={11.5} color={c.or}>A valid page model is required to render the preview.</Txt>}
-          </Section>
           <Section title={'Advanced page model · v' + selected.version}>
-            <Txt size={10.1} mut>JSON is the source payload. Visual controls above edit the same draft model; saving creates a new private version.</Txt>
+            <Txt size={10.1} mut>JSON is the source payload. Visual controls and the phone preview use the same draft model; saving creates a new private version only.</Txt>
             <TextInput
               value={json}
               onChangeText={(value) => { setJson(value); setError(''); }}
@@ -273,13 +318,23 @@ export function CustomerPageEditorScreen() {
               style={{ minHeight: 220, maxHeight: 420, textAlignVertical: 'top', borderWidth: 1, borderColor: c.bd, borderRadius: 12, padding: 10, marginTop: 8, color: c.ink, backgroundColor: c.card, fontSize: 12, fontFamily: 'monospace' }}
             />
             <View style={{ flexDirection: 'row', flexWrap: 'wrap', gap: 8, marginTop: 8 }}>
-              <OutlineBtn onPress={() => { setJson(JSON.stringify(selected.payload, null, 2)); setError(''); }}>Reset edits</OutlineBtn>
-              <OutlineBtn primary disabled={saving || !can(...REQ.content)} onPress={() => { void createDraft(); }}>{saving ? 'Saving…' : 'Save private draft'}</OutlineBtn>
+              <OutlineBtn onPress={() => { setJson(JSON.stringify(selected.payload, null, 2)); setError(''); }} disabled={!editable}>Reset edits</OutlineBtn>
+              <OutlineBtn primary disabled={saving || !editable} onPress={() => { void createDraft(); }}>{saving ? 'Saving…' : 'Save private draft'}</OutlineBtn>
             </View>
-            {!can(...REQ.content) ? <Txt size={9.5} color={c.or} style={{ marginTop: 6 }}>View access only: draft saving is disabled.</Txt> : null}
+            {!can(...REQ.content) ? <Txt size={9.5} color={c.or} style={{ marginTop: 6 }}>View access only: editing and draft saving are disabled.</Txt> : null}
           </Section>
         </>
       ) : null}
+
+      <Section title={'Customer page versions · ' + rows.length}>
+        <ListRows empty={loading ? 'Loading customer page versions…' : 'No customer page-builder versions are available. Start a blank draft to begin.'} rows={rows.map((row) => ({
+          key: row.id,
+          main: row.content_key + ' · v' + row.version,
+          sub: row.locale + ' · updated ' + new Date(row.updated_at).toLocaleString(),
+          right: <View style={{ alignItems: 'flex-end', gap: 4 }}><StatusPill label={row.status} small /><Txt size={9.5} mut>{selected?.id === row.id ? 'Selected' : 'Open ›'}</Txt></View>,
+          onPress: () => openRow(row),
+        }))} />
+      </Section>
     </View>
   );
 }
