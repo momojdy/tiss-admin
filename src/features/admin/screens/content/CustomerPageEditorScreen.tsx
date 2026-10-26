@@ -389,37 +389,6 @@ export function CustomerPageEditorScreen() {
         </View>
       </Section>
 
-      {actualGoodiesPreview && viewMode === 'Draft' && editorMode === 'Edit' ? (
-        <Section title="Edit selected Goodies content">
-          <Txt size={10.5} mut style={{ marginBottom: 8 }}>Tap a service tile, category, promotion, or text area in the phone to select it. Phone navigation is disabled while editing. Changes update this preview and save as a private CMS draft.</Txt>
-          {!goodiesDraft ? <Txt size={10.5} color={c.or}>Published Goodies content could not be loaded for editing. Check CMS access and try Refresh.</Txt> : goodiesTarget ? (
-            <>
-              <Txt size={11} weight={500}>{goodiesTarget.title}</Txt>
-              {goodiesTarget.kind === 'label' ? (
-                <View><Txt size={9.5} mut>Text</Txt><TextInput value={String(goodiesDraft.labels?.find((v: any) => v.id === goodiesTarget.id)?.t?.en?.v || '')} onChangeText={(value) => updateGoodiesField('title', value)} editable={can(...REQ.content)} style={fieldStyle} placeholder="Text" /></View>
-              ) : (
-                <>
-                  <Txt size={9.5} mut>{goodiesTarget.kind === 'category' ? 'Title' : 'Title'}</Txt>
-                  <TextInput value={String((goodiesDraft[goodiesTarget.kind === 'mode' ? 'modes' : goodiesTarget.kind === 'promo' ? 'promos' : 'cats'] || []).find((v: any) => v.id === goodiesTarget.id)?.[goodiesTarget.kind === 'category' ? 'name' : 'title']?.en?.v || '')} onChangeText={(value) => updateGoodiesField('title', value)} editable={can(...REQ.content)} style={fieldStyle} placeholder="Title" />
-                  {goodiesTarget.kind !== 'category' ? <>
-                    <Txt size={9.5} mut>Subtitle</Txt>
-                    <TextInput value={String(goodiesDraft[goodiesTarget.kind === 'mode' ? 'modes' : 'promos']?.find((v: any) => v.id === goodiesTarget.id)?.sub?.en?.v || '')} onChangeText={(value) => updateGoodiesField('sub', value)} editable={can(...REQ.content)} style={fieldStyle} placeholder="Subtitle" />
-                  </> : null}
-                  <Txt size={9.5} mut>Icon / visual</Txt>
-                  <TextInput value={String(goodiesDraft[goodiesTarget.kind === 'mode' ? 'modes' : goodiesTarget.kind === 'promo' ? 'promos' : 'cats']?.find((v: any) => v.id === goodiesTarget.id)?.emoji || '')} onChangeText={(value) => updateGoodiesField('emoji', value)} editable={can(...REQ.content)} style={fieldStyle} placeholder="Emoji or icon" />
-                  <Txt size={9.5} mut>Image asset URL (optional; leave blank to use the icon)</Txt>
-                  <TextInput value={String(goodiesTarget.kind === 'category' ? goodiesDraft.cats?.find((v: any) => v.id === goodiesTarget.id)?.art?.data || '' : goodiesDraft[goodiesTarget.kind === 'mode' ? 'modes' : 'promos']?.find((v: any) => v.id === goodiesTarget.id)?.img?.data || '')} onChangeText={(value) => updateGoodiesField('asset', value)} editable={can(...REQ.content)} style={fieldStyle} placeholder="https://… or clear to remove image" autoCapitalize="none" />
-                </>
-              )}
-              <View style={{ flexDirection: 'row', flexWrap: 'wrap', gap: 6, marginTop: 4 }}>
-                <OutlineBtn onPress={() => setGoodiesTarget(null)}>Deselect</OutlineBtn>
-                <OutlineBtn primary onPress={() => { void saveGoodiesDraft(); }} disabled={goodiesSaving || !goodiesDraft || !can(...REQ.content)}>{goodiesSaving ? 'Saving…' : 'Save Goodies draft'}</OutlineBtn>
-              </View>
-            </>
-          ) : <Txt size={10.5} mut>No item selected yet. Tap a visible part of the phone to edit its title, subtitle, or icon.</Txt>}
-        </Section>
-      ) : null}
-
       {!actualGoodiesPreview && selected && viewMode === 'Draft' && editorMode === 'Edit' ? (
         <>
           <Section title="Page and element structure">
