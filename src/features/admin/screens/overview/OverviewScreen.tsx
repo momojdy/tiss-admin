@@ -66,7 +66,7 @@ export function OverviewScreen() {
     ...failed.slice(0, 1).map((tx) => ({ key: tx.id, title: 'Failed transaction', sub: tx.f + ' · ' + tx.u, right: mny(tx.a), action: () => go('finance', { fv: 'Transactions', fs: 'Failed' }) })),
     ...overdue.slice(0, 2).map((app) => ({ key: app.id, title: 'Application waiting ' + app.age + 'd', sub: app.n + ' · ' + app.s, right: app.o === 'Unassigned' ? 'Unassigned' : app.o, action: () => go('operations', { ov: 'List' }) })),
     ...refunds.slice(0, 1).map((tx) => ({ key: 'refund-' + tx.id, title: 'Refund needs review', sub: tx.u + ' · ' + tx.id, right: mny(tx.rq || tx.a), action: () => go('finance', { fv: 'Refunds' }) })),
-    ...db.CASES.filter((item) => item.st !== 'Resolved').slice(0, 1).map((item) => ({ key: item.id, title: item.st === 'Escalated' ? 'Escalated support case' : 'Open support case', sub: item.svc + ' · ' + item.t, right: item.o || 'Unassigned', action: () => go('operations') })),
+    ...(prototypeSnapshot ? [] : db.CASES.filter((item) => item.st !== 'Resolved').slice(0, 1)).map((item) => ({ key: item.id, title: item.st === 'Escalated' ? 'Escalated support case' : 'Open support case', sub: item.svc + ' · ' + item.t, right: item.o || 'Unassigned', action: () => go('operations') })),
   ].slice(0, 5);
 
   return (
@@ -111,8 +111,8 @@ export function OverviewScreen() {
         <Card style={{ flex: 1.4, minHeight: 152 }}>
           <CardTitle title="Queue mix" right={<Pill onPress={() => go('operations')}>↗</Pill>} />
           <Txt size={22} weight={500}>{prototypeSnapshot ? '—' : waiting.length} <Txt size={9.5} mut>waiting</Txt></Txt>
-          <View style={{ flexDirection: 'row', height: 10, gap: 2, overflow: 'hidden', borderRadius: 99, marginVertical: 12 }}>
-            {queue.map((value, i) => <View key={i} style={{ flex: Math.max(0.01, value), backgroundColor: [c.ye, c.gr, c.or][i] }} />)}
+          <View style={{ flexDirection: 'row', height: 10, gap: 2, overflow: 'hidden', borderRadius: 99, marginVertical: 12, backgroundColor: prototypeSnapshot ? c.inset : undefined }}>
+            {!prototypeSnapshot && queue.map((value, i) => <View key={i} style={{ flex: Math.max(0.01, value), backgroundColor: [c.ye, c.gr, c.or][i] }} />)}
           </View>
           {['Submitted', 'In review', 'Needs info'].map((label, i) => (
             <View key={label} style={{ flexDirection: 'row', justifyContent: 'space-between', marginBottom: 5 }}>
