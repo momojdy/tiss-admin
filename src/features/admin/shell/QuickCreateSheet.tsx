@@ -1,5 +1,3 @@
-import { useState } from 'react';
-import { Alert } from 'react-native';
 import { db, aud, bump } from '../state/db';
 import { can } from '../state/access';
 import { REQ } from '../state/requirements';
@@ -19,7 +17,6 @@ export function QuickCreateSheet({ onClose }: { onClose: () => void }) {
   const form = useForm();
   const toast = useToast();
   const { go } = useNav();
-  const [busy, setBusy] = useState(false);
 
   const openCmsForm = (kind: 'banner' | 'promotion' | 'announcement') => {
     if (!can(...REQ.content)) { toast('You need Content edit access to create a draft.'); return; }
@@ -50,7 +47,6 @@ export function QuickCreateSheet({ onClose }: { onClose: () => void }) {
         const title = String(values.title || '').trim();
         const key = 'admin.' + kind + '.' + slug(title);
         if (!title || !slug(title)) return 'Enter a valid title.';
-        setBusy(true);
         try {
           const payload: Record<string, unknown> = { type: kind, title, status: 'draft', created_from: 'admin-quick-create', ...values };
           delete payload.title;
@@ -62,7 +58,7 @@ export function QuickCreateSheet({ onClose }: { onClose: () => void }) {
           return;
         } catch (error) {
           return error instanceof Error ? error.message : 'Draft could not be saved.';
-        } finally { setBusy(false); }
+        }
       },
     });
     onClose();
@@ -86,14 +82,13 @@ export function QuickCreateSheet({ onClose }: { onClose: () => void }) {
         if (!name) return 'Enter the staff member’s name.';
         if (!/^\S+@\S+\.\S+$/.test(email)) return 'Enter a valid work email.';
         if (!reason) return 'Enter a reason for this invitation.';
-        setBusy(true);
-        try {
+          try {
           await inviteStaff(email, name, reason);
           toast('Invitation sent to ' + email + '.');
           go('people', { ps: 'Invitations' });
         } catch (error) {
           return error instanceof Error ? error.message : 'Invitation could not be sent.';
-        } finally { setBusy(false); }
+        }
       },
     });
     onClose();
