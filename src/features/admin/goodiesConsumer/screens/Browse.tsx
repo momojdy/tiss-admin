@@ -14,7 +14,6 @@ import {MODE1, PROMO} from '../theme';
 import {supabase} from '../../lib/supabase';
 
 const cname = (id: string) => catName(id);
-const CATS = categories();
 function Mode({title, sub, emoji, onPress, grad, bg, fg, small}: any) {
   return (
     <Pressable onPress={onPress} style={{borderRadius: 18, overflow: 'hidden', height: small ? 51 : 112}}>
@@ -55,7 +54,7 @@ function Countdown() {
 }
 
 export function Home({onExit}: {onExit?: () => void}) {
-  const th = useTheme(), ins = useSafeAreaInsets();
+  const th = useTheme(), ins = useSafeAreaInsets(), CATS = categories();
   const seen: any = {}, os = S.orders.filter((o: any) => {if (seen[o.sid]) return false; seen[o.sid] = 1; return true;}).slice(0, 6);
   const cat = (c: string) => ST.filter(s => s.c === c).flatMap(s => s.it);
   const rv = S.rv.filter((id: string) => IT[id]).slice(0, 6), md = modes(), pc = promoCards(), dl = deals();
