@@ -6,6 +6,7 @@ import { db, ui, bump, useDb } from '../../state/db';
 import { can } from '../../state/access';
 import { REQ } from '../../state/requirements';
 import { useOverlay } from '../../ui/Overlay';
+import { useNav } from '../../shell/Nav';
 import { QuickCreateSheet } from '../../shell/QuickCreateSheet';
 import { archiveCmsAsset, archiveCmsVersion, listCmsAssets, publishCmsAsset, publishCmsVersion, saveCmsVersion, uploadCmsAsset } from '../../lib/adminBackend';
 import { Section, Card } from '../../ui/Card';
@@ -33,6 +34,7 @@ export function ContentScreen() {
   const form = useForm();
   const toast = useToast();
   const { openDrawer } = useOverlay();
+  const { go } = useNav();
   const [content, setContent] = useState<ContentRow[]>([]);
   const [assets, setAssets] = useState<AssetRow[]>([]);
   const [error, setError] = useState('');
@@ -341,8 +343,8 @@ export function ContentScreen() {
         </>
       ) : null}
 
-      {activeSection === 'Editor' ? <Section title="Customer page editor">
-        <Txt size={11} mut lh={1.4}>The HTML defines a full customer-page builder. The React Native version can preview and edit Goodies CMS JSON drafts below, but does not yet reproduce the HTML's visual drag-and-drop page builder.</Txt>
+      {activeSection === 'Editor' ? <Section title="Customer page editor" right={<OutlineBtn primary onPress={() => go('editor')}>Open full editor ›</OutlineBtn>}>
+        <Txt size={11} mut lh={1.4}>Open the standalone editor to select a Goodies CMS version, edit its payload and preview the customer page. Saving creates a private draft through the existing CMS API; it does not publish live content.</Txt>
         <ListRows empty="Create or load a Goodies CMS draft to begin." rows={content.filter((row) => row.content_key.toLowerCase().includes('goodies')).map((row) => ({
           key: row.id, main: row.content_key + ' · v' + row.version, sub: row.status + ' · ' + row.locale,
           right: <OutlineBtn onPress={() => { setPreviewRow(row); setEditingDraft(row.status === 'draft' ? row : null); if (row.status === 'draft') setDraftJson(JSON.stringify(row.payload, null, 2)); }}>Open editor</OutlineBtn>,
