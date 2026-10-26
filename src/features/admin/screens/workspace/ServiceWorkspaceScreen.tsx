@@ -48,7 +48,8 @@ export function ServiceWorkspaceScreen() {
     ];
   }, [moduleName, serviceName, serviceApps, serviceCases, serviceTransactions, serviceAccounts, serviceBanners, servicePromos, go, open]);
 
-  const visibleRows = sourceRows.filter((row) => !query || (row.title + ' ' + row.sub + ' ' + row.right).toLowerCase().includes(query));
+  const queryRows = sourceRows.filter((row) => !query || (row.title + ' ' + row.sub + ' ' + row.right).toLowerCase().includes(query));
+  const visibleRows = ui.wf === 'Pending' ? queryRows.filter((row) => /pending|unassigned|submitted|review|failed|needs info|open|discrepancy/i.test(row.right + ' ' + row.sub)) : queryRows;
   const pre = service[5] === 'Pre-order';
 
   return (
