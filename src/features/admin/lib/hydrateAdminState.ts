@@ -1,6 +1,6 @@
 import { loadAdminDomain, listStaff, listAccountRestrictions } from './adminBackend';
 import { supabase } from './supabase';
-import { db, bump } from '../state/db';
+import { db, bump, setDataMode } from '../state/db';
 import { GRANTS, REQUESTS } from '../state/grants';
 import type { Account, Application, ServiceRow, StaffMember, SupportCase, Transaction } from '../data/types';
 
@@ -101,5 +101,6 @@ export async function hydrateAdminState() {
     str(x.action) + ' · ' + str(x.resource_type), str(x.actor_user_id || 'System'), date(x.created_at),
   ] as [string, string, string]);
 
+  setDataMode('live');
   bump();
 }
