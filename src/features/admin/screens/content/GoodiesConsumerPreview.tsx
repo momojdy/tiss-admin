@@ -84,8 +84,42 @@ export function GoodiesConsumerPreview({ editMode = false, onEditTarget }: { edi
       </View>
       <View style={{ width: '100%', maxWidth: 404, height: 720, borderRadius: 30, borderWidth: 7, borderColor: editMode ? orange : '#252529', overflow: 'hidden', backgroundColor: '#FFFFFF' }}>
         <View pointerEvents={editMode ? 'none' : 'auto'} style={{ flex: 1 }}><GoodiesApp embedded previewMode /></View>
-        {editMode ? <Pressable pointerEvents="auto" accessibilityRole="button" accessibilityLabel="Select content in the Goodies phone preview" onPress={(event: any) => { const target = pickTarget(event.nativeEvent.locationY, event.nativeEvent.locationX); if (target) onEditTarget?.(target); }} style={{ position: 'absolute', left: 0, right: 0, top: 0, bottom: 0, zIndex: 999, elevation: 999, backgroundColor: 'rgba(253,128,46,0.035)', borderWidth: 1, borderColor: 'rgba(253,128,46,0.45)' }}><View pointerEvents="none" style={{ alignSelf: 'center', marginTop: 8, backgroundColor: orange, borderRadius: 14, paddingHorizontal: 10, paddingVertical: 5 }}><Text style={{ color: '#fff', fontSize: 10, fontWeight: '800' }}>TAP CONTENT TO EDIT</Text></View></Pressable> : null}
+        {editMode ? (
+          <View pointerEvents="box-none" style={{ position: 'absolute', left: 0, right: 0, top: 0, bottom: 0, zIndex: 999, elevation: 999 }}>
+            <View pointerEvents="none" style={{ position: 'absolute', top: 8, left: 0, right: 0, alignItems: 'center' }}>
+              <Text style={{ color: '#fff', backgroundColor: orange, overflow: 'hidden', borderRadius: 14, paddingHorizontal: 10, paddingVertical: 5, fontSize: 10, fontWeight: '800' }}>TAP A HIGHLIGHTED SECTION TO EDIT</Text>
+            </View>
+            {[
+              { top: 0, height: 22, target: pickTarget(70, 100), label: 'Search / top text' },
+              { top: '22%', height: '19%', target: pickTarget(210, 80), label: 'Service tiles' },
+              { top: '41%', height: '15%', target: pickTarget(330, 80), label: 'Categories' },
+              { top: '56%', height: '20%', target: pickTarget(450, 80), label: 'Promotions' },
+              { top: '76%', height: '24%', target: pickTarget(590, 80), label: 'Section titles' },
+            ].map((zone) => zone.target ? (
+              <Pressable key={zone.label} accessibilityRole="button" accessibilityLabel={'Edit ' + zone.label} onPress={() => onEditTarget?.(zone.target!)}
+                style={{ position: 'absolute', left: 0, right: 0, top: zone.top as any, height: zone.height as any, borderWidth: 2, borderColor: 'rgba(253,128,46,0.8)', backgroundColor: 'rgba(253,128,46,0.10)', alignItems: 'flex-end', justifyContent: 'flex-start', padding: 4 }}>
+                <Text pointerEvents="none" style={{ color: '#FFFFFF', backgroundColor: orange, overflow: 'hidden', borderRadius: 8, paddingHorizontal: 7, paddingVertical: 4, fontSize: 9, fontWeight: '800' }}>{zone.label}</Text>
+              </Pressable>
+            ) : null)}
+          </View>
+        ) : null}
       </View>
+      {editMode ? (
+        <View style={{ width: '100%', maxWidth: 404, marginTop: 12, gap: 7 }}>
+          <Text style={{ color: ink, fontSize: 12, fontWeight: '800' }}>Select content to edit</Text>
+          {[
+            ...((C as any)?.modes || []).filter((v: any) => v.st === 'Live').map((v: any) => ({ kind: 'mode' as const, id: v.id, title: 'Service tile · ' + (v.title?.en?.v || v.id) })),
+            ...((C as any)?.cats || []).filter((v: any) => v.st === 'on').map((v: any) => ({ kind: 'category' as const, id: v.id, title: 'Category · ' + (v.name?.en?.v || v.id) })),
+            ...((C as any)?.promos || []).filter((v: any) => v.st === 'Live').map((v: any) => ({ kind: 'promo' as const, id: v.id, title: 'Promotion · ' + (v.title?.en?.v || v.id) })),
+            ...((C as any)?.labels || []).map((v: any) => ({ kind: 'label' as const, id: v.id, title: 'Text · ' + (v.label || v.id) })),
+          ].map((target) => (
+            <Pressable key={target.kind + ':' + target.id} accessibilityRole="button" onPress={() => onEditTarget?.(target)}
+              style={{ paddingHorizontal: 12, paddingVertical: 10, borderRadius: 10, borderWidth: 1, borderColor: '#E5E5E7', backgroundColor: '#FFFFFF' }}>
+              <Text style={{ color: ink, fontSize: 11, fontWeight: '600' }}>{target.title}</Text>
+            </Pressable>
+          ))}
+        </View>
+      ) : null}
     </View>
   );
 }
