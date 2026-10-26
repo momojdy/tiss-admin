@@ -1,8 +1,8 @@
 # Wantiss Admin HTML → React Native parity audit
 
-**Source of truth:** `wantiss-admin-v9.html` (312,412 bytes, inspected 2026-10-26)  
+**Source of truth for this pass:** the user-uploaded `wantiss-admin-crm final .html` (227,662 UTF-8 bytes, 924 lines; SHA-256 `32170bcbb7213c98364d4997b351a3be0180ff1dc372e49400f1f2574137ee77`).  
 **Target reviewed:** `momojdy/tiss-admin`, default branch `main`  
-**Scope:** source-level comparison. No live-device screenshot comparison has been performed in this audit.
+**Scope:** source-level comparison against the exact uploaded file above. The earlier 312,412-byte `wantiss-admin-v9.html` is a different source version and must not be treated as this pass's baseline. No live-device screenshot comparison has been performed in this audit.
 
 ## Global shell and navigation — baseline at audit start
 
@@ -80,3 +80,32 @@ These values are read directly from the original HTML CSS, not estimated from sc
 - The service workspace is a shared data-driven shell, not yet a bespoke port of every service-specific HTML module.
 - Business detail and the standalone customer-page editor still fall through to the not-ported screen.
 - No Expo Go screenshots or device interaction pass has been performed by this audit. CI typecheck is being used to catch source errors; visual parity and runtime behavior still require on-device verification.
+
+
+## Exact uploaded HTML baseline — 2026-10-26 follow-up
+
+This section supersedes any earlier claims that were based on `wantiss-admin-v9.html`. The uploaded file inspected for the current task is `wantiss-admin-crm final .html`, SHA-256 `32170bcbb7213c98364d4997b351a3be0180ff1dc372e49400f1f2574137ee77`.
+
+Confirmed from that exact file:
+
+- Primary tabs are Overview, Operations, Ecosystem, Content, Finance, Analytics and People; the dock contains collapse, Search, Quick create, Alerts, Operations, Export and Settings.
+- Goodies workspace module order is exactly: Overview, Products and catalog, Categories, Merchants, Product review, Orders, Promotions, Support, Analytics, Settings.
+- Global frame is 512 × 910 CSS px, max-width 100vw and max-height 100%; at viewport widths ≤520 px it uses full viewport width/dynamic height and removes the outer corner radius.
+- The source uses Outfit 300/400/500/600, a 22 px card radius with 12 px padding and 10 px bottom margin, a 318 px max-width drawer, a 26 px dialog radius, and the palette/gradient documented above.
+- Source CSS defines a 57 px left content inset when the dock is expanded and 28 px when collapsed; the expanded dock is 37 px wide and the collapsed dock is 16 × 72 px.
+- HTML interactions that only toast, mutate in-memory demo arrays or say a feature opens “in the next pass” are prototypes, not evidence of a production endpoint.
+
+## Changes made against the exact uploaded baseline
+
+- Goodies navigation labels/order were aligned to the nine module names in this uploaded HTML. The Settings section is explicitly read-only until an authorized server-side settings endpoint exists.
+- Added a separate `CustomerPageEditorScreen` file and registered the `editor` route. It reads Goodies CMS versions from Supabase and saves changes only as private drafts through the existing `saveCmsVersion` server RPC; it does not publish automatically.
+- Added a dedicated business-details screen using only fields present in the authorized ecosystem snapshot. It does not fabricate missing business fields or perform direct status changes. The Service Hub links to this screen.
+- Content Studio now links to the standalone customer page editor. Existing Supabase auth, section permission gates and CMS server RPCs were not replaced by HTML demo mutations.
+
+## Still unverified / remaining
+
+- The global shell and all screens have **not** yet passed same-device screenshot comparison against the uploaded HTML.
+- The HTML's full global responsive behavior, overlays, search results, quick-create forms and settings subpanels still need an end-to-end parity pass.
+- The generic service workspace is not yet a complete one-to-one implementation of every service-specific HTML module. Content Studio workflows and Goodies workflows also need further module-by-module comparison and implementation.
+- Business details currently show only fields available from the authorized snapshot; additional business profile fields require a verified backend query/RPC and explicit permission contract.
+- No Expo Go runtime/typecheck was run as part of these GitHub-only edits. Do not consider this branch production-ready until typecheck, app launch, authorization checks and device screenshots have been verified.
