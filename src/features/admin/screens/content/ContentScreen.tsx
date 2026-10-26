@@ -43,6 +43,7 @@ export function ContentScreen() {
   const [assetFeature, setAssetFeature] = useState('All features');
   const [assetPlacement, setAssetPlacement] = useState('All placements');
   const [customerFeature, setCustomerFeature] = useState('Goodies');
+  const [featurePickerOpen, setFeaturePickerOpen] = useState(false);
 
   const reload = useCallback(async () => {
     setLoading(true);
@@ -292,15 +293,14 @@ export function ContentScreen() {
       {loading ? <Card><Txt size={11} mut>Loading CMS content and media…</Txt><View style={{ gap: 7, marginTop: 10 }}>{[0, 1, 2].map((key) => <View key={key} style={{ height: 12, borderRadius: 6, backgroundColor: c.inset, opacity: 0.8 }} />)}</View></Card> : null}
       {activeSection === 'Overview' || activeSection === 'Editor' ? <Section title="Customer pages · live editor">
         <Txt size={10.5} mut style={{ marginBottom: 8 }}>Choose a customer feature, then jump straight into the shared phone editor. Select Edit or Preview there to inspect the draft and published experience.</Txt>
-        <Pressable accessibilityRole="button" onPress={() => setCustomerFeature((current) => {
-          const options = ['Goodies', 'Stayz', 'Flyz', 'Konsoliss', 'Woulib', 'Wallet', 'Frenzies', 'Wantiss home'];
-          return options[(options.indexOf(current) + 1) % options.length];
-        })} style={{ minHeight: 42, borderWidth: 1, borderColor: c.bd, borderRadius: 12, backgroundColor: c.card, paddingHorizontal: 12, paddingVertical: 10, flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between' }}>
-          <Txt size={12} weight={500}>{customerFeature}</Txt><Txt size={12} mut>Choose feature ↕</Txt>
+        <Pressable accessibilityRole="button" onPress={() => setFeaturePickerOpen((open) => !open)} style={{ minHeight: 42, borderWidth: 1, borderColor: c.bd, borderRadius: 12, backgroundColor: c.card, paddingHorizontal: 12, paddingVertical: 10, flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between' }}>
+          <Txt size={12} weight={500}>{customerFeature}</Txt><Txt size={12} mut>{featurePickerOpen ? '⌃' : '⌄'}</Txt>
         </Pressable>
-        <View style={{ flexDirection: 'row', flexWrap: 'wrap', gap: 5, marginTop: 7 }}>
-          {['Goodies', 'Stayz', 'Flyz', 'Konsoliss', 'Woulib', 'Wallet', 'Frenzies', 'Wantiss home'].map((feature) => <Pill key={feature} on={customerFeature === feature} onPress={() => setCustomerFeature(feature)}>{feature}</Pill>)}
-        </View>
+        {featurePickerOpen ? <View style={{ marginTop: 4, borderWidth: 1, borderColor: c.bd, borderRadius: 12, backgroundColor: c.card, overflow: 'hidden' }}>
+          {['Goodies', 'Stayz', 'Flyz', 'Konsoliss', 'Woulib', 'Wallet', 'Frenzies', 'Wantiss home'].map((feature) => <Pressable key={feature} onPress={() => { setCustomerFeature(feature); setFeaturePickerOpen(false); }} style={{ paddingHorizontal: 12, paddingVertical: 9, borderBottomWidth: 1, borderBottomColor: c.bd, backgroundColor: customerFeature === feature ? c.inset : 'transparent' }}>
+            <Txt size={11.5} weight={customerFeature === feature ? 500 : 400}>{feature}</Txt>
+          </Pressable>)}
+        </View> : null}
         <View style={{ marginTop: 9 }}>
           <OutlineBtn primary onPress={() => go('editor', { editorFeature: customerFeature })}>Open {customerFeature} customer page in live editor ›</OutlineBtn>
         </View>
