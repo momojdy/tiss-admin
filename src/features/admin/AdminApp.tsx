@@ -1,5 +1,5 @@
-import { useEffect, useState } from 'react';
-import { View } from 'react-native';
+import { useEffect, useRef, useState } from 'react';
+import { ScrollView, type ScrollViewInstance, View } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { LinearGradient } from 'expo-linear-gradient';
 import { useFonts, Outfit_300Light, Outfit_400Regular, Outfit_500Medium, Outfit_600SemiBold } from '@expo-google-fonts/outfit';
@@ -13,7 +13,6 @@ import { ScreenHost } from './shell/ScreenHost';
 import { AccountSheet } from './shell/AccountSheet';
 import { NotificationsSheet } from './shell/NotificationsSheet';
 import { FloatingDock } from './shell/FloatingDock';
-import { SearchSheet } from './shell/SearchSheet';
 import { AuthFlow } from './auth/AuthFlow';
 import { idleExpired, leaveApp, sessionStillValid, touch } from './auth/authLogic';
 import { session, expireStaff, setServerGrants } from './state/access';
@@ -29,12 +28,17 @@ function Frame() {
   const [dockExpanded, setDockExpanded] = useState(false);
   const { c } = useTheme();
   const insets = useSafeAreaInsets();
+  const { navKey, keepScroll } = useNav();
+  const scrollRef = useRef<ScrollViewInstance>(null);
+  useEffect(() => { if (!keepScroll) scrollRef.current?.scrollTo({ y: 0, animated: false }); }, [navKey, keepScroll]);
   const { openDrawer } = useOverlay();
   return (
-    <LinearGradient colors={[c.b1, c.b2, c.b3]} style={{ flex: 1, paddingTop: insets.top }} onTouchStart={touch}>
-      <Header onBell={() => openDrawer((close) => <NotificationsSheet onClose={close} />)} onSearch={() => openDrawer((close) => <SearchSheet onClose={close} />)} onAccount={() => openDrawer((close) => <AccountSheet onClose={close} />)} />
-      <Tabs />
-      <ScreenHost dockExpanded={dockExpanded} />
+    <LinearGradient colors={[c.b1, c.b2, c.b3]} style={{ flex: 1 }} onTouchStart={touch}>
+      <ScrollView ref={scrollRef} keyboardShouldPersistTaps="handled" showsVerticalScrollIndicator={false} contentContainerStyle={{ paddingTop: 14 + insets.top, paddingBottom: 90 + insets.bottom, paddingLeft: dockExpanded ? 57 : 28, paddingRight: 12 }}>
+        <Header onBell={() => openDrawer((close) => <NotificationsSheet onClose={close} />)} onAccount={() => openDrawer((close) => <AccountSheet onClose={close} />)} />
+        <Tabs />
+        <ScreenHost />
+      </ScrollView>
       <FloatingDock expanded={dockExpanded} onExpandedChange={setDockExpanded} />
     </LinearGradient>
   );
