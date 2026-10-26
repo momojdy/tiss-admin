@@ -6,7 +6,7 @@ import { useFonts, Outfit_300Light, Outfit_400Regular, Outfit_500Medium, Outfit_
 import { ThemeProvider, useTheme } from './theme/ThemeContext';
 import { ToastProvider } from './ui/Toast';
 import { OverlayProvider, useOverlay } from './ui/Overlay';
-import { NavProvider } from './shell/Nav';
+import { NavProvider, useNav } from './shell/Nav';
 import { Header } from './shell/Header';
 import { Tabs } from './shell/Tabs';
 import { ScreenHost } from './shell/ScreenHost';
