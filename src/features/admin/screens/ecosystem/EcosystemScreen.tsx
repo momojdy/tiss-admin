@@ -1,14 +1,14 @@
 import { Pressable, View } from 'react-native';
 import { bump, db, ui, useDb } from '../../state/db';
 import { can } from '../../state/access';
-import { REQ, useGuard } from '../../state/requirements';
+import { REQ } from '../../state/requirements';
+import { saveCmsVersion } from '../../lib/adminBackend';
 import { useNav } from '../../shell/Nav';
 import { Card } from '../../ui/Card';
 import { Btn, Chips, Pill, Row, SearchInput, Seg, StatusPill } from '../../ui/Controls';
 import { useForm } from '../../ui/FormSheet';
 import { Heading } from '../../ui/Heading';
 import { Small, Table } from '../../ui/Lists';
-import { ProgressBar } from '../../ui/Bits';
 import { Txt } from '../../ui/Txt';
 import { useToast } from '../../ui/Toast';
 import { useTheme } from '../../theme/ThemeContext';
@@ -27,21 +27,40 @@ export function EcosystemScreen() {
   const { go } = useNav();
   const { c } = useTheme();
   const form = useForm();
-  const guard = useGuard();
   const toast = useToast();
   const exportCsv = useExport();
   const l = ecoRows();
-  const pend = db.SVC.reduce((n, s) => n + num(s[3]), 0), act = db.SVC.reduce((n, s) => n + num(s[2]), 0);
   const set = (k: string, v: unknown) => { ui[k] = v; bump(); };
   const nextSort = ({ 'Most active': 'A–Z', 'A–Z': 'Pending', Pending: 'Most active' } as Record<string, string>)[ui.es];
 
-  const addService = () => form({ title: 'Add service', fields: [{ id: 'n', label: 'Service name', type: 'text', required: true }, { id: 'd', label: 'Short description', type: 'text' }],
-    buttons: [{ label: 'Add to directory', key: 's', primary: true }], sub: 'This adds a directory entry only. Building the service itself is separate product work.',
-    onSubmit: (_k, v) => {
-      if (db.SVC.find((s) => s[0].toLowerCase() === String(v.n).toLowerCase())) return 'That service already exists.';
-      db.SVC.push([String(v.n), String(v.d || 'New service'), '–', 'Setup', 0, 'Pre-order', 0, '#f6cfc2']); db.MOD[String(v.n)] = 'Overview|Configuration';
-      bump(); toast(v.n + ' added as pre-order');
-    } });
+  const addService = () => form({
+    title: 'Propose service',
+    sub: 'Save a private proposal for review. This does not create a live service or mutate the service directory.',
+    fields: [
+      { id: 'n', label: 'Service name', type: 'text', required: true },
+      { id: 'd', label: 'Short description', type: 'text' },
+      { id: 'reason', label: 'Reason for proposal', type: 'textarea', required: true },
+    ],
+    buttons: [{ label: 'Save private proposal', key: 's', primary: true }],
+    onSubmit: async (_k, v) => {
+      const name = String(v.n || '').trim();
+      const reason = String(v.reason || '').trim();
+      if (!name) return 'Enter a service name.';
+      if (!reason) return 'Enter a reason for the proposal.';
+      if (db.SVC.some((row) => row[0].toLowerCase() === name.toLowerCase())) return 'That service already exists in the directory.';
+      try {
+        await saveCmsVersion({
+          key: 'admin.service_directory.' + name.toLowerCase().replace(/[^a-z0-9]+/g, '.'),
+          locale: 'en',
+          payload: { name, description: String(v.d || ''), change_reason: reason, proposed_only: true },
+          status: 'draft',
+        });
+        toast('Private service proposal saved. The live directory is unchanged.');
+      } catch (error) {
+        return error instanceof Error ? error.message : 'The proposal could not be saved.';
+      }
+    },
+  });
 
   const grid = () => (
     <View style={{ flexDirection: 'row', flexWrap: 'wrap', gap: 9 }}>
@@ -57,11 +76,11 @@ export function EcosystemScreen() {
               <Txt size={12.3} weight={500}>{s[0]}</Txt>
               <Txt size={9.5} mut style={{ marginTop: 2, marginBottom: 7 }}>{s[1]}</Txt>
               <View style={{ backgroundColor: c.inset, borderRadius: 10, paddingVertical: 6, paddingHorizontal: 8, flexDirection: 'row', justifyContent: 'space-between' }}>
-                <View><Txt size={9.5} mut>{pre ? 'Status' : 'Today'}</Txt><Txt size={10.1} weight={500}>{s[2]}</Txt></View>
-                <View><Txt size={9.5} mut>{pre ? 'Phase' : 'Pending'}</Txt><Txt size={10.1} weight={500}>{s[3]}</Txt></View>
+                <View><Txt size={9.5} mut>Activity</Txt><Txt size={10.1} weight={500}>—</Txt></View>
+                <View><Txt size={9.5} mut>Queue</Txt><Txt size={10.1} weight={500}>—</Txt></View>
               </View>
-              <ProgressBar pct={s[4]} color={s[4] > 80 ? c.gr : c.or} />
-              <View style={{ flexDirection: 'row' }}><Pill>{pre ? 'Pre-order · readiness ' + s[4] + '%' : s[5]}</Pill></View>
+              <Txt size={9.5} mut style={{ marginTop: 8 }}>Live health metrics unavailable</Txt>
+              <View style={{ flexDirection: 'row' }}><Pill>{pre ? 'Pre-order' : 'Directory status · ' + s[5]}</Pill></View>
             </View>
           </Pressable>
         );
@@ -76,9 +95,9 @@ export function EcosystemScreen() {
   return (
     <View>
       <Heading title={'Ecosystem\nServices'} kpis={[
-        { icon: '▥', value: db.SVC.filter((s) => s[5] === 'Active').length, label: 'Active services', tag: '+ Prezo pre-order', onPress: () => go('ecosystem', { ec: 'Active' }) },
-        { icon: '☺', value: act.toLocaleString('en-US'), label: 'Orders and bookings today', onPress: () => go('ecosystem', { es: 'Most active' }) },
-        { icon: '▤', value: pend, label: 'Items pending across services', onPress: () => go('ecosystem', { es: 'Pending' }) },
+        { icon: '▥', value: db.SVC.length, label: 'Services in directory' },
+        { icon: '♛', value: db.BIZ.length, label: 'Business records', onPress: () => go('business') },
+        { icon: '▤', value: db.APPS.filter((app) => app.st < 3).length, label: 'Applications awaiting review', onPress: () => go('operations') },
       ]} />
       <Row><SearchInput value={ui.eq} onChangeText={(v) => set('eq', v)} placeholder="Search services" /></Row>
       <Chips options={['All', 'Active', 'Pre-order', 'Attention', 'Favorites'] as const} value={ui.ec} onChange={(v) => set('ec', v)} />
@@ -86,7 +105,8 @@ export function EcosystemScreen() {
         <Pill onPress={() => set('es', nextSort)}>{'≡ ' + ui.es}</Pill>
         <Seg options={['Grid', 'Table'] as const} value={ui.ev} onChange={(v) => set('ev', v)} />
         {can(...REQ.export) ? <Pill onPress={exportCsv}>⇩ Export</Pill> : null}
-        {can(...REQ.ecosystem) ? <Btn onPress={guard(REQ.ecosystem, addService)}>+ Add service</Btn> : null}
+        {can(...REQ.content) ? <Btn onPress={addService}>+ Propose service</Btn> : null}
+        <Pill onPress={() => go('business')}>Business records · {db.BIZ.length}</Pill>
       </Row>
       {l.length ? (ui.ev === 'Table' ? table() : grid()) : <Txt size={12} mut align="center" style={{ paddingVertical: 14 }}>No services match.</Txt>}
     </View>
