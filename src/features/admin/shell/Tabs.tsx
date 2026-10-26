@@ -11,11 +11,11 @@ export function Tabs() {
   const { c } = useTheme();
   const active = TAB_OF[screen];
   return (
-    <ScrollView horizontal showsHorizontalScrollIndicator={false} contentContainerStyle={{ paddingHorizontal: 16, gap: 6, paddingBottom: 8 }}>
+    <ScrollView style={{ marginTop: 14, marginBottom: 14, marginLeft: -2, marginRight: -12 }} horizontal showsHorizontalScrollIndicator={false} contentContainerStyle={{ paddingHorizontal: 0, gap: 2, paddingBottom: 0 }}>
       {TABS.map((t, i) => (secLv(i) > 0 || i === 0 ? (
         <Pressable key={t} onPress={() => go(TAB_SCREENS[i])} accessibilityRole="tab" accessibilityState={{ selected: i === active }}
-          style={{ paddingHorizontal: 12, paddingVertical: 6, borderRadius: 14, backgroundColor: i === active ? c.ink : 'transparent', borderWidth: 1, borderColor: i === active ? c.ink : c.bd }}>
-          <Txt size={10.6} weight={500} color={i === active ? c.on : c.ink}>{t}</Txt>
+          style={{ paddingHorizontal: 11, paddingVertical: 7, borderRadius: 99, backgroundColor: i === active ? c.ink : 'transparent', borderWidth: 1, borderColor: i === active ? c.ink : c.bd }}>
+          <Txt size={11.8} weight={500} color={i === active ? c.on : c.ink}>{t}</Txt>
         </Pressable>
       ) : null))}
     </ScrollView>
