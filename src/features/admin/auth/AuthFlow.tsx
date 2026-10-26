@@ -136,7 +136,7 @@ export function AuthFlow({ notice, noticeBad, onDone }: Props) {
     const e = email.trim().toLowerCase();
     const token = loginCode.trim();
     if (!emailOk(e)) return message('Enter the email address that received the code.', true);
-    if (!/^\\d{6}$/.test(token)) return message('Enter the 6-digit sign-in code from your email.', true);
+    if (!/^\d{6}$/.test(token)) return message('Enter the 6-digit sign-in code from your email.', true);
     setBusy(true);
     try {
       const { data, error } = await supabase.auth.verifyOtp({ email: e, token, type: 'email' });
@@ -181,7 +181,7 @@ export function AuthFlow({ notice, noticeBad, onDone }: Props) {
     const e = email.trim().toLowerCase();
     const token = resetCode.trim();
     if (!emailOk(e)) return message('Enter the email address that received the code.', true);
-    if (!/^\\d{6}$/.test(token)) return message('Enter the 6-digit code from your reset email.', true);
+    if (!/^\d{6}$/.test(token)) return message('Enter the 6-digit code from your reset email.', true);
     setBusy(true);
     try {
       const { error } = await supabase.auth.verifyOtp({ email: e, token, type: 'recovery' });
