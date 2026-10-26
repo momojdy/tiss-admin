@@ -1,5 +1,5 @@
 import { useCallback, useEffect, useState } from 'react';
-import { TextInput, View } from 'react-native';
+import { Pressable, TextInput, View } from 'react-native';
 import { supabase } from '../../lib/supabase';
 import { saveCmsVersion } from '../../lib/adminBackend';
 import { can } from '../../state/access';
@@ -49,6 +49,7 @@ export function CustomerPageEditorScreen() {
   const [selected, setSelected] = useState<ContentRow | null>(null);
   const [json, setJson] = useState('');
   const [pageKey, setPageKey] = useState('home');
+  const [featureMenuOpen, setFeatureMenuOpen] = useState(false);
   const [pageStack, setPageStack] = useState<string[]>([]);
   const [elementKey, setElementKey] = useState('');
   const [editorMode, setEditorMode] = useState<CustomerPreviewMode>('Edit');
@@ -136,6 +137,27 @@ export function CustomerPageEditorScreen() {
   const publishedRow = rows.find((row) => row.status === 'published' && row.content_key === (selected?.content_key || CONTENT_KEY) && row.locale === (selected?.locale || 'en'));
   const previewPayload = viewMode === 'Published' ? (publishedRow?.payload || (selected?.status === 'published' ? selected.payload : null) || { pages: {} }) : (parsedDraft || selected?.payload || starterModel());
   const pageKeys = previewPayload?.pages && typeof previewPayload.pages === 'object' ? Object.keys(previewPayload.pages) : [];
+  const featureNameFor = (key: string) => {
+    const normalized = key.toLowerCase();
+    if (key === 'home') return 'Wantiss home';
+    if (normalized.includes('goodies')) return 'Goodies';
+    if (normalized.includes('stays') || normalized.includes('stayz')) return 'Stayz';
+    if (normalized.includes('flyz') || normalized.includes('flight')) return 'Flyz';
+    if (normalized.includes('konsoliss')) return 'Konsoliss';
+    if (normalized.includes('wallet') || normalized === 'tab:wallet') return 'Wallet';
+    if (normalized.includes('woulib')) return 'Woulib';
+    if (normalized.includes('frenzies')) return 'Frenzies';
+    if (normalized.includes('konsoliss')) return 'Konsoliss';
+    if (normalized.startsWith('tab:')) return key.slice(4).replace(/^./, (v) => v.toUpperCase());
+    if (normalized.startsWith('svc:')) return key.slice(4);
+    return String(previewPayload?.pages?.[key]?.title || key);
+  };
+  const featureOptions = pageKeys.reduce((items: { label: string; key: string }[], key: string) => {
+    const label = featureNameFor(key);
+    if (!items.some((item) => item.label.toLowerCase() === label.toLowerCase())) items.push({ label, key });
+    return items;
+  }, []);
+  const activeFeature = featureOptions.find((item) => item.key === activePageKey) || featureOptions.find((item) => item.key === pageKey) || featureOptions[0];
   const activePageKey = pageKeys.includes(pageKey) ? pageKey : pageKeys[0] || '';
   const page = activePageKey ? previewPayload?.pages?.[activePageKey] : null;
   const elements = page?.els && typeof page.els === 'object' ? page.els : {};
@@ -232,11 +254,24 @@ export function CustomerPageEditorScreen() {
         <OutlineBtn onPress={startBlankDraft} disabled={!can(...REQ.content)}>Start blank draft</OutlineBtn>
       </View>
       <Heading title="Customer page editor" sub="The phone stays visible while you edit. Draft changes are private until saved; previewing or navigating the phone never publishes content." />
+      <Section title="Choose a customer feature" >
+        <Txt size={10.5} mut style={{ marginBottom: 7 }}>Choose which feature's customer screen you want to inspect. The phone preview below follows the selected page model.</Txt>
+        <Pressable accessibilityRole="button" onPress={() => setFeatureMenuOpen((open) => !open)} style={{ minHeight: 42, borderWidth: 1, borderColor: c.bd, borderRadius: 12, backgroundColor: c.card, paddingHorizontal: 12, paddingVertical: 10, flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between' }}>
+          <Txt size={12} weight={500}>{activeFeature?.label || 'Select a feature'}</Txt>
+          <Txt size={12} mut>{featureMenuOpen ? '⌃' : '⌄'}</Txt>
+        </Pressable>
+        {featureMenuOpen ? <View style={{ marginTop: 5, borderWidth: 1, borderColor: c.bd, borderRadius: 12, backgroundColor: c.card, overflow: 'hidden' }}>
+          {featureOptions.map((item) => <Pressable key={item.key} onPress={() => { setPageKey(item.key); setPageStack([]); setElementKey(''); setFeatureMenuOpen(false); }} style={{ paddingHorizontal: 12, paddingVertical: 10, backgroundColor: activePageKey === item.key ? c.inset : 'transparent', borderBottomWidth: 1, borderBottomColor: c.bd }}>
+            <Txt size={11.5} weight={activePageKey === item.key ? 500 : 400}>{item.label}</Txt>
+            <Txt size={9.5} mut>{String(previewPayload?.pages?.[item.key]?.title || item.key)}</Txt>
+          </Pressable>)}
+        </View> : null}
+      </Section>
       {error ? <Card><Txt size={11.5} color={c.or}>{error}</Txt></Card> : null}
 
       <Section title="Live customer phone preview" right={<View style={{ flexDirection: 'row', flexWrap: 'wrap', gap: 5 }}>
-        <OutlineBtn primary={viewMode === 'Draft'} onPress={() => { setViewMode('Draft'); setPageStack([]); setPageKey('home'); }}>Draft</OutlineBtn>
-        <OutlineBtn primary={viewMode === 'Published'} onPress={() => { setViewMode('Published'); setEditorMode('Preview'); setPageStack([]); setPageKey('home'); setElementKey(''); }}>Published</OutlineBtn>
+        <OutlineBtn primary={viewMode === 'Draft'} onPress={() => { setViewMode('Draft'); setPageStack([]); setPageKey(pageKeys.includes('home') ? 'home' : pageKeys[0] || 'home'); }}>Draft</OutlineBtn>
+        <OutlineBtn primary={viewMode === 'Published'} onPress={() => { setViewMode('Published'); setEditorMode('Preview'); setPageStack([]); setPageKey(pageKeys.includes('home') ? 'home' : pageKeys[0] || 'home'); setElementKey(''); }}>Published</OutlineBtn>
         <OutlineBtn primary={editorMode === 'Edit'} disabled={viewMode === 'Published' || !can(...REQ.content)} onPress={() => { setEditorMode('Edit'); setPageStack([]); }}>Edit</OutlineBtn>
         <OutlineBtn primary={editorMode === 'Preview'} onPress={() => { setEditorMode('Preview'); setPageStack([]); }}>Preview</OutlineBtn>
       </View>}>
