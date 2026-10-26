@@ -121,7 +121,7 @@ Confirmed from that exact file:
 
 - Goodies navigation labels/order were aligned to the nine module names in this uploaded HTML. The Settings section is explicitly read-only until an authorized server-side settings endpoint exists.
 - Added a separate `CustomerPageEditorScreen` file and registered the `editor` route. It reads Goodies CMS versions from Supabase and saves changes only as private drafts through the existing `saveCmsVersion` server RPC; it does not publish automatically.
-- Added a dedicated business-details screen using only fields present in the authorized ecosystem snapshot. It does not fabricate missing business fields or perform direct status changes. The Service Hub links to this screen.
+- Added a dedicated business-details screen using only fields present in the authorized ecosystem snapshot. It does not fabricate missing business fields or perform direct status changes. The Ecosystem screen links to the business list and detail route.
 - Content Studio now links to the standalone customer page editor. Existing Supabase auth, section permission gates and CMS server RPCs were not replaced by HTML demo mutations.
 
 ## Production-data safety corrections
