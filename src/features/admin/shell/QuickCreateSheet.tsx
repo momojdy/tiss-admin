@@ -1,5 +1,5 @@
-import { db, ui, aud, bump } from '../state/db';
-import { can, session } from '../state/access';
+import { db, ui, bump } from '../state/db';
+import { can } from '../state/access';
 import { REQ } from '../state/requirements';
 import { inviteStaff, saveCmsVersion } from '../lib/adminBackend';
 import { useForm } from '../ui/FormSheet';
@@ -51,7 +51,6 @@ export function QuickCreateSheet({ onClose }: { onClose: () => void }) {
           const payload: Record<string, unknown> = { type: kind, title, status: 'draft', created_from: 'admin-quick-create', ...values };
           delete payload.title;
           await saveCmsVersion({ key, locale: 'en', payload: { title, ...payload }, status: 'draft' });
-          aud('CMS draft created · ' + kind + ' · ' + title, session.view);
           ui.cs = 'CMS versions';
           bump();
           toast('Draft saved. Open Content to review it before publishing.');
