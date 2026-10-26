@@ -91,7 +91,7 @@ export function Home({onExit}: {onExit?: () => void}) {
         ))}
       </Rail></View>
       <View style={{marginTop: 20}}><Rail>
-        {pc ? pc.filter(x => !x.newOnly || first()).map(x => <PromoCard key={x.id} kind={x.color} title={x.title} sub={x.sub} btn={x.btn} emoji={x.emoji} target={x.target} />) : (<>
+        {pc ? pc.filter(x => !x.newOnly || first()).map(x => <PromoCard key={x.id} kind={x.color} title={x.title} sub={x.sub} btn={x.btn} emoji={x.emoji} image={x.image} target={x.target} />) : (<>
           {first() ? <PromoCard kind="plum" title="Free delivery on your first order" sub="Welcome to Goodies. New here? It is on us." btn="Order now" emoji="🛵" /> : null}
           <PromoCard kind="orange" title="Earn double points this weekend" sub="Pay with Wallet on any order." btn="Start earning" emoji="🎁" />
           <PromoCard kind="green" title="20% off fresh produce" sub="Straight from local farms and markets." btn="Shop now" emoji="🥬" />
