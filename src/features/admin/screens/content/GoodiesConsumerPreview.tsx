@@ -21,7 +21,7 @@ const screens = [
 
 type EditTarget = { kind: 'mode' | 'promo' | 'category' | 'label'; id: string; title: string };
 
-export function GoodiesConsumerPreview({ editMode = false, onEditTarget }: { editMode?: boolean; onEditTarget?: (target: EditTarget) => void }) {
+export function GoodiesConsumerPreview({ editMode = false, selectedTarget, onEditTarget }: { editMode?: boolean; selectedTarget?: EditTarget | null; onEditTarget?: (target: EditTarget) => void }) {
   // Establish the safety boundary before child screens can mount their effects.
   setPreviewOnly(true);
   useGoodies();
@@ -97,9 +97,6 @@ export function GoodiesConsumerPreview({ editMode = false, onEditTarget }: { edi
               }}
               style={{ position: 'absolute', left: 0, right: 0, top: 0, bottom: 0 }}
             />
-            <View pointerEvents="none" style={{ position: 'absolute', top: 8, left: 0, right: 0, alignItems: 'center' }}>
-              <Text style={{ color: '#fff', backgroundColor: orange, overflow: 'hidden', borderRadius: 14, paddingHorizontal: 10, paddingVertical: 5, fontSize: 10, fontWeight: '800' }}>TAP A HIGHLIGHTED SECTION TO EDIT</Text>
-            </View>
             {[
               { top: 0, height: 22, target: pickTarget(70, 100), label: 'Search / top text' },
               { top: '22%', height: '19%', target: pickTarget(210, 80), label: 'Service tiles' },
@@ -107,10 +104,14 @@ export function GoodiesConsumerPreview({ editMode = false, onEditTarget }: { edi
               { top: '56%', height: '20%', target: pickTarget(450, 80), label: 'Promotions' },
               { top: '76%', height: '24%', target: pickTarget(590, 80), label: 'Section titles' },
             ].map((zone) => zone.target ? (
-              <Pressable key={zone.label} accessibilityRole="button" accessibilityLabel={'Edit ' + zone.label} onPress={() => onEditTarget?.(zone.target!)}
-                style={{ position: 'absolute', left: 0, right: 0, top: zone.top as any, height: zone.height as any, borderWidth: 2, borderColor: 'rgba(253,128,46,0.8)', backgroundColor: 'rgba(253,128,46,0.10)', alignItems: 'flex-end', justifyContent: 'flex-start', padding: 4 }}>
-                <Text pointerEvents="none" style={{ color: '#FFFFFF', backgroundColor: orange, overflow: 'hidden', borderRadius: 8, paddingHorizontal: 7, paddingVertical: 4, fontSize: 9, fontWeight: '800' }}>{zone.label}</Text>
-              </Pressable>
+              <Pressable key={zone.label} accessibilityRole="button" accessibilityLabel={'Select ' + zone.label} onPress={() => onEditTarget?.(zone.target!)}
+                style={{
+                  position: 'absolute', left: 0, right: 0, top: zone.top as any, height: zone.height as any,
+                  borderWidth: selectedTarget?.kind === zone.target.kind && selectedTarget?.id === zone.target.id ? 2 : 0,
+                  borderStyle: 'dashed',
+                  borderColor: orange,
+                  backgroundColor: 'transparent',
+                }} />
             ) : null)}
           </View>
         ) : null}
