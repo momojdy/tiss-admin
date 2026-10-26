@@ -13,7 +13,7 @@ import { session, setServerGrants } from '../state/access';
 import { bump } from '../state/db';
 import { hydrateAdminState } from '../lib/hydrateAdminState';
 
-type View_ = 'in' | 'forgot' | 'sent' | 'reset' | 'invite' | 'blocked';
+type View_ = 'in' | 'code-sent' | 'forgot' | 'sent' | 'reset' | 'invite' | 'blocked';
 interface Props { notice?: string; noticeBad?: boolean; onDone: () => void }
 
 export function AuthFlow({ notice, noticeBad, onDone }: Props) {
@@ -22,6 +22,7 @@ export function AuthFlow({ notice, noticeBad, onDone }: Props) {
   const [view, setView] = useState<View_>('in');
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
+  const [loginCode, setLoginCode] = useState('');
   const [confirm, setConfirm] = useState('');
   const [resetCode, setResetCode] = useState('');
   const [noticeText, setNoticeText] = useState(notice || '');
@@ -73,57 +74,82 @@ export function AuthFlow({ notice, noticeBad, onDone }: Props) {
     });
     return () => { active = false; linkSubscription.remove(); listener.subscription.unsubscribe(); };
   }, []);
+  const completeSignIn = async (user: any, fallbackEmail: string) => {
+    if (!user?.email_confirmed_at) {
+      await supabase.auth.signOut();
+      throw new Error('Verify your work email using the confirmation link before signing in.');
+    }
+    const { data: staff, error: staffError } = await supabase
+      .from('wantiss_admin_staff')
+      .select('user_id,display_name,status,role,invitation_expires_at,invited_at')
+      .eq('user_id', user.id)
+      .maybeSingle();
+    if (staffError) {
+      await supabase.auth.signOut();
+      throw new Error('Staff access could not be verified. Try again later.');
+    }
+    if (!staff) {
+      await supabase.auth.signOut();
+      setView('blocked');
+      throw new Error('This account does not have staff access. Contact Wantiss administration.');
+    }
+    if (staff.status !== 'active' || (staff.invitation_expires_at && Date.parse(staff.invitation_expires_at) <= Date.now())) {
+      await supabase.auth.signOut();
+      setView('blocked');
+      throw new Error(staff.status === 'suspended' ? 'Your staff access is suspended. Contact a Super Admin.' : staff.status === 'revoked' ? 'Your staff access has been revoked.' : 'This invitation expired. Ask a Super Admin to send a new invitation.');
+    }
+    if (staff.invited_at && user.user_metadata?.wantiss_invite_accepted !== true) {
+      setView('invite');
+      message('Invitation verified. Set a password to activate your staff access.');
+      return;
+    }
+    session.who = staff.display_name;
+    session.view = staff.display_name;
+    session.last = Date.now();
+    session.userId = user.id;
+    session.email = user.email || fallbackEmail;
+    session.role = staff.role;
+    session.status = staff.status;
+    const { data: grants } = await supabase.from('wantiss_admin_permission_grants').select('permission_key,access_level,expires_at,revoked_at').eq('staff_user_id', user.id);
+    setServerGrants(grants || []);
+    await hydrateAdminState();
+    bump();
+    onDone();
+  };
+
+  // Temporary passwordless staff login: email OTP only; never creates a new account.
   const signIn = async () => {
     const e = email.trim().toLowerCase();
-    if (!emailOk(e) || !password) return message('Enter your work email and password.', true);
+    if (!emailOk(e)) return message('Enter your verified work email.', true);
     setBusy(true);
     try {
-      const { data, error } = await supabase.auth.signInWithPassword({ email: e, password });
-      if (error || !data.user || !data.session) throw new Error('Email or password is incorrect.');
-      if (!data.user.email_confirmed_at) {
-        await supabase.auth.signOut();
-        throw new Error('Verify your work email using the confirmation link before signing in.');
-      }
-      const { data: staff, error: staffError } = await supabase
-        .from('wantiss_admin_staff')
-        .select('user_id,display_name,status,role,invitation_expires_at,invited_at')
-        .eq('user_id', data.user.id)
-        .maybeSingle();
-      if (staffError) {
-        await supabase.auth.signOut();
-        throw new Error('Staff access could not be verified. Try again later.');
-      }
-      if (!staff) {
-        await supabase.auth.signOut();
-        setView('blocked');
-        throw new Error('This account does not have staff access. Contact Wantiss administration.');
-      }
-      if (staff.status !== 'active' || (staff.invitation_expires_at && Date.parse(staff.invitation_expires_at) <= Date.now())) {
-        await supabase.auth.signOut();
-        setView('blocked');
-        throw new Error(staff.status === 'suspended' ? 'Your staff access is suspended. Contact a Super Admin.' : staff.status === 'revoked' ? 'Your staff access has been revoked.' : 'This invitation expired. Ask a Super Admin to send a new invitation.');
-      }
-      if (staff.invited_at && data.user.user_metadata?.wantiss_invite_accepted !== true) {
-        setView('invite');
-        message('Invitation verified. Set a password to activate your staff access.');
-        return;
-      }
-      session.who = staff.display_name;
-      session.view = staff.display_name;
-      session.last = Date.now();
-      session.userId = data.user.id;
-      session.email = data.user.email || e;
-      session.role = staff.role;
-      session.status = staff.status;
-      const { data: grants } = await supabase.from('wantiss_admin_permission_grants').select('permission_key,access_level,expires_at,revoked_at').eq('staff_user_id', data.user.id);
-      setServerGrants(grants || []);
-      await hydrateAdminState();
-      bump();
-      onDone();
-    } catch (err) {
-      message(err instanceof Error ? err.message : 'Unable to sign in. Try again.', true);
+      const { error } = await supabase.auth.signInWithOtp({
+        email: e,
+        options: { shouldCreateUser: false }
+      });
+      if (error) throw error;
+      setView('code-sent');
+      message('If this email belongs to an existing account, a sign-in code will arrive shortly.');
+    } catch {
+      message('Could not request a sign-in code. Check the email and try again.', true);
     } finally { setBusy(false); }
   };
+
+  const verifyLoginCode = async () => {
+    const e = email.trim().toLowerCase();
+    const token = loginCode.trim();
+    if (!emailOk(e)) return message('Enter your work email.', true);
+    if (!/^\\d{6}$/.test(token)) return message('Enter the 6-digit sign-in code from your email.', true);
+    setBusy(true);
+    try {
+      const { data, error } = await supabase.auth.verifyOtp({ email: e, token, type: 'email' });
+      if (error || !data.user || !data.session) throw new Error('That code is invalid or expired. Request a new one.');
+      await completeSignIn(data.user, e);
+    } catch (err) {
+      message(err instanceof Error ? err.message : 'Unable to verify the code. Try again.', true);
+    } finally { setBusy(false); }
+  };
+
   const sendReset = async () => {
     const e = email.trim().toLowerCase();
     if (!emailOk(e)) return message('Enter a valid work email.', true);
@@ -192,11 +218,20 @@ export function AuthFlow({ notice, noticeBad, onDone }: Props) {
               <Txt size={22.1} lh={1.08} ls={-0.2}>{'Staff\nsign in'}</Txt>
               <Txt size={13} mut lh={1.45} style={{ marginTop: 6, marginBottom: 14 }}>Use your verified Wantiss work email. Access is checked by the server.</Txt>
               {(noticeText || notice) ? <NoticeBox bad={bad}>{noticeText || notice}</NoticeBox> : null}
-              <AuthField label="Work email" value={email} onChangeText={(value) => { setEmail(value); setPassword(''); }} error={undefined} placeholder="Wantiss.app@gmail.com" keyboardType="email-address" autoCapitalize="none" autoCorrect={false} textContentType="username" autoComplete="email" />
-              <AuthField label="Password" value={password} onChangeText={setPassword} error={undefined} password textContentType="password" autoComplete="password" onSubmitEditing={signIn} />
-              <View style={{ alignItems: 'flex-end', marginBottom: 6 }}><LinkText label="Forgot password?" onPress={() => { setView('forgot'); message(''); }} /></View>
-              <PrimaryButton label="Sign in" onPress={signIn} busy={busy} busyLabel="Signing in…" />
-              <View style={{ marginTop: 14 }}><NoticeBox>Staff accounts are created by a Super Admin invitation. Self-registration is disabled.</NoticeBox></View>
+              <AuthField label="Work email" value={email} onChangeText={setEmail} error={undefined} placeholder="Wantiss.app@gmail.com" keyboardType="email-address" autoCapitalize="none" autoCorrect={false} textContentType="emailAddress" autoComplete="email" onSubmitEditing={signIn} />
+              <PrimaryButton label="Email me a sign-in code" onPress={signIn} busy={busy} busyLabel="Sending code…" />
+              <View style={{ marginTop: 14 }}><NoticeBox>Temporary passwordless login. Only existing accounts with active Wantiss staff access can enter; ordinary Wantiss accounts are denied.</NoticeBox></View>
+            </>}
+            {view === 'code-sent' && <>
+              <BigBadge glyph="✉" />
+              <Txt size={22.1} lh={1.08}>{'Check your\\nemail'}</Txt>
+              <Txt size={13} mut style={{ marginTop: 6, marginBottom: 14 }}>Enter the 6-digit sign-in code sent to your work email.</Txt>
+              <AuthField label="Work email" value={email} onChangeText={setEmail} error={undefined} keyboardType="email-address" autoCapitalize="none" autoCorrect={false} />
+              <AuthField label="6-digit sign-in code" value={loginCode} onChangeText={setLoginCode} error={undefined} keyboardType="number-pad" />
+              {noticeText ? <NoticeBox bad={bad}>{noticeText}</NoticeBox> : null}
+              <PrimaryButton label="Verify and sign in" onPress={verifyLoginCode} busy={busy} busyLabel="Verifying…" />
+              <SecondaryButton label="Send a new code" onPress={signIn} />
+              <SecondaryButton label="Back" onPress={() => { setView('in'); setLoginCode(''); message(''); }} />
             </>}
             {view === 'forgot' && <>
               <Txt size={22.1} lh={1.08}>{'Reset your\npassword'}</Txt>
