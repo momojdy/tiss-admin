@@ -14,7 +14,10 @@ export const Stars = ({n, size = 13}: {n: string | number; size?: number}) => {
 };
 
 export function Dish({i, off = 0, left, grid}: {i: Item; off?: number; left?: number; grid?: boolean}) {
-  const th = useTheme(), {width} = useWindowDimensions(), s = STB[i.s];
+  const th = useTheme(), {width} = useWindowDimensions();
+  if (!i) return null;
+  const s = STB[i.s];
+  if (!s) return null;
   const p = off ? dp(i, off) : i.p, w = grid ? (width - 32 - 12) / 2 : 148;
   const dis = i.oos || (!s.open && !s.acceptScheduledOrders), saved = S.favp.indexOf(i.id) > -1;
   return (
@@ -107,7 +110,11 @@ export function StoreCard({s}: {s: Store}) {
 }
 
 export function ItemRow({i}: {i: Item}) {
-  const th = useTheme(), s = STB[i.s], dis = i.oos || (!s.open && !s.acceptScheduledOrders);
+  const th = useTheme();
+  if (!i) return null;
+  const s = STB[i.s];
+  if (!s) return null;
+  const dis = i.oos || (!s.open && !s.acceptScheduledOrders);
   return (
     <View style={{flexDirection: 'row', gap: 12, alignItems: 'center', paddingVertical: 14, borderBottomWidth: 1, borderBottomColor: th.line}}>
       <Pressable onPress={() => openProduct(i.id)} style={{flex: 1, flexDirection: 'row', gap: 12, alignItems: 'center', minWidth: 0}}>
