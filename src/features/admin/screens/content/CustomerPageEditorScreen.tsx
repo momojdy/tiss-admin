@@ -2,6 +2,7 @@ import { useCallback, useEffect, useState } from 'react';
 import { Pressable, TextInput, View } from 'react-native';
 import { supabase } from '../../lib/supabase';
 import { saveCmsVersion } from '../../lib/adminBackend';
+import { ui } from '../../state/db';
 import { can } from '../../state/access';
 import { REQ } from '../../state/requirements';
 import { useNav } from '../../shell/Nav';
@@ -82,6 +83,27 @@ export function CustomerPageEditorScreen() {
   }, []);
 
   useEffect(() => { void reload(); }, [reload]);
+  useEffect(() => {
+    const requestedFeature = ui.editorFeature;
+    if (!requestedFeature || !json) return;
+    let model: Record<string, any>;
+    try { model = JSON.parse(json); } catch { return; }
+    const pages = model?.pages && typeof model.pages === 'object' ? model.pages : {};
+    const keys = Object.keys(pages);
+    const requested = String(requestedFeature).toLowerCase();
+    const match = keys.find((key) => {
+      const label = (String(pages[key]?.title || '') + ' ' + key).toLowerCase();
+      if (requested === 'stayz') return label.includes('stayz') || label.includes('stays');
+      if (requested === 'wantiss home') return key === 'home';
+      return label.includes(requested);
+    });
+    if (match) {
+      setPageKey(match);
+      setPageStack([]);
+      setElementKey('');
+    }
+    delete ui.editorFeature;
+  }, [json, selected?.id]);
 
   const openRow = (row: ContentRow) => {
     setSelected(row);
