@@ -29,7 +29,7 @@ export function FloatingDock({ expanded, onExpandedChange }: { expanded: boolean
   ];
   return (
     <View pointerEvents="box-none" style={{ position: 'absolute', left: expanded ? 9 : 0, top: 0, bottom: 0, justifyContent: 'center', zIndex: 10 }}>
-      <View style={{ backgroundColor: '#16191a', width: expanded ? 37 : 16, paddingVertical: expanded ? 12 : 0, borderTopRightRadius: 24, borderBottomRightRadius: 24, alignItems: 'center', gap: expanded ? 12 : 0, shadowColor: '#000', shadowOpacity: 0.22, shadowRadius: 12, shadowOffset: { width: 3, height: 4 }, elevation: 9 }}>
+      <View style={{ backgroundColor: '#16191a', width: expanded ? 37 : 16, height: expanded ? undefined : 72, paddingVertical: expanded ? 12 : 0, borderTopRightRadius: 24, borderBottomRightRadius: 24, alignItems: 'center', gap: expanded ? 15 : 0, shadowColor: '#000', shadowOpacity: 0.22, shadowRadius: 12, shadowOffset: { width: 3, height: 4 }, elevation: 9 }}>
         {actions.map((action, index) => {
           if (!expanded && index !== 0) return null;
           return (
