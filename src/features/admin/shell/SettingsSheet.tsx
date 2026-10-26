@@ -1,16 +1,57 @@
-import { useState } from 'react';
-import { View } from 'react-native';
+import { useEffect, useState } from 'react';
+import AsyncStorage from '@react-native-async-storage/async-storage';
 import { useTheme, ThemeMode } from '../theme/ThemeContext';
 import { useOverlay, DrawerBody } from '../ui/Overlay';
 import { Card, CardTitle } from '../ui/Card';
 import { ListRows } from '../ui/Lists';
-import { Pill, Seg } from '../ui/Controls';
+import { Pill, Seg, OutlineBtn } from '../ui/Controls';
 import { Txt } from '../ui/Txt';
-import { can } from '../state/access';
+import { can, session } from '../state/access';
 import { REQ } from '../state/requirements';
 import { useToast } from '../ui/Toast';
 import { useNav } from './Nav';
+import { useForm, FieldType } from '../ui/FormSheet';
+import { aud, bump } from '../state/db';
 
+const STORAGE_KEY = '@wantiss-admin-settings-v1';
+type SettingValue = string | boolean;
+type SettingField = { id: string; label: string; type: FieldType; options?: string[]; required?: boolean; value: SettingValue; placeholder?: string };
+const defaults: Record<string, SettingField[]> = {
+  Appearance: [
+    { id: 'mode', label: 'Theme', type: 'select', options: ['Light', 'Dark', 'System'], value: 'Light' },
+    { id: 'dens', label: 'Table density', type: 'select', options: ['Comfortable', 'Compact'], value: 'Comfortable' },
+    { id: 'land', label: 'Landing page', type: 'select', options: ['Overview', 'Operations', 'Ecosystem', 'Content', 'Finance', 'Analytics', 'People'], value: 'Overview' },
+  ],
+  Platform: [
+    { id: 'lang', label: 'Default language', type: 'select', options: ['English', 'Français', 'Kreyòl', 'Español', '简体中文'], value: 'English' },
+    { id: 'cur', label: 'Display currency', type: 'select', options: ['USD', 'HTG'], value: 'USD' },
+    { id: 'reg', label: 'Supported regions', type: 'text', value: 'Haiti, diaspora' },
+  ],
+  Notifications: [
+    { id: 'push', label: 'Push notifications', type: 'check', value: true },
+    { id: 'mail', label: 'Email notifications', type: 'check', value: true },
+    { id: 'crit', label: 'Critical alerts only after hours', type: 'check', value: false },
+  ],
+  'Documents and requirements': [
+    { id: 'exp', label: 'Warn before document expiry (days)', type: 'number', value: '30', required: true },
+    { id: 'rev', label: 'Require a second reviewer for licences', type: 'check', value: false },
+  ],
+  Workflows: [
+    { id: 'sla', label: 'Review target (hours)', type: 'number', value: '48', required: true },
+    { id: 'asg', label: 'Auto-assign new applications', type: 'check', value: false },
+  ],
+  Finance: [
+    { id: 'conf', label: 'Require confirmation for refunds', type: 'check', value: true },
+    { id: 'lim', label: 'Refund approval limit (USD)', type: 'number', value: '200', required: true },
+  ],
+  'Team and access': [
+    { id: 'mfa', label: 'Require MFA for staff', type: 'check', value: true },
+    { id: 'sess', label: 'Session length (minutes)', type: 'number', value: '30', required: true },
+  ],
+  'Help and information': [
+    { id: 'sup', label: 'Support contact', type: 'text', value: 'support@wantiss.example' },
+  ],
+};
 const categories = [
   ['Platform', 'Default language, display currency and supported regions'],
   ['Ecosystem', 'Service availability and service-level configuration'],
@@ -21,13 +62,31 @@ const categories = [
   ['Team and access', 'MFA and staff session rules'],
   ['Help and information', 'Support contact and platform information'],
 ] as const;
+const personal = new Set(['Appearance', 'Notifications']);
+const initial = () => Object.fromEntries(Object.entries(defaults).map(([key, fields]) => [key, Object.fromEntries(fields.map((field) => [field.id, field.value]))])) as Record<string, Record<string, SettingValue>>;
 
 export function SettingsSheet({ onClose }: { onClose: () => void }) {
   const { mode, setMode } = useTheme();
   const { closeAll } = useOverlay();
   const { go } = useNav();
   const toast = useToast();
+  const form = useForm();
   const [selected, setSelected] = useState<string | null>(null);
+  const [settings, setSettings] = useState<Record<string, Record<string, SettingValue>>>(initial);
+  const [loaded, setLoaded] = useState(false);
+
+  useEffect(() => {
+    let mounted = true;
+    void AsyncStorage.getItem(STORAGE_KEY).then((raw) => {
+      if (!mounted) return;
+      if (raw) {
+        try { setSettings({ ...initial(), ...JSON.parse(raw) }); } catch { /* keep defaults if local data is malformed */ }
+      }
+      setLoaded(true);
+    }).catch(() => { if (mounted) setLoaded(true); });
+    return () => { mounted = false; };
+  }, []);
+
   const destinations: Record<string, () => void> = {
     Platform: () => go('ecosystem'),
     Ecosystem: () => go('ecosystem'),
@@ -38,12 +97,49 @@ export function SettingsSheet({ onClose }: { onClose: () => void }) {
     'Team and access': () => go('people'),
     'Help and information': () => go('people'),
   };
+
+  const editCategory = (name: string) => {
+    if (!personal.has(name) && !can(...REQ.settings)) { toast('You need Manage settings access to edit ' + name + '.'); return; }
+    const fields = (defaults[name] || [{ id: 'note', label: 'Configuration note', type: 'textarea' as const, value: '' }]).map((field) => ({
+      ...field,
+      value: settings[name]?.[field.id] ?? field.value,
+    }));
+    if (name === 'Ecosystem') {
+      fields.push({ id: 'note', label: 'Service configuration note', type: 'textarea', value: String(settings[name]?.note || '') } as SettingField);
+    }
+    form({
+      title: name + ' settings',
+      sub: personal.has(name) ? 'These preferences apply to this admin on this device.' : 'Saved preferences are local to this device until a server-backed settings endpoint is implemented. They do not change production platform behavior.',
+      fields,
+      buttons: [{ label: 'Save settings', key: 'save', primary: true }],
+      onSubmit: async (_key, values) => {
+        const next = { ...settings, [name]: { ...(settings[name] || {}), ...values } as Record<string, SettingValue> };
+        setSettings(next);
+        try {
+          await AsyncStorage.setItem(STORAGE_KEY, JSON.stringify(next));
+        } catch {
+          return 'Settings could not be saved on this device.';
+        }
+        if (name === 'Appearance') {
+          const nextMode = String(values.mode || 'Light').toLowerCase() as ThemeMode;
+          setMode(nextMode === 'dark' || nextMode === 'system' ? nextMode : 'light');
+        }
+        aud('Settings changed · ' + name, session.view);
+        bump();
+        toast(personal.has(name) ? name + ' preferences saved on this device.' : name + ' saved locally only; production behavior is unchanged.');
+      },
+    });
+  };
+
   return (
     <DrawerBody title="Settings" onClose={onClose}>
       <Card>
         <CardTitle title="Appearance" />
-        <Txt size={10.1} mut style={{ marginBottom: 8 }}>Follows your selected appearance mode.</Txt>
-        <Seg<ThemeMode> options={['light', 'dark', 'system']} value={mode} onChange={setMode} labels={(value) => value[0].toUpperCase() + value.slice(1)} />
+        <Txt size={10.1} mut style={{ marginBottom: 8 }}>Theme follows your selected mode.</Txt>
+        <Seg<ThemeMode> options={['light', 'dark', 'system']} value={mode} onChange={(next) => { setMode(next); const nextSettings = { ...settings, Appearance: { ...(settings.Appearance || {}), mode: next[0].toUpperCase() + next.slice(1) } }; setSettings(nextSettings); void AsyncStorage.setItem(STORAGE_KEY, JSON.stringify(nextSettings)); }} labels={(value) => value[0].toUpperCase() + value.slice(1)} />
+        <View style={{ flexDirection: 'row', flexWrap: 'wrap', gap: 6, marginTop: 10 }}>
+          <Pill onPress={() => editCategory('Appearance')}>More appearance settings ›</Pill>
+        </View>
       </Card>
       <ListRows rows={categories.map(([name, description]) => ({
         key: name, main: name, sub: description, right: selected === name ? '⌄' : '›',
@@ -52,14 +148,15 @@ export function SettingsSheet({ onClose }: { onClose: () => void }) {
       {selected ? (
         <Card style={{ marginTop: 10 }}>
           <CardTitle title={selected} />
-          <Txt size={11} lh={1.4}>This category is present in the HTML specification. The current React Native backend does not expose a verified, server-persisted settings API for it yet, so this panel will not pretend that changes have been saved.</Txt>
+          <Txt size={10.1} mut lh={1.4}>{personal.has(selected) ? 'Personal preferences are stored on this device.' : 'The HTML includes editable platform settings for this category. This repository has no verified server-side settings endpoint, so saved values here are local preferences only.'}</Txt>
           <View style={{ flexDirection: 'row', flexWrap: 'wrap', marginTop: 10, gap: 6 }}>
-            <Pill onPress={() => { const destination = destinations[selected]; closeAll(); destination?.(); }}>Open related workspace ›</Pill>
-            {can(...REQ.settings) ? <Pill onPress={() => toast('Server settings endpoint is not implemented; no change was saved.')}>Check settings access</Pill> : null}
+            <OutlineBtn primary onPress={() => editCategory(selected)}>Edit settings</OutlineBtn>
+            <OutlineBtn onPress={() => { const destination = destinations[selected]; closeAll(); destination?.(); }}>Open related workspace</OutlineBtn>
           </View>
+          {!personal.has(selected) ? <Txt size={9.5} mut style={{ marginTop: 8 }}>No production setting will be changed by saving this form.</Txt> : null}
         </Card>
       ) : null}
-      <Txt size={9.5} mut style={{ marginTop: 10 }}>The HTML defines platform-wide settings. Only appearance is currently interactive here; the remaining categories require a server-backed settings contract and audit logging.</Txt>
+      {!loaded ? <Txt size={9.5} mut style={{ marginTop: 10 }}>Loading saved preferences…</Txt> : null}
     </DrawerBody>
   );
 }
