@@ -274,9 +274,9 @@ export function ContentScreen() {
         <>
           <Section title="Placements" right={<OutlineBtn primary onPress={openQuickCreate}>+ New banner</OutlineBtn>}>
             <View style={{ flexDirection: 'row', flexWrap: 'wrap', gap: 6, marginBottom: 8 }}>
-              <Pill>{displayBanners.filter((banner) => banner.st === 'Live').length} live</Pill>
-              <Pill>{displayBanners.filter((banner) => banner.st === 'Scheduled').length} scheduled</Pill>
-              <Pill>{displayBanners.filter((banner) => banner.st === 'Draft' || banner.st === 'In review').length} drafts/reviews</Pill>
+              <Pill>{prototypeSnapshot ? '—' : displayBanners.filter((banner) => banner.st === 'Live').length} live</Pill>
+              <Pill>{prototypeSnapshot ? '—' : displayBanners.filter((banner) => banner.st === 'Scheduled').length} scheduled</Pill>
+              <Pill>{prototypeSnapshot ? '—' : displayBanners.filter((banner) => banner.st === 'Draft' || banner.st === 'In review').length} drafts/reviews</Pill>
             </View>
             <ListRows empty={loading ? 'Loading placements…' : prototypeSnapshot ? 'Live CMS placement records are not connected. No prototype placements are shown.' : 'No placements found.'} rows={displayBanners.filter((banner) => banner.st !== 'Archived').slice(0, 6).map((banner) => ({
               key: banner.id, main: banner.pl, sub: banner.t + ' · ' + banner.svc,
@@ -325,7 +325,7 @@ export function ContentScreen() {
       </Section> : null}
 
       {activeSection === 'Approvals' ? <Section title="Approval queue">
-        <ListRows empty="Nothing is marked as in review in the current snapshot." rows={[
+        <ListRows empty={prototypeSnapshot ? 'Live approval records are unavailable. No prototype approvals are shown.' : 'Nothing is marked as in review.'} rows={[
           ...displayBanners.filter((banner) => banner.st === 'In review' || banner.st === 'Draft').map((banner) => ({ key: 'banner-' + banner.id, main: banner.t, sub: 'Banner · ' + banner.svc, right: <OutlineBtn onPress={() => stageContentDraft('approval.' + banner.id, banner.id, { item_type: 'banner', proposed_action: 'review', item_id: banner.id })}>Stage review</OutlineBtn> })),
           ...displayPromotions.filter((promotion) => promotion.st === 'In review' || promotion.st === 'Draft').map((promotion) => ({ key: 'promotion-' + promotion.id, main: promotion.n, sub: 'Promotion · ' + promotion.svc, right: <OutlineBtn onPress={() => stageContentDraft('approval.' + promotion.id, promotion.id, { item_type: 'promotion', proposed_action: 'review', item_id: promotion.id })}>Stage review</OutlineBtn> })),
         ]} />
@@ -333,7 +333,7 @@ export function ContentScreen() {
       </Section> : null}
 
       {activeSection === 'History' ? <Section title="Publishing history (read-only)">
-        <ListRows empty="No history entries." rows={[
+        <ListRows empty={loading ? 'Loading publishing history…' : prototypeSnapshot ? 'Live publishing history is unavailable. No prototype history is shown.' : 'No history entries.'} rows={[
           ...displayHistory.slice(0, 30).map((entry, i) => ({ key: 'change-' + i, main: entry[1], sub: entry[0], right: 'Activity' })),
           ...displayAudit.slice(0, 20).map((entry, i) => ({ key: 'audit-' + i, main: entry[0], sub: entry[1], right: entry[2] })),
         ]} />
@@ -349,7 +349,7 @@ export function ContentScreen() {
             <OutlineBtn onPress={() => { void reload(); }} disabled={busy}>Refresh</OutlineBtn>
           </View>
           <Section title={'Media library · ' + assets.length}>
-            <ListRows empty="No assets are available for your permissions." rows={assets.map((asset) => ({
+            <ListRows empty={loading ? 'Loading media assets…' : error ? 'Media assets could not be loaded. Retry above.' : 'No assets are available for your permissions.'} rows={assets.map((asset) => ({
               key: asset.id, main: asset.asset_key, sub: asset.content_type + ' · ' + Math.ceil(asset.byte_size / 1024) + ' KB · ' + asset.status,
               right: <View style={{ flexDirection: 'row', gap: 4, flexWrap: 'wrap' }}>
                 {asset.status === 'draft' ? <OutlineBtn onPress={() => { void setAssetStatus(asset, 'published'); }}>Publish</OutlineBtn> : null}
@@ -363,7 +363,7 @@ export function ContentScreen() {
 
       {activeSection === 'Editor' ? <Section title="Customer page editor" right={<OutlineBtn primary onPress={() => go('editor')}>Open full editor ›</OutlineBtn>}>
         <Txt size={11} mut lh={1.4}>Open the standalone editor to select a Goodies CMS version, edit its payload and preview the customer page. Saving creates a private draft through the existing CMS API; it does not publish live content.</Txt>
-        <ListRows empty="Create or load a Goodies CMS draft to begin." rows={content.filter((row) => row.content_key.toLowerCase().includes('goodies')).map((row) => ({
+        <ListRows empty={loading ? 'Loading Goodies CMS drafts…' : 'Create or load a Goodies CMS draft to begin.'} rows={content.filter((row) => row.content_key.toLowerCase().includes('goodies')).map((row) => ({
           key: row.id, main: row.content_key + ' · v' + row.version, sub: row.status + ' · ' + row.locale,
           right: <OutlineBtn onPress={() => { setPreviewRow(row); setEditingDraft(row.status === 'draft' ? row : null); if (row.status === 'draft') setDraftJson(JSON.stringify(row.payload, null, 2)); }}>Open editor</OutlineBtn>,
         }))} />
@@ -402,7 +402,7 @@ export function ContentScreen() {
       ) : null}
 
       {activeSection === 'CMS versions' ? <Section title={'Content versions · ' + content.length}>
-        <ListRows empty="No content versions are available for your permissions." rows={content.map((row) => ({
+        <ListRows empty={loading ? 'Loading content versions…' : error ? 'Content versions could not be loaded. Retry above.' : 'No content versions are available for your permissions.'} rows={content.map((row) => ({
           key: row.id, main: row.content_key + ' · ' + row.locale + ' · v' + row.version,
           sub: row.status + ' · updated ' + new Date(row.updated_at).toLocaleString(),
           right: <View style={{ flexDirection: 'row', gap: 4, flexWrap: 'wrap' }}>
