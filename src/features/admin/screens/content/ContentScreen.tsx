@@ -302,15 +302,15 @@ export function ContentScreen() {
       ) : null}
 
       {activeSection === 'Banners' ? <Section title={'Banners and placements · ' + displayBanners.length} right={<OutlineBtn primary onPress={openQuickCreate}>+ New banner</OutlineBtn>}>
-        <ListRows rows={displayBanners.map((banner) => ({ key: banner.id, main: banner.t, sub: banner.svc + ' · ' + banner.pl + (banner.to ? ' · ends ' + banner.to : ''), right: <View style={{ flexDirection: 'row', alignItems: 'center', gap: 5 }}><StatusPill label={banner.st} small /><OutlineBtn onPress={() => editBannerDraft(banner)}>Edit draft</OutlineBtn></View>, onPress: () => editBannerDraft(banner) }))} />
+        <ListRows empty={loading ? 'Loading banners…' : prototypeSnapshot ? 'Live CMS banner records are unavailable. No prototype banners are shown.' : 'No banners found.'} rows={displayBanners.map((banner) => ({ key: banner.id, main: banner.t, sub: banner.svc + ' · ' + banner.pl + (banner.to ? ' · ends ' + banner.to : ''), right: <View style={{ flexDirection: 'row', alignItems: 'center', gap: 5 }}><StatusPill label={banner.st} small /><OutlineBtn onPress={() => editBannerDraft(banner)}>Edit draft</OutlineBtn></View>, onPress: () => editBannerDraft(banner) }))} />
       </Section> : null}
 
       {activeSection === 'Promotions' ? <Section title={'Promotions and campaigns · ' + displayPromotions.length} right={<OutlineBtn primary onPress={openQuickCreate}>+ New promotion</OutlineBtn>}>
-        <ListRows rows={displayPromotions.map((promotion) => ({ key: promotion.id, main: promotion.n, sub: promotion.svc + ' · ' + promotion.fund + ' · ' + promotion.inc, right: <View style={{ flexDirection: 'row', alignItems: 'center', gap: 5 }}><StatusPill label={promotion.st} small /><OutlineBtn onPress={() => editPromotionDraft(promotion)}>Edit draft</OutlineBtn></View>, onPress: () => editPromotionDraft(promotion) }))} />
+        <ListRows empty={loading ? 'Loading promotions…' : prototypeSnapshot ? 'Live CMS campaign records are unavailable. No prototype campaigns are shown.' : 'No promotions found.'} rows={displayPromotions.map((promotion) => ({ key: promotion.id, main: promotion.n, sub: promotion.svc + ' · ' + promotion.fund + ' · ' + promotion.inc, right: <View style={{ flexDirection: 'row', alignItems: 'center', gap: 5 }}><StatusPill label={promotion.st} small /><OutlineBtn onPress={() => editPromotionDraft(promotion)}>Edit draft</OutlineBtn></View>, onPress: () => editPromotionDraft(promotion) }))} />
       </Section> : null}
 
       {activeSection === 'Announcements' ? <Section title={'Announcements · ' + displayAnnouncements.length} right={<OutlineBtn primary onPress={openQuickCreate}>+ New announcement</OutlineBtn>}>
-        <ListRows rows={displayAnnouncements.map((announcement) => ({ key: announcement.id, main: announcement.t, sub: announcement.aud + (announcement.when ? ' · ' + announcement.when : ''), right: <View style={{ flexDirection: 'row', alignItems: 'center', gap: 5 }}><StatusPill label={announcement.st} small /><OutlineBtn onPress={() => editAnnouncementDraft(announcement)}>Edit draft</OutlineBtn></View>, onPress: () => editAnnouncementDraft(announcement) }))} />
+        <ListRows empty={loading ? 'Loading announcements…' : prototypeSnapshot ? 'Live CMS announcement records are unavailable. No prototype announcements are shown.' : 'No announcements found.'} rows={displayAnnouncements.map((announcement) => ({ key: announcement.id, main: announcement.t, sub: announcement.aud + (announcement.when ? ' · ' + announcement.when : ''), right: <View style={{ flexDirection: 'row', alignItems: 'center', gap: 5 }}><StatusPill label={announcement.st} small /><OutlineBtn onPress={() => editAnnouncementDraft(announcement)}>Edit draft</OutlineBtn></View>, onPress: () => editAnnouncementDraft(announcement) }))} />
       </Section> : null}
 
       {activeSection === 'Calendar' ? <Section title="Publishing calendar">
@@ -342,7 +342,7 @@ export function ContentScreen() {
       {activeSection === 'Media' ? (
         <>
           <Section title={'Media library placements · ' + displayMedia.length}>
-            <ListRows empty={prototypeSnapshot ? 'Live media placement data is unavailable.' : 'No media placements found.'} rows={displayMedia.map((media, index) => ({ key: 'media-' + index, main: media[0], sub: media[1].length ? 'Used in ' + media[1].length + ' placement(s)' : 'Unused', right: 'Stage edit ›', onPress: () => stageContentDraft('media', String(index), { media_key: media[0], used_in: media[1] }) }))} />
+            <ListRows empty={loading ? 'Loading media placements…' : prototypeSnapshot ? 'Live media placement data is unavailable.' : 'No media placements found.'} rows={displayMedia.map((media, index) => ({ key: 'media-' + index, main: media[0], sub: media[1].length ? 'Used in ' + media[1].length + ' placement(s)' : 'Unused', right: 'Stage edit ›', onPress: () => stageContentDraft('media', String(index), { media_key: media[0], used_in: media[1] }) }))} />
           </Section>
           <View style={{ flexDirection: 'row', flexWrap: 'wrap', gap: 8 }}>
             <OutlineBtn primary onPress={() => { void pickAsset(); }} disabled={busy}>Upload asset</OutlineBtn>
