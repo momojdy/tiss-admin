@@ -14,7 +14,7 @@ import {MODE1, PROMO} from '../theme';
 import {supabase} from '../../lib/supabase';
 
 const cname = (id: string) => catName(id);
-function Mode({title, sub, emoji, onPress, grad, bg, fg, small}: any) {
+function Mode({title, sub, emoji, image, onPress, grad, bg, fg, small}: any) {
   return (
     <Pressable onPress={onPress} style={{borderRadius: 18, overflow: 'hidden', height: small ? 51 : 112}}>
       {grad ? <Grad colors={MODE1} style={{flex: 1, padding: small ? 0 : 14, paddingHorizontal: 14, justifyContent: small ? 'center' : 'flex-start'}}>{inner()}</Grad> : <View style={{flex: 1, backgroundColor: bg, paddingHorizontal: 14, padding: small ? 0 : 14, justifyContent: small ? 'center' : 'flex-start'}}>{inner()}</View>}
@@ -26,20 +26,20 @@ function Mode({title, sub, emoji, onPress, grad, bg, fg, small}: any) {
       <>
         <T size={small ? 14.5 : 17} weight="800" color={c} style={{lineHeight: small ? undefined : 19.5}}>{title}</T>
         {sub ? <T size={12} color={c} style={{marginTop: 3, opacity: 0.9}}>{sub}</T> : null}
-        <Text style={{position: 'absolute', right: small ? 10 : 6, bottom: small ? undefined : -4, top: small ? 8 : undefined, fontSize: small ? 34 : 62, lineHeight: small ? 36 : 62}}>{emoji}</Text>
+        {image ? <Image source={{uri: image}} style={{position: 'absolute', right: small ? 7 : 4, bottom: small ? 2 : -4, top: small ? 4 : undefined, width: small ? 38 : 76, height: small ? 38 : 76}} resizeMode="contain" /> : <Text style={{position: 'absolute', right: small ? 10 : 6, bottom: small ? undefined : -4, top: small ? 8 : undefined, fontSize: small ? 34 : 62, lineHeight: small ? 36 : 62}}>{emoji}</Text>}
       </>
     );
   }
 }
 
-function PromoCard({kind, title, sub, btn, emoji, target}: {kind: keyof typeof PROMO; title: string; sub: string; btn: string; emoji: string; target?: string}) {
+function PromoCard({kind, title, sub, btn, emoji, image, target}: {kind: keyof typeof PROMO; title: string; sub: string; btn: string; emoji: string; image?: string | null; target?: string}) {
   return (
     <Pressable onPress={() => ui.sheet({kind: 'promo', p: kind === 'plum' ? 'free' : kind === 'orange' ? 'points' : 'produce', custom: {title, sub, btn, emoji, target}})}>
       <Grad colors={PROMO[kind]} angle={110} style={{width: 300, height: 124, borderRadius: 18, padding: 12, overflow: 'hidden'}}>
         <T size={18} weight="800" color="#fff" lines={2} style={{width: 170, lineHeight: 21}}>{title}</T>
         <T size={11.5} color="#fff" lines={2} style={{marginTop: 3, width: 170, lineHeight: 14, opacity: 0.92}}>{sub}</T>
         <View style={{position: 'absolute', left: 16, bottom: 8, backgroundColor: '#fff', borderRadius: 16, paddingHorizontal: 14, paddingVertical: 7}}><T size={12.5} weight="800" color="#1B1B1F">{btn}</T></View>
-        <Text style={{position: 'absolute', right: 8, bottom: 0, fontSize: 78, lineHeight: 78}}>{emoji}</Text>
+        {image ? <Image source={{uri: image}} style={{position: 'absolute', right: 5, bottom: 2, width: 88, height: 88}} resizeMode="contain" /> : <Text style={{position: 'absolute', right: 8, bottom: 0, fontSize: 78, lineHeight: 78}}>{emoji}</Text>}
       </Grad>
     </Pressable>
   );
@@ -76,10 +76,10 @@ export function Home({onExit}: {onExit?: () => void}) {
         <Icon name="search" size={18} color={th.mut} /><T size={14.5} color={th.mut}>{label('lbl.search', tr('searchPh'))}</T>
       </Pressable>
       <View style={{flexDirection: 'row', gap: 10, paddingHorizontal: 16, paddingTop: 16}}>
-        <View style={{flex: 1.25}}><Mode grad title={(md && md[0] ? md[0].title : tr('foodDelivery')).replace(' ', '\n')} sub={md && md[0] ? md[0].sub : tr('hotFresh')} emoji={md && md[0] ? md[0].emoji : '🍛'} onPress={() => go('catlist', md && md[0] ? md[0].cat : 'restaurants')} /></View>
+        <View style={{flex: 1.25}}><Mode grad title={(md && md[0] ? md[0].title : tr('foodDelivery')).replace(' ', '\n')} sub={md && md[0] ? md[0].sub : tr('hotFresh')} emoji={md && md[0] ? md[0].emoji : '🍛'} image={md && md[0] ? md[0].image : null} onPress={() => go('catlist', md && md[0] ? md[0].cat : 'restaurants')} /></View>
         <View style={{flex: 1, gap: 10}}>
-          <Mode small bg={th.m2bg} fg={th.m2fg} title={md && md[1] ? md[1].title : tr('groceries')} emoji={md && md[1] ? md[1].emoji : '🛒'} onPress={() => go('catlist', md && md[1] ? md[1].cat : 'groceries')} />
-          <Mode small bg={th.m3bg} fg={th.m3fg} title={md && md[2] ? md[2].title : tr('drugstore')} emoji={md && md[2] ? md[2].emoji : '💊'} onPress={() => go('catlist', md && md[2] ? md[2].cat : 'drugstore')} />
+          <Mode small bg={th.m2bg} fg={th.m2fg} title={md && md[1] ? md[1].title : tr('groceries')} emoji={md && md[1] ? md[1].emoji : '🛒'} image={md && md[1] ? md[1].image : null} onPress={() => go('catlist', md && md[1] ? md[1].cat : 'groceries')} />
+          <Mode small bg={th.m3bg} fg={th.m3fg} title={md && md[2] ? md[2].title : tr('drugstore')} emoji={md && md[2] ? md[2].emoji : '💊'} image={md && md[2] ? md[2].image : null} onPress={() => go('catlist', md && md[2] ? md[2].cat : 'drugstore')} />
         </View>
       </View>
       <View style={{marginTop: 18}}><Rail gap={14}>
