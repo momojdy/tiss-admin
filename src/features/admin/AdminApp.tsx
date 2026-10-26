@@ -6,7 +6,7 @@ import { useFonts, Outfit_300Light, Outfit_400Regular, Outfit_500Medium, Outfit_
 import { ThemeProvider, useTheme } from './theme/ThemeContext';
 import { ToastProvider } from './ui/Toast';
 import { OverlayProvider, useOverlay } from './ui/Overlay';
-import { NavProvider, useNav } from './shell/Nav';
+import { NavProvider, useNav, TAB_OF, TAB_SCREENS } from './shell/Nav';
 import { Header } from './shell/Header';
 import { Tabs } from './shell/Tabs';
 import { ScreenHost } from './shell/ScreenHost';
@@ -15,7 +15,7 @@ import { NotificationsSheet } from './shell/NotificationsSheet';
 import { FloatingDock } from './shell/FloatingDock';
 import { AuthFlow } from './auth/AuthFlow';
 import { idleExpired, leaveApp, sessionStillValid, touch } from './auth/authLogic';
-import { session, expireStaff, setServerGrants } from './state/access';
+import { session, expireStaff, setServerGrants, secLv } from './state/access';
 import { bump, useDb } from './state/db';
 import { supabase } from './lib/supabase';
 import { hydrateAdminState } from './lib/hydrateAdminState';
@@ -32,9 +32,20 @@ function Frame() {
   const frameWidth = Math.min(512, windowWidth);
   const frameHeight = Math.min(910, windowHeight);
   const frameRadius = windowWidth <= 520 ? 0 : 26;
-  const { navKey, keepScroll } = useNav();
+  const { navKey, keepScroll, screen, go } = useNav();
   const scrollRef = useRef<ScrollViewInstance>(null);
+  const resolvedAccessFor = useRef<string | null>(null);
   useEffect(() => { if (!keepScroll) scrollRef.current?.scrollTo({ y: 0, animated: false }); }, [navKey, keepScroll]);
+  // Resolve the first screen from this signed-in staff member's effective permissions.
+  // Keep the user's later navigation untouched; only perform this once per authenticated identity.
+  useEffect(() => {
+    if (!session.who) return;
+    const identity = session.userId || session.who;
+    if (resolvedAccessFor.current === identity) return;
+    resolvedAccessFor.current = identity;
+    const firstAllowed = TAB_SCREENS.find((id) => secLv(TAB_OF[id]) > 0);
+    if (firstAllowed && secLv(TAB_OF[screen]) === 0) go(firstAllowed);
+  }, [session.who, session.userId, session.role, session.status, screen, go]);
   const { openDrawer } = useOverlay();
   return (
     <View style={{ flex: 1, backgroundColor: c.out, alignItems: 'center', justifyContent: 'center' }}>
