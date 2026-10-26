@@ -83,8 +83,8 @@ export function GoodiesConsumerPreview({ editMode = false, onEditTarget }: { edi
         </ScrollView> : null}
       </View>
       <View style={{ width: '100%', maxWidth: 404, height: 720, borderRadius: 30, borderWidth: 7, borderColor: editMode ? orange : '#252529', overflow: 'hidden', backgroundColor: '#FFFFFF' }}>
-        <GoodiesApp embedded previewMode />
-        {editMode ? <Pressable accessibilityRole="button" accessibilityLabel="Select content in the Goodies phone preview" onPress={(event: any) => { const target = pickTarget(event.nativeEvent.locationY, event.nativeEvent.locationX); if (target) onEditTarget?.(target); }} style={{ position: 'absolute', left: 0, right: 0, top: 0, bottom: 0, backgroundColor: 'rgba(253,128,46,0.035)', borderWidth: 1, borderColor: 'rgba(253,128,46,0.45)' }}><View style={{ alignSelf: 'center', marginTop: 8, backgroundColor: orange, borderRadius: 14, paddingHorizontal: 10, paddingVertical: 5 }}><Text style={{ color: '#fff', fontSize: 10, fontWeight: '800' }}>TAP CONTENT TO EDIT</Text></View></Pressable> : null}
+        <View pointerEvents={editMode ? 'none' : 'auto'} style={{ flex: 1 }}><GoodiesApp embedded previewMode /></View>
+        {editMode ? <Pressable pointerEvents="auto" accessibilityRole="button" accessibilityLabel="Select content in the Goodies phone preview" onPress={(event: any) => { const target = pickTarget(event.nativeEvent.locationY, event.nativeEvent.locationX); if (target) onEditTarget?.(target); }} style={{ position: 'absolute', left: 0, right: 0, top: 0, bottom: 0, zIndex: 999, elevation: 999, backgroundColor: 'rgba(253,128,46,0.035)', borderWidth: 1, borderColor: 'rgba(253,128,46,0.45)' }}><View pointerEvents="none" style={{ alignSelf: 'center', marginTop: 8, backgroundColor: orange, borderRadius: 14, paddingHorizontal: 10, paddingVertical: 5 }}><Text style={{ color: '#fff', fontSize: 10, fontWeight: '800' }}>TAP CONTENT TO EDIT</Text></View></Pressable> : null}
       </View>
     </View>
   );
