@@ -18,6 +18,7 @@ import { AnalyticsScreen } from '../screens/analytics/AnalyticsScreen';
 import { GoodiesAdminScreen } from '../screens/goodies/GoodiesAdminScreen';
 import { ServiceWorkspaceScreen } from '../screens/workspace/ServiceWorkspaceScreen';
 import { CustomerPageEditorScreen } from '../screens/content/CustomerPageEditorScreen';
+import { BusinessDetailsScreen } from '../screens/ecosystem/BusinessDetailsScreen';
 
 /** Screens ported so far. The rest show a clear "not ported yet" card (see README). */
 const SCREENS: Partial<Record<ScreenId, () => ReactNode>> = {
@@ -32,6 +33,7 @@ const SCREENS: Partial<Record<ScreenId, () => ReactNode>> = {
   people: () => <PeopleScreen />,
   content: () => <ContentScreen />,
   editor: () => <CustomerPageEditorScreen />,
+  business: () => <BusinessDetailsScreen />,
 };
 
 function NoAccess({ sec }: { sec: number }) {
