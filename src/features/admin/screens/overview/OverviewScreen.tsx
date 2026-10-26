@@ -1,4 +1,5 @@
-import { Pressable, View } from 'react-native';
+import { Modal, Pressable, TextInput, View } from 'react-native';
+import { useState } from 'react';
 import { db, ui, bump, mny, useDb, dataMode } from '../../state/db';
 import { useNav } from '../../shell/Nav';
 import { useTheme } from '../../theme/ThemeContext';
@@ -9,20 +10,21 @@ import { Chips, Pill, StatusPill } from '../../ui/Controls';
 import { ListRows } from '../../ui/Lists';
 import { Txt } from '../../ui/Txt';
 
-const ranges = ['7D', '30D', '90D', '1Y'] as const;
+const ranges = ['7D', '30D', '90D', '1Y', 'Custom'] as const;
 type Range = typeof ranges[number];
 
-function activity(range: string, transactions: typeof db.INV) {
-  const days = range === '7D' ? 7 : range === '30D' ? 30 : range === '90D' ? 90 : 365;
-  const count = range === '7D' ? 7 : range === '30D' ? 6 : range === '90D' ? 9 : 12;
+function activity(range: string, transactions: typeof db.INV, customStart: string, customEnd: string) {
   const now = new Date();
-  const start = new Date(now);
-  start.setDate(now.getDate() - days + 1);
+  const start = range === 'Custom' ? new Date(customStart + 'T00:00:00') : new Date(now);
+  const end = range === 'Custom' ? new Date(customEnd + 'T23:59:59.999') : now;
+  const days = range === '7D' ? 7 : range === '30D' ? 30 : range === '90D' ? 90 : range === 'Custom' ? Math.max(1, Math.floor((end.getTime() - start.getTime()) / 86400000) + 1) : 365;
+  const count = range === '7D' ? 7 : range === '30D' ? 6 : range === '90D' ? 9 : range === 'Custom' ? Math.min(12, Math.max(3, days)) : 12;
+  if (range !== 'Custom') start.setDate(now.getDate() - days + 1);
   start.setHours(0, 0, 0, 0);
   const vals = Array.from({ length: count }, () => 0);
   const valid = transactions.filter((tx) => {
     const timestamp = tx.createdAt ? Date.parse(tx.createdAt) : NaN;
-    return Number.isFinite(timestamp) && timestamp >= start.getTime() && timestamp <= now.getTime();
+    return Number.isFinite(timestamp) && timestamp >= start.getTime() && timestamp <= end.getTime();
   });
   valid.forEach((tx) => {
     const timestamp = Date.parse(tx.createdAt!);
@@ -56,12 +58,28 @@ export function OverviewScreen() {
   const overdue = waiting.filter((app) => app.age >= 2);
   const unassigned = waiting.filter((app) => app.o === 'Unassigned');
   const queue = [0, 1, 2].map((stage) => waiting.filter((app) => app.st === stage).length);
-  const chart = activity(String(ui.AR || '30D'), prototypeSnapshot ? [] : db.INV);
+  const chart = activity(String(ui.AR || '30D'), prototypeSnapshot ? [] : db.INV, customStart, customEnd);
   const reviewed = prototypeSnapshot ? [] : db.APPS.filter((app) => app.st >= 3 && app.createdAt && app.reviewedAt && Number.isFinite(Date.parse(app.createdAt)) && Number.isFinite(Date.parse(app.reviewedAt)) && Date.parse(app.reviewedAt) >= Date.parse(app.createdAt));
   const within48 = reviewed.filter((app) => Date.parse(app.reviewedAt!) - Date.parse(app.createdAt!) <= 48 * 60 * 60 * 1000).length;
   const reviewSpeedAvailable = reviewed.length > 0;
   const reviewSpeed = reviewSpeedAvailable ? Math.round(within48 / reviewed.length * 100) : 0;
-  const setRange = (range: Range) => { ui.AR = range; bump(); };
+  const [customOpen, setCustomOpen] = useState(false);
+  const [expandedChart, setExpandedChart] = useState(false);
+  const [customStart, setCustomStart] = useState('2026-09-20');
+  const [customEnd, setCustomEnd] = useState('2026-10-17');
+  const [rangeError, setRangeError] = useState('');
+  const setRange = (range: Range) => {
+    if (range === 'Custom') { setRangeError(''); setCustomOpen(true); return; }
+    ui.AR = range; bump();
+  };
+  const applyCustomRange = () => {
+    if (!/^\\d{4}-\\d{2}-\\d{2}$/.test(customStart) || !/^\\d{4}-\\d{2}-\\d{2}$/.test(customEnd)) { setRangeError('Enter both dates in YYYY-MM-DD format.'); return; }
+    if (customEnd < customStart) { setRangeError('End date cannot be before the start date.'); return; }
+    const earliest = '2025-11-01';
+    const today = new Date().toISOString().slice(0, 10);
+    if (customStart < earliest || customEnd > today) { setRangeError('Choose dates between ' + earliest + ' and ' + today + '.'); return; }
+    ui.AR = 'Custom'; setCustomOpen(false); bump();
+  };
   const attention = [
     ...failed.slice(0, 1).map((tx) => ({ key: tx.id, title: 'Failed transaction', sub: tx.f + ' · ' + tx.u, right: mny(tx.a), action: () => go('finance', { fv: 'Transactions', fs: 'Failed' }) })),
     ...overdue.slice(0, 2).map((app) => ({ key: app.id, title: 'Application waiting ' + app.age + 'd', sub: app.n + ' · ' + app.s, right: app.o === 'Unassigned' ? 'Unassigned' : app.o, action: () => go('operations', { ov: 'List' }) })),
@@ -77,12 +95,12 @@ export function OverviewScreen() {
         { icon: '◷', value: prototypeSnapshot ? '—' : waiting.length, label: 'Waiting for review', tag: prototypeSnapshot ? 'Live data unavailable' : overdue.length + ' overdue', tone: overdue.length ? 'r' : '', onPress: () => go('operations', { ov: 'List' }) }, 
       ]} />
 
-      <Section title="Platform activity" right={<Pill onPress={() => go('analytics')}>↗ Analytics</Pill>}>
+      <Section title="Platform activity" right={<View style={{ flexDirection: 'row', gap: 6 }}><Pill onPress={() => setExpandedChart(true)}>↗ Expand</Pill><Pill onPress={() => go('analytics')}>Analytics ›</Pill></View>}>
         <Chips options={ranges} value={ranges.includes(ui.AR as Range) ? ui.AR as Range : '30D'} onChange={setRange} />
         <Txt size={21} weight={500}>{prototypeSnapshot ? '—' : chart.total.toLocaleString('en-US')} <Txt size={10.1} mut>transactions · all services</Txt></Txt>
         <View style={{ flexDirection: 'row', justifyContent: 'space-between', marginTop: 4, marginBottom: 2 }}>
           <Txt size={9.5} mut>Transactions in selected range</Txt>
-          <Txt size={9.5} mut>{ui.AR} activity range</Txt>
+          <Txt size={9.5} mut>{ui.AR === 'Custom' ? customStart + ' – ' + customEnd : ui.AR + ' activity range'}</Txt>
         </View>
         {!prototypeSnapshot && chart.available ? <LineChart vals={chart.vals} color={c.or} max={chart.max} labels={chart.labels} yLabels={chart.yLabels} /> : <Txt size={10.1} mut style={{ marginTop: 8 }}>Live timestamped transaction data is unavailable. No prototype activity is shown.</Txt>}
       </Section>
@@ -157,6 +175,37 @@ export function OverviewScreen() {
         </View>
       </Section>
 
+      <Modal transparent visible={customOpen} animationType="fade" onRequestClose={() => setCustomOpen(false)}>
+        <Pressable onPress={() => setCustomOpen(false)} style={{ flex: 1, backgroundColor: 'rgba(0,0,0,0.42)', justifyContent: 'center', padding: 20 }}>
+          <Pressable onPress={() => {}} style={{ backgroundColor: c.card, borderRadius: 16, padding: 18, gap: 10 }}>
+            <Txt size={16} weight={600}>Custom range</Txt>
+            <Txt size={10.1} mut>Choose a start and end date. The chart will show only timestamped authorized records within this range.</Txt>
+            <Txt size={10.1} mut>Start date (YYYY-MM-DD)</Txt>
+            <TextInput value={customStart} onChangeText={setCustomStart} placeholder="2026-09-20" placeholderTextColor={c.mut} autoCapitalize="none" style={{ color: c.ink, borderWidth: 1, borderColor: c.line, borderRadius: 9, paddingHorizontal: 11, paddingVertical: 10, fontSize: 13 }} />
+            <Txt size={10.1} mut>End date (YYYY-MM-DD)</Txt>
+            <TextInput value={customEnd} onChangeText={setCustomEnd} placeholder="2026-10-17" placeholderTextColor={c.mut} autoCapitalize="none" style={{ color: c.ink, borderWidth: 1, borderColor: c.line, borderRadius: 9, paddingHorizontal: 11, paddingVertical: 10, fontSize: 13 }} />
+            {rangeError ? <Txt size={10.1} color={c.or}>{rangeError}</Txt> : null}
+            <View style={{ flexDirection: 'row', justifyContent: 'flex-end', gap: 8, marginTop: 4 }}>
+              <Pill onPress={() => setCustomOpen(false)}>Cancel</Pill>
+              <Pill onPress={applyCustomRange}>Apply range</Pill>
+            </View>
+          </Pressable>
+        </Pressable>
+      </Modal>
+      <Modal transparent visible={expandedChart} animationType="fade" onRequestClose={() => setExpandedChart(false)}>
+        <Pressable onPress={() => setExpandedChart(false)} style={{ flex: 1, backgroundColor: 'rgba(0,0,0,0.48)', justifyContent: 'center', padding: 14 }}>
+          <Pressable onPress={() => {}} style={{ backgroundColor: c.card, borderRadius: 16, padding: 18, gap: 10 }}>
+            <View style={{ flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center' }}>
+              <Txt size={16} weight={600}>Platform activity</Txt>
+              <Pill onPress={() => setExpandedChart(false)}>Close ×</Pill>
+            </View>
+            <Txt size={10.1} mut>{ui.AR === 'Custom' ? customStart + ' – ' + customEnd : ui.AR + ' selected range'}</Txt>
+            <Txt size={23} weight={600}>{prototypeSnapshot ? '—' : chart.total.toLocaleString('en-US')}</Txt>
+            {!prototypeSnapshot && chart.available ? <LineChart vals={chart.vals} color={c.or} max={chart.max} labels={chart.labels} yLabels={chart.yLabels} /> : <Txt size={10.1} mut style={{ paddingVertical: 24, textAlign: 'center' }}>Live timestamped transaction data is unavailable. No prototype activity is shown.</Txt>}
+            <Txt size={10.1} mut>Service breakdown is unavailable until authorized live transaction data is connected.</Txt>
+          </Pressable>
+        </Pressable>
+      </Modal>
       <Section title="Team and recent activity" right={<Pill onPress={() => go('people', { ps: 'Audit log' })}>Audit log ›</Pill>}>
         <View style={{ flexDirection: 'row', flexWrap: 'wrap', gap: 6, marginBottom: 8 }}>
           {!prototypeSnapshot && db.STAFF.slice(0, 4).map((staff) => <Pill key={staff.n} onPress={() => go('people', { ps: 'Staff' })}>{staff.n} · {staff.st}</Pill>)}
