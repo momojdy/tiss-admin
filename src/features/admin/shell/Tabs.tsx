@@ -14,7 +14,7 @@ export function Tabs() {
     <ScrollView style={{ marginTop: 14, marginBottom: 14, marginLeft: -2, marginRight: -12 }} horizontal showsHorizontalScrollIndicator={false} contentContainerStyle={{ paddingHorizontal: 0, gap: 2, paddingBottom: 0 }}>
       {TABS.map((t, i) => (secLv(i) > 0 || i === 0 ? (
         <Pressable key={t} onPress={() => go(TAB_SCREENS[i])} accessibilityRole="tab" accessibilityState={{ selected: i === active }}
-          style={{ paddingHorizontal: 11, paddingVertical: 7, borderRadius: 99, backgroundColor: i === active ? c.ink : 'transparent', borderWidth: 1, borderColor: i === active ? c.ink : c.bd }}>
+          style={{ paddingHorizontal: 11, paddingVertical: 7, borderRadius: 99, backgroundColor: i === active ? c.ink : 'transparent' }}>
           <Txt size={11.8} weight={500} color={i === active ? c.on : c.ink}>{t}</Txt>
         </Pressable>
       ) : null))}
