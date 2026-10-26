@@ -85,9 +85,9 @@ export function CustomerPageEditorScreen() {
   useEffect(() => { void reload(); }, [reload]);
   useEffect(() => {
     const requestedFeature = ui.editorFeature;
-    if (!requestedFeature || !json) return;
+    if (!requestedFeature) return;
     let model: Record<string, any>;
-    try { model = JSON.parse(json); } catch { return; }
+    try { model = json ? JSON.parse(json) : starterModel(); } catch { return; }
     const pages = model?.pages && typeof model.pages === 'object' ? model.pages : {};
     const keys = Object.keys(pages);
     const requested = String(requestedFeature).toLowerCase();
@@ -101,8 +101,8 @@ export function CustomerPageEditorScreen() {
       setPageKey(match);
       setPageStack([]);
       setElementKey('');
+      delete ui.editorFeature;
     }
-    delete ui.editorFeature;
   }, [json, selected?.id]);
 
   const openRow = (row: ContentRow) => {
