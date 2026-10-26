@@ -118,7 +118,7 @@ export function GoodiesAdminScreen() {
     if (moduleLabel === 'Requests') return data.reqs.map((x: any) => ({ ...x, _kind: 'request', _field: 'note', _title: x.name, _sub: x.vendor + ' · ' + x.st + ' · ' + x.b }));
     if (moduleLabel === 'Promos') return [...data.promos, ...data.coupons].map((x: any) => ({ ...x, _kind: 'promo', _field: x.title ? 'title' : 'desc', _title: x.title?.en?.v || x.code || x.id, _sub: (x.st || 'Draft') + ' · ' + (x.aud || x.store || 'Goodies') }));
     if (moduleLabel === 'Merchants') return [];
-    if (moduleLabel === 'Orders') return [];
+    if (moduleLabel === 'Orders') return dataMode === 'live' ? db.INV.filter((transaction) => transaction.f.toLowerCase().includes('goodies')).map((transaction: any) => ({ ...transaction, _kind: 'order', _field: '', _title: transaction.id + ' · ' + transaction.f, _sub: transaction.u + ' · ' + transaction.a.toFixed(2) + ' · ' + transaction.s })) : [];
     if (moduleLabel === 'Analytics') return [];
     if (moduleLabel === 'Fees') return Object.entries(data.fees).map(([key, value]) => ({ id: key, _kind: 'fee', _field: 'value', _title: key, _sub: Array.isArray(value) ? value.join(' · ') : String(value), value }));
     if (moduleLabel === 'Restricted') return [
@@ -200,7 +200,7 @@ export function GoodiesAdminScreen() {
       ) : moduleLabel === 'Analytics' ? (
         <Section title="Goodies analytics">
           <ListRows rows={[
-            { key: 'orders', main: 'Goodies transactions', right: '—', onPress: () => go('finance', { fv: 'Transactions' }) },
+            { key: 'orders', main: 'Goodies transactions', right: dataMode === 'live' ? String(db.INV.filter((tx) => tx.f.toLowerCase().includes('goodies')).length) : '—', onPress: () => go('finance', { fv: 'Transactions' }) },
             { key: 'promos', main: 'Live Goodies promotions', right: '—', onPress: () => setModule('Promotions') },
             { key: 'catalog', main: 'Builder library items', right: '—', onPress: () => setModule('Products and catalog') },
             { key: 'requests', main: 'Ingredient requests awaiting review', right: '—', onPress: () => setModule('Product review') },
