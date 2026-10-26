@@ -3,7 +3,7 @@ import {View, Text, Pressable, ScrollView, useWindowDimensions, Image} from 'rea
 import {Icon} from '../components/Icon';
 import {T, Grad, Circ, Bar, Sh, Rail, Chips, Cta, Card, Row, Badge, Ttl, Empty, Tile, Radio, Seg, Stepper, Input, Switch, bgIdx, useTheme} from '../components/ui';
 import {Dish, StoreCard, ItemRow} from '../components/cards';
-import {fmtTime, fmtDay, hasAlcohol, alcAge, S, ST, STB, IT, DEALS, money, dp, addr, cnt, first, totals, isPk, ctOf, qtyIn, done, TL, TP, defAddr, emit, save, toast, refreshLiveSchedules} from '../store';
+import {fmtTime, fmtDay, hasAlcohol, alcAge, S, ST, STB, IT, DEALS, money, dp, addr, cnt, first, totals, isPk, ctOf, qtyIn, done, TL, TP, defAddr, emit, save, toast, refreshLiveSchedules, previewOnly} from '../store';
 import {go, tab, back, browse, heart, favp, setSize, toggleDrink, productQty, productAdd, qty, clearAsk, promoApply, promoClear, goCheckout, checkoutNext, setMode, setTip, setSch, setPay, setCard, placeOrder, cancelAsk, reorder, setOrdersTab, refreshPaymentOptions} from '../actions';
 import {CHOOSE_SIZE_CATS, setConsent, createWallet, idResult} from '../actions';
 import {rgText, stageLabels, fees, faq as faqList} from '../content';
@@ -290,7 +290,7 @@ function PickupLocationMap() {
 export function Track({id}: {id: string}) {
   const th = useTheme(), o = S.orders.filter((x: any) => x.id === id)[0];
   useEffect(() => {
-    if (!o?.backendId) return;
+    if (previewOnly || !o?.backendId) return;
     let active = true;
     const sync = async () => {
       const {data, error} = await supabase.from('goodies_orders').select('status,scheduled_for,acceptance_deadline_at,decline_reason_public,payment_status,payment_method,payment_provider_ref').eq('id', o.backendId).maybeSingle();
@@ -356,6 +356,7 @@ export function Track({id}: {id: string}) {
 export function Orders() {
   const backendIds = S.orders.map((o: any) => o.backendId).filter(Boolean).join(',');
   useEffect(() => {
+    if (previewOnly) return;
     let active = true;
     let channel: ReturnType<typeof supabase.channel> | undefined;
     const start = async () => {
