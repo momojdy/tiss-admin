@@ -59,9 +59,9 @@ export function ServiceWorkspaceScreen() {
         <Txt size={10.1} mut>{serviceName} · Workspace</Txt>
       </Row>
       <Heading title={serviceName + '\n' + moduleName} sub={service[1]} kpis={[
-        { icon: '▥', value: service[2], label: pre ? 'Status' : 'Today', tag: service[5], onPress: () => go('finance') },
-        { icon: '◷', value: service[3], label: pre ? 'Launch phase' : 'Pending', tone: num(service[3]) >= 5 ? 'r' : '', onPress: () => go('operations') },
-        { icon: '♛', value: service[4] + '%', label: pre ? 'Launch readiness' : 'Health score' },
+        { icon: '▥', value: serviceTransactions.length, label: 'Transactions matched', tag: pre ? 'Pre-order' : 'Authorized snapshot', onPress: () => go('finance') },
+        { icon: '◷', value: '—', label: 'Applications by service', onPress: () => go('operations') },
+        { icon: '♛', value: '—', label: 'Service health' },
       ]} />
       <View style={{ flexDirection: 'row', flexWrap: 'wrap', gap: 6, marginBottom: 8 }}>
         {modules.map((name) => <Pill key={name} on={name === moduleName} onPress={() => setModule(name)}>{name}</Pill>)}
@@ -72,10 +72,10 @@ export function ServiceWorkspaceScreen() {
           {pre ? <Card><Txt size={11} mut>{serviceName} is marked Pre-order. Do not treat its demo activity as a live service.</Txt></Card> : null}
           <Section title="Service health">
             <ListRows rows={[
-              { key: 'applications', main: 'Applications and submissions', sub: 'Review and onboarding queue', right: String(serviceApps.length), onPress: () => setModule(modules.find((m) => /approval|submission|application|listing/i.test(m)) || 'Overview') },
-              { key: 'transactions', main: 'Transactions and bookings', sub: 'Seeded records associated with this service', right: String(serviceTransactions.length), onPress: () => setModule(modules.find((m) => /order|booking|trip|transaction|shipment|payment|rental|bid/i.test(m)) || 'Overview') },
-              { key: 'support', main: 'Support cases and issues', sub: 'Unresolved service cases', right: String(serviceCases.filter((row) => row.st !== 'Resolved').length), onPress: () => setModule(modules.find((m) => /support|issue|dispute|complaint|incident/i.test(m)) || 'Overview') },
-              { key: 'content', main: 'Banners and promotions', sub: 'Content linked to this service', right: String(serviceBanners.length + servicePromos.length), onPress: () => setModule(modules.find((m) => /promotion|campaign|deal/i.test(m)) || 'Overview') },
+              { key: 'applications', main: 'Applications and submissions', sub: 'The current operations endpoint does not expose a service link for each application.', right: '—', onPress: () => go('operations') },
+              { key: 'transactions', main: 'Transactions and bookings', sub: 'Authorized transactions matched by feature name', right: String(serviceTransactions.length), onPress: () => setModule(modules.find((m) => /order|booking|trip|transaction|shipment|payment|rental|bid/i.test(m)) || 'Overview') },
+              { key: 'support', main: 'Support cases and issues', sub: 'Service-level linking is not available in the current support snapshot.', right: '—', onPress: () => go('operations') },
+              { key: 'content', main: 'Banners and promotions', sub: 'Live placements are not loaded into the service snapshot.', right: '—', onPress: () => go('content') },
             ]} />
           </Section>
           <Section title="Recent activity" right={<Pill onPress={() => go('operations')}>Operations ›</Pill>}>
