@@ -97,7 +97,7 @@ export function AnalyticsScreen() {
       </Section>
 
       <Section title="Content performance">
-        <ListRows empty="No live banners are available." rows={db.BN.filter((banner) => banner.st === 'Live').map((banner) => ({
+        <ListRows empty="Live banner records are not loaded into this analytics snapshot; open Content Studio to query authorized CMS data." rows={db.BN.filter((banner) => banner.st === 'Live').map((banner) => ({
           key: banner.id, main: banner.t, sub: banner.svc + ' · ' + banner.pl,
           right: <StatusPill label={banner.st} tone="gr" small />,
           onPress: () => go('content', { cs: 'Banners' }),
