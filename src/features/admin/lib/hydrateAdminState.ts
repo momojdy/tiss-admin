@@ -32,6 +32,7 @@ export async function hydrateAdminState() {
   db.APPS = applications.map((x): Application => ({
     id: str(x.id), n: str(x.business_name), s: str(x.status), st: x.status === 'approved' ? 3 : x.status === 'rejected' ? 4 : 1,
     age: Math.max(0, Math.floor((Date.now() - Date.parse(str(x.created_at))) / 86400000)),
+    createdAt: str(x.created_at), reviewedAt: str(x.reviewed_at || ''),
     o: str(x.reviewed_by || 'Unassigned'), d: [], hold: 0, esc: 0, due: '',
     notes: x.review_note ? [{ by: 'Reviewer', when: date(x.reviewed_at), txt: str(x.review_note) }] : [],
     log: [],
@@ -44,7 +45,7 @@ export async function hydrateAdminState() {
 
   db.INV = transactions.map((x): Transaction => ({
     id: str(x.id), f: str(x.feature_name || x.activity_type || 'Wallet'), u: str(x.user_id),
-    d: date(x.created_at), n: str(x.description), a: num(x.amount), s: str(x.status),
+    d: date(x.created_at), createdAt: str(x.created_at), n: str(x.description), a: num(x.amount), s: str(x.status),
     ref: 0, rq: 0, log: [],
   }));
 
