@@ -12,6 +12,8 @@ import { Tabs } from './shell/Tabs';
 import { ScreenHost } from './shell/ScreenHost';
 import { AccountSheet } from './shell/AccountSheet';
 import { NotificationsSheet } from './shell/NotificationsSheet';
+import { FloatingDock } from './shell/FloatingDock';
+import { SearchSheet } from './shell/SearchSheet';
 import { AuthFlow } from './auth/AuthFlow';
 import { idleExpired, leaveApp, sessionStillValid, touch } from './auth/authLogic';
 import { session, expireStaff, setServerGrants } from './state/access';
@@ -29,9 +31,10 @@ function Frame() {
   const { openDrawer } = useOverlay();
   return (
     <LinearGradient colors={[c.b1, c.b2, c.b3]} style={{ flex: 1, paddingTop: insets.top }} onTouchStart={touch}>
-      <Header onBell={() => openDrawer((close) => <NotificationsSheet onClose={close} />)} onSearch={() => {}} onAccount={() => openDrawer((close) => <AccountSheet onClose={close} />)} />
+      <Header onBell={() => openDrawer((close) => <NotificationsSheet onClose={close} />)} onSearch={() => openDrawer((close) => <SearchSheet onClose={close} />)} onAccount={() => openDrawer((close) => <AccountSheet onClose={close} />)} />
       <Tabs />
       <ScreenHost />
+      <FloatingDock />
     </LinearGradient>
   );
 }
