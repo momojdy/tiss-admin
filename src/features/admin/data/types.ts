@@ -17,6 +17,12 @@ export interface Transaction {
 }
 export type ServiceRow = [string, string, string, string, number, string, number, string];
 
+/** Business fields returned by the authorized ecosystem domain query. Kept separate from service-directory metadata. */
+export interface BusinessSnapshot {
+  id: string; name: string; verification: string; is_live: boolean;
+  city: string; country: string; payout_ready: boolean;
+}
+
 export interface SupportCase { id: string; t: string; svc: string; pri: string; o: string; st: string; msgs: [string, string][] }
 /** `to` limits who sees it: a staff name, or '*perm' for everyone who can manage permissions. Empty = everyone. */
 export interface Notice { t: string; w: string; f: string; d: string; v: string; read?: number; to?: string }
