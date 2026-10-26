@@ -110,7 +110,7 @@ Confirmed from that exact file:
 | Analytics (`S[5]`) | `AnalyticsScreen.tsx` | Transaction activity now derives from real timestamped records; review-time metrics require real creation/review timestamps. The HTML's user acquisition channels, average order value and other demo analytics are not all implemented as real backend metrics yet. |
 | People (`S[6]`) | `PeopleScreen.tsx`, permission panels and account restriction workflows | People/access screens exist. Customer/business records, audit log and all overlays still need full source comparison and live permission testing. |
 | Business detail (`S[7]`) | `BusinessDetailsScreen.tsx` | Dedicated route now reads only the authorized ecosystem snapshot and shows a business ID, verification, visibility, payout readiness and matching applications. Extra profile fields are not available from the current snapshot and are not fabricated. |
-| Potssy workspace (`S[10]`) | No dedicated Potssy screen is registered | **Missing full parity.** Do not copy the HTML's demo draw/payment mutations into production. It needs a separate screen and server-authorized endpoints for any real campaign, ticket, draw or refund actions. |
+| Potssy workspace (`S[10]`) | `PotssyAdminScreen.tsx` is now registered with the exact module list | A dedicated module navigator exists, but live campaign, ticket, draw, winner, payment and complaint records/endpoints are not connected. The screen deliberately blocks demo draw/payment mutations; full workflows remain incomplete until authorized backend contracts exist. |
 | Service workspace (`S[11]`) | `ServiceWorkspaceScreen.tsx` | Exact service module labels are defined in seed metadata; Goodies is aligned to the uploaded HTML. The current generic data router is not a full port of each module's original workspace behavior. |
 | Customer page editor (`S[9]`) | `CustomerPageEditorScreen.tsx`, `GoodiesPhonePreview.tsx` | A standalone CMS-backed JSON editor and phone preview are registered. It saves only private drafts through the existing CMS RPC. The HTML's visual element-level builder (visibility, order, text and type controls) is not yet fully ported. |
 | Search and Quick Create | `SearchSheet.tsx`, `QuickCreateSheet.tsx`, `FloatingDock.tsx` | Permission-aware search and create entry points exist. Draft creation and protected staff invitations are safer than HTML toast-only demo actions; every search target and create form still needs end-to-end validation. |
@@ -130,6 +130,7 @@ Confirmed from that exact file:
 - Overview and Analytics activity charts now use transaction timestamps from the authorized backend snapshot. If no timestamped records are present, the UI explains that data is unavailable rather than generating a sample series.
 - Application and transaction statuses are normalized from common backend values so the operational and finance filters can use them consistently.
 - Service-health and CMS placement counts are not presented as live metrics when their dedicated authorized snapshots are not loaded.
+- Business snapshots now live in a separate `db.BIZ` collection; the static service directory remains in `db.SVC`. Ecosystem screens no longer mislabel business locations as service statuses, and service creation saves a private proposal rather than mutating the directory locally.
 
 ## Still unverified / remaining
 
