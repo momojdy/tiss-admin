@@ -14,6 +14,7 @@ import { ListRows } from '../../ui/Lists';
 import { OutlineBtn, Pill, StatusPill } from '../../ui/Controls';
 import { Txt } from '../../ui/Txt';
 import { CustomerPagePreview, type CustomerPreviewMode, type CustomerPreviewView } from './CustomerPagePreview';
+import { GoodiesConsumerPreview } from './GoodiesConsumerPreview';
 
 type ContentRow = {
   id: string;
@@ -51,6 +52,7 @@ export function CustomerPageEditorScreen() {
   const [json, setJson] = useState('');
   const [pageKey, setPageKey] = useState('home');
   const [featureMenuOpen, setFeatureMenuOpen] = useState(false);
+  const [actualGoodiesPreview, setActualGoodiesPreview] = useState(false);
   const [pageStack, setPageStack] = useState<string[]>([]);
   const [elementKey, setElementKey] = useState('');
   const [editorMode, setEditorMode] = useState<CustomerPreviewMode>('Edit');
@@ -85,6 +87,7 @@ export function CustomerPageEditorScreen() {
   useEffect(() => { void reload(); }, [reload]);
   useEffect(() => {
     const requestedFeature = ui.editorFeature;
+    if (requestedFeature) setActualGoodiesPreview(String(requestedFeature).toLowerCase() === 'goodies');
     if (!requestedFeature) return;
     let model: Record<string, any>;
     try { model = json ? JSON.parse(json) : starterModel(); } catch { return; }
@@ -277,7 +280,7 @@ export function CustomerPageEditorScreen() {
       </View>
       <Heading title="Customer page editor" sub="The phone stays visible while you edit. Draft changes are private until saved; previewing or navigating the phone never publishes content." />
       <Section title="Choose a customer feature" >
-        <Txt size={10.5} mut style={{ marginBottom: 7 }}>Choose which feature's customer screen you want to inspect. The phone preview below follows the selected page model.</Txt>
+        <Txt size={10.5} mut style={{ marginBottom: 7 }}>Choose which feature's customer screen you want to inspect. Goodies renders the actual consumer app below; other features use the selected CMS page model.</Txt>
         <Pressable accessibilityRole="button" onPress={() => setFeatureMenuOpen((open) => !open)} style={{ minHeight: 42, borderWidth: 1, borderColor: c.bd, borderRadius: 12, backgroundColor: c.card, paddingHorizontal: 12, paddingVertical: 10, flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between' }}>
           <Txt size={12} weight={500}>{activeFeature?.label || 'Select a feature'}</Txt>
           <Txt size={12} mut>{featureMenuOpen ? '⌃' : '⌄'}</Txt>
@@ -301,7 +304,7 @@ export function CustomerPageEditorScreen() {
           {viewMode === 'Published' && !publishedRow && selected?.status !== 'published' ? <Txt size={10.5} color={c.or} style={{ marginBottom: 8 }}>No published version was found for this locale. This is an empty published view, not a draft preview.</Txt> : null}
           {!selected && viewMode === 'Draft' ? <Txt size={10.5} mut style={{ marginBottom: 8 }}>Starter preview · select a version or start a blank draft to edit it.</Txt> : null}
           {selected && viewMode === 'Draft' ? <Txt size={10.5} mut style={{ marginBottom: 8, textAlign: 'center' }}>{editorMode === 'Edit' ? 'Edit mode: tap an element to select it. Changes stay in the draft.' : 'Preview mode: tap linked elements or the bottom navigation to move through customer pages.'}</Txt> : null}
-          <CustomerPagePreview
+          {actualGoodiesPreview ? <GoodiesConsumerPreview /> : <CustomerPagePreview
             payload={previewPayload}
             pageKey={activePageKey}
             mode={viewMode === 'Published' ? 'Preview' : editorMode}
@@ -311,11 +314,11 @@ export function CustomerPageEditorScreen() {
             onSelectElement={(id) => { if (editable) setElementKey(id); }}
             onNavigate={navigatePhone}
             onBack={backPhone}
-          />
+          />}
         </View>
       </Section>
 
-      {selected && viewMode === 'Draft' && editorMode === 'Edit' ? (
+      {!actualGoodiesPreview && selected && viewMode === 'Draft' && editorMode === 'Edit' ? (
         <>
           <Section title="Page and element structure">
             {pageKeys.length ? (
