@@ -9,7 +9,7 @@ export function useOpenModule() {
   const { closeAll } = useOverlay();
   return useCallback((svc: string, m: string) => {
     closeAll();
-    if (svc === 'Potssy' && db.POTMAP[m]) { ui.pt = db.POTMAP[m]; nav.go('potssy'); return; }
+    if (svc === 'Potssy' && db.POTMAP[m]) { ui.pt = db.POTMAP[m]; ui.wsvc = 'Potssy'; ui.wmod = m; ui.wf = 'All'; ui.wq = ''; nav.go('workspace'); return; }
     if (svc === 'Goodies' && db.GMAP[m]) { ui.gz = db.GMAP[m]; ui.wsvc = 'Goodies'; nav.go('goodies'); return; }
     ui.wsvc = svc; ui.wmod = m; ui.wf = 'All'; ui.wq = '';
     nav.go('workspace');
