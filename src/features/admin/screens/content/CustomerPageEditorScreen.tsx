@@ -117,7 +117,7 @@ export function CustomerPageEditorScreen() {
     const item = (next[listKey] || []).find((entry: any) => entry.id === goodiesTarget.id);
     if (!item) return;
     if (field === 'emoji' && goodiesTarget.kind !== 'label') item.emoji = value;
-    else if (field === 'asset' && goodiesTarget.kind === 'category') item.art = value.trim() ? { data: value.trim() } : null;
+    else if (field === 'asset') { if (goodiesTarget.kind === 'category') item.art = value.trim() ? { data: value.trim() } : null; else if (goodiesTarget.kind === 'mode' || goodiesTarget.kind === 'promo') item.img = value.trim() ? { data: value.trim() } : null; }
     else {
       const key = goodiesTarget.kind === 'category' ? 'name' : goodiesTarget.kind === 'label' ? 't' : field;
       if (field === 'emoji') return;
@@ -402,10 +402,8 @@ export function CustomerPageEditorScreen() {
                   </> : null}
                   <Txt size={9.5} mut>Icon / visual</Txt>
                   <TextInput value={String(goodiesDraft[goodiesTarget.kind === 'mode' ? 'modes' : goodiesTarget.kind === 'promo' ? 'promos' : 'cats']?.find((v: any) => v.id === goodiesTarget.id)?.emoji || '')} onChangeText={(value) => updateGoodiesField('emoji', value)} editable={can(...REQ.content)} style={fieldStyle} placeholder="Emoji or icon" />
-                  {goodiesTarget.kind === 'category' ? <>
-                    <Txt size={9.5} mut>Category artwork URL (leave blank to use the icon)</Txt>
-                    <TextInput value={String(goodiesDraft.cats?.find((v: any) => v.id === goodiesTarget.id)?.art?.data || '')} onChangeText={(value) => updateGoodiesField('asset', value)} editable={can(...REQ.content)} style={fieldStyle} placeholder="https://… or clear to remove artwork" autoCapitalize="none" />
-                  </> : null}
+                  <Txt size={9.5} mut>Image asset URL (optional; leave blank to use the icon)</Txt>
+                  <TextInput value={String(goodiesTarget.kind === 'category' ? goodiesDraft.cats?.find((v: any) => v.id === goodiesTarget.id)?.art?.data || '' : goodiesDraft[goodiesTarget.kind === 'mode' ? 'modes' : 'promos']?.find((v: any) => v.id === goodiesTarget.id)?.img?.data || '')} onChangeText={(value) => updateGoodiesField('asset', value)} editable={can(...REQ.content)} style={fieldStyle} placeholder="https://… or clear to remove image" autoCapitalize="none" />
                 </>
               )}
               <View style={{ flexDirection: 'row', flexWrap: 'wrap', gap: 6, marginTop: 4 }}>
