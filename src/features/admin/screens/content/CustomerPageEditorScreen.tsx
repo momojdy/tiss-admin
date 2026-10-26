@@ -217,7 +217,7 @@ export function CustomerPageEditorScreen() {
               <>
                 <Txt size={10.1} mut>Select a page, then an element. These controls update the draft JSON and remain private until saved.</Txt>
                 <View style={{ flexDirection: 'row', flexWrap: 'wrap', gap: 6, marginTop: 8 }}>
-                  {pageKeys.map((key) => <Pill key={key} on={activePageKey === key} onPress={() => { setPageKey(key); setElementKey(''); }}>{String(preview.pages[key]?.title || key)}</Pill>)}
+                  {pageKeys.map((key) => <Pill key={key} on={activePageKey === key} onPress={() => { setPageKey(key); setElementKey(''); }}>{String(preview?.pages?.[key]?.title || key)}</Pill>)}
                   <OutlineBtn onPress={addPage}>+ Add page</OutlineBtn>
                 </View>
                 {page ? (
