@@ -66,11 +66,11 @@ export function GoodiesConsumerPreview({ editMode = false, onEditTarget }: { edi
   return (
     <View style={{ width: '100%', alignItems: 'center' }}>
       <View style={{ width: '100%', maxWidth: 390, marginBottom: 10, paddingHorizontal: 4 }}>
-        <Text style={{ color: ink, fontSize: 12, fontWeight: '800' }}>Actual Goodies consumer screens</Text>
+        <Text style={{ color: ink, fontSize: 12, fontWeight: '800' }}>{editMode ? 'Edit actual Goodies consumer screen' : 'Actual Goodies consumer screens'}</Text>
         <Text style={{ color: muted, fontSize: 10, lineHeight: 15, marginTop: 3 }}>
-          Rendered from the consumer app source. Published catalogue and content load from the configured Wantiss backend. Placing orders is disabled in this preview.
+          {editMode ? 'Phone navigation is paused. Tap a visible section to select its content for editing.' : 'Rendered from the consumer app source. Published catalogue and content load from the configured Wantiss backend. Placing orders is disabled in this preview.'}
         </Text>
-        <ScrollView horizontal showsHorizontalScrollIndicator={false} contentContainerStyle={{ gap: 6, paddingVertical: 10 }}>
+        {!editMode ? <ScrollView horizontal showsHorizontalScrollIndicator={false} contentContainerStyle={{ gap: 6, paddingVertical: 10 }}>
           {screens.map((screen) => {
             const active = S.stack?.[S.stack.length - 1]?.r === screen.key;
             return (
@@ -80,7 +80,7 @@ export function GoodiesConsumerPreview({ editMode = false, onEditTarget }: { edi
               </Pressable>
             );
           })}
-        </ScrollView>
+        </ScrollView> : null}
       </View>
       <View style={{ width: '100%', maxWidth: 404, height: 720, borderRadius: 30, borderWidth: 7, borderColor: editMode ? orange : '#252529', overflow: 'hidden', backgroundColor: '#FFFFFF' }}>
         <GoodiesApp embedded previewMode />
