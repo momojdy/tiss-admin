@@ -3,7 +3,7 @@ import React, {useState, useEffect, useRef} from 'react';
 import {View, Text, Pressable, ScrollView, TextInput, KeyboardAvoidingView, Platform} from 'react-native';
 import {Icon} from '../components/Icon';
 import {T, Bar, Cta, Card, Row, Badge, Ttl, Empty, Switch, Input, Chip, useTheme, Tile} from '../components/ui';
-import {S, defAddr, money, emit, save, toast, ui, push, reset, STB} from '../store';
+import {S, defAddr, money, emit, save, toast, ui, push, reset, STB, previewOnly} from '../store';
 import {back, go, tab, togglePref} from '../actions';
 import {setTheme} from '../store';
 import {t as tr} from '../i18n';
@@ -75,6 +75,7 @@ function Addresses() {
   const th = useTheme(), [edit, setEdit] = useState<any>(null);
   const zoneOf = (t: string) => {let x = 0; for (let i = 0; i < t.length; i++) x = (x * 31 + t.charCodeAt(i)) % 97; return Math.round((x % 5) * 9) / 10;};
   const saveAddr = () => {
+    if (previewOnly) { toast('Address changes are disabled in the admin preview.'); return; }
     const t = (edit.t || '').trim(); if (t.length < 4) {toast('Enter the street and area'); return;}
     let a = S.addr.filter((x: any) => x.id === edit.id)[0]; const isNew = !a;
     if (isNew) {a = {id: Date.now(), def: 0}; S.addr.push(a);}
@@ -127,6 +128,7 @@ function StoreChat({id}: {id: string}) {
   };
   useEffect(() => {
     let active = true;
+    if (previewOnly) { setProblem('Messaging is disabled in the admin preview.'); setLoading(false); return () => { active = false; }; }
     (async () => {
       try {
         const {data: auth, error: authError} = await supabase.auth.getUser();
@@ -160,6 +162,7 @@ function StoreChat({id}: {id: string}) {
     return () => { void supabase.removeChannel(channel); };
   }, [conversationId]);
   const send = async () => {
+    if (previewOnly) { toast('Messaging is disabled in the admin preview.'); return; }
     const body = draft.trim(); if (!body || !conversationId || !userId || sending) return;
     setSending(true);
     try {
@@ -202,6 +205,7 @@ function Contact({p}: {p: any}) {
   const [msg, setMsg] = useState('');
   const [sending, setSending] = useState(false);
   const submit = async () => {
+    if (previewOnly) { toast('Support messages are disabled in the admin preview.'); return; }
     const body = msg.trim();
     if (body.length < 10) {toast('Please write at least 10 characters'); return;}
     if (sending) return;
