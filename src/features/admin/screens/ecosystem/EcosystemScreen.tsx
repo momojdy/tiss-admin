@@ -18,8 +18,8 @@ const num = (x: string) => parseInt(x) || 0;
 
 export const ecoRows = () => {
   const q = String(ui.eq).toLowerCase();
-  const l = db.SVC.filter((c) => (ui.ec === 'All' || (ui.ec === 'Attention' ? num(c[3]) >= 4 : ui.ec === 'Favorites' ? c[6] : c[5] === ui.ec)) && (!q || (c[0] + c[1]).toLowerCase().includes(q)));
-  return l.sort((a, b) => (ui.es === 'A–Z' ? a[0].localeCompare(b[0]) : ui.es === 'Pending' ? num(b[3]) - num(a[3]) : num(b[2]) - num(a[2])));
+  const l = db.SVC.filter((c) => (ui.ec === 'All' || (ui.ec === 'Attention' ? false : ui.ec === 'Favorites' ? Boolean(c[6]) : c[5] === ui.ec)) && (!q || (c[0] + c[1]).toLowerCase().includes(q)));
+  return l.sort((a, b) => (ui.es === 'Favorites' ? Number(Boolean(b[6])) - Number(Boolean(a[6])) || a[0].localeCompare(b[0]) : a[0].localeCompare(b[0])));
 };
 
 export function EcosystemScreen() {
@@ -31,7 +31,7 @@ export function EcosystemScreen() {
   const exportCsv = useExport();
   const l = ecoRows();
   const set = (k: string, v: unknown) => { ui[k] = v; bump(); };
-  const nextSort = ({ 'Most active': 'A–Z', 'A–Z': 'Pending', Pending: 'Most active' } as Record<string, string>)[ui.es];
+  const nextSort = ui.es === 'Favorites' ? 'A–Z' : 'Favorites';
 
   const addService = () => form({
     title: 'Propose service',
@@ -102,13 +102,13 @@ export function EcosystemScreen() {
       <Row><SearchInput value={ui.eq} onChangeText={(v) => set('eq', v)} placeholder="Search services" /></Row>
       <Chips options={['All', 'Active', 'Pre-order', 'Attention', 'Favorites'] as const} value={ui.ec} onChange={(v) => set('ec', v)} />
       <Row wrap>
-        <Pill onPress={() => set('es', nextSort)}>{'≡ ' + ui.es}</Pill>
+        <Pill onPress={() => set('es', nextSort)}>{'≡ ' + (ui.es === 'A–Z' || ui.es === 'Favorites' ? ui.es : 'A–Z')}</Pill>
         <Seg options={['Grid', 'Table'] as const} value={ui.ev} onChange={(v) => set('ev', v)} />
         {can(...REQ.export) ? <Pill onPress={exportCsv}>⇩ Export</Pill> : null}
         {can(...REQ.content) ? <Btn onPress={addService}>+ Propose service</Btn> : null}
         <Pill onPress={() => go('business')}>Business records · {db.BIZ.length}</Pill>
       </Row>
-      {l.length ? (ui.ev === 'Table' ? table() : grid()) : <Txt size={12} mut align="center" style={{ paddingVertical: 14 }}>No services match.</Txt>}
+      {l.length ? (ui.ev === 'Table' ? table() : grid()) : <Txt size={12} mut align="center" style={{ paddingVertical: 14 }}>{ui.ec === 'Attention' ? 'Service-health data is not available in the current authorized snapshot.' : 'No services match.'}</Txt>}
     </View>
   );
 }
