@@ -55,7 +55,7 @@ function NotPorted({ id }: { id: ScreenId }) {
   );
 }
 
-export function ScreenHost() {
+export function ScreenHost({ dockExpanded = false }: { dockExpanded?: boolean }) {
   useDb();
   const { screen, navKey, keepScroll } = useNav();
   const ref = useRef<ScrollViewInstance>(null);
@@ -63,7 +63,7 @@ export function ScreenHost() {
   const allowed = SCREEN_SECTION[screen] === 0 || secLv(SCREEN_SECTION[screen]) > 0;
   const render = SCREENS[screen];
   return (
-    <ScrollView ref={ref} contentContainerStyle={{ paddingHorizontal: 16, paddingBottom: 40 }} keyboardShouldPersistTaps="handled">
+    <ScrollView ref={ref} contentContainerStyle={{ paddingLeft: dockExpanded ? 57 : 28, paddingRight: 12, paddingTop: 4, paddingBottom: 90 }} keyboardShouldPersistTaps="handled">
       {!allowed ? <NoAccess sec={SCREEN_SECTION[screen]} /> : render ? render() : <NotPorted id={screen} />}
     </ScrollView>
   );
