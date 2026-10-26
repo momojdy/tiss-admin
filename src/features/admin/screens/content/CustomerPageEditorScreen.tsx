@@ -16,6 +16,7 @@ import { Txt } from '../../ui/Txt';
 import { CustomerPagePreview, type CustomerPreviewMode, type CustomerPreviewView } from './CustomerPagePreview';
 import { GoodiesConsumerPreview } from './GoodiesConsumerPreview';
 import { applyContent, C as liveGoodiesContent } from '../../goodiesConsumer/content';
+import { fetchPublishedWantissContent } from '../../lib/wantissCms';
 import { emit as emitGoodies } from '../../goodiesConsumer/store';
 
 type ContentRow = {
@@ -94,18 +95,31 @@ export function CustomerPageEditorScreen() {
     if (!actualGoodiesPreview) return;
     let active = true;
     void (async () => {
-      const { data, error: queryError } = await supabase
-        .from('wantiss_cms_content')
-        .select('payload')
-        .in('content_key', ['goodies.content', 'goodies'])
-        .eq('status', 'published')
-        .eq('locale', 'en')
-        .order('version', { ascending: false })
-        .limit(1)
-        .maybeSingle();
-      if (!active) return;
-      if (!queryError && data?.payload && data.payload.v === 5) setGoodiesDraft(JSON.parse(JSON.stringify(data.payload)));
-      else setGoodiesDraft(null);
+      try {
+        // Use the same published-content endpoint as the consumer app. A direct
+        // table query can select the wrong key/version and bypass published assets.
+        const remote = await fetchPublishedWantissContent('en');
+        const record = remote.content
+          .filter((item) => item.content_key === 'goodies.content' || item.content_key === 'goodies')
+          .sort((a, b) => Number(b.version || 0) - Number(a.version || 0))
+          .find((item) => item.payload && (item.payload as any).v === 5);
+        if (!record) throw new Error('No published Goodies v5 content was returned.');
+        const payload: any = JSON.parse(JSON.stringify(record.payload));
+        const assetByKey = new Map(remote.assets.map((asset) => [asset.asset_key, asset.url]));
+        (payload.lib || []).forEach((item: any) => {
+          const key = item.img?.assetKey || item.img?.asset_key;
+          if (key && assetByKey.has(key)) item.img.data = assetByKey.get(key);
+        });
+        if (!active) return;
+        setGoodiesDraft(payload);
+        applyContent(JSON.parse(JSON.stringify(payload)));
+        emitGoodies();
+        setError('');
+      } catch (e) {
+        if (!active) return;
+        setGoodiesDraft(null);
+        setError(e instanceof Error ? e.message : 'Published Goodies content is unavailable.');
+      }
     })();
     return () => { active = false; };
   }, [actualGoodiesPreview]);
@@ -388,6 +402,34 @@ export function CustomerPageEditorScreen() {
           />}
         </View>
       </Section>
+
+      {actualGoodiesPreview && viewMode === 'Draft' && editorMode === 'Edit' && goodiesTarget && goodiesDraft ? (
+        <Section title={goodiesTarget.title}>
+          {goodiesTarget.kind === 'label' ? (
+            <View>
+              <Txt size={9.5} mut>Text</Txt>
+              <TextInput value={String(goodiesDraft.labels?.find((v: any) => v.id === goodiesTarget.id)?.t?.en?.v || '')} onChangeText={(value) => updateGoodiesField('title', value)} editable={can(...REQ.content)} style={fieldStyle} placeholder="Text" />
+            </View>
+          ) : (
+            <>
+              <Txt size={9.5} mut>Title</Txt>
+              <TextInput value={String((goodiesDraft[goodiesTarget.kind === 'mode' ? 'modes' : goodiesTarget.kind === 'promo' ? 'promos' : 'cats'] || []).find((v: any) => v.id === goodiesTarget.id)?.[goodiesTarget.kind === 'category' ? 'name' : 'title']?.en?.v || '')} onChangeText={(value) => updateGoodiesField('title', value)} editable={can(...REQ.content)} style={fieldStyle} placeholder="Title" />
+              {goodiesTarget.kind !== 'category' ? <>
+                <Txt size={9.5} mut>Subtitle</Txt>
+                <TextInput value={String(goodiesDraft[goodiesTarget.kind === 'mode' ? 'modes' : 'promos']?.find((v: any) => v.id === goodiesTarget.id)?.sub?.en?.v || '')} onChangeText={(value) => updateGoodiesField('sub', value)} editable={can(...REQ.content)} style={fieldStyle} placeholder="Subtitle" />
+              </> : null}
+              <Txt size={9.5} mut>Icon</Txt>
+              <TextInput value={String(goodiesDraft[goodiesTarget.kind === 'mode' ? 'modes' : goodiesTarget.kind === 'promo' ? 'promos' : 'cats']?.find((v: any) => v.id === goodiesTarget.id)?.emoji || '')} onChangeText={(value) => updateGoodiesField('emoji', value)} editable={can(...REQ.content)} style={fieldStyle} placeholder="Emoji" />
+              <Txt size={9.5} mut>Image URL</Txt>
+              <TextInput value={String(goodiesTarget.kind === 'category' ? goodiesDraft.cats?.find((v: any) => v.id === goodiesTarget.id)?.art?.data || '' : goodiesDraft[goodiesTarget.kind === 'mode' ? 'modes' : 'promos']?.find((v: any) => v.id === goodiesTarget.id)?.img?.data || '')} onChangeText={(value) => updateGoodiesField('asset', value)} editable={can(...REQ.content)} style={fieldStyle} placeholder="https://…" autoCapitalize="none" />
+            </>
+          )}
+          <View style={{ flexDirection: 'row', flexWrap: 'wrap', gap: 6, marginTop: 4 }}>
+            <OutlineBtn onPress={() => setGoodiesTarget(null)}>Done</OutlineBtn>
+            <OutlineBtn primary onPress={() => { void saveGoodiesDraft(); }} disabled={goodiesSaving || !can(...REQ.content)}>{goodiesSaving ? 'Saving…' : 'Save draft'}</OutlineBtn>
+          </View>
+        </Section>
+      ) : null}
 
       {!actualGoodiesPreview && selected && viewMode === 'Draft' && editorMode === 'Edit' ? (
         <>
