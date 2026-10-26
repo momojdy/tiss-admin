@@ -1,7 +1,6 @@
 import { useState } from 'react';
 import { View } from 'react-native';
-import goodiesSeed from '../../data/goodiesSeed.json';
-import { db, ui, bump, useDb } from '../../state/db';
+import { db, dataMode, ui, bump, useDb } from '../../state/db';
 import { can } from '../../state/access';
 import { REQ } from '../../state/requirements';
 import { saveCmsVersion } from '../../lib/adminBackend';
@@ -15,7 +14,13 @@ import { Chips, OutlineBtn, Pill, StatusPill } from '../../ui/Controls';
 import { ListRows } from '../../ui/Lists';
 import { Txt } from '../../ui/Txt';
 
-const data = goodiesSeed as any;
+/** The HTML workspace structure is retained, but fixture records are never used as production data.
+ * Populate this shape only from an authorized Goodies backend snapshot. */
+const data = {
+  modes: [], promos: [], cats: [], lib: [], reqs: [], coupons: [], fees: {},
+  rg: { prohibited: [], docs: [], texts: [] },
+  labels: [], stages: [], notifs: [], faq: [], topics: [], legal: [],
+} as any;
 const moduleMap: Record<string, string> = { Overview: 'Overview', 'Products and catalog': 'Library', Categories: 'Categories', Merchants: 'Merchants', 'Product review': 'Product review', Orders: 'Orders', Promotions: 'Promos', Support: 'Support', Analytics: 'Analytics', Settings: 'Settings' };
 // Keep the module names and order identical to MOD.Goodies in the uploaded HTML source.
 const modules = ['Overview', 'Products and catalog', 'Categories', 'Merchants', 'Product review', 'Orders', 'Promotions', 'Support', 'Analytics', 'Settings'];
@@ -112,8 +117,125 @@ export function GoodiesAdminScreen() {
     if (moduleLabel === 'Library' || moduleLabel === 'Product review') return data.lib.map((x: any) => ({ ...x, _kind: 'library', _field: 'name', _title: x.name?.en?.v || x.id, _sub: (moduleLabel === 'Product review' ? 'Catalog review · ' : '') + x.role + ' · ' + x.b + ' · ' + x.st }));
     if (moduleLabel === 'Requests') return data.reqs.map((x: any) => ({ ...x, _kind: 'request', _field: 'note', _title: x.name, _sub: x.vendor + ' · ' + x.st + ' · ' + x.b }));
     if (moduleLabel === 'Promos') return [...data.promos, ...data.coupons].map((x: any) => ({ ...x, _kind: 'promo', _field: x.title ? 'title' : 'desc', _title: x.title?.en?.v || x.code || x.id, _sub: (x.st || 'Draft') + ' · ' + (x.aud || x.store || 'Goodies') }));
-    if (moduleLabel === 'Merchants') return db.ACC.filter((account) => account.svc.includes('Goodies')).map((account: any) => ({ ...account, _kind: 'merchant', _field: '', _title: account.n, _sub: account.type + ' · ' + account.svc.join(', ') }));
-    if (moduleLabel === 'Orders') return db.INV.filter((transaction) => transaction.f.toLowerCase().includes('goodies')).map((transaction: any) => ({ ...transaction, _kind: 'order', _field: '', _title: transaction.id + ' · ' + transaction.f, _sub: transaction.u + ' · $' + transaction.a.toFixed(2) + ' · ' + transaction.s }));
+    if (moduleLabel === 'Merchants') return dataMode === 'live' ? db.ACC.filter((account) => account.svc.includes('Goodies')).map((account: any) => ({ ...account, _kind: 'merchant', _field: '', _title: account.n, _sub: account.type + ' · ' + account.svc.join(', ') })) : [];
+    if (moduleLabel === 'Orders') return dataMode === 'live' ? db.INV.filter((transaction) => transaction.f.toLowerCase().includes('goodies')).map((transaction: any) => ({ ...transaction, _kind: 'order', _field: '', _title: transaction.id + ' · ' + transaction.f, _sub: transaction.u + ' · 
+    if (moduleLabel === 'Analytics') return [];
+    if (moduleLabel === 'Fees') return Object.entries(data.fees).map(([key, value]) => ({ id: key, _kind: 'fee', _field: 'value', _title: key, _sub: Array.isArray(value) ? value.join(' · ') : String(value), value }));
+    if (moduleLabel === 'Restricted') return [
+      ...(data.rg.prohibited || []).map((x: any, i: number) => ({ ...x, id: x.id || 'prohibited.' + i, _kind: 'restricted', _field: 'n', _title: x.n || x.id || 'Restricted item', _sub: x.src || 'Platform rule' })),
+      ...(data.rg.docs || []).map((x: any, i: number) => ({ ...x, id: x.id || 'document.' + i, _kind: 'restricted', _field: 'doc', _title: x.doc || 'Required document', _sub: x.cat || 'All services' })),
+      ...(data.rg.texts || []).map((x: any) => ({ ...x, _kind: 'restricted', _field: 't', _title: x.label || x.id, _sub: englishValue(x, 't'), crit: x.crit })),
+    ];
+    if (moduleLabel === 'Texts') return [...data.labels, ...data.stages, ...data.notifs].map((x: any) => ({ ...x, _kind: 'text', _field: x.t ? 't' : 'title', _title: x.label || x.id, _sub: englishValue(x, x.t ? 't' : 'title') }));
+    if (moduleLabel === 'Support') return [...data.faq, ...data.topics, ...data.legal].map((x: any) => ({ ...x, _kind: 'support', _field: x.q ? 'q' : x.t ? 't' : 'name', _title: x.q?.en?.v || x.t?.en?.v || x.name?.en?.v || x.id, _sub: x.st || 'Support content' }));
+    return [];
+  };
+
+  const allItems = itemsForModule();
+  const visible = filter === 'All' ? allItems : allItems.filter((item) => String(item.st || item.status || '').toLowerCase() === filter.toLowerCase());
+
+  const onItem = (item: any) => {
+    const textField = ['mode', 'promo', 'category', 'library', 'text', 'support', 'restricted'].includes(item._kind) ? item._field : '';
+    if (textField) editTextRecord(item, item._title, textField);
+    else if (item._kind === 'request') editRecordStatus(item, 'Ingredient request · ' + item._title, 'st', ['Submitted', 'Approved', 'Denied', 'Needs info']);
+    else if (item._kind === 'fee') {
+      form({ title: 'Fee or rule · ' + item._title, sub: 'Stage a proposed change for review.', fields: [{ id: 'value', label: 'Proposed value', type: 'text', value: item._sub, required: true }, { id: 'reason', label: 'Reason', type: 'textarea', required: true }], buttons: [{ label: 'Save draft', key: 'save', primary: true }], onSubmit: async (_key, values) => {
+        const reason = String(values.reason || '').trim();
+        if (!reason) return 'Enter a reason.';
+        try { await saveDraft(String(item.id), { proposed_value: String(values.value), change_reason: reason, module: moduleName, proposed_only: true }); toast('Fee/rule draft saved; no live fee changed.'); }
+        catch (error) { return error instanceof Error ? error.message : 'Draft could not be saved.'; }
+      } });
+    } else if (item._kind === 'merchant') {
+      openMerchant(item);
+    } else if (item._kind === 'order') {
+      go('finance', { fv: 'Transactions' });
+      toast('Opened Finance to review the Goodies transaction.');
+    } else editRecordStatus(item, item._title, 'st', ['Live', 'Draft', 'Scheduled', 'Archived']);
+  };
+
+  const counts = {
+    categories: data.cats.length, library: data.lib.length, missing: [...data.modes, ...data.promos, ...data.labels, ...data.cats, ...data.stages, ...data.notifs].reduce((sum: number, record: any) => sum + languages.reduce((n, lang) => n + (record.title?.[lang]?.s === 'missing' || record.name?.[lang]?.s === 'missing' || record.t?.[lang]?.s === 'missing' || record.sub?.[lang]?.s === 'missing' ? 1 : 0), 0), 0),
+    requests: data.reqs.filter((item: any) => item.st === 'Submitted').length,
+    promos: data.promos.filter((item: any) => item.st === 'Live').length,
+  };
+
+  return (
+    <View>
+      <View style={{ flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', marginBottom: 4 }}>
+        <View style={{ flex: 1 }}><Heading title="Goodies\nAdmin workspace" sub="Customer content, categories, offers and service rules." /></View>
+        <OutlineBtn onPress={() => go('content')}>CMS ›</OutlineBtn>
+      </View>
+      <View style={{ flexDirection: 'row', flexWrap: 'wrap', gap: 7, marginBottom: 10 }}>
+        {modules.map((name) => <Pill key={name} on={moduleName === name} onPress={() => setModule(name)}>{name}</Pill>)}
+      </View>
+
+      {moduleLabel === 'Overview' ? (
+        <>
+          <Heading title="" kpis={[
+            { icon: '▥', value: '—', label: 'Categories' },
+            { icon: '▤', value: '—', label: 'Builder assets' },
+            { icon: '◷', value: '—', label: 'Ingredient requests' },
+          ]} />
+          <Section title="Goodies health">
+            <ListRows rows={[
+              { key: 'promos', main: 'Live promotions', sub: 'Customer-facing offers', right: '—', onPress: () => setModule('Promotions') },
+              { key: 'missing', main: 'Missing translations', sub: 'English, French, Haitian Creole, Spanish and Chinese', right: '—', onPress: () => setModule('Products and catalog') },
+              { key: 'assets', main: 'Assets without uploaded images', sub: 'Builder library completeness', right: '—', onPress: () => setModule('Products and catalog') },
+              { key: 'restricted', main: 'Restricted-goods rules', sub: 'Review service requirements', right: '—', onPress: () => setModule('Settings') },
+            ]} />
+          </Section>
+          <Section title="Needs review">
+            <ListRows rows={[
+              { key: 'req', main: 'Ingredient requests', sub: 'Review vendor-submitted ingredients', right: '—', onPress: () => setModule('Product review') },
+              { key: 'library', main: 'Builder library', sub: 'Manage ingredients, extras and product assets', right: '—', onPress: () => setModule('Products and catalog') },
+              { key: 'content', main: 'Customer home content', sub: 'Modes, promotions, labels and category order', right: 'Open ›', onPress: () => setModule('Products and catalog') },
+            ]} />
+          </Section>
+        </>
+      ) : moduleLabel === 'Settings' ? (
+        <Section title="Goodies settings">
+          <Txt size={11} mut lh={1.4}>These settings require an authorized server-side configuration endpoint before they can change production behavior. This screen is read-only; no local or demo toggle is presented as a live platform setting.</Txt>
+          <ListRows rows={[
+            { key: 'fees', main: 'Fees and rules', sub: 'Review proposed fees in the Products and catalog workspace only when the server-backed workflow is available.', right: 'Read-only' },
+            { key: 'restricted', main: 'Restricted goods', sub: 'No live restricted-goods rules are loaded; enforcement must remain server-side.', right: 'Read-only' },
+            { key: 'publish', main: 'Publishing permissions', sub: 'CMS drafts remain private until an authorized server-side publish action succeeds.', right: 'Protected' },
+          ]} />
+        </Section>
+      ) : moduleLabel === 'Analytics' ? (
+        <Section title="Goodies analytics">
+          <ListRows rows={[
+            { key: 'orders', main: 'Goodies transactions in current snapshot', right: '—', onPress: () => go('finance', { fv: 'Transactions' }) },
+            { key: 'promos', main: 'Live Goodies promotions', right: '—', onPress: () => setModule('Promotions') },
+            { key: 'catalog', main: 'Builder library items', right: '—', onPress: () => setModule('Products and catalog') },
+            { key: 'requests', main: 'Ingredient requests awaiting review', right: '—', onPress: () => setModule('Product review') },
+          ]} />
+          <Txt size={9.5} mut style={{ marginTop: 8 }}>Order, conversion and revenue analytics need a dedicated Goodies server snapshot; this view does not fabricate those metrics.</Txt>
+        </Section>
+      ) : moduleLabel === 'Fees' ? (
+        <Section title="Fees and rules">
+          <Txt size={10.1} mut style={{ marginBottom: 8 }}>No live fee/rule snapshot is connected. The layout is retained, but sample values are not shown as production configuration.</Txt>
+          <ListRows rows={visible.map((item) => ({ key: item.id, main: item._title, sub: item._sub, right: 'Edit ›', onPress: () => onItem(item) }))} />
+        </Section>
+      ) : (
+        <Section title={moduleName + (dataMode === 'live' ? ' · ' + visible.length : '')} right={<Pill onPress={() => setFilter(filter === 'All' ? 'Live' : 'All')}>{filter === 'All' ? 'Filter live' : 'Show all'}</Pill>}>
+          <Txt size={9.5} mut style={{ marginBottom: 8 }}>Live Goodies records are not connected yet. This workspace keeps the HTML-aligned modules and controls, but it will not display fixture records or claim a production change was made.</Txt>
+          <ListRows empty="No records in this section." rows={visible.map((item) => ({
+            key: String(item.id),
+            main: item._title,
+            sub: item._sub,
+            right: <View style={{ alignItems: 'flex-end', gap: 3 }}>{item.st ? <StatusPill label={String(item.st)} small /> : null}<Txt size={9.5} mut>Open ›</Txt></View>,
+            onPress: () => onItem(item),
+          }))} />
+        </Section>
+      )}
+      <Card style={{ marginTop: 2 }}>
+        <Txt size={10.1} weight={500}>Publishing boundary</Txt>
+        <Txt size={9.5} mut lh={1.4}>This workspace is connected to the existing CMS draft API. The HTML-aligned Goodies workspace is retained. Live catalog, orders, merchant, product-review, configuration and analytics records must come from authorized Goodies endpoints; fixture records are not used here.</Txt>
+      </Card>
+    </View>
+  );
+}
+ + transaction.a.toFixed(2) + ' · ' + transaction.s })) : [];
     if (moduleLabel === 'Analytics') return [];
     if (moduleLabel === 'Fees') return Object.entries(data.fees).map(([key, value]) => ({ id: key, _kind: 'fee', _field: 'value', _title: key, _sub: Array.isArray(value) ? value.join(' · ') : String(value), value }));
     if (moduleLabel === 'Restricted') return [
