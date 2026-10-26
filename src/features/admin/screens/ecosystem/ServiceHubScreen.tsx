@@ -32,7 +32,7 @@ export function ServiceHubScreen() {
   const open = useOpen();
   const openModule = useOpenModule();
   const c = db.SVC.find((x) => x[0] === ui.hub) ?? db.SVC[0];
-  const mods = (db.MOD[c[0]] || 'Overview').split('|');
+  const mods = (c[0] === 'Goodies' ? 'Overview|Products and catalog|Categories|Merchants|Product review|Orders|Promotions|Support|Analytics|Settings' : db.MOD[c[0]] || 'Overview').split('|');
   const pre = c[5] === 'Pre-order';
   const banners = db.BN.filter((b) => b.svc === c[0]);
   const bizId = UUID.test(String(c[7])) ? String(c[7]) : '';
