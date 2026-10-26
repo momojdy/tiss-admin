@@ -321,6 +321,9 @@ export function ContentScreen() {
 
       {activeSection === 'Media' ? (
         <>
+          <Section title={'Media library placements · ' + db.MEDIA.length}>
+            <ListRows empty="No seeded media placements." rows={db.MEDIA.map((media, index) => ({ key: 'media-' + index, main: media[0], sub: media[1].length ? 'Used in ' + media[1].length + ' placement(s)' : 'Unused', right: 'Stage edit ›', onPress: () => stageContentDraft('media', String(index), { media_key: media[0], used_in: media[1] }) }))} />
+          </Section>
           <View style={{ flexDirection: 'row', flexWrap: 'wrap', gap: 8 }}>
             <OutlineBtn primary onPress={() => { void pickAsset(); }} disabled={busy}>Upload asset</OutlineBtn>
             <OutlineBtn onPress={() => { void reload(); }} disabled={busy}>Refresh</OutlineBtn>
