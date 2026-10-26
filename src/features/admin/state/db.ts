@@ -8,7 +8,7 @@ import type {
 const clone = <T,>(x: T): T => JSON.parse(JSON.stringify(x));
 
 /** The in-memory data snapshot. It is cloned from prototype fixtures until a live authorized backend populates it. */
-export const dataMode: 'prototype' | 'live' = 'prototype';
+export let dataMode: 'prototype' | 'live' = 'prototype';
 export const db = Object.assign(clone(seed), { BIZ: [] as BusinessSnapshot[] }) as unknown as {
   APPS: Application[]; INV: Transaction[]; SVC: ServiceRow[]; BIZ: BusinessSnapshot[]; MOD: Record<string, string>; STAFF: StaffMember[];
   ROLES: Record<string, number[]>; RR: Record<string, string[]>; SEC: string[]; LV: string[];
@@ -48,6 +48,7 @@ let version = 0;
 const subs = new Set<() => void>();
 /** Notify every mounted screen that data or UI state changed (the HTML's `rr()`). */
 export const bump = () => { version++; subs.forEach((f) => f()); };
+export const setDataMode = (mode: 'prototype' | 'live') => { dataMode = mode; bump(); };
 const subscribe = (f: () => void) => { subs.add(f); return () => { subs.delete(f); }; };
 /** Subscribe a component to data changes. */
 export const useDb = () => useSyncExternalStore(subscribe, () => version);
