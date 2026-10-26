@@ -4,7 +4,7 @@ import React, {useCallback, useEffect, useRef, useState} from 'react';
 import {View, Pressable, Text} from 'react-native';
 import {Icon} from '../components/Icon';
 import {T, Bar, Cta, Card, Row, Badge, Ttl, useTheme} from '../components/ui';
-import {S, money, emit, save, toast} from '../store';
+import {S, money, emit, save, toast, previewOnly} from '../store';
 import {back, createWallet} from '../actions';
 import {supabase} from '../../lib/supabase';
 
@@ -43,6 +43,7 @@ export function LivePayments() {
   }, []);
 
   const load = useCallback(async () => {
+    if (previewOnly) { setState('signedout'); return; }
     if (!loaded.current) setState('loading');
     try {
       const {data: auth, error: authError} = await supabase.auth.getUser();
@@ -75,6 +76,7 @@ export function LivePayments() {
 
   /* Both card RPCs return a boolean. false means nothing changed, with no error. */
   const act = async (id: string, call: () => PromiseLike<{data: any; error: any}>, okMsg: string, failMsg: string) => {
+    if (previewOnly) { toast('Payment-method changes are disabled in the admin preview.'); return; }
     if (busyRef.current) return;
     busyRef.current = true; setBusyId(id); setConfirmId('');
     let ok = false;
@@ -99,6 +101,7 @@ export function LivePayments() {
     void act(id, () => supabase.rpc('delete_payment_method', {p_payment_method_id: id}), 'Card removed', 'Could not remove this card.');
   };
   const makeWallet = async () => {
+    if (previewOnly) { toast('Wallet changes are disabled in the admin preview.'); return; }
     if (creating) return;
     setCreating(true);
     try {await createWallet();} finally {if (mounted.current) setCreating(false);}
