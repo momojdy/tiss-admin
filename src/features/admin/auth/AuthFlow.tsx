@@ -13,7 +13,7 @@ import { session, setServerGrants } from '../state/access';
 import { bump } from '../state/db';
 import { hydrateAdminState } from '../lib/hydrateAdminState';
 
-type View_ = 'in' | 'forgot' | 'sent' | 'reset' | 'invite' | 'blocked';
+type View_ = 'in' | 'forgot' | 'sent' | 'reset' | 'invite' | 'blocked' | 'create';
 interface Props { notice?: string; noticeBad?: boolean; onDone: () => void }
 
 export function AuthFlow({ notice, noticeBad, onDone }: Props) {
@@ -196,7 +196,17 @@ export function AuthFlow({ notice, noticeBad, onDone }: Props) {
               <AuthField label="Password" value={password} onChangeText={setPassword} error={undefined} password textContentType="password" autoComplete="password" onSubmitEditing={signIn} />
               <View style={{ alignItems: 'flex-end', marginBottom: 6 }}><LinkText label="Forgot password?" onPress={() => { setView('forgot'); message(''); }} /></View>
               <PrimaryButton label="Sign in" onPress={signIn} busy={busy} busyLabel="Signing in…" />
-              <View style={{ marginTop: 14 }}><NoticeBox>Staff accounts are created by a Super Admin invitation. Self-registration is disabled.</NoticeBox></View>
+              <View style={{ marginTop: 14, padding: 14, borderRadius: 14, borderWidth: 1, borderColor: c.bd, backgroundColor: c.card }}>
+                <Txt size={13} style={{ textAlign: 'center', marginBottom: 8 }}>Don't have an account yet?</Txt>
+                <SecondaryButton label="Create your account" onPress={() => { setView('create'); message(''); }} />
+                <Txt size={11} mut lh={1.4} style={{ marginTop: 8, textAlign: 'center' }}>A Super Admin invitation is required to create a staff account.</Txt>
+              </View>
+            </>}
+            {view === 'create' && <>
+              <Txt size={22.1} lh={1.08}>{'Create your\\nstaff account'}</Txt>
+              <Txt size={13} mut lh={1.45} style={{ marginTop: 6, marginBottom: 14 }}>Wantiss staff accounts are invitation-only. Ask a Super Admin to send an invitation to your work email. Open the invitation link to verify your account and set your password; once that step is complete, return here to sign in.</Txt>
+              <NoticeBox>For security, account creation is completed from a verified Supabase invitation link. This screen does not accept an unverified invitation code or create a local-only account.</NoticeBox>
+              <PrimaryButton label="Back to sign in" onPress={() => { setView('in'); message(''); }} />
             </>}
             {view === 'forgot' && <>
               <Txt size={22.1} lh={1.08}>{'Reset your\npassword'}</Txt>
