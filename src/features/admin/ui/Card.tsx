@@ -34,7 +34,7 @@ export function CardTitle({ title, right, size = 11.8 }: { title: ReactNode; rig
 /** `CD(title, body, right)` helper: a Card with a title row and a body. */
 export function Section({ title, right, children, style }: { title: ReactNode; right?: ReactNode; children?: ReactNode; style?: StyleProp<ViewStyle> }) {
   return (
-    <Card style={[{ marginVertical: 8 }, style]}>
+    <Card style={style}>
       <CardTitle title={title} right={right} />
       {children}
     </Card>
