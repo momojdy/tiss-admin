@@ -1,6 +1,6 @@
 import { useState } from 'react';
 import { View } from 'react-native';
-import { db, dataMode, ui, bump, useDb } from '../../state/db';
+import { db, ui, bump, useDb } from '../../state/db';
 import { can } from '../../state/access';
 import { REQ } from '../../state/requirements';
 import { saveCmsVersion } from '../../lib/adminBackend';
@@ -117,8 +117,8 @@ export function GoodiesAdminScreen() {
     if (moduleLabel === 'Library' || moduleLabel === 'Product review') return data.lib.map((x: any) => ({ ...x, _kind: 'library', _field: 'name', _title: x.name?.en?.v || x.id, _sub: (moduleLabel === 'Product review' ? 'Catalog review · ' : '') + x.role + ' · ' + x.b + ' · ' + x.st }));
     if (moduleLabel === 'Requests') return data.reqs.map((x: any) => ({ ...x, _kind: 'request', _field: 'note', _title: x.name, _sub: x.vendor + ' · ' + x.st + ' · ' + x.b }));
     if (moduleLabel === 'Promos') return [...data.promos, ...data.coupons].map((x: any) => ({ ...x, _kind: 'promo', _field: x.title ? 'title' : 'desc', _title: x.title?.en?.v || x.code || x.id, _sub: (x.st || 'Draft') + ' · ' + (x.aud || x.store || 'Goodies') }));
-    if (moduleLabel === 'Merchants') return dataMode === 'live' ? db.ACC.filter((account) => account.svc.includes('Goodies')).map((account: any) => ({ ...account, _kind: 'merchant', _field: '', _title: account.n, _sub: account.type + ' · ' + account.svc.join(', ') })) : [];
-    if (moduleLabel === 'Orders') return dataMode === 'live' ? db.INV.filter((transaction) => transaction.f.toLowerCase().includes('goodies')).map((transaction: any) => ({ ...transaction, _kind: 'order', _field: '', _title: transaction.id + ' · ' + transaction.f, _sub: transaction.u + ' · ' + transaction.a.toFixed(2) + ' · ' + transaction.s })) : [];
+    if (moduleLabel === 'Merchants') return [];
+    if (moduleLabel === 'Orders') return [];
     if (moduleLabel === 'Analytics') return [];
     if (moduleLabel === 'Fees') return Object.entries(data.fees).map(([key, value]) => ({ id: key, _kind: 'fee', _field: 'value', _title: key, _sub: Array.isArray(value) ? value.join(' · ') : String(value), value }));
     if (moduleLabel === 'Restricted') return [
@@ -153,11 +153,7 @@ export function GoodiesAdminScreen() {
     } else editRecordStatus(item, item._title, 'st', ['Live', 'Draft', 'Scheduled', 'Archived']);
   };
 
-  const counts = {
-    categories: data.cats.length, library: data.lib.length, missing: [...data.modes, ...data.promos, ...data.labels, ...data.cats, ...data.stages, ...data.notifs].reduce((sum: number, record: any) => sum + languages.reduce((n, lang) => n + (record.title?.[lang]?.s === 'missing' || record.name?.[lang]?.s === 'missing' || record.t?.[lang]?.s === 'missing' || record.sub?.[lang]?.s === 'missing' ? 1 : 0), 0), 0),
-    requests: data.reqs.filter((item: any) => item.st === 'Submitted').length,
-    promos: data.promos.filter((item: any) => item.st === 'Live').length,
-  };
+
 
   return (
     <View>
@@ -217,7 +213,7 @@ export function GoodiesAdminScreen() {
           <ListRows rows={visible.map((item) => ({ key: item.id, main: item._title, sub: item._sub, right: 'Edit ›', onPress: () => onItem(item) }))} />
         </Section>
       ) : (
-        <Section title={moduleName + (dataMode === 'live' ? ' · ' + visible.length : '')} right={<Pill onPress={() => setFilter(filter === 'All' ? 'Live' : 'All')}>{filter === 'All' ? 'Filter live' : 'Show all'}</Pill>}>
+        <Section title={moduleName} right={<Pill onPress={() => setFilter(filter === 'All' ? 'Live' : 'All')}>{filter === 'All' ? 'Filter live' : 'Show all'}</Pill>}>
           <Txt size={9.5} mut style={{ marginBottom: 8 }}>Live Goodies records are not connected yet. This workspace keeps the HTML-aligned modules and controls, but it will not display fixture records or claim a production change was made.</Txt>
           <ListRows empty="No records in this section." rows={visible.map((item) => ({
             key: String(item.id),
