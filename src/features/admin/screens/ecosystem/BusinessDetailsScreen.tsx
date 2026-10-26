@@ -109,7 +109,7 @@ export function BusinessDetailsScreen() {
           </Section>
           <Card>
             <Txt size={11} weight={500}>Protected actions</Txt>
-            <Txt size={10.1} mut lh={1.4} style={{ marginTop: 5 }}>Verification changes and business restrictions must continue through the existing server-authorized workflow. This details screen does not perform direct status changes.</Txt>
+            <Txt size={10.1} mut lh={1.4} style={{ marginTop: 5 }}>Verification changes and business restrictions are sent through the existing server-authorized workflow. This screen never mutates verification state locally.</Txt>
             {!hasEdit ? <Txt size={10.1} color={c.or} style={{ marginTop: 6 }}>You have view-only or no ecosystem edit access.</Txt> : null}
           </Card>
         </>
