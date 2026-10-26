@@ -1,5 +1,5 @@
 import { useCallback, useEffect, useState } from 'react';
-import { Alert, ScrollView, TextInput, View } from 'react-native';
+import { Alert, TextInput, View } from 'react-native';
 import * as DocumentPicker from 'expo-document-picker';
 import { supabase } from '../../lib/supabase';
 import { archiveCmsAsset, archiveCmsVersion, listCmsAssets, publishCmsAsset, publishCmsVersion, saveCmsVersion, uploadCmsAsset } from '../../lib/adminBackend';
@@ -139,7 +139,7 @@ export function ContentScreen() {
   });
 
   return (
-    <ScrollView contentContainerStyle={{ padding: 16, paddingBottom: 36, gap: 14 }}>
+    <View>
       <Heading title="Content & assets" sub="Manage shared published content and private media." />
       {error ? <Card><Txt size={12} color={c.or}>{error}</Txt></Card> : null}
       <View style={{ flexDirection: 'row', flexWrap: 'wrap', gap: 8 }}>
@@ -192,6 +192,6 @@ export function ContentScreen() {
           </View>,
         }))} />
       </Section>
-    </ScrollView>
+    </View>
   );
 }
