@@ -1,0 +1,48 @@
+# Wantiss Admin HTML → React Native parity audit
+
+**Source of truth:** `wantiss-admin-v9.html` (312,412 bytes, inspected 2026-10-26)  
+**Target reviewed:** `momojdy/tiss-admin`, default branch `main`  
+**Scope:** source-level comparison. No live-device screenshot comparison has been performed in this audit.
+
+## Global shell and navigation
+
+- **HTML reference:** compact account/header area, floating/collapsible vertical dock with seven actions (collapse, Search, Quick create, Alerts, Operations, Export, Settings), seven primary sections (Overview, Operations, Ecosystem, Content, Finance, Analytics, People), blurred overlays/drawers, light/dark/system appearance.
+- **React Native:** account/search/notification header and horizontally scrolling section pills. Search is passed as an empty callback in `AdminApp.tsx`; there is no Quick create, dock export or Settings action in the shell. Navigation and overlays use separate components, which is a good base for restoring parity.
+- **Difference:** the navigation model, access point for global actions, and visual hierarchy are materially different. Restore the HTML dock/action model without replacing the existing authentication and access checks.
+
+## Screen-by-screen
+
+| HTML section/surface | Current React Native implementation | Difference / missing work |
+|---|---|---|
+| Overview | No Overview screen is registered in `ScreenHost.tsx`; it renders the generic “not ported” card. | Entire HTML dashboard missing: KPI row, activity range/chart, attention queue, review-speed ring, queue mix, money snapshot, feature health, content/promotion status, team and recent activity. |
+| Operations | `screens/operations/OperationsScreen.tsx` | A real screen exists. Compare against HTML review board/list/filters, overdue and unassigned queues, detail drawers and keyboard interactions in device screenshots; source inspection alone cannot certify pixel parity. |
+| Ecosystem | `screens/ecosystem/EcosystemScreen.tsx` | Service directory exists with grid/table/search/filter/favourites. HTML service-specific workspace paths and module depth need parity verification. Cards use fixed ~48.4% width, which can wrap differently from HTML's responsive grid. |
+| Service hub / service workspaces | `screens/ecosystem/ServiceHubScreen.tsx` | Current hub mainly shows module names, service content and selected business verification. The HTML defines a different module list for each service, including Goodies, Stays, Woulib, Flyz, services, Habita, Potssy and others. Generic module routing is not equivalent to porting each workspace. |
+| Content | `screens/content/ContentScreen.tsx` | Current screen manages CMS versions/assets and a Goodies phone preview. HTML Content also contains banner/promotion/announcement queues, calendar, approval flows, and its own customer-page editor. The existing CMS screen is useful but does not replace the HTML Content workflow. |
+| Goodies | No `goodies` route registered in `ScreenHost.tsx`; only the Goodies phone preview is in Content. | HTML has a dedicated Goodies workspace: Overview, Home content, Categories, Builder library, Ingredient requests, Promotions, Fees and rules, Restricted goods, Text and notifications, Support and legal, Merchants, Product review, Orders and Analytics. The v5 customer page editor is also omitted from RN. |
+| Finance | `screens/finance/FinanceScreen.tsx` | Finance screen exists. Verify against HTML Transactions/Refunds/Payouts/Settlements/Reconciliation, filters, tables and record drawers. Do not treat existence as parity proof. |
+| Analytics | No Analytics screen is registered; generic “not ported” card is shown. | Entire HTML analytics dashboard missing: shared activity dataset, 7D/30D/90D/1Y/custom range, service filter, approval rate, review turnaround, by-service share, content performance and export/expand interactions. |
+| People | `screens/people/PeopleScreen.tsx` plus `PermissionsPanels.tsx` | Staff/access management is present. Compare HTML's Customers, Businesses, Staff, Requests, Permissions, Audit log and account controls, especially overlays and access-level interactions. |
+| Business detail / customer page editor / Potssy | Route IDs exist in `Nav.tsx`, but `ScreenHost.tsx` does not register screens for them. | Routes fall through to the generic “not ported” card. HTML includes business detail and editor surfaces, and Potssy has its own module workspace. |
+| Search | Header renders a search button but `AdminApp.tsx` supplies `() => {}`. | No working search overlay or cross-record search from the current header. HTML search groups results for applications, transactions, services, staff, customers, content and accounts, gated by permissions. |
+| Quick create | No shell action/overlay in current React Native. | HTML provides New banner, New promotion, Invite staff and New announcement actions, each with its own form and access checks. |
+| Settings | Account sheet exists; no global Settings panel/screen. | HTML Settings covers Appearance, Platform, Ecosystem, Notifications, Documents and requirements, Workflows, Finance, Team and access, and Help and information. RN needs settings UI and persisted/authorized behavior, not a cosmetic placeholder. |
+| Overlays | RN has shared dialog/drawer provider and separate drawer modules. | Reusable foundation exists, but several HTML actions and drawers are absent; overlay sizes/entry points/close behavior require device verification. |
+
+## Design tokens and dimensions
+
+- RN uses Outfit font assets and HTML-derived palette tokens in `theme/tokens.ts`; this is directionally aligned with the source.
+- The HTML uses CSS variables, responsive CSS layout, compact cards, an expandable dock and responsive grid/table layouts. React Native uses explicit style objects and some fixed widths/paddings. Identical token names do **not** guarantee identical typography metrics, wrapping, card height, spacing or overlay geometry.
+- Exact pixel parity requires comparing screenshots at the same device width and font scale and then adjusting screen-specific styles. This source audit does not claim that those measurements have been verified.
+
+## Priority order
+
+1. Register and implement Overview and Analytics using the HTML's existing data/interaction model.
+2. Restore global shell actions: Search, Quick create, Settings and Export; preserve current Supabase auth and server permission enforcement.
+3. Port Goodies and the HTML service workspaces as feature/screen folders, not a single monolithic component.
+4. Bring Content workflows (banners, promotions, announcements, approvals, calendar, customer page editor) into parity alongside the existing CMS version/asset manager.
+5. Capture Expo Go screenshots and exercise every action on a phone; run typecheck/build and report anything not verified.
+
+## Important boundary
+
+This is a source-level audit. It does not prove Supabase schema/RLS correctness, production readiness, or pixel parity. The HTML contains demo/in-memory interactions as well as interface definitions; real-money, staff, publish, refund and access actions must remain connected to their authorized server-side workflows rather than blindly copying demo behavior.
