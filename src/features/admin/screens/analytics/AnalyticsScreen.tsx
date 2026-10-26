@@ -51,7 +51,7 @@ export function AnalyticsScreen() {
   const decided = db.APPS.filter((app) => app.st >= 3);
   const approved = decided.filter((app) => app.st === 3).length;
   const approvalRate = decided.length ? Math.round((approved / decided.length) * 100) : 0;
-  const reviewedWithTimes = decided.filter((app) => app.createdAt && app.reviewedAt && Number.isFinite(Date.parse(app.createdAt)) && Number.isFinite(Date.parse(app.reviewedAt)));
+  const reviewedWithTimes = decided.filter((app) => app.createdAt && app.reviewedAt && Number.isFinite(Date.parse(app.createdAt)) && Number.isFinite(Date.parse(app.reviewedAt)) && Date.parse(app.reviewedAt) >= Date.parse(app.createdAt));
   const averageReview = reviewedWithTimes.length ? (reviewedWithTimes.reduce((sum, app) => sum + Math.max(0, Date.parse(app.reviewedAt!) - Date.parse(app.createdAt!)), 0) / reviewedWithTimes.length / 86400000).toFixed(1) : '—';
   const byService = serviceOptions.map((name) => {
     const data = seriesFor(range, name, db.INV);
