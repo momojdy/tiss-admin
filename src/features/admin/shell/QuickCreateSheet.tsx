@@ -52,7 +52,6 @@ export function QuickCreateSheet({ onClose }: { onClose: () => void }) {
           delete payload.title;
           await saveCmsVersion({ key, locale: 'en', payload: { title, ...payload }, status: 'draft' });
           aud('CMS draft created · ' + kind + ' · ' + title, session.view);
-          bump();
           ui.cs = 'CMS versions';
           bump();
           toast('Draft saved. Open Content to review it before publishing.');
