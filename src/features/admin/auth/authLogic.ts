@@ -4,13 +4,13 @@ import { session } from '../state/access';
 
 export const AUTH_CONFIG = { idleMs: 30 * 60 * 1000 };
 
-export const emailOk = (e: string) => /^[^\\s@]+@[^\\s@]+\\.[^\\s@]{2,}$/.test(e);
+export const emailOk = (e: string) => /^[^\s@]+@[^\s@]+\.[^\s@]{2,}$/.test(e);
 export const maskEmail = (e: string) => e.replace(/^(.).*(@.*)$/, '$1•••$2');
 
 export const PASSWORD_RULES: [string, (p: string) => boolean][] = [
   ['At least 10 characters', (p) => p.length >= 10],
   ['Upper and lower case letters', (p) => /[a-z]/.test(p) && /[A-Z]/.test(p)],
-  ['A number', (p) => /\\d/.test(p)],
+  ['A number', (p) => /\d/.test(p)],
   ['A symbol, like # or !', (p) => /[^A-Za-z0-9]/.test(p)],
 ];
 export const passwordScore = (p: string) => PASSWORD_RULES.filter((r) => r[1](p)).length;
