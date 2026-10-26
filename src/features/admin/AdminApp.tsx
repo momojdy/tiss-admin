@@ -33,7 +33,7 @@ function Frame() {
   useEffect(() => { if (!keepScroll) scrollRef.current?.scrollTo({ y: 0, animated: false }); }, [navKey, keepScroll]);
   const { openDrawer } = useOverlay();
   return (
-    <LinearGradient colors={[c.b1, c.b2, c.b3]} style={{ flex: 1 }} onTouchStart={touch}>
+    <LinearGradient colors={[c.b1, c.b2, c.b3]} start={{ x: 0, y: 1 }} end={{ x: 1, y: 0 }} style={{ flex: 1 }} onTouchStart={touch}>
       <ScrollView ref={scrollRef} keyboardShouldPersistTaps="handled" showsVerticalScrollIndicator={false} contentContainerStyle={{ paddingTop: 14 + insets.top, paddingBottom: 90 + insets.bottom, paddingLeft: dockExpanded ? 57 : 28, paddingRight: 12 }}>
         <Header onBell={() => openDrawer((close) => <NotificationsSheet onClose={close} />)} onAccount={() => openDrawer((close) => <AccountSheet onClose={close} />)} />
         <Tabs />
