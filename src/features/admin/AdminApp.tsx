@@ -1,5 +1,5 @@
 import { useEffect, useRef, useState } from 'react';
-import { ScrollView, type ScrollViewInstance, View } from 'react-native';
+import { ScrollView, type ScrollViewInstance, View, useWindowDimensions } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { LinearGradient } from 'expo-linear-gradient';
 import { useFonts, Outfit_300Light, Outfit_400Regular, Outfit_500Medium, Outfit_600SemiBold } from '@expo-google-fonts/outfit';
@@ -28,19 +28,31 @@ function Frame() {
   const [dockExpanded, setDockExpanded] = useState(false);
   const { c } = useTheme();
   const insets = useSafeAreaInsets();
+  const { width: windowWidth, height: windowHeight } = useWindowDimensions();
+  const frameWidth = Math.min(512, windowWidth);
+  const frameHeight = Math.min(910, windowHeight);
+  const frameRadius = windowWidth <= 520 ? 0 : 26;
   const { navKey, keepScroll } = useNav();
   const scrollRef = useRef<ScrollViewInstance>(null);
   useEffect(() => { if (!keepScroll) scrollRef.current?.scrollTo({ y: 0, animated: false }); }, [navKey, keepScroll]);
   const { openDrawer } = useOverlay();
   return (
-    <LinearGradient colors={[c.b1, c.b2, c.b3]} start={{ x: 0, y: 1 }} end={{ x: 1, y: 0 }} style={{ flex: 1 }} onTouchStart={touch}>
-      <ScrollView ref={scrollRef} keyboardShouldPersistTaps="handled" showsVerticalScrollIndicator={false} contentContainerStyle={{ paddingTop: 14 + insets.top, paddingBottom: 90 + insets.bottom, paddingLeft: dockExpanded ? 57 : 28, paddingRight: 12 }}>
-        <Header onBell={() => openDrawer((close) => <NotificationsSheet onClose={close} />)} onAccount={() => openDrawer((close) => <AccountSheet onClose={close} />)} />
-        <Tabs />
-        <ScreenHost />
-      </ScrollView>
-      <FloatingDock expanded={dockExpanded} onExpandedChange={setDockExpanded} />
-    </LinearGradient>
+    <View style={{ flex: 1, backgroundColor: c.out, alignItems: 'center', justifyContent: 'center' }}>
+      <LinearGradient
+        colors={[c.b1, c.b2, c.b3]}
+        start={{ x: 0, y: 1 }}
+        end={{ x: 1, y: 0 }}
+        style={{ width: frameWidth, height: frameHeight, borderRadius: frameRadius, overflow: 'hidden' }}
+        onTouchStart={touch}
+      >
+        <ScrollView ref={scrollRef} keyboardShouldPersistTaps="handled" showsVerticalScrollIndicator={false} contentContainerStyle={{ paddingTop: 14 + insets.top, paddingBottom: 90 + insets.bottom, paddingLeft: dockExpanded ? 57 : 28, paddingRight: 12 }}>
+          <Header onBell={() => openDrawer((close) => <NotificationsSheet onClose={close} />)} onAccount={() => openDrawer((close) => <AccountSheet onClose={close} />)} />
+          <Tabs />
+          <ScreenHost />
+        </ScrollView>
+        <FloatingDock expanded={dockExpanded} onExpandedChange={setDockExpanded} />
+      </LinearGradient>
+    </View>
   );
 }
 
