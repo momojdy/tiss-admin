@@ -13,7 +13,7 @@ export function useExport() {
   return useCallback(async () => {
     let name = 'wantiss-export.csv';
     let rows: (string | number)[][] = [];
-    if (screen === 'ecosystem') { name = 'services.csv'; rows = [['Service', 'Today', 'Pending', 'Status'], ...ecoRows().map((s) => [s[0], s[2], s[3], s[5]])]; }
+    if (screen === 'ecosystem') { name = 'services.csv'; rows = [['Service', 'Description', 'Directory status'], ...ecoRows().map((s) => [s[0], s[1], s[5]])]; }
     else if (screen === 'finance') { name = 'transactions.csv'; rows = [['Reference', 'Feature', 'User', 'Date', 'Amount', 'Status'], ...txRows().map((x) => [x.id, x.f, x.u, x.d, mny(x.a), x.s])]; }
     else { name = 'applications.csv'; rows = [['Reference', 'Status'], ...db.APPS.map((a: any) => [a.id ?? a[0], a.st ?? a[1]])]; }
     const ok = await shareCsv(name, rows);
