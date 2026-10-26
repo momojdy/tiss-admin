@@ -89,7 +89,7 @@ export function OverviewScreen() {
 
   return (
     <View>
-      <Heading title="Platform\nOverview" sub="Authorized operational snapshot; unavailable metrics are labeled rather than estimated." kpis={[
+      <Heading title="Platform\nOverview" kpis={[
         { icon: '♛', value: prototypeSnapshot ? '—' : db.ACC.filter((account) => account.type === 'Customer').length.toLocaleString('en-US'), label: 'Active customers', tag: prototypeSnapshot ? 'Live data unavailable' : undefined, onPress: () => go('people', { ps: 'Accounts' }) }, 
         { icon: '▥', value: prototypeSnapshot ? '—' : db.APPS.filter((app) => app.st === 3).length, label: 'Approved businesses', onPress: () => go('operations', { ov: 'List' }) }, 
         { icon: '◷', value: prototypeSnapshot ? '—' : waiting.length, label: 'Waiting for review', tag: prototypeSnapshot ? 'Live data unavailable' : overdue.length + ' overdue', tone: overdue.length ? 'r' : '', onPress: () => go('operations', { ov: 'List' }) }, 
@@ -167,12 +167,13 @@ export function OverviewScreen() {
       </Section>
 
       <Section title="Content and promotions" right={<Pill onPress={() => go('content')}>Content ›</Pill>}>
-        <Txt size={10.1} mut lh={1.4}>The current dashboard does not yet load the authorized CMS placement snapshot, so it will not display seeded or zero-valued banner counts as live platform metrics. Open Content Studio to query the available CMS records.</Txt>
-        <View style={{ flexDirection: 'row', flexWrap: 'wrap', gap: 7, marginTop: 8 }}>
-          <Pill onPress={() => go('content', { cs: 'Banners' })}>Open banners</Pill>
-          <Pill onPress={() => go('content', { cs: 'Calendar' })}>Publishing calendar</Pill>
-          <Pill onPress={() => go('content', { cs: 'Approvals' })}>Approval proposals</Pill>
+        <View style={{ flexDirection: 'row', flexWrap: 'wrap', gap: 7, marginBottom: 8 }}>
+          <Pill onPress={() => go('content', { cs: 'Banners' })}>Live —</Pill>
+          <Pill onPress={() => go('content', { cs: 'Calendar' })}>Scheduled —</Pill>
+          <Pill onPress={() => go('content', { cs: 'Approvals' })}>Drafts —</Pill>
+          <Pill onPress={() => go('content', { cs: 'Calendar' })}>Expiring —</Pill>
         </View>
+        <ListRows empty="CMS placement snapshot unavailable. No seeded banner counts or sample placements are shown." rows={[]} />
       </Section>
 
       <Modal transparent visible={customOpen} animationType="fade" onRequestClose={() => setCustomOpen(false)}>
