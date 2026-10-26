@@ -1,7 +1,7 @@
 import React, { useCallback } from 'react';
 import { Pressable, ScrollView, Text, View } from 'react-native';
 import { GoodiesApp } from '../../goodiesConsumer/GoodiesApp';
-import { emit, IT, S, STB, useGoodies } from '../../goodiesConsumer/store';
+import { emit, IT, S, STB, useGoodies, setPreviewOnly } from '../../goodiesConsumer/store';
 
 const orange = '#FD802E';
 const ink = '#1B1B1F';
@@ -19,6 +19,8 @@ const screens = [
 ] as const;
 
 export function GoodiesConsumerPreview() {
+  // Establish the safety boundary before child screens can mount their effects.
+  setPreviewOnly(true);
   useGoodies();
   const navigate = useCallback((route: string) => {
     const storeId = Object.keys(STB)[0] || 's12';
