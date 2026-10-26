@@ -16,8 +16,8 @@ export function BusinessDetailsScreen() {
   const { c } = useTheme();
   const { go } = useNav();
   const id = String(ui.businessId || '');
-  const business = db.SVC.find((row) => String(row[7]) === id && /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i.test(String(row[7])));
-  const applications = business ? db.APPS.filter((row) => row.n === business[0]) : [];
+  const business = db.BIZ.find((row) => row.id === id);
+  const applications = business ? db.APPS.filter((row) => row.n === business.name) : [];
   const hasEdit = can(...REQ.ecosystem);
 
   return (
@@ -26,24 +26,35 @@ export function BusinessDetailsScreen() {
         <OutlineBtn onPress={() => go('ecosystem')}>‹ Ecosystem</OutlineBtn>
         <Pill>Business details</Pill>
       </View>
-      {!business ? (
+      {!id ? (
+        <Section title={'Business records · ' + db.BIZ.length}>
+          <ListRows empty="No business records are available from the authorized ecosystem endpoint." rows={db.BIZ.map((row) => ({
+            key: row.id,
+            main: row.name || 'Unnamed business',
+            sub: [row.city, row.country].filter(Boolean).join(' · ') || 'Location not supplied',
+            right: <StatusPill label={row.verification || 'Unknown'} small />,
+            onPress: () => go('business', { businessId: row.id }),
+          }))} />
+        </Section>
+      ) : !business ? (
         <Card>
           <Txt size={13} weight={500}>Business record unavailable</Txt>
-          <Txt size={11} mut lh={1.4} style={{ marginTop: 6 }}>Open this screen from a business record loaded by the authorized ecosystem endpoint. Seed-only service tiles are not treated as production businesses.</Txt>
+          <Txt size={11} mut lh={1.4} style={{ marginTop: 6 }}>This ID is not present in the currently authorized ecosystem snapshot. Refresh the source record before attempting an action.</Txt>
+          <View style={{ marginTop: 8 }}><OutlineBtn onPress={() => go('business', { businessId: '' })}>Back to businesses</OutlineBtn></View>
         </Card>
       ) : (
         <>
-          <Heading title={business[0]} sub="Business record · authorized ecosystem snapshot" kpis={[
-            { icon: '▥', value: business[2] === '1' ? 'Live' : 'Not live', label: 'Customer visibility' },
-            { icon: '✓', value: business[1] || 'Unknown', label: 'Verification status' },
-            { icon: '◔', value: business[6] ? 'Ready' : 'Not ready', label: 'Payout readiness' },
+          <Heading title={business.name} sub="Business record · authorized ecosystem snapshot" kpis={[
+            { icon: '▥', value: business.is_live ? 'Live' : 'Not live', label: 'Customer visibility' },
+            { icon: '✓', value: business.verification || 'Unknown', label: 'Verification status' },
+            { icon: '◔', value: business.payout_ready ? 'Ready' : 'Not ready', label: 'Payout readiness' },
           ]} />
-          <Section title="Business profile" right={<StatusPill label={business[1] || 'Unknown'} small />}>
+          <Section title="Business profile" right={<StatusPill label={business.verification || 'Unknown'} small />}>
             <ListRows rows={[
-              { key: 'id', main: 'Business ID', sub: id, right: 'Record' },
-              { key: 'location', main: 'Location', sub: business[5] || 'Not supplied by the current endpoint', right: 'Snapshot' },
-              { key: 'visibility', main: 'Live status', sub: business[2] === '1' ? 'Marked live by the authorized snapshot' : 'Not marked live', right: 'Snapshot' },
-              { key: 'payout', main: 'Payout readiness', sub: business[6] ? 'Ready in the authorized snapshot' : 'Not ready or not reported', right: 'Snapshot' },
+              { key: 'id', main: 'Business ID', sub: business.id, right: 'Record' },
+              { key: 'location', main: 'Location', sub: [business.city, business.country].filter(Boolean).join(' · ') || 'Not supplied by the current endpoint', right: 'Snapshot' },
+              { key: 'visibility', main: 'Live status', sub: business.is_live ? 'Marked live by the authorized snapshot' : 'Not marked live', right: 'Snapshot' },
+              { key: 'payout', main: 'Payout readiness', sub: business.payout_ready ? 'Ready in the authorized snapshot' : 'Not ready or not reported', right: 'Snapshot' },
             ]} />
           </Section>
           <Section title="Applications and review history">
