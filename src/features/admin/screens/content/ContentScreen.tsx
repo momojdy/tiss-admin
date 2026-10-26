@@ -1,5 +1,5 @@
 import { useCallback, useEffect, useState } from 'react';
-import { TextInput, View } from 'react-native';
+import { Pressable, TextInput, View } from 'react-native';
 import * as DocumentPicker from 'expo-document-picker';
 import { supabase } from '../../lib/supabase';
 import { db, ui, bump, useDb, dataMode } from '../../state/db';
@@ -39,6 +39,9 @@ export function ContentScreen() {
   const [error, setError] = useState('');
   const [busy, setBusy] = useState(false);
   const [loading, setLoading] = useState(true);
+  const [assetSearch, setAssetSearch] = useState('');
+  const [assetFeature, setAssetFeature] = useState('All features');
+  const [assetPlacement, setAssetPlacement] = useState('All placements');
 
   const reload = useCallback(async () => {
     setLoading(true);
@@ -100,7 +103,9 @@ export function ContentScreen() {
         title: 'Upload private asset',
         sub: 'The asset is private by default. Publishing creates short-lived signed URLs for published customer/vendor content.',
         fields: [
-          { id: 'key', label: 'Asset key', type: 'text', required: true, value: file.name.replace(/\\.[^.]+$/, '').toLowerCase().replace(/[^a-z0-9]+/g, '.') },
+          { id: 'key', label: 'Asset key · use feature.page.placement.name', type: 'text', required: true, value: file.name.replace(/\\.[^.]+$/, '').toLowerCase().replace(/[^a-z0-9]+/g, '.') },
+          { id: 'feature', label: 'Feature', type: 'select', options: ['Goodies', 'Stayz', 'Flyz', 'Konsoliss', 'Woulib', 'Wallet', 'Frenzies', 'Wantiss home'], value: 'Goodies', required: true },
+          { id: 'placement', label: 'Customer page / placement', type: 'select', options: ['Home', 'Checkout', 'Build your own pizza', 'Build your own burger', 'Promo banner', 'Category', 'Product', 'Builder ingredient', 'Other'], value: 'Home', required: true },
           { id: 'alt', label: 'Alt text (English)', type: 'text' },
           { id: 'status', label: 'Initial status', type: 'select', options: ['draft', 'published'], value: 'draft', required: true },
           { id: 'reason', label: 'Reason', type: 'textarea', required: true },
@@ -110,7 +115,7 @@ export function ContentScreen() {
           setBusy(true);
           try {
             const id = await uploadCmsAsset({
-              key: String(values.key), uri: file.uri, fileName: file.name, contentType: file.mimeType!,
+              key: [String(values.feature).toLowerCase().replace(/[^a-z0-9]+/g, '.'), String(values.placement).toLowerCase().replace(/[^a-z0-9]+/g, '.'), String(values.key).replace(/^[.]+|[.]+$/g, '')].filter(Boolean).join('.'), uri: file.uri, fileName: file.name, contentType: file.mimeType!,
               byteSize: file.size!, altText: { en: String(values.alt || '') },
               status: 'draft',
             });
@@ -158,6 +163,29 @@ export function ContentScreen() {
   const displayMedia = prototypeSnapshot ? [] : db.MEDIA;
   const displayHistory = prototypeSnapshot ? [] : db.CH;
   const displayAudit = prototypeSnapshot ? [] : db.AUD;
+  const assetFeatures = ['All features', 'Goodies', 'Stayz', 'Flyz', 'Konsoliss', 'Woulib', 'Wallet', 'Frenzies', 'Wantiss home'];
+  const assetPlacements = ['All placements', 'Home', 'Checkout', 'Build your own pizza', 'Build your own burger', 'Promo banner', 'Category', 'Product', 'Builder ingredient', 'Other'];
+  const classifyAsset = (asset: AssetRow) => {
+    const key = asset.asset_key.toLowerCase().replace(/[_/]+/g, '.');
+    const feature = ['goodies', 'stayz', 'stays', 'flyz', 'konsoliss', 'woulib', 'wallet', 'frenzies'].find((name) => key.includes(name));
+    const placement = key.includes('pizza') ? 'Build your own pizza'
+      : key.includes('burger') ? 'Build your own burger'
+      : key.includes('checkout') || key.includes('check.out') ? 'Checkout'
+      : key.includes('promo') || key.includes('banner') ? 'Promo banner'
+      : key.includes('home') ? 'Home'
+      : key.includes('category') ? 'Category'
+      : key.includes('product') ? 'Product'
+      : key.includes('ingredient') || key.includes('asset') ? 'Builder ingredient'
+      : 'Other';
+    const featureLabel = feature === 'stays' ? 'Stayz' : feature ? feature[0].toUpperCase() + feature.slice(1) : (key.includes('home') ? 'Wantiss home' : 'Other');
+    return { feature: featureLabel, placement };
+  };
+  const filteredAssets = assets.filter((asset) => {
+    const group = classifyAsset(asset);
+    return (assetFeature === 'All features' || group.feature === assetFeature)
+      && (assetPlacement === 'All placements' || group.placement === assetPlacement)
+      && (!assetSearch.trim() || (asset.asset_key + ' ' + asset.content_type + ' ' + group.feature + ' ' + group.placement).toLowerCase().includes(assetSearch.trim().toLowerCase()));
+  });
   const contentSections = ['Overview', 'Media', 'Banners', 'Promotions', 'Announcements', 'Calendar', 'Approvals', 'History', 'Editor', 'CMS versions'] as const;
   type ContentSection = typeof contentSections[number];
   const activeSection: ContentSection = contentSections.includes(ui.cs as ContentSection) ? ui.cs as ContentSection : 'Overview';
@@ -341,15 +369,28 @@ export function ContentScreen() {
             <OutlineBtn primary onPress={() => { void pickAsset(); }} disabled={busy}>Upload asset</OutlineBtn>
             <OutlineBtn onPress={() => { void reload(); }} disabled={busy}>Refresh</OutlineBtn>
           </View>
-          <Section title={'Media library · ' + assets.length}>
-            <ListRows empty={loading ? 'Loading media assets…' : error ? 'Media assets could not be loaded. Retry above.' : 'No assets are available for your permissions.'} rows={assets.map((asset) => ({
-              key: asset.id, main: asset.asset_key, sub: asset.content_type + ' · ' + Math.ceil(asset.byte_size / 1024) + ' KB · ' + asset.status,
-              right: <View style={{ flexDirection: 'row', gap: 4, flexWrap: 'wrap' }}>
-                {asset.status === 'draft' ? <OutlineBtn onPress={() => { void setAssetStatus(asset, 'published'); }}>Publish</OutlineBtn> : null}
-                {asset.status !== 'archived' ? <OutlineBtn onPress={() => { void setAssetStatus(asset, 'archived'); }}>Archive</OutlineBtn> : null}
-                {asset.status !== 'draft' ? <Pill>{asset.status}</Pill> : null}
-              </View>,
-            }))} />
+          <Section title={'Customer assets · ' + filteredAssets.length + ' of ' + assets.length}>
+            <TextInput value={assetSearch} onChangeText={setAssetSearch} placeholder="Search asset key, feature, placement…" placeholderTextColor={c.mut} style={{ borderWidth: 1, borderColor: c.bd, borderRadius: 10, paddingHorizontal: 10, paddingVertical: 8, color: c.ink, backgroundColor: c.card, fontSize: 12, marginBottom: 8 }} />
+            <Txt size={10} mut style={{ marginBottom: 5 }}>Assets are grouped by feature and customer destination. Name new keys like goodies.home.promo-banner.weekend.</Txt>
+            <Txt size={10} weight={500}>Feature</Txt>
+            <View style={{ flexDirection: 'row', flexWrap: 'wrap', gap: 5, marginTop: 5, marginBottom: 8 }}>
+              {assetFeatures.map((feature) => <Pill key={feature} on={assetFeature === feature} onPress={() => setAssetFeature(feature)}>{feature}</Pill>)}
+            </View>
+            <Txt size={10} weight={500}>Customer page / placement</Txt>
+            <View style={{ flexDirection: 'row', flexWrap: 'wrap', gap: 5, marginTop: 5, marginBottom: 8 }}>
+              {assetPlacements.map((placement) => <Pill key={placement} on={assetPlacement === placement} onPress={() => setAssetPlacement(placement)}>{placement}</Pill>)}
+            </View>
+            <ListRows empty={loading ? 'Loading media assets…' : error ? 'Media assets could not be loaded. Retry above.' : 'No assets match these filters.'} rows={filteredAssets.map((asset) => {
+              const group = classifyAsset(asset);
+              return {
+                key: asset.id, main: asset.asset_key, sub: group.feature + ' · ' + group.placement + ' · ' + asset.content_type + ' · ' + Math.ceil(asset.byte_size / 1024) + ' KB · ' + asset.status,
+                right: <View style={{ flexDirection: 'row', gap: 4, flexWrap: 'wrap' }}>
+                  {asset.status === 'draft' ? <OutlineBtn onPress={() => { void setAssetStatus(asset, 'published'); }}>Publish</OutlineBtn> : null}
+                  {asset.status !== 'archived' ? <OutlineBtn onPress={() => { void setAssetStatus(asset, 'archived'); }}>Archive</OutlineBtn> : null}
+                  {asset.status !== 'draft' ? <Pill>{asset.status}</Pill> : null}
+                </View>,
+              };
+            })} />
           </Section>
         </>
       ) : null}
