@@ -67,6 +67,7 @@ export function ServiceHubScreen() {
       {bizId ? (
         <Section title="Business verification" right={<StatusPill label={verification} />}>
           <Txt size={12} mut lh={1.4}>{VERIFY_COPY[verification]}</Txt>
+          <View style={{ flexDirection: 'row', flexWrap: 'wrap', marginTop: 8 }}><OutlineBtn onPress={() => go('business', { businessId: bizId })}>Business details ›</OutlineBtn></View>
           {can(...REQ.ecosystem) ? (
             <ButtonRow>
               {verification !== 'verified' ? <OutlineBtn primary onPress={guard(REQ.ecosystem, () => changeVerification('verified', 'Verify', 'Verify business'))}>Verify business</OutlineBtn> : null}
