@@ -7,7 +7,8 @@ import type {
 
 const clone = <T,>(x: T): T => JSON.parse(JSON.stringify(x));
 
-/** The in-memory data of the prototype (the `APPS`, `INV`, ... arrays of the HTML). Screens mutate it and call `bump()`. */
+/** The in-memory data snapshot. It is cloned from prototype fixtures until a live authorized backend populates it. */
+export const dataMode: 'prototype' | 'live' = 'prototype';
 export const db = Object.assign(clone(seed), { BIZ: [] as BusinessSnapshot[] }) as unknown as {
   APPS: Application[]; INV: Transaction[]; SVC: ServiceRow[]; BIZ: BusinessSnapshot[]; MOD: Record<string, string>; STAFF: StaffMember[];
   ROLES: Record<string, number[]>; RR: Record<string, string[]>; SEC: string[]; LV: string[];

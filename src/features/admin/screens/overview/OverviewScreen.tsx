@@ -1,5 +1,5 @@
-import { View } from 'react-native';
-import { db, ui, bump, mny, useDb } from '../../state/db';
+import { Pressable, View } from 'react-native';
+import { db, ui, bump, mny, useDb, dataMode } from '../../state/db';
 import { useNav } from '../../shell/Nav';
 import { useTheme } from '../../theme/ThemeContext';
 import { Card, CardTitle, Section } from '../../ui/Card';
@@ -46,16 +46,18 @@ export function OverviewScreen() {
   useDb();
   const { c } = useTheme();
   const { go } = useNav();
-  const waiting = db.APPS.filter((app) => app.st < 3);
-  const completed = db.INV.filter((tx) => tx.s === 'Completed');
-  const pending = db.INV.filter((tx) => tx.s === 'Pending');
-  const failed = db.INV.filter((tx) => tx.s === 'Failed');
-  const refunds = db.INV.filter((tx) => tx.rq || tx.s === 'Refund pending');
+  const prototypeSnapshot = dataMode === 'prototype';
+  // Never present fixture rows as live operational metrics.
+  const waiting = prototypeSnapshot ? [] : db.APPS.filter((app) => app.st < 3);
+  const completed = prototypeSnapshot ? [] : db.INV.filter((tx) => tx.s === 'Completed');
+  const pending = prototypeSnapshot ? [] : db.INV.filter((tx) => tx.s === 'Pending');
+  const failed = prototypeSnapshot ? [] : db.INV.filter((tx) => tx.s === 'Failed');
+  const refunds = prototypeSnapshot ? [] : db.INV.filter((tx) => tx.rq || tx.s === 'Refund pending');
   const overdue = waiting.filter((app) => app.age >= 2);
   const unassigned = waiting.filter((app) => app.o === 'Unassigned');
   const queue = [0, 1, 2].map((stage) => waiting.filter((app) => app.st === stage).length);
-  const chart = activity(String(ui.AR || '30D'), db.INV);
-  const reviewed = db.APPS.filter((app) => app.st >= 3 && app.createdAt && app.reviewedAt && Number.isFinite(Date.parse(app.createdAt)) && Number.isFinite(Date.parse(app.reviewedAt)) && Date.parse(app.reviewedAt) >= Date.parse(app.createdAt));
+  const chart = activity(String(ui.AR || '30D'), prototypeSnapshot ? [] : db.INV);
+  const reviewed = prototypeSnapshot ? [] : db.APPS.filter((app) => app.st >= 3 && app.createdAt && app.reviewedAt && Number.isFinite(Date.parse(app.createdAt)) && Number.isFinite(Date.parse(app.reviewedAt)) && Date.parse(app.reviewedAt) >= Date.parse(app.createdAt));
   const within48 = reviewed.filter((app) => Date.parse(app.reviewedAt!) - Date.parse(app.createdAt!) <= 48 * 60 * 60 * 1000).length;
   const reviewSpeedAvailable = reviewed.length > 0;
   const reviewSpeed = reviewSpeedAvailable ? Math.round(within48 / reviewed.length * 100) : 0;
@@ -64,35 +66,43 @@ export function OverviewScreen() {
     ...failed.slice(0, 1).map((tx) => ({ key: tx.id, title: 'Failed transaction', sub: tx.f + ' · ' + tx.u, right: mny(tx.a), action: () => go('finance', { fv: 'Transactions', fs: 'Failed' }) })),
     ...overdue.slice(0, 2).map((app) => ({ key: app.id, title: 'Application waiting ' + app.age + 'd', sub: app.n + ' · ' + app.s, right: app.o === 'Unassigned' ? 'Unassigned' : app.o, action: () => go('operations', { ov: 'List' }) })),
     ...refunds.slice(0, 1).map((tx) => ({ key: 'refund-' + tx.id, title: 'Refund needs review', sub: tx.u + ' · ' + tx.id, right: mny(tx.rq || tx.a), action: () => go('finance', { fv: 'Refunds' }) })),
-    ...db.CASES.filter((item) => item.st !== 'Resolved').slice(0, 1).map((item) => ({ key: item.id, title: item.st === 'Escalated' ? 'Escalated support case' : 'Open support case', sub: item.svc + ' · ' + item.t, right: item.o || 'Unassigned', action: () => go('operations') })),
+    ...(prototypeSnapshot ? [] : db.CASES.filter((item) => item.st !== 'Resolved').slice(0, 1)).map((item) => ({ key: item.id, title: item.st === 'Escalated' ? 'Escalated support case' : 'Open support case', sub: item.svc + ' · ' + item.t, right: item.o || 'Unassigned', action: () => go('operations') })),
   ].slice(0, 5);
 
   return (
     <View>
       <Heading title="Platform\nOverview" sub="Authorized operational snapshot; unavailable metrics are labeled rather than estimated." kpis={[
-        { icon: '♛', value: db.ACC.filter((account) => account.type === 'Customer').length.toLocaleString('en-US'), label: 'Customer profiles', onPress: () => go('people', { ps: 'Accounts' }) },
-        { icon: '▥', value: db.APPS.filter((app) => app.st === 3).length, label: 'Approved applications', onPress: () => go('operations', { ov: 'List' }) },
-        { icon: '◷', value: waiting.length, label: 'Waiting for review', tag: overdue.length + ' overdue', tone: overdue.length ? 'r' : '', onPress: () => go('operations', { ov: 'List' }) },
+        { icon: '♛', value: prototypeSnapshot ? '—' : db.ACC.filter((account) => account.type === 'Customer').length.toLocaleString('en-US'), label: 'Active customers', tag: prototypeSnapshot ? 'Live data unavailable' : undefined, onPress: () => go('people', { ps: 'Accounts' }) }, 
+        { icon: '▥', value: prototypeSnapshot ? '—' : db.APPS.filter((app) => app.st === 3).length, label: 'Approved businesses', onPress: () => go('operations', { ov: 'List' }) }, 
+        { icon: '◷', value: prototypeSnapshot ? '—' : waiting.length, label: 'Waiting for review', tag: prototypeSnapshot ? 'Live data unavailable' : overdue.length + ' overdue', tone: overdue.length ? 'r' : '', onPress: () => go('operations', { ov: 'List' }) }, 
       ]} />
 
       <Section title="Platform activity" right={<Pill onPress={() => go('analytics')}>↗ Analytics</Pill>}>
         <Chips options={ranges} value={ranges.includes(ui.AR as Range) ? ui.AR as Range : '30D'} onChange={setRange} />
-        <Txt size={21} weight={500}>{chart.total.toLocaleString('en-US')} <Txt size={10.1} mut>transactions · all services</Txt></Txt>
+        <Txt size={21} weight={500}>{prototypeSnapshot ? '—' : chart.total.toLocaleString('en-US')} <Txt size={10.1} mut>transactions · all services</Txt></Txt>
         <View style={{ flexDirection: 'row', justifyContent: 'space-between', marginTop: 4, marginBottom: 2 }}>
           <Txt size={9.5} mut>Transactions in selected range</Txt>
           <Txt size={9.5} mut>{ui.AR} activity range</Txt>
         </View>
-        {chart.available ? <LineChart vals={chart.vals} color={c.or} max={chart.max} labels={chart.labels} yLabels={chart.yLabels} /> : <Txt size={10.1} mut style={{ marginTop: 8 }}>Timestamped transactions are unavailable in the current authorized snapshot; no sample activity is substituted.</Txt>}
+        {!prototypeSnapshot && chart.available ? <LineChart vals={chart.vals} color={c.or} max={chart.max} labels={chart.labels} yLabels={chart.yLabels} /> : <Txt size={10.1} mut style={{ marginTop: 8 }}>Live timestamped transaction data is unavailable. No prototype activity is shown.</Txt>}
       </Section>
 
       <Section title="Needs attention" right={<Pill onPress={() => go('operations', { ov: 'List' })}>View queue ›</Pill>}>
-        <ListRows empty="Nothing urgent is waiting right now." rows={attention.map((item) => ({
-          key: item.key,
-          main: item.title,
-          sub: item.sub,
-          right: <Txt size={9.5} color={item.right === 'Unassigned' ? c.or : c.ink}>{item.right}</Txt>,
-          onPress: item.action,
-        }))} />
+        {attention.length === 0 ? (
+          <Txt size={10.1} mut style={{ paddingVertical: 18, textAlign: 'center' }}>
+            {prototypeSnapshot ? 'Live attention items are unavailable. No prototype items are shown.' : 'Nothing urgent is waiting right now.'}
+          </Txt>
+        ) : (
+          <View style={{ flexDirection: 'row', flexWrap: 'wrap', gap: 9 }}>
+            {attention.map((item) => (
+              <Pressable key={item.key} onPress={item.action} style={{ flexGrow: 1, flexBasis: 150, minWidth: 145, backgroundColor: c.card, borderRadius: 13, padding: 12, gap: 7 }}>
+                <Txt size={10.1} weight={600}>{item.title}</Txt>
+                <Txt size={9.5} mut>{item.sub}</Txt>
+                <Txt size={9.5} color={item.right === 'Unassigned' ? c.or : c.ink}>{item.right}</Txt>
+              </Pressable>
+            ))}
+          </View>
+        )}
       </Section>
 
       <View style={{ flexDirection: 'row', gap: 9, alignItems: 'stretch' }}>
@@ -108,13 +118,13 @@ export function OverviewScreen() {
         </Card>
         <Card style={{ flex: 1.4, minHeight: 152 }}>
           <CardTitle title="Queue mix" right={<Pill onPress={() => go('operations')}>↗</Pill>} />
-          <Txt size={22} weight={500}>{waiting.length} <Txt size={9.5} mut>waiting</Txt></Txt>
-          <View style={{ flexDirection: 'row', height: 10, gap: 2, overflow: 'hidden', borderRadius: 99, marginVertical: 12 }}>
-            {queue.map((value, i) => <View key={i} style={{ flex: Math.max(0.01, value), backgroundColor: [c.ye, c.gr, c.or][i] }} />)}
+          <Txt size={22} weight={500}>{prototypeSnapshot ? '—' : waiting.length} <Txt size={9.5} mut>waiting</Txt></Txt>
+          <View style={{ flexDirection: 'row', height: 10, gap: 2, overflow: 'hidden', borderRadius: 99, marginVertical: 12, backgroundColor: prototypeSnapshot ? c.inset : undefined }}>
+            {!prototypeSnapshot && queue.map((value, i) => <View key={i} style={{ flex: Math.max(0.01, value), backgroundColor: [c.ye, c.gr, c.or][i] }} />)}
           </View>
           {['Submitted', 'In review', 'Needs info'].map((label, i) => (
             <View key={label} style={{ flexDirection: 'row', justifyContent: 'space-between', marginBottom: 5 }}>
-              <Txt size={9.5} mut>{label}</Txt><Txt size={9.5}>{queue[i]}</Txt>
+              <Txt size={9.5} mut>{label}</Txt><Txt size={9.5}>{prototypeSnapshot ? '—' : queue[i]}</Txt>
             </View>
           ))}
         </Card>
@@ -122,11 +132,11 @@ export function OverviewScreen() {
 
       <Section title="Money snapshot" right={<Pill onPress={() => go('finance')}>Finance ›</Pill>}>
         <ListRows rows={[
-          { key: 'completed', main: 'Completed', sub: 'Transactions settled or completed', right: <Txt size={10.1}>{completed.length} · {mny(completed.reduce((n, tx) => n + tx.a, 0))}</Txt>, onPress: () => go('finance', { fs: 'Completed' }) },
-          { key: 'pending', main: 'Pending settlement', sub: 'Transactions awaiting completion', right: <Txt size={10.1}>{pending.length} · {mny(pending.reduce((n, tx) => n + tx.a, 0))}</Txt>, onPress: () => go('finance', { fs: 'Pending' }) },
-          { key: 'failed', main: 'Failed or flagged', sub: 'Transactions needing investigation', right: <Txt size={10.1} color={failed.length ? c.or : c.ink}>{failed.length} · {mny(failed.reduce((n, tx) => n + tx.a, 0))}</Txt>, onPress: () => go('finance', { fs: 'Failed' }) },
-          { key: 'refunds', main: 'Refunds waiting', right: String(refunds.length), onPress: () => go('finance', { fv: 'Refunds' }) },
-          { key: 'payouts', main: 'Payouts to check', right: String(db.PAYO.filter((payout) => payout[3] !== 'Paid').length), onPress: () => go('finance', { fv: 'Payouts' }) },
+          { key: 'completed', main: 'Completed', sub: 'Transactions settled or completed', right: <Txt size={10.1}>{prototypeSnapshot ? '— · Live data unavailable' : `${completed.length} · ${mny(completed.reduce((n, tx) => n + tx.a, 0))}`}</Txt>, onPress: () => go('finance', { fs: 'Completed' }) }, 
+          { key: 'pending', main: 'Pending settlement', sub: 'Transactions awaiting completion', right: <Txt size={10.1}>{prototypeSnapshot ? '— · Live data unavailable' : `${pending.length} · ${mny(pending.reduce((n, tx) => n + tx.a, 0))}`}</Txt>, onPress: () => go('finance', { fs: 'Pending' }) }, 
+          { key: 'failed', main: 'Failed or flagged', sub: 'Transactions needing investigation', right: <Txt size={10.1} color={failed.length ? c.or : c.ink}>{prototypeSnapshot ? '— · Live data unavailable' : `${failed.length} · ${mny(failed.reduce((n, tx) => n + tx.a, 0))}`}</Txt>, onPress: () => go('finance', { fs: 'Failed' }) }, 
+          { key: 'refunds', main: 'Refunds waiting', right: prototypeSnapshot ? '—' : String(refunds.length), onPress: () => go('finance', { fv: 'Refunds' }) }, 
+          { key: 'payouts', main: 'Payouts to check', right: prototypeSnapshot ? '—' : String(db.PAYO.filter((payout) => payout[3] !== 'Paid').length), onPress: () => go('finance', { fv: 'Payouts' }) }, 
         ]} />
       </Section>
 
@@ -149,10 +159,10 @@ export function OverviewScreen() {
 
       <Section title="Team and recent activity" right={<Pill onPress={() => go('people', { ps: 'Audit log' })}>Audit log ›</Pill>}>
         <View style={{ flexDirection: 'row', flexWrap: 'wrap', gap: 6, marginBottom: 8 }}>
-          {db.STAFF.slice(0, 4).map((staff) => <Pill key={staff.n} onPress={() => go('people', { ps: 'Staff' })}>{staff.n} · {staff.st}</Pill>)}
-          <Pill onPress={() => go('operations', { ou: 1 })}>{unassigned.length} unassigned</Pill>
+          {!prototypeSnapshot && db.STAFF.slice(0, 4).map((staff) => <Pill key={staff.n} onPress={() => go('people', { ps: 'Staff' })}>{staff.n} · {staff.st}</Pill>)}
+          {!prototypeSnapshot && <Pill onPress={() => go('operations', { ou: 1 })}>{unassigned.length} unassigned</Pill>}
         </View>
-        <ListRows empty="No recent activity." rows={db.AUD.slice(0, 4).map((event, i) => ({
+        <ListRows empty={prototypeSnapshot ? 'Live audit activity is unavailable.' : 'No recent activity.'} rows={(prototypeSnapshot ? [] : db.AUD.slice(0, 4)).map((event, i) => ({
           key: String(i), main: event[0], sub: event[1], right: event[2],
         }))} />
       </Section>
