@@ -10,7 +10,9 @@
 - **React Native:** account/search/notification header and horizontally scrolling section pills. Search is passed as an empty callback in `AdminApp.tsx`; there is no Quick create, dock export or Settings action in the shell. Navigation and overlays use separate components, which is a good base for restoring parity.
 - **Difference:** the navigation model, access point for global actions, and visual hierarchy are materially different. Restore the HTML dock/action model without replacing the existing authentication and access checks.
 
-## Screen-by-screen baseline (before restoration commits)
+## Historical screen-by-screen notes (earlier HTML version; not the current upload's parity verdict)
+
+**Important:** The table below was written against the different 312,412-byte `wantiss-admin-v9.html`. It is retained only as historical context. Do not treat its screen-level claims as a verified comparison against the current uploaded `wantiss-admin-crm final .html`; the exact-upload section below is the active baseline.
 
 | HTML section/surface | Current React Native implementation | Difference / missing work |
 |---|---|---|
