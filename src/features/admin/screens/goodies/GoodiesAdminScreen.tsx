@@ -115,7 +115,11 @@ export function GoodiesAdminScreen() {
     if (moduleLabel === 'Orders') return db.INV.filter((transaction) => transaction.f.toLowerCase().includes('goodies')).map((transaction: any) => ({ ...transaction, _kind: 'order', _field: '', _title: transaction.id + ' · ' + transaction.f, _sub: transaction.u + ' · $' + transaction.a.toFixed(2) + ' · ' + transaction.s }));
     if (moduleLabel === 'Analytics') return [];
     if (moduleLabel === 'Fees') return Object.entries(data.fees).map(([key, value]) => ({ id: key, _kind: 'fee', _field: 'value', _title: key, _sub: Array.isArray(value) ? value.join(' · ') : String(value), value }));
-    if (moduleLabel === 'Restricted') return [...(data.rg.prohibited || []), ...(data.rg.docs || [])].map((x: any, i: number) => ({ ...x, id: x.id || 'restriction.' + i, _kind: 'restricted', _field: 't', _title: x.t?.en?.v || x.name || x.id || 'Requirement ' + (i + 1), _sub: x.crit ? 'Critical requirement' : 'Restricted-goods rule' }));
+    if (moduleLabel === 'Restricted') return [
+      ...(data.rg.prohibited || []).map((x: any, i: number) => ({ ...x, id: x.id || 'prohibited.' + i, _kind: 'restricted', _field: 'n', _title: x.n || x.id || 'Restricted item', _sub: x.src || 'Platform rule' })),
+      ...(data.rg.docs || []).map((x: any, i: number) => ({ ...x, id: x.id || 'document.' + i, _kind: 'restricted', _field: 'doc', _title: x.doc || 'Required document', _sub: x.cat || 'All services' })),
+      ...(data.rg.texts || []).map((x: any) => ({ ...x, _kind: 'restricted', _field: 't', _title: x.label || x.id, _sub: englishValue(x, 't'), crit: x.crit })),
+    ];
     if (moduleLabel === 'Texts') return [...data.labels, ...data.stages, ...data.notifs].map((x: any) => ({ ...x, _kind: 'text', _field: x.t ? 't' : 'title', _title: x.label || x.id, _sub: englishValue(x, x.t ? 't' : 'title') }));
     if (moduleLabel === 'Support') return [...data.faq, ...data.topics, ...data.legal].map((x: any) => ({ ...x, _kind: 'support', _field: x.q ? 'q' : x.t ? 't' : 'name', _title: x.q?.en?.v || x.t?.en?.v || x.name?.en?.v || x.id, _sub: x.st || 'Support content' }));
     return [];
