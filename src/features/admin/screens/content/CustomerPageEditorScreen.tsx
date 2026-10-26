@@ -15,6 +15,8 @@ import { OutlineBtn, Pill, StatusPill } from '../../ui/Controls';
 import { Txt } from '../../ui/Txt';
 import { CustomerPagePreview, type CustomerPreviewMode, type CustomerPreviewView } from './CustomerPagePreview';
 import { GoodiesConsumerPreview } from './GoodiesConsumerPreview';
+import { applyContent } from '../../goodiesConsumer/content';
+import { emit as emitGoodies } from '../../goodiesConsumer/store';
 
 type ContentRow = {
   id: string;
@@ -53,6 +55,9 @@ export function CustomerPageEditorScreen() {
   const [pageKey, setPageKey] = useState('home');
   const [featureMenuOpen, setFeatureMenuOpen] = useState(false);
   const [actualGoodiesPreview, setActualGoodiesPreview] = useState(false);
+  const [goodiesDraft, setGoodiesDraft] = useState<Record<string, any> | null>(null);
+  const [goodiesTarget, setGoodiesTarget] = useState<{ kind: 'mode' | 'promo' | 'category' | 'label'; id: string; title: string } | null>(null);
+  const [goodiesSaving, setGoodiesSaving] = useState(false);
   const [pageStack, setPageStack] = useState<string[]>([]);
   const [elementKey, setElementKey] = useState('');
   const [editorMode, setEditorMode] = useState<CustomerPreviewMode>('Edit');
@@ -85,6 +90,57 @@ export function CustomerPageEditorScreen() {
   }, []);
 
   useEffect(() => { void reload(); }, [reload]);
+  useEffect(() => {
+    if (!actualGoodiesPreview) return;
+    let active = true;
+    void (async () => {
+      const { data, error: queryError } = await supabase
+        .from('wantiss_cms_content')
+        .select('payload')
+        .eq('content_key', 'goodies.content')
+        .eq('status', 'published')
+        .eq('locale', 'en')
+        .order('version', { ascending: false })
+        .limit(1)
+        .maybeSingle();
+      if (!active) return;
+      if (!queryError && data?.payload && data.payload.v === 5) setGoodiesDraft(JSON.parse(JSON.stringify(data.payload)));
+      else setGoodiesDraft(null);
+    })();
+    return () => { active = false; };
+  }, [actualGoodiesPreview]);
+
+  const updateGoodiesField = (field: 'title' | 'sub' | 'emoji', value: string) => {
+    if (!goodiesDraft || !goodiesTarget || viewMode !== 'Draft' || editorMode !== 'Edit' || !can(...REQ.content)) return;
+    const next = JSON.parse(JSON.stringify(goodiesDraft));
+    const listKey = goodiesTarget.kind === 'mode' ? 'modes' : goodiesTarget.kind === 'promo' ? 'promos' : goodiesTarget.kind === 'category' ? 'cats' : 'labels';
+    const item = (next[listKey] || []).find((entry: any) => entry.id === goodiesTarget.id);
+    if (!item) return;
+    if (field === 'emoji' && goodiesTarget.kind !== 'label') item.emoji = value;
+    else {
+      const key = goodiesTarget.kind === 'category' ? 'name' : goodiesTarget.kind === 'label' ? 't' : field;
+      if (field === 'emoji') return;
+      item[key] = item[key] && typeof item[key] === 'object' ? item[key] : {};
+      item[key].en = item[key].en && typeof item[key].en === 'object' ? item[key].en : { v: '', s: 'draft' };
+      item[key].en.v = value;
+      item[key].en.s = 'draft';
+    }
+    setGoodiesDraft(next);
+    try { applyContent(next); emitGoodies(); } catch { setError('This Goodies content draft could not be previewed.'); }
+  };
+
+  const saveGoodiesDraft = async () => {
+    if (!goodiesDraft || !can(...REQ.content)) return;
+    setGoodiesSaving(true);
+    setError('');
+    try {
+      await saveCmsVersion({ key: 'goodies.content', locale: 'en', payload: goodiesDraft, status: 'draft' });
+      toast('Goodies changes saved as a private draft. Customer-facing published content is unchanged.');
+    } catch (e) {
+      setError(e instanceof Error ? e.message : 'Goodies draft could not be saved.');
+    } finally { setGoodiesSaving(false); }
+  };
+
   useEffect(() => {
     const requestedFeature = ui.editorFeature;
     if (requestedFeature) setActualGoodiesPreview(String(requestedFeature).toLowerCase() === 'goodies');
@@ -304,7 +360,7 @@ export function CustomerPageEditorScreen() {
           {viewMode === 'Published' && !publishedRow && selected?.status !== 'published' ? <Txt size={10.5} color={c.or} style={{ marginBottom: 8 }}>No published version was found for this locale. This is an empty published view, not a draft preview.</Txt> : null}
           {!selected && viewMode === 'Draft' ? <Txt size={10.5} mut style={{ marginBottom: 8 }}>Starter preview · select a version or start a blank draft to edit it.</Txt> : null}
           {selected && viewMode === 'Draft' ? <Txt size={10.5} mut style={{ marginBottom: 8, textAlign: 'center' }}>{editorMode === 'Edit' ? 'Edit mode: tap an element to select it. Changes stay in the draft.' : 'Preview mode: tap linked elements or the bottom navigation to move through customer pages.'}</Txt> : null}
-          {actualGoodiesPreview ? <GoodiesConsumerPreview /> : <CustomerPagePreview
+          {actualGoodiesPreview ? <GoodiesConsumerPreview editMode={viewMode === 'Draft' && editorMode === 'Edit' && can(...REQ.content)} onEditTarget={(target) => setGoodiesTarget(target)} /> : <CustomerPagePreview
             payload={previewPayload}
             pageKey={activePageKey}
             mode={viewMode === 'Published' ? 'Preview' : editorMode}
@@ -317,6 +373,35 @@ export function CustomerPageEditorScreen() {
           />}
         </View>
       </Section>
+
+      {actualGoodiesPreview && viewMode === 'Draft' && editorMode === 'Edit' ? (
+        <Section title="Edit selected Goodies content">
+          <Txt size={10.5} mut style={{ marginBottom: 8 }}>Tap a service tile, category, promotion, or text area in the phone to select it. Phone navigation is disabled while editing. Changes update this preview and save as a private CMS draft.</Txt>
+          {!goodiesDraft ? <Txt size={10.5} color={c.or}>Published Goodies content could not be loaded for editing. Check CMS access and try Refresh.</Txt> : goodiesTarget ? (
+            <>
+              <Txt size={11} weight={500}>{goodiesTarget.title}</Txt>
+              {goodiesTarget.kind === 'label' ? (
+                <View><Txt size={9.5} mut>Text</Txt><TextInput value={String(goodiesDraft.labels?.find((v: any) => v.id === goodiesTarget.id)?.t?.en?.v || '')} onChangeText={(value) => updateGoodiesField('title', value)} editable={can(...REQ.content)} style={fieldStyle} placeholder="Text" /></View>
+              ) : (
+                <>
+                  <Txt size={9.5} mut>{goodiesTarget.kind === 'category' ? 'Title' : 'Title'}</Txt>
+                  <TextInput value={String((goodiesDraft[goodiesTarget.kind === 'mode' ? 'modes' : goodiesTarget.kind === 'promo' ? 'promos' : 'cats'] || []).find((v: any) => v.id === goodiesTarget.id)?.[goodiesTarget.kind === 'category' ? 'name' : 'title']?.en?.v || '')} onChangeText={(value) => updateGoodiesField('title', value)} editable={can(...REQ.content)} style={fieldStyle} placeholder="Title" />
+                  {goodiesTarget.kind !== 'category' ? <>
+                    <Txt size={9.5} mut>Subtitle</Txt>
+                    <TextInput value={String(goodiesDraft[goodiesTarget.kind === 'mode' ? 'modes' : 'promos']?.find((v: any) => v.id === goodiesTarget.id)?.sub?.en?.v || '')} onChangeText={(value) => updateGoodiesField('sub', value)} editable={can(...REQ.content)} style={fieldStyle} placeholder="Subtitle" />
+                  </> : null}
+                  <Txt size={9.5} mut>Icon / visual</Txt>
+                  <TextInput value={String(goodiesDraft[goodiesTarget.kind === 'mode' ? 'modes' : goodiesTarget.kind === 'promo' ? 'promos' : 'cats']?.find((v: any) => v.id === goodiesTarget.id)?.emoji || '')} onChangeText={(value) => updateGoodiesField('emoji', value)} editable={can(...REQ.content)} style={fieldStyle} placeholder="Emoji or icon" />
+                </>
+              )}
+              <View style={{ flexDirection: 'row', flexWrap: 'wrap', gap: 6, marginTop: 4 }}>
+                <OutlineBtn onPress={() => setGoodiesTarget(null)}>Deselect</OutlineBtn>
+                <OutlineBtn primary onPress={() => { void saveGoodiesDraft(); }} disabled={goodiesSaving || !goodiesDraft || !can(...REQ.content)}>{goodiesSaving ? 'Saving…' : 'Save Goodies draft'}</OutlineBtn>
+              </View>
+            </>
+          ) : <Txt size={10.5} mut>No item selected yet. Tap a visible part of the phone to edit its title, subtitle, or icon.</Txt>}
+        </Section>
+      ) : null}
 
       {!actualGoodiesPreview && selected && viewMode === 'Draft' && editorMode === 'Edit' ? (
         <>
