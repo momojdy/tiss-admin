@@ -15,7 +15,7 @@ import { OutlineBtn, Pill, StatusPill } from '../../ui/Controls';
 import { Txt } from '../../ui/Txt';
 import { CustomerPagePreview, type CustomerPreviewMode, type CustomerPreviewView } from './CustomerPagePreview';
 import { GoodiesConsumerPreview } from './GoodiesConsumerPreview';
-import { applyContent } from '../../goodiesConsumer/content';
+import { applyContent, C as liveGoodiesContent } from '../../goodiesConsumer/content';
 import { emit as emitGoodies } from '../../goodiesConsumer/store';
 
 type ContentRow = {
@@ -127,7 +127,16 @@ export function CustomerPageEditorScreen() {
       item[key].en.s = 'draft';
     }
     setGoodiesDraft(next);
-    try { applyContent(next); emitGoodies(); } catch { setError('This Goodies content draft could not be previewed.'); }
+    try {
+      const previewPayload = JSON.parse(JSON.stringify(next));
+      const liveLib = new Map(((liveGoodiesContent as any)?.lib || []).map((entry: any) => [entry.id, entry.img?.data]));
+      (previewPayload.lib || []).forEach((entry: any) => {
+        const liveData = liveLib.get(entry.id);
+        if (entry.img && !entry.img.data && liveData) entry.img.data = liveData;
+      });
+      applyContent(previewPayload);
+      emitGoodies();
+    } catch { setError('This Goodies content draft could not be previewed.'); }
   };
 
   const saveGoodiesDraft = async () => {
