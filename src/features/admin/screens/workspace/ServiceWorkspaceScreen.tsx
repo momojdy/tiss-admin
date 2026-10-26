@@ -51,6 +51,14 @@ export function ServiceWorkspaceScreen() {
   const queryRows = sourceRows.filter((row) => !query || (row.title + ' ' + row.sub + ' ' + row.right).toLowerCase().includes(query));
   const visibleRows = ui.wf === 'Pending' ? queryRows.filter((row) => /pending|unassigned|submitted|review|failed|needs info|open|discrepancy/i.test(row.right + ' ' + row.sub)) : queryRows;
   const pre = service[5] === 'Pre-order';
+  // Mirrors the HTML workspace's module-kind split: overview, analytics, configuration, and records.
+  const moduleKind = /analytics/i.test(moduleName) ? 'analytics'
+    : /^Overview$/i.test(moduleName) ? 'overview'
+    : /settings|configuration|pricing and rules|availability|scheduling/i.test(moduleName) ? 'config'
+    : 'records';
+  const analyticsRanges = ['7D', '30D', '90D', '1Y', 'Custom'] as const;
+  const selectedRange = analyticsRanges.includes(String(ui.AR || '30D') as typeof analyticsRanges[number])
+    ? String(ui.AR || '30D') as typeof analyticsRanges[number] : '30D';
 
   return (
     <View>
@@ -59,29 +67,49 @@ export function ServiceWorkspaceScreen() {
         <Txt size={10.1} mut>{serviceName} · Workspace</Txt>
       </Row>
       <Heading title={serviceName + '\n' + moduleName} sub={service[1]} kpis={[
-        { icon: '▥', value: dataMode === 'live' ? serviceTransactions.length : '—', label: 'Transactions matched', tag: pre ? 'Pre-order' : dataMode === 'live' ? 'Authorized snapshot' : 'Live data unavailable', onPress: () => go('finance') },
-        { icon: '◷', value: '—', label: 'Applications by service', onPress: () => go('operations') },
-        { icon: '♛', value: '—', label: 'Service health' },
+        { icon: '▥', value: dataMode === 'live' ? serviceTransactions.length : '—', label: 'Orders today', tag: pre ? 'Pre-order' : dataMode === 'live' ? 'Authorized snapshot' : 'Live data unavailable', onPress: () => go('finance') },
+        { icon: '▤', value: dataMode === 'live' ? sourceRows.filter((row) => /pending|unassigned|submitted|review|failed|needs info|open|discrepancy/i.test(row.right + ' ' + row.sub)).length : '—', label: 'Pending items', onPress: () => go('operations') },
+        { icon: '◔', value: '—', label: 'Health score' },
       ]} />
       <View style={{ flexDirection: 'row', flexWrap: 'wrap', gap: 6, marginBottom: 8 }}>
         {modules.map((name) => <Pill key={name} on={name === moduleName} onPress={() => setModule(name)}>{name}</Pill>)}
       </View>
 
-      {moduleName === 'Overview' ? (
+      {moduleKind === 'overview' ? (
         <>
-          {pre ? <Card><Txt size={11} mut>{serviceName} is marked Pre-order. Do not treat its demo activity as a live service.</Txt></Card> : null}
-          <Section title="Service health">
-            <ListRows rows={[
-              { key: 'applications', main: 'Applications and submissions', sub: 'The current operations endpoint does not expose a service link for each application.', right: '—', onPress: () => go('operations') },
-              { key: 'transactions', main: 'Transactions and bookings', sub: 'Authorized transactions matched by feature name', right: dataMode === 'live' ? String(serviceTransactions.length) : '—', onPress: () => setModule(modules.find((m) => /order|booking|trip|transaction|shipment|payment|rental|bid/i.test(m)) || 'Overview') },
-              { key: 'support', main: 'Support cases and issues', sub: 'Service-level linking is not available in the current support snapshot.', right: '—', onPress: () => go('operations') },
-              { key: 'content', main: 'Banners and promotions', sub: 'Live placements are not loaded into the service snapshot.', right: '—', onPress: () => go('content') },
-            ]} />
+          <Section title="Modules">
+            <ListRows empty="No modules are configured for this service." rows={modules.filter((name) => name !== 'Overview').map((name) => ({
+              key: name, main: name, sub: 'Open ' + serviceName + ' ' + name.toLowerCase(), right: '›', onPress: () => setModule(name),
+            }))} />
           </Section>
           <Section title="Recent activity" right={<Pill onPress={() => go('operations')}>Operations ›</Pill>}>
-            <ListRows empty="No matching service records are in the current snapshot." rows={sourceRows.slice(0, 6).map((row) => ({ key: row.key, main: row.title, sub: row.sub, right: row.right, onPress: row.action }))} />
+            <ListRows empty={dataMode === 'live' ? 'No matching service activity.' : 'Live service activity is not connected. No demo records are shown.'} rows={sourceRows.slice(0, 4).map((row) => ({
+              key: row.key, main: row.title, sub: row.sub, right: row.right, onPress: row.action,
+            }))} />
           </Section>
         </>
+      ) : moduleKind === 'analytics' ? (
+        <>
+          <Row wrap>
+            <Chips options={analyticsRanges} value={selectedRange} onChange={(value) => { ui.AR = value; bump(); }} />
+          </Row>
+          <Section title={serviceName + ' analytics'}>
+            <Txt size={10.5} mut lh={1.4}>No live analytics data is connected for {serviceName}. The HTML range controls are retained, but no sample chart or fabricated totals are shown.</Txt>
+            <View style={{ minHeight: 104, alignItems: 'center', justifyContent: 'center', marginTop: 8, backgroundColor: c.inset, borderRadius: 10 }}>
+              <Txt size={10.1} mut>No data for this range.</Txt>
+            </View>
+          </Section>
+        </>
+      ) : moduleKind === 'config' ? (
+        <Section title={moduleName}>
+          <Txt size={10.5} mut lh={1.4}>Live configuration is not connected for {serviceName}. Settings remain read-only until an authorized service configuration endpoint is available.</Txt>
+          <ListRows rows={[
+            { key: 'enabled', main: 'Enabled', sub: 'Service availability', right: '—' },
+            { key: 'review', main: 'Review before publishing', sub: 'Approval requirement', right: '—' },
+            { key: 'limit', main: 'Daily limit', sub: 'Service-specific limit', right: '—' },
+            { key: 'notify', main: 'Notify admins', sub: 'Operational notifications', right: '—' },
+          ]} />
+        </Section>
       ) : (
         <>
           <Row wrap>
@@ -89,7 +117,7 @@ export function ServiceWorkspaceScreen() {
             <Pill onPress={() => { ui.wq = ''; bump(); }}>Clear</Pill>
           </Row>
           <Section title={moduleName + (dataMode === 'live' ? ' · ' + visibleRows.length : '')} right={<Pill onPress={() => { ui.wf = ui.wf === 'All' ? 'Pending' : 'All'; bump(); }}>{ui.wf === 'All' ? 'Filter pending' : 'Show all'}</Pill>}>
-            <ListRows empty="No live records are connected for this service module. No demo records are shown." rows={visibleRows.map((row) => ({
+            <ListRows empty={dataMode === 'live' ? 'No records match this module.' : 'Live records are not connected for this service module. No demo records are shown.'} rows={visibleRows.map((row) => ({
               key: row.key, main: row.title, sub: row.sub,
               right: <View style={{ alignItems: 'flex-end', gap: 3 }}><Txt size={9.5} color={row.right === 'Unassigned' ? c.or : c.ink}>{row.right}</Txt><Small>Open ›</Small></View>,
               onPress: row.action,
@@ -97,7 +125,7 @@ export function ServiceWorkspaceScreen() {
           </Section>
           <Card>
             <Txt size={10.1} weight={500}>Workspace scope</Txt>
-            <Txt size={9.5} mut lh={1.4}>This workspace uses the HTML-defined module list for each service and keeps the matching record-type layout. Live service records and service-specific create, approve, refund and publish actions must come from authorized endpoints; no fixture records or simulated actions are shown.</Txt>
+            <Txt size={9.5} mut lh={1.4}>This module follows the HTML-defined module list for {serviceName}. Live records and create, approve, refund and publish actions must use authorized service endpoints; this screen does not simulate those actions.</Txt>
             <View style={{ flexDirection: 'row', flexWrap: 'wrap', marginTop: 8, gap: 6 }}>
               <OutlineBtn onPress={() => go('operations')}>Operations</OutlineBtn>
               <OutlineBtn onPress={() => go('finance')}>Finance</OutlineBtn>
