@@ -55,7 +55,7 @@ export function OverviewScreen() {
   const unassigned = waiting.filter((app) => app.o === 'Unassigned');
   const queue = [0, 1, 2].map((stage) => waiting.filter((app) => app.st === stage).length);
   const chart = activity(String(ui.AR || '30D'), db.INV);
-  const reviewed = db.APPS.filter((app) => app.st >= 3 && app.createdAt && app.reviewedAt && Number.isFinite(Date.parse(app.createdAt)) && Number.isFinite(Date.parse(app.reviewedAt)));
+  const reviewed = db.APPS.filter((app) => app.st >= 3 && app.createdAt && app.reviewedAt && Number.isFinite(Date.parse(app.createdAt)) && Number.isFinite(Date.parse(app.reviewedAt)) && Date.parse(app.reviewedAt) >= Date.parse(app.createdAt));
   const within48 = reviewed.filter((app) => Date.parse(app.reviewedAt!) - Date.parse(app.createdAt!) <= 48 * 60 * 60 * 1000).length;
   const reviewSpeedAvailable = reviewed.length > 0;
   const reviewSpeed = reviewSpeedAvailable ? Math.round(within48 / reviewed.length * 100) : 0;
