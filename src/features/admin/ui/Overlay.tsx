@@ -27,7 +27,11 @@ export function OverlayProvider({ children }: { children: ReactNode }) {
   const [items, setItems] = useState<Item[]>([]);
   const { c, dark } = useTheme();
   const insets = useSafeAreaInsets();
-  const { width } = useWindowDimensions();
+  const { width, height } = useWindowDimensions();
+  const frameWidth = Math.min(512, width);
+  const frameHeight = Math.min(910, height);
+  const frameLeft = (width - frameWidth) / 2;
+  const frameTop = (height - frameHeight) / 2;
 
   const api = useMemo<OverlayApi>(() => ({
     openDialog: (render) => { const id = seq++; setItems((l) => [...l, { id, kind: 'dialog', render }]); return id; },
@@ -42,14 +46,14 @@ export function OverlayProvider({ children }: { children: ReactNode }) {
     return () => sub.remove();
   }, [items.length, api]);
 
-  const drawerW = Math.min(318, width);
+  const drawerW = Math.min(318, frameWidth);
   const renderBody = useCallback((it: Item) => (typeof it.render === 'function' ? it.render(() => api.close(it.id)) : it.render), [api]);
 
   return (
     <Ctx.Provider value={api}>
       {children}
       {items.map((it) => (
-        <View key={it.id} style={{ position: 'absolute', top: 0, left: 0, right: 0, bottom: 0, zIndex: 20 + it.id }}>
+        <View key={it.id} style={{ position: 'absolute', top: frameTop, left: frameLeft, width: frameWidth, height: frameHeight, zIndex: 20 + it.id }}>
           <BlurView intensity={25} tint={dark ? 'dark' : 'light'} style={{ position: 'absolute', top: 0, left: 0, right: 0, bottom: 0 }} />
           <Pressable accessibilityLabel="Close" onPress={() => api.close(it.id)} style={{ position: 'absolute', top: 0, left: 0, right: 0, bottom: 0, backgroundColor: c.overlay }} />
           {it.kind === 'dialog' ? (
