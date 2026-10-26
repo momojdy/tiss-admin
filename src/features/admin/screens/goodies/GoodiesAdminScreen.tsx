@@ -135,6 +135,11 @@ export function GoodiesAdminScreen() {
         try { await saveDraft(String(item.id), { proposed_value: String(values.value), change_reason: reason, module: moduleName, proposed_only: true }); toast('Fee/rule draft saved; no live fee changed.'); }
         catch (error) { return error instanceof Error ? error.message : 'Draft could not be saved.'; }
       } });
+    } else if (item._kind === 'merchant') {
+      openMerchant(item);
+    } else if (item._kind === 'order') {
+      go('finance', { fv: 'Transactions' });
+      toast('Opened Finance to review the Goodies transaction.');
     } else editRecordStatus(item, item._title, 'st', ['Live', 'Draft', 'Scheduled', 'Archived']);
   };
 
