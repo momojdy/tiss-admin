@@ -2,14 +2,14 @@ import { useSyncExternalStore } from 'react';
 import seed from '../data/seed.json';
 import { realToday } from '../lib/dates';
 import type {
-  Account, Announcement, Application, AuthRecord, Banner, Notice, Payout, Promotion, Reco, ServiceRow, Settlement, StaffMember, SupportCase, Transaction,
+  Account, Announcement, Application, AuthRecord, Banner, BusinessSnapshot, Notice, Payout, Promotion, Reco, ServiceRow, Settlement, StaffMember, SupportCase, Transaction,
 } from '../data/types';
 
 const clone = <T,>(x: T): T => JSON.parse(JSON.stringify(x));
 
 /** The in-memory data of the prototype (the `APPS`, `INV`, ... arrays of the HTML). Screens mutate it and call `bump()`. */
-export const db = clone(seed) as unknown as {
-  APPS: Application[]; INV: Transaction[]; SVC: ServiceRow[]; MOD: Record<string, string>; STAFF: StaffMember[];
+export const db = Object.assign(clone(seed), { BIZ: [] as BusinessSnapshot[] }) as unknown as {
+  APPS: Application[]; INV: Transaction[]; SVC: ServiceRow[]; BIZ: BusinessSnapshot[]; MOD: Record<string, string>; STAFF: StaffMember[];
   ROLES: Record<string, number[]>; RR: Record<string, string[]>; SEC: string[]; LV: string[];
   CASES: SupportCase[]; NS: Notice[]; CUST: string[][]; BN: Banner[]; PRM: Promotion[]; ANN: Announcement[];
   MEDIA: [string, string[]][]; CH: [string, string][]; AUD: [string, string, string][];
