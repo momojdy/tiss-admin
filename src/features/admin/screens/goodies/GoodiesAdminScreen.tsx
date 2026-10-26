@@ -1,6 +1,6 @@
 import { useState } from 'react';
 import { View } from 'react-native';
-import { db, ui, bump, useDb } from '../../state/db';
+import { db, dataMode, ui, bump, useDb } from '../../state/db';
 import { can } from '../../state/access';
 import { REQ } from '../../state/requirements';
 import { saveCmsVersion } from '../../lib/adminBackend';
