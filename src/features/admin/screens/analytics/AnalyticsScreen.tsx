@@ -117,7 +117,7 @@ export function AnalyticsScreen() {
         {!prototypeSnapshot && chart.available ? <LineChart vals={chart.vals} color={c.or} max={chart.max} labels={chart.labels} yLabels={chart.yLabels} /> : <Txt size={10.1} mut style={{ marginTop: 8 }}>{prototypeSnapshot ? 'Live transaction data is not connected. No prototype series is shown.' : 'No timestamped transactions are available in the authorized snapshot.'}</Txt>}
       </Section>
 
-      <Section title="By feature" right={<Pill onPress={() => go('ecosystem')}>Ecosystem ›</Pill>}>
+      <Section title="By service (same dataset)" right={<Pill onPress={() => go('ecosystem')}>Ecosystem ›</Pill>}>
         <Table columns={[{ title: 'Service', flex: 1.4 }, { title: 'Transactions', align: 'right' }, { title: 'Share', align: 'right' }]}
           rows={prototypeSnapshot ? [] : byService.map((item) => ({
             key: item.name,
