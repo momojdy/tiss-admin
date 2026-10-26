@@ -1,4 +1,4 @@
-import { View } from 'react-native';
+import { Pressable, View } from 'react-native';
 import { db, ui, bump, mny, useDb, dataMode } from '../../state/db';
 import { useNav } from '../../shell/Nav';
 import { useTheme } from '../../theme/ThemeContext';
@@ -88,13 +88,21 @@ export function OverviewScreen() {
       </Section>
 
       <Section title="Needs attention" right={<Pill onPress={() => go('operations', { ov: 'List' })}>View queue ›</Pill>}>
-        <ListRows empty="Nothing urgent is waiting right now." rows={attention.map((item) => ({
-          key: item.key,
-          main: item.title,
-          sub: item.sub,
-          right: <Txt size={9.5} color={item.right === 'Unassigned' ? c.or : c.ink}>{item.right}</Txt>,
-          onPress: item.action,
-        }))} />
+        {attention.length === 0 ? (
+          <Txt size={10.1} mut style={{ paddingVertical: 18, textAlign: 'center' }}>
+            {prototypeSnapshot ? 'Live attention items are unavailable. No prototype items are shown.' : 'Nothing urgent is waiting right now.'}
+          </Txt>
+        ) : (
+          <View style={{ flexDirection: 'row', flexWrap: 'wrap', gap: 9 }}>
+            {attention.map((item) => (
+              <Pressable key={item.key} onPress={item.action} style={{ flexGrow: 1, flexBasis: 150, minWidth: 145, backgroundColor: c.card, borderRadius: 13, padding: 12, gap: 7 }}>
+                <Txt size={10.1} weight={600}>{item.title}</Txt>
+                <Txt size={9.5} mut>{item.sub}</Txt>
+                <Txt size={9.5} color={item.right === 'Unassigned' ? c.or : c.ink}>{item.right}</Txt>
+              </Pressable>
+            ))}
+          </View>
+        )}
       </Section>
 
       <View style={{ flexDirection: 'row', gap: 9, alignItems: 'stretch' }}>
