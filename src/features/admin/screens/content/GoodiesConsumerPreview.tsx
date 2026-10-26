@@ -86,6 +86,17 @@ export function GoodiesConsumerPreview({ editMode = false, onEditTarget }: { edi
         <View pointerEvents={editMode ? 'none' : 'auto'} style={{ flex: 1 }}><GoodiesApp embedded previewMode /></View>
         {editMode ? (
           <View pointerEvents="box-none" style={{ position: 'absolute', left: 0, right: 0, top: 0, bottom: 0, zIndex: 999, elevation: 999 }}>
+            <Pressable
+              accessibilityRole="button"
+              accessibilityLabel="Select Goodies content at this position"
+              onPress={(event: any) => {
+                const y = Number(event?.nativeEvent?.locationY ?? 330);
+                const x = Number(event?.nativeEvent?.locationX ?? 80);
+                const target = pickTarget(y, x);
+                if (target) onEditTarget?.(target);
+              }}
+              style={{ position: 'absolute', left: 0, right: 0, top: 0, bottom: 0 }}
+            />
             <View pointerEvents="none" style={{ position: 'absolute', top: 8, left: 0, right: 0, alignItems: 'center' }}>
               <Text style={{ color: '#fff', backgroundColor: orange, overflow: 'hidden', borderRadius: 14, paddingHorizontal: 10, paddingVertical: 5, fontSize: 10, fontWeight: '800' }}>TAP A HIGHLIGHTED SECTION TO EDIT</Text>
             </View>
