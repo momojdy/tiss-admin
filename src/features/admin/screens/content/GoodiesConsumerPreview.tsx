@@ -10,6 +10,7 @@ const screens = [
   { key: 'home', label: 'Home' },
   { key: 'cats', label: 'Categories' },
   { key: 'orders', label: 'Orders' },
+  { key: 'settings', label: 'Account' },
   { key: 'cart', label: 'Cart' },
   { key: 'store', label: 'Store' },
   { key: 'product', label: 'Product' },
