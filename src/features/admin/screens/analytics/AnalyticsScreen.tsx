@@ -92,7 +92,7 @@ export function AnalyticsScreen() {
     const csv = [
       ['id', 'service', 'status', 'amount', 'created_at'].join(','),
       ...rows.map((tx) => [tx.id, tx.f, tx.s, tx.a, tx.createdAt || ''].map((value) => '"' + String(value ?? '').replace(/"/g, '""') + '"').join(',')),
-    ].join('\\n');
+    ].join('\n');
     await Clipboard.setStringAsync(csv);
     Alert.alert('CSV copied', 'The authorized analytics CSV was copied to your clipboard.');
   };
