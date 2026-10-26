@@ -13,9 +13,13 @@ import { ServiceHubScreen } from '../screens/ecosystem/ServiceHubScreen';
 import { FinanceScreen } from '../screens/finance/FinanceScreen';
 import { PeopleScreen } from '../screens/people/PeopleScreen';
 import { ContentScreen } from '../screens/content/ContentScreen';
+import { OverviewScreen } from '../screens/overview/OverviewScreen';
+import { AnalyticsScreen } from '../screens/analytics/AnalyticsScreen';
 
 /** Screens ported so far. The rest show a clear "not ported yet" card (see README). */
 const SCREENS: Partial<Record<ScreenId, () => ReactNode>> = {
+  overview: () => <OverviewScreen />,
+  analytics: () => <AnalyticsScreen />,
   operations: () => <OperationsScreen />,
   ecosystem: () => <EcosystemScreen />,
   hub: () => <ServiceHubScreen />,
