@@ -58,7 +58,6 @@ export function OverviewScreen() {
   const overdue = waiting.filter((app) => app.age >= 2);
   const unassigned = waiting.filter((app) => app.o === 'Unassigned');
   const queue = [0, 1, 2].map((stage) => waiting.filter((app) => app.st === stage).length);
-  const chart = activity(String(ui.AR || '30D'), prototypeSnapshot ? [] : db.INV, customStart, customEnd);
   const reviewed = prototypeSnapshot ? [] : db.APPS.filter((app) => app.st >= 3 && app.createdAt && app.reviewedAt && Number.isFinite(Date.parse(app.createdAt)) && Number.isFinite(Date.parse(app.reviewedAt)) && Date.parse(app.reviewedAt) >= Date.parse(app.createdAt));
   const within48 = reviewed.filter((app) => Date.parse(app.reviewedAt!) - Date.parse(app.createdAt!) <= 48 * 60 * 60 * 1000).length;
   const reviewSpeedAvailable = reviewed.length > 0;
@@ -67,6 +66,7 @@ export function OverviewScreen() {
   const [expandedChart, setExpandedChart] = useState(false);
   const [customStart, setCustomStart] = useState('2026-09-20');
   const [customEnd, setCustomEnd] = useState('2026-10-17');
+  const chart = activity(String(ui.AR || '30D'), prototypeSnapshot ? [] : db.INV, customStart, customEnd);
   const [rangeError, setRangeError] = useState('');
   const setRange = (range: Range) => {
     if (range === 'Custom') { setRangeError(''); setCustomOpen(true); return; }
@@ -185,9 +185,9 @@ export function OverviewScreen() {
             <Txt size={16} weight={600}>Custom range</Txt>
             <Txt size={10.1} mut>Choose a start and end date. The chart will show only timestamped authorized records within this range.</Txt>
             <Txt size={10.1} mut>Start date (YYYY-MM-DD)</Txt>
-            <TextInput value={customStart} onChangeText={setCustomStart} placeholder="2026-09-20" placeholderTextColor={c.mut} autoCapitalize="none" style={{ color: c.ink, borderWidth: 1, borderColor: c.line, borderRadius: 9, paddingHorizontal: 11, paddingVertical: 10, fontSize: 13 }} />
+            <TextInput value={customStart} onChangeText={setCustomStart} placeholder="2026-09-20" placeholderTextColor={c.mut} autoCapitalize="none" style={{ color: c.ink, borderWidth: 1, borderColor: c.bd, borderRadius: 9, paddingHorizontal: 11, paddingVertical: 10, fontSize: 13 }} />
             <Txt size={10.1} mut>End date (YYYY-MM-DD)</Txt>
-            <TextInput value={customEnd} onChangeText={setCustomEnd} placeholder="2026-10-17" placeholderTextColor={c.mut} autoCapitalize="none" style={{ color: c.ink, borderWidth: 1, borderColor: c.line, borderRadius: 9, paddingHorizontal: 11, paddingVertical: 10, fontSize: 13 }} />
+            <TextInput value={customEnd} onChangeText={setCustomEnd} placeholder="2026-10-17" placeholderTextColor={c.mut} autoCapitalize="none" style={{ color: c.ink, borderWidth: 1, borderColor: c.bd, borderRadius: 9, paddingHorizontal: 11, paddingVertical: 10, fontSize: 13 }} />
             {rangeError ? <Txt size={10.1} color={c.or}>{rangeError}</Txt> : null}
             <View style={{ flexDirection: 'row', justifyContent: 'flex-end', gap: 8, marginTop: 4 }}>
               <Pill onPress={() => setCustomOpen(false)}>Cancel</Pill>
