@@ -81,12 +81,17 @@ export function SettingsSheet({ onClose }: { onClose: () => void }) {
     void AsyncStorage.getItem(STORAGE_KEY).then((raw) => {
       if (!mounted) return;
       if (raw) {
-        try { setSettings({ ...initial(), ...JSON.parse(raw) }); } catch { /* keep defaults if local data is malformed */ }
+        try {
+          const saved = JSON.parse(raw) as Record<string, Record<string, SettingValue>>;
+          setSettings({ ...initial(), ...saved });
+          const savedMode = String(saved.Appearance?.mode || 'Light').toLowerCase();
+          setMode(savedMode === 'dark' || savedMode === 'system' ? savedMode : 'light');
+        } catch { /* keep defaults if local data is malformed */ }
       }
       setLoaded(true);
     }).catch(() => { if (mounted) setLoaded(true); });
     return () => { mounted = false; };
-  }, []);
+  }, [setMode]);
 
   const destinations: Record<string, () => void> = {
     Platform: () => go('ecosystem'),
