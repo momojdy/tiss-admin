@@ -2,7 +2,7 @@ import { useCallback, useEffect, useState } from 'react';
 import { TextInput, View } from 'react-native';
 import * as DocumentPicker from 'expo-document-picker';
 import { supabase } from '../../lib/supabase';
-import { db, ui, bump, useDb } from '../../state/db';
+import { db, ui, bump, useDb, dataMode } from '../../state/db';
 import { can } from '../../state/access';
 import { REQ } from '../../state/requirements';
 import { useOverlay } from '../../ui/Overlay';
@@ -39,6 +39,7 @@ export function ContentScreen() {
   const [assets, setAssets] = useState<AssetRow[]>([]);
   const [error, setError] = useState('');
   const [busy, setBusy] = useState(false);
+  const [loading, setLoading] = useState(true);
   const [editingDraft, setEditingDraft] = useState<ContentRow | null>(null);
   const [draftJson, setDraftJson] = useState('');
   const [draftJsonError, setDraftJsonError] = useState('');
@@ -47,15 +48,24 @@ export function ContentScreen() {
   const previewPayload = (() => { try { return editingDraft ? JSON.parse(draftJson) : previewRow?.payload; } catch { return null; } })();
 
   const reload = useCallback(async () => {
+    setLoading(true);
     setError('');
-    const [contentResult, assetResult] = await Promise.all([
-      supabase.from('wantiss_cms_content').select('id,content_key,locale,version,status,payload,updated_at').order('updated_at', { ascending: false }).limit(300),
-      listCmsAssets().catch((error) => error instanceof Error ? error : new Error('Assets are unavailable.')),
-    ]);
-    if (contentResult.error) setError(contentResult.error.code === '42501' ? 'You do not have permission to view content.' : 'Content records are unavailable. Check the CMS migration and permission grants.');
-    if (assetResult instanceof Error) setError(assetResult.message);
-    setContent(contentResult.data || []);
-    setAssets(Array.isArray(assetResult) ? assetResult as AssetRow[] : []);
+    try {
+      const [contentResult, assetResult] = await Promise.all([
+        supabase.from('wantiss_cms_content').select('id,content_key,locale,version,status,payload,updated_at').order('updated_at', { ascending: false }).limit(300),
+        listCmsAssets().catch((error) => error instanceof Error ? error : new Error('Assets are unavailable.')),
+      ]);
+      if (contentResult.error) setError(contentResult.error.code === '42501' ? 'You do not have permission to view content.' : 'Content records are unavailable. Check the CMS migration and permission grants.');
+      if (assetResult instanceof Error) setError(assetResult.message);
+      setContent(contentResult.data || []);
+      setAssets(Array.isArray(assetResult) ? assetResult as AssetRow[] : []);
+    } catch (error) {
+      setError(error instanceof Error ? error.message : 'Content Studio could not load. Check your connection and permissions.');
+      setContent([]);
+      setAssets([]);
+    } finally {
+      setLoading(false);
+    }
   }, []);
 
   useEffect(() => { void reload(); }, [reload]);
@@ -147,6 +157,14 @@ export function ContentScreen() {
   });
 
 
+  const prototypeSnapshot = dataMode === 'prototype';
+  // Fixture-driven legacy panels remain in the layout, but are not presented as live CMS records.
+  const displayBanners = prototypeSnapshot ? [] : db.BN;
+  const displayPromotions = prototypeSnapshot ? [] : db.PRM;
+  const displayAnnouncements = prototypeSnapshot ? [] : db.ANN;
+  const displayMedia = prototypeSnapshot ? [] : db.MEDIA;
+  const displayHistory = prototypeSnapshot ? [] : db.CH;
+  const displayAudit = prototypeSnapshot ? [] : db.AUD;
   const contentSections = ['Overview', 'Media', 'Banners', 'Promotions', 'Announcements', 'Calendar', 'Approvals', 'History', 'Editor', 'CMS versions'] as const;
   type ContentSection = typeof contentSections[number];
   const activeSection: ContentSection = contentSections.includes(ui.cs as ContentSection) ? ui.cs as ContentSection : 'Overview';
@@ -248,32 +266,33 @@ export function ContentScreen() {
   return (
     <View>
       <Heading title="Content Studio" sub="Banners, campaigns, announcements, media and customer-facing CMS content." />
-      {error ? <Card><Txt size={12} color={c.or}>{error}</Txt></Card> : null}
+      {error ? <Card><Txt size={12} color={c.or}>{error}</Txt><View style={{ marginTop: 8 }}><OutlineBtn onPress={() => { void reload(); }} disabled={loading}>Retry loading</OutlineBtn></View></Card> : null}
+      {loading ? <Card><Txt size={11} mut>Loading CMS content and media…</Txt><View style={{ gap: 7, marginTop: 10 }}>{[0, 1, 2].map((key) => <View key={key} style={{ height: 12, borderRadius: 6, backgroundColor: c.inset, opacity: 0.8 }} />)}</View></Card> : null}
       <Chips options={contentSections} value={activeSection} onChange={changeSection} />
 
       {activeSection === 'Overview' ? (
         <>
           <Section title="Placements" right={<OutlineBtn primary onPress={openQuickCreate}>+ New banner</OutlineBtn>}>
             <View style={{ flexDirection: 'row', flexWrap: 'wrap', gap: 6, marginBottom: 8 }}>
-              <Pill>{db.BN.filter((banner) => banner.st === 'Live').length} live</Pill>
-              <Pill>{db.BN.filter((banner) => banner.st === 'Scheduled').length} scheduled</Pill>
-              <Pill>{db.BN.filter((banner) => banner.st === 'Draft' || banner.st === 'In review').length} drafts/reviews</Pill>
+              <Pill>{displayBanners.filter((banner) => banner.st === 'Live').length} live</Pill>
+              <Pill>{displayBanners.filter((banner) => banner.st === 'Scheduled').length} scheduled</Pill>
+              <Pill>{displayBanners.filter((banner) => banner.st === 'Draft' || banner.st === 'In review').length} drafts/reviews</Pill>
             </View>
-            <ListRows empty="No seeded placements." rows={db.BN.filter((banner) => banner.st !== 'Archived').slice(0, 6).map((banner) => ({
+            <ListRows empty={loading ? 'Loading placements…' : prototypeSnapshot ? 'Live CMS placement records are not connected. No prototype placements are shown.' : 'No placements found.'} rows={displayBanners.filter((banner) => banner.st !== 'Archived').slice(0, 6).map((banner) => ({
               key: banner.id, main: banner.pl, sub: banner.t + ' · ' + banner.svc,
               right: <StatusPill label={banner.st} small />,
               onPress: () => editBannerDraft(banner),
             }))} />
           </Section>
           <Section title="Promotions" right={<OutlineBtn onPress={openQuickCreate}>+ New promotion</OutlineBtn>}>
-            <ListRows empty="No seeded promotions." rows={db.PRM.slice(0, 5).map((promotion) => ({
+            <ListRows empty={loading ? 'Loading promotions…' : prototypeSnapshot ? 'Live campaign records are not connected. No prototype promotions are shown.' : 'No promotions found.'} rows={displayPromotions.slice(0, 5).map((promotion) => ({
               key: promotion.id, main: promotion.n, sub: promotion.svc + ' · ' + promotion.fund,
               right: <StatusPill label={promotion.st} small />,
               onPress: () => editPromotionDraft(promotion),
             }))} />
           </Section>
           <Section title="Announcements" right={<OutlineBtn onPress={openQuickCreate}>+ New announcement</OutlineBtn>}>
-            <ListRows empty="No seeded announcements." rows={db.ANN.slice(0, 4).map((announcement) => ({
+            <ListRows empty={loading ? 'Loading announcements…' : prototypeSnapshot ? 'Live announcement records are not connected. No prototype announcements are shown.' : 'No announcements found.'} rows={displayAnnouncements.slice(0, 4).map((announcement) => ({
               key: announcement.id, main: announcement.t, sub: announcement.aud + (announcement.when ? ' · ' + announcement.when : ''),
               right: <StatusPill label={announcement.st} small />,
               onPress: () => editAnnouncementDraft(announcement),
@@ -282,48 +301,48 @@ export function ContentScreen() {
         </>
       ) : null}
 
-      {activeSection === 'Banners' ? <Section title={'Banners and placements · ' + db.BN.length} right={<OutlineBtn primary onPress={openQuickCreate}>+ New banner</OutlineBtn>}>
-        <ListRows rows={db.BN.map((banner) => ({ key: banner.id, main: banner.t, sub: banner.svc + ' · ' + banner.pl + (banner.to ? ' · ends ' + banner.to : ''), right: <View style={{ flexDirection: 'row', alignItems: 'center', gap: 5 }}><StatusPill label={banner.st} small /><OutlineBtn onPress={() => editBannerDraft(banner)}>Edit draft</OutlineBtn></View>, onPress: () => editBannerDraft(banner) }))} />
+      {activeSection === 'Banners' ? <Section title={'Banners and placements · ' + displayBanners.length} right={<OutlineBtn primary onPress={openQuickCreate}>+ New banner</OutlineBtn>}>
+        <ListRows rows={displayBanners.map((banner) => ({ key: banner.id, main: banner.t, sub: banner.svc + ' · ' + banner.pl + (banner.to ? ' · ends ' + banner.to : ''), right: <View style={{ flexDirection: 'row', alignItems: 'center', gap: 5 }}><StatusPill label={banner.st} small /><OutlineBtn onPress={() => editBannerDraft(banner)}>Edit draft</OutlineBtn></View>, onPress: () => editBannerDraft(banner) }))} />
       </Section> : null}
 
-      {activeSection === 'Promotions' ? <Section title={'Promotions and campaigns · ' + db.PRM.length} right={<OutlineBtn primary onPress={openQuickCreate}>+ New promotion</OutlineBtn>}>
-        <ListRows rows={db.PRM.map((promotion) => ({ key: promotion.id, main: promotion.n, sub: promotion.svc + ' · ' + promotion.fund + ' · ' + promotion.inc, right: <View style={{ flexDirection: 'row', alignItems: 'center', gap: 5 }}><StatusPill label={promotion.st} small /><OutlineBtn onPress={() => editPromotionDraft(promotion)}>Edit draft</OutlineBtn></View>, onPress: () => editPromotionDraft(promotion) }))} />
+      {activeSection === 'Promotions' ? <Section title={'Promotions and campaigns · ' + displayPromotions.length} right={<OutlineBtn primary onPress={openQuickCreate}>+ New promotion</OutlineBtn>}>
+        <ListRows rows={displayPromotions.map((promotion) => ({ key: promotion.id, main: promotion.n, sub: promotion.svc + ' · ' + promotion.fund + ' · ' + promotion.inc, right: <View style={{ flexDirection: 'row', alignItems: 'center', gap: 5 }}><StatusPill label={promotion.st} small /><OutlineBtn onPress={() => editPromotionDraft(promotion)}>Edit draft</OutlineBtn></View>, onPress: () => editPromotionDraft(promotion) }))} />
       </Section> : null}
 
-      {activeSection === 'Announcements' ? <Section title={'Announcements · ' + db.ANN.length} right={<OutlineBtn primary onPress={openQuickCreate}>+ New announcement</OutlineBtn>}>
-        <ListRows rows={db.ANN.map((announcement) => ({ key: announcement.id, main: announcement.t, sub: announcement.aud + (announcement.when ? ' · ' + announcement.when : ''), right: <View style={{ flexDirection: 'row', alignItems: 'center', gap: 5 }}><StatusPill label={announcement.st} small /><OutlineBtn onPress={() => editAnnouncementDraft(announcement)}>Edit draft</OutlineBtn></View>, onPress: () => editAnnouncementDraft(announcement) }))} />
+      {activeSection === 'Announcements' ? <Section title={'Announcements · ' + displayAnnouncements.length} right={<OutlineBtn primary onPress={openQuickCreate}>+ New announcement</OutlineBtn>}>
+        <ListRows rows={displayAnnouncements.map((announcement) => ({ key: announcement.id, main: announcement.t, sub: announcement.aud + (announcement.when ? ' · ' + announcement.when : ''), right: <View style={{ flexDirection: 'row', alignItems: 'center', gap: 5 }}><StatusPill label={announcement.st} small /><OutlineBtn onPress={() => editAnnouncementDraft(announcement)}>Edit draft</OutlineBtn></View>, onPress: () => editAnnouncementDraft(announcement) }))} />
       </Section> : null}
 
       {activeSection === 'Calendar' ? <Section title="Publishing calendar">
         <ListRows empty="No scheduled content dates." rows={[
-          ...db.BN.filter((banner) => banner.from || banner.to).flatMap((banner) => [
+          ...displayBanners.filter((banner) => banner.from || banner.to).flatMap((banner) => [
             ...(banner.from ? [{ key: banner.id + '-start', main: 'Starts · ' + banner.t, sub: banner.svc, right: banner.from, onPress: () => editBannerDraft(banner) }] : []),
             ...(banner.to ? [{ key: banner.id + '-end', main: 'Ends · ' + banner.t, sub: banner.svc, right: banner.to, onPress: () => editBannerDraft(banner) }] : []),
           ]),
-          ...db.PRM.filter((promotion) => promotion.from || promotion.to).map((promotion) => ({ key: promotion.id, main: 'Campaign · ' + promotion.n, sub: promotion.svc, right: promotion.from + ' → ' + promotion.to, onPress: () => editPromotionDraft(promotion) })),
-          ...db.ANN.filter((announcement) => announcement.when).map((announcement) => ({ key: announcement.id, main: 'Announcement · ' + announcement.t, sub: announcement.aud, right: announcement.when, onPress: () => editAnnouncementDraft(announcement) })),
+          ...displayPromotions.filter((promotion) => promotion.from || promotion.to).map((promotion) => ({ key: promotion.id, main: 'Campaign · ' + promotion.n, sub: promotion.svc, right: promotion.from + ' → ' + promotion.to, onPress: () => editPromotionDraft(promotion) })),
+          ...displayAnnouncements.filter((announcement) => announcement.when).map((announcement) => ({ key: announcement.id, main: 'Announcement · ' + announcement.t, sub: announcement.aud, right: announcement.when, onPress: () => editAnnouncementDraft(announcement) })),
         ].sort((a, b) => String(a.right).localeCompare(String(b.right)))} />
       </Section> : null}
 
       {activeSection === 'Approvals' ? <Section title="Approval queue">
         <ListRows empty="Nothing is marked as in review in the current snapshot." rows={[
-          ...db.BN.filter((banner) => banner.st === 'In review' || banner.st === 'Draft').map((banner) => ({ key: 'banner-' + banner.id, main: banner.t, sub: 'Banner · ' + banner.svc, right: <OutlineBtn onPress={() => stageContentDraft('approval.' + banner.id, banner.id, { item_type: 'banner', proposed_action: 'review', item_id: banner.id })}>Stage review</OutlineBtn> })),
-          ...db.PRM.filter((promotion) => promotion.st === 'In review' || promotion.st === 'Draft').map((promotion) => ({ key: 'promotion-' + promotion.id, main: promotion.n, sub: 'Promotion · ' + promotion.svc, right: <OutlineBtn onPress={() => stageContentDraft('approval.' + promotion.id, promotion.id, { item_type: 'promotion', proposed_action: 'review', item_id: promotion.id })}>Stage review</OutlineBtn> })),
+          ...displayBanners.filter((banner) => banner.st === 'In review' || banner.st === 'Draft').map((banner) => ({ key: 'banner-' + banner.id, main: banner.t, sub: 'Banner · ' + banner.svc, right: <OutlineBtn onPress={() => stageContentDraft('approval.' + banner.id, banner.id, { item_type: 'banner', proposed_action: 'review', item_id: banner.id })}>Stage review</OutlineBtn> })),
+          ...displayPromotions.filter((promotion) => promotion.st === 'In review' || promotion.st === 'Draft').map((promotion) => ({ key: 'promotion-' + promotion.id, main: promotion.n, sub: 'Promotion · ' + promotion.svc, right: <OutlineBtn onPress={() => stageContentDraft('approval.' + promotion.id, promotion.id, { item_type: 'promotion', proposed_action: 'review', item_id: promotion.id })}>Stage review</OutlineBtn> })),
         ]} />
         <Txt size={9.5} mut style={{ marginTop: 8 }}>These are draft proposals only. A real approval queue needs a dedicated server-side review endpoint.</Txt>
       </Section> : null}
 
       {activeSection === 'History' ? <Section title="Publishing history (read-only)">
         <ListRows empty="No history entries." rows={[
-          ...db.CH.slice(0, 30).map((entry, i) => ({ key: 'change-' + i, main: entry[1], sub: entry[0], right: 'Activity' })),
-          ...db.AUD.slice(0, 20).map((entry, i) => ({ key: 'audit-' + i, main: entry[0], sub: entry[1], right: entry[2] })),
+          ...displayHistory.slice(0, 30).map((entry, i) => ({ key: 'change-' + i, main: entry[1], sub: entry[0], right: 'Activity' })),
+          ...displayAudit.slice(0, 20).map((entry, i) => ({ key: 'audit-' + i, main: entry[0], sub: entry[1], right: entry[2] })),
         ]} />
       </Section> : null}
 
       {activeSection === 'Media' ? (
         <>
-          <Section title={'Media library placements · ' + db.MEDIA.length}>
-            <ListRows empty="No seeded media placements." rows={db.MEDIA.map((media, index) => ({ key: 'media-' + index, main: media[0], sub: media[1].length ? 'Used in ' + media[1].length + ' placement(s)' : 'Unused', right: 'Stage edit ›', onPress: () => stageContentDraft('media', String(index), { media_key: media[0], used_in: media[1] }) }))} />
+          <Section title={'Media library placements · ' + displayMedia.length}>
+            <ListRows empty={prototypeSnapshot ? 'Live media placement data is unavailable.' : 'No media placements found.'} rows={displayMedia.map((media, index) => ({ key: 'media-' + index, main: media[0], sub: media[1].length ? 'Used in ' + media[1].length + ' placement(s)' : 'Unused', right: 'Stage edit ›', onPress: () => stageContentDraft('media', String(index), { media_key: media[0], used_in: media[1] }) }))} />
           </Section>
           <View style={{ flexDirection: 'row', flexWrap: 'wrap', gap: 8 }}>
             <OutlineBtn primary onPress={() => { void pickAsset(); }} disabled={busy}>Upload asset</OutlineBtn>
