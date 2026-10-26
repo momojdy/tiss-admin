@@ -113,7 +113,7 @@ export function GoodiesAdminScreen() {
   const itemsForModule = (): any[] => {
     if (moduleLabel === 'Home') return [
       ...data.modes.map((x: any) => ({ ...x, _kind: 'mode', _field: 'title', _title: x.title?.en?.v || x.id, _sub: x.sub?.en?.v || 'Home mode' })),
-      ...data.promos.map((x: any) => ({ ...x, _kind: 'promo', _field: 'title', _title: x.title?.en?.v || x.id, _sub: x.sub?.en?.v || x.aud })),
+      ...data.promos.map((x: any) => ({ ...x, _kind: 'promo', _field: 'title', _title: x.title?.en?.v || x.id, _sub: (x.sub?.en?.v || x.aud || 'Goodies promotion') + (x.target ? ' · Target: ' + x.target : '') })),
     ];
     if (moduleLabel === 'Categories') return data.cats.map((x: any) => ({ ...x, _kind: 'category', _field: 'name', _title: x.name?.en?.v || x.id, _sub: x.st + ' · ' + (x.stores || 0) + ' stores' }));
     if (moduleLabel === 'Library' || moduleLabel === 'Product review') return data.lib.map((x: any) => ({ ...x, _kind: 'library', _field: 'name', _title: x.name?.en?.v || x.id, _sub: (moduleLabel === 'Product review' ? 'Catalog review · ' : '') + x.role + ' · ' + x.b + ' · ' + x.st }));
