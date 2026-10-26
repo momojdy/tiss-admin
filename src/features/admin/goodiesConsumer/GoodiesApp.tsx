@@ -26,7 +26,7 @@ const FOOTED = ['product', 'checkout'];
 export function GoodiesApp({onExit, embedded = true, previewMode = false}: {onExit?: () => void; embedded?: boolean; previewMode?: boolean}) {
   useGoodies();
   const th = useTheme(), ins = useSafeAreaInsets();
-  const scroll = useRef<ScrollView>(null);
+  const scroll = useRef<React.ElementRef<typeof ScrollView>>(null);
   const [sheet, setSheet] = useState<any>(null), [toastTxt, setToastTxt] = useState('');
   const toastT = useRef<any>(null);
 

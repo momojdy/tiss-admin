@@ -117,7 +117,7 @@ function Addresses() {
 }
 
 function StoreChat({id}: {id: string}) {
-  const th = useTheme(), store = STB[id], listRef = useRef<ScrollView>(null);
+  const th = useTheme(), store = STB[id], listRef = useRef<React.ElementRef<typeof ScrollView>>(null);
   const [userId, setUserId] = useState(''), [conversationId, setConversationId] = useState(''), [messages, setMessages] = useState<any[]>([]);
   const [draft, setDraft] = useState(''), [loading, setLoading] = useState(true), [sending, setSending] = useState(false), [problem, setProblem] = useState(''), [attempt, setAttempt] = useState(0);
   const loadMessages = async (cid: string) => {
