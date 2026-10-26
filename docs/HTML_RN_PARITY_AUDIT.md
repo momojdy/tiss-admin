@@ -97,6 +97,26 @@ Confirmed from that exact file:
 - Source CSS defines a 57 px left content inset when the dock is expanded and 28 px when collapsed; the expanded dock is 37 px wide and the collapsed dock is 16 × 72 px.
 - HTML interactions that only toast, mutate in-memory demo arrays or say a feature opens “in the next pass” are prototypes, not evidence of a production endpoint.
 
+## Screen-by-screen comparison against the exact uploaded HTML
+
+| HTML surface in uploaded file | React Native implementation on `main` | Current parity result |
+|---|---|---|
+| Global frame, dock and tabs | `AdminApp.tsx`, `FloatingDock.tsx`, `Tabs.tsx` | Frame dimensions and collapse behavior now follow the measured responsive frame; tabs, Outfit tokens, card tokens and dock structure exist. Device screenshot comparison and touch/keyboard parity remain unverified. |
+| Overview (`S[0]`) | `OverviewScreen.tsx` | Operational sections are present. Hardcoded demo KPIs and synthetic activity were removed; timestamped backend records are used where available. Service-health and CMS counts explicitly show unavailable until their authorized snapshots are connected. This is safer than the HTML demo values, but not yet a full data/visual match. |
+| Operations (`S[1]`) | `OperationsScreen.tsx` and operation drawers | Main review workflow exists. Exact board/list geometry, all filters, details and keyboard behavior still need device comparison. |
+| Ecosystem (`S[2]`) | `EcosystemScreen.tsx`, `ServiceHubScreen.tsx`, `ServiceWorkspaceScreen.tsx` | Directory and workspace routes exist. Goodies module labels now match the uploaded source. Most services still share a generic module-driven screen instead of having fully ported, service-specific behavior. |
+| Content Studio (`S[3]`) | `ContentScreen.tsx`, CMS asset/version APIs and Quick Create | Banners, promotions, announcements, calendar, approvals, history, media and CMS versions have UI. CMS versions/assets use existing server functions; seed banners/promotions are not loaded from a verified live endpoint, so their edits are private proposals rather than live changes. Full source interaction parity is incomplete. |
+| Finance (`S[4]`) | `FinanceScreen.tsx`, transaction drawers and authorized finance actions | Screen and server-authorized action infrastructure exist. Full record-by-record parity, payout/reconciliation details and device interactions remain to verify. |
+| Analytics (`S[5]`) | `AnalyticsScreen.tsx` | Transaction activity now derives from real timestamped records; review-time metrics require real creation/review timestamps. The HTML's user acquisition channels, average order value and other demo analytics are not all implemented as real backend metrics yet. |
+| People (`S[6]`) | `PeopleScreen.tsx`, permission panels and account restriction workflows | People/access screens exist. Customer/business records, audit log and all overlays still need full source comparison and live permission testing. |
+| Business detail (`S[7]`) | `BusinessDetailsScreen.tsx` | Dedicated route now reads only the authorized ecosystem snapshot and shows a business ID, verification, visibility, payout readiness and matching applications. Extra profile fields are not available from the current snapshot and are not fabricated. |
+| Potssy workspace (`S[10]`) | No dedicated Potssy screen is registered | **Missing full parity.** Do not copy the HTML's demo draw/payment mutations into production. It needs a separate screen and server-authorized endpoints for any real campaign, ticket, draw or refund actions. |
+| Service workspace (`S[11]`) | `ServiceWorkspaceScreen.tsx` | Exact service module labels are defined in seed metadata; Goodies is aligned to the uploaded HTML. The current generic data router is not a full port of each module's original workspace behavior. |
+| Customer page editor (`S[9]`) | `CustomerPageEditorScreen.tsx`, `GoodiesPhonePreview.tsx` | A standalone CMS-backed JSON editor and phone preview are registered. It saves only private drafts through the existing CMS RPC. The HTML's visual element-level builder (visibility, order, text and type controls) is not yet fully ported. |
+| Search and Quick Create | `SearchSheet.tsx`, `QuickCreateSheet.tsx`, `FloatingDock.tsx` | Permission-aware search and create entry points exist. Draft creation and protected staff invitations are safer than HTML toast-only demo actions; every search target and create form still needs end-to-end validation. |
+| Settings | `SettingsSheet.tsx` | Appearance works locally; other settings are not claimed as production changes because a verified server-side settings endpoint has not been found. |
+| Drawers/dialogs | `Overlay.tsx` and screen-specific drawers | Blur, drawer sizing and responsive frame alignment are implemented. Animation, safe-area, close/back behavior and exact geometry still need device testing. |
+
 ## Changes made against the exact uploaded baseline
 
 - Goodies navigation labels/order were aligned to the nine module names in this uploaded HTML. The Settings section is explicitly read-only until an authorized server-side settings endpoint exists.
