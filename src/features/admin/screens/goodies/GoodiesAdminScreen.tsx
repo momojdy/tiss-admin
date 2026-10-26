@@ -1,6 +1,7 @@
 import { useState } from 'react';
 import { View } from 'react-native';
 import { db, dataMode, ui, bump, useDb } from '../../state/db';
+import goodiesSeed from '../../data/goodiesSeed.json';
 import { can } from '../../state/access';
 import { REQ } from '../../state/requirements';
 import { saveCmsVersion } from '../../lib/adminBackend';
@@ -14,13 +15,14 @@ import { Chips, OutlineBtn, Pill, StatusPill } from '../../ui/Controls';
 import { ListRows } from '../../ui/Lists';
 import { Txt } from '../../ui/Txt';
 
-/** The HTML workspace structure is retained, but fixture records are never used as production data.
- * Populate this shape only from an authorized Goodies backend snapshot. */
-const data = {
-  modes: [], promos: [], cats: [], lib: [], reqs: [], coupons: [], fees: {},
-  rg: { prohibited: [], docs: [], texts: [] },
-  labels: [], stages: [], notifs: [], faq: [], topics: [], legal: [],
-} as any;
+/**
+ * Canonical Goodies feature/configuration reference.
+ * These definitions preserve the mobile feature catalog, builder ingredient roles,
+ * localization metadata, promotion targets (including Wallet), fee/rule structure,
+ * and support copy. They are NOT treated as a live merchant/order/backend snapshot.
+ * Production actions stage a server-side CMS draft; live operational metrics come from APIs.
+ */
+const data = goodiesSeed as any;
 const moduleMap: Record<string, string> = { Overview: 'Overview', 'Products and catalog': 'Library', Categories: 'Categories', Merchants: 'Merchants', 'Product review': 'Product review', Orders: 'Orders', Promotions: 'Promos', Support: 'Support', Analytics: 'Analytics', Settings: 'Settings' };
 // Keep the module names and order identical to MOD.Goodies in the uploaded HTML source.
 const modules = ['Overview', 'Products and catalog', 'Categories', 'Merchants', 'Product review', 'Orders', 'Promotions', 'Support', 'Analytics', 'Settings'];
@@ -87,7 +89,7 @@ export function GoodiesAdminScreen() {
     if (!can(...REQ.content)) { toast('You need Content edit access to stage a Goodies draft.'); return; }
     form({
       title: title,
-      sub: 'Stage a proposed status change for review. The current seed record is not mutated.',
+      sub: 'Stage a proposed status change for review. The reference configuration is not mutated; changes are staged as private CMS drafts.',
       fields: [
         { id: 'status', label: 'Proposed status', type: 'select', options, value: String(record[statusKey] || options[0]), required: true },
         { id: 'reason', label: 'Reason', type: 'textarea', required: true },
@@ -116,7 +118,7 @@ export function GoodiesAdminScreen() {
     if (moduleLabel === 'Categories') return data.cats.map((x: any) => ({ ...x, _kind: 'category', _field: 'name', _title: x.name?.en?.v || x.id, _sub: x.st + ' · ' + (x.stores || 0) + ' stores' }));
     if (moduleLabel === 'Library' || moduleLabel === 'Product review') return data.lib.map((x: any) => ({ ...x, _kind: 'library', _field: 'name', _title: x.name?.en?.v || x.id, _sub: (moduleLabel === 'Product review' ? 'Catalog review · ' : '') + x.role + ' · ' + x.b + ' · ' + x.st }));
     if (moduleLabel === 'Requests') return data.reqs.map((x: any) => ({ ...x, _kind: 'request', _field: 'note', _title: x.name, _sub: x.vendor + ' · ' + x.st + ' · ' + x.b }));
-    if (moduleLabel === 'Promos') return [...data.promos, ...data.coupons].map((x: any) => ({ ...x, _kind: 'promo', _field: x.title ? 'title' : 'desc', _title: x.title?.en?.v || x.code || x.id, _sub: (x.st || 'Draft') + ' · ' + (x.aud || x.store || 'Goodies') }));
+    if (moduleLabel === 'Promos') return [...data.promos, ...data.coupons].map((x: any) => ({ ...x, _kind: 'promo', _field: x.title ? 'title' : 'desc', _title: x.title?.en?.v || x.code || x.id, _sub: (x.st || 'Draft') + ' · ' + (x.aud || x.store || 'Goodies') + (x.target ? ' · Target: ' + x.target : '') }));
     if (moduleLabel === 'Merchants') return [];
     if (moduleLabel === 'Orders') return dataMode === 'live' ? db.INV.filter((transaction) => transaction.f.toLowerCase().includes('goodies')).map((transaction: any) => ({ ...transaction, _kind: 'order', _field: '', _title: transaction.id + ' · ' + transaction.f, _sub: transaction.u + ' · ' + transaction.a.toFixed(2) + ' · ' + transaction.s })) : [];
     if (moduleLabel === 'Analytics') return [];
@@ -168,21 +170,21 @@ export function GoodiesAdminScreen() {
       {moduleLabel === 'Overview' ? (
         <>
           <Heading title="" kpis={[
-            { icon: '▥', value: '—', label: 'Categories' },
-            { icon: '▤', value: '—', label: 'Builder assets' },
-            { icon: '◷', value: '—', label: 'Ingredient requests' },
+            { icon: '▥', value: data.cats.length, label: 'Configured categories' },
+            { icon: '▤', value: data.lib.length, label: 'Builder definitions' },
+            { icon: '◷', value: data.reqs.length, label: 'Request reference entries' },
           ]} />
           <Section title="Goodies health">
             <ListRows rows={[
-              { key: 'promos', main: 'Live promotions', sub: 'Customer-facing offers', right: '—', onPress: () => setModule('Promotions') },
+              { key: 'promos', main: 'Live promotions', sub: 'Seed-defined offer references; live status must be verified by the backend', right: String(data.promos.filter((item: any) => item.st === 'Live').length) + ' refs', onPress: () => setModule('Promotions') },
               { key: 'missing', main: 'Missing translations', sub: 'English, French, Haitian Creole, Spanish and Chinese', right: '—', onPress: () => setModule('Products and catalog') },
-              { key: 'assets', main: 'Assets without uploaded images', sub: 'Builder library completeness', right: '—', onPress: () => setModule('Products and catalog') },
+              { key: 'assets', main: 'Assets without uploaded images', sub: 'Reference catalog definitions', right: String(data.lib.length), onPress: () => setModule('Products and catalog') },
               { key: 'restricted', main: 'Restricted-goods rules', sub: 'Review service requirements', right: '—', onPress: () => setModule('Settings') },
             ]} />
           </Section>
           <Section title="Needs review">
             <ListRows rows={[
-              { key: 'req', main: 'Ingredient requests', sub: 'Review vendor-submitted ingredients', right: '—', onPress: () => setModule('Product review') },
+              { key: 'req', main: 'Ingredient requests', sub: 'Reference request definitions; live requests require backend data', right: String(data.reqs.length) + ' refs', onPress: () => setModule('Product review') },
               { key: 'library', main: 'Builder library', sub: 'Manage ingredients, extras and product assets', right: '—', onPress: () => setModule('Products and catalog') },
               { key: 'content', main: 'Customer home content', sub: 'Modes, promotions, labels and category order', right: 'Open ›', onPress: () => setModule('Products and catalog') },
             ]} />
@@ -214,7 +216,7 @@ export function GoodiesAdminScreen() {
         </Section>
       ) : (
         <Section title={moduleName} right={<Pill onPress={() => setFilter(filter === 'All' ? 'Live' : 'All')}>{filter === 'All' ? 'Filter live' : 'Show all'}</Pill>}>
-          <Txt size={9.5} mut style={{ marginBottom: 8 }}>Live Goodies records are not connected yet. This workspace keeps the HTML-aligned modules and controls, but it will not display fixture records or claim a production change was made.</Txt>
+          <Txt size={9.5} mut style={{ marginBottom: 8 }}>Seed-defined Goodies feature configuration is shown as a reference, not as confirmed live production state. Edits are staged as private server-side CMS drafts; live merchant, order, and request records require their authorized endpoints.</Txt>
           <ListRows empty="No records in this section." rows={visible.map((item) => ({
             key: String(item.id),
             main: item._title,
@@ -226,7 +228,7 @@ export function GoodiesAdminScreen() {
       )}
       <Card style={{ marginTop: 2 }}>
         <Txt size={10.1} weight={500}>Publishing boundary</Txt>
-        <Txt size={9.5} mut lh={1.4}>The HTML-aligned Goodies workspace is retained. Live catalog, orders, merchant, product-review, configuration and analytics records must come from authorized Goodies endpoints; fixture records are not used here.</Txt>
+        <Txt size={9.5} mut lh={1.4}>goodiesSeed.json is retained as Goodies feature configuration and reference metadata, including the builder catalog structure, localization statuses, promotion targets, Wallet links, fee/rule definitions and support copy. It is not treated as authoritative live order, merchant, or analytics data; those records must come from authorized Goodies endpoints.</Txt>
       </Card>
     </View>
   );
