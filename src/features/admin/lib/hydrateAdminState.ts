@@ -7,6 +7,25 @@ import type { Account, Application, ServiceRow, StaffMember, SupportCase, Transa
 const str = (v: unknown) => v == null ? '' : String(v);
 const date = (v: unknown) => v ? new Date(String(v)).toLocaleDateString() : '';
 const num = (v: unknown) => Number(v || 0);
+const normalizedStatus = (value: unknown) => {
+  const raw = str(value).trim().toLowerCase().replace(/[_-]+/g, ' ');
+  const known: Record<string, string> = {
+    completed: 'Completed', succeeded: 'Completed', success: 'Completed',
+    pending: 'Pending', processing: 'Pending', failed: 'Failed', refunded: 'Refunded',
+    'refund pending': 'Refund pending', paid: 'Paid', cancelled: 'Cancelled', canceled: 'Cancelled',
+    'pending provider': 'Pending provider', 'pending settlement': 'Pending settlement',
+  };
+  return known[raw] || raw.replace(/\b\w/g, (letter) => letter.toUpperCase());
+};
+const applicationStage = (value: unknown) => {
+  const raw = str(value).trim().toLowerCase().replace(/[_-]+/g, ' ');
+  if (raw === 'approved') return 3;
+  if (raw === 'rejected' || raw === 'declined') return 4;
+  if (raw.includes('needs info') || raw.includes('need information')) return 2;
+  if (raw.includes('review')) return 1;
+  if (raw === 'submitted' || raw === 'pending' || raw === 'new') return 0;
+  return 1;
+};
 
 function clearDemoRecords() {
   db.APPS = []; db.INV = []; db.SVC = []; db.STAFF = []; db.CASES = []; db.NS = [];
@@ -30,7 +49,7 @@ export async function hydrateAdminState() {
   ]);
 
   db.APPS = applications.map((x): Application => ({
-    id: str(x.id), n: str(x.business_name), s: str(x.status), st: x.status === 'approved' ? 3 : x.status === 'rejected' ? 4 : 1,
+    id: str(x.id), n: str(x.business_name), s: normalizedStatus(x.status), st: applicationStage(x.status),
     age: Math.max(0, Math.floor((Date.now() - Date.parse(str(x.created_at))) / 86400000)),
     createdAt: str(x.created_at), reviewedAt: str(x.reviewed_at || ''),
     o: str(x.reviewed_by || 'Unassigned'), d: [], hold: 0, esc: 0, due: '',
@@ -45,7 +64,7 @@ export async function hydrateAdminState() {
 
   db.INV = transactions.map((x): Transaction => ({
     id: str(x.id), f: str(x.feature_name || x.activity_type || 'Wallet'), u: str(x.user_id),
-    d: date(x.created_at), createdAt: str(x.created_at), n: str(x.description), a: num(x.amount), s: str(x.status),
+    d: date(x.created_at), createdAt: str(x.created_at), n: str(x.description), a: num(x.amount), s: normalizedStatus(x.status),
     ref: 0, rq: 0, log: [],
   }));
 
