@@ -128,7 +128,9 @@ export function AuthFlow({ notice, noticeBad, onDone }: Props) {
     if (!emailOk(e)) return message('Enter a valid work email.', true);
     setBusy(true);
     try {
-      const { error } = await supabase.auth.resetPasswordForEmail(e, { redirectTo: 'wantiss-admin://reset-password' });
+      // Use Expo's active deep-link URL so recovery links return to the app when running in Expo Go.
+      const redirectTo = Linking.createURL('reset-password');
+      const { error } = await supabase.auth.resetPasswordForEmail(e, { redirectTo });
       if (error) throw error;
       setView('sent');
       message('If this address belongs to a staff account, a password-reset email will arrive shortly.');
