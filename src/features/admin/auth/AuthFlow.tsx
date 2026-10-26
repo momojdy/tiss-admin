@@ -203,7 +203,7 @@ export function AuthFlow({ notice, noticeBad, onDone }: Props) {
               </View>
             </>}
             {view === 'create' && <>
-              <Txt size={22.1} lh={1.08}>{'Create your\\nstaff account'}</Txt>
+              <Txt size={22.1} lh={1.08}>{'Create your\nstaff account'}</Txt>
               <Txt size={13} mut lh={1.45} style={{ marginTop: 6, marginBottom: 14 }}>Wantiss staff accounts are invitation-only. Ask a Super Admin to send an invitation to your work email. Open the invitation link to verify your account and set your password; once that step is complete, return here to sign in.</Txt>
               <NoticeBox>For security, account creation is completed from a verified Supabase invitation link. This screen does not accept an unverified invitation code or create a local-only account.</NoticeBox>
               <PrimaryButton label="Back to sign in" onPress={() => { setView('in'); message(''); }} />
