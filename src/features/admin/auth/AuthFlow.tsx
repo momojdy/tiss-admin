@@ -23,6 +23,7 @@ export function AuthFlow({ notice, noticeBad, onDone }: Props) {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [confirm, setConfirm] = useState('');
+  const [resetCode, setResetCode] = useState('');
   const [noticeText, setNoticeText] = useState(notice || '');
   const [bad, setBad] = useState(!!noticeBad);
   const [busy, setBusy] = useState(false);
@@ -128,9 +129,8 @@ export function AuthFlow({ notice, noticeBad, onDone }: Props) {
     if (!emailOk(e)) return message('Enter a valid work email.', true);
     setBusy(true);
     try {
-      // Use Expo's active deep-link URL so recovery links return to the app when running in Expo Go.
-      const redirectTo = Linking.createURL('reset-password');
-      const { error } = await supabase.auth.resetPasswordForEmail(e, { redirectTo });
+      // Recovery uses the email OTP code so it works in Expo Go without app deep-link handling.
+      const { error } = await supabase.auth.resetPasswordForEmail(e);
       if (error) throw error;
       setView('sent');
       message('If this address belongs to a staff account, a password-reset email will arrive shortly.');
@@ -138,6 +138,24 @@ export function AuthFlow({ notice, noticeBad, onDone }: Props) {
       message('We could not request a reset email. Please try again later.', true);
     } finally { setBusy(false); }
   };
+  const verifyResetCode = async () => {
+    const e = email.trim().toLowerCase();
+    const token = resetCode.trim();
+    if (!emailOk(e)) return message('Enter the email address that received the code.', true);
+    if (!/^\\d{6}$/.test(token)) return message('Enter the 6-digit code from your reset email.', true);
+    setBusy(true);
+    try {
+      const { error } = await supabase.auth.verifyOtp({ email: e, token, type: 'recovery' });
+      if (error) throw error;
+      setView('reset');
+      setPassword('');
+      setConfirm('');
+      message('Code verified. Choose a new password.');
+    } catch {
+      message('That code is invalid or expired. Request a new reset email and try again.', true);
+    } finally { setBusy(false); }
+  };
+
   const savePassword = async () => {
     const problem = passwordError(password, email);
     if (problem) return message(problem, true);
@@ -191,7 +209,12 @@ export function AuthFlow({ notice, noticeBad, onDone }: Props) {
             {view === 'sent' && <>
               <BigBadge glyph="✉" />
               <Txt size={22.1} lh={1.08}>{'Check your\nemail'}</Txt>
-              <Txt size={13} mut style={{ marginTop: 6, marginBottom: 14 }}>Use the password-reset link sent to your work email. If the email does not arrive, check spam or ask an administrator to verify your account.</Txt>
+              <Txt size={13} mut style={{ marginTop: 6, marginBottom: 14 }}>Enter the 6-digit verification code in the reset email. Keep this screen open while you check your email.</Txt>
+              <AuthField label="Work email" value={email} onChangeText={setEmail} error={undefined} keyboardType="email-address" autoCapitalize="none" />
+              <AuthField label="6-digit email code" value={resetCode} onChangeText={setResetCode} error={undefined} keyboardType="number-pad" />
+              {noticeText ? <NoticeBox bad={bad}>{noticeText}</NoticeBox> : null}
+              <PrimaryButton label="Verify code" onPress={verifyResetCode} busy={busy} busyLabel="Verifying…" />
+              <SecondaryButton label="Send a new code" onPress={sendReset} />
               <SecondaryButton label="Back to sign in" onPress={() => { setView('in'); message(''); }} />
             </>}
             {view === 'invite' && <>
