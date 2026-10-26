@@ -58,10 +58,10 @@ export function categories(): {id: string; name: Txt; emoji: string; art?: strin
 export const catName = (id: string) => {const c = categories().find(x => x.id === id); return c ? tx(c.name) : id === 'all' ? 'All stores' : id;};
 export const label = (id: string, fallback: string) => {const l = C && C.labels && C.labels.find((x: any) => x.id === id); const s = l ? tx(l.t) : ''; return s || fallback;};
 const live = (r: any) => {const n = new Date().toISOString().slice(0, 10); return r.st === 'Live' && (!r.from || r.from <= n) && (!r.to || r.to >= n);};
-export type PromoCard = {id: string; emoji: string; color: 'plum' | 'orange' | 'green'; title: string; sub: string; btn: string; target: string; newOnly: boolean};
+export type PromoCard = {id: string; emoji: string; image?: string | null; color: 'plum' | 'orange' | 'green'; title: string; sub: string; btn: string; target: string; newOnly: boolean};
 export function promoCards(): PromoCard[] | null {
   if (!C) return [];
-  return C.promos.filter(live).sort((a: any, b: any) => a.ord - b.ord).map((p: any) => ({id: p.id, emoji: p.emoji, color: p.color, title: tx(p.title), sub: tx(p.sub), btn: tx(p.btn), target: p.target, newOnly: p.aud === 'New customers'}));
+  return C.promos.filter(live).sort((a: any, b: any) => a.ord - b.ord).map((p: any) => ({id: p.id, emoji: p.emoji, image: p.img?.data || p.art?.data || null, color: p.color, title: tx(p.title), sub: tx(p.sub), btn: tx(p.btn), target: p.target, newOnly: p.aud === 'New customers'}));
 }
 export function deals(): [string, number, number][] {
   if (!C) return [];
@@ -92,8 +92,8 @@ export const faq = (_fallback: [string, string][]): [string, string][] => (C && 
 export const supportTopics = (_fallback: string[]) => (C && Array.isArray(C.topics) ? C.topics.map((t: any) => tx(t.t)) : []);
 export function legalDoc(id: string): string | null {const d = C && C.legal && C.legal.find((x: any) => x.id === id && x.st === 'Live'); const s = d ? tx(d.t) : ''; return s || null;}
 
-export function modes(): {emoji: string; title: string; sub: string; cat: string}[] | null {
+export function modes(): {emoji: string; image?: string | null; title: string; sub: string; cat: string}[] | null {
   if (!C || !C.modes) return [];
-  return C.modes.filter((m: any) => m.st === 'Live').map((m: any) => ({emoji: m.emoji, title: tx(m.title), sub: tx(m.sub), cat: m.cat}));
+  return C.modes.filter((m: any) => m.st === 'Live').map((m: any) => ({emoji: m.emoji, image: m.img?.data || m.art?.data || null, title: tx(m.title), sub: tx(m.sub), cat: m.cat}));
 }
 contentHooks.coupons = coupons; contentHooks.fees = fees; contentHooks.minAge = minAge;
