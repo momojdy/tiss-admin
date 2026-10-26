@@ -208,6 +208,7 @@ export async function placeOrder() {
 }
 export const cancelAsk = (id: string) => ui.sheet({kind: 'cancel', id});
 export async function cancelOrder(id: string) {
+  if (previewOnly) { ui.close(); toast('Order cancellation is disabled in the admin preview.'); return; }
   const o = S.orders.filter((x: any) => x.id === id)[0]; ui.close();
   if (!o || done(o) || o.st > 2) {toast('This order can no longer be cancelled'); emit(); return;}
   if (o.backendId) {
@@ -246,6 +247,7 @@ export const clearFilters = () => {S.f = ''; S.sub = ''; emit();};
 export const setConsent = (v: boolean) => {S.alcConsent = v; emit();};
 export function alcAccept() {S.alcAck = 1; const p = S.pend; ui.close(); if (p && p[0] && !p[2]) cartAdd(p[0], p[1]); else if (p && p[2]) p[2]();}
 export async function refreshPaymentOptions() {
+  if (previewOnly) return;
   try {
     const {data: sessionData, error: sessionError} = await supabase.auth.getUser();
     if (sessionError || !sessionData.user) return;
@@ -271,6 +273,7 @@ export async function refreshPaymentOptions() {
   }
 }
 export async function createWallet() {
+  if (previewOnly) { toast('Wallet changes are disabled in the admin preview.'); return; }
   try {
     const { error } = await supabase.rpc('ensure_my_wallet');
     if (error) throw error;
