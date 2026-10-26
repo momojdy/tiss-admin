@@ -1,87 +1,67 @@
 import { View } from 'react-native';
-import { can } from '../../state/access';
-import { REQ, useGuard } from '../../state/requirements';
-import { useForm } from '../../ui/FormSheet';
-import { useToast } from '../../ui/Toast';
-import { setBusinessVerification, type BusinessVerification } from '../../lib/adminBackend';
-import { hydrateAdminState } from '../../lib/hydrateAdminState';
 import { db, ui, useDb } from '../../state/db';
 import { useNav } from '../../shell/Nav';
 import { useOpen } from '../../overlays/registry';
-import { Section } from '../../ui/Card';
-import { Card } from '../../ui/Card';
-import { ButtonRow, OutlineBtn, Pill, Row, StatusPill } from '../../ui/Controls';
+import { Section, Card } from '../../ui/Card';
 import { Heading } from '../../ui/Heading';
+import { Pill, Row, StatusPill } from '../../ui/Controls';
 import { ListRows } from '../../ui/Lists';
 import { Txt } from '../../ui/Txt';
 import { useOpenModule } from './useOpenModule';
 
-const UUID = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
-const VERIFY_COPY: Record<BusinessVerification, string> = {
-  pending: 'Not verified. Its Goodies store cannot go live.',
-  verified: 'Verified. The owner can publish its Goodies store.',
-  restricted: 'Restricted. Its Goodies store is unpublished and cannot go live.',
-};
-
 export function ServiceHubScreen() {
   useDb();
-  const form = useForm();
-  const guard = useGuard();
-  const toast = useToast();
   const { go } = useNav();
   const open = useOpen();
   const openModule = useOpenModule();
-  const selectedHub = db.SVC.find((x) => x[0] === ui.hub);
-  const c = selectedHub ?? db.SVC[0];
-  const mods = (c[0] === 'Goodies' ? 'Overview|Products and catalog|Categories|Merchants|Product review|Orders|Promotions|Support|Analytics|Settings' : db.MOD[c[0]] || 'Overview').split('|');
-  const pre = c[5] === 'Pre-order';
-  const banners = db.BN.filter((b) => b.svc === c[0]);
-  const bizId = selectedHub && UUID.test(String(selectedHub[7])) ? String(selectedHub[7]) : '';
-  const verification: BusinessVerification = c[1] === 'verified' || c[1] === 'restricted' ? c[1] : 'pending';
-  const changeVerification = (next: BusinessVerification, title: string, verb: string) => form({
-    title: title + ' ' + c[0],
-    fields: [{ id: 'r', label: 'Reason (saved in the audit log)', type: 'textarea', required: true, maxLength: 500 }],
-    buttons: [{ label: verb, key: 's', primary: true }],
-    sub: next === 'verified' ? 'Confirm you checked the business registration and any licence its category needs.' : 'This unpublishes its Goodies store immediately.',
-    onSubmit: async (_k, v) => {
-      await setBusinessVerification(bizId, next, String(v.r));
-      await hydrateAdminState().catch(() => undefined);
-      toast(c[0] + ': ' + next);
-    },
-  });
+  const selectedHub = db.SVC.find((row) => row[0] === ui.hub);
+  const service = selectedHub ?? db.SVC[0];
+  const serviceName = service[0];
+  const modules = (serviceName === 'Goodies'
+    ? 'Overview|Products and catalog|Categories|Merchants|Product review|Orders|Promotions|Support|Analytics|Settings'
+    : db.MOD[serviceName] || 'Overview|Configuration').split('|');
+  const isPreOrder = service[5] === 'Pre-order';
+  const serviceTransactions = db.INV.filter((tx) =>
+    tx.f.toLowerCase().includes(serviceName.toLowerCase()) ||
+    (serviceName === 'Top up' && /top.?up/i.test(tx.f)),
+  );
+  const banners = db.BN.filter((banner) => banner.svc === serviceName);
+
   return (
     <View>
       <Row style={{ marginBottom: 4 }}>
         <Pill onPress={() => go('ecosystem')}>‹ Back</Pill>
-        <Txt size={10.6} mut>{'Ecosystem › ' + c[0]}</Txt>
+        <Txt size={10.6} mut>{'Ecosystem › ' + serviceName}</Txt>
       </Row>
-      <Heading title={c[0] + '\nService hub'} kpis={bizId ? [
-        { icon: '▥', value: c[2] === '1' ? 'Live' : 'Not live', label: 'Goodies store' },
-        { icon: '▤', value: verification === 'verified' ? 'Verified' : verification === 'restricted' ? 'Restricted' : 'Pending', label: 'Verification' },
-        { icon: '◔', value: c[6] ? 'Ready' : 'Not set up', label: 'Payouts' },
-      ] : [
-        { icon: '▥', value: c[2], label: pre ? 'Status' : 'Orders today', onPress: () => openModule(c[0], 'Overview') },
-        { icon: '▤', value: c[3], label: pre ? 'Phase' : 'Pending items', onPress: () => openModule(c[0], 'Overview') },
-        { icon: '◔', value: c[4] + '%', label: pre ? 'Launch readiness' : 'Health score', onPress: () => openModule(c[0], 'Overview') },
+      <Heading title={serviceName + '\nService hub'} sub={service[1]} kpis={[
+        { icon: '▥', value: serviceTransactions.length, label: 'Transactions matched', onPress: () => go('finance') },
+        { icon: '▤', value: '—', label: 'Applications by service', onPress: () => go('operations') },
+        { icon: '◔', value: '—', label: 'Service health' },
       ]} />
-      {pre ? <Card><Txt size={12} mut>Prezo is in pre-order. It stays separate from active services until its launch state changes.</Txt></Card> : null}
-      {bizId ? (
-        <Section title="Business verification" right={<StatusPill label={verification} />}>
-          <Txt size={12} mut lh={1.4}>{VERIFY_COPY[verification]}</Txt>
-          <View style={{ flexDirection: 'row', flexWrap: 'wrap', marginTop: 8 }}><OutlineBtn onPress={() => go('business', { businessId: bizId })}>Business details ›</OutlineBtn></View>
-          {can(...REQ.ecosystem) ? (
-            <ButtonRow>
-              {verification !== 'verified' ? <OutlineBtn primary onPress={guard(REQ.ecosystem, () => changeVerification('verified', 'Verify', 'Verify business'))}>Verify business</OutlineBtn> : null}
-              {verification === 'verified' ? <OutlineBtn onPress={guard(REQ.ecosystem, () => changeVerification('pending', 'Withdraw verification for', 'Withdraw'))}>Withdraw verification</OutlineBtn> : null}
-              {verification !== 'restricted' ? <OutlineBtn onPress={guard(REQ.ecosystem, () => changeVerification('restricted', 'Restrict', 'Restrict'))}>Restrict business</OutlineBtn> : null}
-            </ButtonRow>
-          ) : null}
-        </Section>
-      ) : null}
-      <Section title="Modules"><ListRows rows={mods.map((m) => ({ key: m, main: m, right: '›', onPress: () => openModule(c[0], m) }))} /></Section>
-      <Section title="Content for this service">
-        <ListRows empty="No content assigned." rows={banners.map((b) => ({ key: b.id, main: b.t, right: <View style={{ flexDirection: 'row', alignItems: 'center', gap: 4 }}><StatusPill label={b.st} /><Txt size={10.1}>›</Txt></View>, onPress: () => open('ban', b.id) }))} />
+      {isPreOrder ? <Card><Txt size={11.5} mut>Pre-order is directory metadata. Launch readiness and activity metrics are not reported as live until an authorized service-health endpoint is connected.</Txt></Card> : null}
+      <Section title="Modules">
+        <ListRows rows={modules.map((module) => ({
+          key: module,
+          main: module,
+          right: '›',
+          onPress: () => openModule(serviceName, module),
+        }))} />
       </Section>
+      <Section title="Content for this service">
+        <ListRows
+          empty="Live content placements are not loaded into the current authorized service snapshot."
+          rows={banners.map((banner) => ({
+            key: banner.id,
+            main: banner.t,
+            right: <View style={{ flexDirection: 'row', alignItems: 'center', gap: 4 }}><StatusPill label={banner.st} /><Txt size={10.1}>›</Txt></View>,
+            onPress: () => open('ban', banner.id),
+          }))}
+        />
+      </Section>
+      <Card>
+        <Txt size={10.1} weight={500}>Workspace boundary</Txt>
+        <Txt size={9.5} mut lh={1.4} style={{ marginTop: 5 }}>The module directory follows the uploaded HTML. Only actions connected to authorized server endpoints may change production data; this hub does not turn demo HTML interactions into live operations.</Txt>
+      </Card>
     </View>
   );
 }
