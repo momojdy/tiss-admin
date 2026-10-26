@@ -70,7 +70,7 @@ export function OverviewScreen() {
 
   return (
     <View>
-      <Heading title="Platform\nOverview" sub="A live operational snapshot of Wantiss." kpis={[
+      <Heading title="Platform\nOverview" sub="Authorized operational snapshot; unavailable metrics are labeled rather than estimated." kpis={[
         { icon: '♛', value: db.ACC.filter((account) => account.type === 'Customer').length.toLocaleString('en-US'), label: 'Customer profiles', onPress: () => go('people', { ps: 'Accounts' }) },
         { icon: '▥', value: db.APPS.filter((app) => app.st === 3).length, label: 'Approved applications', onPress: () => go('operations', { ov: 'List' }) },
         { icon: '◷', value: waiting.length, label: 'Waiting for review', tag: overdue.length + ' overdue', tone: overdue.length ? 'r' : '', onPress: () => go('operations', { ov: 'List' }) },
@@ -132,29 +132,20 @@ export function OverviewScreen() {
       </Section>
 
       <Section title="Feature health" right={<Pill onPress={() => go('ecosystem')}>Ecosystem ›</Pill>}>
-        <ListRows rows={['Goodies', 'Stays', 'Woulib', 'Konsoliss'].map((name) => {
-          const service = db.SVC.find((item) => item[0] === name);
-          const pendingCount = Number.parseInt(service?.[3] || '0', 10) || 0;
-          const status = service?.[5] || 'Unknown';
-          return {
-            key: name,
-            main: name,
-            sub: status === 'Pre-order' ? 'Launch readiness ' + (service?.[4] ?? 0) + '%' : (service?.[2] ?? '0') + ' today · ' + pendingCount + ' pending',
-            right: <StatusPill label={pendingCount >= 5 ? 'Check' : status === 'Active' ? 'OK' : status} tone={pendingCount >= 5 ? 'or' : status === 'Active' ? 'gr' : 'ye'} small />,
-            onPress: () => go('hub', { hub: name }),
-          };
-        })} />
+        <ListRows rows={['Goodies', 'Stays', 'Woulib', 'Konsoliss'].map((name) => ({
+          key: name, main: name,
+          sub: 'Service-health metrics are not supplied by the current authorized endpoint.',
+          right: <StatusPill label="Unavailable" tone="grey" small />,
+        }))} />
       </Section>
 
       <Section title="Content and promotions" right={<Pill onPress={() => go('content')}>Content ›</Pill>}>
-        <View style={{ flexDirection: 'row', flexWrap: 'wrap', gap: 7, marginBottom: 8 }}>
-          <Pill onPress={() => go('content', { cs: 'Banners' })}>{liveBanners.length} live</Pill>
-          <Pill onPress={() => go('content', { cs: 'Calendar' })}>{db.BN.filter((banner) => banner.st === 'Scheduled').length} scheduled</Pill>
-          <Pill onPress={() => go('content', { cs: 'Approvals' })}>{db.BN.filter((banner) => banner.st === 'In review' || banner.st === 'Draft').length} drafts / review</Pill>
+        <Txt size={10.1} mut lh={1.4}>The current dashboard does not yet load the authorized CMS placement snapshot, so it will not display seeded or zero-valued banner counts as live platform metrics. Open Content Studio to query the available CMS records.</Txt>
+        <View style={{ flexDirection: 'row', flexWrap: 'wrap', gap: 7, marginTop: 8 }}>
+          <Pill onPress={() => go('content', { cs: 'Banners' })}>Open banners</Pill>
+          <Pill onPress={() => go('content', { cs: 'Calendar' })}>Publishing calendar</Pill>
+          <Pill onPress={() => go('content', { cs: 'Approvals' })}>Approval proposals</Pill>
         </View>
-        <ListRows empty="No live banners." rows={liveBanners.slice(0, 3).map((banner) => ({
-          key: banner.id, main: banner.t, sub: banner.svc, right: banner.to ? 'Ends ' + banner.to : 'No end date',
-        }))} />
       </Section>
 
       <Section title="Team and recent activity" right={<Pill onPress={() => go('people', { ps: 'Audit log' })}>Audit log ›</Pill>}>
