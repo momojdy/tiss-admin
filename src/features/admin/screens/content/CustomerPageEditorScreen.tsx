@@ -389,7 +389,7 @@ export function CustomerPageEditorScreen() {
           {viewMode === 'Published' && !publishedRow && selected?.status !== 'published' ? <Txt size={10.5} color={c.or} style={{ marginBottom: 8 }}>No published version was found for this locale. This is an empty published view, not a draft preview.</Txt> : null}
           {!selected && viewMode === 'Draft' ? <Txt size={10.5} mut style={{ marginBottom: 8 }}>Starter preview · select a version or start a blank draft to edit it.</Txt> : null}
           {selected && viewMode === 'Draft' ? <Txt size={10.5} mut style={{ marginBottom: 8, textAlign: 'center' }}>{editorMode === 'Edit' ? 'Edit mode: tap an element to select it. Changes stay in the draft.' : 'Preview mode: tap linked elements or the bottom navigation to move through customer pages.'}</Txt> : null}
-          {actualGoodiesPreview ? <GoodiesConsumerPreview editMode={viewMode === 'Draft' && editorMode === 'Edit' && can(...REQ.content)} onEditTarget={(target) => setGoodiesTarget(target)} /> : <CustomerPagePreview
+          {actualGoodiesPreview ? <GoodiesConsumerPreview editMode={viewMode === 'Draft' && editorMode === 'Edit' && can(...REQ.content)} selectedTarget={goodiesTarget} onEditTarget={(target) => setGoodiesTarget(target)} /> : <CustomerPagePreview
             payload={previewPayload}
             pageKey={activePageKey}
             mode={viewMode === 'Published' ? 'Preview' : editorMode}
