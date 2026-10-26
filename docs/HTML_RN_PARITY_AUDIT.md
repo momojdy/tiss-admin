@@ -104,6 +104,13 @@ Confirmed from that exact file:
 - Added a dedicated business-details screen using only fields present in the authorized ecosystem snapshot. It does not fabricate missing business fields or perform direct status changes. The Service Hub links to this screen.
 - Content Studio now links to the standalone customer page editor. Existing Supabase auth, section permission gates and CMS server RPCs were not replaced by HTML demo mutations.
 
+## Production-data safety corrections
+
+- The Overview no longer uses the hardcoded `1,284` customer count, `86` approved-business count, or an illustrative 82% review-speed ring. It derives available counts from the authorized snapshot and leaves review speed unavailable unless both creation and review timestamps exist.
+- Overview and Analytics activity charts now use transaction timestamps from the authorized backend snapshot. If no timestamped records are present, the UI explains that data is unavailable rather than generating a sample series.
+- Application and transaction statuses are normalized from common backend values so the operational and finance filters can use them consistently.
+- Service-health and CMS placement counts are not presented as live metrics when their dedicated authorized snapshots are not loaded.
+
 ## Still unverified / remaining
 
 - The global shell and all screens have **not** yet passed same-device screenshot comparison against the uploaded HTML.
