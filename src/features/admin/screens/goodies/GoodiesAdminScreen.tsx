@@ -182,7 +182,7 @@ export function GoodiesAdminScreen() {
           <Section title="Needs review">
             <ListRows rows={[
               { key: 'req', main: 'Ingredient requests', sub: 'Review vendor-submitted ingredients', right: String(counts.requests), onPress: () => setModule('Product review') },
-              { key: 'library', main: 'Builder library', sub: 'Manage ingredients, extras and product assets', right: String(data.lib.length), onPress: () => setModule('Builder library') },
+              { key: 'library', main: 'Builder library', sub: 'Manage ingredients, extras and product assets', right: String(data.lib.length), onPress: () => setModule('Products and catalog') },
               { key: 'content', main: 'Customer home content', sub: 'Modes, promotions, labels and category order', right: 'Open ›', onPress: () => setModule('Products and catalog') },
             ]} />
           </Section>
@@ -202,7 +202,7 @@ export function GoodiesAdminScreen() {
             { key: 'orders', main: 'Goodies transactions in current snapshot', right: String(db.INV.filter((tx) => tx.f.toLowerCase().includes('goodies')).length), onPress: () => go('finance', { fv: 'Transactions' }) },
             { key: 'promos', main: 'Live Goodies promotions', right: String(data.promos.filter((item: any) => item.st === 'Live').length), onPress: () => setModule('Promotions') },
             { key: 'catalog', main: 'Builder library items', right: String(data.lib.length), onPress: () => setModule('Builder library') },
-            { key: 'requests', main: 'Ingredient requests awaiting review', right: String(counts.requests), onPress: () => setModule('Ingredient requests') },
+            { key: 'requests', main: 'Ingredient requests awaiting review', right: String(counts.requests), onPress: () => setModule('Product review') },
           ]} />
           <Txt size={9.5} mut style={{ marginTop: 8 }}>Order, conversion and revenue analytics need a dedicated Goodies server snapshot; this view does not fabricate those metrics.</Txt>
         </Section>
