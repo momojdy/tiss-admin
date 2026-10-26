@@ -15,11 +15,15 @@ import { PeopleScreen } from '../screens/people/PeopleScreen';
 import { ContentScreen } from '../screens/content/ContentScreen';
 import { OverviewScreen } from '../screens/overview/OverviewScreen';
 import { AnalyticsScreen } from '../screens/analytics/AnalyticsScreen';
+import { GoodiesAdminScreen } from '../screens/goodies/GoodiesAdminScreen';
+import { ServiceWorkspaceScreen } from '../screens/workspace/ServiceWorkspaceScreen';
 
 /** Screens ported so far. The rest show a clear "not ported yet" card (see README). */
 const SCREENS: Partial<Record<ScreenId, () => ReactNode>> = {
   overview: () => <OverviewScreen />,
   analytics: () => <AnalyticsScreen />,
+  goodies: () => <GoodiesAdminScreen />,
+  workspace: () => <ServiceWorkspaceScreen />,
   operations: () => <OperationsScreen />,
   ecosystem: () => <EcosystemScreen />,
   hub: () => <ServiceHubScreen />,
