@@ -110,13 +110,14 @@ export function CustomerPageEditorScreen() {
     return () => { active = false; };
   }, [actualGoodiesPreview]);
 
-  const updateGoodiesField = (field: 'title' | 'sub' | 'emoji', value: string) => {
+  const updateGoodiesField = (field: 'title' | 'sub' | 'emoji' | 'asset', value: string) => {
     if (!goodiesDraft || !goodiesTarget || viewMode !== 'Draft' || editorMode !== 'Edit' || !can(...REQ.content)) return;
     const next = JSON.parse(JSON.stringify(goodiesDraft));
     const listKey = goodiesTarget.kind === 'mode' ? 'modes' : goodiesTarget.kind === 'promo' ? 'promos' : goodiesTarget.kind === 'category' ? 'cats' : 'labels';
     const item = (next[listKey] || []).find((entry: any) => entry.id === goodiesTarget.id);
     if (!item) return;
     if (field === 'emoji' && goodiesTarget.kind !== 'label') item.emoji = value;
+    else if (field === 'asset' && goodiesTarget.kind === 'category') item.art = value.trim() ? { data: value.trim() } : null;
     else {
       const key = goodiesTarget.kind === 'category' ? 'name' : goodiesTarget.kind === 'label' ? 't' : field;
       if (field === 'emoji') return;
@@ -342,7 +343,7 @@ export function CustomerPageEditorScreen() {
           <Txt size={12} mut>{featureMenuOpen ? '⌃' : '⌄'}</Txt>
         </Pressable>
         {featureMenuOpen ? <View style={{ marginTop: 5, borderWidth: 1, borderColor: c.bd, borderRadius: 12, backgroundColor: c.card, overflow: 'hidden' }}>
-          {featureOptions.map((item) => <Pressable key={item.key} onPress={() => { setPageKey(item.key); setPageStack([]); setElementKey(''); setFeatureMenuOpen(false); }} style={{ paddingHorizontal: 12, paddingVertical: 10, backgroundColor: activePageKey === item.key ? c.inset : 'transparent', borderBottomWidth: 1, borderBottomColor: c.bd }}>
+          {featureOptions.map((item) => <Pressable key={item.key} onPress={() => { setPageKey(item.key); setActualGoodiesPreview(item.label === 'Goodies'); setPageStack([]); setElementKey(''); setGoodiesTarget(null); setFeatureMenuOpen(false); }} style={{ paddingHorizontal: 12, paddingVertical: 10, backgroundColor: activePageKey === item.key ? c.inset : 'transparent', borderBottomWidth: 1, borderBottomColor: c.bd }}>
             <Txt size={11.5} weight={activePageKey === item.key ? 500 : 400}>{item.label}</Txt>
             <Txt size={9.5} mut>{String(previewPayload?.pages?.[item.key]?.title || item.key)}</Txt>
           </Pressable>)}
@@ -392,6 +393,10 @@ export function CustomerPageEditorScreen() {
                   </> : null}
                   <Txt size={9.5} mut>Icon / visual</Txt>
                   <TextInput value={String(goodiesDraft[goodiesTarget.kind === 'mode' ? 'modes' : goodiesTarget.kind === 'promo' ? 'promos' : 'cats']?.find((v: any) => v.id === goodiesTarget.id)?.emoji || '')} onChangeText={(value) => updateGoodiesField('emoji', value)} editable={can(...REQ.content)} style={fieldStyle} placeholder="Emoji or icon" />
+                  {goodiesTarget.kind === 'category' ? <>
+                    <Txt size={9.5} mut>Category artwork URL (leave blank to use the icon)</Txt>
+                    <TextInput value={String(goodiesDraft.cats?.find((v: any) => v.id === goodiesTarget.id)?.art?.data || '')} onChangeText={(value) => updateGoodiesField('asset', value)} editable={can(...REQ.content)} style={fieldStyle} placeholder="https://… or clear to remove artwork" autoCapitalize="none" />
+                  </> : null}
                 </>
               )}
               <View style={{ flexDirection: 'row', flexWrap: 'wrap', gap: 6, marginTop: 4 }}>
