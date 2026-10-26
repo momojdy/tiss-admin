@@ -1,5 +1,5 @@
-import { ReactNode, useEffect, useRef } from 'react';
-import { ScrollView, type ScrollViewInstance, View } from 'react-native';
+import { ReactNode } from 'react';
+import { View } from 'react-native';
 import { secLv, SCREEN_SECTION } from '../state/access';
 import { useDb } from '../state/db';
 import { useRequestAccess } from '../overlays/GrantDrawers';
@@ -55,16 +55,10 @@ function NotPorted({ id }: { id: ScreenId }) {
   );
 }
 
-export function ScreenHost({ dockExpanded = false }: { dockExpanded?: boolean }) {
+export function ScreenHost() {
   useDb();
-  const { screen, navKey, keepScroll } = useNav();
-  const ref = useRef<ScrollViewInstance>(null);
-  useEffect(() => { if (!keepScroll) ref.current?.scrollTo({ y: 0, animated: false }); }, [navKey, keepScroll]);
+  const { screen } = useNav();
   const allowed = SCREEN_SECTION[screen] === 0 || secLv(SCREEN_SECTION[screen]) > 0;
   const render = SCREENS[screen];
-  return (
-    <ScrollView ref={ref} contentContainerStyle={{ paddingLeft: dockExpanded ? 57 : 28, paddingRight: 12, paddingTop: 4, paddingBottom: 90 }} keyboardShouldPersistTaps="handled">
-      {!allowed ? <NoAccess sec={SCREEN_SECTION[screen]} /> : render ? render() : <NotPorted id={screen} />}
-    </ScrollView>
-  );
+  return <View>{!allowed ? <NoAccess sec={SCREEN_SECTION[screen]} /> : render ? render() : <NotPorted id={screen} />}</View>;
 }
