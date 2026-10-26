@@ -26,6 +26,7 @@ import './overlays/PeopleDrawers';
 import './overlays/GrantDrawers';
 
 function Frame() {
+  const [dockExpanded, setDockExpanded] = useState(false);
   const { c } = useTheme();
   const insets = useSafeAreaInsets();
   const { openDrawer } = useOverlay();
@@ -33,8 +34,8 @@ function Frame() {
     <LinearGradient colors={[c.b1, c.b2, c.b3]} style={{ flex: 1, paddingTop: insets.top }} onTouchStart={touch}>
       <Header onBell={() => openDrawer((close) => <NotificationsSheet onClose={close} />)} onSearch={() => openDrawer((close) => <SearchSheet onClose={close} />)} onAccount={() => openDrawer((close) => <AccountSheet onClose={close} />)} />
       <Tabs />
-      <ScreenHost />
-      <FloatingDock />
+      <ScreenHost dockExpanded={dockExpanded} />
+      <FloatingDock expanded={dockExpanded} onExpandedChange={setDockExpanded} />
     </LinearGradient>
   );
 }
