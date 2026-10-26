@@ -1,6 +1,6 @@
 import { useMemo } from 'react';
 import { View } from 'react-native';
-import { db, ui, bump, useDb } from '../../state/db';
+import { db, dataMode, ui, bump, useDb } from '../../state/db';
 import { useNav } from '../../shell/Nav';
 import { useOpen } from '../../overlays/registry';
 import { useTheme } from '../../theme/ThemeContext';
@@ -22,12 +22,12 @@ export function ServiceWorkspaceScreen() {
   const modules = (serviceName === 'Goodies' ? 'Overview|Products and catalog|Categories|Merchants|Product review|Orders|Promotions|Support|Analytics|Settings' : db.MOD[serviceName] || 'Overview|Configuration').split('|');
   const moduleName = modules.includes(String(ui.wmod)) ? String(ui.wmod) : 'Overview';
   const setModule = (next: string) => { ui.wmod = next; ui.wf = 'All'; ui.wq = ''; bump(); };
-  const serviceApps = db.APPS.filter((row) => row.s === serviceName);
-  const serviceCases = db.CASES.filter((row) => row.svc === serviceName);
-  const serviceTransactions = db.INV.filter((row) => row.f.toLowerCase().includes(serviceName.toLowerCase()) || (serviceName === 'Top up' && /top.?up/i.test(row.f)));
-  const serviceAccounts = db.ACC.filter((row) => row.svc.includes(serviceName));
-  const serviceBanners = db.BN.filter((row) => row.svc === serviceName);
-  const servicePromos = db.PRM.filter((row) => row.svc === serviceName);
+  const serviceApps = dataMode === 'live' ? db.APPS.filter((row) => row.s === serviceName) : [];
+  const serviceCases = dataMode === 'live' ? db.CASES.filter((row) => row.svc === serviceName) : [];
+  const serviceTransactions = dataMode === 'live' ? db.INV.filter((row) => row.f.toLowerCase().includes(serviceName.toLowerCase()) || (serviceName === 'Top up' && /top.?up/i.test(row.f))) : [];
+  const serviceAccounts = dataMode === 'live' ? db.ACC.filter((row) => row.svc.includes(serviceName)) : [];
+  const serviceBanners = dataMode === 'live' ? db.BN.filter((row) => row.svc === serviceName) : [];
+  const servicePromos = dataMode === 'live' ? db.PRM.filter((row) => row.svc === serviceName) : [];
   const query = String(ui.wq || '').trim().toLowerCase();
 
   const sourceRows = useMemo(() => {
@@ -59,7 +59,7 @@ export function ServiceWorkspaceScreen() {
         <Txt size={10.1} mut>{serviceName} · Workspace</Txt>
       </Row>
       <Heading title={serviceName + '\n' + moduleName} sub={service[1]} kpis={[
-        { icon: '▥', value: serviceTransactions.length, label: 'Transactions matched', tag: pre ? 'Pre-order' : 'Authorized snapshot', onPress: () => go('finance') },
+        { icon: '▥', value: dataMode === 'live' ? serviceTransactions.length : '—', label: 'Transactions matched', tag: pre ? 'Pre-order' : dataMode === 'live' ? 'Authorized snapshot' : 'Live data unavailable', onPress: () => go('finance') },
         { icon: '◷', value: '—', label: 'Applications by service', onPress: () => go('operations') },
         { icon: '♛', value: '—', label: 'Service health' },
       ]} />
@@ -73,7 +73,7 @@ export function ServiceWorkspaceScreen() {
           <Section title="Service health">
             <ListRows rows={[
               { key: 'applications', main: 'Applications and submissions', sub: 'The current operations endpoint does not expose a service link for each application.', right: '—', onPress: () => go('operations') },
-              { key: 'transactions', main: 'Transactions and bookings', sub: 'Authorized transactions matched by feature name', right: String(serviceTransactions.length), onPress: () => setModule(modules.find((m) => /order|booking|trip|transaction|shipment|payment|rental|bid/i.test(m)) || 'Overview') },
+              { key: 'transactions', main: 'Transactions and bookings', sub: 'Authorized transactions matched by feature name', right: dataMode === 'live' ? String(serviceTransactions.length) : '—', onPress: () => setModule(modules.find((m) => /order|booking|trip|transaction|shipment|payment|rental|bid/i.test(m)) || 'Overview') },
               { key: 'support', main: 'Support cases and issues', sub: 'Service-level linking is not available in the current support snapshot.', right: '—', onPress: () => go('operations') },
               { key: 'content', main: 'Banners and promotions', sub: 'Live placements are not loaded into the service snapshot.', right: '—', onPress: () => go('content') },
             ]} />
@@ -88,8 +88,8 @@ export function ServiceWorkspaceScreen() {
             <View style={{ flex: 1, minWidth: 160 }}><SearchInput value={String(ui.wq || '')} onChangeText={(value) => { ui.wq = value; bump(); }} placeholder={'Search ' + moduleName.toLowerCase()} /></View>
             <Pill onPress={() => { ui.wq = ''; bump(); }}>Clear</Pill>
           </Row>
-          <Section title={moduleName + ' · ' + visibleRows.length} right={<Pill onPress={() => { ui.wf = ui.wf === 'All' ? 'Pending' : 'All'; bump(); }}>{ui.wf === 'All' ? 'Filter pending' : 'Show all'}</Pill>}>
-            <ListRows empty="No records match this module in the current dataset." rows={visibleRows.map((row) => ({
+          <Section title={moduleName + (dataMode === 'live' ? ' · ' + visibleRows.length : '')} right={<Pill onPress={() => { ui.wf = ui.wf === 'All' ? 'Pending' : 'All'; bump(); }}>{ui.wf === 'All' ? 'Filter pending' : 'Show all'}</Pill>}>
+            <ListRows empty="No live records are connected for this service module. No demo records are shown." rows={visibleRows.map((row) => ({
               key: row.key, main: row.title, sub: row.sub,
               right: <View style={{ alignItems: 'flex-end', gap: 3 }}><Txt size={9.5} color={row.right === 'Unassigned' ? c.or : c.ink}>{row.right}</Txt><Small>Open ›</Small></View>,
               onPress: row.action,
@@ -97,7 +97,7 @@ export function ServiceWorkspaceScreen() {
           </Section>
           <Card>
             <Txt size={10.1} weight={500}>Workspace scope</Txt>
-            <Txt size={9.5} mut lh={1.4}>This module view is based on the current admin snapshot and links to the existing authorized record drawers. Service-specific create, approve, refund and publish actions must use the corresponding server endpoint; this shared view does not invent them.</Txt>
+            <Txt size={9.5} mut lh={1.4}>This workspace uses the HTML-defined module list for each service and keeps the matching record-type layout. Live service records and service-specific create, approve, refund and publish actions must come from authorized endpoints; no fixture records or simulated actions are shown.</Txt>
             <View style={{ flexDirection: 'row', flexWrap: 'wrap', marginTop: 8, gap: 6 }}>
               <OutlineBtn onPress={() => go('operations')}>Operations</OutlineBtn>
               <OutlineBtn onPress={() => go('finance')}>Finance</OutlineBtn>
