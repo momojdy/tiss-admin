@@ -28,7 +28,7 @@ const applicationStage = (value: unknown) => {
 };
 
 function clearDemoRecords() {
-  db.APPS = []; db.INV = []; db.SVC = []; db.STAFF = []; db.CASES = []; db.NS = [];
+  db.APPS = []; db.INV = []; db.BIZ = []; db.STAFF = []; db.CASES = []; db.NS = [];
   db.ROLES = {}; db.RR = {}; GRANTS.splice(0, GRANTS.length); REQUESTS.splice(0, REQUESTS.length);
   db.CUST = []; db.BN = []; db.PRM = []; db.ANN = []; db.MEDIA = []; db.CH = []; db.AUD = [];
   db.SET = []; db.PAYO = []; db.RECO = []; db.ACC = []; db.PCS = []; db.PZS = []; db.WINS = [];
@@ -57,10 +57,15 @@ export async function hydrateAdminState() {
     log: [],
   }));
 
-  db.SVC = businesses.map((x): ServiceRow => [
-    str(x.name), str(x.verification), x.is_live ? '1' : '0', x.verification === 'pending' ? '1' : '0',
-    0, str(x.city || x.country || 'Business'), x.payout_ready ? 1 : 0, str(x.id),
-  ]);
+  db.BIZ = businesses.map((x) => ({
+    id: str(x.id),
+    name: str(x.name),
+    verification: str(x.verification || 'pending'),
+    is_live: Boolean(x.is_live),
+    city: str(x.city),
+    country: str(x.country),
+    payout_ready: Boolean(x.payout_ready),
+  }));
 
   db.INV = transactions.map((x): Transaction => ({
     id: str(x.id), f: str(x.feature_name || x.activity_type || 'Wallet'), u: str(x.user_id),
