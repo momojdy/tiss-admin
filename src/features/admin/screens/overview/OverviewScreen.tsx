@@ -150,11 +150,11 @@ export function OverviewScreen() {
 
       <Section title="Money snapshot" right={<Pill onPress={() => go('finance')}>Finance ›</Pill>}>
         <ListRows rows={[
-          { key: 'completed', main: 'Completed', sub: 'Transactions settled or completed', right: <Txt size={10.1}>{prototypeSnapshot ? '— · Live data unavailable' : `${completed.length} · ${mny(completed.reduce((n, tx) => n + tx.a, 0))}`}</Txt>, onPress: () => go('finance', { fs: 'Completed' }) }, 
-          { key: 'pending', main: 'Pending settlement', sub: 'Transactions awaiting completion', right: <Txt size={10.1}>{prototypeSnapshot ? '— · Live data unavailable' : `${pending.length} · ${mny(pending.reduce((n, tx) => n + tx.a, 0))}`}</Txt>, onPress: () => go('finance', { fs: 'Pending' }) }, 
-          { key: 'failed', main: 'Failed or flagged', sub: 'Transactions needing investigation', right: <Txt size={10.1} color={failed.length ? c.or : c.ink}>{prototypeSnapshot ? '— · Live data unavailable' : `${failed.length} · ${mny(failed.reduce((n, tx) => n + tx.a, 0))}`}</Txt>, onPress: () => go('finance', { fs: 'Failed' }) }, 
+          { key: 'completed', main: 'Completed this week', right: <Txt size={10.1}>{prototypeSnapshot ? '— · Live data unavailable' : `${completed.length} · ${mny(completed.reduce((n, tx) => n + tx.a, 0))}`}</Txt>, onPress: () => go('finance', { fs: 'Completed' }) }, 
+          { key: 'pending', main: 'Pending settlement', right: <Txt size={10.1}>{prototypeSnapshot ? '— · Live data unavailable' : `${pending.length} · ${mny(pending.reduce((n, tx) => n + tx.a, 0))}`}</Txt>, onPress: () => go('finance', { fs: 'Pending' }) }, 
+          { key: 'failed', main: 'Failed or flagged', right: <Txt size={10.1} color={failed.length ? c.or : c.ink}>{prototypeSnapshot ? '— · Live data unavailable' : `${failed.length} · ${mny(failed.reduce((n, tx) => n + tx.a, 0))}`}</Txt>, onPress: () => go('finance', { fs: 'Failed' }) }, 
           { key: 'refunds', main: 'Refunds waiting', right: prototypeSnapshot ? '—' : String(refunds.length), onPress: () => go('finance', { fv: 'Refunds' }) }, 
-          { key: 'payouts', main: 'Payouts to check', right: prototypeSnapshot ? '—' : String(db.PAYO.filter((payout) => payout[3] !== 'Paid').length), onPress: () => go('finance', { fv: 'Payouts' }) }, 
+          { key: 'payouts', main: 'Payouts due', right: prototypeSnapshot ? '—' : String(db.PAYO.filter((payout) => payout[3] !== 'Paid').length), onPress: () => go('finance', { fv: 'Payouts' }) }, 
         ]} />
       </Section>
 
