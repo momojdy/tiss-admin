@@ -7,9 +7,13 @@ export interface Application {
   d: [string, DocStatus][]; hold: number; esc: number; due: string;
   notes: { by: string; when: string; txt: string }[] | string[][] | unknown[];
   log: [string, string][];
+  /** Exact timestamps are populated only by the authorized backend snapshot. */
+  createdAt?: string; reviewedAt?: string;
 }
 export interface Transaction {
   id: string; f: string; u: string; d: string; n: string; a: number; s: string; ref: number; rq: number; log: [string, string][];
+  /** Exact timestamp from the authorized backend; absent on prototype seed rows. */
+  createdAt?: string;
 }
 export type ServiceRow = [string, string, string, string, number, string, number, string];
 
