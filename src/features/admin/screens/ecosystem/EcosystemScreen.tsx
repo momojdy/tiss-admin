@@ -88,8 +88,8 @@ export function EcosystemScreen() {
     </View>
   );
   const table = () => (
-    <Table columns={[{ title: 'Service', flex: 1.6 }, { title: 'Today' }, { title: 'Pending' }, { title: 'Status', flex: 1.2 }]}
-      rows={l.map((s) => ({ key: s[0], onPress: () => go('hub', { hub: s[0] }), cells: [<View key="n"><Txt size={9.5} weight={600}>{s[0]}</Txt><Small>{s[1]}</Small></View>, s[2], s[3], <StatusPill key="s" label={s[5] === 'Pre-order' ? 'Pre-order' : 'Active'} tone={s[5] === 'Pre-order' ? 'ye' : 'gr'} small />] }))} />
+    <Table columns={[{ title: 'Service', flex: 1.6 }, { title: 'Activity' }, { title: 'Queue' }, { title: 'Directory status', flex: 1.2 }]}
+      rows={l.map((s) => ({ key: s[0], onPress: () => go('hub', { hub: s[0] }), cells: [<View key="n"><Txt size={9.5} weight={600}>{s[0]}</Txt><Small>{s[1]}</Small></View>, '—', '—', <StatusPill key="s" label={s[5] === 'Pre-order' ? 'Pre-order' : s[5] || 'Listed'} tone={s[5] === 'Pre-order' ? 'ye' : 'gr'} small />] }))} />
   );
 
   return (
