@@ -1,4 +1,3 @@
-import { useMemo } from 'react';
 import { View } from 'react-native';
 import { db, ui, bump, mny, useDb } from '../../state/db';
 import { useNav } from '../../shell/Nav';
@@ -36,7 +35,7 @@ export function AnalyticsScreen() {
   const range: Range = ranges.includes(ui.AR as Range) ? ui.AR as Range : '30D';
   const serviceFilter = String(ui.EC || 'All');
   const activeServices = db.SVC.filter((service) => service[5] === 'Active');
-  const chart = useMemo(() => seriesFor(range, serviceFilter, db.SVC), [range, serviceFilter, db.SVC]);
+  const chart = seriesFor(range, serviceFilter, db.SVC);
   const decided = db.APPS.filter((app) => app.st >= 3);
   const approved = decided.filter((app) => app.st === 3).length;
   const approvalRate = decided.length ? Math.round((approved / decided.length) * 100) : 0;
