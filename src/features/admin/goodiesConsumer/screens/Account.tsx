@@ -32,7 +32,7 @@ const LRow = ({icon, title, sub, onPress, right}: {icon: string; title: string; 
 const Avatar = ({z}: {z: number}) => {const th = useTheme(); return <View style={{width: z, height: z, borderRadius: z / 2, backgroundColor: th.br, alignItems: 'center', justifyContent: 'center'}}><T size={Math.round(z * 0.45)} weight="800" color="#fff">{S.pf.av || String(S.pf.n).charAt(0).toUpperCase()}</T></View>;};
 
 function Settings() {
-  const th = useTheme(), d = S.theme === 'dark';
+  const th = useTheme(), d = S.theme === 'dark', defaultAddress = defAddr();
   return (<View>
     <Bar title={tr('settings')} onBack={back} />
     <View style={{paddingHorizontal: 16}}>
@@ -41,7 +41,7 @@ function Settings() {
       <Row sp style={{paddingVertical: 8, paddingHorizontal: 4}}><T>Order updates</T><Switch on={!!S.np.orders} label="Order updates" onPress={() => togglePref('orders')} /></Row>
       <Row sp style={{paddingVertical: 8, paddingHorizontal: 4}}><T>Offers and deals</T><Switch on={!!S.np.promos} label="Offers and deals" onPress={() => togglePref('promos')} /></Row>
       <Ttl>Account</Ttl>
-      <LRow icon="pin" title="Saved addresses" sub={defAddr().t + ' · Wantiss default'} onPress={() => go('addresses')} />
+      <LRow icon="pin" title="Saved addresses" sub={(defaultAddress?.t || 'No saved address') + (defaultAddress?.t ? ' · Wantiss default' : '')} onPress={() => go('addresses')} />
       <LRow icon="wallet" title="Wallet and payment methods" sub={'Balance ' + money(S.wallet)} onPress={() => go('payments')} />
       <LRow icon="heart" title="Favorites" sub={S.fav.length + S.favp.length + ' saved'} onPress={() => go('favs')} />
       <LRow icon="tag" title="Coupons and offers" onPress={() => go('promos')} />
