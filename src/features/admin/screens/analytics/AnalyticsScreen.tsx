@@ -1,4 +1,5 @@
-import { Modal, Pressable, TextInput, View } from 'react-native';
+import { Alert, Modal, Pressable, TextInput, View } from 'react-native';
+import * as Clipboard from 'expo-clipboard';
 import { useState } from 'react';
 import { db, ui, bump, useDb, dataMode } from '../../state/db';
 import { useNav } from '../../shell/Nav';
@@ -77,6 +78,24 @@ export function AnalyticsScreen() {
     ui.AR = 'Custom'; setCustomOpen(false); bump();
   };
   const updateService = (next: string) => { ui.EC = next; bump(); };
+  const exportCsv = async () => {
+    if (prototypeSnapshot) {
+      Alert.alert('Export unavailable', 'Live analytics data is not connected. No prototype records were exported.');
+      return;
+    }
+    const rows = liveTransactions.filter((tx) => {
+      const timestamp = tx.createdAt ? Date.parse(tx.createdAt) : NaN;
+      const start = range === 'Custom' ? new Date(customStart + 'T00:00:00').getTime() : Date.now() - (range === '7D' ? 7 : range === '30D' ? 30 : range === '90D' ? 90 : 365) * 86400000;
+      const end = range === 'Custom' ? new Date(customEnd + 'T23:59:59.999').getTime() : Date.now();
+      return Number.isFinite(timestamp) && timestamp >= start && timestamp <= end && (serviceFilter === 'All' || tx.f === serviceFilter);
+    });
+    const csv = [
+      ['id', 'service', 'status', 'amount', 'created_at'].join(','),
+      ...rows.map((tx) => [tx.id, tx.f, tx.s, tx.a, tx.createdAt || ''].map((value) => '"' + String(value ?? '').replace(/"/g, '""') + '"').join(',')),
+    ].join('\\n');
+    await Clipboard.setStringAsync(csv);
+    Alert.alert('CSV copied', 'The authorized analytics CSV was copied to your clipboard.');
+  };
 
   return (
     <View>
@@ -88,9 +107,10 @@ export function AnalyticsScreen() {
 
       <Section title="Activity" right={<View style={{ flexDirection: 'row', gap: 6 }}><Pill onPress={() => setExpandedChart(true)}>↗ Expand</Pill><Pill onPress={() => go('finance')}>Open finance ›</Pill></View>}>
         <Chips options={ranges} value={range} onChange={updateRange} />
-        <View style={{ flexDirection: 'row', flexWrap: 'wrap', gap: 6, marginBottom: 8 }}>
+        <View style={{ flexDirection: 'row', flexWrap: 'wrap', gap: 6, marginBottom: 8, alignItems: 'center' }}>
           <Pill on={serviceFilter === 'All'} onPress={() => updateService('All')}>All services</Pill>
           {serviceOptions.map((service) => <Pill key={service} on={serviceFilter === service} onPress={() => updateService(service)}>{service}</Pill>)}
+          <Pill onPress={() => { void exportCsv(); }}>⇩ Export CSV</Pill>
         </View>
         <Txt size={21} weight={500}>{!prototypeSnapshot && chart.available ? chart.total.toLocaleString('en-US') : '—'} <Txt size={10.1} mut>transactions · {serviceFilter === 'All' ? 'all services' : serviceFilter}</Txt></Txt>
         <Txt size={9.5} mut style={{ marginTop: 4 }}>{range === 'Custom' ? customStart + ' – ' + customEnd : range + ' range'} · authorized transaction timestamps only</Txt>
