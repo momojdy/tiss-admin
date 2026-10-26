@@ -1,5 +1,5 @@
 import { View } from 'react-native';
-import { db, ui, bump, mny, useDb } from '../../state/db';
+import { db, ui, bump, useDb } from '../../state/db';
 import { useNav } from '../../shell/Nav';
 import { useTheme } from '../../theme/ThemeContext';
 import { Section } from '../../ui/Card';
