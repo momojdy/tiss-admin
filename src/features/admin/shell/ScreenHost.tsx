@@ -64,7 +64,7 @@ function NotPorted({ id }: { id: ScreenId }) {
 export function ScreenHost() {
   useDb();
   const { screen } = useNav();
-  const allowed = SCREEN_SECTION[screen] === 0 || secLv(SCREEN_SECTION[screen]) > 0;
+  const allowed = secLv(SCREEN_SECTION[screen]) > 0;
   const render = SCREENS[screen];
   return <View>{!allowed ? <NoAccess sec={SCREEN_SECTION[screen]} /> : render ? render() : <NotPorted id={screen} />}</View>;
 }
