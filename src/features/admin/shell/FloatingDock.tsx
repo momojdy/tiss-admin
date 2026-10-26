@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react';
+import { useEffect } from 'react';
 import { Pressable, View } from 'react-native';
 import { useNav } from './Nav';
 import { useOverlay } from '../ui/Overlay';
@@ -9,18 +9,17 @@ import { QuickCreateSheet } from './QuickCreateSheet';
 import { SettingsSheet } from './SettingsSheet';
 import { NotificationsSheet } from './NotificationsSheet';
 
-export function FloatingDock() {
-  const [expanded, setExpanded] = useState(false);
+export function FloatingDock({ expanded, onExpandedChange }: { expanded: boolean; onExpandedChange: (value: boolean) => void }) {
   const { go } = useNav();
   const { openDrawer } = useOverlay();
   const exportCsv = useExport();
   useEffect(() => {
     if (!expanded) return;
-    const timer = setTimeout(() => setExpanded(false), 3500);
+    const timer = setTimeout(() => onExpandedChange(false), 3500);
     return () => clearTimeout(timer);
-  }, [expanded]);
+  }, [expanded, onExpandedChange]);
   const actions = [
-    { icon: expanded ? '‹' : '›', label: 'Show / hide menu', run: () => setExpanded((value) => !value) },
+    { icon: expanded ? '‹' : '›', label: 'Show / hide menu', run: () => onExpandedChange(!expanded) },
     { icon: '⌕', label: 'Search', run: () => openDrawer((close) => <SearchSheet onClose={close} />) },
     { icon: '+', label: 'Quick create', run: () => openDrawer((close) => <QuickCreateSheet onClose={close} />) },
     { icon: '♢', label: 'Alerts', run: () => openDrawer((close) => <NotificationsSheet onClose={close} />) },
