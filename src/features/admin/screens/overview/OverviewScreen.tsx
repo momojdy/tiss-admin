@@ -59,7 +59,6 @@ export function OverviewScreen() {
   const within48 = reviewed.filter((app) => Date.parse(app.reviewedAt!) - Date.parse(app.createdAt!) <= 48 * 60 * 60 * 1000).length;
   const reviewSpeedAvailable = reviewed.length > 0;
   const reviewSpeed = reviewSpeedAvailable ? Math.round(within48 / reviewed.length * 100) : 0;
-  const liveBanners = db.BN.filter((banner) => banner.st === 'Live');
   const setRange = (range: Range) => { ui.AR = range; bump(); };
   const attention = [
     ...failed.slice(0, 1).map((tx) => ({ key: tx.id, title: 'Failed transaction', sub: tx.f + ' · ' + tx.u, right: mny(tx.a), action: () => go('finance', { fv: 'Transactions', fs: 'Failed' }) })),
