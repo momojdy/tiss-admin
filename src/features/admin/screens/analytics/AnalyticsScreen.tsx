@@ -150,9 +150,9 @@ export function AnalyticsScreen() {
             <Txt size={16} weight={600}>Custom analytics range</Txt>
             <Txt size={10.1} mut>Choose dates for the transaction and service charts.</Txt>
             <Txt size={10.1} mut>Start date (YYYY-MM-DD)</Txt>
-            <TextInput value={customStart} onChangeText={setCustomStart} placeholder="2026-09-20" placeholderTextColor={c.mut} autoCapitalize="none" style={{ color: c.ink, borderWidth: 1, borderColor: c.line, borderRadius: 9, paddingHorizontal: 11, paddingVertical: 10, fontSize: 13 }} />
+            <TextInput value={customStart} onChangeText={setCustomStart} placeholder="2026-09-20" placeholderTextColor={c.mut} autoCapitalize="none" style={{ color: c.ink, borderWidth: 1, borderColor: c.bd, borderRadius: 9, paddingHorizontal: 11, paddingVertical: 10, fontSize: 13 }} />
             <Txt size={10.1} mut>End date (YYYY-MM-DD)</Txt>
-            <TextInput value={customEnd} onChangeText={setCustomEnd} placeholder="2026-10-17" placeholderTextColor={c.mut} autoCapitalize="none" style={{ color: c.ink, borderWidth: 1, borderColor: c.line, borderRadius: 9, paddingHorizontal: 11, paddingVertical: 10, fontSize: 13 }} />
+            <TextInput value={customEnd} onChangeText={setCustomEnd} placeholder="2026-10-17" placeholderTextColor={c.mut} autoCapitalize="none" style={{ color: c.ink, borderWidth: 1, borderColor: c.bd, borderRadius: 9, paddingHorizontal: 11, paddingVertical: 10, fontSize: 13 }} />
             {rangeError ? <Txt size={10.1} color={c.or}>{rangeError}</Txt> : null}
             <View style={{ flexDirection: 'row', justifyContent: 'flex-end', gap: 8, marginTop: 4 }}>
               <Pill onPress={() => setCustomOpen(false)}>Cancel</Pill>
