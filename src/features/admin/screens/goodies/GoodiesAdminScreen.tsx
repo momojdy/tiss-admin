@@ -103,13 +103,18 @@ export function GoodiesAdminScreen() {
   const openMerchant = (item: any) => { go('people', { ps: 'Accounts' }); toast('Opened People to review ' + item.n + '.'); };
 
   const itemsForModule = (): any[] => {
-    if (moduleLabel === 'Home') return [...data.modes.map((x: any) => ({ ...x, _kind: 'mode', _field: 'title', _title: x.title?.en?.v || x.id, _sub: x.sub?.en?.v || 'Home mode' })), ...data.promos.map((x: any) => ({ ...x, _kind: 'promo', _field: 'title', _title: x.title?.en?.v || x.id, _sub: x.sub?.en?.v || x.aud }))];
+    if (moduleLabel === 'Home') return [
+      ...data.modes.map((x: any) => ({ ...x, _kind: 'mode', _field: 'title', _title: x.title?.en?.v || x.id, _sub: x.sub?.en?.v || 'Home mode' })),
+      ...data.promos.map((x: any) => ({ ...x, _kind: 'promo', _field: 'title', _title: x.title?.en?.v || x.id, _sub: x.sub?.en?.v || x.aud })),
+    ];
     if (moduleLabel === 'Categories') return data.cats.map((x: any) => ({ ...x, _kind: 'category', _field: 'name', _title: x.name?.en?.v || x.id, _sub: x.st + ' · ' + (x.stores || 0) + ' stores' }));
-    if (moduleLabel === 'Library') return data.lib.map((x: any) => ({ ...x, _kind: 'library', _field: 'name', _title: x.name?.en?.v || x.id, _sub: x.role + ' · ' + x.b + ' · ' + x.st }));
+    if (moduleLabel === 'Library' || moduleLabel === 'Product review') return data.lib.map((x: any) => ({ ...x, _kind: 'library', _field: 'name', _title: x.name?.en?.v || x.id, _sub: (moduleLabel === 'Product review' ? 'Catalog review · ' : '') + x.role + ' · ' + x.b + ' · ' + x.st }));
     if (moduleLabel === 'Requests') return data.reqs.map((x: any) => ({ ...x, _kind: 'request', _field: 'note', _title: x.name, _sub: x.vendor + ' · ' + x.st + ' · ' + x.b }));
     if (moduleLabel === 'Promos') return [...data.promos, ...data.coupons].map((x: any) => ({ ...x, _kind: 'promo', _field: x.title ? 'title' : 'desc', _title: x.title?.en?.v || x.code || x.id, _sub: (x.st || 'Draft') + ' · ' + (x.aud || x.store || 'Goodies') }));
-    if (moduleLabel === 'Merchants') return db.ACC.filter((account) => account.svc.includes('Goodies')).map((account: any) => ({ ...account, id: account.id, _kind: 'merchant', _field: '', _title: account.n, _sub: account.type + ' · ' + account.svc.join(', ') }));
-    if (moduleLabel === 'Orders') return db.INV.filter((transaction) => transaction.f.toLowerCase().includes('goodies')).map((transaction: any) => ({ ...transaction, _kind: 'order', _field: '', _title: transaction.id + ' · ' + transaction.f, _sub: transaction.u + ' · .map(([key, value]) => ({ id: key, _kind: 'fee', _field: 'value', _title: key, _sub: Array.isArray(value) ? value.join(' · ') : String(value), value }));
+    if (moduleLabel === 'Merchants') return db.ACC.filter((account) => account.svc.includes('Goodies')).map((account: any) => ({ ...account, _kind: 'merchant', _field: '', _title: account.n, _sub: account.type + ' · ' + account.svc.join(', ') }));
+    if (moduleLabel === 'Orders') return db.INV.filter((transaction) => transaction.f.toLowerCase().includes('goodies')).map((transaction: any) => ({ ...transaction, _kind: 'order', _field: '', _title: transaction.id + ' · ' + transaction.f, _sub: transaction.u + ' · $' + transaction.a.toFixed(2) + ' · ' + transaction.s }));
+    if (moduleLabel === 'Analytics') return [];
+    if (moduleLabel === 'Fees') return Object.entries(data.fees).map(([key, value]) => ({ id: key, _kind: 'fee', _field: 'value', _title: key, _sub: Array.isArray(value) ? value.join(' · ') : String(value), value }));
     if (moduleLabel === 'Restricted') return [...(data.rg.prohibited || []), ...(data.rg.docs || [])].map((x: any, i: number) => ({ ...x, id: x.id || 'restriction.' + i, _kind: 'restricted', _field: 't', _title: x.t?.en?.v || x.name || x.id || 'Requirement ' + (i + 1), _sub: x.crit ? 'Critical requirement' : 'Restricted-goods rule' }));
     if (moduleLabel === 'Texts') return [...data.labels, ...data.stages, ...data.notifs].map((x: any) => ({ ...x, _kind: 'text', _field: x.t ? 't' : 'title', _title: x.label || x.id, _sub: englishValue(x, x.t ? 't' : 'title') }));
     if (moduleLabel === 'Support') return [...data.faq, ...data.topics, ...data.legal].map((x: any) => ({ ...x, _kind: 'support', _field: x.q ? 'q' : x.t ? 't' : 'name', _title: x.q?.en?.v || x.t?.en?.v || x.name?.en?.v || x.id, _sub: x.st || 'Support content' }));
