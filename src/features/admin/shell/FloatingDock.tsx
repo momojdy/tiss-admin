@@ -2,20 +2,17 @@ import { useEffect, useState } from 'react';
 import { Pressable, View } from 'react-native';
 import { useNav } from './Nav';
 import { useOverlay } from '../ui/Overlay';
-import { useTheme } from '../theme/ThemeContext';
 import { Txt } from '../ui/Txt';
 import { useExport } from './useExport';
 import { SearchSheet } from './SearchSheet';
 import { QuickCreateSheet } from './QuickCreateSheet';
 import { SettingsSheet } from './SettingsSheet';
 import { NotificationsSheet } from './NotificationsSheet';
-import { AccountSheet } from './AccountSheet';
 
 export function FloatingDock() {
   const [expanded, setExpanded] = useState(false);
   const { go } = useNav();
   const { openDrawer } = useOverlay();
-  const { c } = useTheme();
   const exportCsv = useExport();
   useEffect(() => {
     if (!expanded) return;
