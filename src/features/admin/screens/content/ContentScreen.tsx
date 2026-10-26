@@ -302,7 +302,7 @@ export function ContentScreen() {
           </Pressable>)}
         </View> : null}
         <View style={{ marginTop: 9 }}>
-          <OutlineBtn primary onPress={() => go('editor', { editorFeature: customerFeature })}>Open {customerFeature} customer page in live editor ›</OutlineBtn>
+          <OutlineBtn primary onPress={() => go('editor', { editorFeature: customerFeature })}>{'Open ' + customerFeature + ' customer page in live editor ›'}</OutlineBtn>
         </View>
       </Section> : null}
       <Chips options={contentSections} value={activeSection} onChange={changeSection} />
