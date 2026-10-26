@@ -97,7 +97,7 @@ export function CustomerPageEditorScreen() {
       const { data, error: queryError } = await supabase
         .from('wantiss_cms_content')
         .select('payload')
-        .eq('content_key', 'goodies.content')
+        .in('content_key', ['goodies.content', 'goodies'])
         .eq('status', 'published')
         .eq('locale', 'en')
         .order('version', { ascending: false })
