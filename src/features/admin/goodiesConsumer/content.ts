@@ -21,7 +21,12 @@ export function applyContent(json: any) {
   });
   subs.forEach(f => f());
 }
+/* The admin editor owns the content while it is mounted. In that mode loadContent()
+   must never fetch or reset C, otherwise it would overwrite the editor's draft. */
+let draftControlled = false;
+export const setDraftControlled = (value: boolean) => {draftControlled = value;};
 export async function loadContent() {
+  if (draftControlled) return;
   try {
     const remote = await fetchPublishedWantissContent('en');
     const record = remote.content.find(x => x.content_key === 'goodies.content' || x.content_key === 'goodies');
@@ -92,8 +97,8 @@ export const faq = (_fallback: [string, string][]): [string, string][] => (C && 
 export const supportTopics = (_fallback: string[]) => (C && Array.isArray(C.topics) ? C.topics.map((t: any) => tx(t.t)) : []);
 export function legalDoc(id: string): string | null {const d = C && C.legal && C.legal.find((x: any) => x.id === id && x.st === 'Live'); const s = d ? tx(d.t) : ''; return s || null;}
 
-export function modes(): {emoji: string; image?: string | null; title: string; sub: string; cat: string}[] | null {
+export function modes(): {id: string; emoji: string; image?: string | null; title: string; sub: string; cat: string}[] | null {
   if (!C || !C.modes) return [];
-  return C.modes.filter((m: any) => m.st === 'Live').map((m: any) => ({emoji: m.emoji, image: m.img?.data || m.art?.data || null, title: tx(m.title), sub: tx(m.sub), cat: m.cat}));
+  return C.modes.filter((m: any) => m.st === 'Live').map((m: any) => ({id: m.id, emoji: m.emoji, image: m.img?.data || m.art?.data || null, title: tx(m.title), sub: tx(m.sub), cat: m.cat}));
 }
 contentHooks.coupons = coupons; contentHooks.fees = fees; contentHooks.minAge = minAge;

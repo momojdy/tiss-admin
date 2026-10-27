@@ -6,6 +6,7 @@ import {LinearGradient} from 'expo-linear-gradient';
 import {light, dark, Theme, BG} from '../theme';
 import {S, useGoodies, money, STB, PV, toast, ui} from '../store';
 import {Icon} from './Icon';
+import {Sel, GoodiesSelection} from '../editContext';
 import {t as tr, ts} from '../i18n';
 
 export const useTheme = (): Theme => {useGoodies(); return S.theme === 'dark' ? dark : light;};
@@ -63,11 +64,12 @@ export function Bar({title, right, onBack, stripe = true}: {title: string; right
   );
 }
 
-export function Sh({title, link, onLink, right}: {title: string; link?: string; onLink?: () => void; right?: any}) {
+export function Sh({title, link, onLink, right, sel}: {title: string; link?: string; onLink?: () => void; right?: any; sel?: GoodiesSelection}) {
   const th = useTheme();
+  const heading = <T size={19} weight="800" style={{flexShrink: 1}}>{title}</T>;
   return (
     <View style={{flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', paddingHorizontal: 16, paddingTop: 24, paddingBottom: 10, gap: 8}}>
-      <T size={19} weight="800" style={{flexShrink: 1}}>{title}</T>
+      {sel ? <Sel sel={sel} style={{flexShrink: 1}}>{heading}</Sel> : heading}
       {link ? <Pressable onPress={onLink}><T size={13} weight="700" color={th.br}>{link}</T></Pressable> : right || null}
     </View>
   );

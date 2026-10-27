@@ -1,8 +1,10 @@
-import React, { useCallback } from 'react';
+import React, { useCallback, useEffect, useLayoutEffect, useMemo } from 'react';
 import { Pressable, ScrollView, Text, View } from 'react-native';
 import { GoodiesApp } from '../../goodiesConsumer/GoodiesApp';
-import { emit, IT, S, STB, useGoodies, setPreviewOnly } from '../../goodiesConsumer/store';
-import { C } from '../../goodiesConsumer/content';
+import { emit, IT, S, STB, useGoodies, setPreviewOnly, setEditLocked } from '../../goodiesConsumer/store';
+import { applyContent, clearContent, setDraftControlled } from '../../goodiesConsumer/content';
+import { resolveForRender } from '../../goodiesConsumer/draft';
+import { EditContext, type GoodiesSelection } from '../../goodiesConsumer/editContext';
 
 const orange = '#FD802E';
 const ink = '#1B1B1F';
@@ -19,12 +21,45 @@ const screens = [
   { key: 'byo', label: 'Build your own' },
 ] as const;
 
-type EditTarget = { kind: 'mode' | 'promo' | 'category' | 'label'; id: string; title: string };
-
-export function GoodiesConsumerPreview({ editMode = false, contentDraft, selectedTarget, onEditTarget }: { editMode?: boolean; contentDraft?: any; selectedTarget?: EditTarget | null; onEditTarget?: (target: EditTarget) => void }) {
-  // Establish the safety boundary before child screens can mount their effects.
+/**
+ * The real Goodies consumer app, driven by the editor's draft.
+ * - The editor owns the draft. This component only renders it (a resolved copy) and never edits it.
+ * - While mounted it blocks GoodiesApp.loadContent() so nothing can overwrite the draft.
+ * - In edit mode the real components select themselves through EditContext; there is no overlay.
+ */
+export function GoodiesConsumerPreview({ editMode = false, contentDraft, assetUrls, selectedTarget, onSelectTarget }: {
+  editMode?: boolean;
+  contentDraft: any | null;
+  assetUrls: Record<string, string>;
+  selectedTarget: GoodiesSelection | null;
+  onSelectTarget: (target: GoodiesSelection) => void;
+}) {
+  // Establish the safety boundaries before child screens can mount their effects.
   setPreviewOnly(true);
+  setDraftControlled(true);
   useGoodies();
+
+  const resolved = useMemo(() => {
+    if (!contentDraft) return null;
+    try { return resolveForRender(contentDraft, assetUrls); } catch { return null; }
+  }, [contentDraft, assetUrls]);
+
+  // Runs before the children's effects on first mount, and on every draft change.
+  useLayoutEffect(() => {
+    try {
+      if (resolved) applyContent(resolved); else void clearContent();
+    } catch { void clearContent(); }
+    emit();
+  }, [resolved]);
+
+  useEffect(() => {
+    setEditLocked(editMode);
+    if (editMode) { S.stack = [{ r: 'home', u: Date.now() }]; emit(); }
+    return () => setEditLocked(false);
+  }, [editMode]);
+
+  useEffect(() => () => { setDraftControlled(false); void clearContent(); }, []);
+
   const navigate = useCallback((route: string) => {
     const storeId = Object.keys(STB)[0] || 's12';
     const itemId = Object.keys(IT)[0] || '';
@@ -36,39 +71,14 @@ export function GoodiesConsumerPreview({ editMode = false, contentDraft, selecte
     emit();
   }, []);
 
-  const pickTarget = (y: number, x: number): EditTarget | null => {
-    const content: any = contentDraft || C;
-    if (!content) return { kind: 'label', id: 'lbl.search', title: 'Search placeholder' };
-    if (y < 160) return { kind: 'label', id: 'lbl.search', title: 'Search placeholder' };
-    if (y < 290) {
-      const list = (content.modes || []).filter((v: any) => v.st === 'Live');
-      const i = x < 170 ? 0 : x < 280 ? 1 : 2;
-      const v = list[i] || list[0];
-      return v ? { kind: 'mode', id: v.id, title: 'Service tile · ' + (v.title?.en?.v || v.id) } : null;
-    }
-    if (y < 390) {
-      const list = (content.cats || []).filter((v: any) => v.st === 'on').sort((a: any,b: any) => (a.ord || 0) - (b.ord || 0));
-      const i = Math.min(list.length - 1, Math.max(0, Math.floor(Math.max(0, x) / 62)));
-      const v = list[i];
-      return v ? { kind: 'category', id: v.id, title: 'Category · ' + (v.name?.en?.v || v.id) } : null;
-    }
-    if (y < 525) {
-      const list = (content.promos || []).filter((v: any) => v.st === 'Live').sort((a: any,b: any) => (a.ord || 0) - (b.ord || 0));
-      const v = list[0];
-      return v ? { kind: 'promo', id: v.id, title: 'Promotion · ' + (v.title?.en?.v || v.id) } : null;
-    }
-    const labels = y < 625 ? ['lbl.coupons','lbl.coupons2'] : ['lbl.flash','lbl.again','lbl.recent','lbl.popular','lbl.produce','lbl.haitian','lbl.trending'];
-    const id = labels[Math.min(labels.length - 1, Math.floor((y - (y < 625 ? 525 : 625)) / 45))] || labels[0];
-    const item = (content.labels || []).find((v: any) => v.id === id);
-    return { kind: 'label', id, title: item?.label || 'Customer text' };
-  };
+  const editValue = useMemo(() => (editMode ? { selected: selectedTarget, select: onSelectTarget } : null), [editMode, selectedTarget, onSelectTarget]);
 
   return (
     <View style={{ width: '100%', alignItems: 'center' }}>
       <View style={{ width: '100%', maxWidth: 390, marginBottom: 10, paddingHorizontal: 4 }}>
         <Text style={{ color: ink, fontSize: 12, fontWeight: '800' }}>{editMode ? 'Edit actual Goodies consumer screen' : 'Actual Goodies consumer screens'}</Text>
         <Text style={{ color: muted, fontSize: 10, lineHeight: 15, marginTop: 3 }}>
-          {editMode ? 'Phone navigation is paused. Tap a visible section to select its content for editing.' : 'Rendered from the consumer app source. Published catalogue and content load from the configured Wantiss backend. Placing orders is disabled in this preview.'}
+          {editMode ? 'Scroll the phone and tap an element to select it. Navigation is paused while editing.' : 'Rendered from the consumer app source using the current draft. Placing orders is disabled in this preview.'}
         </Text>
         {!editMode ? <ScrollView horizontal showsHorizontalScrollIndicator={false} contentContainerStyle={{ gap: 6, paddingVertical: 10 }}>
           {screens.map((screen) => {
@@ -82,56 +92,11 @@ export function GoodiesConsumerPreview({ editMode = false, contentDraft, selecte
           })}
         </ScrollView> : null}
       </View>
-      <View style={{ width: '100%', maxWidth: 404, height: 720, borderRadius: 30, borderWidth: 7, borderColor: editMode ? orange : '#252529', overflow: 'hidden', backgroundColor: '#FFFFFF' }}>
-        <View pointerEvents={editMode ? 'none' : 'auto'} style={{ flex: 1 }}><GoodiesApp embedded previewMode /></View>
-        {editMode ? (
-          <View pointerEvents="box-none" style={{ position: 'absolute', left: 0, right: 0, top: 0, bottom: 0, zIndex: 999, elevation: 999 }}>
-            <Pressable
-              accessibilityRole="button"
-              accessibilityLabel="Select Goodies content at this position"
-              onPress={(event: any) => {
-                const y = Number(event?.nativeEvent?.locationY ?? 210);
-                const x = Number(event?.nativeEvent?.locationX ?? 80);
-                const target = pickTarget(y, x);
-                if (target) onEditTarget?.(target);
-              }}
-              style={{ position: 'absolute', left: 0, right: 0, top: 0, bottom: 0 }}
-            />
-            {[
-              { top: '14%', height: '8%', target: pickTarget(110, 100), label: 'Search' },
-              { top: '22%', height: '19%', target: pickTarget(210, 80), label: 'Food delivery banner' },
-              { top: '41%', height: '15%', target: pickTarget(330, 80), label: 'Categories' },
-              { top: '56%', height: '20%', target: pickTarget(450, 80), label: 'Promotions' },
-              { top: '76%', height: '24%', target: pickTarget(590, 80), label: 'Section titles' },
-            ].map((zone) => zone.target ? (
-              <Pressable key={zone.label} accessibilityRole="button" accessibilityLabel={'Select ' + zone.label} onPress={() => onEditTarget?.(zone.target!)}
-                style={{
-                  position: 'absolute', left: 0, right: 0, top: zone.top as any, height: zone.height as any,
-                  borderWidth: selectedTarget?.kind === zone.target.kind && selectedTarget?.id === zone.target.id ? 2 : 0,
-                  borderStyle: 'dashed',
-                  borderColor: orange,
-                  backgroundColor: 'transparent',
-                }} />
-            ) : null)}
-          </View>
-        ) : null}
+      <View style={{ width: '100%', maxWidth: 404, height: 720, borderRadius: 30, borderWidth: 7, borderColor: '#252529', overflow: 'hidden', backgroundColor: '#FFFFFF' }}>
+        <EditContext.Provider value={editValue}>
+          <GoodiesApp embedded previewMode />
+        </EditContext.Provider>
       </View>
-      {editMode ? (
-        <View style={{ width: '100%', maxWidth: 404, marginTop: 12, gap: 7 }}>
-          <Text style={{ color: ink, fontSize: 12, fontWeight: '800' }}>Select content to edit</Text>
-          {[
-            ...((contentDraft || C as any)?.modes || []).filter((v: any) => v.st === 'Live').map((v: any) => ({ kind: 'mode' as const, id: v.id, title: 'Service tile · ' + (v.title?.en?.v || v.id) })),
-            ...((contentDraft || C as any)?.cats || []).filter((v: any) => v.st === 'on').map((v: any) => ({ kind: 'category' as const, id: v.id, title: 'Category · ' + (v.name?.en?.v || v.id) })),
-            ...((contentDraft || C as any)?.promos || []).filter((v: any) => v.st === 'Live').map((v: any) => ({ kind: 'promo' as const, id: v.id, title: 'Promotion · ' + (v.title?.en?.v || v.id) })),
-            ...((contentDraft || C as any)?.labels || []).map((v: any) => ({ kind: 'label' as const, id: v.id, title: 'Text · ' + (v.label || v.id) })),
-          ].map((target) => (
-            <Pressable key={target.kind + ':' + target.id} accessibilityRole="button" onPress={() => onEditTarget?.(target)}
-              style={{ paddingHorizontal: 12, paddingVertical: 10, borderRadius: 10, borderWidth: 1, borderColor: '#E5E5E7', backgroundColor: '#FFFFFF' }}>
-              <Text style={{ color: ink, fontSize: 11, fontWeight: '600' }}>{target.title}</Text>
-            </Pressable>
-          ))}
-        </View>
-      ) : null}
     </View>
   );
 }

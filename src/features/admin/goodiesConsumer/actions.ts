@@ -2,15 +2,16 @@
 import {providerInfo} from './providers';
 import {supabase} from '../lib/supabase';
 import {
-  hasAlcohol, alcAge, S, IT, STB, ui, toast, emit, save, push, reset, navBack, cartAdd, qtyIn, cnt, totals, pChk, isPk, addr, ctOf, phoneOK, reorderLines, money, hooks, done, cur, refreshLiveSchedules, previewOnly,
+  hasAlcohol, alcAge, S, IT, STB, ui, toast, emit, save, push, reset, navBack, cartAdd, qtyIn, cnt, totals, pChk, isPk, addr, ctOf, phoneOK, reorderLines, money, hooks, done, cur, refreshLiveSchedules, previewOnly, editLocked,
 } from './store';
 
 export const CHOOSE_SIZE_CATS = ['restaurants', 'bakery', 'beverages'];
 
-export const go = (r: string, p?: any) => {S.f = ''; S.sub = ''; push(r, p);};
-export const tab = (p: string) => {S.f = ''; reset(p);};
-export const back = () => navBack();
-export const browse = () => {S.f = ''; reset('home');};
+/* While the admin editor is in edit mode, taps select elements instead of navigating. */
+export const go = (r: string, p?: any) => {if (editLocked) return; S.f = ''; S.sub = ''; push(r, p);};
+export const tab = (p: string) => {if (editLocked) return; S.f = ''; reset(p);};
+export const back = () => {if (editLocked) return; navBack();};
+export const browse = () => {if (editLocked) return; S.f = ''; reset('home');};
 
 export function heart(id: string) {
   const i = S.fav.indexOf(id);
