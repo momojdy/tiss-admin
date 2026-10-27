@@ -21,7 +21,7 @@ const screens = [
 
 type EditTarget = { kind: 'mode' | 'promo' | 'category' | 'label'; id: string; title: string };
 
-export function GoodiesConsumerPreview({ editMode = false, selectedTarget, onEditTarget }: { editMode?: boolean; selectedTarget?: EditTarget | null; onEditTarget?: (target: EditTarget) => void }) {
+export function GoodiesConsumerPreview({ editMode = false, contentDraft, selectedTarget, onEditTarget }: { editMode?: boolean; contentDraft?: any; selectedTarget?: EditTarget | null; onEditTarget?: (target: EditTarget) => void }) {
   // Establish the safety boundary before child screens can mount their effects.
   setPreviewOnly(true);
   useGoodies();
@@ -37,7 +37,7 @@ export function GoodiesConsumerPreview({ editMode = false, selectedTarget, onEdi
   }, []);
 
   const pickTarget = (y: number, x: number): EditTarget | null => {
-    const content: any = C;
+    const content: any = contentDraft || C;
     if (!content) return { kind: 'label', id: 'lbl.search', title: 'Search placeholder' };
     if (y < 160) return { kind: 'label', id: 'lbl.search', title: 'Search placeholder' };
     if (y < 290) {
@@ -120,10 +120,10 @@ export function GoodiesConsumerPreview({ editMode = false, selectedTarget, onEdi
         <View style={{ width: '100%', maxWidth: 404, marginTop: 12, gap: 7 }}>
           <Text style={{ color: ink, fontSize: 12, fontWeight: '800' }}>Select content to edit</Text>
           {[
-            ...((C as any)?.modes || []).filter((v: any) => v.st === 'Live').map((v: any) => ({ kind: 'mode' as const, id: v.id, title: 'Service tile · ' + (v.title?.en?.v || v.id) })),
-            ...((C as any)?.cats || []).filter((v: any) => v.st === 'on').map((v: any) => ({ kind: 'category' as const, id: v.id, title: 'Category · ' + (v.name?.en?.v || v.id) })),
-            ...((C as any)?.promos || []).filter((v: any) => v.st === 'Live').map((v: any) => ({ kind: 'promo' as const, id: v.id, title: 'Promotion · ' + (v.title?.en?.v || v.id) })),
-            ...((C as any)?.labels || []).map((v: any) => ({ kind: 'label' as const, id: v.id, title: 'Text · ' + (v.label || v.id) })),
+            ...((contentDraft || C as any)?.modes || []).filter((v: any) => v.st === 'Live').map((v: any) => ({ kind: 'mode' as const, id: v.id, title: 'Service tile · ' + (v.title?.en?.v || v.id) })),
+            ...((contentDraft || C as any)?.cats || []).filter((v: any) => v.st === 'on').map((v: any) => ({ kind: 'category' as const, id: v.id, title: 'Category · ' + (v.name?.en?.v || v.id) })),
+            ...((contentDraft || C as any)?.promos || []).filter((v: any) => v.st === 'Live').map((v: any) => ({ kind: 'promo' as const, id: v.id, title: 'Promotion · ' + (v.title?.en?.v || v.id) })),
+            ...((contentDraft || C as any)?.labels || []).map((v: any) => ({ kind: 'label' as const, id: v.id, title: 'Text · ' + (v.label || v.id) })),
           ].map((target) => (
             <Pressable key={target.kind + ':' + target.id} accessibilityRole="button" onPress={() => onEditTarget?.(target)}
               style={{ paddingHorizontal: 12, paddingVertical: 10, borderRadius: 10, borderWidth: 1, borderColor: '#E5E5E7', backgroundColor: '#FFFFFF' }}>
