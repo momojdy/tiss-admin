@@ -6,7 +6,7 @@ import {View, Text, Pressable, ScrollView, Animated, PanResponder, BackHandler, 
 import {SafeAreaView, useSafeAreaInsets} from 'react-native-safe-area-context';
 import {Icon} from './components/Icon';
 import {T, Grad, Cta, Badge, Row, Input, Card, SheetBox, Ttl, Radio, useTheme} from './components/ui';
-import {S, ST, STB, load, save, emit, useGoodies, cur, cnt, totals, ui, toast, done, stage, notify, navBack, reset, applyZone, money, TL, TP, addr, push, setPreviewOnly} from './store';
+import {S, ST, STB, load, save, emit, useGoodies, cur, cnt, totals, ui, toast, done, stage, notify, navBack, reset, applyZone, money, TL, TP, addr, push, setPreviewOnly, editLocked} from './store';
 import * as A from './actions';
 import {startGoodiesSync} from './serverSync';
 import {Home, Cats, CatList, Search, Promos, Notifs, Explore} from './screens/Browse';
@@ -32,7 +32,7 @@ export function GoodiesApp({onExit, embedded = true, previewMode = false}: {onEx
 
   /* bridge for store/actions */
   ui.toast = (t: string) => {setToastTxt(t); clearTimeout(toastT.current); toastT.current = setTimeout(() => setToastTxt(''), 2300);};
-  ui.sheet = (s: any) => setSheet(s);
+  ui.sheet = (s: any) => {if (editLocked) return; setSheet(s);};
   ui.close = () => setSheet(null);
 
   useEffect(() => {
@@ -65,6 +65,7 @@ export function GoodiesApp({onExit, embedded = true, previewMode = false}: {onEx
   }, [previewMode]);
 
   const handleBack = () => {
+    if (editLocked) return true;
     const r = navBack();
     if (r === 'exit') {if (embedded) {S.stack = [{r: 'home', u: Date.now()}]; onExit && onExit();} emit();}
     return true;

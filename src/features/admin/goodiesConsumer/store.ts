@@ -10,6 +10,9 @@ export const KEY = 'goodies-live-v4';
 /** Isolated read-only customer-screen preview inside Wantiss Admin. */
 export let previewOnly = false;
 export const setPreviewOnly = (value: boolean) => { previewOnly = value; };
+/** True only while the admin editor is in edit mode: taps select elements and must not navigate. */
+export let editLocked = false;
+export const setEditLocked = (value: boolean) => { editLocked = value; };
 export const WKEY = 'goodies-live-profile-v2';
 
 /* The customer catalog is empty until published backend products are available. */

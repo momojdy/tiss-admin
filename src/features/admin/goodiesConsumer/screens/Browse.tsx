@@ -9,12 +9,14 @@ import {categories, catName, label, promoCards, deals, dealEnd, coupons, modes} 
 import {Image} from 'react-native';
 import {go, tab, back, browse, setFilter, setSub, clearFilters, usePromo, openNotif, readAll, heart} from '../actions';
 import {byoNames} from '../builders/engine';
+import {Sel, useEditing} from '../editContext';
 import {t as tr, tx} from '../i18n';
 import {MODE1, PROMO} from '../theme';
 import {supabase} from '../../lib/supabase';
 
 const cname = (id: string) => catName(id);
-function Mode({title, sub, emoji, image, onPress, grad, bg, fg, small}: any) {
+function Mode({id, title, sub, emoji, image, onPress, grad, bg, fg, small}: any) {
+  const ed = useEditing();
   return (
     <Pressable onPress={onPress} style={{borderRadius: 18, overflow: 'hidden', height: small ? 51 : 112}}>
       {grad ? <Grad colors={MODE1} style={{flex: 1, padding: small ? 0 : 14, paddingHorizontal: 14, justifyContent: small ? 'center' : 'flex-start'}}>{inner()}</Grad> : <View style={{flex: 1, backgroundColor: bg, paddingHorizontal: 14, padding: small ? 0 : 14, justifyContent: small ? 'center' : 'flex-start'}}>{inner()}</View>}
@@ -22,24 +24,45 @@ function Mode({title, sub, emoji, image, onPress, grad, bg, fg, small}: any) {
   );
   function inner() {
     const c = grad ? '#fff' : fg;
+    /* Editable elements are wrapped only when the admin editor provides a mode id. */
+    const wrap = (field: 'title' | 'sub', node: any) => id ? <Sel sel={{kind: 'mode', id, field}}>{node}</Sel> : node;
+    const imgBox: any = {position: 'absolute', right: small ? 7 : 4, bottom: small ? 2 : -4, top: small ? 4 : undefined, width: small ? 38 : 76, height: small ? 38 : 76};
+    const fs = small ? 34 : 62, lh = small ? 36 : 62;
+    const emojiBox: any = {position: 'absolute', right: small ? 10 : 6, bottom: small ? undefined : -4, top: small ? 8 : undefined, fontSize: fs, lineHeight: lh};
+    const art = image
+      ? <Image source={{uri: image}} style={ed && id ? {width: '100%', height: '100%'} : imgBox} resizeMode="contain" />
+      : <Text style={ed && id ? {fontSize: fs, lineHeight: lh, textAlign: 'center'} : emojiBox}>{emoji}</Text>;
+    const artBox: any = image ? imgBox : {position: 'absolute', right: emojiBox.right, bottom: emojiBox.bottom, top: emojiBox.top, width: Math.round(fs * 1.25), height: lh};
     return (
       <>
-        <T size={small ? 14.5 : 17} weight="800" color={c} style={{lineHeight: small ? undefined : 19.5}}>{title}</T>
-        {sub ? <T size={12} color={c} style={{marginTop: 3, opacity: 0.9}}>{sub}</T> : null}
-        {image ? <Image source={{uri: image}} style={{position: 'absolute', right: small ? 7 : 4, bottom: small ? 2 : -4, top: small ? 4 : undefined, width: small ? 38 : 76, height: small ? 38 : 76}} resizeMode="contain" /> : <Text style={{position: 'absolute', right: small ? 10 : 6, bottom: small ? undefined : -4, top: small ? 8 : undefined, fontSize: small ? 34 : 62, lineHeight: small ? 36 : 62}}>{emoji}</Text>}
+        {wrap('title', <T size={small ? 14.5 : 17} weight="800" color={c} style={{lineHeight: small ? undefined : 19.5}}>{title}</T>)}
+        {sub ? wrap('sub', <T size={12} color={c} style={{marginTop: 3, opacity: 0.9}}>{sub}</T>) : null}
+        {id ? <Sel sel={{kind: 'mode', id, field: 'art'}} style={artBox}>{art}</Sel> : art}
       </>
     );
   }
 }
 
-function PromoCard({kind, title, sub, btn, emoji, image, target}: {kind: keyof typeof PROMO; title: string; sub: string; btn: string; emoji: string; image?: string | null; target?: string}) {
+function PromoCard({id, kind, title, sub, btn, emoji, image, target}: {id?: string; kind: keyof typeof PROMO; title: string; sub: string; btn: string; emoji: string; image?: string | null; target?: string}) {
+  const ed = useEditing() && !!id;
+  const wrap = (field: 'title' | 'sub' | 'btn' | 'art', node: any, style?: any) => id ? <Sel sel={{kind: 'promo', id, field}} style={style}>{node}</Sel> : node;
+  const btnBox: any = {position: 'absolute', left: 16, bottom: 8};
+  const btnStyle: any = {backgroundColor: '#fff', borderRadius: 16, paddingHorizontal: 14, paddingVertical: 7};
+  const imgBox: any = {position: 'absolute', right: 5, bottom: 2, width: 88, height: 88};
+  const emojiBox: any = {position: 'absolute', right: 8, bottom: 0, fontSize: 78, lineHeight: 78};
+  const art = image
+    ? <Image source={{uri: image}} style={ed ? {width: '100%', height: '100%'} : imgBox} resizeMode="contain" />
+    : <Text style={ed ? {fontSize: 78, lineHeight: 78, textAlign: 'center'} : emojiBox}>{emoji}</Text>;
+  const artBox: any = image ? imgBox : {position: 'absolute', right: 8, bottom: 0, width: 98, height: 78};
   return (
     <Pressable onPress={() => ui.sheet({kind: 'promo', p: kind === 'plum' ? 'free' : kind === 'orange' ? 'points' : 'produce', custom: {title, sub, btn, emoji, target}})}>
       <Grad colors={PROMO[kind]} angle={110} style={{width: 300, height: 124, borderRadius: 18, padding: 12, overflow: 'hidden'}}>
-        <T size={18} weight="800" color="#fff" lines={2} style={{width: 170, lineHeight: 21}}>{title}</T>
-        <T size={11.5} color="#fff" lines={2} style={{marginTop: 3, width: 170, lineHeight: 14, opacity: 0.92}}>{sub}</T>
-        <View style={{position: 'absolute', left: 16, bottom: 8, backgroundColor: '#fff', borderRadius: 16, paddingHorizontal: 14, paddingVertical: 7}}><T size={12.5} weight="800" color="#1B1B1F">{btn}</T></View>
-        {image ? <Image source={{uri: image}} style={{position: 'absolute', right: 5, bottom: 2, width: 88, height: 88}} resizeMode="contain" /> : <Text style={{position: 'absolute', right: 8, bottom: 0, fontSize: 78, lineHeight: 78}}>{emoji}</Text>}
+        {wrap('title', <T size={18} weight="800" color="#fff" lines={2} style={{width: 170, lineHeight: 21}}>{title}</T>)}
+        {wrap('sub', <T size={11.5} color="#fff" lines={2} style={{marginTop: 3, width: 170, lineHeight: 14, opacity: 0.92}}>{sub}</T>)}
+        {id
+          ? <Sel sel={{kind: 'promo', id, field: 'btn'}} style={btnBox}><View style={btnStyle}><T size={12.5} weight="800" color="#1B1B1F">{btn}</T></View></Sel>
+          : <View style={{...btnBox, ...btnStyle}}><T size={12.5} weight="800" color="#1B1B1F">{btn}</T></View>}
+        {id ? <Sel sel={{kind: 'promo', id, field: 'art'}} style={artBox}>{art}</Sel> : art}
       </Grad>
     </Pressable>
   );
@@ -73,25 +96,25 @@ export function Home({onExit}: {onExit?: () => void}) {
       </View>
       </View>
       <Pressable onPress={() => go('search')} style={{marginTop: 14, marginHorizontal: 16, height: 48, borderRadius: 24, backgroundColor: th.soft, flexDirection: 'row', alignItems: 'center', gap: 10, paddingHorizontal: 16}}>
-        <Icon name="search" size={18} color={th.mut} /><T size={14.5} color={th.mut}>{label('lbl.search', tr('searchPh'))}</T>
+        <Icon name="search" size={18} color={th.mut} /><Sel sel={{kind: 'label', id: 'lbl.search', field: 'text'}}><T size={14.5} color={th.mut}>{label('lbl.search', tr('searchPh'))}</T></Sel>
       </Pressable>
       <View style={{flexDirection: 'row', gap: 10, paddingHorizontal: 16, paddingTop: 16}}>
-        <View style={{flex: 1.25}}><Mode grad title={(md && md[0] ? md[0].title : tr('foodDelivery')).replace(' ', '\n')} sub={md && md[0] ? md[0].sub : tr('hotFresh')} emoji={md && md[0] ? md[0].emoji : '🍛'} image={md && md[0] ? md[0].image : null} onPress={() => go('catlist', md && md[0] ? md[0].cat : 'restaurants')} /></View>
+        <View style={{flex: 1.25}}><Mode id={md && md[0] ? md[0].id : undefined} grad title={(md && md[0] ? md[0].title : tr('foodDelivery')).replace(' ', '\n')} sub={md && md[0] ? md[0].sub : tr('hotFresh')} emoji={md && md[0] ? md[0].emoji : '🍛'} image={md && md[0] ? md[0].image : null} onPress={() => go('catlist', md && md[0] ? md[0].cat : 'restaurants')} /></View>
         <View style={{flex: 1, gap: 10}}>
-          <Mode small bg={th.m2bg} fg={th.m2fg} title={md && md[1] ? md[1].title : tr('groceries')} emoji={md && md[1] ? md[1].emoji : '🛒'} image={md && md[1] ? md[1].image : null} onPress={() => go('catlist', md && md[1] ? md[1].cat : 'groceries')} />
-          <Mode small bg={th.m3bg} fg={th.m3fg} title={md && md[2] ? md[2].title : tr('drugstore')} emoji={md && md[2] ? md[2].emoji : '💊'} image={md && md[2] ? md[2].image : null} onPress={() => go('catlist', md && md[2] ? md[2].cat : 'drugstore')} />
+          <Mode id={md && md[1] ? md[1].id : undefined} small bg={th.m2bg} fg={th.m2fg} title={md && md[1] ? md[1].title : tr('groceries')} emoji={md && md[1] ? md[1].emoji : '🛒'} image={md && md[1] ? md[1].image : null} onPress={() => go('catlist', md && md[1] ? md[1].cat : 'groceries')} />
+          <Mode id={md && md[2] ? md[2].id : undefined} small bg={th.m3bg} fg={th.m3fg} title={md && md[2] ? md[2].title : tr('drugstore')} emoji={md && md[2] ? md[2].emoji : '💊'} image={md && md[2] ? md[2].image : null} onPress={() => go('catlist', md && md[2] ? md[2].cat : 'drugstore')} />
         </View>
       </View>
       <View style={{marginTop: 18}}><Rail gap={14}>
         {CATS.map(c => (
           <Pressable key={c.id} onPress={() => go('catlist', c.id)} style={{width: 68, alignItems: 'center'}}>
-            <View style={{width: 62, height: 62, borderRadius: 31, backgroundColor: th.soft, alignItems: 'center', justifyContent: 'center', overflow: 'hidden'}}>{c.art ? <Image source={{uri: c.art}} style={{width: 62, height: 62}} resizeMode="cover" /> : <Text style={{fontSize: 30}}>{c.emoji}</Text>}</View>
-            <T size={11.5} weight="600" align="center" style={{marginTop: 6, lineHeight: 14}}>{tx(c.name)}</T>
+            <Sel sel={{kind: 'category', id: c.id, field: 'art'}}><View style={{width: 62, height: 62, borderRadius: 31, backgroundColor: th.soft, alignItems: 'center', justifyContent: 'center', overflow: 'hidden'}}>{c.art ? <Image source={{uri: c.art}} style={{width: 62, height: 62}} resizeMode="cover" /> : <Text style={{fontSize: 30}}>{c.emoji}</Text>}</View></Sel>
+            <Sel sel={{kind: 'category', id: c.id, field: 'title'}}><T size={11.5} weight="600" align="center" style={{marginTop: 6, lineHeight: 14}}>{tx(c.name)}</T></Sel>
           </Pressable>
         ))}
       </Rail></View>
       <View style={{marginTop: 20}}><Rail>
-        {pc ? pc.filter(x => !x.newOnly || first()).map(x => <PromoCard key={x.id} kind={x.color} title={x.title} sub={x.sub} btn={x.btn} emoji={x.emoji} image={x.image} target={x.target} />) : (<>
+        {pc ? pc.filter(x => !x.newOnly || first()).map(x => <PromoCard key={x.id} id={x.id} kind={x.color} title={x.title} sub={x.sub} btn={x.btn} emoji={x.emoji} image={x.image} target={x.target} />) : (<>
           {first() ? <PromoCard kind="plum" title="Free delivery on your first order" sub="Welcome to Goodies. New here? It is on us." btn="Order now" emoji="🛵" /> : null}
           <PromoCard kind="orange" title="Earn double points this weekend" sub="Pay with Wallet on any order." btn="Start earning" emoji="🎁" />
           <PromoCard kind="green" title="20% off fresh produce" sub="Straight from local farms and markets." btn="Shop now" emoji="🥬" />
@@ -99,14 +122,14 @@ export function Home({onExit}: {onExit?: () => void}) {
       </Rail></View>
       <View style={{paddingHorizontal: 16, marginTop: 10}}>
         <Pressable onPress={() => go('promos')} style={{flexDirection: 'row', alignItems: 'center', gap: 12, padding: 14, borderWidth: 1.5, borderColor: th.line, borderRadius: 16}}>
-          <View style={{flex: 1}}><T weight="700">{label('lbl.coupons', tr('couponsOffers'))}</T><T size={12.5} color={th.mut}>{label('lbl.coupons2', tr('codesCheckout'))}</T></View>
+          <View style={{flex: 1}}><Sel sel={{kind: 'label', id: 'lbl.coupons', field: 'text'}}><T weight="700">{label('lbl.coupons', tr('couponsOffers'))}</T></Sel><Sel sel={{kind: 'label', id: 'lbl.coupons2', field: 'text'}}><T size={12.5} color={th.mut}>{label('lbl.coupons2', tr('codesCheckout'))}</T></Sel></View>
           <Icon name="chevR" size={16} color={th.ink} />
         </Pressable>
       </View>
-      <Sh title={'⚡ ' + label('lbl.flash', tr('flashDeals'))} right={<Countdown />} />
+      <Sh sel={{kind: 'label', id: 'lbl.flash', field: 'text'}} title={'⚡ ' + label('lbl.flash', tr('flashDeals'))} right={<Countdown />} />
       <Rail>{dl.filter(d => IT[d[0]]).map(d => <Dish key={d[0]} i={IT[d[0]]} off={d[1]} left={d[2]} />)}</Rail>
       {os.length ? (<>
-        <Sh title={label('lbl.again', tr('orderAgain'))} link="History" onLink={() => tab('orders')} />
+        <Sh sel={{kind: 'label', id: 'lbl.again', field: 'text'}} title={label('lbl.again', tr('orderAgain'))} link="History" onLink={() => tab('orders')} />
         <Rail>{os.map((o: any) => {
           const s = STB[o.sid];
           return (
@@ -120,14 +143,14 @@ export function Home({onExit}: {onExit?: () => void}) {
           );
         })}</Rail>
       </>) : null}
-      {rv.length ? (<><Sh title={label('lbl.recent', tr('recentlyViewed'))} /><Rail>{rv.map((id: string) => <Dish key={id} i={IT[id]} />)}</Rail></>) : null}
-      <Sh title={label('lbl.popular', tr('popularVendors'))} link={tr('seeAll')} onLink={() => go('catlist', 'all')} />
+      {rv.length ? (<><Sh sel={{kind: 'label', id: 'lbl.recent', field: 'text'}} title={label('lbl.recent', tr('recentlyViewed'))} /><Rail>{rv.map((id: string) => <Dish key={id} i={IT[id]} />)}</Rail></>) : null}
+      <Sh sel={{kind: 'label', id: 'lbl.popular', field: 'text'}} title={label('lbl.popular', tr('popularVendors'))} link={tr('seeAll')} onLink={() => go('catlist', 'all')} />
       <Rail>{ST.slice().sort((a, b) => b.rv - a.rv).slice(0, 6).map(s => <VCard key={s.id} s={s} />)}</Rail>
-      <Sh title={'🥭 ' + label('lbl.produce', tr('freshProduce'))} link={tr('seeAll')} onLink={() => go('catlist', 'produce')} />
+      <Sh sel={{kind: 'label', id: 'lbl.produce', field: 'text'}} title={'🥭 ' + label('lbl.produce', tr('freshProduce'))} link={tr('seeAll')} onLink={() => go('catlist', 'produce')} />
       <Rail>{cat('produce').map(i => <Dish key={i.id} i={i} />)}</Rail>
-      <Sh title={'🇭🇹 ' + label('lbl.haitian', tr('haitianSpecialties'))} link={tr('seeAll')} onLink={() => go('catlist', 'haitian')} />
+      <Sh sel={{kind: 'label', id: 'lbl.haitian', field: 'text'}} title={'🇭🇹 ' + label('lbl.haitian', tr('haitianSpecialties'))} link={tr('seeAll')} onLink={() => go('catlist', 'haitian')} />
       <Rail>{cat('haitian').map(i => <Dish key={i.id} i={i} />)}</Rail>
-      <Sh title={'🔥 ' + label('lbl.trending', tr('trending'))} />
+      <Sh sel={{kind: 'label', id: 'lbl.trending', field: 'text'}} title={'🔥 ' + label('lbl.trending', tr('trending'))} />
       <View style={{flexDirection: 'row', flexWrap: 'wrap', gap: 12, paddingHorizontal: 16}}>{['s1_1', 's4_0', 's5_0', 's6_0'].map(id => <Dish key={id} i={IT[id]} grid />)}</View>
       <Sh title={tr('restaurantsNear')} link={tr('seeAll')} onLink={() => go('catlist', 'all')} />
       <Chips list={FCH} on={S.f} onPick={setFilter} />

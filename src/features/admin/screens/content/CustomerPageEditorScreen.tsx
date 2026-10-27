@@ -14,10 +14,7 @@ import { ListRows } from '../../ui/Lists';
 import { OutlineBtn, Pill, StatusPill } from '../../ui/Controls';
 import { Txt } from '../../ui/Txt';
 import { CustomerPagePreview, type CustomerPreviewMode, type CustomerPreviewView } from './CustomerPagePreview';
-import { GoodiesConsumerPreview } from './GoodiesConsumerPreview';
-import { applyContent, C as liveGoodiesContent, onContent as onGoodiesContent } from '../../goodiesConsumer/content';
-import { fetchPublishedWantissContent } from '../../lib/wantissCms';
-import { emit as emitGoodies } from '../../goodiesConsumer/store';
+import { GoodiesEditor } from './GoodiesEditor';
 
 type ContentRow = {
   id: string;
@@ -56,9 +53,6 @@ export function CustomerPageEditorScreen() {
   const [pageKey, setPageKey] = useState('home');
   const [featureMenuOpen, setFeatureMenuOpen] = useState(false);
   const [actualGoodiesPreview, setActualGoodiesPreview] = useState(false);
-  const [goodiesDraft, setGoodiesDraft] = useState<Record<string, any> | null>(null);
-  const [goodiesTarget, setGoodiesTarget] = useState<{ kind: 'mode' | 'promo' | 'category' | 'label'; id: string; title: string } | null>(null);
-  const [goodiesSaving, setGoodiesSaving] = useState(false);
   const [pageStack, setPageStack] = useState<string[]>([]);
   const [elementKey, setElementKey] = useState('');
   const [editorMode, setEditorMode] = useState<CustomerPreviewMode>('Edit');
@@ -91,105 +85,6 @@ export function CustomerPageEditorScreen() {
   }, []);
 
   useEffect(() => { void reload(); }, [reload]);
-  useEffect(() => {
-    if (!actualGoodiesPreview) return;
-    let active = true;
-    void (async () => {
-      try {
-        // Use the same published-content endpoint as the consumer app. A direct
-        // table query can select the wrong key/version and bypass published assets.
-        const remote = await fetchPublishedWantissContent('en');
-        const record = remote.content
-          .filter((item) => item.content_key === 'goodies.content' || item.content_key === 'goodies')
-          .sort((a, b) => Number(b.version || 0) - Number(a.version || 0))
-          .find((item) => item.payload && (item.payload as any).v === 5);
-        if (!record) throw new Error('No published Goodies v5 content was returned.');
-        const payload: any = JSON.parse(JSON.stringify(record.payload));
-        const assetByKey = new Map(remote.assets.map((asset) => [asset.asset_key, asset.url]));
-        (payload.lib || []).forEach((item: any) => {
-          const key = item.img?.assetKey || item.img?.asset_key;
-          if (key && assetByKey.has(key)) item.img.data = assetByKey.get(key);
-        });
-        if (!active) return;
-        setGoodiesDraft(payload);
-        applyContent(JSON.parse(JSON.stringify(payload)));
-        emitGoodies();
-        setError('');
-      } catch (e) {
-        if (!active) return;
-        // The embedded consumer app may already have loaded the published export.
-        // Use that exact payload as an editing fallback instead of leaving the
-        // phone visible with no editable fields.
-        const fallback: any = liveGoodiesContent;
-        if (fallback && fallback.v === 5) {
-          const payload: any = JSON.parse(JSON.stringify(fallback));
-          setGoodiesDraft(payload);
-          setError('Using the Goodies content already loaded in the preview. Check the connection before saving.');
-        } else {
-          setGoodiesDraft(null);
-          setError(e instanceof Error ? e.message : 'Published Goodies content is unavailable.');
-        }
-      }
-    })();
-    return () => { active = false; };
-  }, [actualGoodiesPreview]);
-
-  // If the embedded consumer finishes loading after the editor's first request,
-  // hydrate the editor from the same live content source instead of staying read-only.
-  useEffect(() => {
-    if (!actualGoodiesPreview || goodiesDraft) return;
-    const syncLoadedContent = () => {
-      const live: any = liveGoodiesContent;
-      if (!live || live.v !== 5) return;
-      setGoodiesDraft(JSON.parse(JSON.stringify(live)));
-      setError('');
-    };
-    const unsubscribe = onGoodiesContent(syncLoadedContent);
-    syncLoadedContent();
-    return unsubscribe;
-  }, [actualGoodiesPreview, goodiesDraft]);
-
-  const updateGoodiesField = (field: 'title' | 'sub' | 'emoji' | 'asset', value: string) => {
-    if (!goodiesDraft || !goodiesTarget || viewMode !== 'Draft' || editorMode !== 'Edit' || !can(...REQ.content)) return;
-    const next = JSON.parse(JSON.stringify(goodiesDraft));
-    const listKey = goodiesTarget.kind === 'mode' ? 'modes' : goodiesTarget.kind === 'promo' ? 'promos' : goodiesTarget.kind === 'category' ? 'cats' : 'labels';
-    const item = (next[listKey] || []).find((entry: any) => entry.id === goodiesTarget.id);
-    if (!item) return;
-    if (field === 'emoji' && goodiesTarget.kind !== 'label') item.emoji = value;
-    else if (field === 'asset') { if (goodiesTarget.kind === 'category') item.art = value.trim() ? { data: value.trim() } : null; else if (goodiesTarget.kind === 'mode' || goodiesTarget.kind === 'promo') item.img = value.trim() ? { data: value.trim() } : null; }
-    else {
-      const key = goodiesTarget.kind === 'category' ? 'name' : goodiesTarget.kind === 'label' ? 't' : field;
-      if (field === 'emoji') return;
-      item[key] = item[key] && typeof item[key] === 'object' ? item[key] : {};
-      item[key].en = item[key].en && typeof item[key].en === 'object' ? item[key].en : { v: '', s: 'draft' };
-      item[key].en.v = value;
-      item[key].en.s = 'draft';
-    }
-    setGoodiesDraft(next);
-    try {
-      const previewPayload = JSON.parse(JSON.stringify(next));
-      const liveLib = new Map(((liveGoodiesContent as any)?.lib || []).map((entry: any) => [entry.id, entry.img?.data]));
-      (previewPayload.lib || []).forEach((entry: any) => {
-        const liveData = liveLib.get(entry.id);
-        if (entry.img && !entry.img.data && liveData) entry.img.data = liveData;
-      });
-      applyContent(previewPayload);
-      emitGoodies();
-    } catch { setError('This Goodies content draft could not be previewed.'); }
-  };
-
-  const saveGoodiesDraft = async () => {
-    if (!goodiesDraft || !can(...REQ.content)) return;
-    setGoodiesSaving(true);
-    setError('');
-    try {
-      await saveCmsVersion({ key: 'goodies.content', locale: 'en', payload: goodiesDraft, status: 'draft' });
-      toast('Goodies changes saved as a private draft. Customer-facing published content is unchanged.');
-    } catch (e) {
-      setError(e instanceof Error ? e.message : 'Goodies draft could not be saved.');
-    } finally { setGoodiesSaving(false); }
-  };
-
   useEffect(() => {
     const requestedFeature = ui.editorFeature;
     if (requestedFeature) setActualGoodiesPreview(String(requestedFeature).toLowerCase() === 'goodies');
@@ -396,7 +291,7 @@ export function CustomerPageEditorScreen() {
           <Txt size={12} mut>{featureMenuOpen ? '⌃' : '⌄'}</Txt>
         </Pressable>
         {featureMenuOpen ? <View style={{ marginTop: 5, borderWidth: 1, borderColor: c.bd, borderRadius: 12, backgroundColor: c.card, overflow: 'hidden' }}>
-          {featureOptions.map((item) => <Pressable key={item.key} onPress={() => { setPageKey(item.key); setActualGoodiesPreview(item.label === 'Goodies'); setPageStack([]); setElementKey(''); setGoodiesTarget(null); setFeatureMenuOpen(false); }} style={{ paddingHorizontal: 12, paddingVertical: 10, backgroundColor: activePageKey === item.key ? c.inset : 'transparent', borderBottomWidth: 1, borderBottomColor: c.bd }}>
+          {featureOptions.map((item) => <Pressable key={item.key} onPress={() => { setPageKey(item.key); setActualGoodiesPreview(item.label === 'Goodies'); setPageStack([]); setElementKey(''); setFeatureMenuOpen(false); }} style={{ paddingHorizontal: 12, paddingVertical: 10, backgroundColor: activePageKey === item.key ? c.inset : 'transparent', borderBottomWidth: 1, borderBottomColor: c.bd }}>
             <Txt size={11.5} weight={activePageKey === item.key ? 500 : 400}>{item.label}</Txt>
             <Txt size={9.5} mut>{String(previewPayload?.pages?.[item.key]?.title || item.key)}</Txt>
           </Pressable>)}
@@ -404,6 +299,9 @@ export function CustomerPageEditorScreen() {
       </Section>
       {error ? <Card><Txt size={11.5} color={c.or}>{error}</Txt></Card> : null}
 
+      {actualGoodiesPreview ? <GoodiesEditor canEdit={can(...REQ.content)} canPublish={can(...REQ.publish)} /> : null}
+
+      {!actualGoodiesPreview ? (
       <Section title="Live customer phone preview" right={<View style={{ flexDirection: 'row', flexWrap: 'wrap', gap: 5 }}>
         <OutlineBtn primary={viewMode === 'Draft'} onPress={() => { setViewMode('Draft'); setPageStack([]); setPageKey(pageKeys.includes('home') ? 'home' : pageKeys[0] || 'home'); }}>Draft</OutlineBtn>
         <OutlineBtn primary={viewMode === 'Published'} onPress={() => { setViewMode('Published'); setEditorMode('Preview'); setPageStack([]); setPageKey(pageKeys.includes('home') ? 'home' : pageKeys[0] || 'home'); setElementKey(''); }}>Published</OutlineBtn>
@@ -414,7 +312,7 @@ export function CustomerPageEditorScreen() {
           {viewMode === 'Published' && !publishedRow && selected?.status !== 'published' ? <Txt size={10.5} color={c.or} style={{ marginBottom: 8 }}>No published version was found for this locale. This is an empty published view, not a draft preview.</Txt> : null}
           {!selected && viewMode === 'Draft' ? <Txt size={10.5} mut style={{ marginBottom: 8 }}>Starter preview · select a version or start a blank draft to edit it.</Txt> : null}
           {selected && viewMode === 'Draft' ? <Txt size={10.5} mut style={{ marginBottom: 8, textAlign: 'center' }}>{editorMode === 'Edit' ? 'Edit mode: tap an element to select it. Changes stay in the draft.' : 'Preview mode: tap linked elements or the bottom navigation to move through customer pages.'}</Txt> : null}
-          {actualGoodiesPreview ? <GoodiesConsumerPreview editMode={viewMode === 'Draft' && editorMode === 'Edit' && can(...REQ.content)} contentDraft={goodiesDraft} selectedTarget={goodiesTarget} onEditTarget={(target) => setGoodiesTarget(target)} /> : <CustomerPagePreview
+          <CustomerPagePreview
             payload={previewPayload}
             pageKey={activePageKey}
             mode={viewMode === 'Published' ? 'Preview' : editorMode}
@@ -424,36 +322,9 @@ export function CustomerPageEditorScreen() {
             onSelectElement={(id) => { if (editable) setElementKey(id); }}
             onNavigate={navigatePhone}
             onBack={backPhone}
-          />}
+          />
         </View>
       </Section>
-
-      {actualGoodiesPreview && viewMode === 'Draft' && editorMode === 'Edit' && goodiesTarget && goodiesDraft ? (
-        <Section title={goodiesTarget.title}>
-          {goodiesTarget.kind === 'label' ? (
-            <View>
-              <Txt size={9.5} mut>Text</Txt>
-              <TextInput value={String(goodiesDraft.labels?.find((v: any) => v.id === goodiesTarget.id)?.t?.en?.v || '')} onChangeText={(value) => updateGoodiesField('title', value)} editable={can(...REQ.content)} style={fieldStyle} placeholder="Text" />
-            </View>
-          ) : (
-            <>
-              <Txt size={9.5} mut>Title</Txt>
-              <TextInput value={String((goodiesDraft[goodiesTarget.kind === 'mode' ? 'modes' : goodiesTarget.kind === 'promo' ? 'promos' : 'cats'] || []).find((v: any) => v.id === goodiesTarget.id)?.[goodiesTarget.kind === 'category' ? 'name' : 'title']?.en?.v || '')} onChangeText={(value) => updateGoodiesField('title', value)} editable={can(...REQ.content)} style={fieldStyle} placeholder="Title" />
-              {goodiesTarget.kind !== 'category' ? <>
-                <Txt size={9.5} mut>Subtitle</Txt>
-                <TextInput value={String(goodiesDraft[goodiesTarget.kind === 'mode' ? 'modes' : 'promos']?.find((v: any) => v.id === goodiesTarget.id)?.sub?.en?.v || '')} onChangeText={(value) => updateGoodiesField('sub', value)} editable={can(...REQ.content)} style={fieldStyle} placeholder="Subtitle" />
-              </> : null}
-              <Txt size={9.5} mut>Icon</Txt>
-              <TextInput value={String(goodiesDraft[goodiesTarget.kind === 'mode' ? 'modes' : goodiesTarget.kind === 'promo' ? 'promos' : 'cats']?.find((v: any) => v.id === goodiesTarget.id)?.emoji || '')} onChangeText={(value) => updateGoodiesField('emoji', value)} editable={can(...REQ.content)} style={fieldStyle} placeholder="Emoji" />
-              <Txt size={9.5} mut>Image URL</Txt>
-              <TextInput value={String(goodiesTarget.kind === 'category' ? goodiesDraft.cats?.find((v: any) => v.id === goodiesTarget.id)?.art?.data || '' : goodiesDraft[goodiesTarget.kind === 'mode' ? 'modes' : 'promos']?.find((v: any) => v.id === goodiesTarget.id)?.img?.data || '')} onChangeText={(value) => updateGoodiesField('asset', value)} editable={can(...REQ.content)} style={fieldStyle} placeholder="https://…" autoCapitalize="none" />
-            </>
-          )}
-          <View style={{ flexDirection: 'row', flexWrap: 'wrap', gap: 6, marginTop: 4 }}>
-            <OutlineBtn onPress={() => setGoodiesTarget(null)}>Done</OutlineBtn>
-            <OutlineBtn primary onPress={() => { void saveGoodiesDraft(); }} disabled={goodiesSaving || !can(...REQ.content)}>{goodiesSaving ? 'Saving…' : 'Save draft'}</OutlineBtn>
-          </View>
-        </Section>
       ) : null}
 
       {!actualGoodiesPreview && selected && viewMode === 'Draft' && editorMode === 'Edit' ? (
