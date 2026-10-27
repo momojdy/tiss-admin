@@ -90,7 +90,7 @@ export function GoodiesConsumerPreview({ editMode = false, selectedTarget, onEdi
               accessibilityRole="button"
               accessibilityLabel="Select Goodies content at this position"
               onPress={(event: any) => {
-                const y = Number(event?.nativeEvent?.locationY ?? 330);
+                const y = Number(event?.nativeEvent?.locationY ?? 210);
                 const x = Number(event?.nativeEvent?.locationX ?? 80);
                 const target = pickTarget(y, x);
                 if (target) onEditTarget?.(target);
@@ -98,8 +98,8 @@ export function GoodiesConsumerPreview({ editMode = false, selectedTarget, onEdi
               style={{ position: 'absolute', left: 0, right: 0, top: 0, bottom: 0 }}
             />
             {[
-              { top: 0, height: 22, target: pickTarget(70, 100), label: 'Search / top text' },
-              { top: '22%', height: '19%', target: pickTarget(210, 80), label: 'Service tiles' },
+              { top: '14%', height: '8%', target: pickTarget(110, 100), label: 'Search' },
+              { top: '22%', height: '19%', target: pickTarget(210, 80), label: 'Food delivery banner' },
               { top: '41%', height: '15%', target: pickTarget(330, 80), label: 'Categories' },
               { top: '56%', height: '20%', target: pickTarget(450, 80), label: 'Promotions' },
               { top: '76%', height: '24%', target: pickTarget(590, 80), label: 'Section titles' },
