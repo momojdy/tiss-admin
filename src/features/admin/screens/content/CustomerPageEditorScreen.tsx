@@ -15,7 +15,7 @@ import { OutlineBtn, Pill, StatusPill } from '../../ui/Controls';
 import { Txt } from '../../ui/Txt';
 import { CustomerPagePreview, type CustomerPreviewMode, type CustomerPreviewView } from './CustomerPagePreview';
 import { GoodiesConsumerPreview } from './GoodiesConsumerPreview';
-import { applyContent, C as liveGoodiesContent } from '../../goodiesConsumer/content';
+import { applyContent, C as liveGoodiesContent, onContent as onGoodiesContent } from '../../goodiesConsumer/content';
 import { fetchPublishedWantissContent } from '../../lib/wantissCms';
 import { emit as emitGoodies } from '../../goodiesConsumer/store';
 
@@ -133,6 +133,21 @@ export function CustomerPageEditorScreen() {
     })();
     return () => { active = false; };
   }, [actualGoodiesPreview]);
+
+  // If the embedded consumer finishes loading after the editor's first request,
+  // hydrate the editor from the same live content source instead of staying read-only.
+  useEffect(() => {
+    if (!actualGoodiesPreview || goodiesDraft) return;
+    const syncLoadedContent = () => {
+      const live: any = liveGoodiesContent;
+      if (!live || live.v !== 5) return;
+      setGoodiesDraft(JSON.parse(JSON.stringify(live)));
+      setError('');
+    };
+    const unsubscribe = onGoodiesContent(syncLoadedContent);
+    syncLoadedContent();
+    return unsubscribe;
+  }, [actualGoodiesPreview, goodiesDraft]);
 
   const updateGoodiesField = (field: 'title' | 'sub' | 'emoji' | 'asset', value: string) => {
     if (!goodiesDraft || !goodiesTarget || viewMode !== 'Draft' || editorMode !== 'Edit' || !can(...REQ.content)) return;
