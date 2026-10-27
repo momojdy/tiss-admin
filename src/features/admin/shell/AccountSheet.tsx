@@ -50,7 +50,7 @@ export function AccountSheet({ onClose }: { onClose: () => void }) {
     const email = session.email?.trim().toLowerCase() || '';
     const token = recoveryCode.trim();
     const problem = passwordError(newPassword, email);
-    if (!/^\\d{6}$/.test(token)) { setPasswordMessage('Enter the six-digit recovery code from your email.'); setPasswordBad(true); return; }
+    if (!/^\d{6}$/.test(token)) { setPasswordMessage('Enter the six-digit recovery code from your email.'); setPasswordBad(true); return; }
     if (problem) { setPasswordMessage(problem); setPasswordBad(true); return; }
     if (newPassword !== confirmPassword) { setPasswordMessage('The new passwords do not match.'); setPasswordBad(true); return; }
     setPasswordBusy(true); setPasswordMessage(''); setPasswordBad(false);
