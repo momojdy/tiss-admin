@@ -26,6 +26,48 @@ export function AccountSheet({ onClose }: { onClose: () => void }) {
   const [passwordBusy, setPasswordBusy] = useState(false);
   const [passwordMessage, setPasswordMessage] = useState('');
   const [passwordBad, setPasswordBad] = useState(false);
+  const [recoveryMode, setRecoveryMode] = useState(false);
+  const [recoveryCode, setRecoveryCode] = useState('');
+  const [recoverySent, setRecoverySent] = useState(false);
+
+  const sendRecoveryCode = async () => {
+    const email = session.email?.trim().toLowerCase() || '';
+    if (!email) { setPasswordMessage('Your account email is unavailable. Please sign in again.'); setPasswordBad(true); return; }
+    setPasswordBusy(true); setPasswordMessage(''); setPasswordBad(false);
+    try {
+      const { error } = await supabase.auth.resetPasswordForEmail(email);
+      if (error) throw error;
+      setRecoverySent(true);
+      setPasswordMessage('Recovery code sent. Check your email, including spam.');
+      setPasswordBad(false);
+    } catch (err) {
+      setPasswordMessage(err instanceof Error ? err.message : 'Could not send a recovery code. Please try again.');
+      setPasswordBad(true);
+    } finally { setPasswordBusy(false); }
+  };
+
+  const saveRecoveredPassword = async () => {
+    const email = session.email?.trim().toLowerCase() || '';
+    const token = recoveryCode.trim();
+    const problem = passwordError(newPassword, email);
+    if (!/^\\d{6}$/.test(token)) { setPasswordMessage('Enter the six-digit recovery code from your email.'); setPasswordBad(true); return; }
+    if (problem) { setPasswordMessage(problem); setPasswordBad(true); return; }
+    if (newPassword !== confirmPassword) { setPasswordMessage('The new passwords do not match.'); setPasswordBad(true); return; }
+    setPasswordBusy(true); setPasswordMessage(''); setPasswordBad(false);
+    try {
+      const { error: verifyError } = await supabase.auth.verifyOtp({ email, token, type: 'recovery' });
+      if (verifyError) throw verifyError;
+      const { error } = await supabase.auth.updateUser({ password: newPassword });
+      if (error) throw error;
+      setRecoveryMode(false); setRecoverySent(false); setRecoveryCode('');
+      setCurrentPassword(''); setNewPassword(''); setConfirmPassword('');
+      setPasswordMessage('Password reset successfully.');
+      setPasswordBad(false);
+    } catch (err) {
+      setPasswordMessage(err instanceof Error ? err.message : 'Could not reset your password. Check the code and try again.');
+      setPasswordBad(true);
+    } finally { setPasswordBusy(false); }
+  };
 
   const changePassword = async () => {
     const email = session.email?.trim().toLowerCase() || '';
@@ -64,11 +106,33 @@ export function AccountSheet({ onClose }: { onClose: () => void }) {
         <CardTitle title="Change password" />
         <Txt size={10.5} mut style={{ marginBottom: 10 }}>Update your password while signed in. Your current password is required to confirm it is you.</Txt>
         {passwordMessage ? <NoticeBox bad={passwordBad}>{passwordMessage}</NoticeBox> : null}
-        <AuthField label="Current password" value={currentPassword} onChangeText={setCurrentPassword} error={undefined} password textContentType="password" autoComplete="current-password" />
-        <AuthField label="New password" value={newPassword} onChangeText={setNewPassword} error={undefined} password textContentType="newPassword" autoComplete="new-password" />
-        <PasswordChecklist value={newPassword} />
-        <AuthField label="Confirm new password" value={confirmPassword} onChangeText={setConfirmPassword} error={undefined} password textContentType="newPassword" autoComplete="new-password" onSubmitEditing={changePassword} />
-        <PrimaryButton label="Save new password" onPress={changePassword} busy={passwordBusy} busyLabel="Saving password…" />
+        {recoveryMode ? (
+          <>
+            <Txt size={10.5} mut style={{ marginBottom: 10 }}>Reset your password without knowing the old one. We’ll email a six-digit recovery code to {session.email || 'your account email'}.</Txt>
+            {recoverySent ? (
+              <>
+                <AuthField label="Six-digit recovery code" value={recoveryCode} onChangeText={setRecoveryCode} error={undefined} keyboardType="number-pad" maxLength={6} autoComplete="one-time-code" />
+                <AuthField label="New password" value={newPassword} onChangeText={setNewPassword} error={undefined} password textContentType="newPassword" autoComplete="new-password" />
+                <PasswordChecklist value={newPassword} />
+                <AuthField label="Confirm new password" value={confirmPassword} onChangeText={setConfirmPassword} error={undefined} password textContentType="newPassword" autoComplete="new-password" onSubmitEditing={saveRecoveredPassword} />
+                <PrimaryButton label="Reset password" onPress={saveRecoveredPassword} busy={passwordBusy} busyLabel="Resetting password…" />
+                <OutlineBtn onPress={sendRecoveryCode}>Resend recovery code</OutlineBtn>
+              </>
+            ) : (
+              <PrimaryButton label="Send recovery code" onPress={sendRecoveryCode} busy={passwordBusy} busyLabel="Sending code…" />
+            )}
+            <OutlineBtn onPress={() => { setRecoveryMode(false); setRecoverySent(false); setRecoveryCode(''); setNewPassword(''); setConfirmPassword(''); setPasswordMessage(''); setPasswordBad(false); }}>Cancel password recovery</OutlineBtn>
+          </>
+        ) : (
+          <>
+            <AuthField label="Current password" value={currentPassword} onChangeText={setCurrentPassword} error={undefined} password textContentType="password" autoComplete="current-password" />
+            <AuthField label="New password" value={newPassword} onChangeText={setNewPassword} error={undefined} password textContentType="newPassword" autoComplete="new-password" />
+            <PasswordChecklist value={newPassword} />
+            <AuthField label="Confirm new password" value={confirmPassword} onChangeText={setConfirmPassword} error={undefined} password textContentType="newPassword" autoComplete="new-password" onSubmitEditing={changePassword} />
+            <PrimaryButton label="Save new password" onPress={changePassword} busy={passwordBusy} busyLabel="Saving password…" />
+            <OutlineBtn onPress={() => { setRecoveryMode(true); setPasswordMessage(''); setPasswordBad(false); }}>Forgot your current password?</OutlineBtn>
+          </>
+        )}
       </Card>
       <Card>
         <CardTitle title="Appearance" />
