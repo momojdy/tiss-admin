@@ -117,8 +117,18 @@ export function CustomerPageEditorScreen() {
         setError('');
       } catch (e) {
         if (!active) return;
-        setGoodiesDraft(null);
-        setError(e instanceof Error ? e.message : 'Published Goodies content is unavailable.');
+        // The embedded consumer app may already have loaded the published export.
+        // Use that exact payload as an editing fallback instead of leaving the
+        // phone visible with no editable fields.
+        const fallback: any = liveGoodiesContent;
+        if (fallback && fallback.v === 5) {
+          const payload: any = JSON.parse(JSON.stringify(fallback));
+          setGoodiesDraft(payload);
+          setError('Using the Goodies content already loaded in the preview. Check the connection before saving.');
+        } else {
+          setGoodiesDraft(null);
+          setError(e instanceof Error ? e.message : 'Published Goodies content is unavailable.');
+        }
       }
     })();
     return () => { active = false; };
