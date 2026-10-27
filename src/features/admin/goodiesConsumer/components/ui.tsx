@@ -15,12 +15,22 @@ export function T({children, style, size = 14, weight, color, lines, align}: {ch
   return <Text numberOfLines={lines} style={[{fontSize: size, color: color || th.ink, fontWeight: weight}, align ? {textAlign: align} : null, style]}>{typeof children === 'string' ? ts(children) : children}</Text>;
 }
 export const Mut = (p: any) => {const th = useTheme(); return <T {...p} color={th.mut} />;};
+/* Prevent a stray string passed to a layout primitive from becoming a raw
+   React Native text node under View/ScrollView (Fabric throws at runtime). */
+function safeChildren(children: any): any {
+  return React.Children.map(children, (child) =>
+    typeof child === 'string' || typeof child === 'number'
+      ? <T key={'text-' + String(child)}>{String(child)}</T>
+      : child
+  );
+}
+
 
 export function Grad({idx = 0, colors, style, children, angle = 135}: {idx?: number; colors?: readonly [string, string]; style?: ViewStyle; children?: any; angle?: number}) {
   const th = useTheme();
   const c = (colors || BG[idx % 5]) as readonly [string, string];
   const start = angle === 110 ? {x: 0, y: 0.3} : {x: 0, y: 0}, end = angle === 110 ? {x: 1, y: 0.7} : {x: 1, y: 1};
-  return <LinearGradient colors={c as any} start={start} end={end} style={[style, th.dark && colors == null ? {opacity: 0.85} : null]}>{children}</LinearGradient>;
+  return <LinearGradient colors={c as any} start={start} end={end} style={[style, th.dark && colors == null ? {opacity: 0.85} : null]}>{safeChildren(children)}</LinearGradient>;
 }
 
 export const bgIdx = (bg: string) => +String(bg).replace('bg', '') || 0;
@@ -64,7 +74,7 @@ export function Sh({title, link, onLink, right}: {title: string; link?: string; 
 }
 
 export const Rail = ({children, gap = 10, style}: any) => (
-  <ScrollView horizontal showsHorizontalScrollIndicator={false} contentContainerStyle={[{paddingHorizontal: 16, gap}, style]}>{children}</ScrollView>
+  <ScrollView horizontal showsHorizontalScrollIndicator={false} contentContainerStyle={[{paddingHorizontal: 16, gap}, style]}>{safeChildren(children)}</ScrollView>
 );
 
 export function Chip({label, on, onPress, color}: {label: string; on?: boolean; onPress: () => void; color?: string}) {
@@ -88,8 +98,8 @@ export function Cta({label, onPress, ghost, disabled, small}: {label: string; on
   );
 }
 
-export const Card = ({children, style}: any) => {const th = useTheme(); return <View style={[{backgroundColor: th.card, borderWidth: 1, borderColor: th.line, borderRadius: 18, padding: 14, marginBottom: 12}, style]}>{children}</View>;};
-export const Row = ({children, style, sp}: any) => <View style={[{flexDirection: 'row', alignItems: 'center', gap: 12}, sp ? {justifyContent: 'space-between'} : null, style]}>{children}</View>;
+export const Card = ({children, style}: any) => {const th = useTheme(); return <View style={[{backgroundColor: th.card, borderWidth: 1, borderColor: th.line, borderRadius: 18, padding: 14, marginBottom: 12}, style]}>{safeChildren(children)}</View>;};
+export const Row = ({children, style, sp}: any) => <View style={[{flexDirection: 'row', alignItems: 'center', gap: 12}, sp ? {justifyContent: 'space-between'} : null, style]}>{safeChildren(children)}</View>;
 export const Badge = ({label, green, red}: {label: string; green?: boolean; red?: boolean}) => {
   const th = useTheme();
   return <View style={{alignSelf: 'flex-start', borderRadius: 9, paddingHorizontal: 9, paddingVertical: 3, backgroundColor: red ? th.red : green ? 'rgba(14,159,110,.14)' : th.brt}}><T size={11.5} weight="800" color={red ? '#fff' : green ? th.grn : th.brd}>{label}</T></View>;
@@ -122,7 +132,7 @@ export function Radio({on, onPress, children}: {on: boolean; onPress: () => void
   return (
     <Pressable onPress={onPress} style={{flexDirection: 'row', alignItems: 'center', gap: 12, paddingVertical: 13, paddingHorizontal: 14, borderWidth: 1.5, borderColor: on ? th.br : th.line, backgroundColor: on ? th.brt : 'transparent', borderRadius: 16, marginBottom: 10}}>
       <View style={{width: 20, height: 20, borderRadius: 10, borderWidth: on ? 6 : 2, borderColor: on ? th.br : th.line}} />
-      <View style={{flex: 1}}>{children}</View>
+      <View style={{flex: 1}}>{safeChildren(children)}</View>
     </Pressable>
   );
 }
@@ -178,7 +188,7 @@ export function SheetBox({children, large = false, compact = false, onClose}: an
         <View style={{width: 40, height: 4, borderRadius: 2, backgroundColor: th.line}} />
         {onClose ? <Pressable accessibilityRole="button" accessibilityLabel="Close popup" onPress={onClose} hitSlop={12} style={{position: 'absolute', right: 0, top: 2, width: 30, height: 30, borderRadius: 15, alignItems: 'center', justifyContent: 'center', backgroundColor: th.soft}}><Text style={{fontSize: 20, lineHeight: 22, color: th.ink}}>×</Text></Pressable> : null}
       </View>
-      {children}
+      {safeChildren(children)}
     </View>
   );
 }
