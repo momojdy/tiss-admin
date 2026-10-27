@@ -1,10 +1,8 @@
 import { useState } from 'react';
-import { View } from 'react-native';
 import { db, bump, useDb } from '../state/db';
 import { can, me, realMe, session, setView } from '../state/access';
 import { REQ } from '../state/requirements';
-import { leaveApp } from '../auth/authLogic';
-import { passwordError } from '../auth/authLogic';
+import { leaveApp, passwordError } from '../auth/authLogic';
 import { AuthField, PasswordChecklist, PrimaryButton, NoticeBox } from '../auth/AuthFields';
 import { supabase } from '../lib/supabase';
 import { useOverlay } from '../ui/Overlay';
