@@ -2,6 +2,7 @@ import { ReactNode } from 'react';
 import { Pressable, View } from 'react-native';
 import { Tag, IconBtn } from './Controls';
 import { Txt } from './Txt';
+import { AppIcon, AppIconName } from './AppIcon';
 
 export interface KpiSpec {
   icon: string; value: ReactNode; label: string; tag?: string; tone?: 'g' | 'r' | ''; onPress?: () => void;
@@ -10,7 +11,7 @@ export interface KpiSpec {
 export function Kpi({ icon, value, label, tag, tone, onPress }: KpiSpec) {
   const body = (
     <View style={{ flexDirection: 'row', alignItems: 'center', gap: 7 }}>
-      <IconBtn size={36} fontSize={13.4} label={icon} />
+      <IconBtn size={36} fontSize={13.4} label={icon}>{(['users', 'building-2', 'clock-alert'].includes(icon) ? <AppIcon name={icon as AppIconName} size={17} /> : undefined)}</IconBtn>
       <View>
         <View style={{ flexDirection: 'row', alignItems: 'center' }}>
           {typeof value === 'string' || typeof value === 'number' ? <Txt size={14.7} weight={500}>{value}</Txt> : value}
