@@ -5,6 +5,7 @@ import { useNav } from '../../shell/Nav';
 import { useTheme } from '../../theme/ThemeContext';
 import { Card, CardTitle, Section } from '../../ui/Card';
 import { Heading } from '../../ui/Heading';
+import { AppIcon } from '../../ui/AppIcon';
 import { LineChart, Ring } from '../../ui/Charts';
 import { Chips, Pill, StatusPill } from '../../ui/Controls';
 import { ListRows } from '../../ui/Lists';
@@ -96,7 +97,7 @@ export function OverviewScreen() {
         { icon: 'clock-alert', value: prototypeSnapshot ? '—' : waiting.length, label: 'Waiting for review', tag: prototypeSnapshot ? 'Not connected yet' : overdue.length + ' overdue', tone: overdue.length ? 'r' : '', onPress: () => go('operations', { ov: 'List' }) }, 
       ]} />
 
-      <Section title="Platform activity" right={<View style={{ flexDirection: 'row', gap: 6 }}><Pill onPress={() => setExpandedChart(true)}>↗ Expand</Pill><Pill onPress={() => go('analytics')}>Analytics ›</Pill></View>}>
+      <Section title="Platform activity" right={<View style={{ flexDirection: 'row', gap: 6 }}><Pill onPress={() => setExpandedChart(true)}><View style={{ flexDirection: "row", alignItems: "center", gap: 4 }}><AppIcon name="arrow-up-right" size={12} />Expand</View></Pill><Pill onPress={() => go('analytics')}><View style={{ flexDirection: "row", alignItems: "center", gap: 4 }}>Analytics<AppIcon name="chevron-right" size={12} /></View></Pill></View>}>
         <Chips options={ranges} value={ranges.includes(ui.AR as Range) ? ui.AR as Range : '30D'} onChange={setRange} />
         <Txt size={21} weight={500}>{prototypeSnapshot ? '—' : chart.total.toLocaleString('en-US')} <Txt size={10.1} mut>transactions · all services</Txt></Txt>
         <View style={{ flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', marginTop: 4, marginBottom: 2 }}>
@@ -109,7 +110,7 @@ export function OverviewScreen() {
         {!prototypeSnapshot && chart.available ? <LineChart vals={chart.vals} color={c.or} max={chart.max} labels={chart.labels} yLabels={chart.yLabels} /> : <Txt size={10.1} mut style={{ marginTop: 8 }}>{prototypeSnapshot ? 'Not connected yet' : 'No transactions in this range'}</Txt>}
       </Section>
 
-      <Section title="Needs attention" right={<Pill onPress={() => go('operations', { ov: 'List' })}>View queue ›</Pill>}>
+      <Section title="Needs attention" right={<Pill onPress={() => go('operations', { ov: 'List' })}><View style={{ flexDirection: "row", alignItems: "center", gap: 4 }}>View queue<AppIcon name="chevron-right" size={12} /></View></Pill>}>
         {attention.length === 0 ? (
           <Txt size={10.1} mut style={{ paddingVertical: 18, textAlign: 'center' }}>
             {prototypeSnapshot ? 'Not connected yet' : 'Nothing urgent is waiting right now.'}
@@ -139,7 +140,7 @@ export function OverviewScreen() {
           <Txt size={9.5} mut style={{ marginTop: 5 }}>{reviewSpeedAvailable ? reviewed.length + ' reviewed · target 48h' : 'Review timestamps unavailable'}</Txt>
         </Card>
         <Card style={{ flex: 1.4, minHeight: 152 }}>
-          <CardTitle title="Queue mix" right={<Pill onPress={() => go('operations')}>↗</Pill>} />
+          <CardTitle title="Queue mix" right={<Pill onPress={() => go('operations')}><AppIcon name="arrow-up-right" size={12} /></Pill>} />
           <Txt size={22} weight={500}>{prototypeSnapshot ? '—' : waiting.length} <Txt size={9.5} mut>waiting</Txt></Txt>
           <View style={{ flexDirection: 'row', height: 10, gap: 2, overflow: 'hidden', borderRadius: 99, marginVertical: 12, backgroundColor: prototypeSnapshot ? c.inset : undefined }}>
             {!prototypeSnapshot && queue.map((value, i) => <View key={i} style={{ flex: Math.max(0.01, value), backgroundColor: [c.ye, c.gr, c.or][i] }} />)}
@@ -152,7 +153,7 @@ export function OverviewScreen() {
         </Card>
       </View>
 
-      <Section title="Money snapshot" right={<Pill onPress={() => go('finance')}>Finance ›</Pill>}>
+      <Section title="Money snapshot" right={<Pill onPress={() => go('finance')}><View style={{ flexDirection: "row", alignItems: "center", gap: 4 }}>Finance<AppIcon name="chevron-right" size={12} /></View></Pill>}>
         <ListRows rows={[
           { key: 'completed', main: 'Completed this week', right: <Txt size={10.1}>{prototypeSnapshot ? '—' : `${completed.length} · ${mny(completed.reduce((n, tx) => n + tx.a, 0))}`}</Txt>, onPress: () => go('finance', { fs: 'Completed' }) }, 
           { key: 'pending', main: 'Pending settlement', right: <Txt size={10.1}>{prototypeSnapshot ? '—' : `${pending.length} · ${mny(pending.reduce((n, tx) => n + tx.a, 0))}`}</Txt>, onPress: () => go('finance', { fs: 'Pending' }) }, 
@@ -162,7 +163,7 @@ export function OverviewScreen() {
         ]} />
       </Section>
 
-      <Section title="Feature health" right={<Pill onPress={() => go('ecosystem')}>Ecosystem ›</Pill>}>
+      <Section title="Feature health" right={<Pill onPress={() => go('ecosystem')}><View style={{ flexDirection: "row", alignItems: "center", gap: 4 }}>Ecosystem<AppIcon name="chevron-right" size={12} /></View></Pill>}>
         <ListRows rows={['Goodies', 'Stays', 'Woulib', 'Konsoliss'].map((name) => ({
           key: name, main: name,
           sub: 'Service-health metrics are not supplied by the current authorized endpoint.',
@@ -170,7 +171,7 @@ export function OverviewScreen() {
         }))} />
       </Section>
 
-      <Section title="Content and promotions" right={<Pill onPress={() => go('content')}>Content ›</Pill>}>
+      <Section title="Content and promotions" right={<Pill onPress={() => go('content')}><View style={{ flexDirection: "row", alignItems: "center", gap: 4 }}>Content<AppIcon name="chevron-right" size={12} /></View></Pill>}>
         <View style={{ flexDirection: 'row', flexWrap: 'wrap', gap: 7, marginBottom: 8 }}>
           <Pill onPress={() => go('content', { cs: 'Banners' })}>Live —</Pill>
           <Pill onPress={() => go('content', { cs: 'Calendar' })}>Scheduled —</Pill>
@@ -202,7 +203,7 @@ export function OverviewScreen() {
         </>}
       />
 
-      <Section title="Team and recent activity" right={<Pill onPress={() => go('people', { ps: 'Audit log' })}>Audit log ›</Pill>}>
+      <Section title="Team and recent activity" right={<Pill onPress={() => go('people', { ps: 'Audit log' })}><View style={{ flexDirection: "row", alignItems: "center", gap: 4 }}>Audit log<AppIcon name="chevron-right" size={12} /></View></Pill>}>
         <View style={{ flexDirection: 'row', flexWrap: 'wrap', gap: 6, marginBottom: 8 }}>
           {!prototypeSnapshot && db.STAFF.slice(0, 4).map((staff) => <Pill key={staff.n} onPress={() => go('people', { ps: 'Staff' })}>{staff.n} · {staff.st}</Pill>)}
           {!prototypeSnapshot && <Pill onPress={() => go('operations', { ou: 1 })}>{unassigned.length} unassigned</Pill>}
