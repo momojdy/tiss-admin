@@ -12,7 +12,7 @@ import { archiveCmsAsset, archiveCmsVersion, listCmsAssets, publishCmsAsset, pub
 import { Section, Card } from '../../ui/Card';
 import { Heading } from '../../ui/Heading';
 import { ListRows } from '../../ui/Lists';
-import { Chips, OutlineBtn, Pill, SelectMenu, StatusPill } from '../../ui/Controls';
+import { OutlineBtn, Pill, SelectMenu, StatusPill } from '../../ui/Controls';
 import { Field, useForm } from '../../ui/FormSheet';
 import { Txt } from '../../ui/Txt';
 import { useTheme } from '../../theme/ThemeContext';

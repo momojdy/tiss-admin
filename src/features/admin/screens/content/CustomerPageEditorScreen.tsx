@@ -306,10 +306,31 @@ export function CustomerPageEditorScreen() {
 
       {!actualGoodiesPreview ? (
       <Section title="Live customer phone preview" right={<View style={{ flexDirection: 'row', flexWrap: 'wrap', gap: 5 }}>
-        <OutlineBtn primary={viewMode === 'Draft'} onPress={() => { setViewMode('Draft'); setPageStack([]); setPageKey(pageKeys.includes('home') ? 'home' : pageKeys[0] || 'home'); }}>Draft</OutlineBtn>
-        <OutlineBtn primary={viewMode === 'Published'} onPress={() => { setViewMode('Published'); setEditorMode('Preview'); setPageStack([]); setPageKey(pageKeys.includes('home') ? 'home' : pageKeys[0] || 'home'); setElementKey(''); }}>Published</OutlineBtn>
-        <OutlineBtn primary={editorMode === 'Edit'} disabled={viewMode === 'Published' || !can(...REQ.content)} onPress={() => { setEditorMode('Edit'); setPageStack([]); }}>Edit</OutlineBtn>
-        <OutlineBtn primary={editorMode === 'Preview'} onPress={() => { setEditorMode('Preview'); setPageStack([]); }}>Preview</OutlineBtn>
+        <View style={{ width: 172 }}>
+          <SelectMenu
+            label="View"
+            options={(can(...REQ.content) ? ['Draft · Edit', 'Draft · Preview', 'Published'] : ['Draft · Preview', 'Published']) as readonly string[]}
+            value={viewMode === 'Published' ? 'Published' : editorMode === 'Edit' && can(...REQ.content) ? 'Draft · Edit' : 'Draft · Preview'}
+            onChange={(next) => {
+              setPageStack([]);
+              if (next === 'Published') {
+                setViewMode('Published');
+                setEditorMode('Preview');
+                setPageKey(pageKeys.includes('home') ? 'home' : pageKeys[0] || 'home');
+                setElementKey('');
+              } else if (next === 'Draft · Edit') {
+                setViewMode('Draft');
+                setEditorMode('Edit');
+                setPageKey(pageKeys.includes('home') ? 'home' : pageKeys[0] || 'home');
+              } else {
+                setViewMode('Draft');
+                setEditorMode('Preview');
+                setPageKey(pageKeys.includes('home') ? 'home' : pageKeys[0] || 'home');
+                setElementKey('');
+              }
+            }}
+          />
+        </View>
       </View>}>
         <View style={{ alignItems: 'center', paddingVertical: 6 }}>
           {viewMode === 'Published' && !publishedRow && selected?.status !== 'published' ? <Txt size={10.5} color={c.or} style={{ marginBottom: 8 }}>No published version for this locale.</Txt> : null}
