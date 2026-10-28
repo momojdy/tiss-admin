@@ -173,7 +173,7 @@ function EditAccessSheet({ name, onClose, onSaved }: { name: string; onClose: ()
 
   return (
     <DialogCard title={'Individual access · ' + name} onClose={onClose} maxHeight="94%">
-      <Txt size={12} mut lh={1.4}>Supabase enforces grants on protected requests; expired or revoked grants stop authorizing access.</Txt>
+      <Txt size={12} mut lh={1.4}>Server checks enforce grants; expired or revoked grants no longer authorize access.</Txt>
       <Field spec={{ id: 'permission', label: 'Feature or permission', type: 'select', options: permissionOptions }} value={permission} onChange={(v) => setPermission(String(v))} />
       <Field spec={{ id: 'level', label: 'Access level', type: 'select', options: ['view', 'edit', 'manage'] }} value={level} onChange={(v) => setLevel(String(v))} />
       <Field spec={{ id: 'until', label: 'Expires on (optional, YYYY-MM-DD)', type: 'date' }} value={until} onChange={(v) => setUntil(String(v))} />
@@ -200,7 +200,7 @@ export function useInvite() {
   const { closeAll } = useOverlay();
   return () => form({
     title: 'Invite staff',
-    sub: 'A real invitation email will be sent through Supabase Auth. Staff access remains subject to backend permissions.',
+    sub: 'Invitation email is sent through the protected server workflow; permissions still govern access.',
     fields: [
       { id: 'n', label: 'Name', type: 'text', required: true },
       { id: 'e', label: 'Work email', type: 'email', required: true },
@@ -223,7 +223,7 @@ export function useRoleEditor() {
   const { closeAll } = useOverlay();
   return (role: string) => {
     const p = db.ROLES[role], rg = db.RR[role] || [];
-    form({ title: 'Role template · ' + role, sub: role === 'Super Admin' ? 'Super Admin always keeps full access.' : 'Everyone with this role (and no personal override) gets these changes immediately.',
+    form({ title: 'Role template · ' + role, sub: role === 'Super Admin' ? 'Super Admin always keeps full access.' : 'Applies immediately to everyone with this role who has no personal override.',
       fields: [...db.SEC.map((s, i) => ({ id: 'p' + i, label: s, type: 'select' as const, options: db.LV, value: db.LV[p[i]] })), ...RIGHTS.map((x, i) => ({ id: 'x' + i, label: x, type: 'check' as const, value: rg.includes(x) }))],
       buttons: [{ label: 'Save template', key: 's', primary: true }],
       onSubmit: (_k, v) => {
@@ -266,7 +266,7 @@ export function AccountDrawer({ id, close }: { id: string; close: () => void }) 
     const scopes = only ? (a.svc.length ? a.svc : svcNames()) : ['Entire Wantiss account', ...(a.svc.length ? a.svc : svcNames())];
     form({
       title: ban ? 'Ban ' + a.n : (only ? 'Restrict one service · ' : 'Pause ') + a.n,
-      sub: ban ? 'This is a severe action. The account loses access for the scope you choose. Orders, history and wallet balance are kept. It is recorded in the audit history.'
+      sub: ban ? 'Severe action: removes access for the selected scope; orders, history and wallet balance remain, and the action is audited.'
         : 'A pause is temporary. Your Wantiss account has been paused. Reason: the reason you choose.',
       fields: [
         { id: 'rs', label: 'Reason', type: 'select', options: RESTRICT_REASONS, required: true },
