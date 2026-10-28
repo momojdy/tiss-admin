@@ -256,7 +256,6 @@ export function GoodiesEditor({ canEdit, canPublish }: { canEdit: boolean; canPu
         <Section title={kindName[selection.kind] + ' · ' + fieldName[selection.field]}>
           {!item ? (
             <View>
-              <Txt size={10.5} mut>This text is not in the current content, so the app shows its built-in wording.</Txt>
               {selection.kind === 'label' ? <View style={{ marginTop: 8 }}><OutlineBtn primary onPress={createLabel}>Create editable text</OutlineBtn></View> : null}
             </View>
           ) : selection.field !== 'art' ? (
