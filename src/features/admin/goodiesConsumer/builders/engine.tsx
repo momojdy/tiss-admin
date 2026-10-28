@@ -22,7 +22,7 @@ function bClean(b: any): Builder | null {
     if (!b || typeof b !== 'object' || !b.id || ['pizza', 'burger', 'custom'].indexOf(b.type) < 0) return null;
     const num = (v: any) => Math.max(0, parseFloat(v) || 0);
     return {
-      id: String(b.id), type: b.type, name: String(b.name || 'Build Your Own').slice(0, 60), desc: String(b.desc || '').slice(0, 160), emoji: String(b.emoji || '🍽️').slice(0, 4),
+      id: String(b.id), type: b.type, name: String(b.name || 'Build Your Own').slice(0, 60), desc: String(b.desc || '').slice(0, 160), emoji: String(b.emoji || 'utensils').slice(0, 4),
       enabled: b.enabled !== false, available: b.available !== false, base: num(b.base), notes: b.notes !== false,
       sizes: (Array.isArray(b.sizes) ? b.sizes : []).filter((s: any) => s && s.id).map((s: any) => ({id: String(s.id), name: String(s.name || 'Size').slice(0, 30), add: num(s.add), avail: s.avail !== false})),
       groups: (Array.isArray(b.groups) ? b.groups : []).filter((g: any) => g && g.id).map((g: any) => {
