@@ -4,6 +4,7 @@ import AsyncStorage from '@react-native-async-storage/async-storage';
 import { useTheme, ThemeMode } from '../theme/ThemeContext';
 import { useOverlay, DrawerBody } from '../ui/Overlay';
 import { Card, CardTitle } from '../ui/Card';
+import { AppIcon } from '../ui/AppIcon';
 import { OutlineBtn } from '../ui/Controls';
 import { Txt } from '../ui/Txt';
 import { can, session } from '../state/access';
@@ -143,7 +144,7 @@ export function SettingsSheet({ onClose }: { onClose: () => void }) {
               <Txt size={12.5} weight={500}>{name}</Txt>
               <Txt size={10.1} mut>{description}</Txt>
             </View>
-            <Txt size={15} mut>{selected === name ? '⌃' : '›'}</Txt>
+            <AppIcon name={selected === name ? 'chevron-down' : 'chevron-right'} size={16} />
           </Pressable>
           {selected === name ? (
             <Card style={{ marginTop: 2, marginBottom: 8 }}>
