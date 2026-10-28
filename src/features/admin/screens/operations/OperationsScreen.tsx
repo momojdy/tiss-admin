@@ -77,7 +77,7 @@ export function OperationsScreen() {
 
   return (
     <View>
-      <Heading title={'Operations\nQueue'} kpis={[
+      <Heading title="Operations Queue" kpis={[
         { icon: '↗', value: w.length, label: 'Waiting for review', onPress: () => go('operations', { ov: 'Board', o48: 0, ou: 0 }) },
         { icon: '↗', value: pendingDocs(), label: 'Documents to verify', onPress: () => go('operations', { ov: 'Documents' }) },
         { icon: '▤', value: over48().length, label: 'Over 48 hours', tag: 'oldest ' + Math.max(0, ...w.map((a) => a.age)) + 'd', tone: 'r', onPress: () => go('operations', { ov: 'List', o48: 1 }) },
