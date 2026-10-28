@@ -3,13 +3,13 @@ import { ui, bump } from '../state/db';
 
 export type ScreenId =
   | 'overview' | 'operations' | 'ecosystem' | 'content' | 'finance' | 'analytics' | 'people'
-  | 'business' | 'hub' | 'editor' | 'potssy' | 'workspace' | 'goodies';
+  | 'business' | 'hub' | 'editor' | 'potssy' | 'workspace' | 'goodies' | 'branding';
 
 export const TAB_SCREENS: ScreenId[] = ['overview', 'operations', 'ecosystem', 'content', 'finance', 'analytics', 'people'];
 /** Which top tab a screen belongs to (also the section used for access checks). */
 export const TAB_OF: Record<ScreenId, number> = {
   overview: 0, operations: 1, ecosystem: 2, content: 3, finance: 4, analytics: 5, people: 6,
-  business: 1, hub: 2, editor: 3, potssy: 2, workspace: 2, goodies: 2,
+  business: 1, hub: 2, editor: 3, potssy: 2, workspace: 2, goodies: 2, branding: 3,
 };
 
 interface NavApi {

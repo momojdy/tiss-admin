@@ -132,6 +132,6 @@ export const reqMessage = (reqs: Req[]): string => {
 export const can = (...reqs: Req[]) => !reqMessage(reqs);
 
 /** Which tab (section) each screen belongs to, for access checks. */
-export const SCREEN_SECTION: Record<string, number> = { overview: 0, operations: 1, ecosystem: 2, content: 3, finance: 4, analytics: 5, people: 6, business: 1, hub: 2, editor: 3, potssy: 2, workspace: 2, goodies: 2 };
+export const SCREEN_SECTION: Record<string, number> = { overview: 0, operations: 1, ecosystem: 2, content: 3, finance: 4, analytics: 5, people: 6, business: 1, hub: 2, editor: 3, potssy: 2, workspace: 2, goodies: 2, branding: 3 };
 
 export function setView(n: string) { session.view = n; bump(); }

@@ -102,6 +102,7 @@ export function SettingsSheet({ onClose }: { onClose: () => void }) {
     Finance: () => go('finance'),
     'Team and access': () => go('people'),
     'Help and information': () => go('people'),
+    'Branding & identity': () => go('branding'),
   };
 
   const editCategory = (name: string) => {
@@ -136,7 +137,10 @@ export function SettingsSheet({ onClose }: { onClose: () => void }) {
 
   return (
     <DrawerBody title="Settings" onClose={onClose}>
-      {categories.map(([name, description]) => (
+      {[
+        ...categories,
+        ...(session.role === 'super_admin' && session.status === 'active' ? [['Branding & identity', 'Logo and wordmark used in the admin header'] as const] : []),
+      ].map(([name, description]) => (
         <View key={name}>
           <Pressable onPress={() => setSelected((current) => current === name ? null : name)} accessibilityRole="button" accessibilityState={{ expanded: selected === name }}
             style={{ paddingVertical: 13, paddingHorizontal: 12, borderRadius: 12, backgroundColor: selected === name ? '#00000008' : 'transparent', flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between' }}>
@@ -150,7 +154,7 @@ export function SettingsSheet({ onClose }: { onClose: () => void }) {
             <Card style={{ marginTop: 2, marginBottom: 8 }}>
               <CardTitle title={selected} />
               <View style={{ flexDirection: 'row', flexWrap: 'wrap', marginTop: 10, gap: 6 }}>
-                <OutlineBtn primary onPress={() => editCategory(selected)}>Edit settings</OutlineBtn>
+                {selected === 'Branding & identity' ? null : <OutlineBtn primary onPress={() => editCategory(selected)}>Edit settings</OutlineBtn>}
                 {destinations[selected] ? <OutlineBtn onPress={() => { const destination = destinations[selected]; closeAll(); destination?.(); }}>Open related workspace</OutlineBtn> : null}
               </View>
             </Card>

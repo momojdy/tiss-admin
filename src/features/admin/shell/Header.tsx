@@ -1,4 +1,6 @@
 import { Image, Pressable, View } from 'react-native';
+import { useEffect, useState } from 'react';
+import { fetchPublishedWantissContent } from '../lib/wantissCms';
 import { useDb } from '../state/db';
 import { unreadCount } from '../state/notices';
 import { me, session } from '../state/access';
@@ -11,13 +13,15 @@ export function Header({ onBell, onAccount, onSearch }: { onBell: () => void; on
   useDb();
   const { c } = useTheme();
   const n = unreadCount();
+  const [brand, setBrand] = useState<{ name: string; logo_url: string | null; wordmark_url: string | null }>({ name: 'Wantiss', logo_url: null, wordmark_url: null });
+  useEffect(() => { let mounted = true; void fetchPublishedWantissContent().then((result) => { if (mounted) setBrand(result.branding); }).catch(() => {}); return () => { mounted = false; }; }, []);
   return (
     <View style={{ flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between' }}>
-      <View style={{ flexDirection: 'row', alignItems: 'center', gap: 8 }}>
-        <View style={{ width: 25, height: 25, borderRadius: 8, backgroundColor: c.ink, alignItems: 'center', justifyContent: 'center' }}>
-          <Txt size={15.8} weight={500} color={c.on}>W</Txt>
-        </View>
-        <Txt size={16.8} weight={500}>wantiss</Txt>
+      <View style={{ flexDirection: 'row', alignItems: 'center', gap: 8, maxWidth: '58%' }}>
+        {brand.logo_url ? <Image source={{ uri: brand.logo_url }} resizeMode="contain" style={{ width: 27, height: 27 }} /> : <View style={{ width: 25, height: 25, borderRadius: 8, backgroundColor: c.ink, alignItems: 'center', justifyContent: 'center' }}>
+          <Txt size={15.8} weight={500} color={c.on}>{(brand.name[0] || 'W').toUpperCase()}</Txt>
+        </View>}
+        {brand.wordmark_url ? <Image source={{ uri: brand.wordmark_url }} resizeMode="contain" accessibilityLabel={brand.name} style={{ width: 130, height: 30, maxWidth: '100%' }} /> : <Txt size={16.8} weight={500}>{brand.name}</Txt>}
       </View>
       <View style={{ flexDirection: 'row', gap: 6, alignItems: 'center' }}>
         <IconBtn a11y="Search" onPress={onSearch} size={30}><AppIcon name="search" size={16} color={c.ink} /></IconBtn>

@@ -20,6 +20,7 @@ import { ServiceWorkspaceScreen } from '../screens/workspace/ServiceWorkspaceScr
 import { CustomerPageEditorScreen } from '../screens/content/CustomerPageEditorScreen';
 import { BusinessDetailsScreen } from '../screens/ecosystem/BusinessDetailsScreen';
 import { PotssyAdminScreen } from '../screens/potssy/PotssyAdminScreen';
+import { BrandingScreen } from '../screens/content/BrandingScreen';
 
 /** Unported screens render a placeholder until implemented. */
 const SCREENS: Partial<Record<ScreenId, () => ReactNode>> = {
@@ -36,6 +37,7 @@ const SCREENS: Partial<Record<ScreenId, () => ReactNode>> = {
   editor: () => <CustomerPageEditorScreen />,
   business: () => <BusinessDetailsScreen />,
   potssy: () => <PotssyAdminScreen />,
+  branding: () => <BrandingScreen />,
 };
 
 function NoAccess({ sec }: { sec: number }) {
