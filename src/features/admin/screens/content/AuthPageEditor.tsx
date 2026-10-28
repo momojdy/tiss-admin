@@ -18,6 +18,8 @@ const DEFAULTS = {
   headline: '',
   subtitle: '',
   logo_asset_key: LOGO_KEY,
+  google_asset_key: 'wantiss.auth.google',
+  apple_asset_key: 'wantiss.auth.apple',
   primary_color: '#BF008E',
   link_color: '#9D315B',
   buyer_label: 'Buyer',
@@ -45,7 +47,11 @@ export function AuthPageEditor({ canEdit, canPublish }: { canEdit: boolean; canP
   const [row, setRow] = useState<CmsRow | null>(null);
   const [assets, setAssets] = useState<AssetRow[]>([]);
   const [logoAssetId, setLogoAssetId] = useState('');
+  const [googleAssetId, setGoogleAssetId] = useState('');
+  const [appleAssetId, setAppleAssetId] = useState('');
   const [logoPreview, setLogoPreview] = useState('');
+  const [googlePreview, setGooglePreview] = useState('');
+  const [applePreview, setApplePreview] = useState('');
   const [baseline, setBaseline] = useState('');
   const [loading, setLoading] = useState(true);
   const [busy, setBusy] = useState<'save' | 'publish' | 'logo' | 'publish-logo' | ''>('');
@@ -69,13 +75,21 @@ export function AuthPageEditor({ canEdit, canPublish }: { canEdit: boolean; canP
       setRow(latest);
       setDraft(next);
       setBaseline(JSON.stringify(next));
-      const matching = usableAssets.filter((asset) => asset.asset_key === String(next.logo_asset_key || LOGO_KEY) && asset.status !== 'archived')
+      const resolveAsset = (key: string) => usableAssets.filter((asset) => asset.asset_key === key && asset.status !== 'archived')
         .sort((a, b) => Number(b.status === 'published') - Number(a.status === 'published'))[0];
-      setLogoAssetId(matching?.status === 'draft' ? matching.id : '');
-      if (matching) {
-        const { data: signed, error: signedError } = await supabase.storage.from('wantiss-cms-assets').createSignedUrl(matching.storage_path, 3600);
-        setLogoPreview(!signedError && signed?.signedUrl ? signed.signedUrl : '');
-      } else setLogoPreview('');
+      const logo = resolveAsset(String(next.logo_asset_key || LOGO_KEY));
+      const google = resolveAsset(String(next.google_asset_key || 'wantiss.auth.google'));
+      const apple = resolveAsset(String(next.apple_asset_key || 'wantiss.auth.apple'));
+      setLogoAssetId(logo?.status === 'draft' ? logo.id : '');
+      setGoogleAssetId(google?.status === 'draft' ? google.id : '');
+      setAppleAssetId(apple?.status === 'draft' ? apple.id : '');
+      const previewAsset = async (asset: AssetRow | undefined) => {
+        if (!asset) return '';
+        const { data: signed, error: signedError } = await supabase.storage.from('wantiss-cms-assets').createSignedUrl(asset.storage_path, 3600);
+        return !signedError && signed?.signedUrl ? signed.signedUrl : '';
+      };
+      const [logoUrl, googleUrl, appleUrl] = await Promise.all([previewAsset(logo), previewAsset(google), previewAsset(apple)]);
+      setLogoPreview(logoUrl); setGooglePreview(googleUrl); setApplePreview(appleUrl);
     } catch (e) {
       setError(e instanceof Error ? e.message : 'Authentication-page content could not be loaded.');
     } finally { setLoading(false); }
@@ -88,47 +102,47 @@ export function AuthPageEditor({ canEdit, canPublish }: { canEdit: boolean; canP
   };
   const dirty = JSON.stringify(draft) !== baseline;
 
-  const uploadLogo = async () => {
+  type AuthAssetSlot = 'logo' | 'google' | 'apple';
+  const assetConfig = {
+    logo: { key: LOGO_KEY, payloadKey: 'logo_asset_key' as const, label: 'Wantiss authentication page logo' },
+    google: { key: 'wantiss.auth.google', payloadKey: 'google_asset_key' as const, label: 'Google sign-in button image' },
+    apple: { key: 'wantiss.auth.apple', payloadKey: 'apple_asset_key' as const, label: 'Apple sign-in button image' },
+  };
+  const uploadAuthAsset = async (slot: AuthAssetSlot) => {
     if (!canEdit || busy) return;
     setError(''); setNotice('');
     try {
-      const result = await ImagePicker.launchImageLibraryAsync({
-        mediaTypes: ['images'],
-        allowsEditing: true,
-        quality: 0.9,
-      });
+      const result = await ImagePicker.launchImageLibraryAsync({ mediaTypes: ['images'], allowsEditing: true, quality: 0.9 });
       if (result.canceled || !result.assets?.[0]) return;
       const file = result.assets[0];
       const contentType = file.mimeType || 'image/jpeg';
       const byteSize = file.fileSize || 0;
       if (!byteSize) throw new Error('The selected image size could not be read. Choose another image.');
-      setBusy('logo');
+      setBusy(slot);
+      const config = assetConfig[slot];
       const id = await uploadCmsAsset({
-        key: LOGO_KEY,
-        uri: file.uri,
-        fileName: file.fileName || 'auth-logo',
-        contentType,
-        byteSize,
-        altText: { en: 'Wantiss authentication page logo' },
-        status: 'draft',
+        key: config.key, uri: file.uri, fileName: file.fileName || slot + '-auth-asset',
+        contentType, byteSize, altText: { en: config.label }, status: 'draft',
       });
-      setLogoAssetId(id);
-      setLogoPreview(file.uri);
-      update('logo_asset_key', LOGO_KEY);
-      setNotice('Logo uploaded as a private draft. Publish the logo asset, then save and publish the page content.');
+      if (slot === 'logo') { setLogoAssetId(id); setLogoPreview(file.uri); }
+      if (slot === 'google') { setGoogleAssetId(id); setGooglePreview(file.uri); }
+      if (slot === 'apple') { setAppleAssetId(id); setApplePreview(file.uri); }
+      update(config.payloadKey, config.key);
+      setNotice(config.label + ' uploaded as a private draft. Publish this asset, then save and publish the page content.');
     } catch (e) {
-      setError(e instanceof Error ? e.message : 'The logo could not be uploaded.');
+      setError(e instanceof Error ? e.message : 'The selected image could not be uploaded.');
     } finally { setBusy(''); }
   };
 
-  const publishLogo = async () => {
-    if (!logoAssetId || !canPublish || busy) return;
-    setBusy('publish-logo'); setError(''); setNotice('');
+  const publishAuthAsset = async (slot: AuthAssetSlot) => {
+    const id = slot === 'logo' ? logoAssetId : slot === 'google' ? googleAssetId : appleAssetId;
+    if (!id || !canPublish || busy) return;
+    setBusy('publish-' + slot); setError(''); setNotice('');
     try {
-      await publishCmsAsset(logoAssetId);
-      setNotice('Logo asset published. Save and publish the authentication page to use it.');
+      await publishCmsAsset(id);
+      setNotice(assetConfig[slot].label + ' published. Save and publish the authentication page to apply it.');
       await load();
-    } catch (e) { setError(e instanceof Error ? e.message : 'The logo asset could not be published.'); }
+    } catch (e) { setError(e instanceof Error ? e.message : 'The image asset could not be published.'); }
     finally { setBusy(''); }
   };
 
@@ -157,6 +171,17 @@ export function AuthPageEditor({ canEdit, canPublish }: { canEdit: boolean; canP
     finally { setBusy(''); }
   };
 
+  const renderAssetControl = (slot: AuthAssetSlot, title: string, preview: string, assetId: string) => (
+    <View key={slot} style={{ flexDirection: 'row', alignItems: 'center', gap: 12, flexWrap: 'wrap', marginTop: 10 }}>
+      {preview ? <Image source={{ uri: preview }} resizeMode="contain" style={{ width: 100, height: 64, borderRadius: 8, backgroundColor: '#FFFFFF' }} /> : <View style={{ width: 100, height: 64, borderRadius: 8, backgroundColor: c.inset, alignItems: 'center', justifyContent: 'center' }}><Txt size={10} mut>No custom image</Txt></View>}
+      <View style={{ flex: 1, minWidth: 160, gap: 6 }}>
+        <Txt size={11}>{title}</Txt>
+        <OutlineBtn onPress={() => { void uploadAuthAsset(slot); }} disabled={!canEdit || !!busy}>{busy === slot ? 'Uploading…' : 'Choose image from photo library'}</OutlineBtn>
+        {assetId ? <OutlineBtn onPress={() => { void publishAuthAsset(slot); }} disabled={!canPublish || !!busy}>{busy === 'publish-' + slot ? 'Publishing…' : 'Publish image asset'}</OutlineBtn> : null}
+      </View>
+    </View>
+  );
+
   const fieldStyle = { borderWidth: 1, borderColor: c.bd, borderRadius: 10, paddingHorizontal: 10, paddingVertical: 9, marginTop: 5, marginBottom: 9, color: c.ink, backgroundColor: c.card, fontSize: 12 } as const;
   const input = (key: keyof AuthDraft, label: string, multiline = false) => (
     <View key={key} style={{ marginTop: 5 }}>
@@ -172,16 +197,14 @@ export function AuthPageEditor({ canEdit, canPublish }: { canEdit: boolean; canP
       {error ? <Card><Txt size={11} color={c.or}>{error}</Txt></Card> : null}
       {notice ? <Card><Txt size={11} color={c.ink}>{notice}</Txt></Card> : null}
       <Section title="Logo and header">
-        <View style={{ flexDirection: 'row', alignItems: 'center', gap: 12, flexWrap: 'wrap' }}>
-          {logoPreview ? <Image source={{ uri: logoPreview }} resizeMode="contain" style={{ width: 100, height: 70, borderRadius: 8 }} /> : <View style={{ width: 100, height: 70, borderRadius: 8, backgroundColor: c.inset, alignItems: 'center', justifyContent: 'center' }}><Txt size={10} mut>No custom logo</Txt></View>}
-          <View style={{ flex: 1, minWidth: 160, gap: 6 }}>
-            <Txt size={10.5} mut>Logo asset key: {String(draft.logo_asset_key || LOGO_KEY)}</Txt>
-            <OutlineBtn onPress={() => { void uploadLogo(); }} disabled={!canEdit || !!busy}>{busy === 'logo' ? 'Uploading…' : 'Choose logo from photo library'}</OutlineBtn>
-            {logoAssetId ? <OutlineBtn onPress={() => { void publishLogo(); }} disabled={!canPublish || !!busy}>{busy === 'publish-logo' ? 'Publishing logo…' : 'Publish logo asset'}</OutlineBtn> : null}
-          </View>
-        </View>
+        {renderAssetControl('logo', 'Wantiss logo', logoPreview, logoAssetId)}
         {input('headline', 'Optional header title')}
         {input('subtitle', 'Optional header subtitle', true)}
+      </Section>
+      <Section title="Google and Apple sign-in images">
+        <Txt size={10.5} mut>Optional image overrides for the existing social sign-in buttons. Leave these empty to keep the current built-in Google and Apple icons. Uploading images does not change the sign-in actions.</Txt>
+        {renderAssetControl('google', 'Google sign-in image', googlePreview, googleAssetId)}
+        {renderAssetControl('apple', 'Apple sign-in image', applePreview, appleAssetId)}
       </Section>
       <Section title="Text and labels">
         {input('buyer_label', 'Buyer toggle label')}
@@ -206,7 +229,7 @@ export function AuthPageEditor({ canEdit, canPublish }: { canEdit: boolean; canP
         <View style={{ flexDirection: 'row', flexWrap: 'wrap', gap: 8, marginTop: 8 }}>
           <OutlineBtn onPress={() => { void load(); }} disabled={loading || !!busy}>Reload</OutlineBtn>
           <OutlineBtn primary onPress={() => { void save(); }} disabled={!canEdit || !!busy || loading}>{busy === 'save' ? 'Saving…' : 'Save private draft'}</OutlineBtn>
-          <OutlineBtn onPress={() => { void publish(); }} disabled={!row || row.status !== 'draft' || !canPublish || !!busy || loading || dirty || !!logoAssetId}>{busy === 'publish' ? 'Publishing…' : 'Publish page'}</OutlineBtn>
+          <OutlineBtn onPress={() => { void publish(); }} disabled={!row || row.status !== 'draft' || !canPublish || !!busy || loading || dirty || !!logoAssetId || !!googleAssetId || !!appleAssetId}>{busy === 'publish' ? 'Publishing…' : 'Publish page'}</OutlineBtn>
         </View>
         {dirty ? <Txt size={10} color={c.or} style={{ marginTop: 7 }}>You have unsaved edits. Save a draft before publishing.</Txt> : null}
       </Section>
