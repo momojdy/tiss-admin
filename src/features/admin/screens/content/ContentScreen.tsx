@@ -367,7 +367,7 @@ export function ContentScreen() {
       {activeSection === 'Media' ? (
         <>
           <Section title={'Media library placements · ' + displayMedia.length}>
-            <ListRows empty={loading ? 'Loading media placements…' : prototypeSnapshot ? 'Not connected yet' : 'Nothing here yet'} rows={displayMedia.map((media, index) => ({ key: 'media-' + index, main: media[0], sub: media[1].length ? 'Used in ' + media[1].length + ' placement(s)' : 'Unused', right: 'Stage edit ›', onPress: () => stageContentDraft('media', String(index), { media_key: media[0], used_in: media[1] }) }))} />
+            <ListRows empty={loading ? 'Loading media placements…' : prototypeSnapshot ? 'Not connected yet' : 'Nothing here yet'} rows={displayMedia.map((media, index) => ({ key: 'media-' + index, main: media[0], sub: media[1].length ? 'Used in ' + media[1].length + ' placement(s)' : 'Unused', right: <View style={{ flexDirection: 'row', alignItems: 'center', gap: 4 }}>Stage edit<AppIcon name="chevron-right" size={12} /></View>, onPress: () => stageContentDraft('media', String(index), { media_key: media[0], used_in: media[1] }) }))} />
           </Section>
           <View style={{ flexDirection: 'row', flexWrap: 'wrap', gap: 8 }}>
             <OutlineBtn primary onPress={() => { void pickAsset(); }} disabled={busy}>Upload asset</OutlineBtn>
