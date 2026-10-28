@@ -49,7 +49,7 @@ export function ServiceHubScreen() {
       </Section>
       <Section title="Content for this service">
         <ListRows
-          empty="Live content placements are not loaded into the current authorized service snapshot."
+          empty="Not connected yet."
           rows={banners.map((banner) => ({
             key: banner.id,
             main: banner.t,
@@ -60,7 +60,7 @@ export function ServiceHubScreen() {
       </Section>
       <Card>
         <Txt size={10.1} weight={500}>Workspace boundary</Txt>
-        <Txt size={9.5} mut lh={1.4} style={{ marginTop: 5 }}>Only connected server actions can change live data.</Txt>
+        <Txt size={9.5} mut lh={1.4} style={{ marginTop: 5 }}>Only connected actions can change live data.</Txt>
       </Card>
     </View>
   );
