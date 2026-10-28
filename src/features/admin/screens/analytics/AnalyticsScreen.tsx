@@ -125,7 +125,7 @@ export function AnalyticsScreen() {
             cells: [item.name, item.total.toLocaleString('en-US'), item.share + '%'],
             onPress: () => { ui.hub = item.name; go('hub'); },
           }))} />
-        {prototypeSnapshot || !byService.length ? <Txt size={10.1} mut style={{ marginTop: 8 }}>Not connected yet</Txt> : null}
+        {prototypeSnapshot || !byService.length ? <Txt size={10.1} mut style={{ marginTop: 8 }}>{prototypeSnapshot ? 'Not connected yet' : 'Nothing here yet'}</Txt> : null}
       </Section>
 
       <Section title="Approval turnaround">
