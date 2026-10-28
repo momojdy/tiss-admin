@@ -35,8 +35,6 @@ function useReopen() {
 }
 
 /* ================================================================== */
-/* Staff                                                               */
-/* ================================================================== */
 
 export function StaffDrawer({ id, close }: { id: string; close: () => void }) {
   useDb();
@@ -118,7 +116,6 @@ export function StaffDrawer({ id, close }: { id: string; close: () => void }) {
   );
 }
 
-/* ---------------- the "Edit access" dialog ---------------- */
 const RIGHT_OPTS = (on: boolean) => ['From role (' + (on ? 'on' : 'off') + ')', 'Grant', 'Remove'];
 const RIGHT_KEYS: RightChoice[] = ['role', 'grant', 'remove'];
 
@@ -205,7 +202,6 @@ function EditAccessSheet({ name, onClose, onSaved }: { name: string; onClose: ()
 }
 
 /* ================================================================== */
-/* Invite, roles                                                       */
 /* ================================================================== */
 
 export function useInvite() {
@@ -259,7 +255,6 @@ export function useNewRole() {
 }
 
 /* ================================================================== */
-/* Accounts                                                            */
 /* ================================================================== */
 
 export function AccountDrawer({ id, close }: { id: string; close: () => void }) {
@@ -388,7 +383,6 @@ export function AccountDrawer({ id, close }: { id: string; close: () => void }) 
   );
 }
 
-/** A customer row opens the matching account. */
 export function CustomerDrawer({ id, close }: { id: string; close: () => void }) {
   const a = db.ACC.find((x) => x.n === id);
   return a ? <AccountDrawer id={a.id} close={close} /> : null;
