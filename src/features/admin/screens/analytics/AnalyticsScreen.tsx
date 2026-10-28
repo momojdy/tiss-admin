@@ -115,7 +115,7 @@ export function AnalyticsScreen() {
         </View>
         <Txt size={21} weight={500}>{!prototypeSnapshot && chart.available ? chart.total.toLocaleString('en-US') : '—'} <Txt size={10.1} mut>transactions · {serviceFilter === 'All' ? 'all services' : serviceFilter}</Txt></Txt>
         <Txt size={9.5} mut style={{ marginTop: 4 }}>{range === 'Custom' ? customStart + ' – ' + customEnd : range + ' range'} · authorized transaction timestamps only</Txt>
-        {!prototypeSnapshot && chart.available ? <LineChart vals={chart.vals} color={c.or} max={chart.max} labels={chart.labels} yLabels={chart.yLabels} /> : <Txt size={10.1} mut style={{ marginTop: 8 }}>{prototypeSnapshot ? 'Not connected yet' : 'No timestamped transactions are available in the authorized snapshot.'}</Txt>}
+        {!prototypeSnapshot && chart.available ? <LineChart vals={chart.vals} color={c.or} max={chart.max} labels={chart.labels} yLabels={chart.yLabels} /> : <Txt size={10.1} mut style={{ marginTop: 8 }}>{prototypeSnapshot ? 'Not connected yet' : 'Nothing here yet'}</Txt>}
       </Section>
 
       <Section title="By service (same dataset)" right={<Pill onPress={() => go('ecosystem')}>Ecosystem ›</Pill>}>
@@ -125,11 +125,11 @@ export function AnalyticsScreen() {
             cells: [item.name, item.total.toLocaleString('en-US'), item.share + '%'],
             onPress: () => { ui.hub = item.name; go('hub'); },
           }))} />
-        {prototypeSnapshot || !byService.length ? <Txt size={10.1} mut style={{ marginTop: 8 }}>Live service transaction breakdown is unavailable.</Txt> : null}
+        {prototypeSnapshot || !byService.length ? <Txt size={10.1} mut style={{ marginTop: 8 }}>Not connected yet</Txt> : null}
       </Section>
 
       <Section title="Approval turnaround">
-        <ListRows empty={prototypeSnapshot ? 'Not connected yet' : 'No application review records are available.'} rows={['Submitted', 'In review', 'Needs info', 'Approved', 'Rejected'].map((stage, index) => {
+        <ListRows empty={prototypeSnapshot ? 'Not connected yet' : 'Nothing here yet'} rows={['Submitted', 'In review', 'Needs info', 'Approved', 'Rejected'].map((stage, index) => {
           const stageApps = liveApplications.filter((app) => app.st === index);
           const average = stageApps.length ? (stageApps.reduce((sum, app) => sum + app.age, 0) / stageApps.length).toFixed(1) : '—';
           return { key: stage, main: stage, sub: 'Average age: ' + (prototypeSnapshot ? 'unavailable' : average + ' days'), right: prototypeSnapshot ? '—' : String(stageApps.length), onPress: () => go('operations', { ov: 'List' }) };
@@ -137,7 +137,7 @@ export function AnalyticsScreen() {
       </Section>
 
       <Section title="Content performance">
-        <ListRows empty={prototypeSnapshot ? 'Not connected yet' : 'No live banner performance records are available.'} rows={(prototypeSnapshot ? [] : liveBanners.filter((banner) => banner.st === 'Live')).map((banner) => ({
+        <ListRows empty={prototypeSnapshot ? 'Not connected yet' : 'Nothing here yet'} rows={(prototypeSnapshot ? [] : liveBanners.filter((banner) => banner.st === 'Live')).map((banner) => ({
           key: banner.id, main: banner.t, sub: banner.svc + ' · ' + banner.pl,
           right: <StatusPill label={banner.st} tone="gr" small />,
           onPress: () => go('content', { cs: 'Banners' }),
@@ -160,11 +160,11 @@ export function AnalyticsScreen() {
         chartTitle="Platform analytics"
         rangeLabel={range === 'Custom' ? customStart + ' – ' + customEnd : range + ' selected range'}
         totalLabel={prototypeSnapshot ? '—' : chart.total.toLocaleString('en-US')}
-        chartContent={!prototypeSnapshot && chart.available ? <LineChart vals={chart.vals} color={c.or} max={chart.max} labels={chart.labels} yLabels={chart.yLabels} /> : <Txt size={10.1} mut style={{ paddingVertical: 24, textAlign: 'center' }}>Live timestamped transaction data is unavailable. No prototype activity is shown.</Txt>}
+        chartContent={!prototypeSnapshot && chart.available ? <LineChart vals={chart.vals} color={c.or} max={chart.max} labels={chart.labels} yLabels={chart.yLabels} /> : <Txt size={10.1} mut style={{ paddingVertical: 24, textAlign: 'center' }}>{prototypeSnapshot ? 'Not connected yet' : 'Nothing here yet'}</Txt>}
       />
 
       <Section title="Operational snapshot">
-        <ListRows empty="Live operational metrics are unavailable." rows={prototypeSnapshot ? [] : [
+        <ListRows empty={prototypeSnapshot ? "Not connected yet" : "Nothing here yet"} rows={prototypeSnapshot ? [] : [
           { key: 'applications', main: 'Applications waiting', right: String(db.APPS.filter((app) => app.st < 3).length), onPress: () => go('operations') },
           { key: 'refunds', main: 'Refunds requiring attention', right: String(db.INV.filter((tx) => tx.rq || tx.s === 'Refund pending').length), onPress: () => go('finance', { fv: 'Refunds' }) },
           { key: 'payouts', main: 'Payouts not paid', right: String(db.PAYO.filter((payout) => payout[3] !== 'Paid').length), onPress: () => go('finance', { fv: 'Payouts' }) },
