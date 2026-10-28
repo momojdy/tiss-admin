@@ -1,6 +1,6 @@
 import { Image, Pressable, View } from 'react-native';
 import { useEffect, useState } from 'react';
-import { fetchPublishedWantissContent } from '../lib/wantissCms';
+import { fetchPublishedWantissContent, subscribeBrandingChanged } from '../lib/wantissCms';
 import { useDb } from '../state/db';
 import { unreadCount } from '../state/notices';
 import { me, session } from '../state/access';
@@ -14,7 +14,7 @@ export function Header({ onBell, onAccount, onSearch }: { onBell: () => void; on
   const { c } = useTheme();
   const n = unreadCount();
   const [brand, setBrand] = useState<{ name: string; logo_url: string | null; wordmark_url: string | null }>({ name: 'Wantiss', logo_url: null, wordmark_url: null });
-  useEffect(() => { let mounted = true; void fetchPublishedWantissContent().then((result) => { if (mounted) setBrand(result.branding); }).catch(() => {}); return () => { mounted = false; }; }, []);
+  useEffect(() => { let mounted = true; const refreshBrand = () => { void fetchPublishedWantissContent().then((result) => { if (mounted) setBrand(result.branding); }).catch(() => {}); }; refreshBrand(); const unsubscribe = subscribeBrandingChanged(refreshBrand); return () => { mounted = false; unsubscribe(); }; }, []);
   return (
     <View style={{ flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between' }}>
       <View style={{ flexDirection: 'row', alignItems: 'center', gap: 8, maxWidth: '58%' }}>

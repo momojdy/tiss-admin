@@ -16,6 +16,13 @@ export interface PublishedAssetRecord {
   byte_size: number;
   alt_text: Record<string, string>;
 }
+const brandingListeners = new Set<() => void>();
+export const notifyBrandingChanged = () => brandingListeners.forEach((listener) => listener());
+export const subscribeBrandingChanged = (listener: () => void) => {
+  brandingListeners.add(listener);
+  return () => { brandingListeners.delete(listener); };
+};
+
 export interface PublishedBranding { name: string; logo_url: string | null; wordmark_url: string | null; updated_at: string | null; }
 export interface PublishedWantissContent {
   content: PublishedContentRecord[];
