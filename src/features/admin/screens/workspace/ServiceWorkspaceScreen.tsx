@@ -6,6 +6,7 @@ import { useOpen } from '../../overlays/registry';
 import { useTheme } from '../../theme/ThemeContext';
 import { Card, Section } from '../../ui/Card';
 import { Heading } from '../../ui/Heading';
+import { AppIcon } from '../../ui/AppIcon';
 import { Chips, OutlineBtn, Pill, Row, SearchInput, SelectMenu, StatusPill } from '../../ui/Controls';
 import { ListRows, Small } from '../../ui/Lists';
 import { Txt } from '../../ui/Txt';
@@ -61,13 +62,13 @@ export function ServiceWorkspaceScreen() {
   return (
     <View>
       <Row style={{ marginBottom: 4 }}>
-        <Pill onPress={() => go('ecosystem')}>‹ Ecosystem</Pill>
+        <Pill onPress={() => go('ecosystem')}><View style={{ flexDirection: 'row', alignItems: 'center', gap: 4 }}><AppIcon name="arrow-left" size={12} />Ecosystem</View></Pill>
         <Txt size={10.1} mut>{serviceName} · Workspace</Txt>
       </Row>
       <Heading title={serviceName + '\n' + moduleName} sub={service[1] !== 'Active service' ? service[1] : undefined} kpis={[
-        { icon: '▥', value: dataMode === 'live' ? serviceTransactions.length : '—', label: 'Orders today', tag: pre ? 'Pre-order' : dataMode === 'live' ? 'Authorized snapshot' : 'Not connected', onPress: () => go('finance') },
+        { icon: 'activity', value: dataMode === 'live' ? serviceTransactions.length : '—', label: 'Orders today', tag: pre ? 'Pre-order' : dataMode === 'live' ? 'Authorized snapshot' : 'Not connected', onPress: () => go('finance') },
         { icon: '▤', value: dataMode === 'live' ? sourceRows.filter((row) => /pending|unassigned|submitted|review|failed|needs info|open|discrepancy/i.test(row.right + ' ' + row.sub)).length : '—', label: 'Pending items', onPress: () => go('operations') },
-        { icon: '◔', value: '—', label: 'Health score' },
+        { icon: 'pie-chart', value: '—', label: 'Health score' },
       ]} />
       <View style={{ flexDirection: 'row', flexWrap: 'wrap', gap: 6, marginBottom: 8 }}>
         {modules.length > 5 ? <SelectMenu label={serviceName + ' section'} options={modules} value={moduleName} onChange={setModule} /> : <View style={{ flexDirection: 'row', flexWrap: 'wrap', gap: 6, marginBottom: 9 }}>{modules.map((name) => <Pill key={name} on={name === moduleName} onPress={() => setModule(name)}>{name}</Pill>)}</View>}
@@ -77,10 +78,10 @@ export function ServiceWorkspaceScreen() {
         <>
           <Section title="Modules">
             <ListRows empty="No modules are configured for this service." rows={modules.filter((name) => name !== 'Overview').map((name) => ({
-              key: name, main: name, sub: 'Open ' + serviceName + ' ' + name.toLowerCase(), right: '›', onPress: () => setModule(name),
+              key: name, main: name, sub: 'Open ' + serviceName + ' ' + name.toLowerCase(), right: <AppIcon name="chevron-right" size={12} />, onPress: () => setModule(name),
             }))} />
           </Section>
-          <Section title="Recent activity" right={<Pill onPress={() => go('operations')}>Operations ›</Pill>}>
+          <Section title="Recent activity" right={<Pill onPress={() => go('operations')}><View style={{ flexDirection: 'row', alignItems: 'center', gap: 4 }}>Operations<AppIcon name="chevron-right" size={12} /></View></Pill>}>
             <ListRows empty={dataMode === 'live' ? 'No service activity yet' : 'Not connected yet'} rows={sourceRows.slice(0, 4).map((row) => ({
               key: row.key, main: row.title, sub: row.sub, right: row.right, onPress: row.action,
             }))} />
@@ -117,7 +118,7 @@ export function ServiceWorkspaceScreen() {
           <Section title={moduleName + (dataMode === 'live' ? ' · ' + visibleRows.length : '')} right={<Pill onPress={() => { ui.wf = ui.wf === 'All' ? 'Pending' : 'All'; bump(); }}>{ui.wf === 'All' ? 'Filter pending' : 'Show all'}</Pill>}>
             <ListRows empty={dataMode === 'live' ? (query || ui.wf !== 'All' ? 'No records match this search or filter' : 'No records yet for this module') : 'Not connected yet'} rows={visibleRows.map((row) => ({
               key: row.key, main: row.title, sub: row.sub,
-              right: <View style={{ alignItems: 'flex-end', gap: 3 }}><Txt size={9.5} color={row.right === 'Unassigned' ? c.or : c.ink}>{row.right}</Txt><Small>Open ›</Small></View>,
+              right: <View style={{ alignItems: 'flex-end', gap: 3 }}><Txt size={9.5} color={row.right === 'Unassigned' ? c.or : c.ink}>{row.right}</Txt><View style={{ flexDirection: 'row', alignItems: 'center', gap: 4 }}><Small>Open</Small><AppIcon name="chevron-right" size={12} /></View></View>,
               onPress: row.action,
             }))} />
           </Section>
