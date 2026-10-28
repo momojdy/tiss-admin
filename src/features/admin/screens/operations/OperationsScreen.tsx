@@ -44,7 +44,7 @@ export function OperationsScreen() {
           <Txt size={9.5} mut style={{ marginLeft: 11, marginTop: 1, marginBottom: 7 }}>{sub}</Txt>
           <View style={{ gap: 7 }}>
             {l.length ? l.map((a) => (
-              <Deal key={a.id} tone={deal} top={(a.hold ? '⏸ ' : '') + (a.esc ? '⚑ ' : '') + 'Waiting ' + a.age + 'd'} title={a.n} sub={a.s} value={docsText(a)} meta={a.o} onPress={() => open('app', a.id)} />
+              <Deal key={a.id} tone={deal} top={(a.hold ? 'On hold · ' : '') + (a.esc ? 'Escalated · ' : '') + 'Waiting ' + a.age + 'd'} title={a.n} sub={a.s} value={docsText(a)} meta={a.o} onPress={() => open('app', a.id)} />
             )) : <Txt size={12} mut style={{ padding: 8 }}>Nothing here.</Txt>}
           </View>
         </View>
@@ -86,8 +86,8 @@ export function OperationsScreen() {
       <Chips options={['Board', 'List', 'Documents', 'Closed'] as const} value={ui.ov} onChange={(v) => set('ov', v)} />
       <Row wrap>
         {can(...REQ.review) ? <Btn onPress={guard(REQ.review, assignWork)}>+ Assign</Btn> : null}
-        {ui.o48 === 1 ? <Pill on onPress={() => set('o48', 0)}>Over 48h ✕</Pill> : null}
-        {ui.ou === 1 ? <Pill on onPress={() => set('ou', 0)}>Unassigned ✕</Pill> : null}
+        {ui.o48 === 1 ? <Pill on onPress={() => set('o48', 0)}>Clear over-48h filter</Pill> : null}
+        {ui.ou === 1 ? <Pill on onPress={() => set('ou', 0)}>Clear unassigned filter</Pill> : null}
       </Row>
       {body()}
     </View>
