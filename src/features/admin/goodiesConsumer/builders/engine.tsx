@@ -1,9 +1,4 @@
-/* Build Your Own engine: builder state, validation, pricing, and actions. */
-   Differences from v24, all deliberate:
-   - ingredients reference Admin library asset IDs (`assetId`) instead of v24's name-matching (`phKey`);
-   - builders are configured in the Vendor Dashboard, so the seller screens are gone from this file;
-   - an ingredient can also carry a per-item limit (`max`), chosen by the vendor.
-   Builder config is stored under 'goodies-byo-v4', the same key the Vendor Dashboard writes in demo mode. */
+/** Goodies builder engine: validation, pricing, draft state and actions. */
 import React from 'react';
 import {View, Pressable} from 'react-native';
 import AsyncStorage from '@react-native-async-storage/async-storage';
