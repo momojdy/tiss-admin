@@ -26,8 +26,6 @@ function useReopen() {
 }
 
 /* ================================================================== */
-/* Reusable pieces                                                     */
-/* ================================================================== */
 
 /** Remaining-time bar: full at the start of the grant, empty at its end date. Permanent and finished grants have none. */
 export function GrantBar({ g }: { g: Grant }) {
@@ -41,7 +39,6 @@ export function GrantBar({ g }: { g: Grant }) {
   );
 }
 
-/** One grant: what, for what file, who gave it, time left. Tap opens the grant. */
 export function GrantRow({ g, showWho, onPress, last }: { g: Grant; showWho?: boolean; onPress?: () => void; last?: boolean }) {
   const { c } = useTheme();
   const body = (
@@ -65,7 +62,6 @@ export function GrantList({ grants, showWho, empty, onPress }: { grants: Grant[]
 }
 
 /* ================================================================== */
-/* Asking for access (any active staff member)                         */
 /* ================================================================== */
 
 /** Opens the request form for the person the interface follows. `preset` pre-selects a section or right. */
@@ -100,7 +96,6 @@ export function useRequestAccess() {
   };
 }
 
-/** "My access" card for the account sheet: running grants, recent requests, and the request button. */
 export function MyAccessCard() {
   useDb();
   expireStaff();
@@ -124,7 +119,6 @@ export function MyAccessCard() {
 }
 
 /* ================================================================== */
-/* Request drawer (decide)                                             */
 /* ================================================================== */
 
 export function RequestDrawer({ id, close }: { id: string; close: () => void }) {
@@ -189,7 +183,6 @@ export function RequestDrawer({ id, close }: { id: string; close: () => void }) 
 }
 
 /* ================================================================== */
-/* Grant drawer (see, revoke)                                          */
 /* ================================================================== */
 
 export function GrantDrawer({ id, close }: { id: string; close: () => void }) {
@@ -245,7 +238,6 @@ export function GrantDrawer({ id, close }: { id: string; close: () => void }) {
   );
 }
 
-/** Grants and requests of one person, newest first (used in the staff drawer). */
 export function StaffGrants({ who }: { who: string }) {
   const open = useOpen();
   return <GrantList grants={grantsOf(who)} empty="No approved grants yet." onPress={(g) => open('grant', g.id)} />;
