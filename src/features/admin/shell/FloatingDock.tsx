@@ -30,7 +30,7 @@ export function FloatingDock({ expanded, onExpandedChange }: { expanded: boolean
     { icon: '⚙', label: 'Settings', visible: secLv(7) > 0, run: () => openDrawer((close) => <SettingsSheet onClose={close} />) },
   ];
   return (
-    <View pointerEvents="box-none" style={{ position: 'absolute', right: 10, bottom: 22, alignItems: 'flex-end', zIndex: 10 }}>
+    <View pointerEvents="box-none" style={{ position: 'absolute', left: 10, bottom: 22, alignItems: 'flex-start', zIndex: 10 }}>
       <View style={{ backgroundColor: '#16191a', width: expanded ? 168 : 46, paddingVertical: expanded ? 9 : 0, paddingHorizontal: expanded ? 7 : 0, borderRadius: 23, alignItems: 'stretch', gap: expanded ? 3 : 0, shadowColor: '#000', shadowOpacity: 0.24, shadowRadius: 12, shadowOffset: { width: 0, height: 4 }, elevation: 9 }}>
         {actions.filter((action) => action.visible).map((action, index) => {
           if (!expanded && index !== 0) return null;
@@ -43,6 +43,12 @@ export function FloatingDock({ expanded, onExpandedChange }: { expanded: boolean
           );
         })}
       </View>
+      {(can(...REQ.content) || can(...REQ.permissions)) ? <View pointerEvents="box-none" style={{ position: 'absolute', right: 10, bottom: 22, zIndex: 11 }}>
+        <Pressable onPress={() => openDrawer((close) => <QuickCreateSheet onClose={close} />)} accessibilityRole="button" accessibilityLabel="Quick create" hitSlop={8}
+          style={{ width: 48, height: 48, borderRadius: 24, backgroundColor: '#16191a', alignItems: 'center', justifyContent: 'center', shadowColor: '#000', shadowOpacity: 0.24, shadowRadius: 12, shadowOffset: { width: 0, height: 4 }, elevation: 9 }}>
+          <Txt size={25} color="#fff">+</Txt>
+        </Pressable>
+      </View> : null}
     </View>
   );
 }
