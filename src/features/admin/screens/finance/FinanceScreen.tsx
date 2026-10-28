@@ -10,6 +10,7 @@ import { Card, CardTitle, Section } from '../../ui/Card';
 import { Btn, Chips, Pill, Row, SearchInput, SelectMenu, StatusPill } from '../../ui/Controls';
 import { useForm } from '../../ui/FormSheet';
 import { Heading } from '../../ui/Heading';
+import { AppIcon } from '../../ui/AppIcon';
 import { ListRows, Small, Table } from '../../ui/Lists';
 import { LineChart } from '../../ui/Charts';
 import { useToast } from '../../ui/Toast';
@@ -84,7 +85,7 @@ export function FinanceScreen() {
         rows={r.map((x) => ({ key: x.id, onPress: () => open('inv', x.id), cells: [x.id, <View key="f"><Txt size={9.5}>{x.f}</Txt><Small>{x.u}</Small></View>, <View key="d"><Txt size={9.5}>{x.d}</Txt><Small>{x.n}</Small></View>, <Txt key="a" size={9.5} weight={500}>{mny(x.a)}</Txt>, <StatusPill key="s" label={x.s} small />] }))} />
     ) : <Txt size={12} mut align="center" style={{ paddingVertical: 14 }}>No transactions match these filters.</Txt>;
   };
-  const right = (label: string, extra?: string) => (<View style={{ flexDirection: 'row', alignItems: 'center', gap: 6 }}>{extra ? <Txt size={10.1}>{extra}</Txt> : null}<StatusPill label={label} /></View>);
+  const right = (label: string, extra?: string) => (<View style={{ flexDirection: 'row', alignItems: 'center', gap: 6 }}>{extra === '›' ? <AppIcon name="chevron-right" size={12} /> : extra ? <Txt size={10.1}>{extra}</Txt> : null}<StatusPill label={label} /></View>);
 
   let body;
   if (ui.fv === 'Transactions') {
