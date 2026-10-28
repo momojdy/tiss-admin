@@ -1,4 +1,4 @@
-import { ReactNode } from 'react';
+import { ReactNode, useState } from 'react';
 import { Pressable, StyleProp, TextInput, View, ViewStyle } from 'react-native';
 import { useTheme } from '../theme/ThemeContext';
 import { toneColor, STATUS_TONE, Tone } from '../theme/tokens';
@@ -124,6 +124,27 @@ export function SearchInput({ value, onChangeText, placeholder }: { value: strin
     <TextInput value={value} onChangeText={onChangeText} placeholder={'⌕  ' + placeholder} placeholderTextColor={c.mut} accessibilityLabel={placeholder}
       autoCapitalize="none" autoCorrect={false} clearButtonMode="while-editing"
       style={{ flex: 1, backgroundColor: c.card, borderColor: c.bd, borderWidth: 1, borderRadius: 99, paddingVertical: 9, paddingHorizontal: 12, color: c.ink, fontSize: 14 }} />
+  );
+}
+
+export function SelectMenu<T extends string>({ label, options, value, onChange, placeholder }: { label?: string; options: readonly T[]; value: T; onChange: (value: T) => void; placeholder?: string }) {
+  const { c } = useTheme();
+  const [open, setOpen] = useState(false);
+  return (
+    <View style={{ marginBottom: 9 }}>
+      {label ? <Txt size={10} weight={500} style={{ marginBottom: 5 }}>{label}</Txt> : null}
+      <Pressable accessibilityRole="button" accessibilityLabel={label || placeholder || 'Choose option'} accessibilityState={{ expanded: open }} onPress={() => setOpen((current) => !current)}
+        style={{ minHeight: 40, borderWidth: 1, borderColor: c.bd, borderRadius: 10, backgroundColor: c.card, paddingHorizontal: 11, paddingVertical: 9, flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between' }}>
+        <Txt size={11.2} weight={500}>{value || placeholder || 'Select'}</Txt>
+        <Txt size={11} mut>{open ? '⌃' : '⌄'}</Txt>
+      </Pressable>
+      {open ? <View style={{ marginTop: 4, borderWidth: 1, borderColor: c.bd, borderRadius: 10, backgroundColor: c.card, overflow: 'hidden' }}>
+        {options.map((option) => <Pressable key={option} accessibilityRole="button" accessibilityState={{ selected: option === value }} onPress={() => { onChange(option); setOpen(false); }}
+          style={{ paddingHorizontal: 11, paddingVertical: 9, borderBottomWidth: 1, borderBottomColor: c.bd, backgroundColor: option === value ? c.inset : c.card }}>
+          <Txt size={10.8} weight={option === value ? 500 : 400}>{option}</Txt>
+        </Pressable>)}
+      </View> : null}
+    </View>
   );
 }
 

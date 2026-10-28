@@ -1,5 +1,5 @@
 import { useCallback, useEffect, useState } from 'react';
-import { Pressable, TextInput, View } from 'react-native';
+import { TextInput, View } from 'react-native';
 import { supabase } from '../../lib/supabase';
 import { saveCmsVersion } from '../../lib/adminBackend';
 import { ui } from '../../state/db';
@@ -11,7 +11,7 @@ import { useToast } from '../../ui/Toast';
 import { Card, Section } from '../../ui/Card';
 import { Heading } from '../../ui/Heading';
 import { ListRows } from '../../ui/Lists';
-import { OutlineBtn, Pill, StatusPill } from '../../ui/Controls';
+import { OutlineBtn, Pill, SelectMenu, StatusPill } from '../../ui/Controls';
 import { Txt } from '../../ui/Txt';
 import { CustomerPagePreview, type CustomerPreviewMode, type CustomerPreviewView } from './CustomerPagePreview';
 import { GoodiesEditor } from './GoodiesEditor';
@@ -284,17 +284,21 @@ export function CustomerPageEditorScreen() {
         <OutlineBtn onPress={startBlankDraft} disabled={!can(...REQ.content)}>Start blank draft</OutlineBtn>
       </View>
       <Heading title="Customer page editor" />
-      <Section title="Choose a customer feature" >
-        <Pressable accessibilityRole="button" onPress={() => setFeatureMenuOpen((open) => !open)} style={{ minHeight: 42, borderWidth: 1, borderColor: c.bd, borderRadius: 12, backgroundColor: c.card, paddingHorizontal: 12, paddingVertical: 10, flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between' }}>
-          <Txt size={12} weight={500}>{activeFeature?.label || 'Select a feature'}</Txt>
-          <Txt size={12} mut>{featureMenuOpen ? '⌃' : '⌄'}</Txt>
-        </Pressable>
-        {featureMenuOpen ? <View style={{ marginTop: 5, borderWidth: 1, borderColor: c.bd, borderRadius: 12, backgroundColor: c.card, overflow: 'hidden' }}>
-          {featureOptions.map((item) => <Pressable key={item.key} onPress={() => { setPageKey(item.key); setActualGoodiesPreview(item.label === 'Goodies'); setPageStack([]); setElementKey(''); setFeatureMenuOpen(false); }} style={{ paddingHorizontal: 12, paddingVertical: 10, backgroundColor: activePageKey === item.key ? c.inset : 'transparent', borderBottomWidth: 1, borderBottomColor: c.bd }}>
-            <Txt size={11.5} weight={activePageKey === item.key ? 500 : 400}>{item.label}</Txt>
-            <Txt size={9.5} mut>{String(previewPayload?.pages?.[item.key]?.title || item.key)}</Txt>
-          </Pressable>)}
-        </View> : null}
+      <Section title="Customer feature">
+        <SelectMenu
+          label="Feature"
+          options={featureOptions.map((item) => item.label)}
+          value={activeFeature?.label || featureOptions[0]?.label || 'Goodies'}
+          onChange={(label) => {
+            const item = featureOptions.find((option) => option.label === label);
+            if (!item) return;
+            setPageKey(item.key);
+            setActualGoodiesPreview(item.label === 'Goodies');
+            setPageStack([]);
+            setElementKey('');
+          }}
+          placeholder="Select a feature"
+        />
       </Section>
       {error ? <Card><Txt size={11.5} color={c.or}>{error}</Txt></Card> : null}
 

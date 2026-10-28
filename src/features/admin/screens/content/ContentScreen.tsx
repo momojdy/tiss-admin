@@ -1,5 +1,5 @@
 import { useCallback, useEffect, useState } from 'react';
-import { Pressable, TextInput, View } from 'react-native';
+import { TextInput, View } from 'react-native';
 import * as DocumentPicker from 'expo-document-picker';
 import { supabase } from '../../lib/supabase';
 import { db, ui, bump, useDb, dataMode } from '../../state/db';
@@ -12,7 +12,7 @@ import { archiveCmsAsset, archiveCmsVersion, listCmsAssets, publishCmsAsset, pub
 import { Section, Card } from '../../ui/Card';
 import { Heading } from '../../ui/Heading';
 import { ListRows } from '../../ui/Lists';
-import { Chips, OutlineBtn, Pill, StatusPill } from '../../ui/Controls';
+import { Chips, OutlineBtn, Pill, SelectMenu, StatusPill } from '../../ui/Controls';
 import { Field, useForm } from '../../ui/FormSheet';
 import { Txt } from '../../ui/Txt';
 import { useTheme } from '../../theme/ThemeContext';
@@ -42,8 +42,6 @@ export function ContentScreen() {
   const [assetSearch, setAssetSearch] = useState('');
   const [assetFeature, setAssetFeature] = useState('All features');
   const [assetPlacement, setAssetPlacement] = useState('All placements');
-  const [customerFeature, setCustomerFeature] = useState('Goodies');
-  const [featurePickerOpen, setFeaturePickerOpen] = useState(false);
 
   const reload = useCallback(async () => {
     setLoading(true);
@@ -287,21 +285,10 @@ export function ContentScreen() {
       <Heading title="Content Studio" />
       {error ? <Card><Txt size={12} color={c.or}>{error}</Txt><View style={{ marginTop: 8 }}><OutlineBtn onPress={() => { void reload(); }} disabled={loading}>Retry loading</OutlineBtn></View></Card> : null}
       {loading ? <Card><Txt size={11} mut>Loading CMS content and media…</Txt><View style={{ gap: 7, marginTop: 10 }}>{[0, 1, 2].map((key) => <View key={key} style={{ height: 12, borderRadius: 6, backgroundColor: c.inset, opacity: 0.8 }} />)}</View></Card> : null}
-      {activeSection === 'Overview' || activeSection === 'Editor' ? <Section title="Customer pages · live editor">
-        <Txt size={10.5} mut style={{ marginBottom: 8 }}>Choose a customer feature, then jump straight into the shared phone editor. Select Edit or Preview there to inspect the draft and published experience.</Txt>
-        <Pressable accessibilityRole="button" onPress={() => setFeaturePickerOpen((open) => !open)} style={{ minHeight: 42, borderWidth: 1, borderColor: c.bd, borderRadius: 12, backgroundColor: c.card, paddingHorizontal: 12, paddingVertical: 10, flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between' }}>
-          <Txt size={12} weight={500}>{customerFeature}</Txt><Txt size={12} mut>{featurePickerOpen ? '⌃' : '⌄'}</Txt>
-        </Pressable>
-        {featurePickerOpen ? <View style={{ marginTop: 4, borderWidth: 1, borderColor: c.bd, borderRadius: 12, backgroundColor: c.card, overflow: 'hidden' }}>
-          {['Goodies', 'Stayz', 'Flyz', 'Konsoliss', 'Woulib', 'Wallet', 'Frenzies', 'Wantiss home'].map((feature) => <Pressable key={feature} onPress={() => { setCustomerFeature(feature); setFeaturePickerOpen(false); }} style={{ paddingHorizontal: 12, paddingVertical: 9, borderBottomWidth: 1, borderBottomColor: c.bd, backgroundColor: customerFeature === feature ? c.inset : 'transparent' }}>
-            <Txt size={11.5} weight={customerFeature === feature ? 500 : 400}>{feature}</Txt>
-          </Pressable>)}
-        </View> : null}
-        <View style={{ marginTop: 9 }}>
-          <OutlineBtn primary onPress={() => go('editor', { editorFeature: customerFeature })}>{'Open ' + customerFeature + ' customer page in live editor ›'}</OutlineBtn>
-        </View>
-      </Section> : null}
-      <Chips options={contentSections} value={activeSection} onChange={changeSection} />
+      {activeSection === 'Overview' ? <View style={{ alignItems: 'flex-start', marginBottom: 9 }}>
+        <OutlineBtn onPress={() => go('editor')}>Open page editor ›</OutlineBtn>
+      </View> : null}
+      <SelectMenu label="Section" options={contentSections} value={activeSection} onChange={changeSection} />
 
       {activeSection === 'Overview' ? (
         <>

@@ -7,7 +7,7 @@ import { aud } from '../../state/db';
 import { useNav } from '../../shell/Nav';
 import { useOpen } from '../../overlays/registry';
 import { Card, CardTitle, Section } from '../../ui/Card';
-import { Btn, Chips, Pill, Row, SearchInput, StatusPill } from '../../ui/Controls';
+import { Btn, Chips, Pill, Row, SearchInput, SelectMenu, StatusPill } from '../../ui/Controls';
 import { useForm } from '../../ui/FormSheet';
 import { Heading } from '../../ui/Heading';
 import { ListRows, Small, Table } from '../../ui/Lists';
@@ -125,7 +125,7 @@ export function FinanceScreen() {
         { icon: '▥', value: mny(sum(ps)), label: 'Pending settlement', onPress: () => go('finance', { fv: 'Transactions', fs: 'Pending' }) },
         { icon: '◔', value: mny(sum(fl)), label: 'Failed or flagged', tag: fl.length + ' to review', tone: 'r', onPress: () => go('finance', { fv: 'Transactions', fs: 'Failed' }) },
       ]} />
-      <Chips options={['Transactions', 'Wallet', 'Refunds', 'Settlements', 'Payouts', 'Reconciliation'] as const} value={ui.fv} onChange={(v) => set('fv', v)} />
+      <SelectMenu label="Financial area" options={['Transactions', 'Wallet', 'Refunds', 'Settlements', 'Payouts', 'Reconciliation'] as const} value={ui.fv} onChange={(v) => set('fv', v)} />
       {body}
     </View>
   );
