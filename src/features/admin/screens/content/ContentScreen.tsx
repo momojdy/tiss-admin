@@ -188,7 +188,7 @@ export function ContentScreen() {
       && (assetPlacement === 'All placements' || group.placement === assetPlacement)
       && (!assetSearch.trim() || (asset.asset_key + ' ' + asset.content_type + ' ' + group.feature + ' ' + group.placement).toLowerCase().includes(assetSearch.trim().toLowerCase()));
   });
-  const contentSections = ['Overview', 'Media', 'Banners', 'Promotions', 'Announcements', 'Calendar', 'Approvals', 'History', 'CMS versions'] as const;
+  const contentSections = ['Overview', 'Media', 'Banners', 'Promotions', 'Announcements', 'Calendar', 'Approvals', 'History', 'Editor', 'CMS versions'] as const;
   type ContentSection = typeof contentSections[number];
   const activeSection: ContentSection = contentSections.includes(ui.cs as ContentSection) ? ui.cs as ContentSection : 'Overview';
   const changeSection = (section: ContentSection) => { ui.cs = section; bump(); };
