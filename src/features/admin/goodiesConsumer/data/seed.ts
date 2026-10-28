@@ -508,7 +508,6 @@ export const RAW_STORES: RawStore[] = [
 
 /* [itemId, percentOff, unitsLeft] */
 export const DEALS: [string, number, number][] = [['s1_0', 30, 4], ['s3_0', 20, 7], ['s2_0', 25, 7], ['s4_2', 15, 5]];
-/* Store s7 is closed in v24 */
 export const STX: Record<string, {open: number; h: string; nx: string; scheduled?: boolean; scheduledStartMinutes?: number}> = {s7: {open: 0, h: '9am–6pm', nx: 'Opens 9am tomorrow', scheduled: true, scheduledStartMinutes: 60}};
 export const PROMOS: Promo[] = [
   {c: 'GOODIES10', t: '10% off your order', d: '10% off the subtotal. Minimum spend $8.', min: 8, ty: 'pct', v: 10},
