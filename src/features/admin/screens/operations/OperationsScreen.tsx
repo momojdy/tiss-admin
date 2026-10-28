@@ -78,9 +78,9 @@ export function OperationsScreen() {
   return (
     <View>
       <Heading title="Operations Queue" kpis={[
-        { icon: '↗', value: w.length, label: 'Waiting for review', onPress: () => go('operations', { ov: 'Board', o48: 0, ou: 0 }) },
-        { icon: '↗', value: pendingDocs(), label: 'Documents to verify', onPress: () => go('operations', { ov: 'Documents' }) },
-        { icon: '▤', value: over48().length, label: 'Over 48 hours', tag: 'oldest ' + Math.max(0, ...w.map((a) => a.age)) + 'd', tone: 'r', onPress: () => go('operations', { ov: 'List', o48: 1 }) },
+        { icon: 'clock-alert', value: w.length, label: 'Waiting for review', onPress: () => go('operations', { ov: 'Board', o48: 0, ou: 0 }) },
+        { icon: 'file-pen', value: pendingDocs(), label: 'Documents to verify', onPress: () => go('operations', { ov: 'Documents' }) },
+        { icon: 'clipboard-list', value: over48().length, label: 'Over 48 hours', tag: 'oldest ' + Math.max(0, ...w.map((a) => a.age)) + 'd', tone: 'r', onPress: () => go('operations', { ov: 'List', o48: 1 }) },
       ]} />
       <Row><SearchInput value={ui.oq} onChangeText={(v) => set('oq', v)} placeholder="Search business, reviewer, service" /></Row>
       <Chips options={['Board', 'List', 'Documents', 'Closed'] as const} value={ui.ov} onChange={(v) => set('ov', v)} />
