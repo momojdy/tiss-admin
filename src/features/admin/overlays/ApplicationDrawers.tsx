@@ -17,10 +17,10 @@ import { hydrateAdminState } from '../lib/hydrateAdminState';
 import { drawers, useOpen } from './registry';
 import { useNav } from '../shell/Nav';
 import { STATUS_TONE } from '../theme/tokens';
+import { findById } from '../lib/findById';
 
 const NM = ['Business licence', 'Tax ID', 'Owner ID'];
 export const docsText = (a: { d: [string, string][] }) => a.d.filter((x) => x[1] === 'verified').length + ' of 3 docs';
-const find = (id: string) => db.APPS.find((x) => x.id === id);
 
 /** Shared by the application and document drawers: log, audit, close drawers, refresh, confirm. */
 function useFinish() {
@@ -33,7 +33,7 @@ function useFinish() {
 
 export function ApplicationDrawer({ id, close }: { id: string; close: () => void }) {
   useDb();
-  const a = find(id);
+  const a = findById(db.APPS, id);
   const form = useForm();
   const open = useOpen();
   const guard = useGuard();
@@ -165,7 +165,7 @@ export function ApplicationDrawer({ id, close }: { id: string; close: () => void
 export function DocumentDrawer({ id: v, close }: { id: string; close: () => void }) {
   useDb();
   const [id, i] = v.split(':');
-  const a = find(id)!;
+  const a = findById(db.APPS, id)!;
   const d = a.d[+i];
   const form = useForm();
   const open = useOpen();

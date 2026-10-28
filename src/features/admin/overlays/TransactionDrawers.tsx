@@ -14,12 +14,12 @@ import { useTheme } from '../theme/ThemeContext';
 import { shareCsv } from '../lib/csv';
 import { drawers, useOpen } from './registry';
 import { useNav } from '../shell/Nav';
+import { findById } from '../lib/findById';
 
-const find = (id: string) => db.INV.find((t) => t.id === id)!;
 
 function Receipt({ id }: { id: string }) {
   const { c } = useTheme();
-  const x = find(id);
+  const x = findById(db.INV, id)!;
   const pd = x.s === 'Completed';
   const note = x.s === 'Failed' ? 'This payment failed and was not charged.' : x.s === 'Refund pending' ? `A refund of ${mny(x.ref)} is pending. The original payment is unchanged.` : x.s === 'Pending' ? 'Awaiting settlement.' : '';
   const Cell = ({ k, v, sub }: { k: string; v: string; sub?: string }) => (
@@ -56,7 +56,7 @@ function Receipt({ id }: { id: string }) {
 
 export function TransactionDrawer({ id, close }: { id: string; close: () => void }) {
   useDb();
-  const x = find(id);
+  const x = findById(db.INV, id)!;
   const form = useForm();
   const guard = useGuard();
   const toast = useToast();
