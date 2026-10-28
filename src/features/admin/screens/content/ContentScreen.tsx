@@ -18,6 +18,8 @@ import { Txt } from '../../ui/Txt';
 import { useTheme } from '../../theme/ThemeContext';
 import { useToast } from '../../ui/Toast';
 
+const SAVE_PRIVATE_DRAFT_LABEL = 'Save private draft';
+
 type ContentRow = {
   id: string; content_key: string; locale: string; version: number; status: 'draft' | 'published' | 'archived';
   payload: Record<string, unknown>; updated_at: string;
@@ -199,7 +201,7 @@ export function ContentScreen() {
     form({
       title: 'Stage ' + kind + ' change',
       fields: [{ id: 'reason', label: 'Reason for change', type: 'textarea', required: true }],
-      buttons: [{ label: 'Save private draft', key: 'save', primary: true }],
+      buttons: [{ label: SAVE_PRIVATE_DRAFT_LABEL, key: 'save', primary: true }],
       onSubmit: async (_key, values) => {
         const reason = String(values.reason || '').trim();
         if (!reason) return 'Enter a reason for the audit trail.';
@@ -226,7 +228,7 @@ export function ContentScreen() {
         { id: 'from', label: 'Start date', type: 'date', value: banner.from },
         { id: 'to', label: 'End date', type: 'date', value: banner.to },
       ],
-      buttons: [{ label: 'Save private draft', key: 'save', primary: true }],
+      buttons: [{ label: SAVE_PRIVATE_DRAFT_LABEL, key: 'save', primary: true }],
       onSubmit: async (_key, values) => {
         const title = String(values.title || '').trim();
         if (!title) return 'Enter a title.';
@@ -252,7 +254,7 @@ export function ContentScreen() {
         { id: 'to', label: 'End date', type: 'date', required: true, value: promotion.to },
         { id: 'terms', label: 'Terms', type: 'textarea', value: promotion.terms || '' },
       ],
-      buttons: [{ label: 'Save private draft', key: 'save', primary: true }],
+      buttons: [{ label: SAVE_PRIVATE_DRAFT_LABEL, key: 'save', primary: true }],
       onSubmit: async (_key, values) => {
         if (String(values.to || '') < String(values.from || '')) return 'End date cannot be before start date.';
         try {
@@ -272,7 +274,7 @@ export function ContentScreen() {
         { id: 'audience', label: 'Audience', type: 'select', options: ['All customers', 'Businesses and providers', 'One service'], required: true, value: announcement.aud },
         { id: 'date', label: 'Schedule date', type: 'date', value: announcement.when },
       ],
-      buttons: [{ label: 'Save private draft', key: 'save', primary: true }],
+      buttons: [{ label: SAVE_PRIVATE_DRAFT_LABEL, key: 'save', primary: true }],
       onSubmit: async (_key, values) => {
         try {
           await saveCmsVersion({ key: 'admin.announcement.' + announcement.id, locale: 'en', payload: { id: announcement.id, type: 'announcement', title: values.title, audience: values.audience, schedule_date: values.date, proposed_only: true }, status: 'draft' });
