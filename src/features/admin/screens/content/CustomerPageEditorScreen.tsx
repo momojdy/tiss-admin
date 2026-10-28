@@ -51,7 +51,6 @@ export function CustomerPageEditorScreen() {
   const [selected, setSelected] = useState<ContentRow | null>(null);
   const [json, setJson] = useState('');
   const [pageKey, setPageKey] = useState('home');
-  const [featureMenuOpen, setFeatureMenuOpen] = useState(false);
   const [actualGoodiesPreview, setActualGoodiesPreview] = useState(false);
   const [pageStack, setPageStack] = useState<string[]>([]);
   const [elementKey, setElementKey] = useState('');

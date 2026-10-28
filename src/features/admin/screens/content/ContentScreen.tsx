@@ -22,6 +22,7 @@ type ContentRow = {
   id: string; content_key: string; locale: string; version: number; status: 'draft' | 'published' | 'archived';
   payload: Record<string, unknown>; updated_at: string;
 };
+const customerFeatures = ['Goodies', 'Stayz', 'Flyz', 'Konsoliss', 'Woulib', 'Wallet', 'Frenzies', 'Wantiss home'] as const;
 type AssetRow = {
   id: string; asset_key: string; storage_path: string; content_type: string; byte_size: number;
   status: 'draft' | 'published' | 'archived'; alt_text: Record<string, string>; updated_at: string;
@@ -42,6 +43,7 @@ export function ContentScreen() {
   const [assetSearch, setAssetSearch] = useState('');
   const [assetFeature, setAssetFeature] = useState('All features');
   const [assetPlacement, setAssetPlacement] = useState('All placements');
+  const [customerFeature, setCustomerFeature] = useState<(typeof customerFeatures)[number]>('Goodies');
 
   const reload = useCallback(async () => {
     setLoading(true);
@@ -393,6 +395,11 @@ export function ContentScreen() {
           </Section>
         </>
       ) : null}
+
+      {activeSection === 'Editor' ? <Section title="Customer page editor">
+        <SelectMenu label="Customer feature" options={customerFeatures} value={customerFeature} onChange={setCustomerFeature} />
+        <OutlineBtn primary onPress={() => go('editor', { editorFeature: customerFeature })}>Open {customerFeature} page editor ›</OutlineBtn>
+      </Section> : null}
 
       {activeSection === 'CMS versions' ? (
         <View style={{ flexDirection: 'row', flexWrap: 'wrap', gap: 8 }}>
