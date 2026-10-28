@@ -19,6 +19,7 @@ const DEFAULTS = {
   subtitle: '',
   logo_asset_key: LOGO_KEY,
   primary_color: '#BF008E',
+  link_color: '#9D315B',
   buyer_label: 'Buyer',
   business_label: 'B&P 2P',
   business_space_label: 'Business Space',
@@ -198,6 +199,7 @@ export function AuthPageEditor({ canEdit, canPublish }: { canEdit: boolean; canP
         {input('login_prompt', 'Existing-account prompt')}
         {input('login_link', 'Sign-in link text')}
         {input('primary_color', 'Primary accent color (hex, e.g. #BF008E)')}
+        {input('link_color', 'Link color (hex, e.g. #9D315B)')}
       </Section>
       <Section title="Draft and publishing">
         <Txt size={10.5} mut>{loading ? 'Loading current CMS version…' : row ? 'Current version: ' + row.version + ' · ' + row.status : 'No CMS version exists yet. Saving creates the first draft.'}</Txt>
