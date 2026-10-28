@@ -97,7 +97,7 @@ function AuthGate() {
     const t = setInterval(() => {
       if (!session.who) return;
       expireStaff();
-      if (idleExpired()) { leaveApp(); setNotice('You were signed out after 30 minutes of inactivity.'); }
+      if (idleExpired()) { leaveApp(); setNotice('You were signed out after 12 hours of inactivity.'); }
       else if (!sessionStillValid()) { leaveApp(); setNotice('Your access changed. Please sign in again.'); }
       else {
         void (async () => {
