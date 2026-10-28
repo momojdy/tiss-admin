@@ -106,13 +106,13 @@ export function OverviewScreen() {
           </View>
           <Txt size={9.5} mut>{ui.AR === 'Custom' ? customStart + ' – ' + customEnd : ui.AR + ' activity range'}</Txt>
         </View>
-        {!prototypeSnapshot && chart.available ? <LineChart vals={chart.vals} color={c.or} max={chart.max} labels={chart.labels} yLabels={chart.yLabels} /> : <Txt size={10.1} mut style={{ marginTop: 8 }}>{prototypeSnapshot ? 'Not connected yet' : 'Not available'}</Txt>}
+        {!prototypeSnapshot && chart.available ? <LineChart vals={chart.vals} color={c.or} max={chart.max} labels={chart.labels} yLabels={chart.yLabels} /> : <Txt size={10.1} mut style={{ marginTop: 8 }}>{prototypeSnapshot ? 'Not connected yet' : 'No transactions in this range'}</Txt>}
       </Section>
 
       <Section title="Needs attention" right={<Pill onPress={() => go('operations', { ov: 'List' })}>View queue ›</Pill>}>
         {attention.length === 0 ? (
           <Txt size={10.1} mut style={{ paddingVertical: 18, textAlign: 'center' }}>
-            {prototypeSnapshot ? 'Not connected yet' : 'Not available'}
+            {prototypeSnapshot ? 'Not connected yet' : 'Nothing urgent is waiting right now.'}
           </Txt>
         ) : (
           <View style={{ flexDirection: 'row', flexWrap: 'wrap', gap: 9 }}>
@@ -197,7 +197,7 @@ export function OverviewScreen() {
         rangeLabel={ui.AR === 'Custom' ? customStart + ' – ' + customEnd : ui.AR + ' selected range'}
         totalLabel={prototypeSnapshot ? '—' : chart.total.toLocaleString('en-US')}
         chartContent={<>
-          {!prototypeSnapshot && chart.available ? <LineChart vals={chart.vals} color={c.or} max={chart.max} labels={chart.labels} yLabels={chart.yLabels} /> : <Txt size={10.1} mut style={{ paddingVertical: 24, textAlign: 'center' }}>{prototypeSnapshot ? 'Not connected yet' : 'Not available'}</Txt>}
+          {!prototypeSnapshot && chart.available ? <LineChart vals={chart.vals} color={c.or} max={chart.max} labels={chart.labels} yLabels={chart.yLabels} /> : <Txt size={10.1} mut style={{ paddingVertical: 24, textAlign: 'center' }}>{prototypeSnapshot ? 'Not connected yet' : 'No transactions in this range'}</Txt>}
           <Txt size={10.1} mut>Service breakdown is unavailable until authorized live transaction data is connected.</Txt>
         </>}
       />
@@ -207,7 +207,7 @@ export function OverviewScreen() {
           {!prototypeSnapshot && db.STAFF.slice(0, 4).map((staff) => <Pill key={staff.n} onPress={() => go('people', { ps: 'Staff' })}>{staff.n} · {staff.st}</Pill>)}
           {!prototypeSnapshot && <Pill onPress={() => go('operations', { ou: 1 })}>{unassigned.length} unassigned</Pill>}
         </View>
-        <ListRows empty={prototypeSnapshot ? 'Not connected yet' : 'Not available'} rows={(prototypeSnapshot ? [] : db.AUD.slice(0, 4)).map((event, i) => ({
+        <ListRows empty={prototypeSnapshot ? 'Not connected yet' : 'No recent activity.'} rows={(prototypeSnapshot ? [] : db.AUD.slice(0, 4)).map((event, i) => ({
           key: String(i), main: event[0], sub: event[1], right: event[2],
         }))} />
       </Section>

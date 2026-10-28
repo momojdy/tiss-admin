@@ -59,7 +59,7 @@ export function BusinessDetailsScreen() {
       </View>
       {!id ? (
         <Section title={'Business records · ' + db.BIZ.length}>
-          <ListRows empty={dataMode === 'prototype' ? 'Not connected yet.' : 'Not available.'} rows={db.BIZ.map((row) => ({
+          <ListRows empty={dataMode === 'prototype' ? 'Not connected yet.' : 'No business records loaded.'} rows={db.BIZ.map((row) => ({
             key: row.id,
             main: row.name || 'Unnamed business',
             sub: [row.city, row.country].filter(Boolean).join(' · ') || 'Location not supplied',
@@ -99,7 +99,7 @@ export function BusinessDetailsScreen() {
             ) : <Txt size={10.1} color={c.or} style={{ marginTop: 6 }}>You have view-only or no ecosystem edit access.</Txt>}
           </Section>
           <Section title="Applications and review history">
-            <ListRows empty={dataMode === 'prototype' ? 'Not connected yet.' : 'Not available.'} rows={applications.map((row) => ({
+            <ListRows empty={dataMode === 'prototype' ? 'Not connected yet.' : 'No applications for this business.'} rows={applications.map((row) => ({
               key: row.id,
               main: row.id,
               sub: row.s + ' · ' + row.age + ' days waiting',

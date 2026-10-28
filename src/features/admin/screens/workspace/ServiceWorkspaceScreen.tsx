@@ -81,7 +81,7 @@ export function ServiceWorkspaceScreen() {
             }))} />
           </Section>
           <Section title="Recent activity" right={<Pill onPress={() => go('operations')}>Operations ›</Pill>}>
-            <ListRows empty={dataMode === 'live' ? 'Not available' : 'Not connected yet'} rows={sourceRows.slice(0, 4).map((row) => ({
+            <ListRows empty={dataMode === 'live' ? 'No service activity yet' : 'Not connected yet'} rows={sourceRows.slice(0, 4).map((row) => ({
               key: row.key, main: row.title, sub: row.sub, right: row.right, onPress: row.action,
             }))} />
           </Section>
@@ -94,7 +94,7 @@ export function ServiceWorkspaceScreen() {
           <Section title={serviceName + ' analytics'}>
             <Txt size={10.5} mut lh={1.4}>Not connected yet.</Txt>
             <View style={{ minHeight: 104, alignItems: 'center', justifyContent: 'center', marginTop: 8, backgroundColor: c.inset, borderRadius: 10 }}>
-              <Txt size={10.1} mut>Not available for this range.</Txt>
+              <Txt size={10.1} mut>No data for this range.</Txt>
             </View>
           </Section>
         </>
@@ -115,7 +115,7 @@ export function ServiceWorkspaceScreen() {
             <Pill onPress={() => { ui.wq = ''; bump(); }}>Clear</Pill>
           </Row>
           <Section title={moduleName + (dataMode === 'live' ? ' · ' + visibleRows.length : '')} right={<Pill onPress={() => { ui.wf = ui.wf === 'All' ? 'Pending' : 'All'; bump(); }}>{ui.wf === 'All' ? 'Filter pending' : 'Show all'}</Pill>}>
-            <ListRows empty={dataMode === 'live' ? 'Not available' : 'Not connected yet'} rows={visibleRows.map((row) => ({
+            <ListRows empty={dataMode === 'live' ? (query || ui.wf !== 'All' ? 'No records match this search or filter' : 'No records yet for this module') : 'Not connected yet'} rows={visibleRows.map((row) => ({
               key: row.key, main: row.title, sub: row.sub,
               right: <View style={{ alignItems: 'flex-end', gap: 3 }}><Txt size={9.5} color={row.right === 'Unassigned' ? c.or : c.ink}>{row.right}</Txt><Small>Open ›</Small></View>,
               onPress: row.action,
