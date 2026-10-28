@@ -73,7 +73,6 @@ export function ContentScreen() {
 
   const newContent = () => form({
     title: 'Create content version',
-    sub: 'Drafts are private. Publishing and archiving require separate server-side permissions.',
     fields: [
       { id: 'key', label: 'Content key', type: 'text', required: true, placeholder: 'goodies.home.hero' },
       { id: 'locale', label: 'Locale', type: 'select', options: ['en', 'fr', 'ht', 'es', 'zh'], value: 'en', required: true },
@@ -146,7 +145,7 @@ export function ContentScreen() {
 
   const cloneStatus = (row: ContentRow, status: 'draft' | 'published' | 'archived') => form({
     title: status[0].toUpperCase() + status.slice(1) + ' content',
-    sub: status === 'published' ? 'Only a draft can be published. The currently published version will be archived.' : status === 'archived' ? 'This version will no longer be delivered to customers or vendors.' : 'Save a new private draft version.',
+    sub: status === 'published' ? 'Only a draft can be published. The currently published version will be archived.' : status === 'archived' ? 'This version will no longer be delivered to customers or vendors.' : 'Save a new draft version.',
     fields: [{ id: 'reason', label: 'Reason', type: 'textarea', required: true }],
     buttons: [{ label: status === 'published' ? 'Publish version' : status === 'archived' ? 'Archive version' : 'Create draft', key: 'save', primary: true }],
     onSubmit: async (_key, values) => {
