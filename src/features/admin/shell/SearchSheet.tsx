@@ -7,6 +7,7 @@ import { useOpen } from '../overlays/registry';
 import { useOverlay } from '../ui/Overlay';
 import { DrawerBody } from '../ui/Overlay';
 import { ListRows } from '../ui/Lists';
+import { AppIcon } from '../ui/AppIcon';
 import { Txt } from '../ui/Txt';
 import { useTheme } from '../theme/ThemeContext';
 
@@ -43,7 +44,7 @@ export function SearchSheet({ onClose }: { onClose: () => void }) {
       {Object.entries(grouped).map(([group, rows]) => (
         <View key={group} style={{ marginBottom: 12 }}>
           <Txt size={10.1} mut style={{ marginBottom: 4 }}>{group}</Txt>
-          <ListRows rows={rows.map((row) => ({ key: row.key, main: row.title, sub: row.detail, right: '›', onPress: row.open }))} />
+          <ListRows rows={rows.map((row) => ({ key: row.key, main: row.title, sub: row.detail, right: <AppIcon name="chevron-right" size={12} />, onPress: row.open }))} />
         </View>
       ))}
     </DrawerBody>
