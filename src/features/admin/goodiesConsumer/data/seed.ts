@@ -5,55 +5,55 @@ export const CATS: Category[] = [
  {
   "id": "restaurants",
   "name": "Restaurant",
-  "emoji": "food",
+  "emoji": "🍽️",
   "home": true
  },
  {
   "id": "produce",
   "name": "Fresh produce",
-  "emoji": "produce",
+  "emoji": "🥭",
   "home": true
  },
  {
   "id": "beverages",
   "name": "Beverages",
-  "emoji": "beverage",
+  "emoji": "🥤",
   "home": true
  },
  {
   "id": "bakery",
   "name": "Bakery & desserts",
-  "emoji": "bakery",
+  "emoji": "🥐",
   "home": true
  },
  {
   "id": "meat",
   "name": "Meat & seafood",
-  "emoji": "meat",
+  "emoji": "🥩",
   "home": true
  },
  {
   "id": "groceries",
   "name": "Groceries",
-  "emoji": "groceries",
+  "emoji": "🛒",
   "home": true
  },
  {
   "id": "haitian",
   "name": "Haitian products",
-  "emoji": "haiti",
+  "emoji": "🇭🇹",
   "home": true
  },
  {
   "id": "care",
   "name": "Personal care",
-  "emoji": "care",
+  "emoji": "🧴",
   "home": true
  },
  {
   "id": "drugstore",
   "name": "Drugstore",
-  "emoji": "medicine",
+  "emoji": "💊",
   "home": true
  }
 ];
