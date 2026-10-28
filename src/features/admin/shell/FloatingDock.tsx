@@ -1,18 +1,14 @@
 import { useEffect } from 'react';
 import { Pressable, View } from 'react-native';
-import { useNav } from './Nav';
-import { can, secLv } from '../state/access';
+import { can } from '../state/access';
 import { REQ } from '../state/requirements';
 import { useOverlay } from '../ui/Overlay';
 import { Txt } from '../ui/Txt';
 import { useExport } from './useExport';
 import { SearchSheet } from './SearchSheet';
 import { QuickCreateSheet } from './QuickCreateSheet';
-import { SettingsSheet } from './SettingsSheet';
-import { NotificationsSheet } from './NotificationsSheet';
 
 export function FloatingDock({ expanded, onExpandedChange }: { expanded: boolean; onExpandedChange: (value: boolean) => void }) {
-  const { go } = useNav();
   const { openDrawer } = useOverlay();
   const exportCsv = useExport();
   useEffect(() => {
@@ -24,10 +20,7 @@ export function FloatingDock({ expanded, onExpandedChange }: { expanded: boolean
     { icon: expanded ? '‹' : '›', label: 'Show / hide menu', visible: true, run: () => onExpandedChange(!expanded) },
     { icon: '⌕', label: 'Search', visible: true, run: () => openDrawer((close) => <SearchSheet onClose={close} />) },
     { icon: '+', label: 'Quick create', visible: can(...REQ.content) || can(...REQ.permissions), run: () => openDrawer((close) => <QuickCreateSheet onClose={close} />) },
-    { icon: '♢', label: 'Alerts', visible: true, run: () => openDrawer((close) => <NotificationsSheet onClose={close} />) },
-    { icon: '▤', label: 'Operations', visible: secLv(1) > 0, run: () => go('operations') },
     { icon: '⇪', label: 'Export', visible: can(...REQ.export), run: () => { void exportCsv(); } },
-    { icon: '⚙', label: 'Settings', visible: can(...REQ.settings), run: () => openDrawer((close) => <SettingsSheet onClose={close} />) },
   ];
   return (
     <View pointerEvents="box-none" style={{ position: 'absolute', right: 10, bottom: 22, alignItems: 'flex-end', zIndex: 10, flexDirection: expanded ? 'column' : 'row', gap: expanded ? 0 : 8 }}>
