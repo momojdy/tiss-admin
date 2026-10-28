@@ -1,4 +1,3 @@
-import { ReactNode } from 'react';
 import { ReactNode, useState } from 'react';
 import { Pressable, TextInput, TextInputProps, View } from 'react-native';
 import { useTheme } from '../theme/ThemeContext';
