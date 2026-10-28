@@ -54,7 +54,6 @@ const defaults: Record<string, SettingField[]> = {
 const categories = [
   ['Appearance', 'Table density and landing page'],
   ['Platform', 'Default language, display currency and supported regions'],
-  ['Ecosystem', 'Service availability and service-level configuration'],
   ['Notifications', 'Push, email and after-hours critical alerts'],
   ['Documents and requirements', 'Expiry warnings and second-review rules'],
   ['Workflows', 'Review targets and application assignment'],
