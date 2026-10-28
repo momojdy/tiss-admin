@@ -71,7 +71,7 @@ export function AuthPageEditor({ canEdit, canPublish }: { canEdit: boolean; canP
       const matching = usableAssets.filter((asset) => asset.asset_key === String(next.logo_asset_key || LOGO_KEY) && asset.status !== 'archived')
         .sort((a, b) => Number(b.status === 'published') - Number(a.status === 'published'))[0];
       setLogoAssetId(matching?.status === 'draft' ? matching.id : '');
-      if (matching?.status === 'published') {
+      if (matching) {
         const { data: signed, error: signedError } = await supabase.storage.from('wantiss-cms-assets').createSignedUrl(matching.storage_path, 3600);
         setLogoPreview(!signedError && signed?.signedUrl ? signed.signedUrl : '');
       } else setLogoPreview('');
@@ -172,7 +172,7 @@ export function AuthPageEditor({ canEdit, canPublish }: { canEdit: boolean; canP
       {notice ? <Card><Txt size={11} color={c.ink}>{notice}</Txt></Card> : null}
       <Section title="Logo and header">
         <View style={{ flexDirection: 'row', alignItems: 'center', gap: 12, flexWrap: 'wrap' }}>
-          {logoPreview ? <Image source={{ uri: logoPreview }} resizeMode="contain" style={{ width: 100, height: 70, borderRadius: 8 }} /> : <View style={{ width: 100, height: 70, borderRadius: 8, backgroundColor: c.bg, alignItems: 'center', justifyContent: 'center' }}><Txt size={10} mut>No custom logo</Txt></View>}
+          {logoPreview ? <Image source={{ uri: logoPreview }} resizeMode="contain" style={{ width: 100, height: 70, borderRadius: 8 }} /> : <View style={{ width: 100, height: 70, borderRadius: 8, backgroundColor: c.inset, alignItems: 'center', justifyContent: 'center' }}><Txt size={10} mut>No custom logo</Txt></View>}
           <View style={{ flex: 1, minWidth: 160, gap: 6 }}>
             <Txt size={10.5} mut>Logo asset key: {String(draft.logo_asset_key || LOGO_KEY)}</Txt>
             <OutlineBtn onPress={() => { void uploadLogo(); }} disabled={!canEdit || !!busy}>{busy === 'logo' ? 'Uploading…' : 'Choose logo from photo library'}</OutlineBtn>
@@ -204,7 +204,7 @@ export function AuthPageEditor({ canEdit, canPublish }: { canEdit: boolean; canP
         <View style={{ flexDirection: 'row', flexWrap: 'wrap', gap: 8, marginTop: 8 }}>
           <OutlineBtn onPress={() => { void load(); }} disabled={loading || !!busy}>Reload</OutlineBtn>
           <OutlineBtn primary onPress={() => { void save(); }} disabled={!canEdit || !!busy || loading}>{busy === 'save' ? 'Saving…' : 'Save private draft'}</OutlineBtn>
-          <OutlineBtn onPress={() => { void publish(); }} disabled={!row || row.status !== 'draft' || !canPublish || !!busy || loading || dirty}>{busy === 'publish' ? 'Publishing…' : 'Publish page'}</OutlineBtn>
+          <OutlineBtn onPress={() => { void publish(); }} disabled={!row || row.status !== 'draft' || !canPublish || !!busy || loading || dirty || !!logoAssetId}>{busy === 'publish' ? 'Publishing…' : 'Publish page'}</OutlineBtn>
         </View>
         {dirty ? <Txt size={10} color={c.or} style={{ marginTop: 7 }}>You have unsaved edits. Save a draft before publishing.</Txt> : null}
       </Section>
