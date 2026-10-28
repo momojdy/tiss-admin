@@ -54,7 +54,7 @@ export function AuthPageEditor({ canEdit, canPublish }: { canEdit: boolean; canP
   const [applePreview, setApplePreview] = useState('');
   const [baseline, setBaseline] = useState('');
   const [loading, setLoading] = useState(true);
-  const [busy, setBusy] = useState<'save' | 'publish' | 'logo' | 'publish-logo' | ''>('');
+  const [busy, setBusy] = useState<'save' | 'publish' | 'logo' | 'google' | 'apple' | 'publish-logo' | 'publish-google' | 'publish-apple' | ''>('');
   const [error, setError] = useState('');
   const [notice, setNotice] = useState('');
 
