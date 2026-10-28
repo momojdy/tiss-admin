@@ -201,18 +201,17 @@ export function AuthFlow({ notice, noticeBad, onDone }: Props) {
               <View style={{ marginTop: 14, padding: 14, borderRadius: 14, borderWidth: 1, borderColor: c.bd, backgroundColor: c.card }}>
                 <Txt size={13} style={{ textAlign: 'center', marginBottom: 8 }}>Don't have an account yet?</Txt>
                 <SecondaryButton label="Create your account" onPress={() => { setView('create'); message(''); }} />
-                <Txt size={11} mut lh={1.4} style={{ marginTop: 8, textAlign: 'center' }}>A Super Admin invitation is required to create a staff account.</Txt>
               </View>
             </>}
             {view === 'create' && <>
               <Txt size={22.1} lh={1.08}>{'Create your\nstaff account'}</Txt>
               <Txt size={13} mut lh={1.45} style={{ marginTop: 6, marginBottom: 14 }}>Staff accounts are invitation-only. Ask a Super Admin.</Txt>
-              <NoticeBox>For security, account creation is completed from a verified Supabase invitation link. This screen does not accept an unverified invitation code or create a local-only account.</NoticeBox>
+              <NoticeBox>Use a verified Supabase invitation link to activate staff access.</NoticeBox>
               <PrimaryButton label="Back to sign in" onPress={() => { setView('in'); message(''); }} />
             </>}
             {view === 'forgot' && <>
               <Txt size={22.1} lh={1.08}>{'Reset your\npassword'}</Txt>
-              <Txt size={13} mut style={{ marginTop: 6, marginBottom: 14 }}>We will send a secure reset link to your work email.</Txt>
+
               <AuthField label="Work email" value={email} onChangeText={setEmail} error={undefined} keyboardType="email-address" autoCapitalize="none" />
               {noticeText ? <NoticeBox bad={bad}>{noticeText}</NoticeBox> : null}
               <PrimaryButton label="Send reset email" onPress={sendReset} busy={busy} busyLabel="Sending…" />
@@ -231,7 +230,6 @@ export function AuthFlow({ notice, noticeBad, onDone }: Props) {
             </>}
             {view === 'invite' && <>
               <Txt size={22.1} lh={1.08}>{'Accept your\ninvitation'}</Txt>
-              <Txt size={13} mut style={{ marginTop: 6, marginBottom: 14 }}></Txt>
               {noticeText ? <NoticeBox bad={bad}>{noticeText}</NoticeBox> : null}
               <AuthField label="New password" value={password} onChangeText={setPassword} error={undefined} password textContentType="newPassword" />
               <PasswordChecklist value={password} />
