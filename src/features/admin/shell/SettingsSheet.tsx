@@ -110,7 +110,7 @@ export function SettingsSheet({ onClose }: { onClose: () => void }) {
     }
     form({
       title: name + ' settings',
-      sub: personal.has(name) ? 'These preferences apply to this admin on this device.' : 'Saved preferences are local to this device until a server-backed settings endpoint is implemented. They do not change production platform behavior.',
+      sub: personal.has(name) ? 'Personal preference saved on this device.' : 'Local-only settings; production behavior is unchanged.',
       fields,
       buttons: [{ label: 'Save settings', key: 'save', primary: true }],
       onSubmit: async (_key, values) => {
@@ -123,7 +123,7 @@ export function SettingsSheet({ onClose }: { onClose: () => void }) {
         }
         aud('Settings changed · ' + name, session.view);
         bump();
-        toast(personal.has(name) ? name + ' preferences saved on this device.' : name + ' saved locally only; production behavior is unchanged.');
+        toast(personal.has(name) ? 'Saved on this device.' : 'Saved locally; production unchanged.');
       },
     });
   };
@@ -137,12 +137,10 @@ export function SettingsSheet({ onClose }: { onClose: () => void }) {
       {selected ? (
         <Card style={{ marginTop: 10 }}>
           <CardTitle title={selected} />
-          <Txt size={10.1} mut lh={1.4}>{personal.has(selected) ? 'Personal preferences are stored on this device.' : 'Platform settings remain local until a server endpoint is connected.'}</Txt>
           <View style={{ flexDirection: 'row', flexWrap: 'wrap', marginTop: 10, gap: 6 }}>
             <OutlineBtn primary onPress={() => editCategory(selected)}>Edit settings</OutlineBtn>
             {destinations[selected] ? <OutlineBtn onPress={() => { const destination = destinations[selected]; closeAll(); destination?.(); }}>Open related workspace</OutlineBtn> : null}
           </View>
-          {!personal.has(selected) ? <Txt size={9.5} mut style={{ marginTop: 8 }}>No production setting will be changed by saving this form.</Txt> : null}
         </Card>
       ) : null}
       {!loaded ? <Txt size={9.5} mut style={{ marginTop: 10 }}>Loading saved preferences…</Txt> : null}
