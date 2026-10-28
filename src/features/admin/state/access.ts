@@ -13,6 +13,7 @@ export const session = {
   email: null as string | null,
   role: null as string | null,
   status: null as string | null,
+  avatarUrl: null as string | null,
 };
 
 export const RIGHTS = db.RIGHTS;
