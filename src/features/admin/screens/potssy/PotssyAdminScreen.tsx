@@ -37,9 +37,9 @@ export function PotssyAdminScreen() {
         <Txt size={10.1} mut>Potssy · Workspace</Txt>
       </View>
       <Heading title={'Potssy ' + moduleName} kpis={[
-        { icon: '▥', value: '—', label: 'Campaigns' },
-        { icon: '▤', value: '—', label: 'Tickets and entries' },
-        { icon: '◷', value: '—', label: 'Claims awaiting review' },
+        { icon: 'chart-no-axes', value: '—', label: 'Campaigns' },
+        { icon: 'clipboard-list', value: '—', label: 'Tickets and entries' },
+        { icon: 'clock-alert', value: '—', label: 'Claims awaiting review' },
       ]} />
       <View style={{ flexDirection: 'row', flexWrap: 'wrap', gap: 6, marginBottom: 8 }}>
         <SelectMenu label="Potssy section" options={POTSSY_MODULES} value={moduleName} onChange={setModule} />
