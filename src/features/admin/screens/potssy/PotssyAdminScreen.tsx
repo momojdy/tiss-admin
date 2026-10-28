@@ -4,6 +4,7 @@ import { useNav } from '../../shell/Nav';
 import { useTheme } from '../../theme/ThemeContext';
 import { Card, Section } from '../../ui/Card';
 import { Heading } from '../../ui/Heading';
+import { AppIcon } from '../../ui/AppIcon';
 import { OutlineBtn, Pill, SelectMenu } from '../../ui/Controls';
 import { ListRows } from '../../ui/Lists';
 import { Txt } from '../../ui/Txt';
@@ -33,7 +34,7 @@ export function PotssyAdminScreen() {
   return (
     <View>
       <View style={{ flexDirection: 'row', alignItems: 'center', gap: 8, marginBottom: 4 }}>
-        <Pill onPress={() => go('ecosystem')}>‹ Ecosystem</Pill>
+        <Pill onPress={() => go('ecosystem')}><View style={{ flexDirection: 'row', alignItems: 'center', gap: 4 }}><AppIcon name="arrow-left" size={12} />Ecosystem</View></Pill>
         <Txt size={10.1} mut>Potssy · Workspace</Txt>
       </View>
       <Heading title={'Potssy ' + moduleName} kpis={[
@@ -51,9 +52,9 @@ export function PotssyAdminScreen() {
       {moduleName === 'Overview' ? (
         <Section title="Available platform routes">
           <ListRows rows={[
-            { key: 'operations', main: 'Operations', sub: 'Review available queues and support records', right: 'Open ›', onPress: () => go('operations') },
-            { key: 'finance', main: 'Finance', sub: 'Authorized platform transaction records only', right: 'Open ›', onPress: () => go('finance') },
-            { key: 'people', main: 'People and access', sub: 'Account and staff permissions', right: 'Open ›', onPress: () => go('people') },
+            { key: 'operations', main: 'Operations', sub: 'Review available queues and support records', right: <View style={{ flexDirection: 'row', alignItems: 'center', gap: 4 }}>Open<AppIcon name="chevron-right" size={12} /></View>, onPress: () => go('operations') },
+            { key: 'finance', main: 'Finance', sub: 'Authorized platform transaction records only', right: <View style={{ flexDirection: 'row', alignItems: 'center', gap: 4 }}>Open<AppIcon name="chevron-right" size={12} /></View>, onPress: () => go('finance') },
+            { key: 'people', main: 'People and access', sub: 'Account and staff permissions', right: <View style={{ flexDirection: 'row', alignItems: 'center', gap: 4 }}>Open<AppIcon name="chevron-right" size={12} /></View>, onPress: () => go('people') },
           ]} />
         </Section>
       ) : null}
