@@ -24,6 +24,7 @@ export function FloatingDock({ expanded, onExpandedChange }: { expanded: boolean
   }, [expanded, onExpandedChange]);
   const actions = [
     { icon: 'menu', label: 'Show / hide menu', visible: true, run: () => onExpandedChange(!expanded) },
+    { icon: 'check-circle', label: 'Quick Start', visible: secLv(0) > 0, run: () => go('overview') },
     { icon: 'search', label: 'Search', visible: true, run: () => openDrawer((close) => <SearchSheet onClose={close} />) },
     { icon: 'clipboard-list', label: 'Review queue', visible: secLv(1) > 0, run: () => go('operations', { ov: 'List' }) },
     { icon: 'history', label: 'Audit log', visible: secLv(6) > 0, run: () => go('people', { ps: 'Audit log' }) },
