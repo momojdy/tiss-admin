@@ -187,7 +187,7 @@ function OptTile({b, g, it}: {b: Builder; g: any; it: BItem}) {
         <T size={12.5} weight="700" align="center" style={{lineHeight: 14}}>{it.name}</T>
         <T size={11.5} color={on ? th.brd : th.mut} weight={on ? '700' : undefined}>{lab}</T>
       </Pressable>
-      {on ? <View style={{position: 'absolute', top: -4, right: -4, minWidth: 22, height: 22, paddingHorizontal: 5, borderRadius: 11, backgroundColor: th.br, alignItems: 'center', justifyContent: 'center', borderWidth: 2, borderColor: th.bg}}><T size={12} weight="800" color="#fff">{q > 1 ? '×' + q : '✓'}</T></View> : null}
+      {on ? <View style={{position: 'absolute', top: -4, right: -4, minWidth: 22, height: 22, paddingHorizontal: 5, borderRadius: 11, backgroundColor: th.br, alignItems: 'center', justifyContent: 'center', borderWidth: 2, borderColor: th.bg}}>{q > 1 ? <T size={12} weight="800" color="#fff">×{q}</T> : <Icon name="check" size={12} color="#fff" />}</View> : null}
       {on && g.kind === 'many' ? <Pressable accessibilityLabel={'Remove one ' + it.name} onPress={() => bzSub(g.id, it.id)} style={{position: 'absolute', top: -6, left: -6, width: 30, height: 30, borderRadius: 15, backgroundColor: th.bg, borderWidth: 2, borderColor: th.br, alignItems: 'center', justifyContent: 'center'}}><T size={18} weight="800">−</T></Pressable> : null}
     </View>
   );
