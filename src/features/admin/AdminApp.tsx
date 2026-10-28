@@ -86,7 +86,7 @@ function AuthGate() {
     void restore();
     const { data: authListener } = supabase.auth.onAuthStateChange((event) => {
       if (event === 'SIGNED_IN') void Promise.resolve().then(restore);
-      if (event === 'SIGNED_OUT' && session.who) { clearAppSession(); setNotice('Your Supabase session ended. Please sign in again.'); }
+      if (event === 'SIGNED_OUT' && session.who) { clearAppSession(); setNotice('Your sign-in expired. Please sign in again.'); }
     });
     const t = setInterval(() => {
       if (!session.who) return;
@@ -98,7 +98,7 @@ function AuthGate() {
           const { data: auth, error: authError } = await supabase.auth.getUser();
           if (authError) {
             const reason = authError.message || '';
-            if (/refresh token|invalid jwt|jwt expired|session not found|not authenticated/i.test(reason)) {
+            if (/refresh token|invalid jwt|jwt expired|session not found|session missing|not authenticated/i.test(reason)) {
               leaveApp();
               setNotice('Your sign-in expired. Please sign in again.');
             }
