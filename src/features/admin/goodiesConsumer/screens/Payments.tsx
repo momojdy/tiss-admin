@@ -151,7 +151,7 @@ export function LivePayments() {
         </View>
       ) : (
         <Card>
-          <Row style={{gap: 10}}><Icon name="walletEmpty" size={28} color={th.ink} /><View style={{flex: 1}}><T weight="800">No Wantiss wallet found</T></View></Row>
+          <Row style={{gap: 10}}><Icon name="wallet" size={28} color={th.ink} /><View style={{flex: 1}}><T weight="800">No Wantiss wallet found</T></View></Row>
           <T size={13} color={th.mut} style={{marginVertical: 6, lineHeight: 19}}>You haven’t created a wallet, or it was deleted. Create one to pay with it and to receive refunds. Your balance starts at {money(0)}.</T>
           <Cta small label={creating ? 'Creating…' : 'Create wallet'} disabled={creating} onPress={() => {void makeWallet();}} />
         </Card>
