@@ -112,7 +112,7 @@ export function AnalyticsScreen() {
         <View style={{ flexDirection: 'row', flexWrap: 'wrap', gap: 6, marginBottom: 8, alignItems: 'center' }}>
           <Pill on={serviceFilter === 'All'} onPress={() => updateService('All')}>All services</Pill>
           {serviceOptions.map((service) => <Pill key={service} on={serviceFilter === service} onPress={() => updateService(service)}>{service}</Pill>)}
-          <Pill onPress={() => { void exportCsv(); }}>⇩ Export CSV</Pill>
+          <Pill onPress={() => { void exportCsv(); }}><View style={{ flexDirection: "row", alignItems: "center", gap: 4 }}><AppIcon name="download" size={12} />Export CSV</View></Pill>
         </View>
         <Txt size={21} weight={500}>{!prototypeSnapshot && chart.available ? chart.total.toLocaleString('en-US') : '—'} <Txt size={10.1} mut>transactions · {serviceFilter === 'All' ? 'all services' : serviceFilter}</Txt></Txt>
         <Txt size={9.5} mut style={{ marginTop: 4 }}>{range === 'Custom' ? customStart + ' – ' + customEnd : range + ' range'} · authorized transaction timestamps only</Txt>
