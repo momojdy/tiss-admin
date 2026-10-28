@@ -158,7 +158,7 @@ function CustomPlate({b}: {b: Builder}) {
   const names: string[] = []; b.groups.forEach(g => units(g, BD).forEach(id => {const it = itemOf(g, id); if (it) names.push(it.name);}));
   return (
     <View style={{alignItems: 'center', paddingHorizontal: 16}}>
-      <Icon name={b.emoji} size={84} color={th.ink} />
+      <Icon name={b.emoji} size={84} color="#F5F5F5" />
       <View style={{flexDirection: 'row', flexWrap: 'wrap', gap: 6, justifyContent: 'center', marginTop: 8}}>{(names.length ? names : ['Pick your options below']).map((x, i) => <View key={i} style={{backgroundColor: 'rgba(255,255,255,.12)', borderRadius: 14, paddingHorizontal: 10, paddingVertical: 5}}><T size={12.5} color="#F5F5F5">{x}</T></View>)}</View>
     </View>
   );
