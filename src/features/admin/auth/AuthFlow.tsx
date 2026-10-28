@@ -8,12 +8,12 @@ import { Pill } from '../ui/Controls';
 import { Txt } from '../ui/Txt';
 import { AuthField, BigBadge, LinkText, NoticeBox, PasswordChecklist, PrimaryButton, SecondaryButton } from './AuthFields';
 import { emailOk, passwordError } from './authLogic';
-
-const INVITATION_VERIFIED_MESSAGE = INVITATION_VERIFIED_MESSAGE;
 import { supabase } from '../lib/supabase';
 import { session, setServerGrants } from '../state/access';
 import { bump } from '../state/db';
 import { hydrateAdminState } from '../lib/hydrateAdminState';
+
+const INVITATION_VERIFIED_MESSAGE = 'Invitation verified. Set a password to activate your staff access.';
 
 type View_ = 'in' | 'forgot' | 'sent' | 'reset' | 'invite' | 'blocked' | 'create';
 interface Props { notice?: string; noticeBad?: boolean; onDone: () => void }
