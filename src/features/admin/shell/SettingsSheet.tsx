@@ -123,6 +123,10 @@ export function SettingsSheet({ onClose }: { onClose: () => void }) {
         } catch {
           return 'Settings could not be saved on this device.';
         }
+        if (name === 'Appearance') {
+          const nextMode = String(values.mode || 'Light').toLowerCase() as ThemeMode;
+          setMode(nextMode === 'dark' || nextMode === 'system' ? nextMode : 'light');
+        }
         aud('Settings changed · ' + name, session.view);
         bump();
         toast(personal.has(name) ? 'Saved on this device.' : 'Saved locally; production unchanged.');
