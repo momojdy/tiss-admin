@@ -10,6 +10,7 @@ import { useForm } from '../../ui/FormSheet';
 import { Heading } from '../../ui/Heading';
 import { Small, Table } from '../../ui/Lists';
 import { Txt } from '../../ui/Txt';
+import { AppIcon } from '../../ui/AppIcon';
 import { useToast } from '../../ui/Toast';
 import { useTheme } from '../../theme/ThemeContext';
 import { useExport } from '../../shell/useExport';
@@ -70,7 +71,7 @@ export function EcosystemScreen() {
           <Pressable key={s[0]} onPress={() => go('hub', { hub: s[0] })} style={{ width: '48.4%' }} accessibilityRole="button">
             <View style={{ backgroundColor: c.card, borderColor: c.bd, borderWidth: 1, borderRadius: 20, padding: 10, shadowColor: '#3c321e', shadowOpacity: 0.06, shadowRadius: 10, shadowOffset: { width: 0, height: 8 }, elevation: 2 }}>
               <Pressable onPress={() => { s[6] = s[6] ? 0 : 1; bump(); }} hitSlop={8} accessibilityLabel="Favourite" style={{ position: 'absolute', right: 10, top: 10, width: 19, height: 19, borderRadius: 10, borderWidth: s[6] ? 0 : 1, borderColor: c.bd, backgroundColor: s[6] ? c.ye : 'transparent', alignItems: 'center', justifyContent: 'center', zIndex: 2 }}>
-                <Txt size={10.1}>{s[6] ? '★' : '☆'}</Txt>
+                <AppIcon name={s[6] ? 'star-filled' : 'star'} size={11} color={s[6] ? '#302814' : c.ink} />
               </Pressable>
               <View style={{ width: 28, height: 28, borderRadius: 14, backgroundColor: s[7], alignItems: 'center', justifyContent: 'center', marginBottom: 12 }}><Txt size={10.1} color={s[0] === 'Konsoliss' ? '#fff' : '#333'}>{s[0][0]}</Txt></View>
               <Txt size={12.3} weight={500}>{s[0]}</Txt>
@@ -95,9 +96,9 @@ export function EcosystemScreen() {
   return (
     <View>
       <Heading title="Ecosystem Services" kpis={[
-        { icon: '▥', value: db.SVC.length, label: 'Services in directory' },
-        { icon: '♛', value: db.BIZ.length, label: 'Business records', onPress: () => go('business') },
-        { icon: '▤', value: db.APPS.filter((app) => app.st < 3).length, label: 'Applications awaiting review', onPress: () => go('operations') },
+        { icon: 'building-2', value: db.SVC.length, label: 'Services in directory' },
+        { icon: 'users', value: db.BIZ.length, label: 'Business records', onPress: () => go('business') },
+        { icon: 'wallet', value: db.APPS.filter((app) => app.st < 3).length, label: 'Applications awaiting review', onPress: () => go('operations') },
       ]} />
       <Row><SearchInput value={ui.eq} onChangeText={(v) => set('eq', v)} placeholder="Search services" /></Row>
       <Chips options={['All', 'Active', 'Pre-order', 'Attention', 'Favorites'] as const} value={ui.ec} onChange={(v) => set('ec', v)} />
