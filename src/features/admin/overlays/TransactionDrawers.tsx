@@ -17,7 +17,6 @@ import { useNav } from '../shell/Nav';
 
 const find = (id: string) => db.INV.find((t) => t.id === id)!;
 
-/** `.pp` receipt block shown at the top of a transaction drawer. */
 function Receipt({ id }: { id: string }) {
   const { c } = useTheme();
   const x = find(id);
@@ -108,7 +107,6 @@ export function TransactionDrawer({ id, close }: { id: string; close: () => void
   );
 }
 
-/** Settlement, payout and reconciliation detail drawers. */
 function RecordDrawer({ title, status, rows, extra, actions, close }: { title: string; status: string; rows: [string, string][]; extra?: React.ReactNode; actions?: React.ReactNode; close: () => void }) {
   return (
     <DrawerBody title={title} onClose={close} actions={actions}>
