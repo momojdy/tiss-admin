@@ -8,11 +8,7 @@ import { OutlineBtn, Pill, SelectMenu } from '../../ui/Controls';
 import { ListRows } from '../../ui/Lists';
 import { Txt } from '../../ui/Txt';
 
-const modules = [
-  'Overview', 'Raffles and lotteries', 'Campaign approvals', 'Prizes',
-  'Tickets and entries', 'Draws and results', 'Winners and claims',
-  'Payments and refunds', 'Reports and analytics', 'Complaints and settings',
-];
+import { POTSSY_MODULES } from './modules';
 const copy: Record<string, { title: string; detail: string }> = {
   Overview: { title: 'Potssy operational overview', detail: 'Not connected yet.' },
   'Raffles and lotteries': { title: 'Raffles and lotteries', detail: 'Not connected yet.' },
@@ -46,7 +42,7 @@ export function PotssyAdminScreen() {
         { icon: '◷', value: '—', label: 'Claims awaiting review' },
       ]} />
       <View style={{ flexDirection: 'row', flexWrap: 'wrap', gap: 6, marginBottom: 8 }}>
-        <SelectMenu label="Potssy section" options={modules} value={moduleName} onChange={setModule} />
+        <SelectMenu label="Potssy section" options={POTSSY_MODULES} value={moduleName} onChange={setModule} />
       </View>
       <Section title={selected.title}>
         <Txt size={11.2} mut lh={1.45}>{selected.detail}</Txt>

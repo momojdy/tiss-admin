@@ -8,6 +8,7 @@ import { Pill, Row, StatusPill } from '../../ui/Controls';
 import { ListRows } from '../../ui/Lists';
 import { Txt } from '../../ui/Txt';
 import { useOpenModule } from './useOpenModule';
+import { GOODIES_MODULES } from '../goodies/modules';
 
 export function ServiceHubScreen() {
   useDb();
@@ -17,9 +18,9 @@ export function ServiceHubScreen() {
   const selectedHub = db.SVC.find((row) => row[0] === ui.hub);
   const service = selectedHub ?? db.SVC[0];
   const serviceName = service[0];
-  const modules = (serviceName === 'Goodies'
-    ? 'Overview|Products and catalog|Categories|Merchants|Product review|Orders|Promotions|Support|Analytics|Settings'
-    : db.MOD[serviceName] || 'Overview|Configuration').split('|');
+  const modules = serviceName === 'Goodies'
+    ? [...GOODIES_MODULES]
+    : (db.MOD[serviceName] || 'Overview|Configuration').split('|');
   const isPreOrder = service[5] === 'Pre-order';
   const serviceTransactions = db.INV.filter((tx) =>
     tx.f.toLowerCase().includes(serviceName.toLowerCase()) ||
