@@ -11,8 +11,6 @@ import { ListRows, Small } from '../../ui/Lists';
 import { Txt } from '../../ui/Txt';
 import { GOODIES_MODULES } from '../goodies/modules';
 
-const num = (value: unknown) => Number.parseInt(String(value ?? 0), 10) || 0;
-
 export function ServiceWorkspaceScreen() {
   useDb();
   const { c } = useTheme();
