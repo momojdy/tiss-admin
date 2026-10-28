@@ -103,9 +103,9 @@ export function EcosystemScreen() {
       <Row><SearchInput value={ui.eq} onChangeText={(v) => set('eq', v)} placeholder="Search services" /></Row>
       <Chips options={['All', 'Active', 'Pre-order', 'Attention', 'Favorites'] as const} value={ui.ec} onChange={(v) => set('ec', v)} />
       <Row wrap>
-        <Pill onPress={() => set('es', nextSort)}>{'≡ ' + (ui.es === 'A–Z' || ui.es === 'Favorites' ? ui.es : 'A–Z')}</Pill>
+        <Pill onPress={() => set('es', nextSort)}><View style={{ flexDirection: 'row', alignItems: 'center', gap: 4 }}><AppIcon name="filter" size={12} />{ui.es === 'A–Z' || ui.es === 'Favorites' ? ui.es : 'A–Z'}</View></Pill>
         <Seg options={['Grid', 'Table'] as const} value={ui.ev} onChange={(v) => set('ev', v)} />
-        {can(...REQ.export) ? <Pill onPress={exportCsv}>⇩ Export</Pill> : null}
+        {can(...REQ.export) ? <Pill onPress={exportCsv}><View style={{ flexDirection: 'row', alignItems: 'center', gap: 4 }}><AppIcon name="download" size={12} />Export</View></Pill> : null}
         {can(...REQ.content) ? <Btn onPress={addService}>+ Propose service</Btn> : null}
         <Pill onPress={() => go('business')}>Business records · {db.BIZ.length}</Pill>
       </Row>
