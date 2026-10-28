@@ -1,7 +1,7 @@
 import Svg, { Circle, Line, Path, Rect } from 'react-native-svg';
 import { useTheme } from '../theme/ThemeContext';
 
-export type AppIconName = 'search' | 'bell' | 'user-round' | 'menu' | 'settings' | 'download' | 'clipboard-list' | 'history' | 'users' | 'building-2' | 'clock-alert' | 'activity' | 'chart-no-axes' | 'wallet' | 'pie-chart' | 'check-circle' | 'shield-alert' | 'file-pen';
+export type AppIconName = 'search' | 'bell' | 'user-round' | 'menu' | 'settings' | 'download' | 'clipboard-list' | 'history' | 'users' | 'building-2' | 'clock-alert' | 'activity' | 'chart-no-axes' | 'wallet' | 'pie-chart' | 'check-circle' | 'shield-alert' | 'file-pen' | 'plus';
 
 export function AppIcon({ name, size = 18, color }: { name: AppIconName; size?: number; color?: string }) {
   const { c } = useTheme();
@@ -9,6 +9,7 @@ export function AppIcon({ name, size = 18, color }: { name: AppIconName; size?: 
   const common = { stroke, strokeWidth: 1.8, strokeLinecap: 'round' as const, strokeLinejoin: 'round' as const, fill: 'none' as const };
   return (
     <Svg width={size} height={size} viewBox="0 0 24 24">
+      {name === 'plus' ? <><Line x1="12" y1="5" x2="12" y2="19" {...common} /><Line x1="5" y1="12" x2="19" y2="12" {...common} /></> : null}
       {name === 'search' ? <><Circle cx="10.8" cy="10.8" r="6.8" {...common} /><Line x1="16" y1="16" x2="21" y2="21" {...common} /></> : null}
       {name === 'bell' ? <><Path d="M18 8a6 6 0 0 0-12 0c0 7-3 7-3 9h18c0-2-3-2-3-9" {...common} /><Path d="M10 21h4" {...common} /></> : null}
       {name === 'user-round' ? <><Circle cx="12" cy="8" r="3.2" {...common} /><Path d="M5 20c.8-4 3.1-6 7-6s6.2 2 7 6" {...common} /></> : null}
