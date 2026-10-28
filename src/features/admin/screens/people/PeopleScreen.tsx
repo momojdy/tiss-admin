@@ -54,7 +54,7 @@ export function PeopleScreen() {
     if (sub === 'Staff') {
       return <Heading title={'Employees &\nPermissions'} kpis={[
         { icon: 'users', value: count('Active'), label: 'Active staff', onPress: () => go('people', { ps: 'Staff', sst: 'Active' }) },
-        { icon: '◐', value: count('Suspended'), label: 'Suspended', onPress: () => go('people', { ps: 'Staff', sst: 'Suspended' }) },
+        { icon: 'shield-alert', value: count('Suspended'), label: 'Suspended', onPress: () => go('people', { ps: 'Staff', sst: 'Suspended' }) },
         { icon: 'shield-alert', value: count('Revoked'), label: 'Revoked', tone: 'r', onPress: () => go('people', { ps: 'Staff', sst: 'Revoked' }) },
       ]} />;
     }
@@ -63,7 +63,7 @@ export function PeopleScreen() {
       return <Heading title={sub === 'Requests' ? 'Access\nrequests' : 'Permissions\nanalytics'} kpis={[
         { icon: 'file-pen', value: g.pending, label: 'Waiting requests', tone: 'r', onPress: () => go('people', { ps: 'Requests', rqf: 'Pending' }) },
         { icon: 'users', value: g.live, label: 'Running grants', onPress: () => go('people', { ps: 'Permissions', grf: 'Active' }) },
-        { icon: '◔', value: g.soon, label: 'Ending in 3 days', tone: 'r', onPress: () => go('people', { ps: 'Permissions', grf: 'Active' }) },
+        { icon: 'clock-alert', value: g.soon, label: 'Ending in 3 days', tone: 'r', onPress: () => go('people', { ps: 'Permissions', grf: 'Active' }) },
       ]} />;
     }
     if (sub === 'Accounts' || sub === 'Restrictions') {
@@ -76,7 +76,7 @@ export function PeopleScreen() {
     const unassigned = db.APPS.filter((a) => a.o === 'Unassigned' && a.st < 3).length;
     return <Heading title="People" kpis={[
       { icon: 'users', value: count('Active'), label: 'Active staff', onPress: () => go('people', { ps: 'Staff' }) },
-      { icon: '▤', value: db.APPS.filter((a) => a.st < 3).length + db.CASES.filter((x) => x.st !== 'Resolved').length, label: 'Open assignments', tag: unassigned + ' unassigned', tone: 'r', onPress: () => go('operations', { ov: 'List', ou: 1 }) },
+      { icon: 'clipboard-list', value: db.APPS.filter((a) => a.st < 3).length + db.CASES.filter((x) => x.st !== 'Resolved').length, label: 'Open assignments', tag: unassigned + ' unassigned', tone: 'r', onPress: () => go('operations', { ov: 'List', ou: 1 }) },
       { icon: 'settings', value: Object.keys(db.ROLES).length, label: 'Roles', onPress: () => go('people', { ps: 'Roles' }) },
     ]} />;
   };
