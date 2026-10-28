@@ -248,7 +248,7 @@ export function ByoFoot() {
 
 export function ByoScreen({p}: {p: string}) {
   const th = useTheme(), a = (p || '').split('|'), sid = a[0], b = bGet(sid, a[1]);
-  if (!b || !STB[sid]) return <View><Header title="Builder" onBack={back} /><Empty emoji="🍽️" title="This builder is not available" text="The store may have turned it off." button="Back to Goodies" onPress={browse} /></View>;
+  if (!b || !STB[sid]) return <View><Header title="Builder" onBack={back} /><Empty emoji="utensils" title="This builder is not available" text="The store may have turned it off." button="Back to Goodies" onPress={browse} /></View>;
   if (!BD || BD.bid !== b.id || BD.sid !== sid) setBD(bDraft(b, sid));
   if (BD.added) return <ByoDone b={b} />;
   const s = STB[sid], un = !b.enabled || !b.available || BYO.store[sid] === false || !s.open;
@@ -294,7 +294,7 @@ function ByoDone({b}: {b: Builder}) {
     <View>
       <Header title="Added to your order" onBack={back} />
       <View style={{alignItems: 'center', paddingTop: 30, paddingHorizontal: 20}}>
-        {b.type === 'burger' ? <LinearGradient colors={['#2C4A5B', '#233D4C']} style={{alignSelf: 'stretch', borderRadius: 24, paddingVertical: 8, alignItems: 'center'}}><BurgerStage b={b} fin /></LinearGradient> : <Text style={{fontSize: 64}}>✅</Text>}
+        {b.type === 'burger' ? <LinearGradient colors={['#2C4A5B', '#233D4C']} style={{alignSelf: 'stretch', borderRadius: 24, paddingVertical: 8, alignItems: 'center'}}><BurgerStage b={b} fin /></LinearGradient> : <Text style={{fontSize: 64}}>check</Text>}
         <T size={24} weight="800" style={{marginTop: 10}}>Added to your order!</T>
         <T color={th.mut} style={{marginTop: 4}}>{BD.added.n} · {BD.added.q} × {money(BD.added.p)}</T>
         <T size={13} color={th.mut} align="center" style={{marginTop: 6}}>Nothing has been ordered yet. Add more, or review your cart when you are ready.</T>
