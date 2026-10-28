@@ -6,6 +6,7 @@ import { useEffect } from 'react';
 import { useTheme } from '../theme/ThemeContext';
 import { IconBtn } from './Controls';
 import { Txt } from './Txt';
+import { AppIcon } from './AppIcon';
 
 type Kind = 'dialog' | 'drawer';
 type Render = ReactNode | ((close: () => void) => ReactNode);
@@ -83,7 +84,7 @@ export function DialogCard({ children, title, onClose, bg, maxHeight = '92%', ti
       {title !== undefined ? (
         <View style={{ flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', marginBottom: 8 }}>
           {typeof title === 'string' ? <Txt size={titleSize}>{title}</Txt> : title}
-          {onClose ? <IconBtn label="✕" onPress={onClose} a11y="Close" /> : null}
+          {onClose ? <IconBtn label="Close" onPress={onClose} a11y="Close"><AppIcon name="x" size={15} /></IconBtn> : null}
         </View>
       ) : null}
       <ScrollView keyboardShouldPersistTaps="handled" showsVerticalScrollIndicator={false}>{children}</ScrollView>
