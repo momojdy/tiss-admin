@@ -279,7 +279,7 @@ export function CustomerPageEditorScreen() {
   return (
     <View>
       <View style={{ flexDirection: 'row', alignItems: 'center', flexWrap: 'wrap', gap: 8, marginBottom: 4 }}>
-        <OutlineBtn onPress={() => go('content', { cs: 'Overview' })}>‹ Content Studio</OutlineBtn>
+        <OutlineBtn onPress={() => go('content', { cs: 'Editor' })}>‹ Content Studio</OutlineBtn>
         <OutlineBtn onPress={() => { void reload(); }} disabled={loading}>Refresh</OutlineBtn>
         <OutlineBtn onPress={startBlankDraft} disabled={!can(...REQ.content)}>Start blank draft</OutlineBtn>
       </View>
@@ -311,21 +311,18 @@ export function CustomerPageEditorScreen() {
             options={(can(...REQ.content) ? ['Draft · Edit', 'Draft · Preview', 'Published'] : ['Draft · Preview', 'Published']) as readonly string[]}
             value={viewMode === 'Published' ? 'Published' : editorMode === 'Edit' && can(...REQ.content) ? 'Draft · Edit' : 'Draft · Preview'}
             onChange={(next) => {
+              // Match the original Edit and Preview controls: change mode and reset
+              // only the navigation stack, preserving the selected page and element.
               setPageStack([]);
               if (next === 'Published') {
                 setViewMode('Published');
                 setEditorMode('Preview');
-                setPageKey(pageKeys.includes('home') ? 'home' : pageKeys[0] || 'home');
-                setElementKey('');
               } else if (next === 'Draft · Edit') {
                 setViewMode('Draft');
                 setEditorMode('Edit');
-                setPageKey(pageKeys.includes('home') ? 'home' : pageKeys[0] || 'home');
               } else {
                 setViewMode('Draft');
                 setEditorMode('Preview');
-                setPageKey(pageKeys.includes('home') ? 'home' : pageKeys[0] || 'home');
-                setElementKey('');
               }
             }}
           />
