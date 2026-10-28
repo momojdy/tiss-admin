@@ -29,8 +29,6 @@ const Muted = ({ children }: { children: string }) => <Txt size={10.1} mut style
 
 /** Closes every overlay, refreshes the screens, then opens a drawer again (the HTML's `reopen`). */
 
-/* ================================================================== */
-
 export function StaffDrawer({ id, close }: { id: string; close: () => void }) {
   useDb();
   expireStaff();
@@ -196,9 +194,6 @@ function EditAccessSheet({ name, onClose, onSaved }: { name: string; onClose: ()
   );
 }
 
-/* ================================================================== */
-/* ================================================================== */
-
 export function useInvite() {
   const form = useForm();
   const toast = useToast();
@@ -248,9 +243,6 @@ export function useNewRole() {
     buttons: [{ label: 'Create', key: 's', primary: true }],
     onSubmit: (_k, v) => { if (!can(needs('Manage permissions'))) return 'This needs the “Manage permissions” right.'; const er = createRole(String(v.n), String(v.b)); if (er) return er; closeAll(); bump(); toast('Role created. Edit its access next.'); } });
 }
-
-/* ================================================================== */
-/* ================================================================== */
 
 export function AccountDrawer({ id, close }: { id: string; close: () => void }) {
   useDb();
