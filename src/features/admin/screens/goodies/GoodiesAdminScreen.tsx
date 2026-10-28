@@ -11,6 +11,7 @@ import { useToast } from '../../ui/Toast';
 import { useTheme } from '../../theme/ThemeContext';
 import { Card, Section } from '../../ui/Card';
 import { Heading } from '../../ui/Heading';
+import { AppIcon } from '../../ui/AppIcon';
 import { OutlineBtn, Pill, SelectMenu, StatusPill } from '../../ui/Controls';
 import { ListRows } from '../../ui/Lists';
 import { Txt } from '../../ui/Txt';
@@ -155,7 +156,7 @@ export function GoodiesAdminScreen() {
     <View>
       <View style={{ flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', marginBottom: 4 }}>
         <View style={{ flex: 1 }}><Heading title="Goodies Admin workspace" /></View>
-        <OutlineBtn onPress={() => go('content')}>CMS ›</OutlineBtn>
+        <OutlineBtn onPress={() => go('content')}><View style={{ flexDirection: 'row', alignItems: 'center', gap: 4 }}>CMS<AppIcon name="chevron-right" size={12} /></View></OutlineBtn>
       </View>
       <View style={{ flexDirection: 'row', flexWrap: 'wrap', gap: 7, marginBottom: 10 }}>
         <SelectMenu label="Goodies section" options={modules} value={moduleName} onChange={setModule} />
@@ -164,9 +165,9 @@ export function GoodiesAdminScreen() {
       {moduleLabel === 'Overview' ? (
         <>
           <Heading title="" kpis={[
-            { icon: '▥', value: data.cats.length, label: 'Configured categories' },
-            { icon: '▤', value: data.lib.length, label: 'Builder definitions' },
-            { icon: '◷', value: data.reqs.length, label: 'Request reference entries' },
+            { icon: 'building-2', value: data.cats.length, label: 'Configured categories' },
+            { icon: 'clipboard-list', value: data.lib.length, label: 'Builder definitions' },
+            { icon: 'clock-alert', value: data.reqs.length, label: 'Request reference entries' },
           ]} />
           <Section title="Goodies health">
             <ListRows rows={[
@@ -180,7 +181,7 @@ export function GoodiesAdminScreen() {
             <ListRows rows={[
               { key: 'req', main: 'Ingredient requests', sub: 'Not connected yet.', right: String(data.reqs.length) + ' refs', onPress: () => setModule('Product review') },
               { key: 'library', main: 'Builder library', sub: 'Manage ingredients, extras and product assets', right: '—', onPress: () => setModule('Products and catalog') },
-              { key: 'content', main: 'Customer home content', sub: 'Modes, promotions, labels and category order', right: 'Open ›', onPress: () => setModule('Products and catalog') },
+              { key: 'content', main: 'Customer home content', sub: 'Modes, promotions, labels and category order', right: <View style={{ flexDirection: 'row', alignItems: 'center', gap: 4 }}>Open<AppIcon name="chevron-right" size={12} /></View>, onPress: () => setModule('Products and catalog') },
             ]} />
           </Section>
         </>
@@ -206,7 +207,7 @@ export function GoodiesAdminScreen() {
       ) : moduleLabel === 'Fees' ? (
         <Section title="Fees and rules">
           <Txt size={10.1} mut style={{ marginBottom: 8 }}>Not connected yet.</Txt>
-          <ListRows rows={visible.map((item) => ({ key: item.id, main: item._title, sub: item._sub, right: 'Edit ›', onPress: () => onItem(item) }))} />
+          <ListRows rows={visible.map((item) => ({ key: item.id, main: item._title, sub: item._sub, right: <View style={{ flexDirection: 'row', alignItems: 'center', gap: 4 }}>Edit<AppIcon name="chevron-right" size={12} /></View>, onPress: () => onItem(item) }))} />
         </Section>
       ) : (
         <Section title={moduleName} right={<Pill onPress={() => setFilter(filter === 'All' ? 'Live' : 'All')}>{filter === 'All' ? 'Filter live' : 'Show all'}</Pill>}>
@@ -215,7 +216,7 @@ export function GoodiesAdminScreen() {
             key: String(item.id),
             main: item._title,
             sub: item._sub,
-            right: <View style={{ alignItems: 'flex-end', gap: 3 }}>{item.st ? <StatusPill label={String(item.st)} small /> : null}<Txt size={9.5} mut>Open ›</Txt></View>,
+            right: <View style={{ alignItems: 'flex-end', gap: 3 }}>{item.st ? <StatusPill label={String(item.st)} small /> : null}<View style={{ flexDirection: 'row', alignItems: 'center', gap: 4 }}><Txt size={9.5} mut>Open</Txt><AppIcon name="chevron-right" size={12} /></View></View>,
             onPress: () => onItem(item),
           }))} />
         </Section>
