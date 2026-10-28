@@ -100,7 +100,7 @@ export function AnalyticsScreen() {
 
   return (
     <View>
-      <Heading title="Platform\nAnalytics" kpis={[
+      <Heading title="Platform & Analytics" kpis={[
         { icon: '☺', value: !prototypeSnapshot && chart.available ? chart.total.toLocaleString('en-US') : '—', label: 'Transactions', tag: serviceFilter === 'All' ? 'All services' : serviceFilter },
         { icon: '♛', value: prototypeSnapshot || !decided.length ? '—' : approvalRate + '%', label: 'Approval rate', tag: prototypeSnapshot ? 'Not connected yet' : !decided.length ? 'No decisions yet' : approved + ' of ' + decided.length + ' decided' },
         { icon: '◷', value: averageReview === '—' ? '—' : averageReview + ' d', label: 'Average review time', tag: prototypeSnapshot ? 'Not connected yet' : averageReview === '—' ? 'No reviews yet' : undefined },
