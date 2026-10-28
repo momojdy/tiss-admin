@@ -1,0 +1,25 @@
+import Svg, { Circle, Line, Path, Rect } from 'react-native-svg';
+import { useTheme } from '../theme/ThemeContext';
+
+export type AppIconName = 'search' | 'bell' | 'user-round' | 'menu' | 'settings' | 'download' | 'clipboard-list' | 'history' | 'users' | 'building-2' | 'clock-alert';
+
+export function AppIcon({ name, size = 18, color }: { name: AppIconName; size?: number; color?: string }) {
+  const { c } = useTheme();
+  const stroke = color || c.ink;
+  const common = { stroke, strokeWidth: 1.8, strokeLinecap: 'round' as const, strokeLinejoin: 'round' as const, fill: 'none' as const };
+  return (
+    <Svg width={size} height={size} viewBox="0 0 24 24">
+      {name === 'search' ? <><Circle cx="10.8" cy="10.8" r="6.8" {...common} /><Line x1="16" y1="16" x2="21" y2="21" {...common} /></> : null}
+      {name === 'bell' ? <><Path d="M18 8a6 6 0 0 0-12 0c0 7-3 7-3 9h18c0-2-3-2-3-9" {...common} /><Path d="M10 21h4" {...common} /></> : null}
+      {name === 'user-round' ? <><Circle cx="12" cy="8" r="3.2" {...common} /><Path d="M5 20c.8-4 3.1-6 7-6s6.2 2 7 6" {...common} /></> : null}
+      {name === 'menu' ? <><Line x1="4" y1="6" x2="20" y2="6" {...common} /><Line x1="4" y1="12" x2="20" y2="12" {...common} /><Line x1="4" y1="18" x2="20" y2="18" {...common} /></> : null}
+      {name === 'settings' ? <><Circle cx="12" cy="12" r="3" {...common} /><Path d="M19.4 15a1.7 1.7 0 0 0 .3 1.9l.1.1-1.8 3.1-.2-.1a1.7 1.7 0 0 0-1.8-.1 1.7 1.7 0 0 0-1 1.5v.2h-3.6v-.2a1.7 1.7 0 0 0-1-1.5 1.7 1.7 0 0 0-1.8.1l-.2.1-1.8-3.1.1-.1A1.7 1.7 0 0 0 7 15a1.7 1.7 0 0 0-1.5-1H5v-3.6h.5A1.7 1.7 0 0 0 7 9a1.7 1.7 0 0 0-.3-1.9l-.1-.1 1.8-3.1.2.1a1.7 1.7 0 0 0 1.8.1 1.7 1.7 0 0 0 1-1.5v-.2h3.6v.2a1.7 1.7 0 0 0 1 1.5 1.7 1.7 0 0 0 1.8-.1l.2-.1 1.8 3.1-.1.1A1.7 1.7 0 0 0 19 9a1.7 1.7 0 0 0 1.5 1h.5v3.6h-.5a1.7 1.7 0 0 0-1.1 1.4" {...common} /></> : null}
+      {name === 'download' ? <><Path d="M12 3v12m-5-5 5 5 5-5" {...common} /><Path d="M5 17v3h14v-3" {...common} /></> : null}
+      {name === 'clipboard-list' ? <><Rect x="5" y="4" width="14" height="17" rx="2" {...common} /><Path d="M9 4V2h6v2M8 10h8M8 14h8M8 18h4" {...common} /></> : null}
+      {name === 'history' ? <><Path d="M3 12a9 9 0 1 0 2.6-6.4L3 8" {...common} /><Path d="M3 3v5h5M12 7v5l3 2" {...common} /></> : null}
+      {name === 'users' ? <><Circle cx="9" cy="8" r="3" {...common} /><Path d="M3 20c.5-3.5 2.5-5.5 6-5.5s5.5 2 6 5.5M16 5.5a3 3 0 0 1 0 5.8M17 15c2.3.5 3.6 2.1 4 5" {...common} /></> : null}
+      {name === 'building-2' ? <><Rect x="4" y="3" width="16" height="18" rx="1" {...common} /><Path d="M8 7h2M14 7h2M8 11h2M14 11h2M8 15h2M14 15h2M10 21v-3h4v3" {...common} /></> : null}
+      {name === 'clock-alert' ? <><Circle cx="12" cy="12" r="9" {...common} /><Path d="M12 7v5l3 2M18.5 3.5l2 2" {...common} /></> : null}
+    </Svg>
+  );
+}
