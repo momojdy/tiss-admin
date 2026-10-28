@@ -95,12 +95,25 @@ function AuthGate() {
       else if (!sessionStillValid()) { leaveApp(); setNotice('Your access changed. Please sign in again.'); }
       else {
         void (async () => {
-          const { data: auth } = await supabase.auth.getUser();
-          if (!auth.user || !auth.user.email_confirmed_at) { leaveApp(); setNotice('Your Supabase session ended. Please sign in again.'); return; }
+          const { data: auth, error: authError } = await supabase.auth.getUser();
+          if (authError) {
+            const reason = authError.message || '';
+            if (/refresh token|invalid jwt|jwt expired|session not found|not authenticated/i.test(reason)) {
+              leaveApp();
+              setNotice('Your sign-in expired. Please sign in again.');
+            }
+            return;
+          }
+          if (!auth.user || !auth.user.email_confirmed_at) {
+            leaveApp();
+            setNotice('Your sign-in expired. Please sign in again.');
+            return;
+          }
           const { data: staff, error } = await supabase.from('wantiss_admin_staff')
             .select('status,role,invitation_expires_at,invited_at')
             .eq('user_id', session.userId || '').maybeSingle();
-          if (error || !staff || staff.status !== 'active' ||
+          if (error) return;
+          if (!staff || staff.status !== 'active' ||
               (staff.invitation_expires_at && Date.parse(staff.invitation_expires_at) <= Date.now()) ||
               (staff.invited_at && auth.user.user_metadata?.wantiss_invite_accepted !== true)) {
             leaveApp(); setNotice('Your access changed. Please sign in again.'); return;
