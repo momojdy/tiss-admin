@@ -120,7 +120,7 @@ export function LivePayments() {
     return (<View>
       <Bar title="Wallet and payments" onBack={back} />
       <View style={{padding: 16, paddingTop: 40, alignItems: 'center'}}>
-        <Text style={{fontSize: 52}}>🔒</Text>
+        <Icon name="lock" size={46} color={th.ink} />
         <T size={18} weight="800" style={{marginTop: 8}}>Sign in to see your wallet</T>
         <T size={13.5} color={th.mut} align="center" style={{marginVertical: 8, marginBottom: 18}}>Your Wantiss wallet and saved cards are tied to your account.</T>
         <View style={{alignSelf: 'stretch'}}><Cta ghost label="Back" onPress={back} /></View>
@@ -151,7 +151,7 @@ export function LivePayments() {
         </View>
       ) : (
         <Card>
-          <Row style={{gap: 10}}><Text style={{fontSize: 30}}>👛</Text><View style={{flex: 1}}><T weight="800">No Wantiss wallet found</T></View></Row>
+          <Row style={{gap: 10}}><Icon name="walletEmpty" size={28} color={th.ink} /><View style={{flex: 1}}><T weight="800">No Wantiss wallet found</T></View></Row>
           <T size={13} color={th.mut} style={{marginVertical: 6, lineHeight: 19}}>You haven’t created a wallet, or it was deleted. Create one to pay with it and to receive refunds. Your balance starts at {money(0)}.</T>
           <Cta small label={creating ? 'Creating…' : 'Create wallet'} disabled={creating} onPress={() => {void makeWallet();}} />
         </Card>
@@ -179,7 +179,7 @@ export function LivePayments() {
         </Card>
       )) : (
         <Card style={{alignItems: 'center', paddingVertical: 22}}>
-          <Text style={{fontSize: 40}}>💳</Text>
+          <Icon name="card" size={36} color={th.ink} />
           <T weight="800" style={{marginTop: 6}}>No saved cards yet</T>
           <T size={13} color={th.mut} align="center" style={{marginTop: 4, lineHeight: 19}}>Saved cards will appear here and can be used at checkout.</T>
         </Card>
