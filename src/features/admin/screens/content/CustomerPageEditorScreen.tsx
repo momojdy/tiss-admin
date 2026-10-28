@@ -7,6 +7,7 @@ import { can } from '../../state/access';
 import { REQ } from '../../state/requirements';
 import { useNav } from '../../shell/Nav';
 import { useTheme } from '../../theme/ThemeContext';
+import { FeaturePicker } from './FeaturePicker';
 import { useToast } from '../../ui/Toast';
 import { Card, Section } from '../../ui/Card';
 import { Heading } from '../../ui/Heading';
@@ -284,7 +285,7 @@ export function CustomerPageEditorScreen() {
       </View>
       <Heading title="Customer page editor" />
       <Section title="Customer feature">
-        <SelectMenu
+        <FeaturePicker
           label="Feature"
           options={featureOptions.map((item) => item.label)}
           value={activeFeature?.label || featureOptions[0]?.label || 'Goodies'}
@@ -296,7 +297,6 @@ export function CustomerPageEditorScreen() {
             setPageStack([]);
             setElementKey('');
           }}
-          placeholder="Select a feature"
         />
       </Section>
       {error ? <Card><Txt size={11.5} color={c.or}>{error}</Txt></Card> : null}

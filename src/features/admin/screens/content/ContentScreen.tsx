@@ -15,6 +15,7 @@ import { ListRows } from '../../ui/Lists';
 import { OutlineBtn, Pill, SelectMenu, StatusPill } from '../../ui/Controls';
 import { Field, useForm } from '../../ui/FormSheet';
 import { Txt } from '../../ui/Txt';
+import { FeaturePicker } from './FeaturePicker';
 import { useTheme } from '../../theme/ThemeContext';
 import { useToast } from '../../ui/Toast';
 
@@ -399,7 +400,7 @@ export function ContentScreen() {
       ) : null}
 
       {activeSection === 'Editor' ? <Section title="Customer page editor">
-        <SelectMenu label="Customer feature" options={customerFeatures} value={customerFeature} onChange={setCustomerFeature} />
+        <FeaturePicker options={customerFeatures} value={customerFeature} onChange={setCustomerFeature} />
         <OutlineBtn primary onPress={() => go('editor', { editorFeature: customerFeature })}>{`Open ${customerFeature} page editor ›`}</OutlineBtn>
       </Section> : null}
 
