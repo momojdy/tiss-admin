@@ -81,7 +81,7 @@ export function StoreCard({s}: {s: Store}) {
           <Text style={{fontSize: 76}}>{s.e}</Text>
           {s.pr ? <View style={{position: 'absolute', left: 0, top: 14, backgroundColor: th.br, borderTopRightRadius: 8, borderBottomRightRadius: 8, paddingVertical: 5, paddingLeft: 12, paddingRight: 10}}><T size={12} weight="800" color="#fff">{s.pr}</T></View> : null}
           {heartBtn(s.id, S.fav.indexOf(s.id) > -1, () => heart(s.id), S.fav.indexOf(s.id) > -1 ? 'Remove ' + s.n + ' from favorites' : 'Save ' + s.n + ' to favorites')}
-          {!s.open ? pill(tr('closed') + ' · ' + s.nx) : s.far && !s.live ? pill('Pickup only at this address') : s.rv > 80 ? pill('🔥 ' + Math.round(s.rv * 0.95) + ' ordered today') : null}
+          {!s.open ? pill(tr('closed') + ' · ' + s.nx) : s.far && !s.live ? pill('Pickup only at this address') : s.rv > 80 ? pill('flame ' + Math.round(s.rv * 0.95) + ' ordered today') : null}
           <View style={{position: 'absolute', right: 10, bottom: 10, backgroundColor: '#fff', borderRadius: 12, paddingHorizontal: 10, paddingVertical: 5}}><T size={12} weight="700" color="#1B1B1F">{s.eta} min</T></View>
         </Grad>
       </Pressable>
