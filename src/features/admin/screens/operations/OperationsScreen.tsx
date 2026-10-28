@@ -73,7 +73,7 @@ export function OperationsScreen() {
       return l.length ? <ListRows rows={l.map((x) => ({ key: x[0].id + x[2], main: x[0].n, sub: x[1][0], right: <View style={{ flexDirection: 'row', alignItems: 'center', gap: 4 }}><StatusPill label={x[1][1]} /><AppIcon name="chevron-right" size={12} /></View>, onPress: () => open('doc', x[0].id + ':' + x[2]) }))} /> : <Txt size={12} mut>All documents are verified.</Txt>;
     }
     const closed = list.filter((a) => a.st >= 3);
-    return closed.length ? <ListRows rows={closed.map((a) => ({ key: a.id, main: a.n, sub: a.id + ' · ' + a.s, right: <View style={{ flexDirection: 'row', alignItems: 'center', gap: 4 }}><StatusPill label={db.STG[a.st]} tone={STATUS_TONE[db.STG[a.st]]} /><Txt size={10.1}>›</Txt></View>, onPress: () => open('app', a.id) }))} /> : <Txt size={12} mut>No closed applications.</Txt>;
+    return closed.length ? <ListRows rows={closed.map((a) => ({ key: a.id, main: a.n, sub: a.id + ' · ' + a.s, right: <View style={{ flexDirection: 'row', alignItems: 'center', gap: 4 }}><StatusPill label={db.STG[a.st]} tone={STATUS_TONE[db.STG[a.st]]} /><AppIcon name="chevron-right" size={12} /></View>, onPress: () => open('app', a.id) }))} /> : <Txt size={12} mut>No closed applications.</Txt>;
   };
 
   return (
