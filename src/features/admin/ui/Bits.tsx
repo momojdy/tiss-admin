@@ -1,4 +1,4 @@
-import { View, ViewStyle, StyleProp } from 'react-native';
+import { View } from 'react-native';
 import { LinearGradient } from 'expo-linear-gradient';
 import { useTheme } from '../theme/ThemeContext';
 
@@ -20,17 +20,3 @@ export function HeaderAvatar({ size = 28 }: { size?: number }) {
       style={{ width: size, height: size, borderRadius: size / 2, borderWidth: 2, borderColor: c.card }} />
   );
 }
-
-export function ProgressBar({ pct, color, style }: { pct: number; color: string; style?: StyleProp<ViewStyle> }) {
-  const { c } = useTheme();
-  return (
-    <View style={[{ height: 3, borderRadius: 3, backgroundColor: c.inset, marginTop: 9, marginBottom: 7 }, style]}>
-      <View style={{ position: 'absolute', left: 0, top: 0, bottom: 0, width: `${Math.max(0, Math.min(100, pct))}%`, borderRadius: 3, backgroundColor: color }} />
-    </View>
-  );
-}
-
-export const Divider = ({ style }: { style?: StyleProp<ViewStyle> }) => {
-  const { c } = useTheme();
-  return <View style={[{ height: 1, backgroundColor: c.bd }, style]} />;
-};

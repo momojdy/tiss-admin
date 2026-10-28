@@ -1,7 +1,5 @@
 import { View } from 'react-native';
 import Svg, { Circle, Defs, G, Line, LinearGradient as SvgGradient, Path, Stop, Text as SvgText } from 'react-native-svg';
-import { useTheme } from '../theme/ThemeContext';
-import { Txt } from './Txt';
 
 /** Catmull-Rom style smoothing, ported from `smooth()` in the HTML. */
 export function smoothPath(p: number[][]): string {
@@ -50,14 +48,6 @@ export function LineChart({ vals, color, max, fill = true, dash, labels, yLabels
   );
 }
 
-export function SparkLine({ points, color, width = 380, height = 90 }: { points: number[][]; color: string; width?: number; height?: number }) {
-  return (
-    <Svg viewBox={`0 0 ${width} ${height}`} width="100%" height={(height / width) * 300}>
-      <Path d={smoothPath(points)} fill="none" stroke={color} strokeWidth={1.8} />
-    </Svg>
-  );
-}
-
 export function Ring({ pct, size = 96, color = '#f2c94c', track = 'rgba(255,255,255,0.15)', inner = '#2d5e4f', children }: {
   pct: number; size?: number; color?: string; track?: string; inner?: string; children?: React.ReactNode;
 }) {
@@ -73,50 +63,3 @@ export function Ring({ pct, size = 96, color = '#f2c94c', track = 'rgba(255,255,
     </View>
   );
 }
-
-export function Donut({ parts, size = 110, hole, children }: { parts: { pct: number; color: string }[]; size?: number; hole: string; children?: React.ReactNode }) {
-  const r = size / 2, w = 14, rr = r - w / 2, circ = 2 * Math.PI * rr;
-  let acc = 0;
-  return (
-    <View style={{ width: size, height: size, alignSelf: 'center', marginVertical: 8, alignItems: 'center', justifyContent: 'center' }}>
-      <Svg width={size} height={size} style={{ position: 'absolute' }}>
-        {parts.map((p, i) => {
-          const len = (p.pct / 100) * circ, off = (acc / 100) * circ;
-          acc += p.pct;
-          return <Circle key={i} cx={r} cy={r} r={rr} fill="none" stroke={p.color} strokeWidth={w} strokeDasharray={`${len} ${circ}`} strokeDashoffset={-off} transform={`rotate(-90 ${r} ${r})`} />;
-        })}
-        <Circle cx={r} cy={r} r={r - w} fill={hole} />
-      </Svg>
-      {children}
-    </View>
-  );
-}
-
-export function BarColumns({ columns, height = 170, gap = 4, track }: { columns: { segs: { pct: number; color: string }[] }[]; height?: number; gap?: number; track?: string }) {
-  const { c } = useTheme();
-  return (
-    <View style={{ flexDirection: 'row', alignItems: 'flex-end', height, gap, marginTop: 8 }}>
-      {columns.map((col, i) => (
-        <View key={i} style={{ flex: 1, height: '100%', justifyContent: 'flex-end', backgroundColor: track ?? c.inset, borderRadius: 10, overflow: 'hidden' }}>
-          {col.segs.map((s, j) => <View key={j} style={{ height: `${Math.max(0, s.pct)}%`, backgroundColor: s.color }} />)}
-        </View>
-      ))}
-    </View>
-  );
-}
-
-export const AxisLabels = ({ labels, marginLeft = 0, boldLast }: { labels: string[]; marginLeft?: number; boldLast?: boolean }) => (
-  <View style={{ flexDirection: 'row', gap: 4, marginTop: 4, marginLeft }}>
-    {labels.map((m, i) => (
-      <View key={i} style={{ flex: 1, alignItems: 'center' }}>
-        <Txt size={9.5} mut={!(boldLast && i === labels.length - 1)} weight={boldLast && i === labels.length - 1 ? 600 : 400}>{m}</Txt>
-      </View>
-    ))}
-  </View>
-);
-
-export const YAxis = ({ labels, height }: { labels: string[]; height: number }) => (
-  <View style={{ height, justifyContent: 'space-between', marginTop: 8, paddingRight: 4 }}>
-    {labels.map((x, i) => <Txt key={i} size={9.5} mut>{x}</Txt>)}
-  </View>
-);

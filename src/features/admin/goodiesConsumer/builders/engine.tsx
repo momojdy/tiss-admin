@@ -7,16 +7,16 @@ import {previewOnly, S, STB, ui, toast, emit, save, push, navBack, cur, hooks, m
 import {TEMPLATES} from './templates';
 import {T, useTheme, Tile} from '../components/ui';
 
-export const BKEY = 'goodies-byo-v4';
+const BKEY = 'goodies-byo-v4';
 const r2 = (n: number) => Math.round(n * 100) / 100;
 const cl = <X,>(o: X): X => JSON.parse(JSON.stringify(o));
 const rid = () => Math.random().toString(36).slice(2, 10);
 
 export type BItem = {id: string; name: string; price: number; free: boolean; avail: boolean; assetId: string | null; col: string; max?: number};
-export type BGroup = {id: string; name: string; kind: 'one' | 'many'; req: boolean; min: number; max: number; inc: number; me: number; items: BItem[]};
+type BGroup = {id: string; name: string; kind: 'one' | 'many'; req: boolean; min: number; max: number; inc: number; me: number; items: BItem[]};
 export type Builder = {id: string; type: 'pizza' | 'burger' | 'custom'; name: string; desc: string; emoji: string; enabled: boolean; available: boolean; base: number; notes: boolean; sizes: {id: string; name: string; add: number; avail: boolean}[]; groups: BGroup[]};
 
-export function bClean(b: any): Builder | null {
+function bClean(b: any): Builder | null {
   try {
     if (!b || typeof b !== 'object' || !b.id || ['pizza', 'burger', 'custom'].indexOf(b.type) < 0) return null;
     const num = (v: any) => Math.max(0, parseFloat(v) || 0);
@@ -35,7 +35,7 @@ export function bClean(b: any): Builder | null {
   } catch (e) {return null;}
 }
 /* template -> builder with fresh ids */
-export function fromTemplate(type: 'pizza' | 'burger' | 'custom'): Builder {
+function fromTemplate(type: 'pizza' | 'burger' | 'custom'): Builder {
   const t = TEMPLATES[type];
   return bClean({
     id: rid(), type, name: t.name, desc: t.desc, emoji: t.emoji, base: t.base, notes: true,
@@ -71,15 +71,15 @@ export async function loadBuilders() {
   }
   bsave(); emit();
 }
-export const bsave = () => {try {AsyncStorage.setItem(BKEY, JSON.stringify(BYO));} catch (e) {}};
-export const bFor = (sid: string) => BYO.cfg[sid] || [];
+const bsave = () => {try {AsyncStorage.setItem(BKEY, JSON.stringify(BYO));} catch (e) {}};
+const bFor = (sid: string) => BYO.cfg[sid] || [];
 export const bGet = (sid: string, id: string) => bFor(sid).filter(b => b.id === id)[0];
 export const units = (g: BGroup, d: any): string[] => {const a = d.sel && d.sel[g.id]; return Array.isArray(a) ? a : [];};
 export const itemOf = (g: BGroup, id: string) => g.items.filter(i => i.id === id)[0];
-export const byoList = (sid: string) => (BYO.store[sid] === false ? [] : bFor(sid).filter(b => b.enabled));
+const byoList = (sid: string) => (BYO.store[sid] === false ? [] : bFor(sid).filter(b => b.enabled));
 export const byoOn = (sid: string) => byoList(sid).length > 0;
 export const byoNames = (sid: string) => byoList(sid).map(b => b.name + ' build your own custom').join(' ');
-export const limitOf = (g: BGroup, it: BItem) => Math.min(g.me, it.max || g.me);
+const limitOf = (g: BGroup, it: BItem) => Math.min(g.me, it.max || g.me);
 
 export function bBreak(b: Builder, d: any) {
   let tot = b.base; const sz = b.sizes.filter(s => s.id === d.size)[0], lines: any[] = []; if (sz) tot += sz.add;
@@ -108,7 +108,7 @@ export function bCheck(b: Builder, d: any) {
   });
   return {errs, conf, ok: !errs.length && !conf.length};
 }
-export const bFlat = (br: any) => br.lines.map((L: any) => L.items.map((i: any) => (i.qty > 1 ? i.qty + '× ' : '') + i.name).join(', ')).join(' · ');
+const bFlat = (br: any) => br.lines.map((L: any) => L.items.map((i: any) => (i.qty > 1 ? i.qty + '× ' : '') + i.name).join(', ')).join(' · ');
 const hs = (s: string) => {let h = 2166136261; for (let i = 0; i < s.length; i++) h = Math.imul(h ^ s.charCodeAt(i), 16777619); return h >>> 0;};
 export function bLine(b: Builder, d: any, q: number) {
   const br = bBreak(b, d), note = b.notes ? String(d.note || '').trim().slice(0, 200) : '', sel = cl(d.sel);
@@ -140,7 +140,7 @@ export function bzDirty() {
   if (BD.edit) return JSON.stringify([BD.size, BD.sel, BD.note, BD.q]) !== BD.orig;
   return dirtyOf(BD);
 }
-export function bDraftSave() {
+function bDraftSave() {
   if (!BD || BD.edit || BD.added) return;
   if (bzDirty()) BYO.drafts[BD.bid] = {sid: BD.sid, size: BD.size, sel: BD.sel, note: BD.note, q: BD.q}; else delete BYO.drafts[BD.bid];
   bsave();
@@ -148,7 +148,7 @@ export function bDraftSave() {
 const hist = () => {BD.hist.push(JSON.stringify([BD.size, BD.sel])); if (BD.hist.length > 40) BD.hist.shift();};
 const upd = () => {bDraftSave(); emit();};
 
-export function byoOpen(sid: string, bid: string) {
+function byoOpen(sid: string, bid: string) {
   const b = bGet(sid, bid);
   if (!b || !b.enabled || !b.available || BYO.store[sid] === false) {toast('This builder is not available right now'); return;}
   if (!STB[sid].open) {toast(STB[sid].n + ' is closed right now'); return;}

@@ -1,4 +1,4 @@
-/* Seed data copied from Goodies v24 (RAW, CATS, DEALS, PR, SEED). Used by the demo provider only. */
+/* Seed data for the Goodies demo provider. */
 import type {Category, Promo} from './types';
 
 export const CATS: Category[] = [

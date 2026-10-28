@@ -104,16 +104,6 @@ export function Tag({ children, tone }: { children: string; tone?: 'g' | 'r' | '
   );
 }
 
-export function SearchHint({ text }: { text: string }) {
-  const { c } = useTheme();
-  return (
-    <View style={{ flex: 1, backgroundColor: c.card, borderColor: c.bd, borderWidth: 1, borderRadius: 99, paddingVertical: 9, paddingHorizontal: 12 }}>
-      <Txt size={10.6} mut>{'⌕  ' + text}</Txt>
-    </View>
-  );
-}
-
-/** Real search field (`INP(...)` in the HTML): same look as `.srch`, but editable. */
 export function SearchInput({ value, onChangeText, placeholder }: { value: string; onChangeText: (v: string) => void; placeholder: string }) {
   const { c } = useTheme();
   return (

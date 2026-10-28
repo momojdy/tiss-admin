@@ -1,7 +1,6 @@
 import { ReactNode } from 'react';
 import { Pressable, StyleProp, View, ViewStyle } from 'react-native';
 import { useTheme } from '../theme/ThemeContext';
-import { IconBtn } from './Controls';
 import { Txt } from './Txt';
 
 export interface ListRowSpec {
@@ -29,10 +28,6 @@ export function ListRows({ rows, size = 10.1, empty }: { rows: ListRowSpec[]; si
   );
 }
 
-export const Emph = ({ lead, bold, color }: { lead?: string; bold: string; color?: string }) => (
-  <Txt size={10.1}>{lead ? lead + ' ' : ''}<Txt size={10.1} weight={600} color={color}>{bold}</Txt></Txt>
-);
-
 export function KeyValue({ rows }: { rows: [string, ReactNode][] }) {
   const { c } = useTheme();
   return (
@@ -43,20 +38,6 @@ export function KeyValue({ rows }: { rows: [string, ReactNode][] }) {
           <View style={{ flexShrink: 1, alignItems: 'flex-end' }}>{typeof v === 'string' || typeof v === 'number' ? <Txt size={10.1} align="right">{v}</Txt> : v}</View>
         </View>
       ))}
-    </View>
-  );
-}
-
-export function FieldRow({ icon, label, children, trailing, onTrailing }: { icon?: string; label: string; children: ReactNode; trailing?: string; onTrailing?: () => void }) {
-  const { c } = useTheme();
-  return (
-    <View style={{ flexDirection: 'row', alignItems: 'center', gap: 8, paddingVertical: 7, borderBottomWidth: 1, borderBottomColor: c.bd }}>
-      {icon ? <Txt size={10.1} mut>{icon}</Txt> : null}
-      <View style={{ flex: 1 }}>
-        <Txt size={9.5} mut>{label}</Txt>
-        {typeof children === 'string' ? <Txt size={10.1}>{children}</Txt> : children}
-      </View>
-      {trailing ? <IconBtn size={20} fontSize={10.1} label={trailing} onPress={onTrailing} /> : null}
     </View>
   );
 }

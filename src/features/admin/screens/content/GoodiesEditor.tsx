@@ -4,6 +4,7 @@ import { supabase } from '../../lib/supabase';
 import { listCmsAssets, publishCmsVersion, saveCmsVersion } from '../../lib/adminBackend';
 import { fetchPublishedWantissContent } from '../../lib/wantissCms';
 import { useTheme } from '../../theme/ThemeContext';
+import { clone } from '../../lib/clone';
 import { Card, Section } from '../../ui/Card';
 import { OutlineBtn } from '../../ui/Controls';
 import { Txt } from '../../ui/Txt';
@@ -18,7 +19,6 @@ type Notice = { tone: 'ok' | 'warn' | 'error'; text: string };
 const COLUMNS = 'id,content_key,version,status,payload';
 const ASSET_BUCKET = 'wantiss-cms-assets';
 
-const clone = (value: any) => JSON.parse(JSON.stringify(value));
 const listKeyFor = (kind: GoodiesSelection['kind']) => (kind === 'mode' ? 'modes' : kind === 'promo' ? 'promos' : kind === 'category' ? 'cats' : 'labels');
 const textKeyFor = (sel: GoodiesSelection) => (sel.kind === 'label' ? 't' : sel.kind === 'category' ? 'name' : sel.field);
 const readText = (value: any): string => (typeof value === 'string' ? value : String(value?.en?.v ?? ''));

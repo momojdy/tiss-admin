@@ -1,13 +1,13 @@
 import grantsSeed from '../data/grantsSeed.json';
 import { DEMO_DAY, TODAY } from './db';
 import { addDays, daysBetween } from '../lib/dates';
+import { clone } from '../lib/clone';
 import type { AccessRequest, Grant } from '../data/types';
 
 /* Low-level store for access requests and grants. It imports nothing from access.ts so that
  * access.ts can merge live grants into a person's effective access without an import cycle.
  * The rules (request, decide, revoke, analytics) live in grants.ts. */
 
-const clone = <T,>(x: T): T => JSON.parse(JSON.stringify(x));
 const seed = clone(grantsSeed) as unknown as { GRANTS: Grant[]; REQUESTS: AccessRequest[] };
 
 /** The demo rows are dated around DEMO_DAY; when the real clock is on they are moved by the same number of days. */

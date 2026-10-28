@@ -33,19 +33,3 @@ export function Deal({ tone = '', top, title, sub, value, meta, onPress, minWidt
   );
   return onPress ? <Pressable onPress={onPress} style={{ flex: minWidth ? undefined : 1 }} accessibilityRole="button">{body}</Pressable> : body;
 }
-
-export function TileGrid({ cols = 3, gap = 7, children }: { cols?: number; gap?: number; children: React.ReactNode[] }) {
-  const items = (Array.isArray(children) ? children : [children]).flat().filter(Boolean) as React.ReactNode[];
-  const rows: React.ReactNode[][] = [];
-  for (let i = 0; i < items.length; i += cols) rows.push(items.slice(i, i + cols));
-  return (
-    <View style={{ gap }}>
-      {rows.map((r, i) => (
-        <View key={i} style={{ flexDirection: 'row', gap }}>
-          {r.map((x, j) => <View key={j} style={{ flex: 1 }}>{x}</View>)}
-          {r.length < cols ? Array.from({ length: cols - r.length }).map((_, k) => <View key={'e' + k} style={{ flex: 1 }} />) : null}
-        </View>
-      ))}
-    </View>
-  );
-}
