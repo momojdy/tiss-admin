@@ -1,5 +1,6 @@
 /* Goodies draft validation and safe asset handling; confirm the v5 schema against the original Admin export. */
 import {CATS} from './data/seed';
+import {DEFAULT_PROMOS} from './data/defaultPromos';
 import {t as tr} from './i18n';
 
 export const GOODIES_CONTENT_KEY = 'goodies.content';
@@ -103,11 +104,14 @@ export function buildStarterDraft(): any {
     {id: 'mode.groceries', st: 'Live', cat: 'groceries', emoji: '🛒', title: txt(tr('groceries')), sub: txt(''), img: null},
     {id: 'mode.drugstore', st: 'Live', cat: 'drugstore', emoji: '💊', title: txt(tr('drugstore')), sub: txt(''), img: null},
   ];
-  const promos = [
-    {id: 'promo.free-delivery', st: 'Live', ord: 1, color: 'plum', emoji: '🛵', aud: 'New customers', target: '', title: txt('Free delivery on your first order'), sub: txt('Welcome to Goodies. New here? It is on us.'), btn: txt('Order now'), img: null},
-    {id: 'promo.double-points', st: 'Live', ord: 2, color: 'orange', emoji: '🎁', aud: 'All customers', target: '', title: txt('Earn double points this weekend'), sub: txt('Pay with Wallet on any order.'), btn: txt('Start earning'), img: null},
-    {id: 'promo.fresh-produce', st: 'Live', ord: 3, color: 'green', emoji: '🥬', aud: 'All customers', target: '', title: txt('20% off fresh produce'), sub: txt('Straight from local farms and markets.'), btn: txt('Shop now'), img: null},
-  ];
+  const promos = DEFAULT_PROMOS.map((promo) => ({
+    ...promo,
+    st: 'Live',
+    title: txt(promo.title),
+    sub: txt(promo.sub),
+    btn: txt(promo.btn),
+    img: null,
+  }));
   const labelDefs: [string, string, string][] = [
     ['lbl.search', 'Search placeholder', tr('searchPh')],
     ['lbl.coupons', 'Coupons title', tr('couponsOffers')],
