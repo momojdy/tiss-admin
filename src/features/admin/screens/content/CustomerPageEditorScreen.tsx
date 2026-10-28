@@ -17,6 +17,7 @@ import { OutlineBtn, Pill, SelectMenu, StatusPill } from '../../ui/Controls';
 import { Txt } from '../../ui/Txt';
 import { CustomerPagePreview, type CustomerPreviewMode, type CustomerPreviewView } from './CustomerPagePreview';
 import { GoodiesEditor } from './GoodiesEditor';
+import { AuthPageEditor } from './AuthPageEditor';
 
 type ContentRow = {
   id: string;
@@ -54,6 +55,7 @@ export function CustomerPageEditorScreen() {
   const [json, setJson] = useState('');
   const [pageKey, setPageKey] = useState('home');
   const [actualGoodiesPreview, setActualGoodiesPreview] = useState(false);
+  const [actualAuthEditor, setActualAuthEditor] = useState(false);
   const [pageStack, setPageStack] = useState<string[]>([]);
   const [elementKey, setElementKey] = useState('');
   const [editorMode, setEditorMode] = useState<CustomerPreviewMode>('Edit');
@@ -90,13 +92,20 @@ export function CustomerPageEditorScreen() {
   useEffect(() => { void reload(); }, [reload]);
   useEffect(() => {
     const requestedFeature = ui.editorFeature;
-    if (requestedFeature) setActualGoodiesPreview(String(requestedFeature).toLowerCase() === 'goodies');
+    const requested = String(requestedFeature || '').toLowerCase();
+    if (requestedFeature) {
+      setActualGoodiesPreview(requested === 'goodies');
+      setActualAuthEditor(requested === 'auth' || requested === 'authentication');
+    }
     if (!requestedFeature) return;
+    if (requested === 'auth' || requested === 'authentication') {
+      delete ui.editorFeature;
+      return;
+    }
     let model: Record<string, any>;
     try { model = json ? JSON.parse(json) : starterModel(); } catch { return; }
     const pages = model?.pages && typeof model.pages === 'object' ? model.pages : {};
     const keys = Object.keys(pages);
-    const requested = String(requestedFeature).toLowerCase();
     const match = keys.find((key) => {
       const label = (String(pages[key]?.title || '') + ' ' + key).toLowerCase();
       if (requested === 'stayz') return label.includes('stayz') || label.includes('stays');
@@ -190,6 +199,9 @@ export function CustomerPageEditorScreen() {
   // even when the customer-page model has no page whose key contains "goodies".
   if (!featureOptions.some((item) => item.label.toLowerCase() === 'goodies')) {
     featureOptions.unshift({ label: 'Goodies', key: '__actual_goodies__' });
+  }
+  if (!featureOptions.some((item) => item.label.toLowerCase() === 'auth')) {
+    featureOptions.unshift({ label: 'Auth', key: '__auth__' });
   }
   const activePageKey = pageKeys.includes(pageKey) ? pageKey : pageKeys[0] || '';
   const activeFeature = featureOptions.find((item) => item.key === pageKey) || featureOptions.find((item) => item.key === activePageKey) || featureOptions[0];
@@ -316,6 +328,7 @@ export function CustomerPageEditorScreen() {
             if (!item) return;
             setPageKey(item.key);
             setActualGoodiesPreview(item.label === 'Goodies');
+            setActualAuthEditor(item.label === 'Auth');
             setPageStack([]);
             setElementKey('');
           }}
@@ -324,8 +337,9 @@ export function CustomerPageEditorScreen() {
       {error ? <Card><Txt size={11.5} color={c.or}>{error}</Txt></Card> : null}
 
       {actualGoodiesPreview ? <GoodiesEditor canEdit={can(...REQ.content)} canPublish={can(...REQ.publish)} /> : null}
+      {actualAuthEditor ? <AuthPageEditor canEdit={can(...REQ.content)} canPublish={can(...REQ.publish)} /> : null}
 
-      {!actualGoodiesPreview ? (
+      {!actualGoodiesPreview && !actualAuthEditor ? (
       <Section title="Live customer phone preview" right={<View style={{ flexDirection: 'row', flexWrap: 'wrap', gap: 5 }}>
         <View style={{ width: 172 }}>
           <SelectMenu
@@ -367,7 +381,7 @@ export function CustomerPageEditorScreen() {
       </Section>
       ) : null}
 
-      {!actualGoodiesPreview && selected && viewMode === 'Draft' && editorMode === 'Edit' ? (
+      {!actualGoodiesPreview && !actualAuthEditor && selected && viewMode === 'Draft' && editorMode === 'Edit' ? (
         <>
           <Section title="Page and element structure">
             {pageKeys.length ? (
