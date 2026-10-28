@@ -97,7 +97,7 @@ export function DrawerBody({ title, onClose, children, actions }: { title: React
     <View>
       <View style={{ flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', marginBottom: 8 }}>
         {typeof title === 'string' ? <Txt size={14}>{title}</Txt> : title}
-        <IconBtn label="✕" onPress={onClose} a11y="Close" />
+        <IconBtn label="Close" onPress={onClose} a11y="Close"><AppIcon name="x" size={15} /></IconBtn>
       </View>
       {children}
       {actions ? <View style={{ flexDirection: 'row', flexWrap: 'wrap', marginTop: 8 }}>{actions}</View> : null}
