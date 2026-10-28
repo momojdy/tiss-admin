@@ -49,7 +49,7 @@ export function AccountSheet({ onClose }: { onClose: () => void }) {
       });
       if (picked.canceled || !picked.assets?.[0]) return;
       const asset = picked.assets[0];
-      const mime = asset.mimeType || '';
+      const mime = asset.mimeType || (/\.png$/i.test(asset.name) ? 'image/png' : /\.webp$/i.test(asset.name) ? 'image/webp' : /\.jpe?g$/i.test(asset.name) ? 'image/jpeg' : '');
       if (!['image/jpeg', 'image/png', 'image/webp'].includes(mime)) {
         setAvatarMessage('Choose a JPG, PNG or WebP image.');
         return;
