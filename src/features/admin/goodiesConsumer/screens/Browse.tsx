@@ -143,11 +143,11 @@ export function Home({onExit}: {onExit?: () => void}) {
       {rv.length ? (<><Sh sel={{kind: 'label', id: 'lbl.recent', field: 'text'}} title={label('lbl.recent', tr('recentlyViewed'))} /><Rail>{rv.map((id: string) => <Dish key={id} i={IT[id]} />)}</Rail></>) : null}
       <Sh sel={{kind: 'label', id: 'lbl.popular', field: 'text'}} title={label('lbl.popular', tr('popularVendors'))} link={tr('seeAll')} onLink={() => go('catlist', 'all')} />
       <Rail>{ST.slice().sort((a, b) => b.rv - a.rv).slice(0, 6).map(s => <VCard key={s.id} s={s} />)}</Rail>
-      <Sh sel={{kind: 'label', id: 'lbl.produce', field: 'text'}} title={'produce ' + label('lbl.produce', tr('freshProduce'))} link={tr('seeAll')} onLink={() => go('catlist', 'produce')} />
+      <Sh sel={{kind: 'label', id: 'lbl.produce', field: 'text'}} title={label('lbl.produce', tr('freshProduce'))} link={tr('seeAll')} onLink={() => go('catlist', 'produce')} />
       <Rail>{cat('produce').map(i => <Dish key={i.id} i={i} />)}</Rail>
-      <Sh sel={{kind: 'label', id: 'lbl.haitian', field: 'text'}} title={label('lbl.haitian', tr('haitianSpecialties'))} right={<Icon name="haiti" size={15} color={th.ink} />} link={tr('seeAll')} onLink={() => go('catlist', 'haitian')} />
+      <Sh sel={{kind: 'label', id: 'lbl.haitian', field: 'text'}} title={label('lbl.haitian', tr('haitianSpecialties'))} right={<Icon name="globe" size={15} color={th.ink} />} link={tr('seeAll')} onLink={() => go('catlist', 'haitian')} />
       <Rail>{cat('haitian').map(i => <Dish key={i.id} i={i} />)}</Rail>
-      <Sh sel={{kind: 'label', id: 'lbl.trending', field: 'text'}} title={label('lbl.trending', tr('trending'))} right={<Icon name="trending" size={15} color={th.ink} />} />
+      <Sh sel={{kind: 'label', id: 'lbl.trending', field: 'text'}} title={label('lbl.trending', tr('trending'))} right={<Icon name="zap" size={15} color={th.ink} />} />
       <View style={{flexDirection: 'row', flexWrap: 'wrap', gap: 12, paddingHorizontal: 16}}>{['s1_1', 's4_0', 's5_0', 's6_0'].map(id => <Dish key={id} i={IT[id]} grid />)}</View>
       <Sh title={tr('restaurantsNear')} link={tr('seeAll')} onLink={() => go('catlist', 'all')} />
       <Chips list={FCH} on={S.f} onPick={setFilter} />
