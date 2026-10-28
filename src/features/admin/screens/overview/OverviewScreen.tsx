@@ -1,4 +1,4 @@
-import { Modal, Pressable, TextInput, View } from 'react-native';
+import { View } from 'react-native';
 import { useState } from 'react';
 import { db, ui, bump, mny, useDb, dataMode } from '../../state/db';
 import { useNav } from '../../shell/Nav';
@@ -9,6 +9,7 @@ import { LineChart, Ring } from '../../ui/Charts';
 import { Chips, Pill, StatusPill } from '../../ui/Controls';
 import { ListRows } from '../../ui/Lists';
 import { Txt } from '../../ui/Txt';
+import { DateRangeModals } from '../shared/DateRangeModals';
 
 const ranges = ['7D', '30D', '90D', '1Y', 'Custom'] as const;
 type Range = typeof ranges[number];
@@ -179,37 +180,28 @@ export function OverviewScreen() {
         <ListRows empty="CMS placement snapshot unavailable. No seeded banner counts or sample placements are shown." rows={[]} />
       </Section>
 
-      <Modal transparent visible={customOpen} animationType="fade" onRequestClose={() => setCustomOpen(false)}>
-        <Pressable onPress={() => setCustomOpen(false)} style={{ flex: 1, backgroundColor: 'rgba(0,0,0,0.42)', justifyContent: 'center', padding: 20 }}>
-          <Pressable onPress={() => {}} style={{ backgroundColor: c.card, borderRadius: 16, padding: 18, gap: 10 }}>
-            <Txt size={16} weight={600}>Custom range</Txt>
-            <Txt size={10.1} mut>Choose a start and end date. The chart will show only timestamped authorized records within this range.</Txt>
-            <Txt size={10.1} mut>Start date (YYYY-MM-DD)</Txt>
-            <TextInput value={customStart} onChangeText={setCustomStart} placeholder="2026-09-20" placeholderTextColor={c.mut} autoCapitalize="none" style={{ color: c.ink, borderWidth: 1, borderColor: c.bd, borderRadius: 9, paddingHorizontal: 11, paddingVertical: 10, fontSize: 13 }} />
-            <Txt size={10.1} mut>End date (YYYY-MM-DD)</Txt>
-            <TextInput value={customEnd} onChangeText={setCustomEnd} placeholder="2026-10-17" placeholderTextColor={c.mut} autoCapitalize="none" style={{ color: c.ink, borderWidth: 1, borderColor: c.bd, borderRadius: 9, paddingHorizontal: 11, paddingVertical: 10, fontSize: 13 }} />
-            {rangeError ? <Txt size={10.1} color={c.or}>{rangeError}</Txt> : null}
-            <View style={{ flexDirection: 'row', justifyContent: 'flex-end', gap: 8, marginTop: 4 }}>
-              <Pill onPress={() => setCustomOpen(false)}>Cancel</Pill>
-              <Pill onPress={applyCustomRange}>Apply range</Pill>
-            </View>
-          </Pressable>
-        </Pressable>
-      </Modal>
-      <Modal transparent visible={expandedChart} animationType="fade" onRequestClose={() => setExpandedChart(false)}>
-        <Pressable onPress={() => setExpandedChart(false)} style={{ flex: 1, backgroundColor: 'rgba(0,0,0,0.48)', justifyContent: 'center', padding: 14 }}>
-          <Pressable onPress={() => {}} style={{ backgroundColor: c.card, borderRadius: 16, padding: 18, gap: 10 }}>
-            <View style={{ flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center' }}>
-              <Txt size={16} weight={600}>Platform activity</Txt>
-              <Pill onPress={() => setExpandedChart(false)}>Close ×</Pill>
-            </View>
-            <Txt size={10.1} mut>{ui.AR === 'Custom' ? customStart + ' – ' + customEnd : ui.AR + ' selected range'}</Txt>
-            <Txt size={23} weight={600}>{prototypeSnapshot ? '—' : chart.total.toLocaleString('en-US')}</Txt>
-            {!prototypeSnapshot && chart.available ? <LineChart vals={chart.vals} color={c.or} max={chart.max} labels={chart.labels} yLabels={chart.yLabels} /> : <Txt size={10.1} mut style={{ paddingVertical: 24, textAlign: 'center' }}>Live timestamped transaction data is unavailable. No prototype activity is shown.</Txt>}
-            <Txt size={10.1} mut>Service breakdown is unavailable until authorized live transaction data is connected.</Txt>
-          </Pressable>
-        </Pressable>
-      </Modal>
+      <DateRangeModals
+        customOpen={customOpen}
+        onCloseCustom={() => setCustomOpen(false)}
+        customStart={customStart}
+        onChangeStart={setCustomStart}
+        customEnd={customEnd}
+        onChangeEnd={setCustomEnd}
+        rangeError={rangeError}
+        onApply={applyCustomRange}
+        customTitle="Custom range"
+        customDescription="Choose a start and end date. The chart will show only timestamped authorized records within this range."
+        expandedOpen={expandedChart}
+        onCloseExpanded={() => setExpandedChart(false)}
+        chartTitle="Platform activity"
+        rangeLabel={ui.AR === 'Custom' ? customStart + ' – ' + customEnd : ui.AR + ' selected range'}
+        totalLabel={prototypeSnapshot ? '—' : chart.total.toLocaleString('en-US')}
+        chartContent={<>
+          {!prototypeSnapshot && chart.available ? <LineChart vals={chart.vals} color={c.or} max={chart.max} labels={chart.labels} yLabels={chart.yLabels} /> : <Txt size={10.1} mut style={{ paddingVertical: 24, textAlign: 'center' }}>Live timestamped transaction data is unavailable. No prototype activity is shown.</Txt>}
+          <Txt size={10.1} mut>Service breakdown is unavailable until authorized live transaction data is connected.</Txt>
+        </>}
+      />
+
       <Section title="Team and recent activity" right={<Pill onPress={() => go('people', { ps: 'Audit log' })}>Audit log ›</Pill>}>
         <View style={{ flexDirection: 'row', flexWrap: 'wrap', gap: 6, marginBottom: 8 }}>
           {!prototypeSnapshot && db.STAFF.slice(0, 4).map((staff) => <Pill key={staff.n} onPress={() => go('people', { ps: 'Staff' })}>{staff.n} · {staff.st}</Pill>)}
