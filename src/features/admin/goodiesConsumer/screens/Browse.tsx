@@ -274,7 +274,7 @@ export function Search() {
       <View style={{paddingHorizontal: 16}}>
         {S.rec.length ? (<><Ttl>Recent searches</Ttl><View style={{flexDirection: 'row', flexWrap: 'wrap', gap: 8}}>{S.rec.map((x: string) => <Chip key={x} label={x} onPress={() => setQ(x)} />)}</View><Pressable onPress={() => {S.rec = []; emit();}}><T size={13} weight="700" color={th.br} style={{marginTop: 8}}>Clear recent</T></Pressable></>) : null}
         <Ttl>Popular searches</Ttl><View style={{flexDirection: 'row', flexWrap: 'wrap', gap: 8}}>{['Poulet frit', 'Mango', 'Pain patate', 'Riz', 'Pharmacy', 'Jus', 'Seafood'].map(x => <Chip key={x} label={x} onPress={() => setQ(x)} />)}</View>
-        <Ttl>Browse categories</Ttl><View style={{flexDirection: 'row', flexWrap: 'wrap', gap: 8}}>{categories().map(c => <Chip key={c.id} label={c.emoji + ' ' + tx(c.name)} onPress={() => go('catlist', c.id)} />)}</View>
+        <Ttl>Browse categories</Ttl><View style={{flexDirection: 'row', flexWrap: 'wrap', gap: 8}}>{categories().map(c => <Chip key={c.id} label={tx(c.name)} onPress={() => go('catlist', c.id)} />)}</View>
       </View>
     );
   } else {
@@ -295,7 +295,7 @@ export function Search() {
       : (
         <View style={{paddingHorizontal: 16}}>
           {sug.length ? (<><Ttl>Suggestions</Ttl><View style={{flexDirection: 'row', flexWrap: 'wrap', gap: 8}}>{sug.map(x => <Chip key={x} label={x} onPress={() => setQ(x)} />)}</View></>) : null}
-          {cs.length ? (<><Ttl>Categories</Ttl><View style={{flexDirection: 'row', flexWrap: 'wrap', gap: 8}}>{cs.map((c: any) => <Chip key={c.id} label={c.emoji + ' ' + tx(c.name)} onPress={() => go('catlist', c.id)} />)}</View></>) : null}
+          {cs.length ? (<><Ttl>Categories</Ttl><View style={{flexDirection: 'row', flexWrap: 'wrap', gap: 8}}>{cs.map((c: any) => <Chip key={c.id} label={tx(c.name)} onPress={() => go('catlist', c.id)} />)}</View></>) : null}
           {ss.length ? (<><Ttl>Stores</Ttl>{ss.map(s => (
             <View key={s.id} style={{flexDirection: 'row', gap: 10, alignItems: 'center', paddingVertical: 10, borderBottomWidth: 1, borderBottomColor: th.line}}>
               <Pressable accessibilityRole="link" onPress={() => {if (q) rec(r.q.trim()); go('store', s.id);}} style={{flex: 1, flexDirection: 'row', gap: 12, alignItems: 'center', minWidth: 0}}>
