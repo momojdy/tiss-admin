@@ -123,7 +123,7 @@ export function Home({onExit}: {onExit?: () => void}) {
           <Icon name="chevR" size={16} color={th.ink} />
         </Pressable>
       </View>
-      <Sh sel={{kind: 'label', id: 'lbl.flash', field: 'text'}} title={label('lbl.flash', tr('flashDeals'))} right={<Icon name="flash" size={15} color={th.ink} />} right={<Countdown />} />
+      <Sh sel={{kind: 'label', id: 'lbl.flash', field: 'text'}} title={label('lbl.flash', tr('flashDeals'))} right={<Countdown />} />
       <Rail>{dl.filter(d => IT[d[0]]).map(d => <Dish key={d[0]} i={IT[d[0]]} off={d[1]} left={d[2]} />)}</Rail>
       {os.length ? (<>
         <Sh sel={{kind: 'label', id: 'lbl.again', field: 'text'}} title={label('lbl.again', tr('orderAgain'))} link="History" onLink={() => tab('orders')} />
