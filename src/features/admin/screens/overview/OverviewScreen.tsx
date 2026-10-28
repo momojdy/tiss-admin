@@ -90,7 +90,7 @@ export function OverviewScreen() {
 
   return (
     <View>
-      <Heading title="Platform\nOverview" kpis={[
+      <Heading title="Platform & Overview" kpis={[
         { icon: 'users', value: prototypeSnapshot ? '—' : db.ACC.filter((account) => account.type === 'Customer').length.toLocaleString('en-US'), label: 'Active customers', tag: prototypeSnapshot ? 'Not connected yet' : undefined, onPress: () => go('people', { ps: 'Accounts' }) }, 
         { icon: 'building-2', value: prototypeSnapshot ? '—' : db.APPS.filter((app) => app.st === 3).length, label: 'Approved businesses', onPress: () => go('operations', { ov: 'List' }) }, 
         { icon: 'clock-alert', value: prototypeSnapshot ? '—' : waiting.length, label: 'Waiting for review', tag: prototypeSnapshot ? 'Not connected yet' : overdue.length + ' overdue', tone: overdue.length ? 'r' : '', onPress: () => go('operations', { ov: 'List' }) }, 
