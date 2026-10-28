@@ -60,7 +60,7 @@ export function QuickCreateSheet({ onClose }: { onClose: () => void }) {
           const minimumOrder = Number(values.minimumOrder || 0);
           const usageLimit = Number(values.usageLimit || 0);
           const perCustomerLimit = Number(values.perCustomerLimit || 0);
-          const timePattern = /^(?:[01]\\d|2[0-3]):[0-5]\\d$/;
+          const timePattern = /^(?:[01]\d|2[0-3]):[0-5]\d$/;
           if (!/^[A-Za-z0-9_-]{3,32}$/.test(code)) return 'Coupon codes must be 3 to 32 letters, numbers, underscores or hyphens.';
           if (!Number.isFinite(discount) || discount < 0 || (String(values.discountType) === 'Percentage off' && discount > 100)) return 'Enter a valid discount value. Percentages cannot exceed 100.';
           if (!Number.isFinite(minimumOrder) || minimumOrder < 0) return 'Minimum order amount cannot be negative.';
