@@ -16,7 +16,13 @@
     "plugins": [
       "expo-font",
       "expo-sharing",
-      "expo-status-bar"
+      "expo-status-bar",
+      [
+        "expo-image-picker",
+        {
+          "photosPermission": "Allow Wantiss Admin to select brand images from your photo library."
+        }
+      ]
     ],
     "scheme": "wantiss-admin"
   }
