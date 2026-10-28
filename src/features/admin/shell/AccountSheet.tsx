@@ -24,6 +24,7 @@ export function AccountSheet({ onClose }: { onClose: () => void }) {
   const [currentPassword, setCurrentPassword] = useState('');
   const [newPassword, setNewPassword] = useState('');
   const [confirmPassword, setConfirmPassword] = useState('');
+  const [passwordHintsVisible, setPasswordHintsVisible] = useState(false);
   const [passwordBusy, setPasswordBusy] = useState(false);
   const [passwordMessage, setPasswordMessage] = useState('');
   const [passwordBad, setPasswordBad] = useState(false);
@@ -126,10 +127,11 @@ export function AccountSheet({ onClose }: { onClose: () => void }) {
         ) : (
           <>
             <AuthField label="Current password" value={currentPassword} onChangeText={setCurrentPassword} error={undefined} password textContentType="password" autoComplete="current-password" />
-            <AuthField label="New password" value={newPassword} onChangeText={setNewPassword} error={undefined} password textContentType="newPassword" autoComplete="new-password" />
-            <PasswordChecklist value={newPassword} />
-            <AuthField label="Confirm new password" value={confirmPassword} onChangeText={setConfirmPassword} error={undefined} password textContentType="newPassword" autoComplete="new-password" onSubmitEditing={changePassword} />
+            <AuthField label="New password" value={newPassword} onChangeText={(value) => { setNewPassword(value); setPasswordHintsVisible(true); }} error={undefined} password textContentType="newPassword" autoComplete="new-password" onFocus={() => setPasswordHintsVisible(true)} />
+            {passwordHintsVisible ? <PasswordChecklist value={newPassword} /> : null}
+            <AuthField label="Confirm new password" value={confirmPassword} onChangeText={setConfirmPassword} error={undefined} password textContentType="new-password" autoComplete="new-password" onFocus={() => setPasswordHintsVisible(true)} onSubmitEditing={changePassword} />
             <PrimaryButton label="Save new password" onPress={changePassword} busy={passwordBusy} busyLabel="Saving password…" />
+            <View style={{ height: 8 }} />
             <OutlineBtn onPress={() => { setRecoveryMode(true); setPasswordMessage(''); setPasswordBad(false); }}>Forgot your current password?</OutlineBtn>
           </>
         )}
