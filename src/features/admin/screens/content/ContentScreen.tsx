@@ -303,21 +303,21 @@ export function ContentScreen() {
               <Pill>{prototypeSnapshot ? '—' : displayBanners.filter((banner) => banner.st === 'Scheduled').length} scheduled</Pill>
               <Pill>{prototypeSnapshot ? '—' : displayBanners.filter((banner) => banner.st === 'Draft' || banner.st === 'In review').length} drafts/reviews</Pill>
             </View>
-            <ListRows empty={loading ? 'Loading placements…' : prototypeSnapshot ? 'Not connected yet' : 'No placements found.'} rows={displayBanners.filter((banner) => banner.st !== 'Archived').slice(0, 6).map((banner) => ({
+            <ListRows empty={loading ? 'Loading placements…' : prototypeSnapshot ? 'Not connected yet' : 'Nothing here yet'} rows={displayBanners.filter((banner) => banner.st !== 'Archived').slice(0, 6).map((banner) => ({
               key: banner.id, main: banner.pl, sub: banner.t + ' · ' + banner.svc,
               right: <StatusPill label={banner.st} small />,
               onPress: () => editBannerDraft(banner),
             }))} />
           </Section>
           <Section title="Promotions" right={<OutlineBtn onPress={openQuickCreate}>+ New promotion</OutlineBtn>}>
-            <ListRows empty={loading ? 'Loading promotions…' : prototypeSnapshot ? 'Not connected yet' : 'No promotions found.'} rows={displayPromotions.slice(0, 5).map((promotion) => ({
+            <ListRows empty={loading ? 'Loading promotions…' : prototypeSnapshot ? 'Not connected yet' : 'Nothing here yet'} rows={displayPromotions.slice(0, 5).map((promotion) => ({
               key: promotion.id, main: promotion.n, sub: promotion.svc + ' · ' + promotion.fund,
               right: <StatusPill label={promotion.st} small />,
               onPress: () => editPromotionDraft(promotion),
             }))} />
           </Section>
           <Section title="Announcements" right={<OutlineBtn onPress={openQuickCreate}>+ New announcement</OutlineBtn>}>
-            <ListRows empty={loading ? 'Loading announcements…' : prototypeSnapshot ? 'Not connected yet' : 'No announcements found.'} rows={displayAnnouncements.slice(0, 4).map((announcement) => ({
+            <ListRows empty={loading ? 'Loading announcements…' : prototypeSnapshot ? 'Not connected yet' : 'Nothing here yet'} rows={displayAnnouncements.slice(0, 4).map((announcement) => ({
               key: announcement.id, main: announcement.t, sub: announcement.aud + (announcement.when ? ' · ' + announcement.when : ''),
               right: <StatusPill label={announcement.st} small />,
               onPress: () => editAnnouncementDraft(announcement),
@@ -327,15 +327,15 @@ export function ContentScreen() {
       ) : null}
 
       {activeSection === 'Banners' ? <Section title={'Banners and placements · ' + displayBanners.length} right={<OutlineBtn primary onPress={openQuickCreate}>+ New banner</OutlineBtn>}>
-        <ListRows empty={loading ? 'Loading banners…' : prototypeSnapshot ? 'Not connected yet' : 'No banners found.'} rows={displayBanners.map((banner) => ({ key: banner.id, main: banner.t, sub: banner.svc + ' · ' + banner.pl + (banner.to ? ' · ends ' + banner.to : ''), right: <View style={{ flexDirection: 'row', alignItems: 'center', gap: 5 }}><StatusPill label={banner.st} small /><OutlineBtn onPress={() => editBannerDraft(banner)}>Edit draft</OutlineBtn></View>, onPress: () => editBannerDraft(banner) }))} />
+        <ListRows empty={loading ? 'Loading banners…' : prototypeSnapshot ? 'Not connected yet' : 'Nothing here yet'} rows={displayBanners.map((banner) => ({ key: banner.id, main: banner.t, sub: banner.svc + ' · ' + banner.pl + (banner.to ? ' · ends ' + banner.to : ''), right: <View style={{ flexDirection: 'row', alignItems: 'center', gap: 5 }}><StatusPill label={banner.st} small /><OutlineBtn onPress={() => editBannerDraft(banner)}>Edit draft</OutlineBtn></View>, onPress: () => editBannerDraft(banner) }))} />
       </Section> : null}
 
       {activeSection === 'Promotions' ? <Section title={'Promotions and campaigns · ' + displayPromotions.length} right={<OutlineBtn primary onPress={openQuickCreate}>+ New promotion</OutlineBtn>}>
-        <ListRows empty={loading ? 'Loading promotions…' : prototypeSnapshot ? 'Not connected yet' : 'No promotions found.'} rows={displayPromotions.map((promotion) => ({ key: promotion.id, main: promotion.n, sub: promotion.svc + ' · ' + promotion.fund + ' · ' + promotion.inc, right: <View style={{ flexDirection: 'row', alignItems: 'center', gap: 5 }}><StatusPill label={promotion.st} small /><OutlineBtn onPress={() => editPromotionDraft(promotion)}>Edit draft</OutlineBtn></View>, onPress: () => editPromotionDraft(promotion) }))} />
+        <ListRows empty={loading ? 'Loading promotions…' : prototypeSnapshot ? 'Not connected yet' : 'Nothing here yet'} rows={displayPromotions.map((promotion) => ({ key: promotion.id, main: promotion.n, sub: promotion.svc + ' · ' + promotion.fund + ' · ' + promotion.inc, right: <View style={{ flexDirection: 'row', alignItems: 'center', gap: 5 }}><StatusPill label={promotion.st} small /><OutlineBtn onPress={() => editPromotionDraft(promotion)}>Edit draft</OutlineBtn></View>, onPress: () => editPromotionDraft(promotion) }))} />
       </Section> : null}
 
       {activeSection === 'Announcements' ? <Section title={'Announcements · ' + displayAnnouncements.length} right={<OutlineBtn primary onPress={openQuickCreate}>+ New announcement</OutlineBtn>}>
-        <ListRows empty={loading ? 'Loading announcements…' : prototypeSnapshot ? 'Not connected yet' : 'No announcements found.'} rows={displayAnnouncements.map((announcement) => ({ key: announcement.id, main: announcement.t, sub: announcement.aud + (announcement.when ? ' · ' + announcement.when : ''), right: <View style={{ flexDirection: 'row', alignItems: 'center', gap: 5 }}><StatusPill label={announcement.st} small /><OutlineBtn onPress={() => editAnnouncementDraft(announcement)}>Edit draft</OutlineBtn></View>, onPress: () => editAnnouncementDraft(announcement) }))} />
+        <ListRows empty={loading ? 'Loading announcements…' : prototypeSnapshot ? 'Not connected yet' : 'Nothing here yet'} rows={displayAnnouncements.map((announcement) => ({ key: announcement.id, main: announcement.t, sub: announcement.aud + (announcement.when ? ' · ' + announcement.when : ''), right: <View style={{ flexDirection: 'row', alignItems: 'center', gap: 5 }}><StatusPill label={announcement.st} small /><OutlineBtn onPress={() => editAnnouncementDraft(announcement)}>Edit draft</OutlineBtn></View>, onPress: () => editAnnouncementDraft(announcement) }))} />
       </Section> : null}
 
       {activeSection === 'Calendar' ? <Section title="Publishing calendar">
@@ -350,7 +350,7 @@ export function ContentScreen() {
       </Section> : null}
 
       {activeSection === 'Approvals' ? <Section title="Approval queue">
-        <ListRows empty={prototypeSnapshot ? 'Not connected yet' : 'Nothing is marked as in review.'} rows={[
+        <ListRows empty={prototypeSnapshot ? 'Not connected yet' : 'Nothing here yet'} rows={[
           ...displayBanners.filter((banner) => banner.st === 'In review' || banner.st === 'Draft').map((banner) => ({ key: 'banner-' + banner.id, main: banner.t, sub: 'Banner · ' + banner.svc, right: <OutlineBtn onPress={() => stageContentDraft('approval.' + banner.id, banner.id, { item_type: 'banner', proposed_action: 'review', item_id: banner.id })}>Stage review</OutlineBtn> })),
           ...displayPromotions.filter((promotion) => promotion.st === 'In review' || promotion.st === 'Draft').map((promotion) => ({ key: 'promotion-' + promotion.id, main: promotion.n, sub: 'Promotion · ' + promotion.svc, right: <OutlineBtn onPress={() => stageContentDraft('approval.' + promotion.id, promotion.id, { item_type: 'promotion', proposed_action: 'review', item_id: promotion.id })}>Stage review</OutlineBtn> })),
         ]} />
@@ -358,7 +358,7 @@ export function ContentScreen() {
       </Section> : null}
 
       {activeSection === 'History' ? <Section title="Publishing history (read-only)">
-        <ListRows empty={loading ? 'Loading publishing history…' : prototypeSnapshot ? 'Not connected yet' : 'No history entries.'} rows={[
+        <ListRows empty={loading ? 'Loading publishing history…' : prototypeSnapshot ? 'Not connected yet' : 'Nothing here yet'} rows={[
           ...displayHistory.slice(0, 30).map((entry, i) => ({ key: 'change-' + i, main: entry[1], sub: entry[0], right: 'Activity' })),
           ...displayAudit.slice(0, 20).map((entry, i) => ({ key: 'audit-' + i, main: entry[0], sub: entry[1], right: entry[2] })),
         ]} />
@@ -367,7 +367,7 @@ export function ContentScreen() {
       {activeSection === 'Media' ? (
         <>
           <Section title={'Media library placements · ' + displayMedia.length}>
-            <ListRows empty={loading ? 'Loading media placements…' : prototypeSnapshot ? 'Not connected yet' : 'No media placements found.'} rows={displayMedia.map((media, index) => ({ key: 'media-' + index, main: media[0], sub: media[1].length ? 'Used in ' + media[1].length + ' placement(s)' : 'Unused', right: 'Stage edit ›', onPress: () => stageContentDraft('media', String(index), { media_key: media[0], used_in: media[1] }) }))} />
+            <ListRows empty={loading ? 'Loading media placements…' : prototypeSnapshot ? 'Not connected yet' : 'Nothing here yet'} rows={displayMedia.map((media, index) => ({ key: 'media-' + index, main: media[0], sub: media[1].length ? 'Used in ' + media[1].length + ' placement(s)' : 'Unused', right: 'Stage edit ›', onPress: () => stageContentDraft('media', String(index), { media_key: media[0], used_in: media[1] }) }))} />
           </Section>
           <View style={{ flexDirection: 'row', flexWrap: 'wrap', gap: 8 }}>
             <OutlineBtn primary onPress={() => { void pickAsset(); }} disabled={busy}>Upload asset</OutlineBtn>
@@ -375,7 +375,6 @@ export function ContentScreen() {
           </View>
           <Section title={'Customer assets · ' + filteredAssets.length + ' of ' + assets.length}>
             <TextInput value={assetSearch} onChangeText={setAssetSearch} placeholder="Search asset key, feature, placement…" placeholderTextColor={c.mut} style={{ borderWidth: 1, borderColor: c.bd, borderRadius: 10, paddingHorizontal: 10, paddingVertical: 8, color: c.ink, backgroundColor: c.card, fontSize: 12, marginBottom: 8 }} />
-            <Txt size={10} mut style={{ marginBottom: 5 }}>Assets are grouped by feature and customer destination. Name new keys like goodies.home.promo-banner.weekend.</Txt>
              <SelectMenu label="Feature" options={assetFeatures} value={assetFeature} onChange={setAssetFeature} />
              <SelectMenu label="Customer page / placement" options={assetPlacements} value={assetPlacement} onChange={setAssetPlacement} />
             <ListRows empty={loading ? 'Loading media assets…' : error ? 'Media assets could not be loaded. Retry above.' : 'No assets match these filters.'} rows={filteredAssets.map((asset) => {
