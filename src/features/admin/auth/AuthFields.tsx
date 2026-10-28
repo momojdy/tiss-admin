@@ -8,7 +8,7 @@ export interface AuthFieldProps extends Omit<TextInputProps, 'onChange'> {
   label: string; error?: string; value: string; onChangeText: (v: string) => void; password?: boolean; readOnly?: boolean;
 }
 
-export function AuthField({ label, error, value, onChangeText, password, readOnly, ...rest }: AuthFieldProps) {
+export function AuthField({ label, error, value, onChangeText, password, readOnly, onFocus: onFieldFocus, onBlur: onFieldBlur, ...rest }: AuthFieldProps) {
   const { c } = useTheme();
   const [show, setShow] = useState(false);
   const [focus, setFocus] = useState(false);
@@ -19,7 +19,7 @@ export function AuthField({ label, error, value, onChangeText, password, readOnl
         <TextInput
           {...rest} value={value} onChangeText={onChangeText} editable={!readOnly} secureTextEntry={password && !show}
           accessibilityLabel={label} placeholderTextColor={c.mut} autoCapitalize="none" autoCorrect={false} spellCheck={false}
-          onFocus={() => setFocus(true)} onBlur={() => setFocus(false)}
+          onFocus={(event) => { setFocus(true); onFieldFocus?.(event); }} onBlur={(event) => { setFocus(false); onFieldBlur?.(event); }}
           style={{ height: 48, borderRadius: 14, paddingHorizontal: 14, paddingRight: password ? 72 : 14, fontSize: 16, color: c.ink, backgroundColor: c.card,
             borderWidth: 1, borderColor: error ? c.or : focus ? c.gr : c.bd }}
         />
