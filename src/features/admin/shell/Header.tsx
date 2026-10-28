@@ -1,4 +1,4 @@
-import { Pressable, View } from 'react-native';
+import { Image, Pressable, View } from 'react-native';
 import { useDb } from '../state/db';
 import { unreadCount } from '../state/notices';
 import { me } from '../state/access';
@@ -26,7 +26,7 @@ export function Header({ onBell, onAccount, onSearch }: { onBell: () => void; on
           {n ? <View style={{ position: 'absolute', right: -2, top: -2, minWidth: 14, height: 14, borderRadius: 7, backgroundColor: c.or, alignItems: 'center', justifyContent: 'center' }}><Txt size={8.5} color="#fff" weight={600}>{n}</Txt></View> : null}
         </View>
         <Pressable onPress={onAccount} accessibilityLabel={'Account menu for ' + me().n} hitSlop={6}>
-          <View style={{ width: 30, height: 30, borderRadius: 15, borderWidth: 1, borderColor: c.bd, backgroundColor: c.card, alignItems: "center", justifyContent: "center" }}><AppIcon name="user-round" size={17} color={c.ink} /></View>
+          {session.avatarUrl ? <Image source={{ uri: session.avatarUrl }} style={{ width: 30, height: 30, borderRadius: 15, borderWidth: 1, borderColor: c.bd }} /> : <View style={{ width: 30, height: 30, borderRadius: 15, borderWidth: 1, borderColor: c.bd, backgroundColor: c.card, alignItems: "center", justifyContent: "center" }}><AppIcon name="user-round" size={17} color={c.ink} /></View>}
         </Pressable>
       </View>
     </View>
