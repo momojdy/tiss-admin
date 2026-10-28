@@ -155,8 +155,8 @@ export function OverviewScreen() {
       <Section title="Money snapshot" right={<Pill onPress={() => go('finance')}>Finance ›</Pill>}>
         <ListRows rows={[
           { key: 'completed', main: 'Completed this week', right: <Txt size={10.1}>{prototypeSnapshot ? '—' : `${completed.length} · ${mny(completed.reduce((n, tx) => n + tx.a, 0))}`}</Txt>, onPress: () => go('finance', { fs: 'Completed' }) }, 
-          { key: 'pending', main: 'Pending settlement', right: <Txt size={10.1}>{prototypeSnapshot ? 'Not connected yet' : `${pending.length} · ${mny(pending.reduce((n, tx) => n + tx.a, 0))}`}</Txt>, onPress: () => go('finance', { fs: 'Pending' }) }, 
-          { key: 'failed', main: 'Failed or flagged', right: <Txt size={10.1} color={failed.length ? c.or : c.ink}>{prototypeSnapshot ? 'Not connected yet' : `${failed.length} · ${mny(failed.reduce((n, tx) => n + tx.a, 0))}`}</Txt>, onPress: () => go('finance', { fs: 'Failed' }) }, 
+          { key: 'pending', main: 'Pending settlement', right: <Txt size={10.1}>{prototypeSnapshot ? '—' : `${pending.length} · ${mny(pending.reduce((n, tx) => n + tx.a, 0))}`}</Txt>, onPress: () => go('finance', { fs: 'Pending' }) }, 
+          { key: 'failed', main: 'Failed or flagged', right: <Txt size={10.1} color={failed.length ? c.or : c.ink}>{prototypeSnapshot ? '—' : `${failed.length} · ${mny(failed.reduce((n, tx) => n + tx.a, 0))}`}</Txt>, onPress: () => go('finance', { fs: 'Failed' }) }, 
           { key: 'refunds', main: 'Refunds waiting', right: prototypeSnapshot ? '—' : String(refunds.length), onPress: () => go('finance', { fv: 'Refunds' }) }, 
           { key: 'payouts', main: 'Payouts due', right: prototypeSnapshot ? '—' : String(db.PAYO.filter((payout) => payout[3] !== 'Paid').length), onPress: () => go('finance', { fv: 'Payouts' }) }, 
         ]} />
