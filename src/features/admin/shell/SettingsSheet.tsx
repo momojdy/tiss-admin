@@ -142,7 +142,7 @@ export function SettingsSheet({ onClose }: { onClose: () => void }) {
         ...(session.role === 'super_admin' && session.status === 'active' ? [['Branding & identity', 'Logo and wordmark used in the admin header'] as const] : []),
       ].map(([name, description]) => (
         <View key={name}>
-          <Pressable onPress={() => setSelected((current) => current === name ? null : name)} accessibilityRole="button" accessibilityState={{ expanded: selected === name }}
+          <Pressable onPress={() => { if (name === 'Branding & identity') { closeAll(); go('branding'); return; } setSelected((current) => current === name ? null : name); }} accessibilityRole="button" accessibilityState={{ expanded: selected === name }}
             style={{ paddingVertical: 13, paddingHorizontal: 12, borderRadius: 12, backgroundColor: selected === name ? '#00000008' : 'transparent', flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between' }}>
             <View style={{ flex: 1, paddingRight: 10 }}>
               <Txt size={12.5} weight={500}>{name}</Txt>
