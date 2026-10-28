@@ -11,6 +11,7 @@ import { useInvite, useNewRole, useRoleEditor } from '../../overlays/PeopleDrawe
 import { Section } from '../../ui/Card';
 import { Btn, Chips, Row, SearchInput, SelectMenu, StatusPill } from '../../ui/Controls';
 import { Heading } from '../../ui/Heading';
+import { AppIcon } from '../../ui/AppIcon';
 import { ListRows } from '../../ui/Lists';
 import { Txt } from '../../ui/Txt';
 import { PermissionsBody, RequestsBody } from './PermissionsPanels';
@@ -29,7 +30,7 @@ const RESTRICTION_TEST: Record<string, (action: string) => boolean> = {
 /** Short column heads for the access matrix: Overview -> Ov, Operations -> Op ... */
 const abbr = (s: string) => s.slice(0, 2);
 
-const Chev = () => <Txt size={10.1}>›</Txt>;
+const Chev = () => <AppIcon name="chevron-right" size={12} />;
 const Right = ({ children }: { children: React.ReactNode }) => <View style={{ flexDirection: 'row', alignItems: 'center', gap: 4 }}>{children}<Chev /></View>;
 
 export function PeopleScreen() {
