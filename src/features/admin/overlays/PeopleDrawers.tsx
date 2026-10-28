@@ -16,6 +16,7 @@ import { KeyValue, ListRows } from '../ui/Lists';
 import { DialogCard, DrawerBody, useOverlay } from '../ui/Overlay';
 import { useToast } from '../ui/Toast';
 import { Txt } from '../ui/Txt';
+import { AppIcon } from '../ui/AppIcon';
 import { useTheme } from '../theme/ThemeContext';
 import { useNav } from '../shell/Nav';
 import { inviteStaff as inviteStaffBackend, setStaffStatus as setStaffStatusBackend, grantStaffPermission as grantStaffPermissionBackend, revokeStaffPermission as revokeStaffPermissionBackend, listPermissionGrants, applyAccountRestriction as applyAccountRestrictionBackend, liftAccountRestriction as liftAccountRestrictionBackend, updateAccountRestriction as updateAccountRestrictionBackend } from '../lib/adminBackend';
@@ -361,7 +362,7 @@ export function AccountDrawer({ id, close }: { id: string; close: () => void }) 
       </Section>
       <Section title="What this means"><Txt size={12} lh={1.4}>{what}</Txt></Section>
       <Section title="Activity">
-        <ListRows rows={[{ main: tx.length + ' transactions', right: 'Open in Finance ›', onPress: () => { closeAll(); nav.go('finance', { fv: 'Transactions', fs: 'All', fq: a.n }); } }]} />
+        <ListRows rows={[{ main: tx.length + ' transactions', right: <View style={{ flexDirection: 'row', alignItems: 'center', gap: 4 }}>Open in Finance<AppIcon name="chevron-right" size={12} /></View>, onPress: () => { closeAll(); nav.go('finance', { fv: 'Transactions', fs: 'All', fq: a.n }); } }]} />
       </Section>
       <Section title="Status history (append only)">
         <ListRows empty="No history yet." rows={a.hist.slice().reverse().map((h, i) => ({ key: String(i), main: h.action, sub: h.txt + ' · ' + h.by + (h.internal && canSusp ? ' · internal note: ' + h.internal : ''), right: h.when }))} />
