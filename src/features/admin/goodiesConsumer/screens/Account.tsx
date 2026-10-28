@@ -3,7 +3,7 @@ import React, {useState, useEffect, useRef} from 'react';
 import {View, Text, Pressable, ScrollView, TextInput, KeyboardAvoidingView, Platform} from 'react-native';
 import {Icon} from '../components/Icon';
 import {T, Bar, Cta, Card, Row, Badge, Ttl, Empty, Switch, Input, Chip, useTheme, Tile} from '../components/ui';
-import {S, defAddr, money, emit, save, toast, ui, push, reset, STB, previewOnly} from '../store';
+import {S, defAddr, money, emit, save, toast, ui, push, reset, STB, previewOnly, zoneOf} from '../store';
 import {back, go, tab, togglePref} from '../actions';
 import {setTheme} from '../store';
 import {t as tr} from '../i18n';
@@ -73,7 +73,6 @@ function Profile() {
 
 function Addresses() {
   const th = useTheme(), [edit, setEdit] = useState<any>(null);
-  const zoneOf = (t: string) => {let x = 0; for (let i = 0; i < t.length; i++) x = (x * 31 + t.charCodeAt(i)) % 97; return Math.round((x % 5) * 9) / 10;};
   const saveAddr = () => {
     if (previewOnly) { toast('Address changes are disabled in the admin preview.'); return; }
     const t = (edit.t || '').trim(); if (t.length < 4) {toast('Enter the street and area'); return;}
