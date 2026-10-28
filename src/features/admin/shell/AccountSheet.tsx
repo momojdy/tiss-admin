@@ -13,6 +13,7 @@ import { Card, CardTitle } from '../ui/Card';
 import { Chips, OutlineBtn, Seg } from '../ui/Controls';
 import { ListRows } from '../ui/Lists';
 import { Txt } from '../ui/Txt';
+import { AppIcon } from '../ui/AppIcon';
 import { useTheme, ThemeMode } from '../theme/ThemeContext';
 import { MyAccessCard } from '../overlays/GrantDrawers';
 import { SettingsSheet } from './SettingsSheet';
@@ -150,7 +151,7 @@ export function AccountSheet({ onClose }: { onClose: () => void }) {
     <DrawerBody title="Account" onClose={onClose}>
       <Card>
         <View style={{ flexDirection: 'row', alignItems: 'center', gap: 12 }}>
-          {session.avatarUrl ? <Image source={{ uri: session.avatarUrl }} style={{ width: 54, height: 54, borderRadius: 27 }} /> : <View style={{ width: 54, height: 54, borderRadius: 27, backgroundColor: '#0000000A', alignItems: 'center', justifyContent: 'center' }}><Txt size={22}>●</Txt></View>}
+          {session.avatarUrl ? <Image source={{ uri: session.avatarUrl }} style={{ width: 54, height: 54, borderRadius: 27 }} /> : <View style={{ width: 54, height: 54, borderRadius: 27, backgroundColor: '#0000000A', alignItems: 'center', justifyContent: 'center' }}><AppIcon name="user-round" size={25} /></View>}
           <View style={{ flex: 1 }}>
             <Txt size={13} weight={500}>{mine.n}</Txt>
             <Txt size={10.1} mut>{mine.role} · {mine.st}</Txt>
