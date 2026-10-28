@@ -7,6 +7,7 @@ import { useTheme } from '../theme/ThemeContext';
 import { Pill } from '../ui/Controls';
 import { Txt } from '../ui/Txt';
 import { AuthField, BigBadge, LinkText, NoticeBox, PasswordChecklist, PrimaryButton, SecondaryButton } from './AuthFields';
+import { AppIcon } from '../ui/AppIcon';
 import { emailOk, passwordError } from './authLogic';
 import { supabase } from '../lib/supabase';
 import { session, setServerGrants } from '../state/access';
@@ -219,7 +220,7 @@ export function AuthFlow({ notice, noticeBad, onDone }: Props) {
               <SecondaryButton label="Back to sign in" onPress={() => { setView('in'); message(''); }} />
             </>}
             {view === 'sent' && <>
-              <BigBadge glyph="✉" />
+              <BigBadge glyph={<AppIcon name="mail" size={22} />} />
               <Txt size={22.1} lh={1.08}>{'Check your\nemail'}</Txt>
               <Txt size={13} mut style={{ marginTop: 6, marginBottom: 14 }}>Enter the 6-digit code from your reset email.</Txt>
               <AuthField label="Work email" value={email} onChangeText={setEmail} error={undefined} keyboardType="email-address" autoCapitalize="none" />
