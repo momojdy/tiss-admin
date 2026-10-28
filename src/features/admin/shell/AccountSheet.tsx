@@ -1,6 +1,6 @@
 import { useState } from 'react';
 import { db, bump, useDb } from '../state/db';
-import { can, me, realMe, session, setView } from '../state/access';
+import { can, me, realMe, secLv, session, setView } from '../state/access';
 import { REQ } from '../state/requirements';
 import { leaveApp, passwordError } from '../auth/authLogic';
 import { AuthField, PasswordChecklist, PrimaryButton, NoticeBox } from '../auth/AuthFields';
@@ -150,7 +150,7 @@ export function AccountSheet({ onClose }: { onClose: () => void }) {
         <CardTitle title="My activity" />
         <ListRows empty="No activity yet." rows={mineLog.map((a, i) => ({ key: String(i), main: a[0], sub: a[2] }))} />
       </Card>
-      {can(...REQ.settings) ? <OutlineBtn onPress={() => { closeAll(); openDrawer((close) => <SettingsSheet onClose={close} />); }}>Open settings ›</OutlineBtn> : null}
+      {secLv(7) > 0 ? <OutlineBtn onPress={() => { closeAll(); openDrawer((close) => <SettingsSheet onClose={close} />); }}>Open settings ›</OutlineBtn> : null}
       <OutlineBtn onPress={() => { closeAll(); leaveApp(); bump(); }}>Sign out</OutlineBtn>
     </DrawerBody>
   );
