@@ -5,7 +5,7 @@ import { useTheme, ThemeMode } from '../theme/ThemeContext';
 import { useOverlay, DrawerBody } from '../ui/Overlay';
 import { Card, CardTitle } from '../ui/Card';
 import { ListRows } from '../ui/Lists';
-import { Pill, Seg, OutlineBtn } from '../ui/Controls';
+import { Pill, OutlineBtn } from '../ui/Controls';
 import { Txt } from '../ui/Txt';
 import { can, session } from '../state/access';
 import { REQ } from '../state/requirements';
@@ -67,7 +67,7 @@ const personal = new Set(['Appearance', 'Notifications']);
 const initial = () => Object.fromEntries(Object.entries(defaults).map(([key, fields]) => [key, Object.fromEntries(fields.map((field) => [field.id, field.value]))])) as Record<string, Record<string, SettingValue>>;
 
 export function SettingsSheet({ onClose }: { onClose: () => void }) {
-  const { mode, setMode } = useTheme();
+  const { setMode } = useTheme();
   const { closeAll } = useOverlay();
   const { go } = useNav();
   const toast = useToast();
@@ -139,14 +139,6 @@ export function SettingsSheet({ onClose }: { onClose: () => void }) {
 
   return (
     <DrawerBody title="Settings" onClose={onClose}>
-      <Card>
-        <CardTitle title="Appearance" />
-        <Txt size={10.1} mut style={{ marginBottom: 8 }}>Theme follows your selected mode.</Txt>
-        <Seg<ThemeMode> options={['light', 'dark', 'system']} value={mode} onChange={(next) => { setMode(next); const nextSettings = { ...settings, Appearance: { ...(settings.Appearance || {}), mode: next[0].toUpperCase() + next.slice(1) } }; setSettings(nextSettings); void AsyncStorage.setItem(STORAGE_KEY, JSON.stringify(nextSettings)); }} labels={(value) => value[0].toUpperCase() + value.slice(1)} />
-        <View style={{ flexDirection: 'row', flexWrap: 'wrap', gap: 6, marginTop: 10 }}>
-          <Pill onPress={() => editCategory('Appearance')}>More appearance settings ›</Pill>
-        </View>
-      </Card>
       <ListRows rows={categories.map(([name, description]) => ({
         key: name, main: name, sub: description, right: selected === name ? '⌄' : '›',
         onPress: () => setSelected((current) => current === name ? null : name),
