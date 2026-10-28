@@ -1,7 +1,7 @@
 import { useCallback, useEffect, useState } from 'react';
 import { TextInput, View } from 'react-native';
 import { supabase } from '../../lib/supabase';
-import { saveCmsVersion } from '../../lib/adminBackend';
+import { publishCmsVersion, saveCmsVersion } from '../../lib/adminBackend';
 import { ui } from '../../state/db';
 import { can } from '../../state/access';
 import { REQ } from '../../state/requirements';
@@ -61,6 +61,8 @@ export function CustomerPageEditorScreen() {
   const [error, setError] = useState('');
   const [loading, setLoading] = useState(false);
   const [saving, setSaving] = useState(false);
+  const [publishing, setPublishing] = useState(false);
+  const [confirmPublish, setConfirmPublish] = useState(false);
 
   const reload = useCallback(async (): Promise<ContentRow[]> => {
     setLoading(true);
@@ -118,6 +120,7 @@ export function CustomerPageEditorScreen() {
     setViewMode('Draft');
     setEditorMode('Edit');
     setError('');
+    setConfirmPublish(false);
   };
 
   const startBlankDraft = () => {
@@ -275,6 +278,24 @@ export function CustomerPageEditorScreen() {
     }
   };
 
+  const publishSelected = async () => {
+    if (!selected || selected.id === 'local-new' || selected.status !== 'draft' || !can(...REQ.publish) || publishing) return;
+    setPublishing(true);
+    setError('');
+    try {
+      await publishCmsVersion(selected.id);
+      setConfirmPublish(false);
+      const next = await reload();
+      const published = next.find((row) => row.id === selected.id);
+      if (published) openRow(published);
+      toast('Published customer page version. The public content endpoint will serve the published version.');
+    } catch (e) {
+      setError(e instanceof Error ? e.message : 'The customer page version could not be published.');
+    } finally {
+      setPublishing(false);
+    }
+  };
+
   const fieldStyle = { borderWidth: 1, borderColor: c.bd, borderRadius: 10, paddingHorizontal: 9, paddingVertical: 8, marginTop: 5, marginBottom: 8, color: c.ink, backgroundColor: c.card, fontSize: 11 } as const;
 
   return (
@@ -406,8 +427,20 @@ export function CustomerPageEditorScreen() {
             <View style={{ flexDirection: 'row', flexWrap: 'wrap', gap: 8, marginTop: 8 }}>
               <OutlineBtn onPress={() => { setJson(JSON.stringify(selected.payload, null, 2)); setError(''); }} disabled={!editable}>Reset edits</OutlineBtn>
               <OutlineBtn primary disabled={saving || !editable} onPress={() => { void createDraft(); }}>{saving ? 'Saving…' : 'Save private draft'}</OutlineBtn>
+              <OutlineBtn disabled={!selected || selected.id === 'local-new' || selected.status !== 'draft' || !can(...REQ.publish) || publishing || editable && Boolean(parsedDraft && JSON.stringify(parsedDraft) !== JSON.stringify(selected.payload))} onPress={() => setConfirmPublish(true)}>Publish…</OutlineBtn>
             </View>
+            {confirmPublish ? (
+              <View style={{ marginTop: 8, padding: 10, borderWidth: 1, borderColor: c.or, borderRadius: 10 }}>
+                <Txt size={11} weight={500}>Publish this customer page version?</Txt>
+                <Txt size={10} mut style={{ marginTop: 3 }}>Only the saved version is published. Unsaved edits must be saved as a new draft first.</Txt>
+                <View style={{ flexDirection: 'row', flexWrap: 'wrap', gap: 6, marginTop: 8 }}>
+                  <OutlineBtn primary disabled={publishing} onPress={() => { void publishSelected(); }}>{publishing ? 'Publishing…' : 'Confirm publish'}</OutlineBtn>
+                  <OutlineBtn disabled={publishing} onPress={() => setConfirmPublish(false)}>Cancel</OutlineBtn>
+                </View>
+              </View>
+            ) : null}
             {!can(...REQ.content) ? <Txt size={9.5} color={c.or} style={{ marginTop: 6 }}>View access only: editing and draft saving are disabled.</Txt> : null}
+            {!can(...REQ.publish) ? <Txt size={9.5} color={c.or} style={{ marginTop: 6 }}>Publishing requires content publish permission.</Txt> : null}
           </Section>
         </>
       ) : null}
