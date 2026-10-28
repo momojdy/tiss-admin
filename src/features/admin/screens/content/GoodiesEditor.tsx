@@ -209,7 +209,7 @@ export function GoodiesEditor({ canEdit, canPublish }: { canEdit: boolean; canPu
         <OutlineBtn primary={mode === 'Edit'} disabled={!canEdit} onPress={() => toggleMode('Edit')}>Edit</OutlineBtn>
         <OutlineBtn primary={mode === 'Preview'} onPress={() => toggleMode('Preview')}>Preview</OutlineBtn>
       </View>}>
-        <Txt size={10.5} mut>{statusLine}{dirty ? ' · unsaved changes' : ''}</Txt>
+        {source !== 'none' || row ? <Txt size={10.5} mut>{statusLine}{dirty ? ' · unsaved changes' : ''}</Txt> : null}
         
         <View style={{ flexDirection: 'row', flexWrap: 'wrap', gap: 6, marginTop: 8 }}>
           <OutlineBtn primary onPress={() => { void save(); }} disabled={!ready || !canEdit || !dirty || !!busy}>{busy === 'save' ? 'Saving…' : 'Save draft'}</OutlineBtn>
