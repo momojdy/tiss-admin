@@ -1,7 +1,7 @@
 import Svg, { Circle, Line, Path, Rect } from 'react-native-svg';
 import { useTheme } from '../theme/ThemeContext';
 
-export type AppIconName = 'search' | 'bell' | 'user-round' | 'menu' | 'settings' | 'download' | 'clipboard-list' | 'history' | 'users' | 'building-2' | 'clock-alert' | 'activity' | 'chart-no-axes' | 'wallet' | 'pie-chart' | 'check-circle' | 'shield-alert' | 'file-pen' | 'plus' | 'star' | 'star-filled' | 'mail' | 'x' | 'chevron-down' | 'chevron-right' | 'arrow-up-right' | 'filter' | 'check';
+export type AppIconName = 'search' | 'bell' | 'user-round' | 'menu' | 'settings' | 'download' | 'clipboard-list' | 'history' | 'users' | 'building-2' | 'clock-alert' | 'activity' | 'chart-no-axes' | 'wallet' | 'pie-chart' | 'check-circle' | 'shield-alert' | 'file-pen' | 'plus' | 'star' | 'star-filled' | 'mail' | 'x' | 'chevron-down' | 'chevron-right' | 'arrow-up-right' | 'arrow-left' | 'filter' | 'check';
 
 export function AppIcon({ name, size = 18, color }: { name: AppIconName; size?: number; color?: string }) {
   const { c } = useTheme();
@@ -13,6 +13,7 @@ export function AppIcon({ name, size = 18, color }: { name: AppIconName; size?: 
       {name === 'x' ? <><Line x1="6" y1="6" x2="18" y2="18" {...common} /><Line x1="18" y1="6" x2="6" y2="18" {...common} /></> : null}
       {name === 'chevron-down' ? <Path d="m6 9 6 6 6-6" {...common} /> : null}
       {name === 'chevron-right' ? <Path d="m9 6 6 6-6 6" {...common} /> : null}
+      {name === 'arrow-left' ? <><Path d="M19 12H5m7 7-7-7 7-7" {...common} /></> : null}
       {name === 'arrow-up-right' ? <><Path d="M7 17 17 7M8 7h9v9" {...common} /></> : null}
       {name === 'filter' ? <><Path d="M4 6h16M7 12h10M10 18h4" {...common} /></> : null}
       {name === 'check' ? <Path d="m5 12 4 4L19 6" {...common} /> : null}
