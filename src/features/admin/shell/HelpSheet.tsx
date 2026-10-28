@@ -1,5 +1,5 @@
 import { View } from 'react-native';
-import { useNav } from './Nav';
+import { useNav, ScreenId } from './Nav';
 import { useOverlay, DrawerBody } from '../ui/Overlay';
 import { Card, CardTitle } from '../ui/Card';
 import { OutlineBtn } from '../ui/Controls';
@@ -9,7 +9,7 @@ import { AppIcon } from '../ui/AppIcon';
 export function HelpSheet({ onClose }: { onClose: () => void }) {
   const { go } = useNav();
   const { closeAll } = useOverlay();
-  const open = (screen: string) => {
+  const open = (screen: ScreenId) => {
     closeAll();
     go(screen);
   };
