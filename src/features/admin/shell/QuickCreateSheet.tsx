@@ -67,7 +67,7 @@ export function QuickCreateSheet({ onClose }: { onClose: () => void }) {
     if (!can(...REQ.permissions)) { toast('You need Manage permissions access to invite staff.'); return; }
     form({
       title: 'Invite staff',
-      sub: 'An invitation is sent through the protected server workflow. Staff access is not created locally.',
+      sub: 'Invitation sent through the protected server workflow.',
       fields: [
         { id: 'name', label: 'Display name', type: 'text', required: true },
         { id: 'email', label: 'Work email', type: 'email', required: true },
