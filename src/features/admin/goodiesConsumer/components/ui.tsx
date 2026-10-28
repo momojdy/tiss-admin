@@ -110,7 +110,7 @@ export function Empty({emoji, icon, title, text, button, onPress}: {emoji?: stri
   const th = useTheme();
   return (
     <View style={{alignItems: 'center', paddingVertical: 70, paddingHorizontal: 30}}>
-      {icon ? <View style={{width: 68, height: 68, borderRadius: 34, backgroundColor: 'rgba(253,128,46,0.12)', alignItems: 'center', justifyContent: 'center', marginBottom: 4}}><Icon name={icon} size={30} color="#FD802E" /></View> : emoji ? <Text style={{fontSize: 64}}>{emoji}</Text> : null}
+      {icon ? <View style={{width: 68, height: 68, borderRadius: 34, backgroundColor: 'rgba(253,128,46,0.12)', alignItems: 'center', justifyContent: 'center', marginBottom: 4}}><Icon name={icon} size={30} color="#FD802E" /></View> : emoji ? <Icon name={emoji} size={48} color="#FD802E" /> : null}
       <T size={19} weight="800" style={{marginTop: 12, marginBottom: 6}}>{title}</T>
       {text ? <T size={14} color={th.mut} align="center" style={{marginBottom: 20}}>{text}</T> : null}
       {button ? <View style={{alignSelf: 'stretch'}}><Cta label={button} onPress={onPress as any} /></View> : null}
@@ -170,7 +170,7 @@ export function Input({label, value, onChange, placeholder, multiline, keyboard}
 
 export const Tile = ({e, bg, size = 56, photo}: {e: string; bg: string; size?: number; photo?: string | null}) => (
   <Grad idx={bgIdx(bg)} style={{width: size, height: size, borderRadius: 16, alignItems: 'center', justifyContent: 'center'}}>
-    {photo ? <Image source={{uri: photo}} style={{width: size, height: size, borderRadius: 16}} /> : <Text style={{fontSize: size * 0.54}}>{e}</Text>}
+    {photo ? <Image source={{uri: photo}} style={{width: size, height: size, borderRadius: 16}} /> : <Icon name={e} size={size * 0.52} color="#1B1B1F" />}
   </Grad>
 );
 
@@ -185,7 +185,7 @@ export function SheetBox({children, large = false, compact = false, onClose}: an
     <View {...pan.panHandlers} style={{backgroundColor: th.bg, borderTopLeftRadius: 24, borderTopRightRadius: 24, paddingHorizontal: 20, paddingTop: 10, paddingBottom: 20, height: compact || large ? '100%' : undefined, maxHeight: '100%', flexShrink: 1, minHeight: 0, overflow: 'hidden'}}>
       <View style={{height: 34, flexDirection: 'row', alignItems: 'center', justifyContent: 'center', marginBottom: 8}}>
         <View style={{width: 40, height: 4, borderRadius: 2, backgroundColor: th.line}} />
-        {onClose ? <Pressable accessibilityRole="button" accessibilityLabel="Close popup" onPress={onClose} hitSlop={12} style={{position: 'absolute', right: 0, top: 2, width: 30, height: 30, borderRadius: 15, alignItems: 'center', justifyContent: 'center', backgroundColor: th.soft}}><Text style={{fontSize: 20, lineHeight: 22, color: th.ink}}>×</Text></Pressable> : null}
+        {onClose ? <Pressable accessibilityRole="button" accessibilityLabel="Close popup" onPress={onClose} hitSlop={12} style={{position: 'absolute', right: 0, top: 2, width: 30, height: 30, borderRadius: 15, alignItems: 'center', justifyContent: 'center', backgroundColor: th.soft}}><Icon name="x" size={15} color={th.ink} /></Pressable> : null}
       </View>
       {safeChildren(children)}
     </View>
