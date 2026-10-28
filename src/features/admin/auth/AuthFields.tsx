@@ -8,7 +8,6 @@ export interface AuthFieldProps extends Omit<TextInputProps, 'onChange'> {
   label: string; error?: string; value: string; onChangeText: (v: string) => void; password?: boolean; readOnly?: boolean;
 }
 
-/** Labelled 48px field with inline error and a Show/Hide toggle for passwords. */
 export function AuthField({ label, error, value, onChangeText, password, readOnly, ...rest }: AuthFieldProps) {
   const { c } = useTheme();
   const [show, setShow] = useState(false);
@@ -36,7 +35,6 @@ export function AuthField({ label, error, value, onChangeText, password, readOnl
   );
 }
 
-/** Strength bar plus the four password rules. */
 export function PasswordChecklist({ value }: { value: string }) {
   const { c } = useTheme();
   const sc = passwordScore(value);
