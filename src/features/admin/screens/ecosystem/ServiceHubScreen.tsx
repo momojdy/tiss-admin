@@ -34,7 +34,7 @@ export function ServiceHubScreen() {
         <Pill onPress={() => go('ecosystem')}>‹ Back</Pill>
         <Txt size={10.6} mut>{'Ecosystem › ' + serviceName}</Txt>
       </Row>
-      <Heading title={serviceName + '\nService hub'} sub={service[1]} kpis={[
+      <Heading title={serviceName + '\nService hub'} sub={service[1] !== 'Active service' ? service[1] : undefined} kpis={[
         { icon: '▥', value: serviceTransactions.length, label: 'Transactions matched', onPress: () => go('finance') },
         { icon: '▤', value: '—', label: 'Applications by service', onPress: () => go('operations') },
         { icon: '◔', value: '—', label: 'Service health' },

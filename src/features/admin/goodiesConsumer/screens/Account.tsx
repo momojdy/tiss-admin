@@ -60,7 +60,6 @@ function Profile() {
     <Bar title="Profile" onBack={back} />
     <View style={{paddingHorizontal: 16}}>
       <Card style={{alignItems: 'center'}}><Avatar z={76} /><T size={17} weight="800" style={{marginTop: 10}}>{p.n}</T><T size={13.5} color={th.mut} align="center" style={{lineHeight: 22}}>{p.e}{'\n'}{p.ph}</T><View style={{marginTop: 8}}><Badge label="Shared Wantiss account" /></View></Card>
-      <LRow icon="pin" title="Saved addresses" sub="Shared with Wantiss" onPress={() => go('addresses')} />
       <LRow icon="bag" title="Order history" sub={S.orders.length + ' orders'} onPress={() => tab('orders')} />
       <LRow icon="heart" title="Favorites" onPress={() => go('favs')} />
       <LRow icon="wallet" title="Wallet and payments" onPress={() => go('payments')} />

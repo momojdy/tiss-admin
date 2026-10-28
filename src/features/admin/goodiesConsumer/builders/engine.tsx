@@ -7,6 +7,7 @@ import {previewOnly, S, STB, ui, toast, emit, save, push, navBack, cur, hooks, m
 import {TEMPLATES} from './templates';
 import {T, useTheme, Tile} from '../components/ui';
 
+// Keep this key stable: it restores existing local builder configurations across app launches.
 const BKEY = 'goodies-byo-v4';
 const r2 = (n: number) => Math.round(n * 100) / 100;
 const cl = <X,>(o: X): X => JSON.parse(JSON.stringify(o));
