@@ -1,7 +1,7 @@
 import Svg, { Circle, Line, Path, Rect } from 'react-native-svg';
 import { useTheme } from '../theme/ThemeContext';
 
-export type AppIconName = 'search' | 'bell' | 'user-round' | 'menu' | 'settings' | 'download' | 'clipboard-list' | 'history' | 'users' | 'building-2' | 'clock-alert' | 'activity' | 'chart-no-axes' | 'wallet' | 'pie-chart' | 'check-circle';
+export type AppIconName = 'search' | 'bell' | 'user-round' | 'menu' | 'settings' | 'download' | 'clipboard-list' | 'history' | 'users' | 'building-2' | 'clock-alert' | 'activity' | 'chart-no-axes' | 'wallet' | 'pie-chart' | 'check-circle' | 'shield-alert' | 'file-pen';
 
 export function AppIcon({ name, size = 18, color }: { name: AppIconName; size?: number; color?: string }) {
   const { c } = useTheme();
@@ -25,6 +25,8 @@ export function AppIcon({ name, size = 18, color }: { name: AppIconName; size?: 
       {name === 'wallet' ? <><Rect x="3" y="6" width="18" height="14" rx="2" {...common} /><Path d="M3 9h18M15 14h3" {...common} /></> : null}
       {name === 'pie-chart' ? <><Path d="M12 3v9h9A9 9 0 1 1 12 3Z" {...common} /><Path d="M15 3.5A9 9 0 0 1 20.5 9H15Z" {...common} /></> : null}
       {name === 'check-circle' ? <><Circle cx="12" cy="12" r="9" {...common} /><Path d="m8 12 2.5 2.5L16.5 9" {...common} /></> : null}
+      {name === 'shield-alert' ? <><Path d="M12 22s8-4 8-11V5l-8-3-8 3v6c0 7 8 11 8 11Z" {...common} /><Path d="M12 8v4M12 16h.01" {...common} /></> : null}
+      {name === 'file-pen' ? <><Path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h7" {...common} /><Path d="M14 2v6h6M8 13h5M8 17h3M16 20l4-4 2 2-4 4-3 1Z" {...common} /></> : null}
     </Svg>
   );
 }
