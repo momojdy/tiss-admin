@@ -1,10 +1,9 @@
 import { useEffect, useState } from 'react';
-import { View } from 'react-native';
+import { Pressable, View } from 'react-native';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { useTheme, ThemeMode } from '../theme/ThemeContext';
 import { useOverlay, DrawerBody } from '../ui/Overlay';
 import { Card, CardTitle } from '../ui/Card';
-import { ListRows } from '../ui/Lists';
 import { OutlineBtn } from '../ui/Controls';
 import { Txt } from '../ui/Txt';
 import { can, session } from '../state/access';
@@ -136,19 +135,27 @@ export function SettingsSheet({ onClose }: { onClose: () => void }) {
 
   return (
     <DrawerBody title="Settings" onClose={onClose}>
-      <ListRows rows={categories.map(([name, description]) => ({
-        key: name, main: name, sub: description, right: selected === name ? '⌄' : '›',
-        onPress: () => setSelected((current) => current === name ? null : name),
-      }))} />
-      {selected ? (
-        <Card style={{ marginTop: 10 }}>
-          <CardTitle title={selected} />
-          <View style={{ flexDirection: 'row', flexWrap: 'wrap', marginTop: 10, gap: 6 }}>
-            <OutlineBtn primary onPress={() => editCategory(selected)}>Edit settings</OutlineBtn>
-            {destinations[selected] ? <OutlineBtn onPress={() => { const destination = destinations[selected]; closeAll(); destination?.(); }}>Open related workspace</OutlineBtn> : null}
-          </View>
-        </Card>
-      ) : null}
+      {categories.map(([name, description]) => (
+        <View key={name}>
+          <Pressable onPress={() => setSelected((current) => current === name ? null : name)} accessibilityRole="button" accessibilityState={{ expanded: selected === name }}
+            style={{ paddingVertical: 13, paddingHorizontal: 12, borderRadius: 12, backgroundColor: selected === name ? '#00000008' : 'transparent', flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between' }}>
+            <View style={{ flex: 1, paddingRight: 10 }}>
+              <Txt size={12.5} weight={500}>{name}</Txt>
+              <Txt size={10.1} mut>{description}</Txt>
+            </View>
+            <Txt size={15} mut>{selected === name ? '⌃' : '›'}</Txt>
+          </Pressable>
+          {selected === name ? (
+            <Card style={{ marginTop: 2, marginBottom: 8 }}>
+              <CardTitle title={selected} />
+              <View style={{ flexDirection: 'row', flexWrap: 'wrap', marginTop: 10, gap: 6 }}>
+                <OutlineBtn primary onPress={() => editCategory(selected)}>Edit settings</OutlineBtn>
+                {destinations[selected] ? <OutlineBtn onPress={() => { const destination = destinations[selected]; closeAll(); destination?.(); }}>Open related workspace</OutlineBtn> : null}
+              </View>
+            </Card>
+          ) : null}
+        </View>
+      ))}
       {!loaded ? <Txt size={9.5} mut style={{ marginTop: 10 }}>Loading saved preferences…</Txt> : null}
     </DrawerBody>
   );
