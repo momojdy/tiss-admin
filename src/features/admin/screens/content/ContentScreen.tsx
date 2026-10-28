@@ -344,7 +344,7 @@ export function ContentScreen() {
             ...(banner.from ? [{ key: banner.id + '-start', main: 'Starts · ' + banner.t, sub: banner.svc, right: banner.from, onPress: () => editBannerDraft(banner) }] : []),
             ...(banner.to ? [{ key: banner.id + '-end', main: 'Ends · ' + banner.t, sub: banner.svc, right: banner.to, onPress: () => editBannerDraft(banner) }] : []),
           ]),
-          ...displayPromotions.filter((promotion) => promotion.from || promotion.to).map((promotion) => ({ key: promotion.id, main: 'Campaign · ' + promotion.n, sub: promotion.svc, right: promotion.from + ' → ' + promotion.to, onPress: () => editPromotionDraft(promotion) })),
+          ...displayPromotions.filter((promotion) => promotion.from || promotion.to).map((promotion) => ({ key: promotion.id, main: 'Campaign · ' + promotion.n, sub: promotion.svc, right: promotion.from + ' to ' + promotion.to, onPress: () => editPromotionDraft(promotion) })),
           ...displayAnnouncements.filter((announcement) => announcement.when).map((announcement) => ({ key: announcement.id, main: 'Announcement · ' + announcement.t, sub: announcement.aud, right: announcement.when, onPress: () => editAnnouncementDraft(announcement) })),
         ].sort((a, b) => String(a.right).localeCompare(String(b.right)))} />
       </Section> : null}
