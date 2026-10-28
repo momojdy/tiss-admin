@@ -4,6 +4,7 @@ import { useNav } from '../../shell/Nav';
 import { useOpen } from '../../overlays/registry';
 import { Section, Card } from '../../ui/Card';
 import { Heading } from '../../ui/Heading';
+import { AppIcon } from '../../ui/AppIcon';
 import { Pill, Row, StatusPill } from '../../ui/Controls';
 import { ListRows } from '../../ui/Lists';
 import { Txt } from '../../ui/Txt';
@@ -31,20 +32,20 @@ export function ServiceHubScreen() {
   return (
     <View>
       <Row style={{ marginBottom: 4 }}>
-        <Pill onPress={() => go('ecosystem')}>‹ Back</Pill>
-        <Txt size={10.6} mut>{'Ecosystem › ' + serviceName}</Txt>
+        <Pill onPress={() => go('ecosystem')}><View style={{ flexDirection: 'row', alignItems: 'center', gap: 4 }}><AppIcon name="arrow-left" size={12} />Back</View></Pill>
+        <Txt size={10.6} mut>{'Ecosystem / ' + serviceName}</Txt>
       </Row>
       <Heading title={serviceName + '\nService hub'} sub={service[1] !== 'Active service' ? service[1] : undefined} kpis={[
-        { icon: '▥', value: serviceTransactions.length, label: 'Transactions matched', onPress: () => go('finance') },
-        { icon: '▤', value: '—', label: 'Applications by service', onPress: () => go('operations') },
-        { icon: '◔', value: '—', label: 'Service health' },
+        { icon: 'activity', value: serviceTransactions.length, label: 'Transactions matched', onPress: () => go('finance') },
+        { icon: 'clipboard-list', value: '—', label: 'Applications by service', onPress: () => go('operations') },
+        { icon: 'pie-chart', value: '—', label: 'Service health' },
       ]} />
       {isPreOrder ? <Card><Txt size={11.5} mut>Pre-order is directory metadata. Launch readiness and activity metrics are not reported as live until an authorized service-health endpoint is connected.</Txt></Card> : null}
       <Section title="Modules">
         <ListRows rows={modules.map((module) => ({
           key: module,
           main: module,
-          right: '›',
+          right: <AppIcon name="chevron-right" size={12} />, 
           onPress: () => openModule(serviceName, module),
         }))} />
       </Section>
@@ -54,7 +55,7 @@ export function ServiceHubScreen() {
           rows={banners.map((banner) => ({
             key: banner.id,
             main: banner.t,
-            right: <View style={{ flexDirection: 'row', alignItems: 'center', gap: 4 }}><StatusPill label={banner.st} /><Txt size={10.1}>›</Txt></View>,
+            right: <View style={{ flexDirection: 'row', alignItems: 'center', gap: 4 }}><StatusPill label={banner.st} /><AppIcon name="chevron-right" size={12} /></View>,
             onPress: () => open('ban', banner.id),
           }))}
         />
