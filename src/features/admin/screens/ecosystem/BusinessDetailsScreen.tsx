@@ -76,9 +76,9 @@ export function BusinessDetailsScreen() {
       ) : (
         <>
           <Heading title={business.name} kpis={[
-            { icon: '▥', value: business.is_live ? 'Live' : 'Not live', label: 'Customer visibility' },
-            { icon: '✓', value: business.verification || 'Unknown', label: 'Verification status' },
-            { icon: '◔', value: business.payout_ready ? 'Ready' : 'Not ready', label: 'Payout readiness' },
+            { icon: 'building-2', value: business.is_live ? 'Live' : 'Not live', label: 'Customer visibility' },
+            { icon: 'check-circle', value: business.verification || 'Unknown', label: 'Verification status' },
+            { icon: 'pie-chart', value: business.payout_ready ? 'Ready' : 'Not ready', label: 'Payout readiness' },
           ]} />
           <Section title="Business profile" right={<StatusPill label={business.verification || 'Unknown'} small />}>
             <ListRows rows={[
