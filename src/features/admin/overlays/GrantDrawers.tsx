@@ -20,8 +20,6 @@ import type { AccessRequest, Grant } from '../data/types';
 
 /** Closes every overlay, refreshes the screens, then opens a drawer again. */
 
-/* ================================================================== */
-
 /** Remaining-time bar: full at the start of the grant, empty at its end date. Permanent and finished grants have none. */
 export function GrantBar({ g }: { g: Grant }) {
   const { c } = useTheme();
@@ -55,9 +53,6 @@ export function GrantList({ grants, showWho, empty, onPress }: { grants: Grant[]
   if (!grants.length) return <Txt size={12} mut>{empty}</Txt>;
   return <View>{grants.map((g, i) => <GrantRow key={g.id} g={g} showWho={showWho} last={i === grants.length - 1} onPress={onPress ? () => onPress(g) : undefined} />)}</View>;
 }
-
-/* ================================================================== */
-/* ================================================================== */
 
 /** Opens the request form for the person the interface follows. `preset` pre-selects a section or right. */
 export function useRequestAccess() {
@@ -112,9 +107,6 @@ export function MyAccessCard() {
     </Card>
   );
 }
-
-/* ================================================================== */
-/* ================================================================== */
 
 export function RequestDrawer({ id, close }: { id: string; close: () => void }) {
   useDb();
@@ -176,9 +168,6 @@ export function RequestDrawer({ id, close }: { id: string; close: () => void }) 
     </DrawerBody>
   );
 }
-
-/* ================================================================== */
-/* ================================================================== */
 
 export function GrantDrawer({ id, close }: { id: string; close: () => void }) {
   useDb();
