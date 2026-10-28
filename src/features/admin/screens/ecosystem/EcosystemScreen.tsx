@@ -79,7 +79,7 @@ export function EcosystemScreen() {
                 <View><Txt size={9.5} mut>Activity</Txt><Txt size={10.1} weight={500}>—</Txt></View>
                 <View><Txt size={9.5} mut>Queue</Txt><Txt size={10.1} weight={500}>—</Txt></View>
               </View>
-              <Txt size={9.5} mut style={{ marginTop: 8 }}>Live health metrics unavailable</Txt>
+              <Txt size={9.5} mut style={{ marginTop: 8 }}>Not connected yet</Txt>
               <View style={{ flexDirection: 'row' }}><Pill>{pre ? 'Pre-order' : 'Directory status · ' + s[5]}</Pill></View>
             </View>
           </Pressable>
@@ -108,7 +108,7 @@ export function EcosystemScreen() {
         {can(...REQ.content) ? <Btn onPress={addService}>+ Propose service</Btn> : null}
         <Pill onPress={() => go('business')}>Business records · {db.BIZ.length}</Pill>
       </Row>
-      {l.length ? (ui.ev === 'Table' ? table() : grid()) : <Txt size={12} mut align="center" style={{ paddingVertical: 14 }}>{ui.ec === 'Attention' ? 'Service-health data is not available in the current authorized snapshot.' : 'No services match.'}</Txt>}
+      {l.length ? (ui.ev === 'Table' ? table() : grid()) : <Txt size={12} mut align="center" style={{ paddingVertical: 14 }}>{ui.ec === 'Attention' ? 'Not connected yet.' : 'No services match.'}</Txt>}
     </View>
   );
 }
