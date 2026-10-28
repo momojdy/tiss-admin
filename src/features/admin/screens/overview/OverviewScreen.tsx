@@ -74,7 +74,7 @@ export function OverviewScreen() {
     ui.AR = range; bump();
   };
   const applyCustomRange = () => {
-    if (!/^\\d{4}-\\d{2}-\\d{2}$/.test(customStart) || !/^\\d{4}-\\d{2}-\\d{2}$/.test(customEnd)) { setRangeError('Enter both dates in YYYY-MM-DD format.'); return; }
+    if (!/^\d{4}-\d{2}-\d{2}$/.test(customStart) || !/^\d{4}-\d{2}-\d{2}$/.test(customEnd)) { setRangeError('Enter both dates in YYYY-MM-DD format.'); return; }
     if (customEnd < customStart) { setRangeError('End date cannot be before the start date.'); return; }
     const earliest = '2025-11-01';
     const today = new Date().toISOString().slice(0, 10);
