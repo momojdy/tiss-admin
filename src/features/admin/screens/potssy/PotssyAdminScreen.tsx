@@ -4,7 +4,7 @@ import { useNav } from '../../shell/Nav';
 import { useTheme } from '../../theme/ThemeContext';
 import { Card, Section } from '../../ui/Card';
 import { Heading } from '../../ui/Heading';
-import { Chips, OutlineBtn, Pill } from '../../ui/Controls';
+import { OutlineBtn, Pill, SelectMenu } from '../../ui/Controls';
 import { ListRows } from '../../ui/Lists';
 import { Txt } from '../../ui/Txt';
 
@@ -46,7 +46,7 @@ export function PotssyAdminScreen() {
         { icon: '◷', value: '—', label: 'Claims awaiting review' },
       ]} />
       <View style={{ flexDirection: 'row', flexWrap: 'wrap', gap: 6, marginBottom: 8 }}>
-        {modules.map((name) => <Pill key={name} on={name === moduleName} onPress={() => setModule(name)}>{name}</Pill>)}
+        <SelectMenu label="Potssy section" options={modules} value={moduleName} onChange={setModule} />
       </View>
       <Section title={selected.title}>
         <Txt size={11.2} mut lh={1.45}>{selected.detail}</Txt>

@@ -6,7 +6,7 @@ import { useOpen } from '../../overlays/registry';
 import { useTheme } from '../../theme/ThemeContext';
 import { Card, Section } from '../../ui/Card';
 import { Heading } from '../../ui/Heading';
-import { Chips, OutlineBtn, Pill, Row, SearchInput, StatusPill } from '../../ui/Controls';
+import { Chips, OutlineBtn, Pill, Row, SearchInput, SelectMenu, StatusPill } from '../../ui/Controls';
 import { ListRows, Small } from '../../ui/Lists';
 import { Txt } from '../../ui/Txt';
 import { GOODIES_MODULES } from '../goodies/modules';
@@ -72,7 +72,7 @@ export function ServiceWorkspaceScreen() {
         { icon: '◔', value: '—', label: 'Health score' },
       ]} />
       <View style={{ flexDirection: 'row', flexWrap: 'wrap', gap: 6, marginBottom: 8 }}>
-        {modules.map((name) => <Pill key={name} on={name === moduleName} onPress={() => setModule(name)}>{name}</Pill>)}
+        {modules.length > 5 ? <SelectMenu label={serviceName + ' section'} options={modules} value={moduleName} onChange={setModule} /> : <View style={{ flexDirection: 'row', flexWrap: 'wrap', gap: 6, marginBottom: 9 }}>{modules.map((name) => <Pill key={name} on={name === moduleName} onPress={() => setModule(name)}>{name}</Pill>)}</View>}
       </View>
 
       {moduleKind === 'overview' ? (

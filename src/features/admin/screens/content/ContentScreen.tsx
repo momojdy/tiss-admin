@@ -376,14 +376,8 @@ export function ContentScreen() {
           <Section title={'Customer assets · ' + filteredAssets.length + ' of ' + assets.length}>
             <TextInput value={assetSearch} onChangeText={setAssetSearch} placeholder="Search asset key, feature, placement…" placeholderTextColor={c.mut} style={{ borderWidth: 1, borderColor: c.bd, borderRadius: 10, paddingHorizontal: 10, paddingVertical: 8, color: c.ink, backgroundColor: c.card, fontSize: 12, marginBottom: 8 }} />
             <Txt size={10} mut style={{ marginBottom: 5 }}>Assets are grouped by feature and customer destination. Name new keys like goodies.home.promo-banner.weekend.</Txt>
-            <Txt size={10} weight={500}>Feature</Txt>
-            <View style={{ flexDirection: 'row', flexWrap: 'wrap', gap: 5, marginTop: 5, marginBottom: 8 }}>
-              {assetFeatures.map((feature) => <Pill key={feature} on={assetFeature === feature} onPress={() => setAssetFeature(feature)}>{feature}</Pill>)}
-            </View>
-            <Txt size={10} weight={500}>Customer page / placement</Txt>
-            <View style={{ flexDirection: 'row', flexWrap: 'wrap', gap: 5, marginTop: 5, marginBottom: 8 }}>
-              {assetPlacements.map((placement) => <Pill key={placement} on={assetPlacement === placement} onPress={() => setAssetPlacement(placement)}>{placement}</Pill>)}
-            </View>
+             <SelectMenu label="Feature" options={assetFeatures} value={assetFeature} onChange={setAssetFeature} />
+             <SelectMenu label="Customer page / placement" options={assetPlacements} value={assetPlacement} onChange={setAssetPlacement} />
             <ListRows empty={loading ? 'Loading media assets…' : error ? 'Media assets could not be loaded. Retry above.' : 'No assets match these filters.'} rows={filteredAssets.map((asset) => {
               const group = classifyAsset(asset);
               return {

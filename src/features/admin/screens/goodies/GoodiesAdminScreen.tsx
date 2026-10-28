@@ -11,7 +11,7 @@ import { useToast } from '../../ui/Toast';
 import { useTheme } from '../../theme/ThemeContext';
 import { Card, Section } from '../../ui/Card';
 import { Heading } from '../../ui/Heading';
-import { Chips, OutlineBtn, Pill, StatusPill } from '../../ui/Controls';
+import { OutlineBtn, Pill, SelectMenu, StatusPill } from '../../ui/Controls';
 import { ListRows } from '../../ui/Lists';
 import { Txt } from '../../ui/Txt';
 import { GOODIES_MODULES } from './modules';
@@ -158,7 +158,7 @@ export function GoodiesAdminScreen() {
         <OutlineBtn onPress={() => go('content')}>CMS ›</OutlineBtn>
       </View>
       <View style={{ flexDirection: 'row', flexWrap: 'wrap', gap: 7, marginBottom: 10 }}>
-        {modules.map((name) => <Pill key={name} on={moduleName === name} onPress={() => setModule(name)}>{name}</Pill>)}
+        <SelectMenu label="Goodies section" options={modules} value={moduleName} onChange={setModule} />
       </View>
 
       {moduleLabel === 'Overview' ? (
