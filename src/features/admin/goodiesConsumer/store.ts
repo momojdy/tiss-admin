@@ -69,7 +69,7 @@ function formatHour(d: Date) {
   let h = d.getHours(), m = String(d.getMinutes()).padStart(2, '0');
   return (h % 12 || 12) + (m === '00' ? '' : ':' + m) + (h >= 12 ? 'pm' : 'am');
 }
-const CAT_EMOJI: Record<string, string> = {restaurants: '🍽️', produce: '🥭', beverages: '🥤', bakery: '🥐', meat: '🥩', groceries: '🛒', haitian: '🇭🇹', care: '🧴', drugstore: '💊'};
+const CAT_EMOJI: Record<string, string> = {restaurants: 'food', produce: 'produce', beverages: 'beverage', bakery: 'bakery', meat: 'meat', groceries: 'groceries', haitian: 'haiti', care: 'care', drugstore: 'medicine'};
 const DAY_NAMES = ['Sunday', 'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday'];
 type DayHours = {open: string; close: string; closed: boolean};
 const hm = (v: any): number | null => {
@@ -112,7 +112,7 @@ function liveStore(r: any, items: Item[]): Store {
   const id = String(r.store_id || r.business_id), names = r.names && typeof r.names === 'object' ? r.names : {};
   const eMin = Number(r.eta_min) || 20, eMax = Number(r.eta_max) || 35, st = openState(r.hours);
   const store: Store = {
-    id, businessId: String(r.business_id), c: r.category || 'groceries', e: CAT_EMOJI[r.category] || '🛍️', bg: bgOf(id), r: 0, rv: 0, km: 0, km0: 0,
+    id, businessId: String(r.business_id), c: r.category || 'groceries', e: CAT_EMOJI[r.category] || 'store', bg: bgOf(id), r: 0, rv: 0, km: 0, km0: 0,
     eta: eMin + '–' + eMax, eta0: eMin + '–' + eMax, fee: Number(r.delivery_fee) || 0, min: Number(r.min_order) || 0,
     pr: r.promo || '', k: r.kind || '', it: items, open: st.open, h: st.h, nx: st.nx, far: false, live: true,
     logo: r.logo_url || null, cover: null, acceptScheduledOrders: !!r.accept_scheduled_orders,
@@ -126,7 +126,7 @@ function liveStore(r: any, items: Item[]): Store {
 
 function placeholderStore(sid: string, name: string): Store {
   return {
-    id: sid, n: name || 'Store', c: '', e: '🛍️', bg: bgOf(sid), r: 0, rv: 0, km: 0, km0: 0, eta: '0–0', eta0: '0–0', fee: 0, min: 0, pr: '', k: '', it: [],
+    id: sid, n: name || 'Store', c: '', e: 'store', bg: bgOf(sid), r: 0, rv: 0, km: 0, km0: 0, eta: '0–0', eta0: '0–0', fee: 0, min: 0, pr: '', k: '', it: [],
     open: 0, h: '', nx: 'No longer taking orders', far: false, acceptScheduledOrders: false,
   };
 }
@@ -177,7 +177,7 @@ export async function refreshLiveSchedules() {
     prods.forEach(p => {
       const r = stores.find(x => x.business_id === p.business_id); if (!r) return;
       const stock = Math.max(0, Math.floor(Number(p.stock) || 0));
-      const it: Item = {id: p.id, s: String(r.store_id || r.business_id), n: p.name, p: Number(p.price) || 0, e: p.emoji || '🛍️', stock, oos: stock < 1 ? 1 : 0, d: p.description || '', al: '', w: false, restriction: p.restriction || null, photo: p.photo_url || null};
+      const it: Item = {id: p.id, s: String(r.store_id || r.business_id), n: p.name, p: Number(p.price) || 0, e: p.emoji || 'package', stock, oos: stock < 1 ? 1 : 0, d: p.description || '', al: '', w: false, restriction: p.restriction || null, photo: p.photo_url || null};
       IT[p.id] = it; byBiz[r.business_id].push(it);
     });
     stores.forEach(r => {const s = liveStore(r, byBiz[r.business_id] || []); const rating = ratingByBiz[String(r.business_id)]; if (rating?.count) { s.r = Math.round((rating.sum / rating.count) * 10) / 10; s.rv = rating.count; } STB[s.id] = s; ST.push(s);});
