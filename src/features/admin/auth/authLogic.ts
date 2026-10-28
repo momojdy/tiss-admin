@@ -2,7 +2,7 @@ import { supabase } from '../lib/supabase';
 import { bump } from '../state/db';
 import { session } from '../state/access';
 
-export const AUTH_CONFIG = { idleMs: 30 * 60 * 1000 };
+export const AUTH_CONFIG = { idleMs: 12 * 60 * 60 * 1000 };
 
 export const emailOk = (e: string) => /^[^\s@]+@[^\s@]+\.[^\s@]{2,}$/.test(e);
 export const maskEmail = (e: string) => e.replace(/^(.).*(@.*)$/, '$1•••$2');
