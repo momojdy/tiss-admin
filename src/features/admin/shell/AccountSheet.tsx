@@ -190,7 +190,7 @@ export function AccountSheet({ onClose }: { onClose: () => void }) {
             {passwordHintsVisible ? <PasswordChecklist value={newPassword} /> : null}
             <AuthField label="Confirm new password" value={confirmPassword} onChangeText={setConfirmPassword} error={undefined} password textContentType="newPassword" autoComplete="new-password" onFocus={() => setPasswordHintsVisible(true)} onSubmitEditing={changePassword} />
             <PrimaryButton label="Save new password" onPress={changePassword} busy={passwordBusy} busyLabel="Saving password…" />
-            <View style={{ height: 8 }} />
+            <View style={{ height: 12 }} />
             <OutlineBtn onPress={() => { setRecoveryMode(true); setPasswordMessage(''); setPasswordBad(false); }}>Forgot your current password?</OutlineBtn>
           </>
         )}
