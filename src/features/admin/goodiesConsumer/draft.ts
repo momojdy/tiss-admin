@@ -1,6 +1,7 @@
 /* Goodies draft validation and safe asset handling; confirm the v5 schema against the original Admin export. */
 import {CATS} from './data/seed';
 import {DEFAULT_PROMOS} from './data/defaultPromos';
+import {clone} from '../lib/clone';
 import {t as tr} from './i18n';
 
 export const GOODIES_CONTENT_KEY = 'goodies.content';
@@ -11,7 +12,7 @@ const REQUIRED_ARRAYS = ['cats', 'promos', 'modes', 'labels', 'deals', 'coupons'
 export const isSignedUrl = (value: unknown): boolean =>
   typeof value === 'string' && (value.indexOf('/storage/v1/object/sign/') > -1 || /[?&]token=/.test(value));
 
-const clone = <T,>(value: T): T => JSON.parse(JSON.stringify(value));
+
 
 /** Key-order independent JSON, so a jsonb round trip compares equal. */
 export function stable(value: any): string {
