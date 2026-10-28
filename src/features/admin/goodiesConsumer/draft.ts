@@ -101,9 +101,9 @@ const txt = (value: string) => ({en: {v: value, s: 'draft' as const}});
 
 export function buildStarterDraft(): any {
   const modes = [
-    {id: 'mode.food', st: 'Live', cat: 'restaurants', emoji: 'utensils', title: txt(tr('foodDelivery')), sub: txt(tr('hotFresh')), img: null},
-    {id: 'mode.groceries', st: 'Live', cat: 'groceries', emoji: 'cart', title: txt(tr('groceries')), sub: txt(''), img: null},
-    {id: 'mode.drugstore', st: 'Live', cat: 'drugstore', emoji: 'pill', title: txt(tr('drugstore')), sub: txt(''), img: null},
+    {id: 'mode.food', st: 'Live', cat: 'restaurants', emoji: '🍛', title: txt(tr('foodDelivery')), sub: txt(tr('hotFresh')), img: null},
+    {id: 'mode.groceries', st: 'Live', cat: 'groceries', emoji: '🛒', title: txt(tr('groceries')), sub: txt(''), img: null},
+    {id: 'mode.drugstore', st: 'Live', cat: 'drugstore', emoji: '💊', title: txt(tr('drugstore')), sub: txt(''), img: null},
   ];
   const promos = DEFAULT_PROMOS.map((promo) => ({
     ...promo,
