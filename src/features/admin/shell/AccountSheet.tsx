@@ -1,6 +1,6 @@
 import { useState } from 'react';
-import { Image, Pressable, View } from 'react-native';
-import * as DocumentPicker from 'expo-document-picker';
+import { Alert, Image, Pressable, View } from 'react-native';
+import * as ImagePicker from 'expo-image-picker';
 import { db, bump, useDb } from '../state/db';
 import { can, me, realMe, secLv, session, setView } from '../state/access';
 import { REQ } from '../state/requirements';
@@ -37,30 +37,56 @@ export function AccountSheet({ onClose }: { onClose: () => void }) {
   const [recoveryCode, setRecoveryCode] = useState('');
   const [recoverySent, setRecoverySent] = useState(false);
 
-  const uploadAvatar = async () => {
+  const uploadAvatar = async (source: 'gallery' | 'camera') => {
     if (!session.userId) { setAvatarMessage('Please sign in again before uploading a profile photo.'); return; }
     setAvatarBusy(true);
     setAvatarMessage('');
     try {
-      const picked = await DocumentPicker.getDocumentAsync({
-        type: ['image/jpeg', 'image/png', 'image/webp'],
-        copyToCacheDirectory: true,
-        multiple: false,
-      });
+      if (source === 'gallery') {
+        const permission = await ImagePicker.requestMediaLibraryPermissionsAsync();
+        if (!permission.granted) {
+          setAvatarMessage('Allow photo library access to choose a profile picture.');
+          return;
+        }
+      } else {
+        const permission = await ImagePicker.requestCameraPermissionsAsync();
+        if (!permission.granted) {
+          setAvatarMessage('Allow camera access to take a profile picture.');
+          return;
+        }
+      }
+
+      const picked = source === 'gallery'
+        ? await ImagePicker.launchImageLibraryAsync({
+            mediaTypes: ['images'],
+            allowsEditing: true,
+            aspect: [1, 1],
+            quality: 0.85,
+          })
+        : await ImagePicker.launchCameraAsync({
+            mediaTypes: ['images'],
+            allowsEditing: true,
+            aspect: [1, 1],
+            quality: 0.85,
+          });
       if (picked.canceled || !picked.assets?.[0]) return;
       const asset = picked.assets[0];
-      const mime = asset.mimeType || (/\.png$/i.test(asset.name) ? 'image/png' : /\.webp$/i.test(asset.name) ? 'image/webp' : /\.jpe?g$/i.test(asset.name) ? 'image/jpeg' : '');
+      const mime = asset.mimeType || (/\.png$/i.test(asset.fileName || '') ? 'image/png' : /\.webp$/i.test(asset.fileName || '') ? 'image/webp' : /\.jpe?g$/i.test(asset.fileName || '') ? 'image/jpeg' : '');
       if (!['image/jpeg', 'image/png', 'image/webp'].includes(mime)) {
         setAvatarMessage('Choose a JPG, PNG or WebP image.');
         return;
       }
-      if (asset.size && asset.size > 5 * 1024 * 1024) {
+      if (asset.fileSize && asset.fileSize > 5 * 1024 * 1024) {
         setAvatarMessage('Choose an image smaller than 5 MB.');
         return;
       }
       const response = await fetch(asset.uri);
       if (!response.ok) throw new Error('The selected image could not be read.');
       const blob = await response.blob();
+      if (blob.size > 5 * 1024 * 1024) {
+        setAvatarMessage('Choose an image smaller than 5 MB.');
+        return;
+      }
       const extension = mime === 'image/png' ? 'png' : mime === 'image/webp' ? 'webp' : 'jpg';
       const path = session.userId + '/admin-avatar.' + extension;
       const { error: uploadError } = await supabase.storage.from('wallet-avatars').upload(path, blob, {
@@ -80,6 +106,14 @@ export function AccountSheet({ onClose }: { onClose: () => void }) {
     } finally {
       setAvatarBusy(false);
     }
+  };
+
+  const chooseAvatarSource = () => {
+    Alert.alert('Profile photo', 'Choose how you want to add your picture.', [
+      { text: 'Choose from gallery', onPress: () => { void uploadAvatar('gallery'); } },
+      { text: 'Take a photo', onPress: () => { void uploadAvatar('camera'); } },
+      { text: 'Cancel', style: 'cancel' },
+    ]);
   };
 
   const sendRecoveryCode = async () => {
@@ -158,7 +192,7 @@ export function AccountSheet({ onClose }: { onClose: () => void }) {
             {session.email ? <Txt size={10.1} mut>{session.email}</Txt> : null}
           </View>
         </View>
-        <Pressable onPress={() => { void uploadAvatar(); }} disabled={avatarBusy} accessibilityRole="button" style={{ marginTop: 12, paddingVertical: 10, paddingHorizontal: 12, borderRadius: 12, backgroundColor: '#00000008', alignItems: 'center', opacity: avatarBusy ? 0.6 : 1 }}>
+        <Pressable onPress={chooseAvatarSource} disabled={avatarBusy} accessibilityRole="button" style={{ marginTop: 12, paddingVertical: 10, paddingHorizontal: 12, borderRadius: 12, backgroundColor: '#00000008', alignItems: 'center', opacity: avatarBusy ? 0.6 : 1 }}>
           <Txt size={11.5} weight={500}>{avatarBusy ? 'Uploading photo…' : session.avatarUrl ? 'Change profile photo' : 'Upload profile photo'}</Txt>
         </Pressable>
         {avatarMessage ? <Txt size={10.1} mut style={{ marginTop: 6 }}>{avatarMessage}</Txt> : null}
