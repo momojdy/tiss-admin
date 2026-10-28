@@ -1,11 +1,12 @@
 import { useSyncExternalStore } from 'react';
 import seed from '../data/seed.json';
 import { realToday } from '../lib/dates';
+import { clone } from '../lib/clone';
 import type {
   Account, Announcement, Application, AuthRecord, Banner, BusinessSnapshot, Notice, Payout, Promotion, Reco, ServiceRow, Settlement, StaffMember, SupportCase, Transaction,
 } from '../data/types';
 
-const clone = <T,>(x: T): T => JSON.parse(JSON.stringify(x));
+
 
 /** The in-memory data snapshot. It is cloned from prototype fixtures until a live authorized backend populates it. */
 export let dataMode: 'prototype' | 'live' = 'prototype';
