@@ -161,7 +161,7 @@ export function GoodiesEditor({ canEdit, canPublish }: { canEdit: boolean; canPu
       const saved = data as Row;
       setRow(saved); setSource('draft'); setBaseline(stable(saved.payload));
       if (stable(saved.payload) === stable(clean)) {
-        setNotice({ tone: 'ok', text: 'Saved as draft version ' + saved.version + ' and confirmed. Customers still see the published version.' });
+        setNotice({ tone: 'ok', text: 'Saved as draft version ' + saved.version + ' and confirmed.' });
       } else {
         setNotice({ tone: 'warn', text: 'Saved as version ' + saved.version + ' but the stored content differs from what was sent. Press Reload and review.' });
       }
