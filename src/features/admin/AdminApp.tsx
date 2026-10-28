@@ -81,7 +81,7 @@ function AuthGate() {
       if (!mounted) return;
       if (error || !staff || staff.status !== 'active' || (staff.invitation_expires_at && Date.parse(staff.invitation_expires_at) <= Date.now()) || !data.session.user.email_confirmed_at ) { await supabase.auth.signOut(); return; }
       if (staff.invited_at && data.session.user.user_metadata?.wantiss_invite_accepted !== true) return;
-      session.who = staff.display_name; session.view = staff.display_name; session.last = Date.now(); session.userId = staff.user_id; session.email = data.session.user.email || null; session.role = staff.role; session.status = staff.status; const { data: grants } = await supabase.from('wantiss_admin_permission_grants').select('permission_key,access_level,expires_at,revoked_at').eq('staff_user_id', data.session.user.id); setServerGrants(grants || []); await hydrateAdminState(); bump();
+      session.who = staff.display_name; session.view = staff.display_name; session.last = Date.now(); session.userId = staff.user_id; session.email = data.session.user.email || null; session.avatarUrl = typeof data.session.user.user_metadata?.avatar_url === 'string' ? data.session.user.user_metadata.avatar_url : null; session.role = staff.role; session.status = staff.status; const { data: grants } = await supabase.from('wantiss_admin_permission_grants').select('permission_key,access_level,expires_at,revoked_at').eq('staff_user_id', data.session.user.id); setServerGrants(grants || []); await hydrateAdminState(); bump();
     };
     void restore();
     const { data: authListener } = supabase.auth.onAuthStateChange((event) => {
