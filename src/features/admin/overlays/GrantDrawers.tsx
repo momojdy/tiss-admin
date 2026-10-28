@@ -68,7 +68,7 @@ export function useRequestAccess() {
     const cur = first.startsWith(SECTION_PREFIX) ? acs(who).lv[db.SEC.indexOf(first.slice(SECTION_PREFIX.length))] : 0;
     form({
       title: 'Request access',
-      sub: 'A grant adds access without changing your role. A Super Admin sets its duration and can revoke it early.',
+      sub: 'Adds access without changing your role; a Super Admin can revoke it.',
       fields: [
         { id: 'tg', label: 'What do you need access to?', type: 'select', options: targets, value: first, required: true },
         { id: 'lv', label: 'Level (for sections; rights are on or off)', type: 'select', options: ['View', 'Edit'], value: cur >= 1 ? 'Edit' : 'View' },
@@ -125,7 +125,7 @@ export function RequestDrawer({ id, close }: { id: string; close: () => void }) 
 
   const approve = () => form({
     title: 'Approve · ' + r.by,
-    sub: 'Adds access without changing their role. It expires on the selected date or can be revoked early; permanent grants last until revoked.',
+    sub: 'Adds access without changing their role. It expires on the selected date or remains until revoked.',
     fields: [
       ...(r.kind === 'section' ? [{ id: 'lv', label: 'Access level', type: 'select', options: ['View', 'Edit'], value: LN[r.level], required: true } as FieldSpec] : []),
       { id: 'du', label: 'How long', type: 'select', options: durationOptions(), value: defaultDuration(r.ask), required: true },
@@ -182,14 +182,14 @@ export function GrantDrawer({ id, close }: { id: string; close: () => void }) {
   const mp = can(...REQ.permissions), st = grantStatus(g);
   const revoke = () => form({
     title: 'Revoke now · ' + g.who,
-    sub: grantLabel(g) + ' ends immediately, including for active sessions. Their role and other grants are not touched.' + (g.end ? ' It was due to end on ' + g.end + '.' : ' It was permanent.'),
+    sub: grantLabel(g) + ' ends immediately, including active sessions. Their role and other grants stay unchanged.',
     fields: [{ id: 'nt', label: 'Reason', type: 'textarea', required: true }],
     buttons: [{ label: 'Revoke grant', key: 's', primary: true }],
     onSubmit: (_k, v) => { const er = revokeGrant(g.id, String(v.nt)); if (er) return er; reopen('grant', g.id); toast('Grant revoked. Access ended now.'); },
   });
   const changeEnd = () => form({
     title: 'Change end date · ' + g.who,
-    sub: grantLabel(g) + (g.end ? ' is due to end on ' + g.end + '.' : ' is permanent.') + ' The new period counts from today. Use it to extend, shorten, or make the grant permanent.',
+    sub: grantLabel(g) + (g.end ? ' currently ends on ' + g.end + '.' : ' is permanent.') + ' The new end date is calculated from today.'',
     fields: [
       { id: 'du', label: 'New period', type: 'select', options: durationOptions(), value: durationOptions()[2], required: true },
       { id: 'cu', label: 'End date, only for “A specific date” (YYYY-MM-DD)', type: 'date' },
