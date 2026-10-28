@@ -59,7 +59,7 @@ export function BusinessDetailsScreen() {
       </View>
       {!id ? (
         <Section title={'Business records · ' + db.BIZ.length}>
-          <ListRows empty="No business records are available from the authorized ecosystem endpoint." rows={db.BIZ.map((row) => ({
+          <ListRows empty="No business records yet." rows={db.BIZ.map((row) => ({
             key: row.id,
             main: row.name || 'Unnamed business',
             sub: [row.city, row.country].filter(Boolean).join(' · ') || 'Location not supplied',
@@ -70,7 +70,7 @@ export function BusinessDetailsScreen() {
       ) : !business ? (
         <Card>
           <Txt size={13} weight={500}>Business record unavailable</Txt>
-          <Txt size={11} mut lh={1.4} style={{ marginTop: 6 }}>This ID is not present in the currently authorized ecosystem snapshot. Refresh the source record before attempting an action.</Txt>
+          <Txt size={11} mut lh={1.4} style={{ marginTop: 6 }}>This business record is unavailable. Refresh the source record before taking action.</Txt>
           <View style={{ marginTop: 8 }}><OutlineBtn onPress={() => go('business', { businessId: '' })}>Back to businesses</OutlineBtn></View>
         </Card>
       ) : (
@@ -84,12 +84,12 @@ export function BusinessDetailsScreen() {
             <ListRows rows={[
               { key: 'id', main: 'Business ID', sub: business.id, right: 'Record' },
               { key: 'location', main: 'Location', sub: [business.city, business.country].filter(Boolean).join(' · ') || 'Not supplied by the current endpoint', right: 'Snapshot' },
-              { key: 'visibility', main: 'Live status', sub: business.is_live ? 'Marked live by the authorized snapshot' : 'Not marked live', right: 'Snapshot' },
-              { key: 'payout', main: 'Payout readiness', sub: business.payout_ready ? 'Ready in the authorized snapshot' : 'Not ready or not reported', right: 'Snapshot' },
+              { key: 'visibility', main: 'Live status', sub: business.is_live ? 'Marked live' : 'Not marked live', right: 'Snapshot' },
+              { key: 'payout', main: 'Payout readiness', sub: business.payout_ready ? 'Ready' : 'Not ready or not reported', right: 'Snapshot' },
             ]} />
           </Section>
           <Section title="Verification and access" right={<StatusPill label={verification} small />}>
-            <Txt size={10.1} mut lh={1.4}>Changes are sent to the existing server-authorized verification function and recorded with a reason. No local-only status mutation is performed.</Txt>
+            <Txt size={10.1} mut lh={1.4}>Changes are processed by the server and recorded with a reason.</Txt>
             {hasEdit ? (
               <ButtonRow>
                 {verification !== 'verified' ? <OutlineBtn primary onPress={guard(REQ.ecosystem, () => changeVerification('verified', 'Verify', 'Verify business'))}>Verify business</OutlineBtn> : null}
@@ -99,7 +99,7 @@ export function BusinessDetailsScreen() {
             ) : <Txt size={10.1} color={c.or} style={{ marginTop: 6 }}>You have view-only or no ecosystem edit access.</Txt>}
           </Section>
           <Section title="Applications and review history">
-            <ListRows empty="No matching application records are available in the current authorized snapshot." rows={applications.map((row) => ({
+            <ListRows empty="Nothing here yet." rows={applications.map((row) => ({
               key: row.id,
               main: row.id,
               sub: row.s + ' · ' + row.age + ' days waiting',
@@ -109,7 +109,7 @@ export function BusinessDetailsScreen() {
           </Section>
           <Card>
             <Txt size={11} weight={500}>Protected actions</Txt>
-            <Txt size={10.1} mut lh={1.4} style={{ marginTop: 5 }}>Verification changes and business restrictions are sent through the existing server-authorized workflow. This screen never mutates verification state locally.</Txt>
+            <Txt size={10.1} mut lh={1.4} style={{ marginTop: 5 }}>Verification and restriction changes use the server-authorized workflow.</Txt>
             {!hasEdit ? <Txt size={10.1} color={c.or} style={{ marginTop: 6 }}>You have view-only or no ecosystem edit access.</Txt> : null}
           </Card>
         </>
