@@ -176,8 +176,6 @@ export function reinstateStaff(n: string, role: string, note: string) {
   logStaff(s, 'Reinstated', 'Role: ' + role, note);
   aud('Staff reinstated · ' + n, session.view);
 }
-
-/* ---------------- invitations ---------------- */
 const emailShape = /^\S+@\S+\.\S+$/;
 const makeCode = () => 'WNT-' + Math.random().toString(36).slice(2, 6).toUpperCase() + '-' + Math.random().toString(36).slice(2, 6).toUpperCase();
 export const inviteEmail = (n: string) => authDb[n]?.email;
@@ -202,8 +200,6 @@ export function cancelInvite(n: string) {
   s.st = 'Cancelled';
   aud('Invitation cancelled · ' + n, session.view);
 }
-
-/* ---------------- role templates ---------------- */
 export function saveRoleTemplate(role: string, levels: number[], rights: string[]) {
   if (role === 'Super Admin') return;
   levels.forEach((l, i) => { db.ROLES[role][i] = l; });
