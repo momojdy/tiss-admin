@@ -1,3 +1,4 @@
+import { ReactNode } from 'react';
 import { ReactNode, useState } from 'react';
 import { Pressable, TextInput, TextInputProps, View } from 'react-native';
 import { useTheme } from '../theme/ThemeContext';
@@ -87,7 +88,7 @@ export function NoticeBox({ children, bad }: { children: ReactNode; bad?: boolea
   );
 }
 
-export function BigBadge({ glyph, tone }: { glyph: string; tone?: 'ok' | 'bad' }) {
+export function BigBadge({ glyph, tone }: { glyph: ReactNode; tone?: 'ok' | 'bad' }) {
   const { c } = useTheme();
   return (
     <View style={{ width: 54, height: 54, borderRadius: 27, backgroundColor: tone === 'ok' ? c.gr : tone === 'bad' ? c.or : c.card, borderWidth: 1, borderColor: c.bd, alignItems: 'center', justifyContent: 'center', marginTop: 4, marginBottom: 14 }}>
