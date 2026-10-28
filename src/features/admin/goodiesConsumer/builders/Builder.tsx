@@ -154,6 +154,7 @@ function PizzaStage({b}: {b: Builder}) {
   return <SvgXml width={px} height={px} xml={xml} />;
 }
 function CustomPlate({b}: {b: Builder}) {
+  const th = useTheme();
   const names: string[] = []; b.groups.forEach(g => units(g, BD).forEach(id => {const it = itemOf(g, id); if (it) names.push(it.name);}));
   return (
     <View style={{alignItems: 'center', paddingHorizontal: 16}}>
