@@ -30,13 +30,15 @@ export function FloatingDock({ expanded, onExpandedChange }: { expanded: boolean
     { icon: '⚙', label: 'Settings', visible: secLv(7) > 0, run: () => openDrawer((close) => <SettingsSheet onClose={close} />) },
   ];
   return (
-    <View pointerEvents="box-none" style={{ position: 'absolute', left: expanded ? 9 : 0, top: 0, bottom: 0, justifyContent: 'center', zIndex: 10 }}>
-      <View style={{ backgroundColor: '#16191a', width: expanded ? 37 : 16, height: expanded ? undefined : 72, paddingVertical: expanded ? 12 : 0, borderTopRightRadius: 24, borderBottomRightRadius: 24, alignItems: 'center', gap: expanded ? 15 : 0, shadowColor: '#000', shadowOpacity: 0.22, shadowRadius: 12, shadowOffset: { width: 3, height: 4 }, elevation: 9 }}>
+    <View pointerEvents="box-none" style={{ position: 'absolute', right: 10, bottom: 22, alignItems: 'flex-end', zIndex: 10 }}>
+      <View style={{ backgroundColor: '#16191a', width: expanded ? 168 : 46, paddingVertical: expanded ? 9 : 0, paddingHorizontal: expanded ? 7 : 0, borderRadius: 23, alignItems: 'stretch', gap: expanded ? 3 : 0, shadowColor: '#000', shadowOpacity: 0.24, shadowRadius: 12, shadowOffset: { width: 0, height: 4 }, elevation: 9 }}>
         {actions.filter((action) => action.visible).map((action, index) => {
           if (!expanded && index !== 0) return null;
           return (
-            <Pressable key={action.label} onPress={action.run} accessibilityRole="button" accessibilityLabel={action.label} hitSlop={6} style={{ width: expanded ? 34 : 16, minHeight: 34, alignItems: 'center', justifyContent: 'center' }}>
-              <Txt size={expanded ? 14 : 12} color="#fff">{action.icon}</Txt>
+            <Pressable key={action.label} onPress={action.run} accessibilityRole="button" accessibilityLabel={action.label} hitSlop={6}
+              style={{ minHeight: expanded ? 38 : 46, paddingHorizontal: expanded ? 9 : 0, flexDirection: 'row', alignItems: 'center', justifyContent: expanded ? 'flex-start' : 'center', gap: 10, borderRadius: 18 }}>
+              <Txt size={expanded ? 14 : 17} color="#fff">{expanded ? action.icon : '☰'}</Txt>
+              {expanded ? <Txt size={11.5} color="#fff" weight={500}>{action.label}</Txt> : null}
             </Pressable>
           );
         })}

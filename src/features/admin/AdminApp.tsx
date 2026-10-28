@@ -36,7 +36,7 @@ function Frame() {
   const scrollRef = useRef<ScrollViewInstance>(null);
   const resolvedAccessFor = useRef<string | null>(null);
   useEffect(() => { if (!keepScroll) scrollRef.current?.scrollTo({ y: 0, animated: false }); }, [navKey, keepScroll]);
-  // Resolve the initial screen from effective permissions once per authenticated identity; preserve later navigation.
+  // Resolve the initial screen once per authenticated identity; preserve later navigation.
   useEffect(() => {
     if (!session.who) return;
     const identity = session.userId || session.who;
@@ -55,7 +55,7 @@ function Frame() {
         style={{ width: frameWidth, height: frameHeight, borderRadius: frameRadius, overflow: 'hidden' }}
         onTouchStart={touch}
       >
-        <ScrollView ref={scrollRef} keyboardShouldPersistTaps="handled" showsVerticalScrollIndicator={false} contentContainerStyle={{ paddingTop: 14 + insets.top, paddingBottom: 90 + insets.bottom, paddingLeft: dockExpanded ? 57 : 28, paddingRight: 12 }}>
+        <ScrollView ref={scrollRef} keyboardShouldPersistTaps="handled" showsVerticalScrollIndicator={false} contentContainerStyle={{ paddingTop: 14 + insets.top, paddingBottom: 90 + insets.bottom, paddingLeft: 18, paddingRight: dockExpanded ? 184 : 18 }}>
           <Header onBell={() => openDrawer((close) => <NotificationsSheet onClose={close} />)} onAccount={() => openDrawer((close) => <AccountSheet onClose={close} />)} />
           <Tabs />
           <ScreenHost />
