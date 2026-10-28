@@ -118,5 +118,4 @@ export function FormSheet({ title, fields, buttons, sub, onSubmit, onClose }: Fo
   );
 }
 
-/** Read-only helper to show text inside a dialog. */
 export const Note = ({ children }: { children: ReactNode }) => <Txt size={12} mut lh={1.4} style={{ marginBottom: 6 }}>{children}</Txt>;
