@@ -3,7 +3,7 @@ import React, {useState, useEffect, useRef} from 'react';
 import {View, Text, Pressable, ScrollView, TextInput, KeyboardAvoidingView, Platform} from 'react-native';
 import {Icon} from '../components/Icon';
 import {T, Bar, Cta, Card, Row, Badge, Ttl, Empty, Switch, Input, Chip, useTheme, Tile} from '../components/ui';
-import {S, defAddr, money, emit, save, toast, ui, push, reset, STB, previewOnly, zoneOf} from '../store';
+import {S, defAddr, money, emit, save, toast, ui, push, reset, resetDemo, STB, previewOnly, zoneOf} from '../store';
 import {back, go, tab, togglePref} from '../actions';
 import {setTheme} from '../store';
 import {t as tr} from '../i18n';
@@ -48,7 +48,7 @@ function Settings() {
 
       <LRow icon="moon" title="Dark mode" sub="Goodies only. Other Wantiss features keep their theme." onPress={() => setTheme(d ? 'light' : 'dark')} right={<Switch on={d} label="Dark mode" onPress={() => setTheme(d ? 'light' : 'dark')} />} />
       <LRow icon="help" title="Help center" sub="FAQs and support" onPress={() => go('help')} />
-      {providerInfo.demo ? (<><Ttl>Demo</Ttl><LRow icon="tag" title="Import Admin content" sub="Paste the export from Wantiss Admin" onPress={() => ui.sheet({kind: 'import'})} /><LRow icon="user" title="Reset Goodies demo data" sub="Clears orders, cart and checkout numbers" onPress={() => {require('../store').resetDemo(); toast('Demo data reset');}} /></>) : null}
+      {providerInfo.demo ? (<><Ttl>Demo</Ttl><LRow icon="tag" title="Import Admin content" sub="Paste the export from Wantiss Admin" onPress={() => ui.sheet({kind: 'import'})} /><LRow icon="user" title="Reset Goodies demo data" sub="Clears orders, cart and checkout numbers" onPress={() => {resetDemo(); toast('Demo data reset');}} /></>) : null}
       <T size={12} color={th.mut} align="center" style={{marginTop: 18}}>Goodies {providerInfo.demo ? '(demo)' : ''}</T>
     </View>
   </View>);

@@ -3,7 +3,7 @@ import React, {useEffect, useMemo, useRef, useState} from 'react';
 import {View, Text, Pressable, ScrollView, Animated, PanResponder, BackHandler, Platform, StatusBar, KeyboardAvoidingView, Dimensions} from 'react-native';
 import {SafeAreaView, useSafeAreaInsets} from 'react-native-safe-area-context';
 import {Icon} from './components/Icon';
-import {T, Grad, Cta, Badge, Row, Input, Card, SheetBox, Ttl, Radio, useTheme} from './components/ui';
+import {T, Grad, Cta, Badge, Row, Input, Card, SheetBox, Ttl, Radio, useTheme, Bar} from './components/ui';
 import {S, ST, STB, load, save, emit, useGoodies, cur, cnt, totals, ui, toast, done, stage, notify, navBack, reset, applyZone, money, TL, TP, addr, push, setPreviewOnly, editLocked} from './store';
 import * as A from './actions';
 import {startGoodiesSync} from './serverSync';
@@ -15,6 +15,7 @@ import {ByoScreen, ByoFoot} from './builders/Builder';
 import {loadBuilders, BD} from './builders/engine';
 import {loadContent} from './content';
 import {PROMO} from './theme';
+import {CATS} from './data/seed';
 import {t as tr} from './i18n';
 
 const TABS = ['home', 'cats', 'orders', 'cart'];
@@ -98,7 +99,7 @@ export function GoodiesApp({onExit, embedded = true, previewMode = false}: {onEx
     case 'cart': body = <Cart />; break;
     case 'explore': body = <Explore />; break;
     case 'search': body = <Search />; break;
-    case 'catlist': body = <><TopBar title={c.p === 'all' ? 'All stores' : String(require('./data/seed').CATS.find((x: any) => x.id === c.p)?.name || '')} /><CatList p={c.p} /></>; break;
+    case 'catlist': body = <><TopBar title={c.p === 'all' ? 'All stores' : String(CATS.find((x: any) => x.id === c.p)?.name || '')} /><CatList p={c.p} /></>; break;
     case 'store': body = <Store id={c.p} />; break;
     case 'reviews': body = <StoreReviews id={c.p} />; break;
     case 'product': body = <Product />; break;
@@ -165,7 +166,6 @@ export function GoodiesApp({onExit, embedded = true, previewMode = false}: {onEx
 }
 
 function TopBar({title}: {title: string}) {
-  const {Bar} = require('./components/ui');
   return <Bar title={title} onBack={A.back} />;
 }
 

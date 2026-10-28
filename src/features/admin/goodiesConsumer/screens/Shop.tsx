@@ -3,7 +3,7 @@ import {View, Text, Pressable, ScrollView, useWindowDimensions, Image} from 'rea
 import {Icon} from '../components/Icon';
 import {T, Grad, Circ, Bar, Sh, Rail, Chips, Cta, Card, Row, Badge, Ttl, Empty, Tile, Radio, Seg, Stepper, Input, Switch, bgIdx, useTheme} from '../components/ui';
 import {Dish, StoreCard, ItemRow} from '../components/cards';
-import {fmtTime, fmtDay, hasAlcohol, alcAge, S, ST, STB, IT, DEALS, money, dp, addr, cnt, first, totals, isPk, ctOf, qtyIn, done, TL, TP, defAddr, emit, save, toast, refreshLiveSchedules, previewOnly} from '../store';
+import {fmtTime, fmtDay, hasAlcohol, alcAge, S, ST, STB, IT, DEALS, money, dp, addr, cnt, first, totals, isPk, ctOf, qtyIn, done, TL, TP, defAddr, emit, save, toast, refreshLiveSchedules, previewOnly, ui, stage} from '../store';
 import {go, tab, back, browse, heart, favp, setSize, toggleDrink, productQty, productAdd, qty, clearAsk, promoApply, promoClear, goCheckout, checkoutNext, setMode, setTip, setSch, setPay, setCard, placeOrder, cancelAsk, reorder, setOrdersTab, refreshPaymentOptions} from '../actions';
 import {CHOOSE_SIZE_CATS, setConsent, createWallet, idResult} from '../actions';
 import {rgText, stageLabels, fees, faq as faqList} from '../content';
@@ -42,7 +42,7 @@ export function Store({id}: {id: string}) {
           <Pressable accessibilityRole="button" accessibilityLabel="Read store reviews" onPress={() => go('reviews', id)}><Badge green label={s.live && s.rv === 0 ? 'New · No reviews yet' : '★ ' + s.r.toFixed(1) + ' (' + s.rv + ')'} /></Pressable><Badge label={s.eta + ' min'} /><Badge label={s.fee === 0 ? tr('freeDelivery') : money(s.fee) + ' ' + tr('delivery')} /><Badge label={'Min. ' + money(s.min)} /><Badge label="Delivery + pickup" />{s.pr ? <Badge label={s.pr} /> : null}
         </View>
         <View style={{flexDirection: 'row', gap: 8, marginTop: 10}}>
-          <Cta small ghost label="Store info" onPress={() => require('../store').ui.sheet({kind: 'sinfo', id})} />
+          <Cta small ghost label="Store info" onPress={() => ui.sheet({kind: 'sinfo', id})} />
           <Cta small ghost label="Message store" onPress={() => go('contact', {storeContact: true, storeId: id})} />
         </View>
         <View style={{marginTop: 14}}><Input value={S.ss[id] || ''} onChange={v => {S.ss[id] = v; emit();}} placeholder={'Search in ' + s.n} /></View>
@@ -149,7 +149,7 @@ const Sum = ({rows, total}: {rows: [string, string, 'g'?][]; total?: [string, st
 
 export function Cart() {
   const th = useTheme(), c = S.cart, [code, setCode] = useState(S.pin || '');
-  if (!c.lines.length) return <View><Bar title="Your cart" onBack={back} /><Empty emoji="🛒" title="Your cart is empty" text="Explore nearby stores, check what's open, and discover products around your chosen address." button="Start browsing" onPress={() => go('explore')} /><View style={{paddingHorizontal:16,marginTop:12}}><Cta ghost label="Start a group order" onPress={() => require('../store').ui.sheet({kind:'group-order'})} /></View></View>;
+  if (!c.lines.length) return <View><Bar title="Your cart" onBack={back} /><Empty emoji="🛒" title="Your cart is empty" text="Explore nearby stores, check what's open, and discover products around your chosen address." button="Start browsing" onPress={() => go('explore')} /><View style={{paddingHorizontal:16,marginTop:12}}><Cta ghost label="Start a group order" onPress={() => ui.sheet({kind:'group-order'})} /></View></View>;
   const t = totals(), st = t.st!, badLine = c.lines.some((l: any) => l.byo && lineBad(l)), short = t.sub < st.min || badLine;
   return (
     <View>
@@ -175,7 +175,7 @@ export function Cart() {
           );
         })}
         <Pressable onPress={() => go('store', st.id)} style={{flexDirection: 'row', alignItems: 'center', gap: 12, marginTop: 14, padding: 14, borderWidth: 1.5, borderStyle: 'dashed', borderColor: th.line, borderRadius: 16}}><T weight="700" style={{flex: 1}}>+ Continue shopping</T><Icon name="chevR" size={16} color={th.ink} /></Pressable>
-        <Pressable accessibilityRole="button" accessibilityLabel="Start a group order" onPress={() => require('../store').ui.sheet({kind:'group-order'})} style={{flexDirection:'row',alignItems:'center',gap:12,marginTop:10,padding:14,borderWidth:1,borderColor:th.br,borderRadius:16,backgroundColor:th.brt}}>
+        <Pressable accessibilityRole="button" accessibilityLabel="Start a group order" onPress={() => ui.sheet({kind:'group-order'})} style={{flexDirection:'row',alignItems:'center',gap:12,marginTop:10,padding:14,borderWidth:1,borderColor:th.br,borderRadius:16,backgroundColor:th.brt}}>
           <View style={{width:42,height:42,borderRadius:13,backgroundColor:th.card,alignItems:'center',justifyContent:'center'}}><Icon name="user" size={21} color={th.br}/></View>
           <View style={{flex:1}}><T weight="800">Start a group order</T><T size={12.5} color={th.mut} style={{marginTop:3}}>Invite friends and coordinate a shared cart</T></View>
           <Icon name="chevR" size={17} color={th.br}/>
@@ -213,7 +213,7 @@ export function Checkout() {
     {st.far && !st.live ? <Card style={{backgroundColor: th.brt, borderColor: th.br, marginTop: 12}}><T weight="700">Pickup only</T><T size={13} color={th.mut}>{st.n} is {st.km.toFixed(1)} km from this address, beyond delivery range. Pick another address to get delivery.</T></Card> : null}
     {hasAlcohol() && !S.hasWallet ? <Card style={{backgroundColor: th.brt, borderColor: th.br, marginTop: 12}}><T weight="800">Create a Wantiss wallet</T><T size={13} color={th.mut} style={{marginVertical: 4}}>{rgText('rg.wallet', 'Create a Wantiss wallet so any refund has somewhere to go. You can withdraw from it later.', alcAge(S.cart.sid).age)}</T><Cta small label="Create wallet" onPress={createWallet} /></Card> : null}
     <Ttl>Contact number</Ttl>
-    <Card><Row><IcBox icon="phone" /><View style={{flex: 1}}><T weight="700">{ct.ph}</T><View style={{marginTop: 3, flexDirection: 'row', gap: 6, flexWrap: 'wrap'}}>{ct.w ? <Badge green label="Default Wantiss number" /> : <><Badge label="Goodies checkout number" /><T size={12.5} color={th.mut}>{ct.l}</T></>}</View></View><Pressable onPress={() => require('../store').ui.sheet({kind: 'contacts'})}><T size={13} weight="700" color={th.br}>Change</T></Pressable></Row></Card>
+    <Card><Row><IcBox icon="phone" /><View style={{flex: 1}}><T weight="700">{ct.ph}</T><View style={{marginTop: 3, flexDirection: 'row', gap: 6, flexWrap: 'wrap'}}>{ct.w ? <Badge green label="Default Wantiss number" /> : <><Badge label="Goodies checkout number" /><T size={12.5} color={th.mut}>{ct.l}</T></>}</View></View><Pressable onPress={() => ui.sheet({kind: 'contacts'})}><T size={13} weight="700" color={th.br}>Change</T></Pressable></Row></Card>
   </>);
   if (S.cs === 1) body = (<>
     <T size={15} weight="800" style={{marginBottom: 8}}>When do you want it?</T>
@@ -224,7 +224,7 @@ export function Checkout() {
           <T weight="800">{S.sch ? 'Scheduled order' : 'Choose a date & time'}</T>
           <T size={12.5} color={th.mut} style={{marginTop:3}}>{S.sch ? fmtDay(new Date(S.sch))+', '+fmtTime(new Date(S.sch)) : (st.open ? 'Choose an exact time, or keep ASAP.' : 'The store’s minimum advance time is applied automatically.')}</T>
         </View>
-        <View style={{width:142}}><Cta small label={S.sch ? 'Change time' : 'Choose time'} onPress={() => require('../store').ui.sheet({kind:'schedule'})} /></View>
+        <View style={{width:142}}><Cta small label={S.sch ? 'Change time' : 'Choose time'} onPress={() => ui.sheet({kind:'schedule'})} /></View>
       </Row>
       {S.sch ? <Pressable onPress={()=>setSch(0)} style={{alignSelf:'flex-start',paddingTop:9}}><T size={12.5} weight="700" color={th.red}>Clear scheduled time</T></Pressable> : null}
     </Card>
@@ -309,7 +309,7 @@ export function Track({id}: {id: string}) {
       o.expired = data.status === 'expired';
       if (data.scheduled_for) o.sch = new Date(data.scheduled_for).getTime();
       o.cx = ['cancelled', 'declined', 'expired'].includes(data.status) ? 1 : 0;
-      o.st = require('../store').stage(o);
+      o.st = stage(o);
       save(); emit();
     };
     void sync();
@@ -336,7 +336,7 @@ export function Track({id}: {id: string}) {
         {o.pk && o.st >= 3 && !o.cx ? <PickupLocationMap /> : null}
         {!o.pk && o.st >= 4 && !dn ? <DeliveryRouteMap /> : null}
         {o.alc ? <Card style={{borderColor: o.alc.status === 'failed' ? th.red : th.br}}><Row><Text style={{fontSize: 26}}>🪪</Text><View style={{flex: 1}}><T weight="800">ID check · {o.alc.age}+ ({o.alc.who === 'shop' ? 'checked by the shop' : 'checked by the courier'})</T><T size={13} color={th.mut}>{o.alc.status === 'pending' ? 'Have your valid government photo ID ready. The order is completed only after it is checked.' : o.alc.status === 'passed' ? 'ID checked.' : (o.pay === 'cash' ? 'ID check failed. You were not charged.' : 'ID check failed. ' + money(o.refund || 0) + ' was refunded to your Wantiss wallet. The delivery fee is not refunded.')}</T></View></Row>{providerInfo.demo && o.alc.status === 'pending' && o.st >= (o.pk ? 3 : 5) ? <View style={{flexDirection: 'row', gap: 8, marginTop: 10}}><Cta small ghost label="Demo: ID valid" onPress={() => idResult(o.id, true)} /><Cta small ghost label="Demo: ID failed" onPress={() => idResult(o.id, false)} /></View> : null}</Card> : null}
-        {dn && !o.cx && (!o.rated || (!o.pk && !o.driverRated)) ? <Card><Row sp style={{alignItems:'center'}}><View style={{flex:1}}><T weight="800">Rate your order</T><T size={12} color={th.mut}>Order and delivery feedback</T></View><View style={{flexDirection:'row',gap:3}}>{[1,2,3,4,5].map(k=><Pressable key={k} accessibilityRole="button" accessibilityLabel={'Rate order ' + k + ' stars'} onPress={()=>{S.rt=k;require('../store').ui.sheet({kind:'review',id:o.id,initialStars:k});}}><Icon name="star" size={23} color={o.rated>=k?'#FFB400':th.line} fill /></Pressable>)}</View></Row>{o.rated ? <T size={12} color={th.mut} style={{marginTop:5}}>Your rating: {o.rated} ★</T> : null}{!o.pk ? <><View style={{height:1,backgroundColor:th.line,marginVertical:10}}/><Row sp style={{alignItems:'center'}}><View style={{flex:1}}><T weight="800">Rate your driver</T><T size={12} color={th.mut}>Delivery experience</T></View>{o.driverRated ? <T weight="700">{o.driverRated} ★</T> : <View style={{flexDirection:'row',gap:3}}>{[1,2,3,4,5].map(k=><Pressable key={k} accessibilityRole="button" accessibilityLabel={'Rate driver ' + k + ' stars'} onPress={()=>{S.rt=k;require('../store').ui.sheet({kind:'driver-review',id:o.id,initialStars:k});}}><Icon name="star" size={23} color="#FFB400" fill /></Pressable>)}</View>}</Row></> : null}</Card> : null}
+        {dn && !o.cx && (!o.rated || (!o.pk && !o.driverRated)) ? <Card><Row sp style={{alignItems:'center'}}><View style={{flex:1}}><T weight="800">Rate your order</T><T size={12} color={th.mut}>Order and delivery feedback</T></View><View style={{flexDirection:'row',gap:3}}>{[1,2,3,4,5].map(k=><Pressable key={k} accessibilityRole="button" accessibilityLabel={'Rate order ' + k + ' stars'} onPress={()=>{S.rt=k;ui.sheet({kind:'review',id:o.id,initialStars:k});}}><Icon name="star" size={23} color={o.rated>=k?'#FFB400':th.line} fill /></Pressable>)}</View></Row>{o.rated ? <T size={12} color={th.mut} style={{marginTop:5}}>Your rating: {o.rated} ★</T> : null}{!o.pk ? <><View style={{height:1,backgroundColor:th.line,marginVertical:10}}/><Row sp style={{alignItems:'center'}}><View style={{flex:1}}><T weight="800">Rate your driver</T><T size={12} color={th.mut}>Delivery experience</T></View>{o.driverRated ? <T weight="700">{o.driverRated} ★</T> : <View style={{flexDirection:'row',gap:3}}>{[1,2,3,4,5].map(k=><Pressable key={k} accessibilityRole="button" accessibilityLabel={'Rate driver ' + k + ' stars'} onPress={()=>{S.rt=k;ui.sheet({kind:'driver-review',id:o.id,initialStars:k});}}><Icon name="star" size={23} color="#FFB400" fill /></Pressable>)}</View>}</Row></> : null}</Card> : null}
         {o.rated && (o.pk || o.driverRated) ? <Card>
           <T weight="700" align="center">Thank you for your feedback!</T>
           {o.orderReview?.t ? <T size={12.5} color={th.mut} style={{marginTop:8}}>Your shop/order comment: “{o.orderReview.t}”</T> : null}
@@ -380,7 +380,7 @@ export function Orders() {
           order.expired = row.status === 'expired';
           order.cx = ['cancelled', 'declined', 'expired'].includes(row.status) ? 1 : 0;
           if (row.scheduled_for) order.sch = new Date(row.scheduled_for).getTime();
-          order.st = require('../store').stage(order);
+          order.st = stage(order);
           changed = true;
         }
         if (changed) { save(); emit(); }
