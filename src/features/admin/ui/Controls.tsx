@@ -3,6 +3,7 @@ import { Pressable, StyleProp, TextInput, View, ViewStyle } from 'react-native';
 import { useTheme } from '../theme/ThemeContext';
 import { toneColor, STATUS_TONE, Tone } from '../theme/tokens';
 import { Txt } from './Txt';
+import { AppIcon } from './AppIcon';
 
 export const Dot = ({ color, size = 6, style }: { color?: Tone; size?: number; style?: StyleProp<ViewStyle> }) => {
   const { c } = useTheme();
@@ -122,7 +123,7 @@ export function SelectMenu<T extends string>({ label, options, value, onChange, 
       <Pressable accessibilityRole="button" accessibilityLabel={label || placeholder || 'Choose option'} accessibilityState={{ expanded: open }} onPress={() => setOpen((current) => !current)}
         style={{ minHeight: 40, borderWidth: 1, borderColor: c.bd, borderRadius: 10, backgroundColor: c.card, paddingHorizontal: 11, paddingVertical: 9, flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between' }}>
         <Txt size={11.2} weight={500}>{value || placeholder || 'Select'}</Txt>
-        <Txt size={11} mut>{open ? '⌃' : '⌄'}</Txt>
+        <AppIcon name={open ? 'chevron-down' : 'chevron-right'} size={14} />
       </Pressable>
       {open ? <View style={{ marginTop: 4, borderWidth: 1, borderColor: c.bd, borderRadius: 10, backgroundColor: c.card, overflow: 'hidden' }}>
         {options.map((option) => <Pressable key={option} accessibilityRole="button" accessibilityState={{ selected: option === value }} onPress={() => { onChange(option); setOpen(false); }}
