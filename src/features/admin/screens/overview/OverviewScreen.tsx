@@ -1,4 +1,4 @@
-import { View } from 'react-native';
+import { Pressable, View } from 'react-native';
 import { useState } from 'react';
 import { db, ui, bump, mny, useDb, dataMode } from '../../state/db';
 import { useNav } from '../../shell/Nav';
