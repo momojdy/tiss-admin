@@ -1,6 +1,4 @@
-/* Starter templates. Copied from Goodies v24 (tplPizza, tplBurger, tplCustom). Items now reference admin library asset IDs instead of v24's name-matching.
-   Bun items reference a pair base (burger.bun_sesame -> _top and _bottom). Sauce items reference a base (burger.sauce_ketchup -> layer, icon, cup).
-   PROPOSED contract: assetId values must exist in the Wantiss Admin builder library. */
+/* Starter templates use Admin library asset IDs; the proposed assetId contract still needs validation. */
 export type TplItem = {name: string; price: number; free: boolean; assetId: string | null; col: string | null; max?: number};
 export type TplGroup = {name: string; kind: 'one' | 'many'; req: boolean; min: number; max: number; inc: number; me: number; items: TplItem[]};
 export type TplBuilder = {type: 'pizza' | 'burger' | 'custom'; name: string; desc: string; emoji: string; base: number; sizes: {name: string; add: number}[]; groups: TplGroup[]};

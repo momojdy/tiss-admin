@@ -16,7 +16,6 @@ const Chev = () => <Txt size={10.1}>›</Txt>;
 const REQUEST_FILTERS = ['Pending', 'Approved', 'Declined', 'Cancelled', 'All'] as const;
 const GRANT_FILTERS = ['All', 'Active', 'Expired', 'Revoked'] as const;
 
-/** People > Requests: the queue a Super Admin works through. */
 export function RequestsBody() {
   const open = useOpen();
   const q = String(ui.pq).toLowerCase();
@@ -46,7 +45,6 @@ function Tile({ value, label, tone }: { value: number; label: string; tone?: str
   );
 }
 
-/** People > Permissions: what is running, who has what and until when, history, and the way to revoke. */
 export function PermissionsBody() {
   const open = useOpen();
   const { c } = useTheme();

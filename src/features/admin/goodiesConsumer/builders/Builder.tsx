@@ -1,4 +1,4 @@
-/* Build Your Own screen. Port of v24 vByo, bzStage, bgView, pzView, bzOpts, bzRev, bzFoot, vByoDone. */
+
 import React, {useEffect, useMemo, useRef} from 'react';
 import {useSafeAreaInsets} from 'react-native-safe-area-context';
 import {View, Text, Pressable, ScrollView, Image, Animated, Easing, TextInput} from 'react-native';
@@ -12,7 +12,6 @@ import {ASSETS, LAYOUT} from '../content';
 import {BD, Builder, BItem, bGet, bDraft, setBD, units, itemOf, bBreak, bCheck, bzDirty, BYO, bzAdd, bzSub, bzSize, bzUndo, bzQty, bzNote, bzResetAsk, bzAddOrder, bzCancel, bzAnother, bzShop} from './engine';
 import {PSZ, bzr, hs, clamp, shade, pizzaBase, defsXml, shreds, iconXml, hasSymbol} from './pizzaArt';
 
-/* ---------- asset helpers (Admin library ids) ---------- */
 const key = (assetId: string | null) => (assetId || '').replace(/^(burger|pizza)\./, '');
 const isBun = (it: BItem) => /^(bun_|lettuce_wrap)/.test(key(it.assetId));
 const isSeason = (it: BItem) => /^(pepper_|spice_)/.test(key(it.assetId));
@@ -32,7 +31,7 @@ export const pizzaArtOf = (it: BItem) => {
   return ['pepperoni', 'mushroom', 'olives', 'basil', 'peppers', 'tomato', 'mozzarella'].includes(k) ? k : 'generic';
 };
 
-/* v24 layer tables, overridden by Admin layout metadata when present */
+/* Layer tables provide fallbacks; Admin layout metadata overrides them. */
 const RKt: any = {lwb: .5, lwt: 11, sauce: 1, patty: 6, cheese: 7, shred: 7.4, bacon: 8, lettuce: 9, pickle: 9.5, cucumber: 9.55, avocado: 9.6, mushroom: 9.65, pineapple: 9.7, jalapeno: 9.75, generic: 9.8, tomato: 10, egg: 10.4, caramel: 10.7, onion: 10.8, pepper: 11.2, spice: 11.4};
 const Wt: any = {lwb: 178, lwt: 178, patty: 184, cheese: 160, shred: 154, lettuce: 176, tomato: 152, onion: 144, caramel: 148, pickle: 134, cucumber: 136, jalapeno: 120, pineapple: 140, avocado: 156, mushroom: 150, bacon: 158, egg: 152, sauce: 112, generic: 146, pepper: 70, spice: 65};
 const Kt: any = {lwb: .2, lwt: .12, patty: .13, cheese: .035, shred: .035, lettuce: .07, tomato: .055, onion: .04, caramel: .045, pickle: .045, cucumber: .045, jalapeno: .045, pineapple: .05, avocado: .05, mushroom: .05, bacon: .055, egg: .055, sauce: .02, generic: .05, pepper: .025, spice: .02};
@@ -98,7 +97,7 @@ function Flakes() {
   );
 }
 
-/* v24 vector burger, used when the Admin library is missing a needed layer (shown, never silently) */
+/* Show fallback burger artwork if a required Admin layer is missing. */
 function BurgerFallback({b}: {b: Builder}) {
   const th = useTheme();
   let bun: BItem | null = null; let L: BItem[] = [];
@@ -124,7 +123,6 @@ function BurgerFallback({b}: {b: Builder}) {
   return <View style={{alignItems: 'center'}}><SvgXml width={190} height={hgt} xml={`<svg xmlns="http://www.w3.org/2000/svg" viewBox="${vb}">${o}</svg>`} /><T size={10.5} color="rgba(255,255,255,.6)" style={{marginTop: 6}}>Preview drawing. Photo layers appear once uploaded in Admin.</T></View>;
 }
 
-/* ---------- pizza ---------- */
 const PZ_ORDER = ['crust', 'sauce', 'cheese', 'meat', 'veg'];
 const pzRole = (it: BItem) => {const k = key(it.assetId); return /_crust$/.test(k) ? 0 : /_sauce$/.test(k) ? 1 : ['mozzarella', 'cheddar', 'parmesan'].includes(k) ? 2 : ['pepperoni', 'sausage', 'bacon'].includes(k) ? 3 : 4;};
 function pizzaPieces(b: Builder, d: any) {
@@ -173,7 +171,6 @@ export function Stage({b, fin}: {b: Builder; fin?: boolean}) {
   );
 }
 
-/* ---------- options ---------- */
 const hint = (g: any) => {const rq = g.req || g.min > 0, mn = rq ? Math.max(1, g.min) : 0; if (g.kind === 'one') return 'Choose 1 · ' + (rq ? 'Required' : 'Optional'); return (mn ? 'Choose ' + mn + (g.max > mn ? ' to ' + g.max : '') : 'Up to ' + g.max) + ' · ' + (rq ? 'Required' : 'Optional');};
 function TileIcon({it, type}: {it: BItem; type: string}) {
   const th = useTheme(), a = thumbAsset(it, type);

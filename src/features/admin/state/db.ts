@@ -22,7 +22,6 @@ export const db = Object.assign(clone(seed), { BIZ: [] as BusinessSnapshot[] }) 
   GK: string[]; VOC: Record<string, string[]>; GMAP: Record<string, string>; CATIDS: [string, string, string][]; RIGHTS: string[]; reasons: string[];
 };
 
-/** Authentication is handled by Supabase; this module stores prototype UI data. */
 export const authDb: Record<string, AuthRecord> = {};
 
 /** The clock. The prototype's other demo data (applications, restrictions...) is dated around 2026-10-17, so the demo keeps that

@@ -6,7 +6,7 @@ import { useNav } from './Nav';
 import { ecoRows } from '../screens/ecosystem/EcosystemScreen';
 import { txRows } from '../screens/finance/FinanceScreen';
 
-/** Export of the list on the current screen, as a CSV through the share sheet. */
+/** Exports the current screen's list as CSV via the share sheet. */
 export function useExport() {
   const { screen } = useNav();
   const toast = useToast();

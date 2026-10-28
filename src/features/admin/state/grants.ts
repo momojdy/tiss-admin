@@ -8,8 +8,6 @@ export { GRANTS, REQUESTS, isLive, liveGrantsFor, addDays, daysBetween, validDat
 
 /** Puts a notice in the notification centre. `to` is a staff name or '*perm' (everyone who can manage permissions). */
 const notify = (to: string, t: string, d: string, v: string, crit = false) => { db.NS.unshift({ t, w: 'just now', f: (crit ? 'crit ' : '') + 'unread', d, v, to }); };
-
-
 /** Managing permissions stays with the Super Admin role; it cannot be requested or granted for a period. */
 export const REQUESTABLE_RIGHTS = RIGHTS.filter((r) => r !== 'Manage permissions');
 export const SECTION_PREFIX = 'Section · ';
@@ -28,7 +26,6 @@ export function requestTargets(who: string): string[] {
 
 export const grantLabel = (g: Pick<Grant, 'kind' | 'sec' | 'right' | 'level'>) => (g.kind === 'section' ? db.SEC[g.sec] + ' · ' + LN[g.level] : g.right);
 export const requestLabel = (r: AccessRequest) => grantLabel(r);
-
 const PRESETS: [string, number][] = [['1 day', 1], ['3 days', 3], ['1 week', 7], ['2 weeks', 14], ['1 month', 30]];
 export const ASK_OPTIONS = ['Not sure', ...PRESETS.map((p) => p[0]), 'Permanent'];
 export const PERMANENT = 'Permanent (until revoked)';
@@ -48,7 +45,6 @@ export function endFromChoice(choice: string, custom: string): { end: string; er
   const preset = PRESETS.find(([l]) => choice.startsWith(l + ' ·'));
   return preset ? { end: addDays(TODAY, preset[1]), error: '' } : { end: '', error: 'Choose how long the access lasts.' };
 }
-
 const wasExpired = (g: Grant) => g.st === 'Expired' || (g.st === 'Active' && !!g.end && g.end < TODAY);
 export const grantStatus = (g: Grant): Grant['st'] => (wasExpired(g) ? 'Expired' : g.st);
 export const daysLeft = (g: Grant): number | null => (g.end ? daysBetween(TODAY, g.end) : null);
@@ -81,10 +77,6 @@ export const REQ_TONE: Record<string, string> = { Pending: 'ye', Approved: 'gr',
 const nextId = (prefix: string, list: { id: string }[]) => prefix + String(Math.max(0, ...list.map((x) => +x.id.slice(prefix.length) || 0)) + 1).padStart(4, '0');
 const self = (n: string) => n === session.view;
 const NEEDS_MP = 'This needs the “Manage permissions” right.';
-
-/* ------------------------------------------------------------------ */
-/* Requesting                                                          */
-/* ------------------------------------------------------------------ */
 export interface RequestInput { target: string; level: string; item: string; why: string; ask: string }
 
 /** A staff member asks for more access to review or change something. Returns an error message, or '' when sent. */
@@ -129,10 +121,6 @@ export function cancelRequest(id: string): string {
   aud('Access request cancelled · ' + r.by, r.by);
   return '';
 }
-
-/* ------------------------------------------------------------------ */
-/* Deciding                                                            */
-/* ------------------------------------------------------------------ */
 export interface DecisionInput { approve: boolean; level: string; choice: string; custom: string; note: string }
 
 /** Approve (with a level and an end date, or permanent) or decline a pending request. Returns an error message, or ''. */
@@ -169,10 +157,6 @@ export function decideRequest(id: string, d: DecisionInput): string {
   notify(s.n, 'Access approved · ' + grantLabel(g) + ' · ' + (end ? 'until ' + end : 'no end date'), 'grant', g.id);
   return '';
 }
-
-/* ------------------------------------------------------------------ */
-/* Revoking                                                            */
-/* ------------------------------------------------------------------ */
 /** Ends a grant now, before its end date. It applies immediately, including to active sessions. */
 export function revokeGrant(id: string, note: string): string {
   if (!can(needs('Manage permissions'))) return NEEDS_MP;
@@ -214,10 +198,6 @@ export function closeGrantsFor(who: string, note: string) {
     g.st = 'Revoked'; g.closed = TODAY; g.closedBy = session.view; g.closeNote = note;
   });
 }
-
-/* ------------------------------------------------------------------ */
-/* Analytics for the Permissions page                                  */
-/* ------------------------------------------------------------------ */
 export function grantStats() {
   const live = GRANTS.filter(isLive);
   return {

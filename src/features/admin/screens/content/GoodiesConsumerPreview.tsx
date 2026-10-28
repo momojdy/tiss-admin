@@ -21,12 +21,7 @@ const screens = [
   { key: 'byo', label: 'Build your own' },
 ] as const;
 
-/**
- * The real Goodies consumer app, driven by the editor's draft.
- * - The editor owns the draft. This component only renders it (a resolved copy) and never edits it.
- * - While mounted it blocks GoodiesApp.loadContent() so nothing can overwrite the draft.
- * - In edit mode the real components select themselves through EditContext; there is no overlay.
- */
+/** Renders a resolved copy of the editor-owned draft and prevents consumer loading from overwriting it. */
 export function GoodiesConsumerPreview({ editMode = false, contentDraft, assetUrls, selectedTarget, onSelectTarget }: {
   editMode?: boolean;
   contentDraft: any | null;

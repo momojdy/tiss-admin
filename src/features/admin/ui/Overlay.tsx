@@ -22,7 +22,6 @@ export const useOverlay = () => useContext(Ctx);
 
 let seq = 1;
 
-/** `.ov`: stacked overlays over the whole admin frame. Dialogs are centred, drawers slide in from the right. */
 export function OverlayProvider({ children }: { children: ReactNode }) {
   const [items, setItems] = useState<Item[]>([]);
   const { c, dark } = useTheme();

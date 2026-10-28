@@ -11,7 +11,7 @@ import { Txt } from '../ui/Txt';
 
 const FILTERS = ['All', 'Unread', 'Mine'] as const;
 
-/** The bell: notices for the person the interface follows (access decisions, escalations, expiries). Tap one to open what it is about. */
+/** Notifications for the current staff identity; selecting one opens its related item. */
 export function NotificationsSheet({ onClose }: { onClose: () => void }) {
   useDb();
   expireStaff();

@@ -15,7 +15,6 @@ export function smoothPath(p: number[][]): string {
 
 const MONTHS = 'Nov Dec Jan Feb Mar Apr May Jun Jul Aug Sep Oct'.split(' ');
 
-/** `line(...)`: area line chart with optional dashed target line. viewBox matches the HTML (405 x 160). */
 export function LineChart({ vals, color, max, fill = true, dash, labels, yLabels }: {
   vals: number[]; color: string; max: number; fill?: boolean; dash?: boolean; labels?: string[]; yLabels?: string[];
 }) {
@@ -51,7 +50,6 @@ export function LineChart({ vals, color, max, fill = true, dash, labels, yLabels
   );
 }
 
-/** Plain smooth line (approval-rate trend). */
 export function SparkLine({ points, color, width = 380, height = 90 }: { points: number[][]; color: string; width?: number; height?: number }) {
   return (
     <Svg viewBox={`0 0 ${width} ${height}`} width="100%" height={(height / width) * 300}>

@@ -9,7 +9,7 @@ import { useNav } from '../../shell/Nav';
 import { useOpen } from '../../overlays/registry';
 import { useInvite, useNewRole, useRoleEditor } from '../../overlays/PeopleDrawers';
 import { Section } from '../../ui/Card';
-import { Btn, Chips, Row, SearchInput, SelectMenu, StatusPill } from '../../ui/Controls';
+import { Btn, Chips, Row, SearchInput, StatusPill } from '../../ui/Controls';
 import { Heading } from '../../ui/Heading';
 import { ListRows } from '../../ui/Lists';
 import { Txt } from '../../ui/Txt';
@@ -49,7 +49,6 @@ export function PeopleScreen() {
   const subs = PEOPLE_SUBS.filter((x) => mp || !grantSubs.includes(x));
   const q = String(ui.pq).toLowerCase();
 
-  /* ---------- header and KPIs per sub-page (the HTML swaps the header too) ---------- */
   const count = (st: string) => db.STAFF.filter((s) => s.st === st).length;
   const header = () => {
     if (sub === 'Staff') {
@@ -82,7 +81,6 @@ export function PeopleScreen() {
     ]} />;
   };
 
-  /* ---------- staff ---------- */
   const staffRows = (): StaffMember[] => db.STAFF.filter((s) => s.st !== 'Cancelled' && (ui.sst === 'All' || s.st === ui.sst) && (ui.pr === 'All' || s.role === ui.pr) && (!q || s.n.toLowerCase().includes(q)));
 
   const matrix = (l: StaffMember[]) => (
@@ -140,7 +138,6 @@ export function PeopleScreen() {
     );
   };
 
-  /* ---------- the other sub-pages ---------- */
   const accountsBody = () => {
     const l = db.ACC.filter((a) => (ui.at === 'All' || a.type === ui.at) && (ui.ast === 'All' || accStatus(a) === ui.ast) && (!q || (a.n + a.id + a.svc.join()).toLowerCase().includes(q)));
     return (
@@ -216,11 +213,11 @@ export function PeopleScreen() {
   return (
     <View>
       {header()}
-      <SelectMenu label="People section" options={subs} value={sub as (typeof PEOPLE_SUBS)[number]} onChange={(v) => set('ps', v)} />
+      <Chips options={subs} value={sub as (typeof PEOPLE_SUBS)[number]} onChange={(v) => set('ps', v)} />
       {sub === 'Staff' ? (
         <>
           <Chips options={STAFF_STATUS} value={ui.sst} onChange={(v) => set('sst', v)} />
-          <SelectMenu label="Role" options={['All', ...Object.keys(db.ROLES)]} value={ui.pr} onChange={(v) => set('pr', v)} />
+          <Chips options={['All', ...Object.keys(db.ROLES)]} value={ui.pr} onChange={(v) => set('pr', v)} />
         </>
       ) : null}
       {sub === 'Accounts' ? (
@@ -241,7 +238,6 @@ export function PeopleScreen() {
   );
 }
 
-/** Tappable matrix row. */
 function Pressable2({ children, onPress }: { children: React.ReactNode; onPress: () => void }) {
   return <Pressable onPress={onPress} accessibilityRole="button">{children}</Pressable>;
 }

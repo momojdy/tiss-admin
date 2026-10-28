@@ -55,7 +55,6 @@ export async function importContent(text: string) { const j = JSON.parse(text); 
 export async function clearContent() { C = null; Object.keys(ASSETS).forEach(k => delete ASSETS[k]); Object.keys(LAYOUT).forEach(k => delete LAYOUT[k]); subs.forEach(f => f()); }
 export const hasContent = () => !!C;
 
-/* ---------- accessors ---------- */
 export function categories(): {id: string; name: Txt; emoji: string; art?: string | null}[] {
   if (!C) return [];
   return C.cats.filter((c: any) => c.st === 'on').sort((a: any, b: any) => a.ord - b.ord).map((c: any) => ({id: c.id, name: c.name, emoji: c.emoji, art: c.art ? c.art.data : null, home: c.home}));

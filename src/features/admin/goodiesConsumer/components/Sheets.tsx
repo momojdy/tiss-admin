@@ -328,7 +328,7 @@ function CtForm({id}: {id: any}) {
   </>);
 }
 
-/* DEMO: paste the JSON exported from Wantiss Admin (Goodies > Overview > Export content). Production fetches the same shape from the backend. */
+/* Development helper: paste an Admin export; production loads this content from the backend. */
 function ImportSheet({close}: {close: () => void}) {
   const th = useTheme(), [txt, setTxt] = useState('');
   return (<>

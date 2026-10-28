@@ -1,9 +1,4 @@
-/* Goodies editable draft: validation, persistence-safe cloning, render-time asset resolution
-   and the generated starter draft. Pure functions, no network, no global state.
-
-   The v5 schema is not documented in this repository. These rules come from what
-   content.ts reads (cats, promos, modes, labels, deals, coupons, stages, lib, ages, ageDef)
-   and must be checked against the original Admin export when one is available. */
+/* Goodies draft validation and safe asset handling; confirm the v5 schema against the original Admin export. */
 import {CATS} from './data/seed';
 import {t as tr} from './i18n';
 
@@ -100,7 +95,6 @@ export function resolveForRender(draft: any, urlByKey: Record<string, string>): 
   return out;
 }
 
-/* ---------- generated starter draft (never saved automatically) ---------- */
 const txt = (value: string) => ({en: {v: value, s: 'draft' as const}});
 
 export function buildStarterDraft(): any {

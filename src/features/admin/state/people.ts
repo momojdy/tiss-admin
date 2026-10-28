@@ -3,10 +3,6 @@ import { effOf, lastSuperAdmin, LN, logStaff, nm, RIGHTS, session, staffByName }
 import { closeGrantsFor } from './grants';
 import type { Account, Restriction, StaffMember } from '../data/types';
 
-/* ------------------------------------------------------------------ */
-/* Accounts: customers, sellers and vendors (restrictions)             */
-/* ------------------------------------------------------------------ */
-
 export const RID = () => 'R-' + Math.random().toString(36).slice(2, 7);
 export const svcNames = () => db.SVC.map((s) => s[0]);
 export const accById = (id: string) => db.ACC.find((a) => a.id === id);
@@ -102,10 +98,6 @@ export function markAppeal(a: Account) {
 export function upholdBan(a: Account, note: string) {
   a.appeal = 0; accHist(a, 'momo', 'Upheld', 'Ban upheld after review', note); aud('Ban upheld · ' + a.n, session.view);
 }
-
-/* ------------------------------------------------------------------ */
-/* Staff access                                                        */
-/* ------------------------------------------------------------------ */
 
 export const openItems = (n: string) => db.APPS.filter((a) => a.o === n && a.st < 3).length + (staffByName(n)?.x ?? 0);
 export const STAFF_TONE: Record<string, string> = { Active: 'gr', Suspended: 'ye', Revoked: 'or', Invited: 'blue', Cancelled: 'grey' };

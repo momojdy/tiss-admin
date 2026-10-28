@@ -1,4 +1,4 @@
-import { ReactNode, useState } from 'react';
+import { ReactNode } from 'react';
 import { Pressable, StyleProp, TextInput, View, ViewStyle } from 'react-native';
 import { useTheme } from '../theme/ThemeContext';
 import { toneColor, STATUS_TONE, Tone } from '../theme/tokens';
@@ -21,7 +21,6 @@ export function IconBtn({ label, onPress, size = 30, bg, borderless, fontSize = 
   return onPress ? <Pressable onPress={onPress} accessibilityRole="button" accessibilityLabel={a11y ?? label} hitSlop={6}>{body}</Pressable> : body;
 }
 
-/** `.pl`: small pill, used for chips, tags and filters. `on` is the selected state. */
 export function Pill({ children, on, onPress, style, textStyle, size = 9.5 }: { children: ReactNode; on?: boolean; onPress?: () => void; style?: StyleProp<ViewStyle>; textStyle?: object; size?: number }) {
   const { c } = useTheme();
   const body = (
@@ -50,7 +49,6 @@ export function Btn({ children, onPress, style, disabled }: { children: string; 
   );
 }
 
-/** `.ob`: outlined action button; `primary` is the filled `.ob.k` variant. */
 export function OutlineBtn({ children, onPress, primary, style, disabled }: { children: string; onPress?: () => void; primary?: boolean; style?: StyleProp<ViewStyle>; disabled?: boolean }) {
   const { c } = useTheme();
   return (
@@ -83,7 +81,6 @@ export function Seg<T extends string | number>({ options, value, onChange, label
   );
 }
 
-/** `CHIPS(list, current, key)`: wrapping row of filter pills. */
 export function Chips<T extends string>({ options, value, onChange }: { options: readonly T[]; value: T; onChange: (v: T) => void }) {
   return (
     <View style={{ flexDirection: 'row', flexWrap: 'wrap', gap: 7, marginBottom: 9 }}>
@@ -92,7 +89,6 @@ export function Chips<T extends string>({ options, value, onChange }: { options:
   );
 }
 
-/** `.row`: horizontal flex row with 7px gap and 9px bottom margin. */
 export const Row = ({ children, style, wrap }: { children: ReactNode; style?: StyleProp<ViewStyle>; wrap?: boolean }) => (
   <View style={[{ flexDirection: 'row', alignItems: 'center', gap: 7, marginBottom: 9 }, wrap ? { flexWrap: 'wrap' } : null, style]}>{children}</View>
 );
@@ -108,6 +104,7 @@ export function Tag({ children, tone }: { children: string; tone?: 'g' | 'r' | '
   );
 }
 
+/** `.srch`: search-looking field (display only). */
 export function SearchHint({ text }: { text: string }) {
   const { c } = useTheme();
   return (
@@ -124,27 +121,6 @@ export function SearchInput({ value, onChangeText, placeholder }: { value: strin
     <TextInput value={value} onChangeText={onChangeText} placeholder={'⌕  ' + placeholder} placeholderTextColor={c.mut} accessibilityLabel={placeholder}
       autoCapitalize="none" autoCorrect={false} clearButtonMode="while-editing"
       style={{ flex: 1, backgroundColor: c.card, borderColor: c.bd, borderWidth: 1, borderRadius: 99, paddingVertical: 9, paddingHorizontal: 12, color: c.ink, fontSize: 14 }} />
-  );
-}
-
-export function SelectMenu<T extends string>({ label, options, value, onChange, placeholder }: { label?: string; options: readonly T[]; value: T; onChange: (value: T) => void; placeholder?: string }) {
-  const { c } = useTheme();
-  const [open, setOpen] = useState(false);
-  return (
-    <View style={{ marginBottom: 9 }}>
-      {label ? <Txt size={10} weight={500} style={{ marginBottom: 5 }}>{label}</Txt> : null}
-      <Pressable accessibilityRole="button" accessibilityLabel={label || placeholder || 'Choose option'} accessibilityState={{ expanded: open }} onPress={() => setOpen((current) => !current)}
-        style={{ minHeight: 40, borderWidth: 1, borderColor: c.bd, borderRadius: 10, backgroundColor: c.card, paddingHorizontal: 11, paddingVertical: 9, flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between' }}>
-        <Txt size={11.2} weight={500}>{value || placeholder || 'Select'}</Txt>
-        <Txt size={11} mut>{open ? '⌃' : '⌄'}</Txt>
-      </Pressable>
-      {open ? <View style={{ marginTop: 4, borderWidth: 1, borderColor: c.bd, borderRadius: 10, backgroundColor: c.card, overflow: 'hidden' }}>
-        {options.map((option) => <Pressable key={option} accessibilityRole="button" accessibilityState={{ selected: option === value }} onPress={() => { onChange(option); setOpen(false); }}
-          style={{ paddingHorizontal: 11, paddingVertical: 9, borderBottomWidth: 1, borderBottomColor: c.bd, backgroundColor: option === value ? c.inset : c.card }}>
-          <Txt size={10.8} weight={option === value ? 500 : 400}>{option}</Txt>
-        </Pressable>)}
-      </View> : null}
-    </View>
   );
 }
 

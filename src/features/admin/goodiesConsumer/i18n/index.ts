@@ -51,7 +51,6 @@ export function tx(v: Txt | undefined | null): string {
   return ok ? (e as any).v : v[DEFAULT_LANG]?.v || '';
 }
 
-/* Broad coverage without editing every screen: <T> passes its text through here. Exact English match, otherwise unchanged. */
 export function ts(s: string): string {
   const l: string = S.lang || DEFAULT_LANG;
   if (l === 'en') return s;

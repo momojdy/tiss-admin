@@ -20,7 +20,6 @@ export function Card({ children, style }: { children: ReactNode; style?: StylePr
   );
 }
 
-/** `.ct`: card title on the left, optional actions on the right. */
 export function CardTitle({ title, right, size = 11.8 }: { title: ReactNode; right?: ReactNode; size?: number }) {
   return (
     <View style={{ flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', marginBottom: 8 }}>
@@ -30,7 +29,6 @@ export function CardTitle({ title, right, size = 11.8 }: { title: ReactNode; rig
   );
 }
 
-/** `CD(title, body, right)` helper: a Card with a title row and a body. */
 export function Section({ title, right, children, style }: { title: ReactNode; right?: ReactNode; children?: ReactNode; style?: StyleProp<ViewStyle> }) {
   return (
     <Card style={style}>

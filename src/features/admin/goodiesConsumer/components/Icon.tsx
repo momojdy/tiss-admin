@@ -1,4 +1,3 @@
-/* Icons copied from Goodies v24 (24x24, stroke 2, round caps). */
 import React from 'react';
 import Svg, {Path, Circle, Rect} from 'react-native-svg';
 

@@ -29,12 +29,10 @@ export function ListRows({ rows, size = 10.1, empty }: { rows: ListRowSpec[]; si
   );
 }
 
-/** Bold-emphasised right side text: `129 <b>$12,480</b>`. */
 export const Emph = ({ lead, bold, color }: { lead?: string; bold: string; color?: string }) => (
   <Txt size={10.1}>{lead ? lead + ' ' : ''}<Txt size={10.1} weight={600} color={color}>{bold}</Txt></Txt>
 );
 
-/** `KV([[label, value], ...])`: the receipt-style key/value card (`.pp`). */
 export function KeyValue({ rows }: { rows: [string, ReactNode][] }) {
   const { c } = useTheme();
   return (

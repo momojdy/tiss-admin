@@ -1,4 +1,3 @@
-/* UI primitives. Every dimension below is copied from the Goodies v24 stylesheet. */
 import React, {useMemo, useRef} from 'react';
 import {useSafeAreaInsets} from 'react-native-safe-area-context';
 import {View, Text, Pressable, ScrollView, TextInput, StyleSheet, ViewStyle, TextStyle, Image, PanResponder} from 'react-native';
@@ -36,7 +35,6 @@ export function Grad({idx = 0, colors, style, children, angle = 135}: {idx?: num
 
 export const bgIdx = (bg: string) => +String(bg).replace('bg', '') || 0;
 
-/* header: circular icon button */
 export function Circ({icon, onPress, dot, count, label, color, fill = false}: {icon: string; onPress: () => void; dot?: boolean; count?: number; label: string; color?: string; fill?: boolean}) {
   const th = useTheme();
   return (
@@ -176,7 +174,6 @@ export const Tile = ({e, bg, size = 56, photo}: {e: string; bg: string; size?: n
   </Grad>
 );
 
-/* sheet rendered by the shell */
 export function SheetBox({children, large = false, compact = false, onClose}: any) {
   const th = useTheme();
   const pan = useMemo(() => PanResponder.create({

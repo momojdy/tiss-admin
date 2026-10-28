@@ -240,7 +240,7 @@ export async function load() {
   }
   /* The catalog must be loaded before the cart, favorites and orders are checked against it. */
   await refreshLiveSchedules();
-  /* sanitise exactly like v24 */
+  /* Ported from v24: sanitize cached state before cart, favorites, and order checks. */
   const c = S.cart;
   if (!c || !Array.isArray(c.lines)) S.cart = {sid: null, lines: []};
   S.cart.lines = S.cart.lines.filter((l: any) => l && ((l.byo && l.byo.bid && l.byo.sel && l.byo.lines) || IT[l.id]) && l.q > 0);

@@ -21,7 +21,7 @@ import { CustomerPageEditorScreen } from '../screens/content/CustomerPageEditorS
 import { BusinessDetailsScreen } from '../screens/ecosystem/BusinessDetailsScreen';
 import { PotssyAdminScreen } from '../screens/potssy/PotssyAdminScreen';
 
-/** Screens ported so far. The rest show a clear "not ported yet" card (see README). */
+/** Unported screens render a placeholder until implemented. */
 const SCREENS: Partial<Record<ScreenId, () => ReactNode>> = {
   overview: () => <OverviewScreen />,
   analytics: () => <AnalyticsScreen />,

@@ -1,8 +1,4 @@
-/* Element selection for the admin Goodies editor.
-   The admin preview provides EditContext; the real consumer components wrap their
-   editable elements in <Sel>. Without the provider (the normal consumer app, or the
-   preview outside edit mode) <Sel> renders its children untouched: no wrapper, no
-   outline, no extra handlers. */
+/* Edit selection stays isolated; outside edit mode, consumer elements render unchanged. */
 import React, {createContext, useContext} from 'react';
 import {Pressable, View, ViewStyle} from 'react-native';
 

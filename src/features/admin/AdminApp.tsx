@@ -36,7 +36,7 @@ function Frame() {
   const scrollRef = useRef<ScrollViewInstance>(null);
   const resolvedAccessFor = useRef<string | null>(null);
   useEffect(() => { if (!keepScroll) scrollRef.current?.scrollTo({ y: 0, animated: false }); }, [navKey, keepScroll]);
-  // Resolve the initial screen once per authenticated identity; preserve later navigation.
+  // Resolve the initial screen from effective permissions once per authenticated identity; preserve later navigation.
   useEffect(() => {
     if (!session.who) return;
     const identity = session.userId || session.who;

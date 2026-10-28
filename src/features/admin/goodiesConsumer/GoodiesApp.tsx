@@ -1,6 +1,4 @@
-/* Goodies customer app entry. Mount inside the main Wantiss app:
-     <GoodiesApp onExit={() => navigation.goBack()} />
-   Navigation is an internal stack that mirrors v24 (S.stack). Native back (Android) and left-edge swipe (iOS and Android) both call navBack(). */
+/* Goodies customer app entry; navigation stays inside its own stack. */
 import React, {useEffect, useMemo, useRef, useState} from 'react';
 import {View, Text, Pressable, ScrollView, Animated, PanResponder, BackHandler, Platform, StatusBar, KeyboardAvoidingView, Dimensions} from 'react-native';
 import {SafeAreaView, useSafeAreaInsets} from 'react-native-safe-area-context';
@@ -30,7 +28,6 @@ export function GoodiesApp({onExit, embedded = true, previewMode = false}: {onEx
   const [sheet, setSheet] = useState<any>(null), [toastTxt, setToastTxt] = useState('');
   const toastT = useRef<any>(null);
 
-  /* bridge for store/actions */
   ui.toast = (t: string) => {setToastTxt(t); clearTimeout(toastT.current); toastT.current = setTimeout(() => setToastTxt(''), 2300);};
   ui.sheet = (s: any) => {if (editLocked) return; setSheet(s);};
   ui.close = () => setSheet(null);
@@ -46,7 +43,6 @@ export function GoodiesApp({onExit, embedded = true, previewMode = false}: {onEx
       if (active && !previewMode) stopSync = startGoodiesSync();
     })();
     if (embedded) S.stack = [{r: 'home', u: Date.now()}];
-    /* order progress ticker (v24: every second) */
     const id = setInterval(() => {
       let ch = false;
       S.orders.forEach((o: any) => {

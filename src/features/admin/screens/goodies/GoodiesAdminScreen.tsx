@@ -15,13 +15,7 @@ import { Chips, OutlineBtn, Pill, StatusPill } from '../../ui/Controls';
 import { ListRows } from '../../ui/Lists';
 import { Txt } from '../../ui/Txt';
 
-/**
- * Canonical Goodies feature/configuration reference.
- * These definitions preserve the mobile feature catalog, builder ingredient roles,
- * localization metadata, promotion targets (including Wallet), fee/rule structure,
- * and support copy. They are NOT treated as a live merchant/order/backend snapshot.
- * Production actions stage a server-side CMS draft; live operational metrics come from APIs.
- */
+/** Canonical Goodies configuration reference, not a live snapshot; production changes use server-side drafts. */
 const data = goodiesSeed as any;
 const moduleMap: Record<string, string> = { Overview: 'Overview', 'Products and catalog': 'Library', Categories: 'Categories', Merchants: 'Merchants', 'Product review': 'Product review', Orders: 'Orders', Promotions: 'Promos', Support: 'Support', Analytics: 'Analytics', Settings: 'Settings' };
 const modules = ['Overview', 'Products and catalog', 'Categories', 'Merchants', 'Product review', 'Orders', 'Promotions', 'Support', 'Analytics', 'Settings'];

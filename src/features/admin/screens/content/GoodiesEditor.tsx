@@ -25,12 +25,7 @@ const readText = (value: any): string => (typeof value === 'string' ? value : St
 const fieldName: Record<string, string> = { title: 'Title', sub: 'Subtitle', btn: 'Button text', text: 'Text', art: 'Emoji and image' };
 const kindName: Record<string, string> = { mode: 'Service tile', promo: 'Promotion', category: 'Category', label: 'Text' };
 
-/**
- * Owns the Goodies draft. Lifecycle: load (draft row, else published row, else nothing)
- * -> optional unsaved starter -> select a real element -> edit the draft -> preview re-renders
- * -> save a new draft version and read it back -> publish (separate, explicit) -> verify.
- * Asset keys are stored; signed URLs exist only in memory for rendering.
- */
+/** Owns the Goodies draft lifecycle; stores asset keys and keeps signed URLs in memory only. */
 export function GoodiesEditor({ canEdit, canPublish }: { canEdit: boolean; canPublish: boolean }) {
   const { c } = useTheme();
   const [loadState, setLoadState] = useState<'loading' | 'ready' | 'error'>('loading');

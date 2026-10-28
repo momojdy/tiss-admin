@@ -1,4 +1,4 @@
-/* Build Your Own engine. Port of the v24 builder logic (bClean, bBreak, bCheck, bLine, lineBad, drafts, actions).
+/* Build Your Own engine: builder state, validation, pricing, and actions. */
    Differences from v24, all deliberate:
    - ingredients reference Admin library asset IDs (`assetId`) instead of v24's name-matching (`phKey`);
    - builders are configured in the Vendor Dashboard, so the seller screens are gone from this file;
@@ -86,7 +86,6 @@ export const byoOn = (sid: string) => byoList(sid).length > 0;
 export const byoNames = (sid: string) => byoList(sid).map(b => b.name + ' build your own custom').join(' ');
 export const limitOf = (g: BGroup, it: BItem) => Math.min(g.me, it.max || g.me);
 
-/* ---------- pricing + validation (single source for preview, review and cart) ---------- */
 export function bBreak(b: Builder, d: any) {
   let tot = b.base; const sz = b.sizes.filter(s => s.id === d.size)[0], lines: any[] = []; if (sz) tot += sz.add;
   b.groups.forEach(g => {
@@ -128,7 +127,6 @@ export function lineBad(l: any): string {
 }
 hooks.bGet = bGet; hooks.bCheck = bCheck; hooks.bLine = bLine; (hooks as any).lineBad = lineBad;
 
-/* ---------- drafts ---------- */
 export let BD: any = null;
 export const setBD = (d: any) => {BD = d;};
 const dirtyOf = (d: any) => Object.keys(d.sel).some(k => d.sel[k].length) || !!d.note || d.q > 1;
@@ -155,7 +153,6 @@ export function bDraftSave() {
 const hist = () => {BD.hist.push(JSON.stringify([BD.size, BD.sel])); if (BD.hist.length > 40) BD.hist.shift();};
 const upd = () => {bDraftSave(); emit();};
 
-/* ---------- actions ---------- */
 export function byoOpen(sid: string, bid: string) {
   const b = bGet(sid, bid);
   if (!b || !b.enabled || !b.available || BYO.store[sid] === false) {toast('This builder is not available right now'); return;}
@@ -242,7 +239,6 @@ hooks.byoGuard = () => {
 };
 hooks.byoClear = () => {if (BD) {bDraftSave();} BD = null;};
 
-/* ---------- store page pieces ---------- */
 function TagText({text}: {text: string}) {const th = useTheme(); return <T size={13} weight="700" color={th.brd} style={{marginTop: 3}}>{text}</T>;}
 export function byoTag(sid: string): React.ReactNode {
   const l = byoList(sid); if (!l.length) return null;

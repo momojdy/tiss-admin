@@ -1,4 +1,4 @@
-/* Actions. 1:1 port of the Goodies v24 `A` handlers. Messages stay in English here and move to i18n keys during the localization pass. */
+/* Goodies customer actions and their state transitions. */
 import {providerInfo} from './providers';
 import {supabase} from '../lib/supabase';
 import {
@@ -244,7 +244,6 @@ export const setFilter = (k: string) => {S.f = k; emit();};
 export const setSub = (k: string) => {S.sub = k; emit();};
 export const clearFilters = () => {S.f = ''; S.sub = ''; emit();};
 
-/* ---------- alcohol: rules, consent, ID check, refund ---------- */
 export const setConsent = (v: boolean) => {S.alcConsent = v; emit();};
 export function alcAccept() {S.alcAck = 1; const p = S.pend; ui.close(); if (p && p[0] && !p[2]) cartAdd(p[0], p[1]); else if (p && p[2]) p[2]();}
 export async function refreshPaymentOptions() {

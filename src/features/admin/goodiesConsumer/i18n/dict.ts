@@ -1,6 +1,4 @@
-/* Interface string drafts: English -> fr, ht, es, zh-Hans.
-   ALL ARE MACHINE DRAFTS. They are shown in the demo only (cfg.showMachineDrafts) and must be human reviewed before production.
-   Haitian Creole in particular needs a native reviewer. Lookup is by exact English text, see ts() in i18n/index.ts. */
+/* Machine-generated translations; Haitian Creole and other non-English strings need human review before production. */
 export const DICT: Record<string, Record<string, string>> = {
 "Back": {
 "fr": "Retour",

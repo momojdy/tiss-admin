@@ -14,7 +14,7 @@ export const TAB_OF: Record<ScreenId, number> = {
 
 interface NavApi {
   screen: ScreenId;
-  /** Open a screen. `state` sets UI filters first (the HTML's `gp` links). `keepScroll` keeps the scroll offset. */
+  /** Navigate to a screen; optional state sets filters and keepScroll preserves scroll position. */
   go: (s: ScreenId, state?: Record<string, unknown>, keepScroll?: boolean) => void;
   back: () => void;
   /** increments on every navigation so the shell can reset scroll */
