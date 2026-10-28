@@ -189,7 +189,7 @@ export function GrantDrawer({ id, close }: { id: string; close: () => void }) {
   });
   const changeEnd = () => form({
     title: 'Change end date · ' + g.who,
-    sub: grantLabel(g) + (g.end ? ' currently ends on ' + g.end + '.' : ' is permanent.') + ' The new end date is calculated from today.'',
+    sub: grantLabel(g) + (g.end ? ' currently ends on ' + g.end + '.' : ' is permanent.') + ' The new end date is calculated from today.',
     fields: [
       { id: 'du', label: 'New period', type: 'select', options: durationOptions(), value: durationOptions()[2], required: true },
       { id: 'cu', label: 'End date, only for “A specific date” (YYYY-MM-DD)', type: 'date' },
