@@ -21,7 +21,8 @@ export const passwordError = (p: string, email?: string) => {
   return '';
 };
 
-export function leaveApp() {
+/** Clears in-memory staff state without starting another Supabase auth event. */
+export function clearAppSession() {
   session.who = null;
   session.view = '';
   session.userId = null;
@@ -31,6 +32,10 @@ export function leaveApp() {
   session.avatarUrl = null;
   session.last = Date.now();
   bump();
+}
+
+export function leaveApp() {
+  clearAppSession();
   void supabase.auth.signOut();
 }
 
