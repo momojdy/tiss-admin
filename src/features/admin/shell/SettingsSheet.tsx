@@ -1,10 +1,11 @@
 import { useEffect, useState } from 'react';
 import { View } from 'react-native';
 import AsyncStorage from '@react-native-async-storage/async-storage';
+import { useTheme, ThemeMode } from '../theme/ThemeContext';
 import { useOverlay, DrawerBody } from '../ui/Overlay';
 import { Card, CardTitle } from '../ui/Card';
 import { ListRows } from '../ui/Lists';
-import { Pill, OutlineBtn } from '../ui/Controls';
+import { Pill, Seg, OutlineBtn } from '../ui/Controls';
 import { Txt } from '../ui/Txt';
 import { can, session } from '../state/access';
 import { REQ } from '../state/requirements';
@@ -18,13 +19,15 @@ type SettingValue = string | boolean;
 type SettingField = { id: string; label: string; type: FieldType; options?: string[]; required?: boolean; value: SettingValue; placeholder?: string };
 const defaults: Record<string, SettingField[]> = {
   Appearance: [
-        { id: 'dens', label: 'Table density', type: 'select', options: ['Comfortable', 'Compact'], value: 'Comfortable' },
+    { id: 'mode', label: 'Theme', type: 'select', options: ['Light', 'Dark', 'System'], value: 'Light' },
+    { id: 'dens', label: 'Table density', type: 'select', options: ['Comfortable', 'Compact'], value: 'Comfortable' },
     { id: 'land', label: 'Landing page', type: 'select', options: ['Overview', 'Operations', 'Ecosystem', 'Content', 'Finance', 'Analytics', 'People'], value: 'Overview' },
   ],
   Platform: [
     { id: 'lang', label: 'Default language', type: 'select', options: ['English', 'Français', 'Kreyòl', 'Español', '简体中文'], value: 'English' },
     { id: 'cur', label: 'Display currency', type: 'select', options: ['USD', 'HTG'], value: 'USD' },
     { id: 'reg', label: 'Supported regions', type: 'text', value: 'Haiti, diaspora' },
+    { id: 'note', label: 'Service configuration note', type: 'textarea', value: '' },
   ],
   Notifications: [
     { id: 'push', label: 'Push notifications', type: 'check', value: true },
@@ -65,6 +68,7 @@ const personal = new Set(['Appearance', 'Notifications']);
 const initial = () => Object.fromEntries(Object.entries(defaults).map(([key, fields]) => [key, Object.fromEntries(fields.map((field) => [field.id, field.value]))])) as Record<string, Record<string, SettingValue>>;
 
 export function SettingsSheet({ onClose }: { onClose: () => void }) {
+  const { mode, setMode } = useTheme();
   const { closeAll } = useOverlay();
   const { go } = useNav();
   const toast = useToast();
@@ -80,17 +84,18 @@ export function SettingsSheet({ onClose }: { onClose: () => void }) {
       if (raw) {
         try {
           const saved = JSON.parse(raw) as Record<string, Record<string, SettingValue>>;
-          setSettings({ ...initial(), ...saved });
+          setSettings({ ...initial(), ...saved, Appearance: { ...initial().Appearance, ...(saved.Appearance || {}) }, Platform: { ...initial().Platform, ...(saved.Platform || {}), note: saved.Platform?.note ?? saved.Ecosystem?.note ?? '' } });
+          const savedMode = String(saved.Appearance?.mode || 'Light').toLowerCase();
+          setMode(savedMode === 'dark' || savedMode === 'system' ? savedMode as ThemeMode : 'light');
         } catch { /* keep defaults if local data is malformed */ }
       }
       setLoaded(true);
     }).catch(() => { if (mounted) setLoaded(true); });
     return () => { mounted = false; };
-  }, []);
+  }, [setMode]);
 
   const destinations: Record<string, () => void> = {
     Platform: () => go('ecosystem'),
-    Ecosystem: () => go('ecosystem'),
     Notifications: () => go('operations'),
     'Documents and requirements': () => go('operations'),
     Workflows: () => go('operations'),
@@ -105,9 +110,6 @@ export function SettingsSheet({ onClose }: { onClose: () => void }) {
       ...field,
       value: settings[name]?.[field.id] ?? field.value,
     }));
-    if (name === 'Ecosystem') {
-      fields.push({ id: 'note', label: 'Service configuration note', type: 'textarea', value: String(settings[name]?.note || '') } as SettingField);
-    }
     form({
       title: name + ' settings',
       sub: personal.has(name) ? 'Personal preference saved on this device.' : 'Local-only settings; production behavior is unchanged.',
@@ -130,6 +132,17 @@ export function SettingsSheet({ onClose }: { onClose: () => void }) {
 
   return (
     <DrawerBody title="Settings" onClose={onClose}>
+      <Card>
+        <CardTitle title="Appearance" />
+        <Txt size={10.1} mut style={{ marginBottom: 8 }}>Theme follows your selected mode.</Txt>
+        <Seg<ThemeMode> options={['light', 'dark', 'system']} value={mode} onChange={(next) => {
+          setMode(next);
+          setSettings((current) => ({ ...current, Appearance: { ...(current.Appearance || {}), mode: next[0].toUpperCase() + next.slice(1) } }));
+        }} labels={(value) => value[0].toUpperCase() + value.slice(1)} />
+        <View style={{ flexDirection: 'row', flexWrap: 'wrap', gap: 6, marginTop: 10 }}>
+          <Pill onPress={() => editCategory('Appearance')}>More appearance settings ›</Pill>
+        </View>
+      </Card>
       <ListRows rows={categories.map(([name, description]) => ({
         key: name, main: name, sub: description, right: selected === name ? '⌄' : '›',
         onPress: () => setSelected((current) => current === name ? null : name),
