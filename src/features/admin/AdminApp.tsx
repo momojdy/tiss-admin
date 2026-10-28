@@ -79,7 +79,13 @@ function AuthGate() {
       if (!mounted || !data.session) return;
       const { data: staff, error } = await supabase.from('wantiss_admin_staff').select('user_id,display_name,status,role,invitation_expires_at,invited_at').eq('user_id', data.session.user.id).maybeSingle();
       if (!mounted) return;
-      if (error || !staff || staff.status !== 'active' || (staff.invitation_expires_at && Date.parse(staff.invitation_expires_at) <= Date.now()) || !data.session.user.email_confirmed_at ) { await supabase.auth.signOut(); return; }
+      // A temporary database/network error is not proof that this user's access was revoked.
+      // Keep the persisted Supabase session and let the next restore/validation attempt retry.
+      if (error) {
+        setNotice('Unable to verify your staff access right now. Please try again shortly.');
+        return;
+      }
+      if (!staff || staff.status !== 'active' || (staff.invitation_expires_at && Date.parse(staff.invitation_expires_at) <= Date.now()) || !data.session.user.email_confirmed_at ) { await supabase.auth.signOut(); return; }
       if (staff.invited_at && data.session.user.user_metadata?.wantiss_invite_accepted !== true) return;
       session.who = staff.display_name; session.view = staff.display_name; session.last = Date.now(); session.userId = staff.user_id; session.email = data.session.user.email || null; session.avatarUrl = typeof data.session.user.user_metadata?.avatar_url === 'string' ? data.session.user.user_metadata.avatar_url : null; session.role = staff.role; session.status = staff.status; const { data: grants } = await supabase.from('wantiss_admin_permission_grants').select('permission_key,access_level,expires_at,revoked_at').eq('staff_user_id', data.session.user.id); setServerGrants(grants || []); await hydrateAdminState(); bump();
     };
