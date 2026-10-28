@@ -120,14 +120,15 @@ export function AuthPageEditor({ canEdit, canPublish }: { canEdit: boolean; canP
       if (!byteSize) throw new Error('The selected image size could not be read. Choose another image.');
       setBusy(slot);
       const config = assetConfig[slot];
+      const assetKey = config.key + '.' + crypto.randomUUID();
       const id = await uploadCmsAsset({
-        key: config.key, uri: file.uri, fileName: file.fileName || slot + '-auth-asset',
+        key: assetKey, uri: file.uri, fileName: file.fileName || slot + '-auth-asset',
         contentType, byteSize, altText: { en: config.label }, status: 'draft',
       });
       if (slot === 'logo') { setLogoAssetId(id); setLogoPreview(file.uri); }
       if (slot === 'google') { setGoogleAssetId(id); setGooglePreview(file.uri); }
       if (slot === 'apple') { setAppleAssetId(id); setApplePreview(file.uri); }
-      update(config.payloadKey, config.key);
+      update(config.payloadKey, assetKey);
       setNotice(config.label + ' uploaded as a private draft. Publish this asset, then save and publish the page content.');
     } catch (e) {
       setError(e instanceof Error ? e.message : 'The selected image could not be uploaded.');
@@ -140,8 +141,10 @@ export function AuthPageEditor({ canEdit, canPublish }: { canEdit: boolean; canP
     setBusy('publish-' + slot); setError(''); setNotice('');
     try {
       await publishCmsAsset(id);
-      setNotice(assetConfig[slot].label + ' published. Save and publish the authentication page to apply it.');
-      await load();
+      if (slot === 'logo') setLogoAssetId('');
+      if (slot === 'google') setGoogleAssetId('');
+      if (slot === 'apple') setAppleAssetId('');
+      setNotice(assetConfig[slot].label + ' published. Save and publish the page draft to make it live.');
     } catch (e) { setError(e instanceof Error ? e.message : 'The image asset could not be published.'); }
     finally { setBusy(''); }
   };
