@@ -19,8 +19,7 @@ type SettingValue = string | boolean;
 type SettingField = { id: string; label: string; type: FieldType; options?: string[]; required?: boolean; value: SettingValue; placeholder?: string };
 const defaults: Record<string, SettingField[]> = {
   Appearance: [
-    { id: 'mode', label: 'Theme', type: 'select', options: ['Light', 'Dark', 'System'], value: 'Light' },
-    { id: 'dens', label: 'Table density', type: 'select', options: ['Comfortable', 'Compact'], value: 'Comfortable' },
+        { id: 'dens', label: 'Table density', type: 'select', options: ['Comfortable', 'Compact'], value: 'Comfortable' },
     { id: 'land', label: 'Landing page', type: 'select', options: ['Overview', 'Operations', 'Ecosystem', 'Content', 'Finance', 'Analytics', 'People'], value: 'Overview' },
   ],
   Platform: [
@@ -54,6 +53,7 @@ const defaults: Record<string, SettingField[]> = {
   ],
 };
 const categories = [
+  ['Appearance', 'Table density and landing page'],
   ['Platform', 'Default language, display currency and supported regions'],
   ['Ecosystem', 'Service availability and service-level configuration'],
   ['Notifications', 'Push, email and after-hours critical alerts'],
@@ -126,7 +126,7 @@ export function SettingsSheet({ onClose }: { onClose: () => void }) {
         } catch {
           return 'Settings could not be saved on this device.';
         }
-        if (name === 'Appearance') {
+        if (name === 'Appearance' && values.mode !== undefined) {
           const nextMode = String(values.mode || 'Light').toLowerCase() as ThemeMode;
           setMode(nextMode === 'dark' || nextMode === 'system' ? nextMode : 'light');
         }
@@ -149,7 +149,7 @@ export function SettingsSheet({ onClose }: { onClose: () => void }) {
           <Txt size={10.1} mut lh={1.4}>{personal.has(selected) ? 'Personal preferences are stored on this device.' : 'Platform settings remain local until a server endpoint is connected.'}</Txt>
           <View style={{ flexDirection: 'row', flexWrap: 'wrap', marginTop: 10, gap: 6 }}>
             <OutlineBtn primary onPress={() => editCategory(selected)}>Edit settings</OutlineBtn>
-            <OutlineBtn onPress={() => { const destination = destinations[selected]; closeAll(); destination?.(); }}>Open related workspace</OutlineBtn>
+            {destinations[selected] ? <OutlineBtn onPress={() => { const destination = destinations[selected]; closeAll(); destination?.(); }}>Open related workspace</OutlineBtn> : null}
           </View>
           {!personal.has(selected) ? <Txt size={9.5} mut style={{ marginTop: 8 }}>No production setting will be changed by saving this form.</Txt> : null}
         </Card>
