@@ -6,6 +6,7 @@ import { useNav } from '../../shell/Nav';
 import { useTheme } from '../../theme/ThemeContext';
 import { Section } from '../../ui/Card';
 import { Heading } from '../../ui/Heading';
+import { AppIcon } from '../../ui/AppIcon';
 import { LineChart } from '../../ui/Charts';
 import { Chips, Pill, StatusPill } from '../../ui/Controls';
 import { ListRows, Table } from '../../ui/Lists';
@@ -106,7 +107,7 @@ export function AnalyticsScreen() {
         { icon: 'clock-alert', value: averageReview === '—' ? '—' : averageReview + ' d', label: 'Average review time', tag: prototypeSnapshot ? 'Not connected yet' : averageReview === '—' ? 'No reviews yet' : undefined },
       ]} />
 
-      <Section title="Activity" right={<View style={{ flexDirection: 'row', gap: 6 }}><Pill onPress={() => setExpandedChart(true)}>↗ Expand</Pill><Pill onPress={() => go('finance')}>Open finance ›</Pill></View>}>
+      <Section title="Activity" right={<View style={{ flexDirection: 'row', gap: 6 }}><Pill onPress={() => setExpandedChart(true)}><View style={{ flexDirection: "row", alignItems: "center", gap: 4 }}><AppIcon name="arrow-up-right" size={12} />Expand</View></Pill><Pill onPress={() => go('finance')}><View style={{ flexDirection: "row", alignItems: "center", gap: 4 }}>Open finance<AppIcon name="chevron-right" size={12} /></View></Pill></View>}>
         <Chips options={ranges} value={range} onChange={updateRange} />
         <View style={{ flexDirection: 'row', flexWrap: 'wrap', gap: 6, marginBottom: 8, alignItems: 'center' }}>
           <Pill on={serviceFilter === 'All'} onPress={() => updateService('All')}>All services</Pill>
@@ -118,7 +119,7 @@ export function AnalyticsScreen() {
         {!prototypeSnapshot && chart.available ? <LineChart vals={chart.vals} color={c.or} max={chart.max} labels={chart.labels} yLabels={chart.yLabels} /> : <Txt size={10.1} mut style={{ marginTop: 8 }}>{prototypeSnapshot ? 'Not connected yet' : 'No transactions in this range'}</Txt>}
       </Section>
 
-      <Section title="By service (same dataset)" right={<Pill onPress={() => go('ecosystem')}>Ecosystem ›</Pill>}>
+      <Section title="By service (same dataset)" right={<Pill onPress={() => go('ecosystem')}><View style={{ flexDirection: "row", alignItems: "center", gap: 4 }}>Ecosystem<AppIcon name="chevron-right" size={12} /></View></Pill>}>
         <Table columns={[{ title: 'Service', flex: 1.4 }, { title: 'Transactions', align: 'right' }, { title: 'Share', align: 'right' }]}
           rows={prototypeSnapshot ? [] : byService.map((item) => ({
             key: item.name,
