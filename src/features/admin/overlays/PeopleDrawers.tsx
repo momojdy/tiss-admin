@@ -55,7 +55,7 @@ export function StaffDrawer({ id, close }: { id: string; close: () => void }) {
   const base = effOf(s.role, s.ov, s.st), liveG = liveGrantsFor(s.n);
 
   const edit = () => openDialog((done) => <EditAccessSheet name={id} onClose={done} onSaved={() => { reopen('staff', id); toast('Access updated. It applies immediately, including to active sessions.'); }} />);
-  const suspend = () => form({ title: 'Suspend access · ' + id, sub: 'The role and permissions are kept so access can be restored. Active sessions end now.',
+  const suspend = () => form({ title: 'Suspend access · ' + id, sub: 'Their role and permissions are kept; active sessions end now.',
     fields: [{ id: 'r', label: 'Reason', type: 'select', options: ['Security concern', 'Under investigation', 'Leave of absence', 'Other'], required: true }, { id: 'nt', label: 'Internal note', type: 'textarea' }, { id: 'en', label: 'Restore automatically on (optional, YYYY-MM-DD)', type: 'date' }],
     buttons: [{ label: 'Suspend access', key: 's', primary: true }],
     onSubmit: async (_k, v) => { if (!s.userId) return 'This staff record is not linked to Supabase Auth.'; await setStaffStatusBackend(s.userId, 'suspended', [String(v.r), String(v.nt)].filter(Boolean).join(': ')); await hydrateAdminState(); reopen('staff', id); toast('Access suspended. Active sessions ended.'); } });
@@ -63,11 +63,11 @@ export function StaffDrawer({ id, close }: { id: string; close: () => void }) {
     fields: [{ id: 'nt', label: 'Reason', type: 'textarea', required: true }], buttons: [{ label: 'Restore access', key: 's', primary: true }],
     onSubmit: async (_k, v) => { if (!s.userId) return 'This staff record is not linked to Supabase Auth.'; await setStaffStatusBackend(s.userId, 'active', String(v.nt)); await hydrateAdminState(); reopen('staff', id); toast('Access restored'); } });
   const revoke = () => form({ title: 'Revoke all access · ' + id,
-    sub: 'Removes the role and every individual grant, and ends active sessions. Their customer account, orders and audit records are kept. Open applications become Unassigned.',
+    sub: 'Removes the role and all grants, ends active sessions, and unassigns open applications. Customer records and audit history remain.',
     fields: [{ id: 'r', label: 'Reason', type: 'select', options: ['Left the company', 'Security breach', 'Role ended', 'Other'], required: true }, { id: 'nt', label: 'Internal note', type: 'textarea', required: true }, { id: 'cf', label: 'Type REVOKE to confirm', type: 'text', required: true }],
     buttons: [{ label: 'Revoke all access', key: 's', primary: true }],
     onSubmit: async (_k, v) => { if (String(v.cf) !== 'REVOKE') return 'Type REVOKE to confirm.'; if (!s.userId) return 'This staff record is not linked to Supabase Auth.'; await setStaffStatusBackend(s.userId, 'revoked', [String(v.r), String(v.nt)].join(': ')); await hydrateAdminState(); reopen('staff', id); toast('All staff access revoked. Records kept.'); } });
-  const reinstate = () => form({ title: 'Reinstate · ' + id, sub: 'Starts with the role template only. No old individual grants return.',
+  const reinstate = () => form({ title: 'Reinstate · ' + id, sub: 'Starts with the role template only; old individual grants do not return.',
     fields: [{ id: 'ro', label: 'Role template', type: 'select', options: Object.keys(db.ROLES), required: true }, { id: 'nt', label: 'Reason', type: 'textarea', required: true }],
     buttons: [{ label: 'Reinstate staff', key: 's', primary: true }],
     onSubmit: async (_k, v) => { if (!s.userId) return 'This staff record is not linked to Supabase Auth.'; await setStaffStatusBackend(s.userId, 'active', String(v.nt) + ' · role remains server-assigned'); await hydrateAdminState(); reopen('staff', id); toast('Staff access restored.'); } });
@@ -183,7 +183,7 @@ function EditAccessSheet({ name, onClose, onSaved }: { name: string; onClose: ()
 
   return (
     <DialogCard title={'Individual access · ' + name} onClose={onClose} maxHeight="94%">
-      <Txt size={12} mut lh={1.4}>Grants are enforced by Supabase on every protected request. Expired and revoked grants stop authorizing access without relying on this screen.</Txt>
+      <Txt size={12} mut lh={1.4}>Supabase enforces grants on protected requests; expired or revoked grants stop authorizing access.</Txt>
       <Field spec={{ id: 'permission', label: 'Feature or permission', type: 'select', options: permissionOptions }} value={permission} onChange={(v) => setPermission(String(v))} />
       <Field spec={{ id: 'level', label: 'Access level', type: 'select', options: ['view', 'edit', 'manage'] }} value={level} onChange={(v) => setLevel(String(v))} />
       <Field spec={{ id: 'until', label: 'Expires on (optional, YYYY-MM-DD)', type: 'date' }} value={until} onChange={(v) => setUntil(String(v))} />

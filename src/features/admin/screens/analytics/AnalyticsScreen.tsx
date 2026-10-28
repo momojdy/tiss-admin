@@ -8,7 +8,7 @@ import { Section } from '../../ui/Card';
 import { Heading } from '../../ui/Heading';
 import { LineChart } from '../../ui/Charts';
 import { Chips, Pill, StatusPill } from '../../ui/Controls';
-import { ListRows, Table, Small } from '../../ui/Lists';
+import { ListRows, Table } from '../../ui/Lists';
 import { Txt } from '../../ui/Txt';
 
 const ranges = ['7D', '30D', '90D', '1Y', 'Custom'] as const;
@@ -80,7 +80,7 @@ export function AnalyticsScreen() {
   const updateService = (next: string) => { ui.EC = next; bump(); };
   const exportCsv = async () => {
     if (prototypeSnapshot) {
-      Alert.alert('Export unavailable', 'Live analytics data is not connected. No prototype records were exported.');
+      Alert.alert('Export unavailable', 'Not connected yet');
       return;
     }
     const rows = liveTransactions.filter((tx) => {
@@ -99,10 +99,10 @@ export function AnalyticsScreen() {
 
   return (
     <View>
-      <Heading title="Platform\nAnalytics" sub="Activity, service mix and review performance." kpis={[
+      <Heading title="Platform\nAnalytics" kpis={[
         { icon: '☺', value: !prototypeSnapshot && chart.available ? chart.total.toLocaleString('en-US') : '—', label: 'Transactions', tag: serviceFilter === 'All' ? 'All services' : serviceFilter },
-        { icon: '♛', value: prototypeSnapshot || !decided.length ? '—' : approvalRate + '%', label: 'Approval rate', tag: prototypeSnapshot || !decided.length ? 'Live data unavailable' : approved + ' of ' + decided.length + ' decided' },
-        { icon: '◷', value: averageReview === '—' ? '—' : averageReview + ' d', label: 'Average review time', tag: prototypeSnapshot ? 'Live data unavailable' : undefined },
+        { icon: '♛', value: prototypeSnapshot || !decided.length ? '—' : approvalRate + '%', label: 'Approval rate', tag: prototypeSnapshot || !decided.length ? 'Not connected yet' : approved + ' of ' + decided.length + ' decided' },
+        { icon: '◷', value: averageReview === '—' ? '—' : averageReview + ' d', label: 'Average review time', tag: prototypeSnapshot ? 'Not connected yet' : undefined },
       ]} />
 
       <Section title="Activity" right={<View style={{ flexDirection: 'row', gap: 6 }}><Pill onPress={() => setExpandedChart(true)}>↗ Expand</Pill><Pill onPress={() => go('finance')}>Open finance ›</Pill></View>}>
@@ -114,7 +114,7 @@ export function AnalyticsScreen() {
         </View>
         <Txt size={21} weight={500}>{!prototypeSnapshot && chart.available ? chart.total.toLocaleString('en-US') : '—'} <Txt size={10.1} mut>transactions · {serviceFilter === 'All' ? 'all services' : serviceFilter}</Txt></Txt>
         <Txt size={9.5} mut style={{ marginTop: 4 }}>{range === 'Custom' ? customStart + ' – ' + customEnd : range + ' range'} · authorized transaction timestamps only</Txt>
-        {!prototypeSnapshot && chart.available ? <LineChart vals={chart.vals} color={c.or} max={chart.max} labels={chart.labels} yLabels={chart.yLabels} /> : <Txt size={10.1} mut style={{ marginTop: 8 }}>{prototypeSnapshot ? 'Live transaction data is not connected. No prototype series is shown.' : 'No timestamped transactions are available in the authorized snapshot.'}</Txt>}
+        {!prototypeSnapshot && chart.available ? <LineChart vals={chart.vals} color={c.or} max={chart.max} labels={chart.labels} yLabels={chart.yLabels} /> : <Txt size={10.1} mut style={{ marginTop: 8 }}>{prototypeSnapshot ? 'Not connected yet' : 'No timestamped transactions are available in the authorized snapshot.'}</Txt>}
       </Section>
 
       <Section title="By service (same dataset)" right={<Pill onPress={() => go('ecosystem')}>Ecosystem ›</Pill>}>
@@ -128,7 +128,7 @@ export function AnalyticsScreen() {
       </Section>
 
       <Section title="Approval turnaround">
-        <ListRows empty={prototypeSnapshot ? 'Live application review data is unavailable. No prototype stage counts are shown.' : 'No application review records are available.'} rows={['Submitted', 'In review', 'Needs info', 'Approved', 'Rejected'].map((stage, index) => {
+        <ListRows empty={prototypeSnapshot ? 'Not connected yet' : 'No application review records are available.'} rows={['Submitted', 'In review', 'Needs info', 'Approved', 'Rejected'].map((stage, index) => {
           const stageApps = liveApplications.filter((app) => app.st === index);
           const average = stageApps.length ? (stageApps.reduce((sum, app) => sum + app.age, 0) / stageApps.length).toFixed(1) : '—';
           return { key: stage, main: stage, sub: 'Average age: ' + (prototypeSnapshot ? 'unavailable' : average + ' days'), right: prototypeSnapshot ? '—' : String(stageApps.length), onPress: () => go('operations', { ov: 'List' }) };
@@ -136,12 +136,11 @@ export function AnalyticsScreen() {
       </Section>
 
       <Section title="Content performance">
-        <ListRows empty={prototypeSnapshot ? 'Live banner performance data is unavailable. No prototype view counts are shown.' : 'No live banner performance records are available.'} rows={(prototypeSnapshot ? [] : liveBanners.filter((banner) => banner.st === 'Live')).map((banner) => ({
+        <ListRows empty={prototypeSnapshot ? 'Not connected yet' : 'No live banner performance records are available.'} rows={(prototypeSnapshot ? [] : liveBanners.filter((banner) => banner.st === 'Live')).map((banner) => ({
           key: banner.id, main: banner.t, sub: banner.svc + ' · ' + banner.pl,
           right: <StatusPill label={banner.st} tone="gr" small />,
           onPress: () => go('content', { cs: 'Banners' }),
         }))} />
-        <Small>HTML source defines these as demo view counts; the RN version does not invent real impressions.</Small>
       </Section>
 
       <Modal transparent visible={customOpen} animationType="fade" onRequestClose={() => setCustomOpen(false)}>

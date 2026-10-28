@@ -15,14 +15,14 @@ const modules = [
 ];
 const copy: Record<string, { title: string; detail: string }> = {
   Overview: { title: 'Potssy operational overview', detail: 'Campaign, ticket, draw and claims summaries must come from an authorized Potssy backend snapshot.' },
-  'Raffles and lotteries': { title: 'Raffles and lotteries', detail: 'Campaign records are not loaded from a verified server endpoint. The HTML raffle records are demo data and are not shown as live campaigns.' },
-  'Campaign approvals': { title: 'Campaign approvals', detail: 'No authorized Potssy campaign-approval queue is connected. Do not approve or publish campaigns from the HTML prototype state.' },
+  'Raffles and lotteries': { title: 'Raffles and lotteries', detail: 'Campaign records are not connected yet.' },
+  'Campaign approvals': { title: 'Campaign approvals', detail: 'Approval queue not connected. Campaign actions are disabled.' },
   Prizes: { title: 'Prizes', detail: 'Prize inventory and eligibility need an authorized server query before they can be managed here.' },
   'Tickets and entries': { title: 'Tickets and entries', detail: 'Ticket purchases and entries are not available in the current authorized snapshot.' },
-  'Draws and results': { title: 'Draws and results', detail: 'The HTML uses a demo draw. This screen deliberately does not select winners or create draw results without a server-authorized draw workflow.' },
+  'Draws and results': { title: 'Draws and results', detail: 'Draw actions are disabled until an authorized server workflow is connected.' },
   'Winners and claims': { title: 'Winners and claims', detail: 'Winner identity, verification and claim status need server-backed records and audited actions.' },
   'Payments and refunds': { title: 'Payments and refunds', detail: 'No Potssy-specific payment or refund endpoint is connected here. Use Finance only for transactions that are actually present in its authorized snapshot.' },
-  'Reports and analytics': { title: 'Reports and analytics', detail: 'Live campaign, ticket and claim analytics are unavailable; no demo totals are substituted.' },
+  'Reports and analytics': { title: 'Reports and analytics', detail: 'Not connected yet.' },
   'Complaints and settings': { title: 'Complaints and settings', detail: 'Complaint records and Potssy configuration require authorized service endpoints. Settings are read-only until those endpoints exist.' },
 };
 
@@ -40,7 +40,7 @@ export function PotssyAdminScreen() {
         <Pill onPress={() => go('ecosystem')}>‹ Ecosystem</Pill>
         <Txt size={10.1} mut>Potssy · Workspace</Txt>
       </View>
-      <Heading title={'Potssy\n' + moduleName} sub="Dedicated workspace · server-backed actions only" kpis={[
+      <Heading title={'Potssy\n' + moduleName} kpis={[
         { icon: '▥', value: '—', label: 'Campaigns' },
         { icon: '▤', value: '—', label: 'Tickets and entries' },
         { icon: '◷', value: '—', label: 'Claims awaiting review' },

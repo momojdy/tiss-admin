@@ -24,7 +24,6 @@ import { Txt } from '../../ui/Txt';
  */
 const data = goodiesSeed as any;
 const moduleMap: Record<string, string> = { Overview: 'Overview', 'Products and catalog': 'Library', Categories: 'Categories', Merchants: 'Merchants', 'Product review': 'Product review', Orders: 'Orders', Promotions: 'Promos', Support: 'Support', Analytics: 'Analytics', Settings: 'Settings' };
-// Keep the module names and order identical to MOD.Goodies in the uploaded HTML source.
 const modules = ['Overview', 'Products and catalog', 'Categories', 'Merchants', 'Product review', 'Orders', 'Promotions', 'Support', 'Analytics', 'Settings'];
 const languages = ['en', 'fr', 'ht', 'es', 'zh'];
 
@@ -160,7 +159,7 @@ export function GoodiesAdminScreen() {
   return (
     <View>
       <View style={{ flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', marginBottom: 4 }}>
-        <View style={{ flex: 1 }}><Heading title="Goodies\nAdmin workspace" sub="Customer content, categories, offers and service rules." /></View>
+        <View style={{ flex: 1 }}><Heading title="Goodies\nAdmin workspace" /></View>
         <OutlineBtn onPress={() => go('content')}>CMS ›</OutlineBtn>
       </View>
       <View style={{ flexDirection: 'row', flexWrap: 'wrap', gap: 7, marginBottom: 10 }}>
@@ -192,11 +191,11 @@ export function GoodiesAdminScreen() {
         </>
       ) : moduleLabel === 'Settings' ? (
         <Section title="Goodies settings">
-          <Txt size={11} mut lh={1.4}>These settings require an authorized server-side configuration endpoint before they can change production behavior. This screen is read-only; no local or demo toggle is presented as a live platform setting.</Txt>
+          <Txt size={11} mut lh={1.4}>Read-only until an authorized server configuration endpoint is connected.</Txt>
           <ListRows rows={[
             { key: 'fees', main: 'Fees and rules', sub: 'Review proposed fees in the Products and catalog workspace only when the server-backed workflow is available.', right: 'Read-only' },
-            { key: 'restricted', main: 'Restricted goods', sub: 'No live restricted-goods rules are loaded; enforcement must remain server-side.', right: 'Read-only' },
-            { key: 'publish', main: 'Publishing permissions', sub: 'CMS drafts remain private until an authorized server-side publish action succeeds.', right: 'Protected' },
+            { key: 'restricted', main: 'Restricted goods', sub: 'Rules are not connected; enforcement remains server-side.', right: 'Read-only' },
+            { key: 'publish', main: 'Publishing permissions', sub: 'Publishing requires an authorized server action.', right: 'Protected' },
           ]} />
         </Section>
       ) : moduleLabel === 'Analytics' ? (
@@ -211,7 +210,7 @@ export function GoodiesAdminScreen() {
         </Section>
       ) : moduleLabel === 'Fees' ? (
         <Section title="Fees and rules">
-          <Txt size={10.1} mut style={{ marginBottom: 8 }}>No live fee/rule snapshot is connected. The layout is retained, but sample values are not shown as production configuration.</Txt>
+          <Txt size={10.1} mut style={{ marginBottom: 8 }}>Not connected yet.</Txt>
           <ListRows rows={visible.map((item) => ({ key: item.id, main: item._title, sub: item._sub, right: 'Edit ›', onPress: () => onItem(item) }))} />
         </Section>
       ) : (

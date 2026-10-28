@@ -283,9 +283,8 @@ export function CustomerPageEditorScreen() {
         <OutlineBtn onPress={() => { void reload(); }} disabled={loading}>Refresh</OutlineBtn>
         <OutlineBtn onPress={startBlankDraft} disabled={!can(...REQ.content)}>Start blank draft</OutlineBtn>
       </View>
-      <Heading title="Customer page editor" sub="The phone stays visible while you edit. Draft changes are private until saved; previewing or navigating the phone never publishes content." />
+      <Heading title="Customer page editor" />
       <Section title="Choose a customer feature" >
-        <Txt size={10.5} mut style={{ marginBottom: 7 }}>Choose which feature's customer screen you want to inspect. Goodies renders the actual consumer app below; other features use the selected CMS page model.</Txt>
         <Pressable accessibilityRole="button" onPress={() => setFeatureMenuOpen((open) => !open)} style={{ minHeight: 42, borderWidth: 1, borderColor: c.bd, borderRadius: 12, backgroundColor: c.card, paddingHorizontal: 12, paddingVertical: 10, flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between' }}>
           <Txt size={12} weight={500}>{activeFeature?.label || 'Select a feature'}</Txt>
           <Txt size={12} mut>{featureMenuOpen ? '⌃' : '⌄'}</Txt>
@@ -309,9 +308,7 @@ export function CustomerPageEditorScreen() {
         <OutlineBtn primary={editorMode === 'Preview'} onPress={() => { setEditorMode('Preview'); setPageStack([]); }}>Preview</OutlineBtn>
       </View>}>
         <View style={{ alignItems: 'center', paddingVertical: 6 }}>
-          {viewMode === 'Published' && !publishedRow && selected?.status !== 'published' ? <Txt size={10.5} color={c.or} style={{ marginBottom: 8 }}>No published version was found for this locale. This is an empty published view, not a draft preview.</Txt> : null}
-          {!selected && viewMode === 'Draft' ? <Txt size={10.5} mut style={{ marginBottom: 8 }}>Starter preview · select a version or start a blank draft to edit it.</Txt> : null}
-          {selected && viewMode === 'Draft' ? <Txt size={10.5} mut style={{ marginBottom: 8, textAlign: 'center' }}>{editorMode === 'Edit' ? 'Edit mode: tap an element to select it. Changes stay in the draft.' : 'Preview mode: tap linked elements or the bottom navigation to move through customer pages.'}</Txt> : null}
+          {viewMode === 'Published' && !publishedRow && selected?.status !== 'published' ? <Txt size={10.5} color={c.or} style={{ marginBottom: 8 }}>No published version for this locale.</Txt> : null}
           <CustomerPagePreview
             payload={previewPayload}
             pageKey={activePageKey}
@@ -332,7 +329,6 @@ export function CustomerPageEditorScreen() {
           <Section title="Page and element structure">
             {pageKeys.length ? (
               <>
-                <Txt size={10.1} mut>Select a page, then an element. Changes update the phone above immediately and remain private until saved.</Txt>
                 <View style={{ flexDirection: 'row', flexWrap: 'wrap', gap: 6, marginTop: 8 }}>
                   {pageKeys.map((key) => <Pill key={key} on={activePageKey === key} onPress={() => { setPageKey(key); setPageStack([]); setElementKey(''); }}>{String(previewPayload?.pages?.[key]?.title || key)}</Pill>)}
                   <OutlineBtn onPress={addPage} disabled={!editable}>+ Add page</OutlineBtn>
@@ -375,7 +371,6 @@ export function CustomerPageEditorScreen() {
             ) : <Txt size={10.1} mut>This draft does not contain a pages object. Correct the JSON model below or start a blank page-builder draft.</Txt>}
           </Section>
           <Section title={'Advanced page model · v' + selected.version}>
-            <Txt size={10.1} mut>JSON is the source payload. Visual controls and the phone preview use the same draft model; saving creates a new private version only.</Txt>
             <TextInput
               value={json}
               onChangeText={(value) => { setJson(value); setError(''); }}

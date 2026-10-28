@@ -8,6 +8,8 @@ import { Pill } from '../ui/Controls';
 import { Txt } from '../ui/Txt';
 import { AuthField, BigBadge, LinkText, NoticeBox, PasswordChecklist, PrimaryButton, SecondaryButton } from './AuthFields';
 import { emailOk, passwordError } from './authLogic';
+
+const INVITATION_VERIFIED_MESSAGE = INVITATION_VERIFIED_MESSAGE;
 import { supabase } from '../lib/supabase';
 import { session, setServerGrants } from '../state/access';
 import { bump } from '../state/db';
@@ -47,7 +49,7 @@ export function AuthFlow({ notice, noticeBad, onDone }: Props) {
         if (!active) return;
         if (type === 'invite' || parsed.pathname.includes('accept-invite')) {
           setView('invite');
-          message('Invitation verified. Set a password to activate your staff access.');
+          message(INVITATION_VERIFIED_MESSAGE);
         } else if (type === 'recovery' || parsed.pathname.includes('reset-password')) {
           setView('reset');
           message('Choose a new password from your verified reset link.');
@@ -64,7 +66,7 @@ export function AuthFlow({ notice, noticeBad, onDone }: Props) {
         .select('invited_at,invitation_expires_at').eq('user_id', user.id).maybeSingle();
       if (active && pendingInvite?.invited_at && (!pendingInvite.invitation_expires_at || Date.parse(pendingInvite.invitation_expires_at) > Date.now())) {
         setView('invite');
-        message('Invitation verified. Set a password to activate your staff access.');
+        message(INVITATION_VERIFIED_MESSAGE);
       }
     });
     const linkSubscription = Linking.addEventListener('url', ({ url }) => { void consumeAuthLink(url); });
@@ -105,7 +107,7 @@ export function AuthFlow({ notice, noticeBad, onDone }: Props) {
       }
       if (staff.invited_at && data.user.user_metadata?.wantiss_invite_accepted !== true) {
         setView('invite');
-        message('Invitation verified. Set a password to activate your staff access.');
+        message(INVITATION_VERIFIED_MESSAGE);
         return;
       }
       session.who = staff.display_name;
@@ -204,7 +206,7 @@ export function AuthFlow({ notice, noticeBad, onDone }: Props) {
             </>}
             {view === 'create' && <>
               <Txt size={22.1} lh={1.08}>{'Create your\nstaff account'}</Txt>
-              <Txt size={13} mut lh={1.45} style={{ marginTop: 6, marginBottom: 14 }}>Wantiss staff accounts are invitation-only. Ask a Super Admin to send an invitation to your work email. Open the invitation link to verify your account and set your password; once that step is complete, return here to sign in.</Txt>
+              <Txt size={13} mut lh={1.45} style={{ marginTop: 6, marginBottom: 14 }}>Staff accounts are invitation-only. Ask a Super Admin.</Txt>
               <NoticeBox>For security, account creation is completed from a verified Supabase invitation link. This screen does not accept an unverified invitation code or create a local-only account.</NoticeBox>
               <PrimaryButton label="Back to sign in" onPress={() => { setView('in'); message(''); }} />
             </>}
@@ -219,7 +221,7 @@ export function AuthFlow({ notice, noticeBad, onDone }: Props) {
             {view === 'sent' && <>
               <BigBadge glyph="✉" />
               <Txt size={22.1} lh={1.08}>{'Check your\nemail'}</Txt>
-              <Txt size={13} mut style={{ marginTop: 6, marginBottom: 14 }}>Enter the 6-digit verification code in the reset email. Keep this screen open while you check your email.</Txt>
+              <Txt size={13} mut style={{ marginTop: 6, marginBottom: 14 }}>Enter the 6-digit code from your reset email.</Txt>
               <AuthField label="Work email" value={email} onChangeText={setEmail} error={undefined} keyboardType="email-address" autoCapitalize="none" />
               <AuthField label="6-digit email code" value={resetCode} onChangeText={setResetCode} error={undefined} keyboardType="number-pad" />
               {noticeText ? <NoticeBox bad={bad}>{noticeText}</NoticeBox> : null}
@@ -229,7 +231,7 @@ export function AuthFlow({ notice, noticeBad, onDone }: Props) {
             </>}
             {view === 'invite' && <>
               <Txt size={22.1} lh={1.08}>{'Accept your\ninvitation'}</Txt>
-              <Txt size={13} mut style={{ marginTop: 6, marginBottom: 14 }}>Create a secure password for your Wantiss staff account.</Txt>
+              <Txt size={13} mut style={{ marginTop: 6, marginBottom: 14 }}></Txt>
               {noticeText ? <NoticeBox bad={bad}>{noticeText}</NoticeBox> : null}
               <AuthField label="New password" value={password} onChangeText={setPassword} error={undefined} password textContentType="newPassword" />
               <PasswordChecklist value={password} />

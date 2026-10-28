@@ -154,7 +154,7 @@ export function SettingsSheet({ onClose }: { onClose: () => void }) {
       {selected ? (
         <Card style={{ marginTop: 10 }}>
           <CardTitle title={selected} />
-          <Txt size={10.1} mut lh={1.4}>{personal.has(selected) ? 'Personal preferences are stored on this device.' : 'The HTML includes editable platform settings for this category. This repository has no verified server-side settings endpoint, so saved values here are local preferences only.'}</Txt>
+          <Txt size={10.1} mut lh={1.4}>{personal.has(selected) ? 'Personal preferences are stored on this device.' : 'Platform settings remain local until a server endpoint is connected.'}</Txt>
           <View style={{ flexDirection: 'row', flexWrap: 'wrap', marginTop: 10, gap: 6 }}>
             <OutlineBtn primary onPress={() => editCategory(selected)}>Edit settings</OutlineBtn>
             <OutlineBtn onPress={() => { const destination = destinations[selected]; closeAll(); destination?.(); }}>Open related workspace</OutlineBtn>

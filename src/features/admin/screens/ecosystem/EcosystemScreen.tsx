@@ -35,7 +35,7 @@ export function EcosystemScreen() {
 
   const addService = () => form({
     title: 'Propose service',
-    sub: 'Save a private proposal for review. This does not create a live service or mutate the service directory.',
+    sub: 'Saves a proposal for review; does not create a live service.',
     fields: [
       { id: 'n', label: 'Service name', type: 'text', required: true },
       { id: 'd', label: 'Short description', type: 'text' },

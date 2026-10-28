@@ -51,7 +51,6 @@ export function ServiceWorkspaceScreen() {
   const queryRows = sourceRows.filter((row) => !query || (row.title + ' ' + row.sub + ' ' + row.right).toLowerCase().includes(query));
   const visibleRows = ui.wf === 'Pending' ? queryRows.filter((row) => /pending|unassigned|submitted|review|failed|needs info|open|discrepancy/i.test(row.right + ' ' + row.sub)) : queryRows;
   const pre = service[5] === 'Pre-order';
-  // Mirrors the HTML workspace's module-kind split: overview, analytics, configuration, and records.
   const moduleKind = /analytics/i.test(moduleName) ? 'analytics'
     : /^Overview$/i.test(moduleName) ? 'overview'
     : /settings|configuration|pricing and rules|availability|scheduling/i.test(moduleName) ? 'config'
@@ -67,7 +66,7 @@ export function ServiceWorkspaceScreen() {
         <Txt size={10.1} mut>{serviceName} · Workspace</Txt>
       </Row>
       <Heading title={serviceName + '\n' + moduleName} sub={service[1]} kpis={[
-        { icon: '▥', value: dataMode === 'live' ? serviceTransactions.length : '—', label: 'Orders today', tag: pre ? 'Pre-order' : dataMode === 'live' ? 'Authorized snapshot' : 'Live data unavailable', onPress: () => go('finance') },
+        { icon: '▥', value: dataMode === 'live' ? serviceTransactions.length : '—', label: 'Orders today', tag: pre ? 'Pre-order' : dataMode === 'live' ? 'Authorized snapshot' : 'Not connected', onPress: () => go('finance') },
         { icon: '▤', value: dataMode === 'live' ? sourceRows.filter((row) => /pending|unassigned|submitted|review|failed|needs info|open|discrepancy/i.test(row.right + ' ' + row.sub)).length : '—', label: 'Pending items', onPress: () => go('operations') },
         { icon: '◔', value: '—', label: 'Health score' },
       ]} />
@@ -83,7 +82,7 @@ export function ServiceWorkspaceScreen() {
             }))} />
           </Section>
           <Section title="Recent activity" right={<Pill onPress={() => go('operations')}>Operations ›</Pill>}>
-            <ListRows empty={dataMode === 'live' ? 'No matching service activity.' : 'Live service activity is not connected. No demo records are shown.'} rows={sourceRows.slice(0, 4).map((row) => ({
+            <ListRows empty={dataMode === 'live' ? 'No matching service activity.' : 'Not connected yet'} rows={sourceRows.slice(0, 4).map((row) => ({
               key: row.key, main: row.title, sub: row.sub, right: row.right, onPress: row.action,
             }))} />
           </Section>
@@ -94,7 +93,7 @@ export function ServiceWorkspaceScreen() {
             <Chips options={analyticsRanges} value={selectedRange} onChange={(value) => { ui.AR = value; bump(); }} />
           </Row>
           <Section title={serviceName + ' analytics'}>
-            <Txt size={10.5} mut lh={1.4}>No live analytics data is connected for {serviceName}. The HTML range controls are retained, but no sample chart or fabricated totals are shown.</Txt>
+            <Txt size={10.5} mut lh={1.4}>Not connected yet.</Txt>
             <View style={{ minHeight: 104, alignItems: 'center', justifyContent: 'center', marginTop: 8, backgroundColor: c.inset, borderRadius: 10 }}>
               <Txt size={10.1} mut>No data for this range.</Txt>
             </View>
@@ -102,7 +101,7 @@ export function ServiceWorkspaceScreen() {
         </>
       ) : moduleKind === 'config' ? (
         <Section title={moduleName}>
-          <Txt size={10.5} mut lh={1.4}>Live configuration is not connected for {serviceName}. Settings remain read-only until an authorized service configuration endpoint is available.</Txt>
+          <Txt size={10.5} mut lh={1.4}>Read-only until an authorized configuration endpoint is connected.</Txt>
           <ListRows rows={[
             { key: 'enabled', main: 'Enabled', sub: 'Service availability', right: '—' },
             { key: 'review', main: 'Review before publishing', sub: 'Approval requirement', right: '—' },
@@ -117,7 +116,7 @@ export function ServiceWorkspaceScreen() {
             <Pill onPress={() => { ui.wq = ''; bump(); }}>Clear</Pill>
           </Row>
           <Section title={moduleName + (dataMode === 'live' ? ' · ' + visibleRows.length : '')} right={<Pill onPress={() => { ui.wf = ui.wf === 'All' ? 'Pending' : 'All'; bump(); }}>{ui.wf === 'All' ? 'Filter pending' : 'Show all'}</Pill>}>
-            <ListRows empty={dataMode === 'live' ? 'No records match this module.' : 'Live records are not connected for this service module. No demo records are shown.'} rows={visibleRows.map((row) => ({
+            <ListRows empty={dataMode === 'live' ? 'No records match this module.' : 'Not connected yet'} rows={visibleRows.map((row) => ({
               key: row.key, main: row.title, sub: row.sub,
               right: <View style={{ alignItems: 'flex-end', gap: 3 }}><Txt size={9.5} color={row.right === 'Unassigned' ? c.or : c.ink}>{row.right}</Txt><Small>Open ›</Small></View>,
               onPress: row.action,
@@ -125,7 +124,7 @@ export function ServiceWorkspaceScreen() {
           </Section>
           <Card>
             <Txt size={10.1} weight={500}>Workspace scope</Txt>
-            <Txt size={9.5} mut lh={1.4}>This module follows the HTML-defined module list for {serviceName}. Live records and create, approve, refund and publish actions must use authorized service endpoints; this screen does not simulate those actions.</Txt>
+            <Txt size={9.5} mut lh={1.4}>Actions are disabled until authorized service endpoints are connected.</Txt>
             <View style={{ flexDirection: 'row', flexWrap: 'wrap', marginTop: 8, gap: 6 }}>
               <OutlineBtn onPress={() => go('operations')}>Operations</OutlineBtn>
               <OutlineBtn onPress={() => go('finance')}>Finance</OutlineBtn>

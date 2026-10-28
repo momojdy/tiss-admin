@@ -10,7 +10,7 @@ import { Txt } from '../../ui/Txt';
 import { GoodiesConsumerPreview } from './GoodiesConsumerPreview';
 import type { GoodiesSelection } from '../../goodiesConsumer/editContext';
 import {
-  GOODIES_CONTENT_KEY, STARTER_GAPS, buildStarterDraft, imageKeyFor, isSignedUrl, referencedAssetKeys, sanitizeForSave, stable, validateGoodiesDraft,
+  GOODIES_CONTENT_KEY, buildStarterDraft, imageKeyFor, isSignedUrl, referencedAssetKeys, sanitizeForSave, stable, validateGoodiesDraft,
 } from '../../goodiesConsumer/draft';
 
 type Row = { id: string; content_key: string; version: number; status: 'draft' | 'published' | 'archived'; payload: any };
@@ -147,7 +147,7 @@ export function GoodiesEditor({ canEdit, canPublish }: { canEdit: boolean; canPu
   const startStarter = () => {
     if (!canEdit) return;
     setDraft(buildStarterDraft()); setBaseline(''); setSource('starter'); setRow(null); setSelection(null); setMode('Edit');
-    setNotice({ tone: 'warn', text: 'Starter draft created. It is NOT saved. Review the phone, then press Save draft.' });
+    setNotice({ tone: 'warn', text: 'Starter draft not saved yet.' });
   };
   const discardStarter = () => { setDraft(null); setSource('none'); setBaseline(''); setSelection(null); setNotice(null); };
 
@@ -215,7 +215,7 @@ export function GoodiesEditor({ canEdit, canPublish }: { canEdit: boolean; canPu
         <OutlineBtn primary={mode === 'Preview'} onPress={() => toggleMode('Preview')}>Preview</OutlineBtn>
       </View>}>
         <Txt size={10.5} mut>{statusLine}{dirty ? ' · unsaved changes' : ''}</Txt>
-        <Txt size={10} mut style={{ marginTop: 3 }}>Edits stay in this draft until you save. Saving never changes what customers see. Publishing is a separate step.</Txt>
+        
         <View style={{ flexDirection: 'row', flexWrap: 'wrap', gap: 6, marginTop: 8 }}>
           <OutlineBtn primary onPress={() => { void save(); }} disabled={!ready || !canEdit || !dirty || !!busy}>{busy === 'save' ? 'Saving…' : 'Save draft'}</OutlineBtn>
           <OutlineBtn onPress={() => { void load(); void loadAssets(); }} disabled={!!busy}>{dirty ? 'Discard changes & reload' : 'Reload'}</OutlineBtn>
@@ -225,7 +225,7 @@ export function GoodiesEditor({ canEdit, canPublish }: { canEdit: boolean; canPu
         {confirmPublish ? (
           <View style={{ marginTop: 6, padding: 10, borderWidth: 1, borderColor: c.or, borderRadius: 12 }}>
             <Txt size={11} weight={500}>Publish version {row?.version} to all customers?</Txt>
-            <Txt size={10} mut style={{ marginTop: 2 }}>The customer app will use this content instead of its built-in defaults. The previous published version is archived.</Txt>
+            <Txt size={10} mut style={{ marginTop: 2 }}>Publishing replaces the built-in defaults. The current version is archived.</Txt>
             <View style={{ flexDirection: 'row', flexWrap: 'wrap', gap: 6, marginTop: 8 }}>
               <OutlineBtn primary onPress={() => { void publish(); }} disabled={!!busy}>{busy === 'publish' ? 'Publishing…' : 'Yes, publish'}</OutlineBtn>
               <OutlineBtn onPress={() => setConfirmPublish(false)} disabled={!!busy}>Cancel</OutlineBtn>
@@ -245,18 +245,10 @@ export function GoodiesEditor({ canEdit, canPublish }: { canEdit: boolean; canPu
       ) : null}
       {loadState === 'ready' && !draft ? (
         <Card>
-          <Txt size={11} weight={500}>No Goodies content exists yet.</Txt>
-          <Txt size={10} mut style={{ marginTop: 3 }}>The phone below shows the app's built-in defaults. You can generate a starter draft from the built-in categories and Home texts. It stays unsaved until you press Save draft.</Txt>
+          <Txt size={11} weight={500}>No Goodies content yet</Txt>
           <View style={{ marginTop: 8 }}><OutlineBtn primary disabled={!canEdit} onPress={startStarter}>Create starter draft (unsaved)</OutlineBtn></View>
         </Card>
       ) : null}
-      {source === 'starter' ? (
-        <Card>
-          <Txt size={11} weight={500}>Starter draft: what is missing</Txt>
-          {STARTER_GAPS.map((gap) => <Txt key={gap} size={10} mut style={{ marginTop: 3 }}>{'• ' + gap}</Txt>)}
-        </Card>
-      ) : null}
-
       <Section title="Goodies phone preview">
         <View style={{ alignItems: 'center', paddingVertical: 6 }}>
           {loadState === 'loading' && !draft ? <Txt size={10.5} mut>Loading Goodies content…</Txt> : (

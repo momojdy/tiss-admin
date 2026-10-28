@@ -103,16 +103,6 @@ export function resolveForRender(draft: any, urlByKey: Record<string, string>): 
 /* ---------- generated starter draft (never saved automatically) ---------- */
 const txt = (value: string) => ({en: {v: value, s: 'draft' as const}});
 
-export const STARTER_GAPS = [
-  'No images: the built-in data has none, so every tile, category and promotion shows an emoji.',
-  'The original Home banner is not in the repository (the code says "Food delivery"). Re-enter its text and art if it differed.',
-  'Promotion targets are empty, because the built-in promotions have none.',
-  'Only English text. French, Haitian Creole, Spanish and Chinese are not included.',
-  'Flash deals and coupons are empty on purpose. The demo coupons are not copied.',
-  'Fees, regulation text, FAQ and legal documents are not included.',
-  'Publishing any version replaces every built-in fallback in the customer app with this content.',
-];
-
 export function buildStarterDraft(): any {
   const modes = [
     {id: 'mode.food', st: 'Live', cat: 'restaurants', emoji: '🍛', title: txt(tr('foodDelivery')), sub: txt(tr('hotFresh')), img: null},

@@ -39,7 +39,6 @@ export function QuickCreateSheet({ onClose }: { onClose: () => void }) {
     ];
     form({
       title: 'New ' + kind,
-      sub: 'Creates a private CMS draft. It does not publish anything automatically.',
       fields,
       buttons: [{ label: 'Save draft', key: 'save', primary: true }],
       onSubmit: async (_key, values) => {
@@ -96,14 +95,12 @@ export function QuickCreateSheet({ onClose }: { onClose: () => void }) {
 
   return (
     <DrawerBody title="Quick create" onClose={onClose}>
-      <Txt size={10.6} mut style={{ marginBottom: 10 }}>Create a private draft or invite staff. Publishing and staff provisioning stay server-authorized.</Txt>
       <Card>
         <OutlineBtn primary onPress={() => openCmsForm('banner')}>New banner</OutlineBtn>
         <OutlineBtn onPress={() => openCmsForm('promotion')}>New promotion</OutlineBtn>
         <OutlineBtn onPress={() => openInviteForm()}>Invite staff</OutlineBtn>
         <OutlineBtn onPress={() => openCmsForm('announcement')}>New announcement</OutlineBtn>
       </Card>
-      <Txt size={9.5} mut>Banner, promotion and announcement drafts are stored as CMS versions. The HTML prototype's separate publishing/approval tables still need server integration before these drafts can go live.</Txt>
     </DrawerBody>
   );
 }

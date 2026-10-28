@@ -60,7 +60,7 @@ export function ServiceHubScreen() {
       </Section>
       <Card>
         <Txt size={10.1} weight={500}>Workspace boundary</Txt>
-        <Txt size={9.5} mut lh={1.4} style={{ marginTop: 5 }}>The module directory follows the uploaded HTML. Only actions connected to authorized server endpoints may change production data; this hub does not turn demo HTML interactions into live operations.</Txt>
+        <Txt size={9.5} mut lh={1.4} style={{ marginTop: 5 }}>Only connected server actions can change live data.</Txt>
       </Card>
     </View>
   );

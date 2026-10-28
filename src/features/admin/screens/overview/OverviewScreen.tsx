@@ -90,9 +90,9 @@ export function OverviewScreen() {
   return (
     <View>
       <Heading title="Platform\nOverview" kpis={[
-        { icon: '♛', value: prototypeSnapshot ? '—' : db.ACC.filter((account) => account.type === 'Customer').length.toLocaleString('en-US'), label: 'Active customers', tag: prototypeSnapshot ? 'Live data unavailable' : undefined, onPress: () => go('people', { ps: 'Accounts' }) }, 
+        { icon: '♛', value: prototypeSnapshot ? '—' : db.ACC.filter((account) => account.type === 'Customer').length.toLocaleString('en-US'), label: 'Active customers', tag: prototypeSnapshot ? 'Not connected yet' : undefined, onPress: () => go('people', { ps: 'Accounts' }) }, 
         { icon: '▥', value: prototypeSnapshot ? '—' : db.APPS.filter((app) => app.st === 3).length, label: 'Approved businesses', onPress: () => go('operations', { ov: 'List' }) }, 
-        { icon: '◷', value: prototypeSnapshot ? '—' : waiting.length, label: 'Waiting for review', tag: prototypeSnapshot ? 'Live data unavailable' : overdue.length + ' overdue', tone: overdue.length ? 'r' : '', onPress: () => go('operations', { ov: 'List' }) }, 
+        { icon: '◷', value: prototypeSnapshot ? '—' : waiting.length, label: 'Waiting for review', tag: prototypeSnapshot ? 'Not connected yet' : overdue.length + ' overdue', tone: overdue.length ? 'r' : '', onPress: () => go('operations', { ov: 'List' }) }, 
       ]} />
 
       <Section title="Platform activity" right={<View style={{ flexDirection: 'row', gap: 6 }}><Pill onPress={() => setExpandedChart(true)}>↗ Expand</Pill><Pill onPress={() => go('analytics')}>Analytics ›</Pill></View>}>
@@ -111,7 +111,7 @@ export function OverviewScreen() {
       <Section title="Needs attention" right={<Pill onPress={() => go('operations', { ov: 'List' })}>View queue ›</Pill>}>
         {attention.length === 0 ? (
           <Txt size={10.1} mut style={{ paddingVertical: 18, textAlign: 'center' }}>
-            {prototypeSnapshot ? 'Live attention items are unavailable. No prototype items are shown.' : 'Nothing urgent is waiting right now.'}
+            {prototypeSnapshot ? 'Not connected yet' : 'Nothing urgent is waiting right now.'}
           </Txt>
         ) : (
           <View style={{ flexDirection: 'row', flexWrap: 'wrap', gap: 9 }}>
@@ -153,9 +153,9 @@ export function OverviewScreen() {
 
       <Section title="Money snapshot" right={<Pill onPress={() => go('finance')}>Finance ›</Pill>}>
         <ListRows rows={[
-          { key: 'completed', main: 'Completed this week', right: <Txt size={10.1}>{prototypeSnapshot ? '— · Live data unavailable' : `${completed.length} · ${mny(completed.reduce((n, tx) => n + tx.a, 0))}`}</Txt>, onPress: () => go('finance', { fs: 'Completed' }) }, 
-          { key: 'pending', main: 'Pending settlement', right: <Txt size={10.1}>{prototypeSnapshot ? '— · Live data unavailable' : `${pending.length} · ${mny(pending.reduce((n, tx) => n + tx.a, 0))}`}</Txt>, onPress: () => go('finance', { fs: 'Pending' }) }, 
-          { key: 'failed', main: 'Failed or flagged', right: <Txt size={10.1} color={failed.length ? c.or : c.ink}>{prototypeSnapshot ? '— · Live data unavailable' : `${failed.length} · ${mny(failed.reduce((n, tx) => n + tx.a, 0))}`}</Txt>, onPress: () => go('finance', { fs: 'Failed' }) }, 
+          { key: 'completed', main: 'Completed this week', right: <Txt size={10.1}>{prototypeSnapshot ? 'Not connected yet' : `${completed.length} · ${mny(completed.reduce((n, tx) => n + tx.a, 0))}`}</Txt>, onPress: () => go('finance', { fs: 'Completed' }) }, 
+          { key: 'pending', main: 'Pending settlement', right: <Txt size={10.1}>{prototypeSnapshot ? 'Not connected yet' : `${pending.length} · ${mny(pending.reduce((n, tx) => n + tx.a, 0))}`}</Txt>, onPress: () => go('finance', { fs: 'Pending' }) }, 
+          { key: 'failed', main: 'Failed or flagged', right: <Txt size={10.1} color={failed.length ? c.or : c.ink}>{prototypeSnapshot ? 'Not connected yet' : `${failed.length} · ${mny(failed.reduce((n, tx) => n + tx.a, 0))}`}</Txt>, onPress: () => go('finance', { fs: 'Failed' }) }, 
           { key: 'refunds', main: 'Refunds waiting', right: prototypeSnapshot ? '—' : String(refunds.length), onPress: () => go('finance', { fv: 'Refunds' }) }, 
           { key: 'payouts', main: 'Payouts due', right: prototypeSnapshot ? '—' : String(db.PAYO.filter((payout) => payout[3] !== 'Paid').length), onPress: () => go('finance', { fv: 'Payouts' }) }, 
         ]} />
@@ -215,7 +215,7 @@ export function OverviewScreen() {
           {!prototypeSnapshot && db.STAFF.slice(0, 4).map((staff) => <Pill key={staff.n} onPress={() => go('people', { ps: 'Staff' })}>{staff.n} · {staff.st}</Pill>)}
           {!prototypeSnapshot && <Pill onPress={() => go('operations', { ou: 1 })}>{unassigned.length} unassigned</Pill>}
         </View>
-        <ListRows empty={prototypeSnapshot ? 'Live audit activity is unavailable.' : 'No recent activity.'} rows={(prototypeSnapshot ? [] : db.AUD.slice(0, 4)).map((event, i) => ({
+        <ListRows empty={prototypeSnapshot ? 'Not connected yet' : 'No recent activity.'} rows={(prototypeSnapshot ? [] : db.AUD.slice(0, 4)).map((event, i) => ({
           key: String(i), main: event[0], sub: event[1], right: event[2],
         }))} />
       </Section>

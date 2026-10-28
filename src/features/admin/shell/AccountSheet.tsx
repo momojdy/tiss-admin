@@ -104,11 +104,10 @@ export function AccountSheet({ onClose }: { onClose: () => void }) {
       </Card>
       <Card>
         <CardTitle title="Change password" />
-        <Txt size={10.5} mut style={{ marginBottom: 10 }}>Update your password while signed in. Your current password is required to confirm it is you.</Txt>
         {passwordMessage ? <NoticeBox bad={passwordBad}>{passwordMessage}</NoticeBox> : null}
         {recoveryMode ? (
           <>
-            <Txt size={10.5} mut style={{ marginBottom: 10 }}>Reset your password without knowing the old one. We’ll email a six-digit recovery code to {session.email || 'your account email'}.</Txt>
+            <Txt size={10.5} mut style={{ marginBottom: 10 }}>We'll email a 6-digit code to {session.email || 'your account email'}.</Txt>
             {recoverySent ? (
               <>
                 <AuthField label="Six-digit recovery code" value={recoveryCode} onChangeText={setRecoveryCode} error={undefined} keyboardType="number-pad" maxLength={6} autoComplete="one-time-code" />

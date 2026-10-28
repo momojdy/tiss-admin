@@ -75,7 +75,7 @@ export function BusinessDetailsScreen() {
         </Card>
       ) : (
         <>
-          <Heading title={business.name} sub="Business record · authorized ecosystem snapshot" kpis={[
+          <Heading title={business.name} kpis={[
             { icon: '▥', value: business.is_live ? 'Live' : 'Not live', label: 'Customer visibility' },
             { icon: '✓', value: business.verification || 'Unknown', label: 'Verification status' },
             { icon: '◔', value: business.payout_ready ? 'Ready' : 'Not ready', label: 'Payout readiness' },

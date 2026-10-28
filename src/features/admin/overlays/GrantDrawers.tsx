@@ -82,7 +82,7 @@ export function useRequestAccess() {
     const cur = first.startsWith(SECTION_PREFIX) ? acs(who).lv[db.SEC.indexOf(first.slice(SECTION_PREFIX.length))] : 0;
     form({
       title: 'Request access',
-      sub: 'Ask a Super Admin for more access. They choose the level and how long it lasts, and can end it early. Your role does not change.',
+      sub: 'A grant adds access without changing your role. A Super Admin sets its duration and can revoke it early.',
       fields: [
         { id: 'tg', label: 'What do you need access to?', type: 'select', options: targets, value: first, required: true },
         { id: 'lv', label: 'Level (for sections; rights are on or off)', type: 'select', options: ['View', 'Edit'], value: cur >= 1 ? 'Edit' : 'View' },
@@ -144,7 +144,7 @@ export function RequestDrawer({ id, close }: { id: string; close: () => void }) 
 
   const approve = () => form({
     title: 'Approve · ' + r.by,
-    sub: 'The grant adds to their role and never removes anything. It ends on the date you choose and you can revoke it earlier. Permanent grants stay until you revoke them.',
+    sub: 'Adds access without changing their role. It expires on the selected date or can be revoked early; permanent grants last until revoked.',
     fields: [
       ...(r.kind === 'section' ? [{ id: 'lv', label: 'Access level', type: 'select', options: ['View', 'Edit'], value: LN[r.level], required: true } as FieldSpec] : []),
       { id: 'du', label: 'How long', type: 'select', options: durationOptions(), value: defaultDuration(r.ask), required: true },
