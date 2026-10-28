@@ -15,7 +15,7 @@ import { NotificationsSheet } from './shell/NotificationsSheet';
 import { FloatingDock } from './shell/FloatingDock';
 import { SearchSheet } from './shell/SearchSheet';
 import { AuthFlow } from './auth/AuthFlow';
-import { idleExpired, leaveApp, sessionStillValid, touch } from './auth/authLogic';
+import { clearAppSession, idleExpired, leaveApp, sessionStillValid, touch } from './auth/authLogic';
 import { session, expireStaff, setServerGrants, secLv } from './state/access';
 import { bump, useDb } from './state/db';
 import { supabase } from './lib/supabase';
@@ -86,7 +86,7 @@ function AuthGate() {
     void restore();
     const { data: authListener } = supabase.auth.onAuthStateChange((event) => {
       if (event === 'SIGNED_IN') void Promise.resolve().then(restore);
-      if (event === 'SIGNED_OUT' && session.who) { leaveApp(); setNotice('Your Supabase session ended. Please sign in again.'); }
+      if (event === 'SIGNED_OUT' && session.who) { clearAppSession(); setNotice('Your Supabase session ended. Please sign in again.'); }
     });
     const t = setInterval(() => {
       if (!session.who) return;
