@@ -21,18 +21,13 @@ import { useNav } from '../shell/Nav';
 import { inviteStaff as inviteStaffBackend, setStaffStatus as setStaffStatusBackend, grantStaffPermission as grantStaffPermissionBackend, revokeStaffPermission as revokeStaffPermissionBackend, listPermissionGrants, applyAccountRestriction as applyAccountRestrictionBackend, liftAccountRestriction as liftAccountRestrictionBackend, updateAccountRestriction as updateAccountRestrictionBackend } from '../lib/adminBackend';
 import { hydrateAdminState } from '../lib/hydrateAdminState';
 import { StaffGrants } from './GrantDrawers';
-import { drawers, useOpen } from './registry';
+import { drawers, useReopen } from './registry';
 import type { Restriction } from '../data/types';
 
 const secTone = (lv: number) => (lv === 0 ? 'grey' : lv === 1 ? '#d6e6d9' : 'gr');
 const Muted = ({ children }: { children: string }) => <Txt size={10.1} mut style={{ marginTop: 6 }}>{children}</Txt>;
 
 /** Closes every overlay, refreshes the screens, then opens a drawer again (the HTML's `reopen`). */
-function useReopen() {
-  const { closeAll } = useOverlay();
-  const open = useOpen();
-  return (kind: string, id: string) => { closeAll(); bump(); open(kind, id); };
-}
 
 /* ================================================================== */
 
