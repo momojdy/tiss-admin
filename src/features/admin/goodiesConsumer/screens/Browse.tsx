@@ -300,7 +300,7 @@ export function Search() {
             <View key={s.id} style={{flexDirection: 'row', gap: 10, alignItems: 'center', paddingVertical: 10, borderBottomWidth: 1, borderBottomColor: th.line}}>
               <Pressable accessibilityRole="link" onPress={() => {if (q) rec(r.q.trim()); go('store', s.id);}} style={{flex: 1, flexDirection: 'row', gap: 12, alignItems: 'center', minWidth: 0}}>
                 <Tile e={s.e} bg={s.bg} />
-                <View style={{flex: 1, minWidth: 0}}><View style={{flexDirection: 'row', gap: 6, alignItems: 'center', flexWrap: 'wrap'}}><T weight="700">{s.n}</T>{!s.open ? <Badge red label={tr('closed')} /> : null}</View><T size={13} color={th.mut}>{s.k} · {s.eta} min · {s.rv > 0 ? '★ ' + s.r.toFixed(1) : 'New store'}</T></View>
+                <View style={{flex: 1, minWidth: 0}}><View style={{flexDirection: 'row', gap: 6, alignItems: 'center', flexWrap: 'wrap'}}><T weight="700">{s.n}</T>{!s.open ? <Badge red label={tr('closed')} /> : null}</View><T size={13} color={th.mut}>{s.k} · {s.eta} min · {s.rv > 0 ? 'Rating ' + s.r.toFixed(1) : 'New store'}</T></View>
               </Pressable>
               {heartBtn(s.id, S.fav.indexOf(s.id) > -1, () => heart(s.id), S.fav.indexOf(s.id) > -1 ? 'Remove ' + s.n + ' from favorites' : 'Save ' + s.n + ' to favorites')}
               <Pressable accessibilityRole="link" accessibilityLabel={'Open ' + s.n} onPress={() => {if (q) rec(r.q.trim()); go('store', s.id);}}><Icon name="chevR" size={16} color={th.ink} /></Pressable>
