@@ -28,6 +28,7 @@ export function leaveApp() {
   session.email = null;
   session.role = null;
   session.status = null;
+  session.avatarUrl = null;
   session.last = Date.now();
   bump();
   void supabase.auth.signOut();
