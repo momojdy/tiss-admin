@@ -106,7 +106,7 @@ export function OverviewScreen() {
           </View>
           <Txt size={9.5} mut>{ui.AR === 'Custom' ? customStart + ' – ' + customEnd : ui.AR + ' activity range'}</Txt>
         </View>
-        {!prototypeSnapshot && chart.available ? <LineChart vals={chart.vals} color={c.or} max={chart.max} labels={chart.labels} yLabels={chart.yLabels} /> : <Txt size={10.1} mut style={{ marginTop: 8 }}>Live timestamped transaction data is unavailable. No prototype activity is shown.</Txt>}
+        {!prototypeSnapshot && chart.available ? <LineChart vals={chart.vals} color={c.or} max={chart.max} labels={chart.labels} yLabels={chart.yLabels} /> : <Txt size={10.1} mut style={{ marginTop: 8 }}>{prototypeSnapshot ? 'Not connected yet' : 'Nothing here yet'}</Txt>}
       </Section>
 
       <Section title="Needs attention" right={<Pill onPress={() => go('operations', { ov: 'List' })}>View queue ›</Pill>}>
@@ -154,7 +154,7 @@ export function OverviewScreen() {
 
       <Section title="Money snapshot" right={<Pill onPress={() => go('finance')}>Finance ›</Pill>}>
         <ListRows rows={[
-          { key: 'completed', main: 'Completed this week', right: <Txt size={10.1}>{prototypeSnapshot ? 'Not connected yet' : `${completed.length} · ${mny(completed.reduce((n, tx) => n + tx.a, 0))}`}</Txt>, onPress: () => go('finance', { fs: 'Completed' }) }, 
+          { key: 'completed', main: 'Completed this week', right: <Txt size={10.1}>{prototypeSnapshot ? '—' : `${completed.length} · ${mny(completed.reduce((n, tx) => n + tx.a, 0))}`}</Txt>, onPress: () => go('finance', { fs: 'Completed' }) }, 
           { key: 'pending', main: 'Pending settlement', right: <Txt size={10.1}>{prototypeSnapshot ? 'Not connected yet' : `${pending.length} · ${mny(pending.reduce((n, tx) => n + tx.a, 0))}`}</Txt>, onPress: () => go('finance', { fs: 'Pending' }) }, 
           { key: 'failed', main: 'Failed or flagged', right: <Txt size={10.1} color={failed.length ? c.or : c.ink}>{prototypeSnapshot ? 'Not connected yet' : `${failed.length} · ${mny(failed.reduce((n, tx) => n + tx.a, 0))}`}</Txt>, onPress: () => go('finance', { fs: 'Failed' }) }, 
           { key: 'refunds', main: 'Refunds waiting', right: prototypeSnapshot ? '—' : String(refunds.length), onPress: () => go('finance', { fv: 'Refunds' }) }, 
@@ -177,7 +177,7 @@ export function OverviewScreen() {
           <Pill onPress={() => go('content', { cs: 'Approvals' })}>Drafts —</Pill>
           <Pill onPress={() => go('content', { cs: 'Calendar' })}>Expiring —</Pill>
         </View>
-        <ListRows empty="CMS placement snapshot unavailable. No seeded banner counts or sample placements are shown." rows={[]} />
+        <ListRows empty="Not connected yet" rows={[]} />
       </Section>
 
       <DateRangeModals
@@ -197,7 +197,7 @@ export function OverviewScreen() {
         rangeLabel={ui.AR === 'Custom' ? customStart + ' – ' + customEnd : ui.AR + ' selected range'}
         totalLabel={prototypeSnapshot ? '—' : chart.total.toLocaleString('en-US')}
         chartContent={<>
-          {!prototypeSnapshot && chart.available ? <LineChart vals={chart.vals} color={c.or} max={chart.max} labels={chart.labels} yLabels={chart.yLabels} /> : <Txt size={10.1} mut style={{ paddingVertical: 24, textAlign: 'center' }}>Live timestamped transaction data is unavailable. No prototype activity is shown.</Txt>}
+          {!prototypeSnapshot && chart.available ? <LineChart vals={chart.vals} color={c.or} max={chart.max} labels={chart.labels} yLabels={chart.yLabels} /> : <Txt size={10.1} mut style={{ paddingVertical: 24, textAlign: 'center' }}>{prototypeSnapshot ? 'Not connected yet' : 'Nothing here yet'}</Txt>}
           <Txt size={10.1} mut>Service breakdown is unavailable until authorized live transaction data is connected.</Txt>
         </>}
       />
@@ -207,7 +207,7 @@ export function OverviewScreen() {
           {!prototypeSnapshot && db.STAFF.slice(0, 4).map((staff) => <Pill key={staff.n} onPress={() => go('people', { ps: 'Staff' })}>{staff.n} · {staff.st}</Pill>)}
           {!prototypeSnapshot && <Pill onPress={() => go('operations', { ou: 1 })}>{unassigned.length} unassigned</Pill>}
         </View>
-        <ListRows empty={prototypeSnapshot ? 'Not connected yet' : 'No recent activity.'} rows={(prototypeSnapshot ? [] : db.AUD.slice(0, 4)).map((event, i) => ({
+        <ListRows empty={prototypeSnapshot ? 'Not connected yet' : 'Nothing here yet'} rows={(prototypeSnapshot ? [] : db.AUD.slice(0, 4)).map((event, i) => ({
           key: String(i), main: event[0], sub: event[1], right: event[2],
         }))} />
       </Section>
