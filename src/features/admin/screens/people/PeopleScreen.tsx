@@ -53,31 +53,31 @@ export function PeopleScreen() {
   const header = () => {
     if (sub === 'Staff') {
       return <Heading title={'Employees &\nPermissions'} kpis={[
-        { icon: '☺', value: count('Active'), label: 'Active staff', onPress: () => go('people', { ps: 'Staff', sst: 'Active' }) },
+        { icon: 'users', value: count('Active'), label: 'Active staff', onPress: () => go('people', { ps: 'Staff', sst: 'Active' }) },
         { icon: '◐', value: count('Suspended'), label: 'Suspended', onPress: () => go('people', { ps: 'Staff', sst: 'Suspended' }) },
-        { icon: '⚑', value: count('Revoked'), label: 'Revoked', tone: 'r', onPress: () => go('people', { ps: 'Staff', sst: 'Revoked' }) },
+        { icon: 'shield-alert', value: count('Revoked'), label: 'Revoked', tone: 'r', onPress: () => go('people', { ps: 'Staff', sst: 'Revoked' }) },
       ]} />;
     }
     if (sub === 'Requests' || sub === 'Permissions') {
       const g = grantStats();
       return <Heading title={sub === 'Requests' ? 'Access\nrequests' : 'Permissions\nanalytics'} kpis={[
-        { icon: '✎', value: g.pending, label: 'Waiting requests', tone: 'r', onPress: () => go('people', { ps: 'Requests', rqf: 'Pending' }) },
-        { icon: '☺', value: g.live, label: 'Running grants', onPress: () => go('people', { ps: 'Permissions', grf: 'Active' }) },
+        { icon: 'file-pen', value: g.pending, label: 'Waiting requests', tone: 'r', onPress: () => go('people', { ps: 'Requests', rqf: 'Pending' }) },
+        { icon: 'users', value: g.live, label: 'Running grants', onPress: () => go('people', { ps: 'Permissions', grf: 'Active' }) },
         { icon: '◔', value: g.soon, label: 'Ending in 3 days', tone: 'r', onPress: () => go('people', { ps: 'Permissions', grf: 'Active' }) },
       ]} />;
     }
     if (sub === 'Accounts' || sub === 'Restrictions') {
       return <Heading title="People" kpis={[
-        { icon: '⚑', value: db.ACC.filter((a) => accStatus(a) !== 'Active').length, label: 'Restricted accounts', tone: 'r', onPress: () => go('people', { ps: 'Accounts', ast: 'All', at: 'All' }) },
-        { icon: '☺', value: db.ACC.filter((a) => accStatus(a) === 'Suspended').length, label: 'Suspended', onPress: () => go('people', { ps: 'Accounts', ast: 'Suspended' }) },
-        { icon: '⚑', value: db.ACC.filter((a) => ['Banned', 'In review'].includes(accStatus(a))).length, label: 'Banned', tone: 'r', onPress: () => go('people', { ps: 'Accounts', ast: 'Banned' }) },
+        { icon: 'shield-alert', value: db.ACC.filter((a) => accStatus(a) !== 'Active').length, label: 'Restricted accounts', tone: 'r', onPress: () => go('people', { ps: 'Accounts', ast: 'All', at: 'All' }) },
+        { icon: 'users', value: db.ACC.filter((a) => accStatus(a) === 'Suspended').length, label: 'Suspended', onPress: () => go('people', { ps: 'Accounts', ast: 'Suspended' }) },
+        { icon: 'shield-alert', value: db.ACC.filter((a) => ['Banned', 'In review'].includes(accStatus(a))).length, label: 'Banned', tone: 'r', onPress: () => go('people', { ps: 'Accounts', ast: 'Banned' }) },
       ]} />;
     }
     const unassigned = db.APPS.filter((a) => a.o === 'Unassigned' && a.st < 3).length;
     return <Heading title="People" kpis={[
-      { icon: '☺', value: count('Active'), label: 'Active staff', onPress: () => go('people', { ps: 'Staff' }) },
+      { icon: 'users', value: count('Active'), label: 'Active staff', onPress: () => go('people', { ps: 'Staff' }) },
       { icon: '▤', value: db.APPS.filter((a) => a.st < 3).length + db.CASES.filter((x) => x.st !== 'Resolved').length, label: 'Open assignments', tag: unassigned + ' unassigned', tone: 'r', onPress: () => go('operations', { ov: 'List', ou: 1 }) },
-      { icon: '⚙', value: Object.keys(db.ROLES).length, label: 'Roles', onPress: () => go('people', { ps: 'Roles' }) },
+      { icon: 'settings', value: Object.keys(db.ROLES).length, label: 'Roles', onPress: () => go('people', { ps: 'Roles' }) },
     ]} />;
   };
 
