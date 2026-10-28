@@ -7,7 +7,7 @@ import { HeaderAvatar } from '../ui/Bits';
 import { Txt } from '../ui/Txt';
 import { useTheme } from '../theme/ThemeContext';
 
-export function Header({ onBell, onAccount, onSearch, onMore }: { onBell: () => void; onAccount: () => void; onSearch: () => void; onMore?: () => void }) {
+export function Header({ onBell, onAccount, onSearch }: { onBell: () => void; onAccount: () => void; onSearch: () => void }) {
   useDb();
   const { c } = useTheme();
   const n = unreadCount();
@@ -21,7 +21,6 @@ export function Header({ onBell, onAccount, onSearch, onMore }: { onBell: () => 
       </View>
       <View style={{ flexDirection: 'row', gap: 6, alignItems: 'center' }}>
         <IconBtn label="⌕" a11y="Search" onPress={onSearch} size={30} />
-        {onMore ? <IconBtn label="⋯" a11y="More screen actions" onPress={onMore} size={30} /> : null}
         <View>
           <IconBtn label="♢" a11y="Notifications" onPress={onBell} size={30} />
           {n ? <View style={{ position: 'absolute', right: -2, top: -2, minWidth: 14, height: 14, borderRadius: 7, backgroundColor: c.or, alignItems: 'center', justifyContent: 'center' }}><Txt size={8.5} color="#fff" weight={600}>{n}</Txt></View> : null}

@@ -5,10 +5,7 @@ import { LinearGradient } from 'expo-linear-gradient';
 import { useFonts, Outfit_300Light, Outfit_400Regular, Outfit_500Medium, Outfit_600SemiBold } from '@expo-google-fonts/outfit';
 import { ThemeProvider, useTheme } from './theme/ThemeContext';
 import { ToastProvider } from './ui/Toast';
-import { OverlayProvider, useOverlay, DrawerBody } from './ui/Overlay';
-import { Card } from './ui/Card';
-import { OutlineBtn } from './ui/Controls';
-import { Txt } from './ui/Txt';
+import { OverlayProvider, useOverlay } from './ui/Overlay';
 import { NavProvider, useNav, TAB_OF, TAB_SCREENS } from './shell/Nav';
 import { Header } from './shell/Header';
 import { Tabs } from './shell/Tabs';
@@ -19,9 +16,7 @@ import { FloatingDock } from './shell/FloatingDock';
 import { SearchSheet } from './shell/SearchSheet';
 import { AuthFlow } from './auth/AuthFlow';
 import { idleExpired, leaveApp, sessionStillValid, touch } from './auth/authLogic';
-import { session, expireStaff, setServerGrants, secLv, can } from './state/access';
-import { REQ } from './state/requirements';
-import { useExport } from './shell/useExport';
+import { session, expireStaff, setServerGrants, secLv } from './state/access';
 import { bump, useDb } from './state/db';
 import { supabase } from './lib/supabase';
 import { hydrateAdminState } from './lib/hydrateAdminState';
@@ -30,18 +25,6 @@ import './overlays/TransactionDrawers';
 import './overlays/PeopleDrawers';
 import './overlays/GrantDrawers';
 
-
-function ScreenActionsSheet({ screen, onClose, onExport }: { screen: string; onClose: () => void; onExport: () => void }) {
-  const label = screen === 'finance' ? 'Finance' : screen === 'ecosystem' ? 'Ecosystem' : 'Operations';
-  return (
-    <DrawerBody title={label + ' actions'} onClose={onClose}>
-      <Card>
-        <Txt size={10.5} mut style={{ marginBottom: 10 }}>Export this screen’s current list as a CSV file.</Txt>
-        <OutlineBtn primary onPress={() => { onClose(); onExport(); }}>Export current screen · CSV</OutlineBtn>
-      </Card>
-    </DrawerBody>
-  );
-}
 
 function Frame() {
   const [dockExpanded, setDockExpanded] = useState(false);
@@ -52,7 +35,6 @@ function Frame() {
   const frameHeight = Math.min(910, windowHeight);
   const frameRadius = windowWidth <= 520 ? 0 : 26;
   const { navKey, keepScroll, screen, go } = useNav();
-  const exportCsv = useExport();
   const scrollRef = useRef<ScrollViewInstance>(null);
   const resolvedAccessFor = useRef<string | null>(null);
   useEffect(() => { if (!keepScroll) scrollRef.current?.scrollTo({ y: 0, animated: false }); }, [navKey, keepScroll]);
@@ -76,7 +58,7 @@ function Frame() {
         onTouchStart={touch}
       >
         <ScrollView ref={scrollRef} keyboardShouldPersistTaps="handled" showsVerticalScrollIndicator={false} contentContainerStyle={{ paddingTop: 14 + insets.top, paddingBottom: (dockExpanded ? 360 : 90) + insets.bottom, paddingLeft: 18, paddingRight: 18 }}>
-          <Header onBell={() => openDrawer((close) => <NotificationsSheet onClose={close} />)} onAccount={() => openDrawer((close) => <AccountSheet onClose={close} />)} onSearch={() => openDrawer((close) => <SearchSheet onClose={close} />)} onMore={can(...REQ.export) && ['operations', 'finance', 'ecosystem'].includes(screen) ? () => openDrawer((close) => <ScreenActionsSheet screen={screen} onClose={close} onExport={() => { void exportCsv(); }} />) : undefined} />
+          <Header onBell={() => openDrawer((close) => <NotificationsSheet onClose={close} />)} onAccount={() => openDrawer((close) => <AccountSheet onClose={close} />)} onSearch={() => openDrawer((close) => <SearchSheet onClose={close} />)} />
           <Tabs />
           <ScreenHost />
         </ScrollView>
