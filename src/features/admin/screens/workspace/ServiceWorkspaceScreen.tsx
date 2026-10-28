@@ -9,6 +9,7 @@ import { Heading } from '../../ui/Heading';
 import { Chips, OutlineBtn, Pill, Row, SearchInput, StatusPill } from '../../ui/Controls';
 import { ListRows, Small } from '../../ui/Lists';
 import { Txt } from '../../ui/Txt';
+import { GOODIES_MODULES } from '../goodies/modules';
 
 const num = (value: unknown) => Number.parseInt(String(value ?? 0), 10) || 0;
 
@@ -19,7 +20,7 @@ export function ServiceWorkspaceScreen() {
   const open = useOpen();
   const serviceName = String(ui.wsvc || 'Goodies');
   const service = db.SVC.find((row) => row[0] === serviceName) || db.SVC[0];
-  const modules = (serviceName === 'Goodies' ? 'Overview|Products and catalog|Categories|Merchants|Product review|Orders|Promotions|Support|Analytics|Settings' : db.MOD[serviceName] || 'Overview|Configuration').split('|');
+  const modules = (serviceName === 'Goodies' ? GOODIES_MODULES.join('|') : db.MOD[serviceName] || 'Overview|Configuration').split('|');
   const moduleName = modules.includes(String(ui.wmod)) ? String(ui.wmod) : 'Overview';
   const setModule = (next: string) => { ui.wmod = next; ui.wf = 'All'; ui.wq = ''; bump(); };
   const serviceApps = dataMode === 'live' ? db.APPS.filter((row) => row.s === serviceName) : [];

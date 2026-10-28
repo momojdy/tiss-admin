@@ -14,11 +14,12 @@ import { Heading } from '../../ui/Heading';
 import { Chips, OutlineBtn, Pill, StatusPill } from '../../ui/Controls';
 import { ListRows } from '../../ui/Lists';
 import { Txt } from '../../ui/Txt';
+import { GOODIES_MODULES } from './modules';
 
 /** Canonical Goodies configuration reference, not a live snapshot; production changes use server-side drafts. */
 const data = goodiesSeed as any;
 const moduleMap: Record<string, string> = { Overview: 'Overview', 'Products and catalog': 'Library', Categories: 'Categories', Merchants: 'Merchants', 'Product review': 'Product review', Orders: 'Orders', Promotions: 'Promos', Support: 'Support', Analytics: 'Analytics', Settings: 'Settings' };
-const modules = ['Overview', 'Products and catalog', 'Categories', 'Merchants', 'Product review', 'Orders', 'Promotions', 'Support', 'Analytics', 'Settings'];
+const modules = GOODIES_MODULES;
 const languages = ['en', 'fr', 'ht', 'es', 'zh'];
 
 function englishValue(record: any, field: string) {
