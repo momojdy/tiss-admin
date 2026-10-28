@@ -10,6 +10,7 @@ import { KeyValue, ListRows } from '../ui/Lists';
 import { DrawerBody, useOverlay } from '../ui/Overlay';
 import { useToast } from '../ui/Toast';
 import { Txt } from '../ui/Txt';
+import { AppIcon } from '../ui/AppIcon';
 import { useTheme } from '../theme/ThemeContext';
 import { shareText } from '../lib/csv';
 import { getBusinessApplicationDocumentUrl, listBusinessApplicationDocuments, reviewBusinessApplication, setBusinessApplicationDocumentStatus, type BusinessApplicationDocument } from '../lib/adminBackend';
@@ -113,7 +114,7 @@ export function ApplicationDrawer({ id, close }: { id: string; close: () => void
       </View>
       <KeyValue rows={[['Waiting', a.age + ' day' + (a.age === 1 ? '' : 's')], ['Owner', a.o], ['Due', a.due || 'Not set'], ['Documents', docsText(a) + ' verified']]} />
       <Section title="Requirements">
-        <ListRows empty={a.d.length === 0 ? "No document records are available from the server yet. Approval stays blocked until the required documents are submitted and verified." : "No documents."} rows={a.d.map((x, i) => ({ main: x[0], right: <View style={{ flexDirection: 'row', alignItems: 'center', gap: 4 }}><StatusPill label={x[1]} /><Txt size={10.1}>›</Txt></View>, onPress: () => open('doc', id + ':' + i) }))} />
+        <ListRows empty={a.d.length === 0 ? "No document records are available from the server yet. Approval stays blocked until the required documents are submitted and verified." : "No documents."} rows={a.d.map((x, i) => ({ main: x[0], right: <View style={{ flexDirection: 'row', alignItems: 'center', gap: 4 }}><StatusPill label={x[1]} /><AppIcon name="chevron-right" size={12} /></View>, onPress: () => open('doc', id + ':' + i) }))} />
       </Section>
       <Section title="Server-submitted documents">
         {docsLoading ? <Txt size={12} mut>Loading application documents…</Txt> : docsError ? <Txt size={12} color="#B42318">{docsError}</Txt> : serverDocs.length ? serverDocs.map((doc) => (
@@ -156,7 +157,7 @@ export function ApplicationDrawer({ id, close }: { id: string; close: () => void
         {edit ? <ButtonRow><OutlineBtn onPress={guard(REQ.review, addNote)}>+ Add note</OutlineBtn></ButtonRow> : null}
       </Section>
       <Card style={{ marginVertical: 8 }}>
-        <ListRows rows={[{ main: 'Open business profile', right: '›', onPress: () => { closeAll(); nav.go('business'); } }]} />
+        <ListRows rows={[{ main: 'Open business profile', right: <AppIcon name="chevron-right" size={12} />, onPress: () => { closeAll(); nav.go('business'); } }]} />
       </Card>
     </DrawerBody>
   );
@@ -200,7 +201,7 @@ export function DocumentDrawer({ id: v, close }: { id: string; close: () => void
       <View style={{ flexDirection: 'row', gap: 7, marginVertical: 8 }}>
         <Pill onPress={() => setZoom((z) => Math.max(0.5, z - 0.25))}>− Zoom</Pill>
         <Pill onPress={() => setZoom((z) => Math.min(2, z + 0.25))}>+ Zoom</Pill>
-        <Pill onPress={download}>⇩ Download</Pill>
+        <Pill onPress={download}><View style={{ flexDirection: "row", alignItems: "center", gap: 4 }}><AppIcon name="download" size={12} />Download</View></Pill>
       </View>
       <KeyValue rows={[['Version', 'v1'], ['Uploaded', a.log[0][0]], ['Expiry', d[1] === 'expired' ? 'Expired Oct 1' : 'Oct 2027'], ['Reviewer notes', d[1] === 'rejected' ? 'Rejected earlier' : 'None']]} />
     </DrawerBody>
