@@ -10,6 +10,7 @@ import { KeyValue, ListRows } from '../ui/Lists';
 import { DrawerBody, useOverlay } from '../ui/Overlay';
 import { useToast } from '../ui/Toast';
 import { Txt } from '../ui/Txt';
+import { AppIcon } from '../ui/AppIcon';
 import { useTheme } from '../theme/ThemeContext';
 import { shareCsv } from '../lib/csv';
 import { drawers, useOpen } from './registry';
@@ -92,7 +93,7 @@ export function TransactionDrawer({ id, close }: { id: string; close: () => void
     <>
       {x.s === 'Completed' && mx > 0 && can(...REQ.refund) ? <OutlineBtn primary onPress={guard(REQ.refund, refund)}>{x.rq ? 'Review refund request' : 'Refund'}</OutlineBtn> : null}
       <OutlineBtn onPress={() => copy(id, 'Reference copied')}>Copy reference</OutlineBtn>
-      <OutlineBtn onPress={receipt}>⇩ Receipt</OutlineBtn>
+      <OutlineBtn onPress={receipt}><View style={{ flexDirection: "row", alignItems: "center", gap: 4 }}><AppIcon name="download" size={12} />Receipt</View></OutlineBtn>
     </>
   );
   return (
@@ -102,7 +103,7 @@ export function TransactionDrawer({ id, close }: { id: string; close: () => void
       </View>
       <Receipt id={id} />
       <Section title="Timeline"><ListRows rows={x.log.slice().reverse().map((l) => ({ main: l[1], right: l[0] }))} /></Section>
-      <ListRows rows={[{ main: 'Open related service', right: '›', onPress: () => { closeAll(); nav.go('hub', { hub: svcName }); } }]} />
+      <ListRows rows={[{ main: 'Open related service', right: <AppIcon name="chevron-right" size={12} />, onPress: () => { closeAll(); nav.go('hub', { hub: svcName }); } }]} />
     </DrawerBody>
   );
 }
@@ -124,7 +125,7 @@ export function SettlementDrawer({ id, close }: { id: string; close: () => void 
   const { closeAll } = useOverlay();
   return (
     <RecordDrawer title={s[0]} status={s[4]} close={close} rows={[['Provider group', s[1]], ['Period', s[2]], ['Amount', mny(s[3])]]}
-      extra={<Section title="Included transactions"><ListRows rows={db.INV.filter((x) => x.s === 'Completed').slice(0, 3).map((x) => ({ main: x.id + ' · ' + x.f, right: mny(x.a) + ' ›', onPress: () => open('inv', x.id) }))} /></Section>}
+      extra={<Section title="Included transactions"><ListRows rows={db.INV.filter((x) => x.s === 'Completed').slice(0, 3).map((x) => ({ main: x.id + ' · ' + x.f, right: <View style={{ flexDirection: 'row', alignItems: 'center', gap: 4 }}><Txt>{mny(x.a)}</Txt><AppIcon name="chevron-right" size={12} /></View>, onPress: () => open('inv', x.id) }))} /></Section>}
       actions={s[4] === 'Discrepancy' ? <OutlineBtn onPress={() => { closeAll(); nav.go('finance', { fv: 'Reconciliation' }); }}>Open reconciliation</OutlineBtn> : null} />
   );
 }
