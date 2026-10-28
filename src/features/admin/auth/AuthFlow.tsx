@@ -192,7 +192,7 @@ export function AuthFlow({ notice, noticeBad, onDone }: Props) {
             </View>
             {view === 'in' && <>
               <Txt size={22.1} lh={1.08} ls={-0.2}>{'Staff\nsign in'}</Txt>
-              <Txt size={13} mut lh={1.45} style={{ marginTop: 6, marginBottom: 14 }}>Use your verified Wantiss work email. Access is checked by the server.</Txt>
+              <Txt size={13} mut lh={1.45} style={{ marginTop: 6, marginBottom: 14 }}>Use your verified Wantiss work email.</Txt>
               {(noticeText || notice) ? <NoticeBox bad={bad}>{noticeText || notice}</NoticeBox> : null}
               <AuthField label="Work email" value={email} onChangeText={(value) => { setEmail(value); setPassword(''); }} error={undefined} placeholder="Wantiss.app@gmail.com" keyboardType="email-address" autoCapitalize="none" autoCorrect={false} textContentType="username" autoComplete="email" />
               <AuthField label="Password" value={password} onChangeText={setPassword} error={undefined} password textContentType="password" autoComplete="password" onSubmitEditing={signIn} />
