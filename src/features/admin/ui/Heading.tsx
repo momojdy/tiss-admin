@@ -9,7 +9,7 @@ export interface KpiSpec {
 }
 
 export function Kpi({ icon, value, label, tag, tone, onPress }: KpiSpec) {
-  const iconMap: Record<string, AppIconName> = { '☺': 'activity', '♛': 'users', '◷': 'clock-alert', '↗': 'chart-no-axes', '▤': 'wallet', '▥': 'building-2', '◔': 'pie-chart', users: 'users', 'building-2': 'building-2', 'clock-alert': 'clock-alert' };
+  const iconMap: Record<string, AppIconName> = { '☺': 'activity', '♛': 'users', '◷': 'clock-alert', '↗': 'chart-no-axes', '▤': 'wallet', '▥': 'building-2', '◔': 'pie-chart', '✓': 'check-circle', users: 'users', 'building-2': 'building-2', 'clock-alert': 'clock-alert' };
   const iconName = iconMap[icon];
   const body = (
     <View style={{ flexDirection: 'row', alignItems: 'center', gap: 7 }}>
