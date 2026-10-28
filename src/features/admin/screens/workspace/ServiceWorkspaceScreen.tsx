@@ -67,7 +67,7 @@ export function ServiceWorkspaceScreen() {
       </Row>
       <Heading title={serviceName + '\n' + moduleName} sub={service[1] !== 'Active service' ? service[1] : undefined} kpis={[
         { icon: 'activity', value: dataMode === 'live' ? serviceTransactions.length : '—', label: 'Orders today', tag: pre ? 'Pre-order' : dataMode === 'live' ? 'Authorized snapshot' : 'Not connected', onPress: () => go('finance') },
-        { icon: '▤', value: dataMode === 'live' ? sourceRows.filter((row) => /pending|unassigned|submitted|review|failed|needs info|open|discrepancy/i.test(row.right + ' ' + row.sub)).length : '—', label: 'Pending items', onPress: () => go('operations') },
+        { icon: 'clipboard-list', value: dataMode === 'live' ? sourceRows.filter((row) => /pending|unassigned|submitted|review|failed|needs info|open|discrepancy/i.test(row.right + ' ' + row.sub)).length : '—', label: 'Pending items', onPress: () => go('operations') },
         { icon: 'pie-chart', value: '—', label: 'Health score' },
       ]} />
       <View style={{ flexDirection: 'row', flexWrap: 'wrap', gap: 6, marginBottom: 8 }}>
