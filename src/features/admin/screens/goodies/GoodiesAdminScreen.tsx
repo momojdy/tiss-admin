@@ -94,7 +94,7 @@ export function GoodiesAdminScreen() {
         if (!reason) return 'Enter a reason for the audit trail.';
         try {
           await saveDraft(String(record.id || title.toLowerCase().replace(/[^a-z0-9]+/g, '.')), { record: { ...record, [statusKey]: values.status }, change_reason: reason, module: moduleName, proposed_only: true });
-          toast('Proposed change saved as a private draft.');
+          toast('Saved as private draft.');
         } catch (error) {
           return error instanceof Error ? error.message : 'Proposed change could not be saved.';
         }
@@ -170,7 +170,7 @@ export function GoodiesAdminScreen() {
           ]} />
           <Section title="Goodies health">
             <ListRows rows={[
-              { key: 'promos', main: 'Live promotions', sub: 'Seed-defined offer references; live status must be verified by the backend', right: String(data.promos.filter((item: any) => item.st === 'Live').length) + ' refs', onPress: () => setModule('Promotions') },
+              { key: 'promos', main: 'Promotion references', sub: 'Not connected yet.', right: String(data.promos.filter((item: any) => item.st === 'Live').length) + ' refs', onPress: () => setModule('Promotions') },
               { key: 'missing', main: 'Missing translations', sub: 'English, French, Haitian Creole, Spanish and Chinese', right: '—', onPress: () => setModule('Products and catalog') },
               { key: 'assets', main: 'Assets without uploaded images', sub: 'Reference catalog definitions', right: String(data.lib.length), onPress: () => setModule('Products and catalog') },
               { key: 'restricted', main: 'Restricted-goods rules', sub: 'Review service requirements', right: '—', onPress: () => setModule('Settings') },
@@ -178,7 +178,7 @@ export function GoodiesAdminScreen() {
           </Section>
           <Section title="Needs review">
             <ListRows rows={[
-              { key: 'req', main: 'Ingredient requests', sub: 'Reference request definitions; live requests require backend data', right: String(data.reqs.length) + ' refs', onPress: () => setModule('Product review') },
+              { key: 'req', main: 'Ingredient requests', sub: 'Not connected yet.', right: String(data.reqs.length) + ' refs', onPress: () => setModule('Product review') },
               { key: 'library', main: 'Builder library', sub: 'Manage ingredients, extras and product assets', right: '—', onPress: () => setModule('Products and catalog') },
               { key: 'content', main: 'Customer home content', sub: 'Modes, promotions, labels and category order', right: 'Open ›', onPress: () => setModule('Products and catalog') },
             ]} />
@@ -186,10 +186,10 @@ export function GoodiesAdminScreen() {
         </>
       ) : moduleLabel === 'Settings' ? (
         <Section title="Goodies settings">
-          <Txt size={11} mut lh={1.4}>Read-only until an authorized server configuration endpoint is connected.</Txt>
+          <Txt size={11} mut lh={1.4}>Read-only until the server connection is ready.</Txt>
           <ListRows rows={[
-            { key: 'fees', main: 'Fees and rules', sub: 'Review proposed fees in the Products and catalog workspace only when the server-backed workflow is available.', right: 'Read-only' },
-            { key: 'restricted', main: 'Restricted goods', sub: 'Rules are not connected; enforcement remains server-side.', right: 'Read-only' },
+            { key: 'fees', main: 'Fees and rules', sub: 'Not connected yet.', right: 'Read-only' },
+            { key: 'restricted', main: 'Restricted goods', sub: 'Enforcement remains server-side.', right: 'Read-only' },
             { key: 'publish', main: 'Publishing permissions', sub: 'Publishing requires an authorized server action.', right: 'Protected' },
           ]} />
         </Section>
@@ -201,7 +201,7 @@ export function GoodiesAdminScreen() {
             { key: 'catalog', main: 'Builder library items', right: '—', onPress: () => setModule('Products and catalog') },
             { key: 'requests', main: 'Ingredient requests awaiting review', right: '—', onPress: () => setModule('Product review') },
           ]} />
-          <Txt size={9.5} mut style={{ marginTop: 8 }}>Order, conversion and revenue analytics need a dedicated Goodies server snapshot; this view does not fabricate those metrics.</Txt>
+          <Txt size={9.5} mut style={{ marginTop: 8 }}>Not connected yet.</Txt>
         </Section>
       ) : moduleLabel === 'Fees' ? (
         <Section title="Fees and rules">
@@ -210,7 +210,7 @@ export function GoodiesAdminScreen() {
         </Section>
       ) : (
         <Section title={moduleName} right={<Pill onPress={() => setFilter(filter === 'All' ? 'Live' : 'All')}>{filter === 'All' ? 'Filter live' : 'Show all'}</Pill>}>
-          <Txt size={9.5} mut style={{ marginBottom: 8 }}>Seed-defined Goodies feature configuration is shown as a reference, not as confirmed live production state. Edits are staged as private server-side CMS drafts; live merchant, order, and request records require their authorized endpoints.</Txt>
+          <Txt size={9.5} mut style={{ marginBottom: 8 }}>Configuration is shown for reference. Live merchant, order and request data are not connected.</Txt>
           <ListRows empty="No records in this section." rows={visible.map((item) => ({
             key: String(item.id),
             main: item._title,
