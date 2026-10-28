@@ -1,7 +1,6 @@
 import { useEffect, useState } from 'react';
 import { View } from 'react-native';
 import AsyncStorage from '@react-native-async-storage/async-storage';
-import { useTheme, ThemeMode } from '../theme/ThemeContext';
 import { useOverlay, DrawerBody } from '../ui/Overlay';
 import { Card, CardTitle } from '../ui/Card';
 import { ListRows } from '../ui/Lists';
@@ -67,7 +66,6 @@ const personal = new Set(['Appearance', 'Notifications']);
 const initial = () => Object.fromEntries(Object.entries(defaults).map(([key, fields]) => [key, Object.fromEntries(fields.map((field) => [field.id, field.value]))])) as Record<string, Record<string, SettingValue>>;
 
 export function SettingsSheet({ onClose }: { onClose: () => void }) {
-  const { setMode } = useTheme();
   const { closeAll } = useOverlay();
   const { go } = useNav();
   const toast = useToast();
@@ -84,14 +82,12 @@ export function SettingsSheet({ onClose }: { onClose: () => void }) {
         try {
           const saved = JSON.parse(raw) as Record<string, Record<string, SettingValue>>;
           setSettings({ ...initial(), ...saved });
-          const savedMode = String(saved.Appearance?.mode || 'Light').toLowerCase();
-          setMode(savedMode === 'dark' || savedMode === 'system' ? savedMode : 'light');
         } catch { /* keep defaults if local data is malformed */ }
       }
       setLoaded(true);
     }).catch(() => { if (mounted) setLoaded(true); });
     return () => { mounted = false; };
-  }, [setMode]);
+  }, []);
 
   const destinations: Record<string, () => void> = {
     Platform: () => go('ecosystem'),
@@ -125,10 +121,6 @@ export function SettingsSheet({ onClose }: { onClose: () => void }) {
           await AsyncStorage.setItem(STORAGE_KEY, JSON.stringify(next));
         } catch {
           return 'Settings could not be saved on this device.';
-        }
-        if (name === 'Appearance' && values.mode !== undefined) {
-          const nextMode = String(values.mode || 'Light').toLowerCase() as ThemeMode;
-          setMode(nextMode === 'dark' || nextMode === 'system' ? nextMode : 'light');
         }
         aud('Settings changed · ' + name, session.view);
         bump();
