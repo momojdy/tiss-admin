@@ -186,7 +186,7 @@ export function ContentScreen() {
       && (assetPlacement === 'All placements' || group.placement === assetPlacement)
       && (!assetSearch.trim() || (asset.asset_key + ' ' + asset.content_type + ' ' + group.feature + ' ' + group.placement).toLowerCase().includes(assetSearch.trim().toLowerCase()));
   });
-  const contentSections = ['Overview', 'Media', 'Banners', 'Promotions', 'Announcements', 'Calendar', 'Approvals', 'History', 'Editor', 'CMS versions'] as const;
+  const contentSections = ['Overview', 'Media', 'Banners', 'Promotions', 'Announcements', 'Calendar', 'Approvals', 'History', 'CMS versions'] as const;
   type ContentSection = typeof contentSections[number];
   const activeSection: ContentSection = contentSections.includes(ui.cs as ContentSection) ? ui.cs as ContentSection : 'Overview';
   const changeSection = (section: ContentSection) => { ui.cs = section; bump(); };
@@ -393,13 +393,6 @@ export function ContentScreen() {
           </Section>
         </>
       ) : null}
-
-      {activeSection === 'Editor' ? <Section title="Customer page editor" right={<OutlineBtn primary onPress={() => go('editor')}>Open customer page editor ›</OutlineBtn>}>
-        <Txt size={11} mut lh={1.4}>The live phone preview is part of the customer-page editor. Switch between Edit and Preview, navigate linked customer pages, and compare the current draft with the published version there. Draft saves remain private; this screen does not publish page content.</Txt>
-        <View style={{ marginTop: 10 }}>
-          <OutlineBtn primary onPress={() => go('editor')}>Open editor with live phone preview</OutlineBtn>
-        </View>
-      </Section> : null}
 
       {activeSection === 'CMS versions' ? (
         <View style={{ flexDirection: 'row', flexWrap: 'wrap', gap: 8 }}>

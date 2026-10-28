@@ -279,7 +279,7 @@ export function CustomerPageEditorScreen() {
   return (
     <View>
       <View style={{ flexDirection: 'row', alignItems: 'center', flexWrap: 'wrap', gap: 8, marginBottom: 4 }}>
-        <OutlineBtn onPress={() => go('content', { cs: 'Editor' })}>‹ Content Studio</OutlineBtn>
+        <OutlineBtn onPress={() => go('content', { cs: 'Overview' })}>‹ Content Studio</OutlineBtn>
         <OutlineBtn onPress={() => { void reload(); }} disabled={loading}>Refresh</OutlineBtn>
         <OutlineBtn onPress={startBlankDraft} disabled={!can(...REQ.content)}>Start blank draft</OutlineBtn>
       </View>
