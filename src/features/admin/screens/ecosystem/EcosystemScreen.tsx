@@ -94,7 +94,7 @@ export function EcosystemScreen() {
 
   return (
     <View>
-      <Heading title={'Ecosystem\nServices'} kpis={[
+      <Heading title="Ecosystem Services" kpis={[
         { icon: '▥', value: db.SVC.length, label: 'Services in directory' },
         { icon: '♛', value: db.BIZ.length, label: 'Business records', onPress: () => go('business') },
         { icon: '▤', value: db.APPS.filter((app) => app.st < 3).length, label: 'Applications awaiting review', onPress: () => go('operations') },
