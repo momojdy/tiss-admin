@@ -25,7 +25,7 @@ export function Dish({i, off = 0, left, grid}: {i: Item; off?: number; left?: nu
       <View>
         <Pressable accessibilityRole="link" onPress={() => openProduct(i.id, off)}>
           <Grad idx={bgIdx(s.bg)} style={{height: 108, alignItems: 'center', justifyContent: 'center'}}>
-            <Icon name={i.e} size={54} color="#1B1B1F" />
+            <Text style={{fontSize: 54}}>{i.e}</Text>
             {off ? <View style={{position: 'absolute', left: 8, top: 8, backgroundColor: th.red, borderRadius: 9, paddingHorizontal: 8, paddingVertical: 3}}><T size={11.5} weight="800" color="#fff">-{off}%</T></View> : null}
             {i.oos ? <View style={{position: 'absolute', left: 8, top: 8, backgroundColor: '#555', borderRadius: 9, paddingHorizontal: 8, paddingVertical: 3}}><T size={11.5} weight="800" color="#fff">{tr('soldOut')}</T></View> : null}
           </Grad>
@@ -57,7 +57,7 @@ export function VCard({s}: {s: Store}) {
     <View style={{width: 148, borderRadius: 18, backgroundColor: th.card, borderWidth: 1, borderColor: th.line, overflow: 'hidden'}}>
       <View>
         <Pressable accessibilityRole="link" onPress={() => go('store', s.id)}>
-          <Grad idx={bgIdx(s.bg)} style={{height: 108, alignItems: 'center', justifyContent: 'center'}}><Icon name={s.e} size={54} color="#1B1B1F" /></Grad>
+          <Grad idx={bgIdx(s.bg)} style={{height: 108, alignItems: 'center', justifyContent: 'center'}}><Text style={{fontSize: 54}}>{s.e}</Text></Grad>
         </Pressable>
         {heartBtn(s.id, saved, () => heart(s.id), saved ? 'Remove ' + s.n + ' from favorites' : 'Save ' + s.n + ' to favorites')}
       </View>
@@ -78,10 +78,10 @@ export function StoreCard({s}: {s: Store}) {
     <View>
       <Pressable accessibilityRole="link" onPress={() => go('store', s.id)}>
         <Grad idx={bgIdx(s.bg)} style={{height: 160, borderRadius: 18, alignItems: 'center', justifyContent: 'center', overflow: 'hidden'}}>
-          <Icon name={s.e} size={76} color="#1B1B1F" />
+          <Text style={{fontSize: 76}}>{s.e}</Text>
           {s.pr ? <View style={{position: 'absolute', left: 0, top: 14, backgroundColor: th.br, borderTopRightRadius: 8, borderBottomRightRadius: 8, paddingVertical: 5, paddingLeft: 12, paddingRight: 10}}><T size={12} weight="800" color="#fff">{s.pr}</T></View> : null}
           {heartBtn(s.id, S.fav.indexOf(s.id) > -1, () => heart(s.id), S.fav.indexOf(s.id) > -1 ? 'Remove ' + s.n + ' from favorites' : 'Save ' + s.n + ' to favorites')}
-          {!s.open ? pill(tr('closed') + ' · ' + s.nx) : s.far && !s.live ? pill('Pickup only at this address') : s.rv > 80 ? pill('flame ' + Math.round(s.rv * 0.95) + ' ordered today') : null}
+          {!s.open ? pill(tr('closed') + ' · ' + s.nx) : s.far && !s.live ? pill('Pickup only at this address') : s.rv > 80 ? pill('🔥 ' + Math.round(s.rv * 0.95) + ' ordered today') : null}
           <View style={{position: 'absolute', right: 10, bottom: 10, backgroundColor: '#fff', borderRadius: 12, paddingHorizontal: 10, paddingVertical: 5}}><T size={12} weight="700" color="#1B1B1F">{s.eta} min</T></View>
         </Grad>
       </Pressable>
@@ -89,7 +89,7 @@ export function StoreCard({s}: {s: Store}) {
         <View style={{flexDirection: 'row', gap: 8, marginTop: 8}}>
           {s.it.slice(0, 3).map(i => (
             <Pressable key={i.id} onPress={() => openProduct(i.id)} style={{flex: 1, minWidth: 0}}>
-              <Grad idx={bgIdx(s.bg)} style={{height: 72, borderRadius: 14, alignItems: 'center', justifyContent: 'center'}}><Icon name={i.e} size={36} color="#1B1B1F" /></Grad>
+              <Grad idx={bgIdx(s.bg)} style={{height: 72, borderRadius: 14, alignItems: 'center', justifyContent: 'center'}}><Text style={{fontSize: 36}}>{i.e}</Text></Grad>
               <T size={13} weight="800" style={{marginTop: 5}}>{money(i.p)}</T>
               <T size={11.5} color={th.mut} lines={1}>{i.n}</T>
             </Pressable>
