@@ -1,5 +1,6 @@
 import { ReactNode, useCallback } from 'react';
 import { useOverlay } from '../ui/Overlay';
+import { bump } from '../state/db';
 
 export type DrawerFactory = (id: string, close: () => void) => ReactNode;
 /** Detail drawers register themselves here so any screen or panel can open them by kind and id
@@ -14,3 +15,9 @@ export function useOpen() {
   }, [openDrawer]);
 }
 export const useCloseAll = () => useOverlay().closeAll;
+
+export function useReopen() {
+  const { closeAll } = useOverlay();
+  const open = useOpen();
+  return (kind: string, id: string) => { closeAll(); bump(); open(kind, id); };
+}
