@@ -11,6 +11,7 @@ import { QuickCreateSheet } from '../../shell/QuickCreateSheet';
 import { archiveCmsAsset, archiveCmsVersion, listCmsAssets, publishCmsAsset, publishCmsVersion, saveCmsVersion, uploadCmsAsset } from '../../lib/adminBackend';
 import { Section, Card } from '../../ui/Card';
 import { Heading } from '../../ui/Heading';
+import { AppIcon } from '../../ui/AppIcon';
 import { ListRows } from '../../ui/Lists';
 import { OutlineBtn, Pill, SelectMenu, StatusPill } from '../../ui/Controls';
 import { Field, useForm } from '../../ui/FormSheet';
@@ -290,7 +291,7 @@ export function ContentScreen() {
       {error ? <Card><Txt size={12} color={c.or}>{error}</Txt><View style={{ marginTop: 8 }}><OutlineBtn onPress={() => { void reload(); }} disabled={loading}>Retry loading</OutlineBtn></View></Card> : null}
       {loading ? <Card><Txt size={11} mut>Loading CMS content and media…</Txt><View style={{ gap: 7, marginTop: 10 }}>{[0, 1, 2].map((key) => <View key={key} style={{ height: 12, borderRadius: 6, backgroundColor: c.inset, opacity: 0.8 }} />)}</View></Card> : null}
       {activeSection === 'Overview' ? <View style={{ alignItems: 'flex-start', marginBottom: 9 }}>
-        <OutlineBtn onPress={() => go('editor')}>Open page editor ›</OutlineBtn>
+        <OutlineBtn onPress={() => go('editor')}><View style={{ flexDirection: 'row', alignItems: 'center', gap: 4 }}>Open page editor<AppIcon name="chevron-right" size={12} /></View></OutlineBtn>
       </View> : null}
       <SelectMenu label="Section" options={contentSections} value={activeSection} onChange={changeSection} />
 
@@ -393,7 +394,7 @@ export function ContentScreen() {
 
       {activeSection === 'Editor' ? <Section title="Customer page editor">
         <FeaturePicker options={customerFeatures} value={customerFeature} onChange={setCustomerFeature} />
-        <OutlineBtn primary onPress={() => go('editor', { editorFeature: customerFeature })}>{`Open ${customerFeature} page editor ›`}</OutlineBtn>
+        <OutlineBtn primary onPress={() => go('editor', { editorFeature: customerFeature })}><View style={{ flexDirection: 'row', alignItems: 'center', gap: 4 }}>{`Open ${customerFeature} page editor`}<AppIcon name="chevron-right" size={12} /></View></OutlineBtn>
       </Section> : null}
 
       {activeSection === 'CMS versions' ? (
