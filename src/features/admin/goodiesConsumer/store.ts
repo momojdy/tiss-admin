@@ -5,6 +5,7 @@ import {supabase} from '../lib/supabase';
 import {providerInfo} from './providers';
 import type {Store, Item, Address, CartLine, Order} from './data/types';
 import {STAGES_DELIVERY, STAGES_PICKUP} from './data/seed';
+import {assertDemoOnly} from './providers';
 export const KEY = 'goodies-live-v4';
 
 /** Isolated read-only customer-screen preview inside Wantiss Admin. */
@@ -377,7 +378,6 @@ export const FCH: [string, string][] = [['', 'All'], ['offers', 'Offers'], ['fre
 
 /* demo only: wipes local data */
 export async function resetDemo() {
-  const {assertDemoOnly} = require('./providers');
   assertDemoOnly('Reset demo data');
   await AsyncStorage.multiRemove([KEY, WKEY]);
   Object.assign(S, WDEF(), GDEF());

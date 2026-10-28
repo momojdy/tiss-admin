@@ -1,8 +1,8 @@
 /* Goodies customer actions and their state transitions. */
-import {providerInfo} from './providers';
+import {assertDemoOnly, providerInfo} from './providers';
 import {supabase} from '../lib/supabase';
 import {
-  hasAlcohol, alcAge, S, IT, STB, ui, toast, emit, save, push, reset, navBack, cartAdd, qtyIn, cnt, totals, pChk, isPk, addr, ctOf, phoneOK, reorderLines, money, hooks, done, cur, refreshLiveSchedules, previewOnly, editLocked,
+  hasAlcohol, alcAge, S, IT, STB, ui, toast, emit, save, push, reset, navBack, cartAdd, qtyIn, cnt, totals, pChk, isPk, addr, ctOf, phoneOK, reorderLines, money, hooks, done, cur, refreshLiveSchedules, contentHooks, previewOnly, editLocked,
 } from './store';
 
 export const CHOOSE_SIZE_CATS = ['restaurants', 'bakery', 'beverages'];
@@ -285,9 +285,9 @@ export async function createWallet() {
 }
 /* DEMO ONLY: in production the courier app (delivery) or the Vendor Dashboard (pickup) records this result. */
 export function idResult(id: string, ok: boolean) {
-  require('./providers').assertDemoOnly('Simulated ID check');
+  assertDemoOnly('Simulated ID check');
   const o = S.orders.filter((x: any) => x.id === id)[0]; if (!o || !o.alc || o.alc.status !== 'pending') return;
-  const F = require('./store').contentHooks.fees ? require('./store').contentHooks.fees() : {rfSvc: true, rfTip: true};
+  const F = contentHooks.fees ? contentHooks.fees() : {rfSvc: true, rfTip: true};
   if (ok) {o.alc.status = 'passed'; toast('ID checked. Order can be completed');}
   else {
     o.alc.status = 'failed'; o.cx = 1; o.idFail = 1;

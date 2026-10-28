@@ -8,7 +8,7 @@ import {S, ST, STB, IT, DEALS, PR, money, addr, cnt, unread, first, filt, FCH, e
 import {categories, catName, label, promoCards, deals, dealEnd, coupons, modes} from '../content';
 import {DEFAULT_PROMOS} from '../data/defaultPromos';
 import {Image} from 'react-native';
-import {go, tab, back, browse, setFilter, setSub, clearFilters, usePromo, openNotif, readAll, heart} from '../actions';
+import {go, tab, back, browse, setFilter, setSub, clearFilters, usePromo, openNotif, readAll, heart, reorder} from '../actions';
 import {byoNames} from '../builders/engine';
 import {Sel, useEditing} from '../editContext';
 import {t as tr, tx} from '../i18n';
@@ -130,7 +130,7 @@ export function Home({onExit}: {onExit?: () => void}) {
         <Rail>{os.map((o: any) => {
           const s = STB[o.sid];
           return (
-            <Pressable key={o.id} onPress={() => require('../actions').reorder(o.id)} style={{width: 76, alignItems: 'center'}}>
+            <Pressable key={o.id} onPress={() => reorder(o.id)} style={{width: 76, alignItems: 'center'}}>
               <Grad idx={bgIdx(s.bg)} style={{width: 64, height: 64, borderRadius: 32, alignItems: 'center', justifyContent: 'center', borderWidth: 2, borderColor: th.br}}>
                 <Text style={{fontSize: 30}}>{s.e}</Text>
                 <View style={{position: 'absolute', bottom: -5, backgroundColor: th.br, borderRadius: 8, paddingHorizontal: 6, paddingVertical: 2}}><T size={9.5} weight="800" color="#fff">Reorder</T></View>

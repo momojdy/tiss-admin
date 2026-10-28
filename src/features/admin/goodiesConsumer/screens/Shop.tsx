@@ -398,7 +398,7 @@ export function Orders() {
   const stTxt = (o: any) => (o.cx ? 'Cancelled' : stageLabels(!!o.pk, o.pk ? TP : TL)[o.st]);
   return (
     <View>
-      <Bar title="Your orders" onBack={() => require('../actions').back()} />
+      <Bar title="Your orders" onBack={() => back()} />
       <View style={{paddingHorizontal: 16}}>
         <Seg list={[['active', 'Active'], ['past', 'Past']]} on={S.ot} onPick={setOrdersTab} />
         <View style={{height: 14}} />
