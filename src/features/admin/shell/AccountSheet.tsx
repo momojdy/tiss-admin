@@ -1,4 +1,6 @@
 import { useState } from 'react';
+import { Image, Pressable, View } from 'react-native';
+import * as DocumentPicker from 'expo-document-picker';
 import { db, bump, useDb } from '../state/db';
 import { can, me, realMe, secLv, session, setView } from '../state/access';
 import { REQ } from '../state/requirements';
@@ -25,12 +27,59 @@ export function AccountSheet({ onClose }: { onClose: () => void }) {
   const [newPassword, setNewPassword] = useState('');
   const [confirmPassword, setConfirmPassword] = useState('');
   const [passwordHintsVisible, setPasswordHintsVisible] = useState(false);
+  const [avatarBusy, setAvatarBusy] = useState(false);
+  const [avatarMessage, setAvatarMessage] = useState('');
   const [passwordBusy, setPasswordBusy] = useState(false);
   const [passwordMessage, setPasswordMessage] = useState('');
   const [passwordBad, setPasswordBad] = useState(false);
   const [recoveryMode, setRecoveryMode] = useState(false);
   const [recoveryCode, setRecoveryCode] = useState('');
   const [recoverySent, setRecoverySent] = useState(false);
+
+  const uploadAvatar = async () => {
+    if (!session.userId) { setAvatarMessage('Please sign in again before uploading a profile photo.'); return; }
+    setAvatarBusy(true);
+    setAvatarMessage('');
+    try {
+      const picked = await DocumentPicker.getDocumentAsync({
+        type: ['image/jpeg', 'image/png', 'image/webp'],
+        copyToCacheDirectory: true,
+        multiple: false,
+      });
+      if (picked.canceled || !picked.assets?.[0]) return;
+      const asset = picked.assets[0];
+      const mime = asset.mimeType || '';
+      if (!['image/jpeg', 'image/png', 'image/webp'].includes(mime)) {
+        setAvatarMessage('Choose a JPG, PNG or WebP image.');
+        return;
+      }
+      if (asset.size && asset.size > 5 * 1024 * 1024) {
+        setAvatarMessage('Choose an image smaller than 5 MB.');
+        return;
+      }
+      const response = await fetch(asset.uri);
+      if (!response.ok) throw new Error('The selected image could not be read.');
+      const blob = await response.blob();
+      const extension = mime === 'image/png' ? 'png' : mime === 'image/webp' ? 'webp' : 'jpg';
+      const path = session.userId + '/admin-avatar.' + extension;
+      const { error: uploadError } = await supabase.storage.from('wallet-avatars').upload(path, blob, {
+        contentType: mime,
+        upsert: true,
+        cacheControl: '3600',
+      });
+      if (uploadError) throw uploadError;
+      const publicUrl = supabase.storage.from('wallet-avatars').getPublicUrl(path).data.publicUrl + '?v=' + Date.now();
+      const { error: profileError } = await supabase.auth.updateUser({ data: { avatar_url: publicUrl } });
+      if (profileError) throw profileError;
+      session.avatarUrl = publicUrl;
+      bump();
+      setAvatarMessage('Profile photo updated.');
+    } catch (error) {
+      setAvatarMessage(error instanceof Error ? error.message : 'Could not upload your profile photo. Please try again.');
+    } finally {
+      setAvatarBusy(false);
+    }
+  };
 
   const sendRecoveryCode = async () => {
     const email = session.email?.trim().toLowerCase() || '';
@@ -100,9 +149,18 @@ export function AccountSheet({ onClose }: { onClose: () => void }) {
   return (
     <DrawerBody title="Account" onClose={onClose}>
       <Card>
-        <Txt size={13} weight={500}>{mine.n}</Txt>
-        <Txt size={10.1} mut>{mine.role} · {mine.st}</Txt>
-        {session.email ? <Txt size={10.1} mut>{session.email}</Txt> : null}
+        <View style={{ flexDirection: 'row', alignItems: 'center', gap: 12 }}>
+          {session.avatarUrl ? <Image source={{ uri: session.avatarUrl }} style={{ width: 54, height: 54, borderRadius: 27 }} /> : <View style={{ width: 54, height: 54, borderRadius: 27, backgroundColor: '#0000000A', alignItems: 'center', justifyContent: 'center' }}><Txt size={22}>●</Txt></View>}
+          <View style={{ flex: 1 }}>
+            <Txt size={13} weight={500}>{mine.n}</Txt>
+            <Txt size={10.1} mut>{mine.role} · {mine.st}</Txt>
+            {session.email ? <Txt size={10.1} mut>{session.email}</Txt> : null}
+          </View>
+        </View>
+        <Pressable onPress={() => { void uploadAvatar(); }} disabled={avatarBusy} accessibilityRole="button" style={{ marginTop: 12, paddingVertical: 10, paddingHorizontal: 12, borderRadius: 12, backgroundColor: '#00000008', alignItems: 'center', opacity: avatarBusy ? 0.6 : 1 }}>
+          <Txt size={11.5} weight={500}>{avatarBusy ? 'Uploading photo…' : session.avatarUrl ? 'Change profile photo' : 'Upload profile photo'}</Txt>
+        </Pressable>
+        {avatarMessage ? <Txt size={10.1} mut style={{ marginTop: 6 }}>{avatarMessage}</Txt> : null}
       </Card>
       <Card>
         <CardTitle title="Change password" />
