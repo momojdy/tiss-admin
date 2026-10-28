@@ -121,9 +121,9 @@ export function FinanceScreen() {
   return (
     <View>
       <Heading title="Money & Transactions" kpis={[
-        { icon: '▤', value: mny(sum(cs)), label: 'Completed', onPress: () => go('finance', { fv: 'Transactions', fs: 'Completed' }) },
-        { icon: '▥', value: mny(sum(ps)), label: 'Pending settlement', onPress: () => go('finance', { fv: 'Transactions', fs: 'Pending' }) },
-        { icon: '◔', value: mny(sum(fl)), label: 'Failed or flagged', tag: fl.length + ' to review', tone: 'r', onPress: () => go('finance', { fv: 'Transactions', fs: 'Failed' }) },
+        { icon: 'wallet', value: mny(sum(cs)), label: 'Completed', onPress: () => go('finance', { fv: 'Transactions', fs: 'Completed' }) },
+        { icon: 'clock-alert', value: mny(sum(ps)), label: 'Pending settlement', onPress: () => go('finance', { fv: 'Transactions', fs: 'Pending' }) },
+        { icon: 'shield-alert', value: mny(sum(fl)), label: 'Failed or flagged', tag: fl.length + ' to review', tone: 'r', onPress: () => go('finance', { fv: 'Transactions', fs: 'Failed' }) },
       ]} />
       <SelectMenu label="Financial area" options={['Transactions', 'Wallet', 'Refunds', 'Settlements', 'Payouts', 'Reconciliation'] as const} value={ui.fv} onChange={(v) => set('fv', v)} />
       {body}
