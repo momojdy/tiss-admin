@@ -101,9 +101,9 @@ export function AnalyticsScreen() {
   return (
     <View>
       <Heading title="Platform & Analytics" kpis={[
-        { icon: '☺', value: !prototypeSnapshot && chart.available ? chart.total.toLocaleString('en-US') : '—', label: 'Transactions', tag: serviceFilter === 'All' ? 'All services' : serviceFilter },
-        { icon: '♛', value: prototypeSnapshot || !decided.length ? '—' : approvalRate + '%', label: 'Approval rate', tag: prototypeSnapshot ? 'Not connected yet' : !decided.length ? 'No decisions yet' : approved + ' of ' + decided.length + ' decided' },
-        { icon: '◷', value: averageReview === '—' ? '—' : averageReview + ' d', label: 'Average review time', tag: prototypeSnapshot ? 'Not connected yet' : averageReview === '—' ? 'No reviews yet' : undefined },
+        { icon: 'activity', value: !prototypeSnapshot && chart.available ? chart.total.toLocaleString('en-US') : '—', label: 'Transactions', tag: serviceFilter === 'All' ? 'All services' : serviceFilter },
+        { icon: 'check-circle', value: prototypeSnapshot || !decided.length ? '—' : approvalRate + '%', label: 'Approval rate', tag: prototypeSnapshot ? 'Not connected yet' : !decided.length ? 'No decisions yet' : approved + ' of ' + decided.length + ' decided' },
+        { icon: 'clock-alert', value: averageReview === '—' ? '—' : averageReview + ' d', label: 'Average review time', tag: prototypeSnapshot ? 'Not connected yet' : averageReview === '—' ? 'No reviews yet' : undefined },
       ]} />
 
       <Section title="Activity" right={<View style={{ flexDirection: 'row', gap: 6 }}><Pill onPress={() => setExpandedChart(true)}>↗ Expand</Pill><Pill onPress={() => go('finance')}>Open finance ›</Pill></View>}>
