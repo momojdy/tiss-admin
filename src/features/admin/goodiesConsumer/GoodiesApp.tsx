@@ -201,7 +201,7 @@ function WantissEntry() {
       <Pressable onPress={() => {S.stack = [{r: 'wantiss', u: 1}, {r: 'home', u: 2}]; emit();}} style={{height: 130, borderRadius: 18, overflow: 'hidden'}}>
         <Grad colors={['#FD802E', '#FF9F4D']} style={{flex: 1, padding: 14}}>
           <T size={22} weight="800" color="#fff">Goodies</T><T size={12} color="#fff" style={{marginTop: 3}}>Food, groceries, drinks and everyday essentials</T>
-          <Text style={{position: 'absolute', right: 6, bottom: -4, fontSize: 62}}>bag</Text>
+          <Icon name="bag" size={62} color="#1B1B1F" />
         </Grad>
       </Pressable>
       <T size={12.5} color={th.mut} align="center" style={{marginTop: 16}}>This is a stand-in for the Wantiss home. Other services will appear here.</T>
