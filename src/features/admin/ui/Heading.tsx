@@ -9,9 +9,11 @@ export interface KpiSpec {
 }
 
 export function Kpi({ icon, value, label, tag, tone, onPress }: KpiSpec) {
+  const iconMap: Record<string, AppIconName> = { '☺': 'activity', '♛': 'users', '◷': 'clock-alert', '↗': 'chart-no-axes', '▤': 'wallet', '▥': 'building-2', '◔': 'pie-chart', users: 'users', 'building-2': 'building-2', 'clock-alert': 'clock-alert' };
+  const iconName = iconMap[icon];
   const body = (
     <View style={{ flexDirection: 'row', alignItems: 'center', gap: 7 }}>
-      <IconBtn size={36} fontSize={13.4} label={icon}>{(['users', 'building-2', 'clock-alert'].includes(icon) ? <AppIcon name={icon as AppIconName} size={17} /> : undefined)}</IconBtn>
+      <IconBtn size={36} fontSize={13.4} label={icon}>{iconName ? <AppIcon name={iconName} size={17} /> : undefined}</IconBtn>
       <View>
         <View style={{ flexDirection: 'row', alignItems: 'center' }}>
           {typeof value === 'string' || typeof value === 'number' ? <Txt size={14.7} weight={500}>{value}</Txt> : value}
