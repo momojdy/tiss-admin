@@ -6,6 +6,7 @@ import {T, Mut, Grad, Circ, Bar, Sh, Rail, Chip, Chips, Cta, Card, Row, Badge, T
 import {Dish, VCard, StoreCard, ItemRow} from '../components/cards';
 import {S, ST, STB, IT, DEALS, PR, money, addr, cnt, unread, first, filt, FCH, emit, save, toast, ui} from '../store';
 import {categories, catName, label, promoCards, deals, dealEnd, coupons, modes} from '../content';
+import {DEFAULT_PROMOS} from '../data/defaultPromos';
 import {Image} from 'react-native';
 import {go, tab, back, browse, setFilter, setSub, clearFilters, usePromo, openNotif, readAll, heart} from '../actions';
 import {byoNames} from '../builders/engine';
@@ -114,11 +115,7 @@ export function Home({onExit}: {onExit?: () => void}) {
         ))}
       </Rail></View>
       <View style={{marginTop: 20}}><Rail>
-        {pc ? pc.filter(x => !x.newOnly || first()).map(x => <PromoCard key={x.id} id={x.id} kind={x.color} title={x.title} sub={x.sub} btn={x.btn} emoji={x.emoji} image={x.image} target={x.target} />) : (<>
-          {first() ? <PromoCard kind="plum" title="Free delivery on your first order" sub="Welcome to Goodies. New here? It is on us." btn="Order now" emoji="🛵" /> : null}
-          <PromoCard kind="orange" title="Earn double points this weekend" sub="Pay with Wallet on any order." btn="Start earning" emoji="🎁" />
-          <PromoCard kind="green" title="20% off fresh produce" sub="Straight from local farms and markets." btn="Shop now" emoji="🥬" />
-        </>)}
+        {pc ? pc.filter(x => !x.newOnly || first()).map(x => <PromoCard key={x.id} id={x.id} kind={x.color} title={x.title} sub={x.sub} btn={x.btn} emoji={x.emoji} image={x.image} target={x.target} />) : DEFAULT_PROMOS.filter((promo) => promo.aud !== 'New customers' || first()).map((promo) => <PromoCard key={promo.id} kind={promo.color} title={promo.title} sub={promo.sub} btn={promo.btn} emoji={promo.emoji} />)}
       </Rail></View>
       <View style={{paddingHorizontal: 16, marginTop: 10}}>
         <Pressable onPress={() => go('promos')} style={{flexDirection: 'row', alignItems: 'center', gap: 12, padding: 14, borderWidth: 1.5, borderColor: th.line, borderRadius: 16}}>
