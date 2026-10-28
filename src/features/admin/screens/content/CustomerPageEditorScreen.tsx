@@ -11,6 +11,7 @@ import { FeaturePicker } from './FeaturePicker';
 import { useToast } from '../../ui/Toast';
 import { Card, Section } from '../../ui/Card';
 import { Heading } from '../../ui/Heading';
+import { AppIcon } from '../../ui/AppIcon';
 import { ListRows } from '../../ui/Lists';
 import { OutlineBtn, Pill, SelectMenu, StatusPill } from '../../ui/Controls';
 import { Txt } from '../../ui/Txt';
@@ -279,7 +280,7 @@ export function CustomerPageEditorScreen() {
   return (
     <View>
       <View style={{ flexDirection: 'row', alignItems: 'center', flexWrap: 'wrap', gap: 8, marginBottom: 4 }}>
-        <OutlineBtn onPress={() => go('content', { cs: 'Editor' })}>‹ Content Studio</OutlineBtn>
+        <OutlineBtn onPress={() => go('content', { cs: 'Editor' })}><View style={{ flexDirection: 'row', alignItems: 'center', gap: 4 }}><AppIcon name="arrow-left" size={12} />Content Studio</View></OutlineBtn>
         <OutlineBtn onPress={() => { void reload(); }} disabled={loading}>Refresh</OutlineBtn>
         <OutlineBtn onPress={startBlankDraft} disabled={!can(...REQ.content)}>Start blank draft</OutlineBtn>
       </View>
@@ -416,7 +417,7 @@ export function CustomerPageEditorScreen() {
           key: row.id,
           main: row.content_key + ' · v' + row.version,
           sub: row.locale + ' · updated ' + new Date(row.updated_at).toLocaleString(),
-          right: <View style={{ alignItems: 'flex-end', gap: 4 }}><StatusPill label={row.status} small /><Txt size={9.5} mut>{selected?.id === row.id ? 'Selected' : 'Open ›'}</Txt></View>,
+          right: <View style={{ alignItems: 'flex-end', gap: 4 }}><StatusPill label={row.status} small /><Txt size={9.5} mut>{selected?.id === row.id ? 'Selected' : 'Open'}</Txt></View>,
           onPress: () => openRow(row),
         }))} />
       </Section>
