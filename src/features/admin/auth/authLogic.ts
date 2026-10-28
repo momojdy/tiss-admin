@@ -22,7 +22,6 @@ export const passwordError = (p: string, email?: string) => {
 };
 
 export function leaveApp() {
-  void supabase.auth.signOut();
   session.who = null;
   session.view = '';
   session.userId = null;
@@ -31,6 +30,7 @@ export function leaveApp() {
   session.status = null;
   session.last = Date.now();
   bump();
+  void supabase.auth.signOut();
 }
 
 export const sessionStillValid = () => !!session.userId && session.status === 'active';
