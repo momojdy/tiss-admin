@@ -75,7 +75,7 @@ export function FinanceScreen() {
     key: action.id,
     main: (action.action_type === 'refund_request' ? 'Refund request' : 'Wallet adjustment') + ' · ' + mny(action.amount),
     sub: action.target_user_id + ' · ' + action.reason,
-    right: right(action.status === 'pending_provider' ? 'Provider action required' : action.status, '›'),
+    right: right(action.status === 'pending_provider' ? 'Provider action required' : action.status, 'navigate'),
     onPress: () => { if (action.status === 'pending') reviewAction(action); },
   }));
   const txTable = () => {
@@ -85,7 +85,7 @@ export function FinanceScreen() {
         rows={r.map((x) => ({ key: x.id, onPress: () => open('inv', x.id), cells: [x.id, <View key="f"><Txt size={9.5}>{x.f}</Txt><Small>{x.u}</Small></View>, <View key="d"><Txt size={9.5}>{x.d}</Txt><Small>{x.n}</Small></View>, <Txt key="a" size={9.5} weight={500}>{mny(x.a)}</Txt>, <StatusPill key="s" label={x.s} small />] }))} />
     ) : <Txt size={12} mut align="center" style={{ paddingVertical: 14 }}>No transactions match these filters.</Txt>;
   };
-  const right = (label: string, extra?: string) => (<View style={{ flexDirection: 'row', alignItems: 'center', gap: 6 }}>{extra === '›' ? <AppIcon name="chevron-right" size={12} /> : extra ? <Txt size={10.1}>{extra}</Txt> : null}<StatusPill label={label} /></View>);
+  const right = (label: string, extra?: string) => (<View style={{ flexDirection: 'row', alignItems: 'center', gap: 6 }}>{extra === 'navigate' ? <AppIcon name="chevron-right" size={12} /> : extra ? <Txt size={10.1}>{extra}</Txt> : null}<StatusPill label={label} /></View>);
 
   let body;
   if (ui.fv === 'Transactions') {
@@ -110,13 +110,13 @@ export function FinanceScreen() {
   } else if (ui.fv === 'Wallet') {
     body = <Section title="Wallet ledger"><ListRows rows={db.INV.filter((x) => /Top up|refund|Adjustment/i.test(x.f)).map((x) => ({ key: x.id, main: x.id + ' · ' + x.f, sub: x.u + ' · ' + x.d, right: right(x.s, (/refund|Debit|Fee/i.test(x.f) ? '−' : '+') + mny(x.a)), onPress: () => open('inv', x.id) }))} /></Section>;
   } else if (ui.fv === 'Refunds') {
-    body = <Section title="Refund requests and outcomes"><ListRows rows={db.INV.filter((x) => x.rq || x.s === 'Refunded' || x.s === 'Refund pending' || x.ref).map((x) => ({ key: x.id, main: x.id + ' · ' + x.u, sub: x.rq ? 'Requested ' + mny(x.rq) + ' of ' + mny(x.a) : 'Refunded ' + mny(x.ref || x.a), right: right(x.rq ? 'Pending' : x.s === 'Refunded' ? 'Refunded' : 'Refund pending', '›'), onPress: () => open(x.rq ? 'rfd' : 'inv', x.id) }))} /></Section>;
+    body = <Section title="Refund requests and outcomes"><ListRows rows={db.INV.filter((x) => x.rq || x.s === 'Refunded' || x.s === 'Refund pending' || x.ref).map((x) => ({ key: x.id, main: x.id + ' · ' + x.u, sub: x.rq ? 'Requested ' + mny(x.rq) + ' of ' + mny(x.a) : 'Refunded ' + mny(x.ref || x.a), right: right(x.rq ? 'Pending' : x.s === 'Refunded' ? 'Refunded' : 'Refund pending', 'navigate'), onPress: () => open(x.rq ? 'rfd' : 'inv', x.id) }))} /></Section>;
   } else if (ui.fv === 'Settlements') {
     body = <Section title="Settlements"><ListRows rows={db.SET.map((s, i) => ({ key: s[0], main: s[0], sub: s[1] + ' · ' + s[2], right: right(s[4], mny(s[3])), onPress: () => open('stl', String(i)) }))} /></Section>;
   } else if (ui.fv === 'Payouts') {
     body = <Section title="Payouts"><ListRows rows={db.PAYO.map((s, i) => ({ key: s[0], main: s[0], sub: s[1], right: right(s[3], mny(s[2])), onPress: () => open('pay', String(i)) }))} /></Section>;
   } else {
-    body = <Section title="Reconciliation exceptions"><ListRows rows={db.RECO.map((r, i) => ({ key: r.id, main: r.id + ' · ' + r.t, right: right(r.st, '›'), onPress: () => open('rec', String(i)) }))} /></Section>;
+    body = <Section title="Reconciliation exceptions"><ListRows rows={db.RECO.map((r, i) => ({ key: r.id, main: r.id + ' · ' + r.t, right: right(r.st, 'navigate'), onPress: () => open('rec', String(i)) }))} /></Section>;
   }
 
   return (
