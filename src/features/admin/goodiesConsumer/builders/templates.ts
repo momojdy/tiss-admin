@@ -7,7 +7,7 @@ export const TEMPLATES: Record<'pizza' | 'burger' | 'custom', TplBuilder> = {
   "type": "pizza",
   "name": "Build Your Pizza",
   "desc": "Pick a size, crust, sauce, cheese and toppings.",
-  "emoji": "pizza",
+  "emoji": "🍕",
   "base": 8.0,
   "sizes": [
    {
@@ -211,7 +211,7 @@ export const TEMPLATES: Record<'pizza' | 'burger' | 'custom', TplBuilder> = {
   "type": "burger",
   "name": "Build Your Burger",
   "desc": "Stack it your way: bun, patties, cheese and toppings.",
-  "emoji": "burger",
+  "emoji": "🍔",
   "base": 5.0,
   "sizes": [],
   "groups": [
@@ -694,7 +694,7 @@ export const TEMPLATES: Record<'pizza' | 'burger' | 'custom', TplBuilder> = {
   "type": "custom",
   "name": "Build Your Own",
   "desc": "Choose what goes in.",
-  "emoji": "utensils",
+  "emoji": "🍽️",
   "base": 4.0,
   "sizes": [],
   "groups": [
