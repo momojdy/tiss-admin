@@ -10,6 +10,7 @@ import { hydrateAdminState } from '../../lib/hydrateAdminState';
 import { useTheme } from '../../theme/ThemeContext';
 import { Card, Section } from '../../ui/Card';
 import { Heading } from '../../ui/Heading';
+import { AppIcon } from '../../ui/AppIcon';
 import { ButtonRow, OutlineBtn, Pill, StatusPill } from '../../ui/Controls';
 import { ListRows } from '../../ui/Lists';
 import { Txt } from '../../ui/Txt';
@@ -54,7 +55,7 @@ export function BusinessDetailsScreen() {
   return (
     <View>
       <View style={{ flexDirection: 'row', alignItems: 'center', gap: 8, marginBottom: 4 }}>
-        <OutlineBtn onPress={() => go('ecosystem')}>‹ Ecosystem</OutlineBtn>
+        <OutlineBtn onPress={() => go('ecosystem')}><View style={{ flexDirection: 'row', alignItems: 'center', gap: 4 }}><AppIcon name="arrow-left" size={12} />Ecosystem</View></OutlineBtn>
         <Pill>Business details</Pill>
       </View>
       {!id ? (
