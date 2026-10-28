@@ -60,7 +60,6 @@ export function SparkLine({ points, color, width = 380, height = 90 }: { points:
   );
 }
 
-/** `.ring`: progress ring (the HTML uses a conic gradient). */
 export function Ring({ pct, size = 96, color = '#f2c94c', track = 'rgba(255,255,255,0.15)', inner = '#2d5e4f', children }: {
   pct: number; size?: number; color?: string; track?: string; inner?: string; children?: React.ReactNode;
 }) {
@@ -77,7 +76,6 @@ export function Ring({ pct, size = 96, color = '#f2c94c', track = 'rgba(255,255,
   );
 }
 
-/** `.don`: donut with segments (fractions summing to 1). */
 export function Donut({ parts, size = 110, hole, children }: { parts: { pct: number; color: string }[]; size?: number; hole: string; children?: React.ReactNode }) {
   const r = size / 2, w = 14, rr = r - w / 2, circ = 2 * Math.PI * rr;
   let acc = 0;
@@ -96,7 +94,6 @@ export function Donut({ parts, size = 110, hole, children }: { parts: { pct: num
   );
 }
 
-/** `.sk`: vertical bars / stacked bars. Each column is a list of stacked segments (height in %). */
 export function BarColumns({ columns, height = 170, gap = 4, track }: { columns: { segs: { pct: number; color: string }[] }[]; height?: number; gap?: number; track?: string }) {
   const { c } = useTheme();
   return (
@@ -110,7 +107,6 @@ export function BarColumns({ columns, height = 170, gap = 4, track }: { columns:
   );
 }
 
-/** `.mo`: month labels row. */
 export const AxisLabels = ({ labels, marginLeft = 0, boldLast }: { labels: string[]; marginLeft?: number; boldLast?: boolean }) => (
   <View style={{ flexDirection: 'row', gap: 4, marginTop: 4, marginLeft }}>
     {labels.map((m, i) => (
@@ -121,7 +117,6 @@ export const AxisLabels = ({ labels, marginLeft = 0, boldLast }: { labels: strin
   </View>
 );
 
-/** `.ax`: y-axis labels column. */
 export const YAxis = ({ labels, height }: { labels: string[]; height: number }) => (
   <View style={{ height, justifyContent: 'space-between', marginTop: 8, paddingRight: 4 }}>
     {labels.map((x, i) => <Txt key={i} size={9.5} mut>{x}</Txt>)}

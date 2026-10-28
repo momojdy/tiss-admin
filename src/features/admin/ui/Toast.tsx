@@ -8,7 +8,6 @@ type ToastFn = (message: string, undo?: () => void) => void;
 const Ctx = createContext<ToastFn>(() => {});
 export const useToast = () => useContext(Ctx);
 
-/** `.toast`: dark pill at the bottom with an optional Undo action. */
 export function ToastProvider({ children }: { children: ReactNode }) {
   const [t, setT] = useState<{ m: string; undo?: () => void } | null>(null);
   const timer = useRef<ReturnType<typeof setTimeout> | null>(null);

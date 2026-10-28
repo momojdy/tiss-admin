@@ -8,7 +8,6 @@ export interface ListRowSpec {
   main: ReactNode; sub?: string; right?: ReactNode; onPress?: () => void; key?: string;
 }
 
-/** `AL([...])`: the divided list used inside cards and drawers (`.al`). */
 export function ListRows({ rows, size = 10.1, empty }: { rows: ListRowSpec[]; size?: number; empty?: string }) {
   const { c } = useTheme();
   if (!rows.length && empty) return <Txt size={12} mut>{empty}</Txt>;
@@ -50,7 +49,6 @@ export function KeyValue({ rows }: { rows: [string, ReactNode][] }) {
   );
 }
 
-/** `.fl`: icon, small caption, value, optional trailing icon. */
 export function FieldRow({ icon, label, children, trailing, onTrailing }: { icon?: string; label: string; children: ReactNode; trailing?: string; onTrailing?: () => void }) {
   const { c } = useTheme();
   return (

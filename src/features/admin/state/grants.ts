@@ -10,9 +10,6 @@ export { GRANTS, REQUESTS, isLive, liveGrantsFor, addDays, daysBetween, validDat
 const notify = (to: string, t: string, d: string, v: string, crit = false) => { db.NS.unshift({ t, w: 'just now', f: (crit ? 'crit ' : '') + 'unread', d, v, to }); };
 
 
-/* ------------------------------------------------------------------ */
-/* What can be requested                                               */
-/* ------------------------------------------------------------------ */
 /** Managing permissions stays with the Super Admin role; it cannot be requested or granted for a period. */
 export const REQUESTABLE_RIGHTS = RIGHTS.filter((r) => r !== 'Manage permissions');
 export const SECTION_PREFIX = 'Section · ';
@@ -32,9 +29,6 @@ export function requestTargets(who: string): string[] {
 export const grantLabel = (g: Pick<Grant, 'kind' | 'sec' | 'right' | 'level'>) => (g.kind === 'section' ? db.SEC[g.sec] + ' · ' + LN[g.level] : g.right);
 export const requestLabel = (r: AccessRequest) => grantLabel(r);
 
-/* ------------------------------------------------------------------ */
-/* Durations                                                           */
-/* ------------------------------------------------------------------ */
 const PRESETS: [string, number][] = [['1 day', 1], ['3 days', 3], ['1 week', 7], ['2 weeks', 14], ['1 month', 30]];
 export const ASK_OPTIONS = ['Not sure', ...PRESETS.map((p) => p[0]), 'Permanent'];
 export const PERMANENT = 'Permanent (until revoked)';
@@ -55,9 +49,6 @@ export function endFromChoice(choice: string, custom: string): { end: string; er
   return preset ? { end: addDays(TODAY, preset[1]), error: '' } : { end: '', error: 'Choose how long the access lasts.' };
 }
 
-/* ------------------------------------------------------------------ */
-/* Reading state                                                       */
-/* ------------------------------------------------------------------ */
 const wasExpired = (g: Grant) => g.st === 'Expired' || (g.st === 'Active' && !!g.end && g.end < TODAY);
 export const grantStatus = (g: Grant): Grant['st'] => (wasExpired(g) ? 'Expired' : g.st);
 export const daysLeft = (g: Grant): number | null => (g.end ? daysBetween(TODAY, g.end) : null);

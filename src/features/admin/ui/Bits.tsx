@@ -2,7 +2,6 @@ import { View, ViewStyle, StyleProp } from 'react-native';
 import { LinearGradient } from 'expo-linear-gradient';
 import { useTheme } from '../theme/ThemeContext';
 
-/** `.fa`: overlapping avatar dots on dark tiles. */
 export function AvatarStack({ n = 3 }: { n?: number }) {
   return (
     <View style={{ flexDirection: 'row' }}>
@@ -14,7 +13,6 @@ export function AvatarStack({ n = 3 }: { n?: number }) {
   );
 }
 
-/** `.av`: the header avatar. */
 export function HeaderAvatar({ size = 28 }: { size?: number }) {
   const { c } = useTheme();
   return (
@@ -23,7 +21,6 @@ export function HeaderAvatar({ size = 28 }: { size?: number }) {
   );
 }
 
-/** `.bar`: thin progress bar. */
 export function ProgressBar({ pct, color, style }: { pct: number; color: string; style?: StyleProp<ViewStyle> }) {
   const { c } = useTheme();
   return (

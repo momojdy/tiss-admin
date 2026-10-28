@@ -77,7 +77,6 @@ export function OverlayProvider({ children }: { children: ReactNode }) {
   );
 }
 
-/** `.dp`: dialog surface. */
 export function DialogCard({ children, title, onClose, bg, maxHeight = '92%', titleSize = 14 }: { children: ReactNode; title?: ReactNode; onClose?: () => void; bg?: string; maxHeight?: number | `${number}%`; titleSize?: number }) {
   const { c } = useTheme();
   return (
@@ -93,7 +92,6 @@ export function DialogCard({ children, title, onClose, bg, maxHeight = '92%', ti
   );
 }
 
-/** `DRW(title, body, actions)`: drawer header + body + action row. */
 export function DrawerBody({ title, onClose, children, actions }: { title: ReactNode; onClose: () => void; children?: ReactNode; actions?: ReactNode }) {
   return (
     <View>

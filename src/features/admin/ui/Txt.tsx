@@ -14,7 +14,6 @@ export interface TxtProps extends TextProps {
   align?: TextStyle['textAlign'];
 }
 
-/** Text with the Outfit font stack. Sizes are the CSS px values from the HTML. */
 export function Txt({ size = 12, weight = 400, color, mut, lh, ls, align, style, ...rest }: TxtProps) {
   const { c } = useTheme();
   return (

@@ -5,7 +5,6 @@ import { useTheme } from '../theme/ThemeContext';
 
 export type DealTone = '' | 'o' | 'g' | 'y' | 'w';
 
-/** `deal(...)`: the dark, coloured work tile used for queues, placements and attention items. */
 export function Deal({ tone = '', top, title, sub, value, meta, onPress, minWidth }: {
   tone?: DealTone; top: string; title: string; sub?: string; value?: string; meta?: string; onPress?: () => void; minWidth?: number;
 }) {
@@ -35,7 +34,6 @@ export function Deal({ tone = '', top, title, sub, value, meta, onPress, minWidt
   return onPress ? <Pressable onPress={onPress} style={{ flex: minWidth ? undefined : 1 }} accessibilityRole="button">{body}</Pressable> : body;
 }
 
-/** Lays tiles out in `cols` columns with a 7px gap (`.g3`). */
 export function TileGrid({ cols = 3, gap = 7, children }: { cols?: number; gap?: number; children: React.ReactNode[] }) {
   const items = (Array.isArray(children) ? children : [children]).flat().filter(Boolean) as React.ReactNode[];
   const rows: React.ReactNode[][] = [];

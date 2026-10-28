@@ -3,7 +3,6 @@ import { StyleProp, View, ViewStyle } from 'react-native';
 import { useTheme } from '../theme/ThemeContext';
 import { Txt } from './Txt';
 
-/** `.c` in the HTML: translucent rounded card with a soft shadow. */
 export function Card({ children, style }: { children: ReactNode; style?: StyleProp<ViewStyle> }) {
   const { c } = useTheme();
   return (

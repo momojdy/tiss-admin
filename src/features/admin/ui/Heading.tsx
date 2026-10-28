@@ -7,7 +7,6 @@ export interface KpiSpec {
   icon: string; value: ReactNode; label: string; tag?: string; tone?: 'g' | 'r' | ''; onPress?: () => void;
 }
 
-/** `K(...)`: icon, bold value (with optional tag) and caption. */
 export function Kpi({ icon, value, label, tag, tone, onPress }: KpiSpec) {
   const body = (
     <View style={{ flexDirection: 'row', alignItems: 'center', gap: 7 }}>
@@ -24,7 +23,6 @@ export function Kpi({ icon, value, label, tag, tone, onPress }: KpiSpec) {
   return onPress ? <Pressable onPress={onPress} accessibilityRole="button">{body}</Pressable> : body;
 }
 
-/** `HD(title, kpis)`: page title plus the KPI row. Use \n in the title for a line break. */
 export function Heading({ title, kpis, sub }: { title: string; kpis?: KpiSpec[]; sub?: string }) {
   return (
     <View>

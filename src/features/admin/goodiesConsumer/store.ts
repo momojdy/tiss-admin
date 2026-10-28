@@ -1,4 +1,4 @@
-/* Goodies state, persistence, pricing and cart logic. */
+
 import {useSyncExternalStore} from 'react';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import {supabase} from '../lib/supabase';
@@ -25,8 +25,6 @@ export const contentHooks: {coupons?: () => any[]; fees?: () => any; minAge?: (c
 const coupons = () => (contentHooks.coupons ? contentHooks.coupons() : []);
 const feesNow = () => (contentHooks.fees ? contentHooks.fees() : {svc: 0, firstFree: false, far: 0, tips: [], lead: 0, step: 0, slots: 0, pay: {Wallet: 0, MonCash: 0, Card: 0, Cash: 0}, rfSvc: false, rfTip: false});
 export const DEALS: any[] = [];
-
-/* ---------- helpers ---------- */
 const LOC: Record<string, string> = {en: 'en-US', fr: 'fr-FR', ht: 'fr-HT', es: 'es-ES', 'zh-Hans': 'zh-Hans-CN'};
 /* Language only changes the number format. The currency stays USD until the Admin Display currency setting is wired in. */
 export const money = (n: number) => {
@@ -42,8 +40,6 @@ export const dp = (i: Item, off: number) => Math.round(i.p * (100 - off)) / 100;
 export const cname = (id: string, cats: {id: string; name: any}[]) => (cats.find(c => c.id === id) as any)?.name || 'All stores';
 const zoneOf = (t: string) => {let x = 0; for (let i = 0; i < t.length; i++) x = (x * 31 + t.charCodeAt(i)) % 97; return Math.round((x % 5) * 9) / 10;};
 export const phoneOK = (s: string) => {s = String(s || '').trim(); const d = s.replace(/\D/g, ''); return /^[+\d][\d\s().-]*$/.test(s) && d.length >= 8 && d.length <= 15;};
-
-/* ---------- state ---------- */
 const WDEF = () => ({
   pf: {n: '', e: '', ph: '', av: ''},
   addr: [] as Address[],
@@ -61,14 +57,10 @@ export const S: any = Object.assign(WDEF(), GDEF());
 let uid = 0;
 S.stack = [{r: 'home', u: ++uid}] as Route[];
 Object.assign(S, {f: '', sub: '', ot: 'active', ft: 'stores', sh: null, pend: null, bump: 0, cs: 0, time: 'ASAP', sch: 0, note: '', pin: '', busy: 0, ss: {}, srt: 'rel', sr: {q: '', sort: 'rel', f: {}}, theme: 'light', lang: 'en', ready: false});
-
-/* ---------- subscription ---------- */
 const subs = new Set<() => void>();
 let ver = 0;
 export const emit = () => {ver++; subs.forEach(f => f());};
 export function useGoodies() {return useSyncExternalStore(cb => {subs.add(cb); return () => {subs.delete(cb);};}, () => ver);}
-
-/* ---------- ui bridge (toast / sheet) ---------- */
 export const ui: {toast: (t: string) => void; sheet: (h: any) => void; close: () => void} = {toast: () => {}, sheet: () => {}, close: () => {}};
 export const toast = (t: string) => ui.toast(t);
 
@@ -76,8 +68,6 @@ function formatHour(d: Date) {
   let h = d.getHours(), m = String(d.getMinutes()).padStart(2, '0');
   return (h % 12 || 12) + (m === '00' ? '' : ':' + m) + (h >= 12 ? 'pm' : 'am');
 }
-
-/* ---------- live catalog (stores + products from the backend) ---------- */
 const CAT_EMOJI: Record<string, string> = {restaurants: '🍽️', produce: '🥭', beverages: '🥤', bakery: '🥐', meat: '🥩', groceries: '🛒', haitian: '🇭🇹', care: '🧴', drugstore: '💊'};
 const DAY_NAMES = ['Sunday', 'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday'];
 type DayHours = {open: string; close: string; closed: boolean};
@@ -210,8 +200,6 @@ export async function refreshLiveSchedules() {
   }
   emit();
 }
-
-/* ---------- persistence ---------- */
 export async function load() {
   const merge = async (key: string, D: any) => {
     try {
@@ -278,8 +266,6 @@ export function save() {
 }
 export const setTheme = (t: 'light' | 'dark') => {S.theme = t; if (!previewOnly) AsyncStorage.setItem('goodies-theme', t); emit();};
 export const setLang = (l: string) => {S.lang = l; if (!previewOnly) AsyncStorage.setItem('goodies-lang', l); emit();};
-
-/* ---------- derived ---------- */
 export const defAddr = (): Address => S.addr.filter((a: Address) => a.def)[0] || S.addr[0];
 export const addr = (): Address => S.addr.filter((a: Address) => a.id === S.as)[0] || defAddr();
 export const cur = (): Route => S.stack[S.stack.length - 1];
@@ -314,8 +300,6 @@ export function notify(t: string, d: string, r: string, p: string, k?: string) {
   if (k === 'p' && !S.np.promos) return;
   S.notifs.unshift({id: Date.now() + Math.random(), t, d, r, p, u: 1});
 }
-
-/* ---------- pricing ---------- */
 export function pChk(code: string, sub: number, sid: string | null) {
   const p = coupons().filter((x: any) => x.c === code)[0];
   if (!p) return {e: 'That code is not valid'} as any;
@@ -338,8 +322,6 @@ export function canBuy(i: Item) {
   if (i.oos) {toast('Sorry, ' + i.n + ' is out of stock'); return false;}
   return true;
 }
-
-/* ---------- navigation (internal stack, same semantics as v24) ---------- */
 export function push(r: string, p?: any) {ui.close(); S.stack.push({r, p, u: ++uid}); emit();}
 export function reset(r: string) {ui.close(); S.stack = [{r, u: ++uid}]; emit();}
 export const hooks: {byoGuard: () => boolean; byoClear: () => void; bGet: any; bCheck: any; bLine: any} = {byoGuard: () => false, byoClear: () => {}, bGet: null, bCheck: null, bLine: null};
@@ -354,8 +336,6 @@ export function navBack(): 'exit' | void {
   else if (c.r !== 'wantiss') S.stack = [{r: 'home', u: ++uid}];
   emit();
 }
-
-/* ---------- cart ops ---------- */
 export function cartAdd(i: Item, o: {q: number; size?: number; drink?: number; off?: number; note?: string}) {
   if (!canBuy(i)) return;
   const c = S.cart;
@@ -404,8 +384,6 @@ export async function resetDemo() {
   S.stack = [{r: 'home', u: ++uid}];
   applyZone(); emit();
 }
-
-/* ---------- restricted goods (alcohol) ---------- */
 export const hasAlcohol = (lines?: CartLine[]) => (lines || S.cart.lines).some((l: any) => !l.byo && IT[l.id] && (IT[l.id] as any).restriction === 'alcohol');
 export const alcAge = (pickupStoreId?: string | null) => {
   const cc = isPk() ? ((pickupStoreId && (STB[pickupStoreId] as any).cc) || 'HT') : (addr() as any).cc || 'HT';

@@ -9,7 +9,6 @@ export const Dot = ({ color, size = 6, style }: { color?: Tone; size?: number; s
   return <View style={[{ width: size, height: size, borderRadius: size / 2, backgroundColor: toneColor(c, color ?? 'or'), marginRight: 3 }, style]} />;
 };
 
-/** `.ic`: round icon button. */
 export function IconBtn({ label, onPress, size = 30, bg, borderless, fontSize = 12.3, color, a11y, children, style }: {
   label?: string; onPress?: () => void; size?: number; bg?: string; borderless?: boolean; fontSize?: number; color?: string; a11y?: string; children?: ReactNode; style?: StyleProp<ViewStyle>;
 }) {
@@ -33,7 +32,6 @@ export function Pill({ children, on, onPress, style, textStyle, size = 9.5 }: { 
   return onPress ? <Pressable onPress={onPress} accessibilityRole="button">{body}</Pressable> : body;
 }
 
-/** `PL(label)` in the HTML: pill with a coloured status dot. */
 export function StatusPill({ label, tone, small, onPress }: { label: string; tone?: Tone; small?: boolean; onPress?: () => void }) {
   return (
     <Pill onPress={onPress} style={small ? { paddingVertical: 3, paddingHorizontal: 7 } : undefined}>
@@ -43,7 +41,6 @@ export function StatusPill({ label, tone, small, onPress }: { label: string; ton
   );
 }
 
-/** `.btn`: filled pill button. */
 export function Btn({ children, onPress, style, disabled }: { children: string; onPress?: () => void; style?: StyleProp<ViewStyle>; disabled?: boolean }) {
   const { c } = useTheme();
   return (
@@ -100,7 +97,6 @@ export const Row = ({ children, style, wrap }: { children: ReactNode; style?: St
   <View style={[{ flexDirection: 'row', alignItems: 'center', gap: 7, marginBottom: 9 }, wrap ? { flexWrap: 'wrap' } : null, style]}>{children}</View>
 );
 
-/** `.tg`: small coloured tag next to a KPI value. */
 export function Tag({ children, tone }: { children: string; tone?: 'g' | 'r' | '' }) {
   const { c } = useTheme();
   const bg = tone === 'g' ? c.gr : tone === 'r' ? c.or : c.ye;
@@ -112,7 +108,6 @@ export function Tag({ children, tone }: { children: string; tone?: 'g' | 'r' | '
   );
 }
 
-/** `.srch`: search-looking field (display only). */
 export function SearchHint({ text }: { text: string }) {
   const { c } = useTheme();
   return (
@@ -132,7 +127,6 @@ export function SearchInput({ value, onChangeText, placeholder }: { value: strin
   );
 }
 
-/** Count badge in a board column title (`.tg` with the inset background). */
 export function CountTag({ n }: { n: number }) {
   const { c } = useTheme();
   return <View style={{ backgroundColor: c.inset, borderRadius: 99, paddingVertical: 2, paddingHorizontal: 6, marginLeft: 3 }}><Txt size={9.5} weight={500}>{String(n)}</Txt></View>;
