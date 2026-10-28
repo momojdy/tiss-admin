@@ -9,7 +9,7 @@ import { useNav } from '../../shell/Nav';
 import { useOpen } from '../../overlays/registry';
 import { useInvite, useNewRole, useRoleEditor } from '../../overlays/PeopleDrawers';
 import { Section } from '../../ui/Card';
-import { Btn, Chips, Row, SearchInput, StatusPill } from '../../ui/Controls';
+import { Btn, Chips, Row, SearchInput, SelectMenu, StatusPill } from '../../ui/Controls';
 import { Heading } from '../../ui/Heading';
 import { ListRows } from '../../ui/Lists';
 import { Txt } from '../../ui/Txt';
@@ -213,11 +213,11 @@ export function PeopleScreen() {
   return (
     <View>
       {header()}
-      <Chips options={subs} value={sub as (typeof PEOPLE_SUBS)[number]} onChange={(v) => set('ps', v)} />
+      <SelectMenu label="People section" options={subs} value={sub as (typeof PEOPLE_SUBS)[number]} onChange={(v) => set('ps', v)} />
       {sub === 'Staff' ? (
         <>
           <Chips options={STAFF_STATUS} value={ui.sst} onChange={(v) => set('sst', v)} />
-          <Chips options={['All', ...Object.keys(db.ROLES)]} value={ui.pr} onChange={(v) => set('pr', v)} />
+          <SelectMenu label="Role" options={['All', ...Object.keys(db.ROLES)]} value={ui.pr} onChange={(v) => set('pr', v)} />
         </>
       ) : null}
       {sub === 'Accounts' ? (
