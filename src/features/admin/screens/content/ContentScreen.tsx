@@ -398,7 +398,7 @@ export function ContentScreen() {
 
       {activeSection === 'Editor' ? <Section title="Customer page editor">
         <SelectMenu label="Customer feature" options={customerFeatures} value={customerFeature} onChange={setCustomerFeature} />
-        <OutlineBtn primary onPress={() => go('editor', { editorFeature: customerFeature })}>Open {customerFeature} page editor ›</OutlineBtn>
+        <OutlineBtn primary onPress={() => go('editor', { editorFeature: customerFeature })}>{'Open ' + customerFeature + ' page editor ›'}</OutlineBtn>
       </Section> : null}
 
       {activeSection === 'CMS versions' ? (
