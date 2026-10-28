@@ -23,7 +23,7 @@ const copy: Record<string, { title: string; detail: string }> = {
   'Winners and claims': { title: 'Winners and claims', detail: 'Winner identity, verification and claim status need server-backed records and audited actions.' },
   'Payments and refunds': { title: 'Payments and refunds', detail: 'No Potssy-specific payment or refund endpoint is connected here. Use Finance only for transactions that are actually present in its authorized snapshot.' },
   'Reports and analytics': { title: 'Reports and analytics', detail: 'Not connected yet.' },
-  'Complaints and settings': { title: 'Complaints and settings', detail: 'Complaint records and Potssy configuration require authorized service endpoints. Settings are read-only until those endpoints exist.' },
+  'Complaints and settings': { title: 'Complaints and settings', detail: 'Settings are read-only until authorized service endpoints are connected.' },
 };
 
 export function PotssyAdminScreen() {
