@@ -32,7 +32,7 @@ function Mode({id, title, sub, emoji, image, onPress, grad, bg, fg, small}: any)
     const emojiBox: any = {position: 'absolute', right: small ? 10 : 6, bottom: small ? undefined : -4, top: small ? 8 : undefined, fontSize: fs, lineHeight: lh};
     const art = image
       ? <Image source={{uri: image}} style={ed && id ? {width: '100%', height: '100%'} : imgBox} resizeMode="contain" />
-      : <View style={[ed && id ? {alignItems: 'center', justifyContent: 'center'} : emojiBox, {alignItems: 'center', justifyContent: 'center'}]}><Icon name={emoji} size={small ? 28 : 54} color={c} /></View>;
+      : <Text style={ed && id ? {fontSize: fs, lineHeight: lh, textAlign: 'center'} : emojiBox}>{emoji}</Text>;
     const artBox: any = image ? imgBox : {position: 'absolute', right: emojiBox.right, bottom: emojiBox.bottom, top: emojiBox.top, width: Math.round(fs * 1.25), height: lh};
     return (
       <>
@@ -53,7 +53,7 @@ function PromoCard({id, kind, title, sub, btn, emoji, image, target}: {id?: stri
   const emojiBox: any = {position: 'absolute', right: 8, bottom: 0, fontSize: 78, lineHeight: 78};
   const art = image
     ? <Image source={{uri: image}} style={ed ? {width: '100%', height: '100%'} : imgBox} resizeMode="contain" />
-    : <View style={[emojiBox, {alignItems: 'center', justifyContent: 'center'}]}><Icon name={emoji} size={64} color="#fff" /></View>;
+    : <Text style={ed ? {fontSize: 78, lineHeight: 78, textAlign: 'center'} : emojiBox}>{emoji}</Text>;
   const artBox: any = image ? imgBox : {position: 'absolute', right: 8, bottom: 0, width: 98, height: 78};
   return (
     <Pressable onPress={() => ui.sheet({kind: 'promo', p: kind === 'plum' ? 'free' : kind === 'orange' ? 'points' : 'produce', custom: {title, sub, btn, emoji, target}})}>
@@ -100,16 +100,16 @@ export function Home({onExit}: {onExit?: () => void}) {
         <Icon name="search" size={18} color={th.mut} /><Sel sel={{kind: 'label', id: 'lbl.search', field: 'text'}}><T size={14.5} color={th.mut}>{label('lbl.search', tr('searchPh'))}</T></Sel>
       </Pressable>
       <View style={{flexDirection: 'row', gap: 10, paddingHorizontal: 16, paddingTop: 16}}>
-        <View style={{flex: 1.25}}><Mode id={md && md[0] ? md[0].id : undefined} grad title={(md && md[0] ? md[0].title : tr('foodDelivery')).replace(' ', '\n')} sub={md && md[0] ? md[0].sub : tr('hotFresh')} emoji={md && md[0] ? md[0].emoji : 'food'} image={md && md[0] ? md[0].image : null} onPress={() => go('catlist', md && md[0] ? md[0].cat : 'restaurants')} /></View>
+        <View style={{flex: 1.25}}><Mode id={md && md[0] ? md[0].id : undefined} grad title={(md && md[0] ? md[0].title : tr('foodDelivery')).replace(' ', '\n')} sub={md && md[0] ? md[0].sub : tr('hotFresh')} emoji={md && md[0] ? md[0].emoji : '🍛'} image={md && md[0] ? md[0].image : null} onPress={() => go('catlist', md && md[0] ? md[0].cat : 'restaurants')} /></View>
         <View style={{flex: 1, gap: 10}}>
-          <Mode id={md && md[1] ? md[1].id : undefined} small bg={th.m2bg} fg={th.m2fg} title={md && md[1] ? md[1].title : tr('groceries')} emoji={md && md[1] ? md[1].emoji : 'groceries'} image={md && md[1] ? md[1].image : null} onPress={() => go('catlist', md && md[1] ? md[1].cat : 'groceries')} />
-          <Mode id={md && md[2] ? md[2].id : undefined} small bg={th.m3bg} fg={th.m3fg} title={md && md[2] ? md[2].title : tr('drugstore')} emoji={md && md[2] ? md[2].emoji : 'medicine'} image={md && md[2] ? md[2].image : null} onPress={() => go('catlist', md && md[2] ? md[2].cat : 'drugstore')} />
+          <Mode id={md && md[1] ? md[1].id : undefined} small bg={th.m2bg} fg={th.m2fg} title={md && md[1] ? md[1].title : tr('groceries')} emoji={md && md[1] ? md[1].emoji : '🛒'} image={md && md[1] ? md[1].image : null} onPress={() => go('catlist', md && md[1] ? md[1].cat : 'groceries')} />
+          <Mode id={md && md[2] ? md[2].id : undefined} small bg={th.m3bg} fg={th.m3fg} title={md && md[2] ? md[2].title : tr('drugstore')} emoji={md && md[2] ? md[2].emoji : '💊'} image={md && md[2] ? md[2].image : null} onPress={() => go('catlist', md && md[2] ? md[2].cat : 'drugstore')} />
         </View>
       </View>
       <View style={{marginTop: 18}}><Rail gap={14}>
         {CATS.map(c => (
           <Pressable key={c.id} onPress={() => go('catlist', c.id)} style={{width: 68, alignItems: 'center'}}>
-            <Sel sel={{kind: 'category', id: c.id, field: 'art'}}><View style={{width: 62, height: 62, borderRadius: 31, backgroundColor: th.soft, alignItems: 'center', justifyContent: 'center', overflow: 'hidden'}}>{c.art ? <Image source={{uri: c.art}} style={{width: 62, height: 62}} resizeMode="cover" /> : <Icon name={c.emoji} size={28} color={th.ink} />}</View></Sel>
+            <Sel sel={{kind: 'category', id: c.id, field: 'art'}}><View style={{width: 62, height: 62, borderRadius: 31, backgroundColor: th.soft, alignItems: 'center', justifyContent: 'center', overflow: 'hidden'}}>{c.art ? <Image source={{uri: c.art}} style={{width: 62, height: 62}} resizeMode="cover" /> : <Text style={{fontSize: 30}}>{c.emoji}</Text>}</View></Sel>
             <Sel sel={{kind: 'category', id: c.id, field: 'title'}}><T size={11.5} weight="600" align="center" style={{marginTop: 6, lineHeight: 14}}>{tx(c.name)}</T></Sel>
           </Pressable>
         ))}
@@ -123,7 +123,7 @@ export function Home({onExit}: {onExit?: () => void}) {
           <Icon name="chevR" size={16} color={th.ink} />
         </Pressable>
       </View>
-      <Sh sel={{kind: 'label', id: 'lbl.flash', field: 'text'}} title={label('lbl.flash', tr('flashDeals'))} right={<Countdown />} />
+      <Sh sel={{kind: 'label', id: 'lbl.flash', field: 'text'}} title={'⚡ ' + label('lbl.flash', tr('flashDeals'))} right={<Countdown />} />
       <Rail>{dl.filter(d => IT[d[0]]).map(d => <Dish key={d[0]} i={IT[d[0]]} off={d[1]} left={d[2]} />)}</Rail>
       {os.length ? (<>
         <Sh sel={{kind: 'label', id: 'lbl.again', field: 'text'}} title={label('lbl.again', tr('orderAgain'))} link="History" onLink={() => tab('orders')} />
@@ -132,7 +132,7 @@ export function Home({onExit}: {onExit?: () => void}) {
           return (
             <Pressable key={o.id} onPress={() => reorder(o.id)} style={{width: 76, alignItems: 'center'}}>
               <Grad idx={bgIdx(s.bg)} style={{width: 64, height: 64, borderRadius: 32, alignItems: 'center', justifyContent: 'center', borderWidth: 2, borderColor: th.br}}>
-                <Icon name={s.e} size={28} color={th.ink} />
+                <Text style={{fontSize: 30}}>{s.e}</Text>
                 <View style={{position: 'absolute', bottom: -5, backgroundColor: th.br, borderRadius: 8, paddingHorizontal: 6, paddingVertical: 2}}><T size={9.5} weight="800" color="#fff">Reorder</T></View>
               </Grad>
               <T size={11.5} weight="600" align="center" style={{marginTop: 10}}>{s.n}</T>
@@ -143,11 +143,11 @@ export function Home({onExit}: {onExit?: () => void}) {
       {rv.length ? (<><Sh sel={{kind: 'label', id: 'lbl.recent', field: 'text'}} title={label('lbl.recent', tr('recentlyViewed'))} /><Rail>{rv.map((id: string) => <Dish key={id} i={IT[id]} />)}</Rail></>) : null}
       <Sh sel={{kind: 'label', id: 'lbl.popular', field: 'text'}} title={label('lbl.popular', tr('popularVendors'))} link={tr('seeAll')} onLink={() => go('catlist', 'all')} />
       <Rail>{ST.slice().sort((a, b) => b.rv - a.rv).slice(0, 6).map(s => <VCard key={s.id} s={s} />)}</Rail>
-      <Sh sel={{kind: 'label', id: 'lbl.produce', field: 'text'}} title={label('lbl.produce', tr('freshProduce'))} link={tr('seeAll')} onLink={() => go('catlist', 'produce')} />
+      <Sh sel={{kind: 'label', id: 'lbl.produce', field: 'text'}} title={'🥭 ' + label('lbl.produce', tr('freshProduce'))} link={tr('seeAll')} onLink={() => go('catlist', 'produce')} />
       <Rail>{cat('produce').map(i => <Dish key={i.id} i={i} />)}</Rail>
-      <Sh sel={{kind: 'label', id: 'lbl.haitian', field: 'text'}} title={label('lbl.haitian', tr('haitianSpecialties'))} right={<Icon name="globe" size={15} color={th.ink} />} link={tr('seeAll')} onLink={() => go('catlist', 'haitian')} />
+      <Sh sel={{kind: 'label', id: 'lbl.haitian', field: 'text'}} title={'🇭🇹 ' + label('lbl.haitian', tr('haitianSpecialties'))} link={tr('seeAll')} onLink={() => go('catlist', 'haitian')} />
       <Rail>{cat('haitian').map(i => <Dish key={i.id} i={i} />)}</Rail>
-      <Sh sel={{kind: 'label', id: 'lbl.trending', field: 'text'}} title={label('lbl.trending', tr('trending'))} right={<Icon name="zap" size={15} color={th.ink} />} />
+      <Sh sel={{kind: 'label', id: 'lbl.trending', field: 'text'}} title={'🔥 ' + label('lbl.trending', tr('trending'))} />
       <View style={{flexDirection: 'row', flexWrap: 'wrap', gap: 12, paddingHorizontal: 16}}>{['s1_1', 's4_0', 's5_0', 's6_0'].map(id => <Dish key={id} i={IT[id]} grid />)}</View>
       <Sh title={tr('restaurantsNear')} link={tr('seeAll')} onLink={() => go('catlist', 'all')} />
       <Chips list={FCH} on={S.f} onPick={setFilter} />
@@ -199,7 +199,7 @@ export function Explore() {
       </View>
       {visible.length ? <View style={{paddingHorizontal: 16, gap: 14}}>
         {visible.map(s => <StoreCard key={s.id} s={s} />)}
-      </View> : <View style={{paddingHorizontal: 16}}><Empty emoji="clockEmpty" title="No stores match right now" text="Try another category or show all available options." button="Show all available" onPress={() => {setScope('all'); setCategory('all');}} /></View>}
+      </View> : <View style={{paddingHorizontal: 16}}><Empty emoji="🕒" title="No stores match right now" text="Try another category or show all available options." button="Show all available" onPress={() => {setScope('all'); setCategory('all');}} /></View>}
       <View style={{paddingHorizontal: 16, marginTop: 20}}>
         <Sh title="Products to explore" />
         {products.length ? <View style={{flexDirection: 'row', flexWrap: 'wrap', gap: 12}}>
@@ -217,12 +217,12 @@ export function Explore() {
 
 export function Cats() {
   const th = useTheme(), {width} = useWindowDimensions(), w = (width - 32 - 16) / 3;
-  const all = [...categories().map(c => ({id: c.id, e: c.emoji, n: tx(c.name), art: c.art})), {id: 'all', e: 'storeEmpty', n: 'All stores', art: null as any}];
+  const all = [...categories().map(c => ({id: c.id, e: c.emoji, n: tx(c.name), art: c.art})), {id: 'all', e: '🏪', n: 'All stores', art: null as any}];
   return (
     <View style={{paddingHorizontal: 16, flexDirection: 'row', flexWrap: 'wrap', rowGap: 18, columnGap: 8}}>
       {all.map(c => (
         <Pressable key={c.id} onPress={() => go('catlist', c.id)} style={{width: w, alignItems: 'center'}}>
-          <View style={{width: 62, height: 62, borderRadius: 31, backgroundColor: th.soft, alignItems: 'center', justifyContent: 'center', overflow: 'hidden'}}>{c.art ? <Image source={{uri: c.art}} style={{width: 62, height: 62}} resizeMode="cover" /> : <Icon name={c.e} size={28} color={th.ink} />}</View>
+          <View style={{width: 62, height: 62, borderRadius: 31, backgroundColor: th.soft, alignItems: 'center', justifyContent: 'center', overflow: 'hidden'}}>{c.art ? <Image source={{uri: c.art}} style={{width: 62, height: 62}} resizeMode="cover" /> : <Text style={{fontSize: 30}}>{c.e}</Text>}</View>
           <T size={11.5} weight="600" align="center" style={{marginTop: 6, lineHeight: 14}}>{c.n}</T>
         </Pressable>
       ))}
@@ -239,7 +239,7 @@ export function CatList({p}: {p: string}) {
   return (
     <View>
       <View style={{paddingHorizontal: 16}}>
-        <View style={{marginBottom: 12}}><Mode grad small={false} title={p === 'all' ? 'Everything near you' : cname(p)} sub={l.length + ' store' + (l.length === 1 ? '' : 's') + ' · ' + its.length + ' products'} emoji={c ? c.emoji : 'storeEmpty'} onPress={() => {}} /></View>
+        <View style={{marginBottom: 12}}><Mode grad small={false} title={p === 'all' ? 'Everything near you' : cname(p)} sub={l.length + ' store' + (l.length === 1 ? '' : 's') + ' · ' + its.length + ' products'} emoji={c ? c.emoji : '🏪'} onPress={() => {}} /></View>
       </View>
       {p !== 'all' && kinds.length > 1 ? (<><T size={12.5} weight="700" color={th.mut} style={{paddingHorizontal: 16, paddingBottom: 6}}>SUBCATEGORIES</T><Chips list={[['', 'All'], ...kinds.map(k => [k, k] as [string, string])]} on={S.sub} onPick={setSub} /></>) : null}
       <Chips list={FCH} on={S.f} onPick={setFilter} />
@@ -249,7 +249,7 @@ export function CatList({p}: {p: string}) {
         <View style={{gap: 22, paddingHorizontal: 16}}>{l.map(s => <StoreCard key={s.id} s={s} />)}</View>
         <Sh title="Popular products" />
         <View style={{flexDirection: 'row', flexWrap: 'wrap', gap: 12, paddingHorizontal: 16}}>{its.slice(0, 8).map(i => <Dish key={i.id} i={i} grid />)}</View>
-      </>) : <Empty emoji="searchEmpty" title="Nothing matches" text="Clear the filter to see every store." button="Clear filters" onPress={clearFilters} />}
+      </>) : <Empty emoji="🔎" title="Nothing matches" text="Clear the filter to see every store." button="Clear filters" onPress={clearFilters} />}
     </View>
   );
 }
@@ -274,7 +274,7 @@ export function Search() {
       <View style={{paddingHorizontal: 16}}>
         {S.rec.length ? (<><Ttl>Recent searches</Ttl><View style={{flexDirection: 'row', flexWrap: 'wrap', gap: 8}}>{S.rec.map((x: string) => <Chip key={x} label={x} onPress={() => setQ(x)} />)}</View><Pressable onPress={() => {S.rec = []; emit();}}><T size={13} weight="700" color={th.br} style={{marginTop: 8}}>Clear recent</T></Pressable></>) : null}
         <Ttl>Popular searches</Ttl><View style={{flexDirection: 'row', flexWrap: 'wrap', gap: 8}}>{['Poulet frit', 'Mango', 'Pain patate', 'Riz', 'Pharmacy', 'Jus', 'Seafood'].map(x => <Chip key={x} label={x} onPress={() => setQ(x)} />)}</View>
-        <Ttl>Browse categories</Ttl><View style={{flexDirection: 'row', flexWrap: 'wrap', gap: 8}}>{categories().map(c => <Chip key={c.id} label={tx(c.name)} onPress={() => go('catlist', c.id)} />)}</View>
+        <Ttl>Browse categories</Ttl><View style={{flexDirection: 'row', flexWrap: 'wrap', gap: 8}}>{categories().map(c => <Chip key={c.id} label={c.emoji + ' ' + tx(c.name)} onPress={() => go('catlist', c.id)} />)}</View>
       </View>
     );
   } else {
@@ -291,16 +291,16 @@ export function Search() {
     if (q) ST.forEach(s => {if (s.n.toLowerCase().indexOf(q) === 0 && set.indexOf(s.n) < 0) set.push(s.n); s.it.forEach(i => {const w = i.n.toLowerCase(); if ((w.indexOf(q) === 0 || w.indexOf(' ' + q) > -1) && set.indexOf(i.n) < 0) set.push(i.n);});});
     const sug = set.filter(x => x.toLowerCase() !== q).slice(0, 5);
     body = (!ss.length && !is.length && !cs.length)
-      ? <Empty emoji="help" title={'No results' + (q ? ' for "' + r.q + '"' : '')} text="Try another word, or remove a filter." button={any ? 'Clear filters' : 'Clear search'} onPress={() => {if (any) S.sr.f = {}; else S.sr.q = ''; emit();}} />
+      ? <Empty emoji="🤷" title={'No results' + (q ? ' for "' + r.q + '"' : '')} text="Try another word, or remove a filter." button={any ? 'Clear filters' : 'Clear search'} onPress={() => {if (any) S.sr.f = {}; else S.sr.q = ''; emit();}} />
       : (
         <View style={{paddingHorizontal: 16}}>
           {sug.length ? (<><Ttl>Suggestions</Ttl><View style={{flexDirection: 'row', flexWrap: 'wrap', gap: 8}}>{sug.map(x => <Chip key={x} label={x} onPress={() => setQ(x)} />)}</View></>) : null}
-          {cs.length ? (<><Ttl>Categories</Ttl><View style={{flexDirection: 'row', flexWrap: 'wrap', gap: 8}}>{cs.map((c: any) => <Chip key={c.id} label={tx(c.name)} onPress={() => go('catlist', c.id)} />)}</View></>) : null}
+          {cs.length ? (<><Ttl>Categories</Ttl><View style={{flexDirection: 'row', flexWrap: 'wrap', gap: 8}}>{cs.map((c: any) => <Chip key={c.id} label={c.emoji + ' ' + tx(c.name)} onPress={() => go('catlist', c.id)} />)}</View></>) : null}
           {ss.length ? (<><Ttl>Stores</Ttl>{ss.map(s => (
             <View key={s.id} style={{flexDirection: 'row', gap: 10, alignItems: 'center', paddingVertical: 10, borderBottomWidth: 1, borderBottomColor: th.line}}>
               <Pressable accessibilityRole="link" onPress={() => {if (q) rec(r.q.trim()); go('store', s.id);}} style={{flex: 1, flexDirection: 'row', gap: 12, alignItems: 'center', minWidth: 0}}>
                 <Tile e={s.e} bg={s.bg} />
-                <View style={{flex: 1, minWidth: 0}}><View style={{flexDirection: 'row', gap: 6, alignItems: 'center', flexWrap: 'wrap'}}><T weight="700">{s.n}</T>{!s.open ? <Badge red label={tr('closed')} /> : null}</View><T size={13} color={th.mut}>{s.k} · {s.eta} min · {s.rv > 0 ? 'Rating ' + s.r.toFixed(1) : 'New store'}</T></View>
+                <View style={{flex: 1, minWidth: 0}}><View style={{flexDirection: 'row', gap: 6, alignItems: 'center', flexWrap: 'wrap'}}><T weight="700">{s.n}</T>{!s.open ? <Badge red label={tr('closed')} /> : null}</View><T size={13} color={th.mut}>{s.k} · {s.eta} min · {s.rv > 0 ? '★ ' + s.r.toFixed(1) : 'New store'}</T></View>
               </Pressable>
               {heartBtn(s.id, S.fav.indexOf(s.id) > -1, () => heart(s.id), S.fav.indexOf(s.id) > -1 ? 'Remove ' + s.n + ' from favorites' : 'Save ' + s.n + ' to favorites')}
               <Pressable accessibilityRole="link" accessibilityLabel={'Open ' + s.n} onPress={() => {if (q) rec(r.q.trim()); go('store', s.id);}}><Icon name="chevR" size={16} color={th.ink} /></Pressable>
@@ -439,11 +439,11 @@ export function Notifs() {
         {serverError ? <T size={12} color={th.red}>{serverError}</T> : null}
         {items.length ? items.map((n: any) => (
           <Pressable key={(n.server ? 'server-' : 'local-') + n.id} onPress={() => { void open(n); }} style={{flexDirection: 'row', alignItems: 'center', gap: 12, paddingVertical: 14, paddingHorizontal: 4, borderBottomWidth: 1, borderBottomColor: th.line}}>
-            <View style={{width: 44, height: 44, borderRadius: 16, backgroundColor: n.u ? th.brt : th.soft, alignItems: 'center', justifyContent: 'center'}}><Text style={{fontSize: 22}}>{n.r === 'track' ? 'scooter' : 'gift'}</Text></View>
+            <View style={{width: 44, height: 44, borderRadius: 16, backgroundColor: n.u ? th.brt : th.soft, alignItems: 'center', justifyContent: 'center'}}><Text style={{fontSize: 22}}>{n.r === 'track' ? '🛵' : '🎁'}</Text></View>
             <View style={{flex: 1}}><T weight={n.u ? '800' : undefined}>{n.t}</T><T size={13} color={th.mut}>{n.d}</T></View>
             {n.u ? <View style={{width: 8, height: 8, borderRadius: 4, backgroundColor: th.br}} /> : null}
           </Pressable>
-        )) : <Empty emoji="notification" title="All caught up" text="New offers and order updates appear here." />}
+        )) : <Empty emoji="🔔" title="All caught up" text="New offers and order updates appear here." />}
       </View>
     </View>
   );
