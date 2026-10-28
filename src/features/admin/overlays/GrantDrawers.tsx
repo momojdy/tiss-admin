@@ -15,15 +15,10 @@ import { useToast } from '../ui/Toast';
 import { Txt } from '../ui/Txt';
 import { useTheme } from '../theme/ThemeContext';
 import { toneColor } from '../theme/tokens';
-import { drawers, useOpen } from './registry';
+import { drawers, useOpen, useReopen } from './registry';
 import type { AccessRequest, Grant } from '../data/types';
 
 /** Closes every overlay, refreshes the screens, then opens a drawer again. */
-function useReopen() {
-  const { closeAll } = useOverlay();
-  const open = useOpen();
-  return (kind: string, id: string) => { closeAll(); bump(); open(kind, id); };
-}
 
 /* ================================================================== */
 
