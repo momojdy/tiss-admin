@@ -154,11 +154,10 @@ function PizzaStage({b}: {b: Builder}) {
   return <SvgXml width={px} height={px} xml={xml} />;
 }
 function CustomPlate({b}: {b: Builder}) {
-  const th = useTheme();
   const names: string[] = []; b.groups.forEach(g => units(g, BD).forEach(id => {const it = itemOf(g, id); if (it) names.push(it.name);}));
   return (
     <View style={{alignItems: 'center', paddingHorizontal: 16}}>
-      <Icon name={b.emoji} size={84} color="#F5F5F5" />
+      <Text style={{fontSize: 84, lineHeight: 92}}>{b.emoji}</Text>
       <View style={{flexDirection: 'row', flexWrap: 'wrap', gap: 6, justifyContent: 'center', marginTop: 8}}>{(names.length ? names : ['Pick your options below']).map((x, i) => <View key={i} style={{backgroundColor: 'rgba(255,255,255,.12)', borderRadius: 14, paddingHorizontal: 10, paddingVertical: 5}}><T size={12.5} color="#F5F5F5">{x}</T></View>)}</View>
     </View>
   );
@@ -188,7 +187,7 @@ function OptTile({b, g, it}: {b: Builder; g: any; it: BItem}) {
         <T size={12.5} weight="700" align="center" style={{lineHeight: 14}}>{it.name}</T>
         <T size={11.5} color={on ? th.brd : th.mut} weight={on ? '700' : undefined}>{lab}</T>
       </Pressable>
-      {on ? <View style={{position: 'absolute', top: -4, right: -4, minWidth: 22, height: 22, paddingHorizontal: 5, borderRadius: 11, backgroundColor: th.br, alignItems: 'center', justifyContent: 'center', borderWidth: 2, borderColor: th.bg}}>{q > 1 ? <T size={12} weight="800" color="#fff">×{q}</T> : <Icon name="check" size={12} color="#fff" />}</View> : null}
+      {on ? <View style={{position: 'absolute', top: -4, right: -4, minWidth: 22, height: 22, paddingHorizontal: 5, borderRadius: 11, backgroundColor: th.br, alignItems: 'center', justifyContent: 'center', borderWidth: 2, borderColor: th.bg}}><T size={12} weight="800" color="#fff">{q > 1 ? '×' + q : '✓'}</T></View> : null}
       {on && g.kind === 'many' ? <Pressable accessibilityLabel={'Remove one ' + it.name} onPress={() => bzSub(g.id, it.id)} style={{position: 'absolute', top: -6, left: -6, width: 30, height: 30, borderRadius: 15, backgroundColor: th.bg, borderWidth: 2, borderColor: th.br, alignItems: 'center', justifyContent: 'center'}}><T size={18} weight="800">−</T></Pressable> : null}
     </View>
   );
@@ -249,7 +248,7 @@ export function ByoFoot() {
 
 export function ByoScreen({p}: {p: string}) {
   const th = useTheme(), a = (p || '').split('|'), sid = a[0], b = bGet(sid, a[1]);
-  if (!b || !STB[sid]) return <View><Header title="Builder" onBack={back} /><Empty emoji="utensils" title="This builder is not available" text="The store may have turned it off." button="Back to Goodies" onPress={browse} /></View>;
+  if (!b || !STB[sid]) return <View><Header title="Builder" onBack={back} /><Empty emoji="🍽️" title="This builder is not available" text="The store may have turned it off." button="Back to Goodies" onPress={browse} /></View>;
   if (!BD || BD.bid !== b.id || BD.sid !== sid) setBD(bDraft(b, sid));
   if (BD.added) return <ByoDone b={b} />;
   const s = STB[sid], un = !b.enabled || !b.available || BYO.store[sid] === false || !s.open;
@@ -295,7 +294,7 @@ function ByoDone({b}: {b: Builder}) {
     <View>
       <Header title="Added to your order" onBack={back} />
       <View style={{alignItems: 'center', paddingTop: 30, paddingHorizontal: 20}}>
-        {b.type === 'burger' ? <LinearGradient colors={['#2C4A5B', '#233D4C']} style={{alignSelf: 'stretch', borderRadius: 24, paddingVertical: 8, alignItems: 'center'}}><BurgerStage b={b} fin /></LinearGradient> : <Icon name="check" size={64} color="#1B1B1F" />}
+        {b.type === 'burger' ? <LinearGradient colors={['#2C4A5B', '#233D4C']} style={{alignSelf: 'stretch', borderRadius: 24, paddingVertical: 8, alignItems: 'center'}}><BurgerStage b={b} fin /></LinearGradient> : <Text style={{fontSize: 64}}>✅</Text>}
         <T size={24} weight="800" style={{marginTop: 10}}>Added to your order!</T>
         <T color={th.mut} style={{marginTop: 4}}>{BD.added.n} · {BD.added.q} × {money(BD.added.p)}</T>
         <T size={13} color={th.mut} align="center" style={{marginTop: 6}}>Nothing has been ordered yet. Add more, or review your cart when you are ready.</T>
