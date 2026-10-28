@@ -239,7 +239,7 @@ export function useAssignWork() {
       { id: 'o', label: 'Reviewer', type: 'select', options: db.STAFF.map((s) => s.n), required: true },
       { id: 'due', label: 'Due date', type: 'date' }],
       buttons: [{ label: 'Assign', key: 's', primary: true }], sub: 'Reassignment keeps the earlier history.',
-      onSubmit: (_k, v) => { const a = find(String(v.a).split(' ')[0]); if (!a) return 'Choose an application.'; a.o = String(v.o); a.due = String(v.due || a.due); finish(a, 'Assigned to ' + v.o); } });
+      onSubmit: (_k, v) => { const a = findById(db.APPS, String(v.a).split(' ')[0]); if (!a) return 'Choose an application.'; a.o = String(v.o); a.due = String(v.due || a.due); finish(a, 'Assigned to ' + v.o); } });
   };
 }
 
