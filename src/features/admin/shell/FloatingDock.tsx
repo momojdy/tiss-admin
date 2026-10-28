@@ -47,7 +47,7 @@ export function FloatingDock({ expanded, onExpandedChange }: { expanded: boolean
       {!expanded && (can(...REQ.content) || can(...REQ.permissions)) ? <View pointerEvents="box-none">
         <Pressable onPress={() => openDrawer((close) => <QuickCreateSheet onClose={close} />)} accessibilityRole="button" accessibilityLabel="Quick create" hitSlop={8}
           style={{ width: 48, height: 48, borderRadius: 24, backgroundColor: '#16191a', alignItems: 'center', justifyContent: 'center', shadowColor: '#000', shadowOpacity: 0.24, shadowRadius: 12, shadowOffset: { width: 0, height: 4 }, elevation: 9 }}>
-          <Txt size={25} color="#fff">+</Txt>
+          <AppIcon name="plus" size={21} color="#fff" />
         </Pressable>
       </View> : null}
     </View>
