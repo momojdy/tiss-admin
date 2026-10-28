@@ -13,11 +13,12 @@ import { ListRows } from '../ui/Lists';
 import { Txt } from '../ui/Txt';
 import { useTheme, ThemeMode } from '../theme/ThemeContext';
 import { MyAccessCard } from '../overlays/GrantDrawers';
+import { SettingsSheet } from './SettingsSheet';
 
 export function AccountSheet({ onClose }: { onClose: () => void }) {
   useDb();
   const { mode, setMode } = useTheme();
-  const { closeAll } = useOverlay();
+  const { closeAll, openDrawer } = useOverlay();
   const mine = realMe() ?? me();
   const mineLog = db.AUD.filter((a) => a[1] === mine.n).slice(0, 5);
   const [currentPassword, setCurrentPassword] = useState('');
@@ -149,6 +150,7 @@ export function AccountSheet({ onClose }: { onClose: () => void }) {
         <CardTitle title="My activity" />
         <ListRows empty="No activity yet." rows={mineLog.map((a, i) => ({ key: String(i), main: a[0], sub: a[2] }))} />
       </Card>
+      {can(...REQ.settings) ? <OutlineBtn onPress={() => { closeAll(); openDrawer((close) => <SettingsSheet onClose={close} />); }}>Open settings ›</OutlineBtn> : null}
       <OutlineBtn onPress={() => { closeAll(); leaveApp(); bump(); }}>Sign out</OutlineBtn>
     </DrawerBody>
   );

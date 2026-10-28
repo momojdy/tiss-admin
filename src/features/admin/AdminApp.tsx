@@ -13,6 +13,7 @@ import { ScreenHost } from './shell/ScreenHost';
 import { AccountSheet } from './shell/AccountSheet';
 import { NotificationsSheet } from './shell/NotificationsSheet';
 import { FloatingDock } from './shell/FloatingDock';
+import { SearchSheet } from './shell/SearchSheet';
 import { AuthFlow } from './auth/AuthFlow';
 import { idleExpired, leaveApp, sessionStillValid, touch } from './auth/authLogic';
 import { session, expireStaff, setServerGrants, secLv } from './state/access';
@@ -56,7 +57,7 @@ function Frame() {
         onTouchStart={touch}
       >
         <ScrollView ref={scrollRef} keyboardShouldPersistTaps="handled" showsVerticalScrollIndicator={false} contentContainerStyle={{ paddingTop: 14 + insets.top, paddingBottom: (dockExpanded ? 360 : 90) + insets.bottom, paddingLeft: 18, paddingRight: 18 }}>
-          <Header onBell={() => openDrawer((close) => <NotificationsSheet onClose={close} />)} onAccount={() => openDrawer((close) => <AccountSheet onClose={close} />)} />
+          <Header onBell={() => openDrawer((close) => <NotificationsSheet onClose={close} />)} onAccount={() => openDrawer((close) => <AccountSheet onClose={close} />)} onSearch={() => openDrawer((close) => <SearchSheet onClose={close} />)} />
           <Tabs />
           <ScreenHost />
         </ScrollView>
