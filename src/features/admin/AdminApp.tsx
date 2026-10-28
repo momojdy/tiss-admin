@@ -55,7 +55,7 @@ function Frame() {
         style={{ width: frameWidth, height: frameHeight, borderRadius: frameRadius, overflow: 'hidden' }}
         onTouchStart={touch}
       >
-        <ScrollView ref={scrollRef} keyboardShouldPersistTaps="handled" showsVerticalScrollIndicator={false} contentContainerStyle={{ paddingTop: 14 + insets.top, paddingBottom: 90 + insets.bottom, paddingLeft: 18, paddingRight: dockExpanded ? 184 : 18 }}>
+        <ScrollView ref={scrollRef} keyboardShouldPersistTaps="handled" showsVerticalScrollIndicator={false} contentContainerStyle={{ paddingTop: 14 + insets.top, paddingBottom: (dockExpanded ? 360 : 90) + insets.bottom, paddingLeft: 18, paddingRight: 18 }}>
           <Header onBell={() => openDrawer((close) => <NotificationsSheet onClose={close} />)} onAccount={() => openDrawer((close) => <AccountSheet onClose={close} />)} />
           <Tabs />
           <ScreenHost />
