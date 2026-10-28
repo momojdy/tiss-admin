@@ -1,7 +1,7 @@
 import { Image, Pressable, View } from 'react-native';
 import { useDb } from '../state/db';
 import { unreadCount } from '../state/notices';
-import { me } from '../state/access';
+import { me, session } from '../state/access';
 import { IconBtn } from '../ui/Controls';
 import { Txt } from '../ui/Txt';
 import { AppIcon } from '../ui/AppIcon';
