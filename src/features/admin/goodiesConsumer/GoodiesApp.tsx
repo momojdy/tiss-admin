@@ -52,7 +52,7 @@ export function GoodiesApp({onExit, embedded = true, previewMode = false}: {onEx
           if (st !== o.st) {
             o.st = st; ch = true; const Tt = o.pk ? TP : TL;
             notify(done(o) ? 'Order ' + (o.pk ? 'picked up' : 'delivered') : 'Order update', o.id + ': ' + Tt[st], 'track', o.id, 'o');
-            if (done(o)) toast('Order ' + o.id + ' ' + (o.pk ? 'picked up' : 'delivered') + ' 🎉');
+            if (done(o)) toast('Order ' + o.id + ' ' + (o.pk ? 'picked up' : 'delivered') + ' check');
           }
         }
       });
@@ -201,7 +201,7 @@ function WantissEntry() {
       <Pressable onPress={() => {S.stack = [{r: 'wantiss', u: 1}, {r: 'home', u: 2}]; emit();}} style={{height: 130, borderRadius: 18, overflow: 'hidden'}}>
         <Grad colors={['#FD802E', '#FF9F4D']} style={{flex: 1, padding: 14}}>
           <T size={22} weight="800" color="#fff">Goodies</T><T size={12} color="#fff" style={{marginTop: 3}}>Food, groceries, drinks and everyday essentials</T>
-          <Text style={{position: 'absolute', right: 6, bottom: -4, fontSize: 62}}>🛍️</Text>
+          <Text style={{position: 'absolute', right: 6, bottom: -4, fontSize: 62}}>bag</Text>
         </Grad>
       </Pressable>
       <T size={12.5} color={th.mut} align="center" style={{marginTop: 16}}>This is a stand-in for the Wantiss home. Other services will appear here.</T>
