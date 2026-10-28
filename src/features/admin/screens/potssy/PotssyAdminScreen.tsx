@@ -36,7 +36,7 @@ export function PotssyAdminScreen() {
         <Pill onPress={() => go('ecosystem')}>‹ Ecosystem</Pill>
         <Txt size={10.1} mut>Potssy · Workspace</Txt>
       </View>
-      <Heading title={'Potssy\n' + moduleName} kpis={[
+      <Heading title={'Potssy ' + moduleName} kpis={[
         { icon: '▥', value: '—', label: 'Campaigns' },
         { icon: '▤', value: '—', label: 'Tickets and entries' },
         { icon: '◷', value: '—', label: 'Claims awaiting review' },
