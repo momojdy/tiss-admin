@@ -56,7 +56,7 @@ function NotPorted({ id }: { id: ScreenId }) {
   return (
     <Card>
       <Txt size={14} weight={500}>{id[0].toUpperCase() + id.slice(1)}</Txt>
-      <Txt size={10.6} mut style={{ marginTop: 6 }}>This screen has not been ported to React Native yet. The uploaded HTML reference (wantiss-admin-crm final .html) remains the source of truth for it.</Txt>
+      <Txt size={10.6} mut style={{ marginTop: 6 }}>This screen is coming soon.</Txt>
     </Card>
   );
 }
