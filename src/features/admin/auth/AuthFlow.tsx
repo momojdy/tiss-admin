@@ -115,6 +115,7 @@ export function AuthFlow({ notice, noticeBad, onDone }: Props) {
       session.last = Date.now();
       session.userId = data.user.id;
       session.email = data.user.email || e;
+      session.avatarUrl = typeof data.user.user_metadata?.avatar_url === 'string' ? data.user.user_metadata.avatar_url : null;
       session.role = staff.role;
       session.status = staff.status;
       const { data: grants } = await supabase.from('wantiss_admin_permission_grants').select('permission_key,access_level,expires_at,revoked_at').eq('staff_user_id', data.user.id);
