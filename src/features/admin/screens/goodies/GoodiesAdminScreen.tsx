@@ -51,7 +51,7 @@ export function GoodiesAdminScreen() {
     const current = englishValue(record, field);
     form({
       title: 'Edit · ' + title,
-      sub: 'This saves a private Goodies CMS draft. It does not change live customer content until the draft is reviewed and published.',
+      sub: 'Review the proposed change before publishing.',
       fields: [
         { id: 'value', label: 'English text', type: 'textarea', value: current, required: true, maxLength: 1000 },
         { id: 'status', label: 'Draft status', type: 'select', options: ['Draft', 'Needs review'], value: 'Draft', required: true },
@@ -83,7 +83,7 @@ export function GoodiesAdminScreen() {
     if (!can(...REQ.content)) { toast('You need Content edit access to stage a Goodies draft.'); return; }
     form({
       title: title,
-      sub: 'Stage a proposed status change for review. The reference configuration is not mutated; changes are staged as private CMS drafts.',
+      sub: 'Stage the proposed status change for review.',
       fields: [
         { id: 'status', label: 'Proposed status', type: 'select', options, value: String(record[statusKey] || options[0]), required: true },
         { id: 'reason', label: 'Reason', type: 'textarea', required: true },
