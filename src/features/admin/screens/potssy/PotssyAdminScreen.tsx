@@ -55,7 +55,7 @@ export function PotssyAdminScreen() {
       {moduleName === 'Overview' ? (
         <Section title="Available platform routes">
           <ListRows rows={[
-            { key: 'operations', main: 'Operations', sub: 'Review queues and support records available in the authorized snapshot', right: 'Open ›', onPress: () => go('operations') },
+            { key: 'operations', main: 'Operations', sub: 'Review available queues and support records', right: 'Open ›', onPress: () => go('operations') },
             { key: 'finance', main: 'Finance', sub: 'Authorized platform transaction records only', right: 'Open ›', onPress: () => go('finance') },
             { key: 'people', main: 'People and access', sub: 'Account and staff permissions', right: 'Open ›', onPress: () => go('people') },
           ]} />
