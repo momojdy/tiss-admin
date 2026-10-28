@@ -102,24 +102,30 @@ function AuthGate() {
       else {
         void (async () => {
           const { data: auth, error: authError } = await supabase.auth.getUser();
+          let authUser = auth.user;
           if (authError) {
             // A failed user lookup can be caused by a temporary network/refresh outage.
             // Attempt a refresh before treating the persisted session as invalid.
             const { data: refreshed, error: refreshError } = await supabase.auth.refreshSession();
-            if (!refreshError && refreshed.session) return;
-            const reason = refreshError?.message || authError.message || '';
-            const code = 'code' in (refreshError || {}) ? String((refreshError as { code?: string }).code || '') : '';
-            const invalidSession = /invalid_refresh_token|refresh_token_not_found|refresh token (is )?(invalid|expired|not found)|session (not found|missing)|not authenticated/i.test(code + ' ' + reason)
-              || (refreshError?.status === 400 && /refresh|token|session|expired|invalid/i.test(reason));
-            if (invalidSession) {
-              leaveApp();
-              setNotice('Your sign-in expired. Please sign in again.');
+            if (!refreshError && refreshed.session) {
+              // Continue with staff and grant verification using the refreshed identity.
+              // A successful token refresh must not skip checks for revoked permissions.
+              authUser = refreshed.session.user;
+            } else {
+              const reason = refreshError?.message || authError.message || '';
+              const code = 'code' in (refreshError || {}) ? String((refreshError as { code?: string }).code || '') : '';
+              const invalidSession = /invalid_refresh_token|refresh_token_not_found|refresh token (is )?(invalid|expired|not found)|session (not found|missing)|not authenticated/i.test(code + ' ' + reason)
+                || (refreshError?.status === 400 && /refresh|token|session|expired|invalid/i.test(reason));
+              if (invalidSession) {
+                leaveApp();
+                setNotice('Your sign-in expired. Please sign in again.');
+              }
+              // Network failures and other transient errors keep the current session;
+              // the next scheduled check retries without redirecting to login.
+              return;
             }
-            // Network failures and other transient errors keep the current session;
-            // the next scheduled check retries without redirecting to login.
-            return;
           }
-          if (!auth.user || !auth.user.email_confirmed_at) {
+          if (!authUser || !authUser.email_confirmed_at) {
             leaveApp();
             setNotice('Your sign-in expired. Please sign in again.');
             return;
@@ -130,7 +136,7 @@ function AuthGate() {
           if (error) return;
           if (!staff || staff.status !== 'active' ||
               (staff.invitation_expires_at && Date.parse(staff.invitation_expires_at) <= Date.now()) ||
-              (staff.invited_at && auth.user.user_metadata?.wantiss_invite_accepted !== true)) {
+              (staff.invited_at && authUser.user_metadata?.wantiss_invite_accepted !== true)) {
             leaveApp(); setNotice('Your access changed. Please sign in again.'); return;
           }
           session.role = staff.role;
