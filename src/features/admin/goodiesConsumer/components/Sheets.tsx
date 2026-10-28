@@ -32,7 +32,7 @@ export function Sheets({sheet, close}: {sheet: any; close: () => void}) {
   if (k === 'promo') {
     const d = PROMO_DETAIL[sheet.p as 'free' | 'points' | 'produce'], custom = sheet.custom || {};
     content = (<>
-      <View style={{height: 150, borderRadius: 20, alignItems: 'center', justifyContent: 'center', backgroundColor: d.bg, marginBottom: 12}}><Text style={{fontSize: 78}}>{custom.emoji || d.e}</Text></View>
+      <View style={{height: 150, borderRadius: 20, alignItems: 'center', justifyContent: 'center', backgroundColor: d.bg, marginBottom: 12}}><Icon name={custom.emoji || d.e} size={64} color={th.ink} /></View>
       <T size={21} weight="800">{custom.title || d.t}</T>
       <T color={th.mut} style={{marginVertical: 8, marginBottom: 18, lineHeight: 21}}>{custom.sub || d.d}</T>
       <Cta label={custom.btn || d.b} onPress={() => {
@@ -53,7 +53,7 @@ export function Sheets({sheet, close}: {sheet: any; close: () => void}) {
       <T color={th.mut} style={{marginTop: 6, marginBottom: 14, lineHeight: 21}}>{s.businessDescription || s.k}</T>
       <Card style={{padding: 16}}>
         <Row style={{gap: 10, alignItems: 'center', marginBottom: 10}}>
-          <Pressable accessibilityRole="button" accessibilityLabel="Read store reviews" onPress={() => {close(); A.go('reviews', sheet.id);}} style={{flex: 1}}><T size={13} color={th.br}>CUSTOMER REVIEWS</T><T size={18} weight="800">{s.rv > 0 ? '★ ' + s.r.toFixed(1) + ' (' + s.rv + ' reviews)' : 'No reviews yet'}</T></Pressable>
+          <Pressable accessibilityRole="button" accessibilityLabel="Read store reviews" onPress={() => {close(); A.go('reviews', sheet.id);}} style={{flex: 1}}><T size={13} color={th.br}>CUSTOMER REVIEWS</T><Row style={{alignItems: "center", gap: 4}}>{s.rv > 0 ? <><Icon name="star" size={16} color="#FFB400" fill /><T size={18} weight="800">{s.r.toFixed(1) + ' (' + s.rv + ' reviews)'}</T></> : <T size={18} weight="800">No reviews yet</T>}</Row></Pressable>
           <Badge label={s.open ? 'Open now' : 'Closed now'} />
         </Row>
         {row('Opening hours', s.h)}
