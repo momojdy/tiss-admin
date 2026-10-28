@@ -154,7 +154,7 @@ export function GoodiesAdminScreen() {
   return (
     <View>
       <View style={{ flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', marginBottom: 4 }}>
-        <View style={{ flex: 1 }}><Heading title="Goodies\nAdmin workspace" /></View>
+        <View style={{ flex: 1 }}><Heading title="Goodies Admin workspace" /></View>
         <OutlineBtn onPress={() => go('content')}>CMS ›</OutlineBtn>
       </View>
       <View style={{ flexDirection: 'row', flexWrap: 'wrap', gap: 7, marginBottom: 10 }}>
