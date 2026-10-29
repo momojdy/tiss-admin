@@ -31,7 +31,8 @@
   },
   "devDependencies": {
     "@types/react": "~19.3.0",
-    "typescript": "~6.0.3"
+    "typescript": "~6.0.3",
+    "babel-preset-expo": "~58.0.20"
   },
   "engines": {
     "node": ">=22.13.0"
