@@ -54,6 +54,8 @@ export function CustomerPageEditorScreen() {
   const [selected, setSelected] = useState<ContentRow | null>(null);
   const [json, setJson] = useState('');
   const [pageKey, setPageKey] = useState('home');
+  const [pageGroup, setPageGroup] = useState<'Main' | 'Services'>('Main');
+  const [pageChoice, setPageChoice] = useState('Authentication pages');
   const [actualGoodiesPreview, setActualGoodiesPreview] = useState(false);
   const [actualAuthEditor, setActualAuthEditor] = useState(false);
   const [pageStack, setPageStack] = useState<string[]>([]);
@@ -336,19 +338,61 @@ export function CustomerPageEditorScreen() {
         <OutlineBtn onPress={startBlankDraft} disabled={!can(...REQ.content)}>Start blank draft</OutlineBtn>
       </View>
       <Heading title="Customer page editor" />
-      <Section title="Customer feature">
-        <FeaturePicker
-          label="Feature"
-          options={featureOptions.map((item) => item.label)}
-          value={activeFeature?.label || featureOptions[0]?.label || 'Goodies'}
-          onChange={(label) => {
-            const item = featureOptions.find((option) => option.label === label);
-            if (!item) return;
-            setPageKey(item.key);
-            setActualGoodiesPreview(item.label === 'Goodies');
-            setActualAuthEditor(item.label === 'Auth');
+      <Section title="Page selection">
+        <SelectMenu
+          label="Page group"
+          options={['Main', 'Services']}
+          value={pageGroup}
+          onChange={(group) => {
+            const nextGroup = group as 'Main' | 'Services';
+            setPageGroup(nextGroup);
+            const first = nextGroup === 'Main' ? 'Authentication pages' : 'Goodies';
+            setPageChoice(first);
+            if (first === 'Authentication pages') {
+              setPageKey('__auth__');
+              setActualAuthEditor(true);
+              setActualGoodiesPreview(false);
+            } else {
+              setPageKey('__actual_goodies__');
+              setActualGoodiesPreview(true);
+              setActualAuthEditor(false);
+            }
             setPageStack([]);
             setElementKey('');
+          }}
+        />
+        <SelectMenu
+          label="Page"
+          options={pageGroup === 'Main'
+            ? ['Authentication pages', 'Home page', 'Settings', 'Me', 'Wallet', 'Orders', 'Addresses', 'Notifications']
+            : ['Goodies', 'Stayz', 'Flyz', 'Konsoliss', 'Woulib', 'Frenzies']}
+          value={pageChoice}
+          onChange={(label) => {
+            setPageChoice(label);
+            setPageStack([]);
+            setElementKey('');
+            setActualAuthEditor(label === 'Authentication pages');
+            setActualGoodiesPreview(label === 'Goodies');
+            const keyByLabel: Record<string, string> = {
+              'Authentication pages': '__auth__', 'Home page': 'home',
+              Settings: 'settings', Me: 'me', Wallet: 'wallet', Orders: 'orders',
+              Addresses: 'addresses', Notifications: 'notifications',
+              Goodies: '__actual_goodies__', Stayz: 'stayz', Flyz: 'flyz',
+              Konsoliss: 'konsoliss', Woulib: 'woulib', Frenzies: 'frenzies',
+            };
+            const key = keyByLabel[label] || label.toLowerCase();
+            setPageKey(key);
+            if (label !== 'Authentication pages' && label !== 'Goodies') {
+              const exists = Boolean((previewPayload?.pages || {})[key]);
+              if (!exists) {
+                ui.editorFeature = key;
+                setError(label + ' has no page draft yet. Select “Start blank draft” to create one.');
+              } else {
+                setError('');
+              }
+            } else {
+              setError('');
+            }
           }}
         />
       </Section>
