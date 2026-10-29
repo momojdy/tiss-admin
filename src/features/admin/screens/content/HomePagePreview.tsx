@@ -1,6 +1,7 @@
-import { useEffect, useState, type ReactNode } from 'react';
-import { Image, Pressable, ScrollView, Text, View } from 'react-native';
+import { useEffect, useRef, useState, type ReactNode } from 'react';
+import { Animated, Image, Pressable, ScrollView, Text, View } from 'react-native';
 import Svg, { Path } from 'react-native-svg';
+import { CategoryCarousel, TEASER_H } from './HomeCategoryCarousel';
 import { DEFAULT_HOME_COPY, homeCategorySlug, type HomeCopy } from '../../lib/wantissHomeContent';
 
 // Copy of the customer Home screen (tiss_tiss_beta: src/screens/Main/mainHomeScreen.tsx) at its 390 point design width.
@@ -18,10 +19,6 @@ const LOGO = BASE + 'WantisslogoOuterless.PNG';
 const TABS = [
   { label: 'Favs', field: 'tab_favs', width: 60 }, { label: 'For you', field: 'tab_for_you', width: 65 }, { label: 'Flash', field: 'tab_flash', width: 70 },
   { label: 'Locals', field: 'tab_locals', width: 60 }, { label: 'New Arrivals', field: 'tab_new_arrivals', width: 80 }, { label: 'Live', field: 'tab_live', width: 70 },
-];
-const CATEGORIES: { label: string; file: string }[] = [
-  { label: 'Goodies', file: 'Goodies.PNG' }, { label: 'Woulib', file: 'Woulib.PNG' }, { label: 'Services', file: 'Services.PNG' },
-  { label: 'Globiz', file: 'Globiz.PNG' }, { label: 'Konsoliss', file: 'Konsoliss.PNG' }, { label: 'Stays', file: 'stays.PNG' },
 ];
 const FEATURED_COLORS = ['#E8C7D8', '#D8B7E0', '#C9A8DE'];
 const CARD_COLORS = ['#D8CFC0', '#C9CEDD', '#D9D9D9'];
@@ -62,6 +59,8 @@ export function HomePagePreview({ copy = DEFAULT_HOME_COPY, images = {}, editMod
   const [tab, setTab] = useState('For you');
   const [tickValue, setTick] = useState(0);
   const [popupOpen, setPopupOpen] = useState(true);
+  const progress = useRef(new Animated.Value(0)).current;
+  const [scrollLocked, setScrollLocked] = useState(false);
   useEffect(() => { if (editMode) return; const id = setInterval(() => setTick((v) => v + 1), 3000); return () => clearInterval(id); }, [editMode]);
   const tick = editMode ? 0 : tickValue;
   const colW = (390 - 16 - 12) / 2;
@@ -156,23 +155,17 @@ export function HomePagePreview({ copy = DEFAULT_HOME_COPY, images = {}, editMod
         </View>
       </View>
 
-      <ScrollView showsVerticalScrollIndicator={false} contentContainerStyle={{ paddingBottom: 105 }}>
-        <View style={{ marginTop: 6, width: 390, height: 88, overflow: 'hidden' }}>
-          {CATEGORIES.map((item, index) => (
-            <View key={item.label} style={{ position: 'absolute', left: index * (390 / 5.59), top: 0 }}>
-              {index < 5 ? sel('cat:' + homeCategorySlug(item.label), category(item), 12) : category(item)}
-            </View>
-          ))}
-          <View pointerEvents="none" style={{ position: 'absolute', left: 0, right: 0, top: 78, height: 10, alignItems: 'center', justifyContent: 'center', flexDirection: 'row' }}>
-            <View style={{ width: 14, height: 4, marginHorizontal: 2, borderRadius: 2, backgroundColor: MAGENTA }} />
-            <View style={{ width: 6, height: 6, marginHorizontal: 2, borderRadius: 3, backgroundColor: '#E0E0E0' }} />
-          </View>
+      <ScrollView scrollEnabled={!scrollLocked} showsVerticalScrollIndicator={false} contentContainerStyle={{ paddingBottom: 105 }}>
+        <View style={{ marginTop: 6 }}>
+          <CategoryCarousel p={progress} onDragActive={setScrollLocked} renderItem={(item) => sel('cat:' + homeCategorySlug(item.label), category(item), 12)} />
         </View>
 
-        <View style={{ height: 156, flexDirection: 'row' }}>
-          {teaser('featured', h('featured_label'), 'sparkle', '#FBEAF0', FEATURED_COLORS[tick % 3], [h('featured_caption_1'), h('featured_caption_2'), h('featured_caption_3')][tick % 3])}
-          {teaser('flash', h('flash_label'), 'clock', '#FCEFD9', '#E8C888', [h('flash_caption_1'), h('flash_caption_2'), h('flash_caption_3')][tick % 3])}
-        </View>
+        <Animated.View style={{ height: progress.interpolate({ inputRange: [0, 1], outputRange: [TEASER_H, 0] }), opacity: progress.interpolate({ inputRange: [0, 1], outputRange: [1, 0] }), overflow: 'hidden' }}>
+          <View style={{ height: TEASER_H, flexDirection: 'row' }}>
+            {teaser('featured', h('featured_label'), 'sparkle', '#FBEAF0', FEATURED_COLORS[tick % 3], [h('featured_caption_1'), h('featured_caption_2'), h('featured_caption_3')][tick % 3])}
+            {teaser('flash', h('flash_label'), 'clock', '#FCEFD9', '#E8C888', [h('flash_caption_1'), h('flash_caption_2'), h('flash_caption_3')][tick % 3])}
+          </View>
+        </Animated.View>
 
         <View style={{ marginHorizontal: 6, marginTop: 6 }}>
           <View style={{ height: 150, padding: 10, paddingTop: 16, borderRadius: 16, backgroundColor: LAVENDER }}>
