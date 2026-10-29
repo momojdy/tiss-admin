@@ -1,6 +1,6 @@
 import { useCallback, useEffect, useState } from 'react';
 import { Image, TextInput, View } from 'react-native';
-import { AuthPhonePreview } from './AuthPhonePreview';
+import { AuthPagePreview } from './AuthPagePreview';
 import * as ImagePicker from 'expo-image-picker';
 import * as DocumentPicker from 'expo-document-picker';
 import { supabase } from '../../lib/supabase';
@@ -162,9 +162,9 @@ export function AuthPageEditor({ canEdit, canPublish }: { canEdit: boolean; canP
         key: assetKey, uri, fileName, contentType, byteSize,
         altText: { en: config.label }, status: 'draft',
       });
-      if (slot === 'logo') { setLogoAssetId(id); setLogoPreview(file.uri); }
-      if (slot === 'google') { setGoogleAssetId(id); setGooglePreview(file.uri); }
-      if (slot === 'apple') { setAppleAssetId(id); setApplePreview(file.uri); }
+      if (slot === 'logo') { setLogoAssetId(id); setLogoPreview(uri); }
+      if (slot === 'google') { setGoogleAssetId(id); setGooglePreview(uri); }
+      if (slot === 'apple') { setAppleAssetId(id); setApplePreview(uri); }
       update(config.payloadKey, assetKey);
       setNotice(config.label + ' uploaded as a private draft. Publish this asset, then save and publish the page content.');
     } catch (e) {
@@ -241,7 +241,12 @@ export function AuthPageEditor({ canEdit, canPublish }: { canEdit: boolean; canP
       <Txt size={11} mut style={{ marginBottom: 10 }}>Edit the existing sign-in and registration page. Authentication actions and validation remain in the customer app; this editor only changes published presentation content.</Txt>
       {error ? <Card><Txt size={11} color={c.or}>{error}</Txt></Card> : null}
       {notice ? <Card><Txt size={11} color={c.ink}>{notice}</Txt></Card> : null}
-      <Section title="Authentication phone preview">\n        <AuthPhonePreview draft={draft} logoPreview={logoPreview} googlePreview={googlePreview} applePreview={applePreview} />\n      </Section>\n      <Section title="Logo and header">
+      <Section title="Authentication phone preview">
+        <View style={{ alignItems: 'center', paddingVertical: 6 }}>
+          <AuthPagePreview copy={draft} logoUrl={logoPreview} googleUrl={googlePreview} appleUrl={applePreview} />
+        </View>
+      </Section>
+      <Section title="Logo and header">
         {renderAssetControl('logo', 'Wantiss logo', logoPreview, logoAssetId)}
         {input('headline', 'Optional header title')}
         {input('subtitle', 'Optional header subtitle', true)}
