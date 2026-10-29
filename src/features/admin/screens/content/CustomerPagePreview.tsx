@@ -99,7 +99,7 @@ export function CustomerPagePreview({ payload, pageKey, mode = 'Preview', view =
         {order.length === 0 ? <Text style={{ color: muted, fontSize: 10, textAlign: 'center', padding: 22 }}>This page has no visible elements yet.</Text> : null}
       </ScrollView>
       <View style={{ flexDirection: 'row', justifyContent: 'space-around', borderTopWidth: 1, borderColor: border, paddingVertical: 9, backgroundColor: '#fff' }}>
-        {pageKeys.slice(0, 4).map((key) => <Pressable key={key} disabled={mode === 'Edit' || !onNavigate} onPress={() => onNavigate?.(key)} style={{ paddingHorizontal: 5, paddingVertical: 3 }}><Text numberOfLines={1} style={{ color: key === pageKey ? '#2F5D4E' : muted, fontSize: 8, fontWeight: key === pageKey ? '700' : '400' }}>{payload.pages?.[key]?.title || key}</Text></Pressable>)}
+        {pageKeys.slice(0, 4).map((key) => <Pressable key={key} disabled={!onNavigate} onPress={() => onNavigate?.(key)} style={{ paddingHorizontal: 5, paddingVertical: 3 }}><Text numberOfLines={1} style={{ color: key === pageKey ? '#2F5D4E' : muted, fontSize: 8, fontWeight: key === pageKey ? '700' : '400' }}>{payload.pages?.[key]?.title || key}</Text></Pressable>)}
       </View>
       <View style={{ height: 12, alignItems: 'center', justifyContent: 'center', backgroundColor: '#fff' }}><View style={{ width: 72, height: 3, borderRadius: 3, backgroundColor: '#D5D5D5' }} /></View>
     </View>
