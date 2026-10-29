@@ -1,8 +1,9 @@
 import { useEffect, useState, type ReactNode } from 'react';
-import { Image, Pressable, Text, View, useWindowDimensions } from 'react-native';
+import { Image, Pressable, Text, View } from 'react-native';
 import { LinearGradient } from 'expo-linear-gradient';
 import Svg, { Path } from 'react-native-svg';
 import { HomePagePreview } from './HomePagePreview';
+import { PhoneFrame } from './PhoneFrame';
 
 const PINK = '#BF008E';
 const LINK = '#9D315B';
@@ -16,12 +17,6 @@ const RED = '#FF0000';
 const SELECT = '#FD802E';
 const LOGO_URL = 'https://raw.githubusercontent.com/momojdy/tiss_icons_assets/refs/heads/main/WantisslogoOuterless.PNG';
 const GOOGLE_PNG = 'https://www.gstatic.com/firebasejs/ui/2.0.0/images/auth/google.png';
-
-// The customer app lays this page out on a 390 point wide screen; the preview renders that exact layout and scales it down.
-const SCREEN_W = 390;
-const SCREEN_H = 844;
-const BEZEL = 7;
-const MAX_SCALE = 0.82;
 
 export type AuthPreviewCopy = Record<string, string | undefined>;
 export type AuthTarget = 'logo' | 'headline' | 'subtitle' | 'buyer' | 'business' | 'space' | 'email' | 'password' | 'fullName' | 'businessName' | 'forgot' | 'google' | 'apple' | 'submit' | 'bottom';
@@ -57,8 +52,6 @@ export function AuthPagePreview({ copy, logoUrl, googleUrl, appleUrl, editMode =
   selected?: AuthTarget | null;
   onSelect?: (target: AuthTarget) => void;
 }) {
-  const { width } = useWindowDimensions();
-  const scale = Math.min(MAX_SCALE, Math.max(0.5, (width - 48) / (SCREEN_W + BEZEL * 2)));
   const [vendor, setVendor] = useState(false);
   const [register, setRegister] = useState(false);
   const [step, setStep] = useState(0);
@@ -177,8 +170,7 @@ export function AuthPagePreview({ copy, logoUrl, googleUrl, appleUrl, editMode =
           {chip('Business', vendor, () => setRole(true))}
         </>}
       </View>
-      <View style={{ width: SCREEN_W * scale + BEZEL * 2, height: SCREEN_H * scale + BEZEL * 2, borderRadius: 30, borderWidth: BEZEL, borderColor: '#252529', overflow: 'hidden', backgroundColor: PAGE_BG }}>
-        <View pointerEvents="box-none" style={{ position: 'absolute', left: 0, top: 0, width: SCREEN_W, height: SCREEN_H, transform: [{ translateX: -(SCREEN_W * (1 - scale)) / 2 }, { translateY: -(SCREEN_H * (1 - scale)) / 2 }, { scale }] }}>
+      <PhoneFrame background={PAGE_BG}>
           {showHome ? <HomePagePreview /> : <View style={{ flex: 1, backgroundColor: PAGE_BG }}>
             <LinearGradient colors={['#F7DDEB', '#FBEAF3', '#FFF5E9']} locations={[0, 0.85, 0.925]} start={{ x: 1, y: 1 }} end={{ x: 0, y: 0 }} style={{ position: 'absolute', top: 0, left: 0, right: 0, height: 356 }} pointerEvents={editMode ? 'box-none' : 'none'}>
               <View style={{ flex: 1, paddingLeft: 10, paddingTop: 50, paddingRight: 30, paddingBottom: 25 }}>
@@ -210,8 +202,7 @@ export function AuthPagePreview({ copy, logoUrl, googleUrl, appleUrl, editMode =
               </View>
             </View>
           </View>}
-        </View>
-      </View>
+      </PhoneFrame>
     </View>
   );
 }

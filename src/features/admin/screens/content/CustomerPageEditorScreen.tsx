@@ -17,6 +17,7 @@ import { Txt } from '../../ui/Txt';
 import { CustomerPagePreview, type CustomerPreviewMode, type CustomerPreviewView } from './CustomerPagePreview';
 import { GoodiesEditor } from './GoodiesEditor';
 import { AuthPageEditor } from './AuthPageEditor';
+import { HomePageEditor } from './HomePageEditor';
 
 type ContentRow = {
   id: string;
@@ -322,6 +323,7 @@ export function CustomerPageEditorScreen() {
     }
   };
 
+  const homeEditor = pageGroup === 'Main' && pageChoice === 'Home page';
   const fieldStyle = { borderWidth: 1, borderColor: c.bd, borderRadius: 10, paddingHorizontal: 9, paddingVertical: 8, marginTop: 5, marginBottom: 8, color: c.ink, backgroundColor: c.card, fontSize: 11 } as const;
 
   return (
@@ -394,8 +396,9 @@ export function CustomerPageEditorScreen() {
 
       {actualGoodiesPreview ? <GoodiesEditor canEdit={can(...REQ.content)} canPublish={can(...REQ.publish)} /> : null}
       {actualAuthEditor ? <AuthPageEditor canEdit={can(...REQ.content)} canPublish={can(...REQ.publish)} /> : null}
+      {homeEditor ? <HomePageEditor canEdit={can(...REQ.content)} canPublish={can(...REQ.publish)} /> : null}
 
-      {!actualGoodiesPreview && !actualAuthEditor ? (
+      {!actualGoodiesPreview && !actualAuthEditor && !homeEditor ? (
       <Section title="Live customer phone preview" right={<View style={{ flexDirection: 'row', flexWrap: 'wrap', gap: 5 }}>
         <View style={{ width: 172 }}>
           <SelectMenu
@@ -437,7 +440,7 @@ export function CustomerPageEditorScreen() {
       </Section>
       ) : null}
 
-      {!actualGoodiesPreview && !actualAuthEditor && selected && viewMode === 'Draft' && editorMode === 'Edit' ? (
+      {!actualGoodiesPreview && !actualAuthEditor && !homeEditor && selected && viewMode === 'Draft' && editorMode === 'Edit' ? (
         <>
           <Section title="Page and element structure">
             {pageKeys.length ? (
