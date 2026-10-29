@@ -137,7 +137,7 @@ export function CustomerPageEditorScreen() {
       setError('Content edit access is required to create a page draft.');
       return;
     }
-    const payload = starterModel();
+    const payload: Record<string, any> = starterModel();
     const requested = String(ui.editorFeature || '').toLowerCase();
     const mainPageTitles: Record<string, string> = {
       settings: 'Settings', me: 'Me', wallet: 'Wallet', orders: 'Orders',
