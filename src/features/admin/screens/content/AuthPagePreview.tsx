@@ -1,7 +1,8 @@
-import { useState, type ReactNode } from 'react';
+import { useEffect, useState, type ReactNode } from 'react';
 import { Image, Pressable, Text, View, useWindowDimensions } from 'react-native';
 import { LinearGradient } from 'expo-linear-gradient';
 import Svg, { Path } from 'react-native-svg';
+import { HomePagePreview } from './HomePagePreview';
 
 const PINK = '#BF008E';
 const LINK = '#9D315B';
@@ -61,6 +62,11 @@ export function AuthPagePreview({ copy, logoUrl, googleUrl, appleUrl, editMode =
   const [vendor, setVendor] = useState(false);
   const [register, setRegister] = useState(false);
   const [step, setStep] = useState(0);
+  const [screen, setScreen] = useState<'auth' | 'home'>('auth');
+  // Signing in only navigates in preview mode; while editing, every tap selects an element instead.
+  const showHome = screen === 'home' && !editMode;
+  const goHome = () => setScreen('home');
+  useEffect(() => { if (editMode) setScreen('auth'); }, [editMode]);
 
   const accent = safeColor(copy.primary_color, PINK);
   const linkAccent = safeColor(copy.link_color, LINK);
@@ -103,13 +109,15 @@ export function AuthPagePreview({ copy, logoUrl, googleUrl, appleUrl, editMode =
     // "Next" is fixed app text: in edit mode it just moves to the next registration step.
     return (
       <View style={{ paddingHorizontal: 15, paddingTop: 20 }}>
-        {label === 'Next' ? <Pressable onPress={() => setStep(1)}>{button}</Pressable> : sel('submit', button, 15)}
+        {label === 'Next' ? <Pressable onPress={() => setStep(1)}>{button}</Pressable> : editMode ? sel('submit', button, 15) : <Pressable onPress={goHome} accessibilityRole="button">{button}</Pressable>}
       </View>
     );
   };
 
-  const socialButton = (target: AuthTarget, children: ReactNode) => sel(target,
-    <View style={{ width: 100, height: 50, borderWidth: 0.5, borderColor: FIELD_TEXT, borderRadius: 10, alignItems: 'center', justifyContent: 'center', backgroundColor: '#fff' }}>{children}</View>, 10);
+  const socialButton = (target: AuthTarget, children: ReactNode) => {
+    const box = <View style={{ width: 100, height: 50, borderWidth: 0.5, borderColor: FIELD_TEXT, borderRadius: 10, alignItems: 'center', justifyContent: 'center', backgroundColor: '#fff' }}>{children}</View>;
+    return editMode ? sel(target, box, 10) : <Pressable onPress={goHome} accessibilityRole="button">{box}</Pressable>;
+  };
 
   const credentials = (submitLabel: string) => (
     <View>
@@ -162,14 +170,16 @@ export function AuthPagePreview({ copy, logoUrl, googleUrl, appleUrl, editMode =
   return (
     <View style={{ alignItems: 'center', width: '100%' }}>
       <View style={{ flexDirection: 'row', flexWrap: 'wrap', gap: 6, marginBottom: 8, justifyContent: 'center' }}>
-        {chip('Sign in', !register, () => { setRegister(false); setStep(0); })}
-        {chip('Register', register, () => { setRegister(true); setStep(0); })}
-        {chip('Buyer', !vendor, () => setRole(false))}
-        {chip('Business', vendor, () => setRole(true))}
+        {showHome ? chip('Back to sign in', false, () => setScreen('auth')) : <>
+          {chip('Sign in', !register, () => { setRegister(false); setStep(0); })}
+          {chip('Register', register, () => { setRegister(true); setStep(0); })}
+          {chip('Buyer', !vendor, () => setRole(false))}
+          {chip('Business', vendor, () => setRole(true))}
+        </>}
       </View>
       <View style={{ width: SCREEN_W * scale + BEZEL * 2, height: SCREEN_H * scale + BEZEL * 2, borderRadius: 30, borderWidth: BEZEL, borderColor: '#252529', overflow: 'hidden', backgroundColor: PAGE_BG }}>
         <View pointerEvents="box-none" style={{ position: 'absolute', left: 0, top: 0, width: SCREEN_W, height: SCREEN_H, transform: [{ translateX: -(SCREEN_W * (1 - scale)) / 2 }, { translateY: -(SCREEN_H * (1 - scale)) / 2 }, { scale }] }}>
-          <View style={{ flex: 1, backgroundColor: PAGE_BG }}>
+          {showHome ? <HomePagePreview /> : <View style={{ flex: 1, backgroundColor: PAGE_BG }}>
             <LinearGradient colors={['#F7DDEB', '#FBEAF3', '#FFF5E9']} locations={[0, 0.85, 0.925]} start={{ x: 1, y: 1 }} end={{ x: 0, y: 0 }} style={{ position: 'absolute', top: 0, left: 0, right: 0, height: 356 }} pointerEvents={editMode ? 'box-none' : 'none'}>
               <View style={{ flex: 1, paddingLeft: 10, paddingTop: 50, paddingRight: 30, paddingBottom: 25 }}>
                 {sel('logo', <Image source={{ uri: logoUrl || LOGO_URL }} style={{ width: '100%', height: headline || subtitle || editMode ? 202 : 281, borderRadius: 8 }} resizeMode="contain" />, 8)}
@@ -199,7 +209,7 @@ export function AuthPagePreview({ copy, logoUrl, googleUrl, appleUrl, editMode =
                   </Pressable>, 8)}
               </View>
             </View>
-          </View>
+          </View>}
         </View>
       </View>
     </View>
