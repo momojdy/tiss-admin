@@ -1,5 +1,6 @@
 import { useCallback, useEffect, useState } from 'react';
 import { Image, TextInput, View } from 'react-native';
+import { AuthPhonePreview } from './AuthPhonePreview';
 import * as ImagePicker from 'expo-image-picker';
 import * as DocumentPicker from 'expo-document-picker';
 import { supabase } from '../../lib/supabase';
@@ -240,7 +241,7 @@ export function AuthPageEditor({ canEdit, canPublish }: { canEdit: boolean; canP
       <Txt size={11} mut style={{ marginBottom: 10 }}>Edit the existing sign-in and registration page. Authentication actions and validation remain in the customer app; this editor only changes published presentation content.</Txt>
       {error ? <Card><Txt size={11} color={c.or}>{error}</Txt></Card> : null}
       {notice ? <Card><Txt size={11} color={c.ink}>{notice}</Txt></Card> : null}
-      <Section title="Logo and header">
+      <Section title="Authentication phone preview">\n        <AuthPhonePreview draft={draft} logoPreview={logoPreview} googlePreview={googlePreview} applePreview={applePreview} />\n      </Section>\n      <Section title="Logo and header">
         {renderAssetControl('logo', 'Wantiss logo', logoPreview, logoAssetId)}
         {input('headline', 'Optional header title')}
         {input('subtitle', 'Optional header subtitle', true)}
