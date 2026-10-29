@@ -54,7 +54,7 @@ export function CustomerPageEditorScreen() {
   const [json, setJson] = useState('');
   const [pageKey, setPageKey] = useState('home');
   const [pageGroup, setPageGroup] = useState<'Main' | 'Services'>('Main');
-  const [pageChoice, setPageChoice] = useState('Authentication pages');
+  const [pageChoice, setPageChoice] = useState('Home page');
   const [actualGoodiesPreview, setActualGoodiesPreview] = useState(false);
   const [actualAuthEditor, setActualAuthEditor] = useState(false);
   const [pageStack, setPageStack] = useState<string[]>([]);
@@ -256,7 +256,6 @@ export function CustomerPageEditorScreen() {
   });
 
   const navigatePhone = (nextPage: string) => {
-    if (viewMode === 'Draft' && editorMode === 'Edit') return;
     if (!previewPayload?.pages?.[nextPage]) return;
     setPageStack((current) => [...current, activePageKey]);
     setPageKey(nextPage);
