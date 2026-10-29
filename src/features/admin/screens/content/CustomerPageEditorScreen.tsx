@@ -138,12 +138,30 @@ export function CustomerPageEditorScreen() {
       return;
     }
     const payload = starterModel();
+    const requested = String(ui.editorFeature || '').toLowerCase();
+    const mainPageTitles: Record<string, string> = {
+      settings: 'Settings', me: 'Me', wallet: 'Wallet', orders: 'Orders',
+      addresses: 'Addresses', notifications: 'Notifications',
+    };
+    const requestedKey = Object.keys(mainPageTitles).find((key) => key === requested);
+    if (requestedKey) {
+      const title = mainPageTitles[requestedKey];
+      payload.pages[requestedKey] = {
+        title,
+        order: [requestedKey + '.heading'],
+        els: {
+          [requestedKey + '.heading']: {
+            t: 'text', title, label: title, sub: 'Add page content', vis: 1,
+          },
+        },
+      };
+    }
     setSelected({
       id: 'local-new', content_key: CONTENT_KEY, locale: 'en', version: 0,
       status: 'draft', payload, updated_at: new Date().toISOString(),
     });
     setJson(JSON.stringify(payload, null, 2));
-    setPageKey('home');
+    setPageKey(requestedKey || 'home');
     setPageStack([]);
     setElementKey('');
     setViewMode('Draft');
