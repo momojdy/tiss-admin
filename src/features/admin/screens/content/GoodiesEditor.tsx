@@ -206,8 +206,8 @@ export function GoodiesEditor({ canEdit, canPublish }: { canEdit: boolean; canPu
   return (
     <View>
       <Section title="Goodies content" right={<View style={{ flexDirection: 'row', flexWrap: 'wrap', gap: 5 }}>
-        <OutlineBtn primary={mode === 'Edit'} disabled={!canEdit} onPress={() => toggleMode('Edit')}>Edit</OutlineBtn>
-        <OutlineBtn primary={mode === 'Preview'} onPress={() => toggleMode('Preview')}>Preview</OutlineBtn>
+        <OutlineBtn primary={mode === 'Edit'} disabled={!canEdit} onPress={() => toggleMode('Edit')}>Manual editor</OutlineBtn>
+        <OutlineBtn primary={mode === 'Preview'} onPress={() => toggleMode('Preview')}>Phone preview</OutlineBtn>
       </View>}>
         {source !== 'none' || row ? <Txt size={10.5} mut>{statusLine}{dirty ? ' · unsaved changes' : ''}</Txt> : null}
         
