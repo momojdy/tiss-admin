@@ -268,14 +268,14 @@ export function AuthPageEditor({ canEdit, canPublish }: { canEdit: boolean; canP
   return (
     <View>
       <Heading title="Authentication page editor" />
-      <Txt size={11} mut style={{ marginBottom: 10 }}>Edit the existing sign-in and registration page. Authentication actions and validation remain in the customer app; this editor only changes published presentation content.</Txt>
+      <Txt size={11} mut style={{ marginBottom: 10 }}>Edit sign-in and registration copy, colors, and images.</Txt>
       {error ? <Card><Txt size={11} color={c.or}>{error}</Txt></Card> : null}
       {notice ? <Card><Txt size={11} color={c.ink}>{notice}</Txt></Card> : null}
       <Section title="Authentication page" right={<View style={{ flexDirection: 'row', flexWrap: 'wrap', gap: 5 }}>
         <OutlineBtn primary={manual} onPress={() => switchMode('Manual editor')}>Manual editor</OutlineBtn>
         <OutlineBtn primary={!manual} onPress={() => switchMode('Phone preview')}>Phone preview</OutlineBtn>
       </View>}>
-        <Txt size={10} mut>{manual ? (canEdit ? 'Tap any element on the phone to edit it, or change everything from the lists below.' : 'View access only: editing is disabled.') : 'Preview only. Switch between sign in, register, buyer and business above the phone.'}</Txt>
+        <Txt size={10} mut>{manual ? (canEdit ? 'Select an item on the phone or edit it below.' : 'View access only: editing is disabled.') : 'Choose sign-in, registration, buyer, or business above.'}</Txt>
         <View style={{ alignItems: 'center', paddingVertical: 8 }}>
           <AuthPagePreview copy={draft} logoUrl={logoPreview} googleUrl={googlePreview} appleUrl={applePreview} editMode={editOnPhone} selected={selected} onSelect={setSelected} />
         </View>
@@ -297,7 +297,7 @@ export function AuthPageEditor({ canEdit, canPublish }: { canEdit: boolean; canP
         {input('subtitle', 'Optional header subtitle', true)}
       </Section>
       <Section title="Google and Apple sign-in images">
-        <Txt size={10.5} mut>Choose each button image from your photo library (including the image version of a Live Photo) or from Files. Upload the image, publish that image asset, then save and publish the page draft. The existing Google and Apple sign-in actions stay unchanged. Supported formats: JPEG, PNG, WebP, and GIF.</Txt>
+        <Txt size={10.5} mut>Choose images from Photos or Files, then publish the assets and page draft. Sign-in actions stay unchanged. Formats: JPEG, PNG, WebP, GIF.</Txt>
         {renderAssetControl('google', 'Google sign-in image', googlePreview, googleAssetId)}
         {renderAssetControl('apple', 'Apple sign-in image', applePreview, appleAssetId)}
       </Section>
