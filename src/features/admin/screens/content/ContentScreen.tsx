@@ -26,7 +26,12 @@ type ContentRow = {
   id: string; content_key: string; locale: string; version: number; status: 'draft' | 'published' | 'archived';
   payload: Record<string, unknown>; updated_at: string;
 };
-const customerFeatures = ['Goodies', 'Stayz', 'Flyz', 'Konsoliss', 'Woulib', 'Wallet', 'Frenzies', 'Wantiss home'] as const;
+const customerFeatures = ['Goodies', 'Stayz', 'Flyz', 'Konsoliss', 'Woulib', 'Frenzies'] as const;
+const editorPagesByGroup: Record<string, string[]> = {
+  Main: ['Authentication pages', 'Home page', 'Settings', 'Me', 'Wallet', 'Orders', 'Addresses', 'Notifications'],
+  Services: [...customerFeatures],
+};
+const editorTarget = (page: string) => page === 'Authentication pages' ? 'Auth' : page === 'Home page' ? 'Wantiss home' : page;
 type AssetRow = {
   id: string; asset_key: string; storage_path: string; content_type: string; byte_size: number;
   status: 'draft' | 'published' | 'archived'; alt_text: Record<string, string>; updated_at: string;
@@ -47,7 +52,8 @@ export function ContentScreen() {
   const [assetSearch, setAssetSearch] = useState('');
   const [assetFeature, setAssetFeature] = useState('All features');
   const [assetPlacement, setAssetPlacement] = useState('All placements');
-  const [customerFeature, setCustomerFeature] = useState<(typeof customerFeatures)[number]>('Goodies');
+  const [editorGroup, setEditorGroup] = useState('Main');
+  const [customerFeature, setCustomerFeature] = useState('Authentication pages');
 
   const reload = useCallback(async () => {
     setLoading(true);
@@ -106,7 +112,7 @@ export function ContentScreen() {
       if (!file.size || !file.mimeType) { setError('The selected file has no readable size or MIME type.'); return; }
       form({
         title: 'Upload private asset',
-        sub: 'The asset is private by default. Publishing creates short-lived signed URLs for published customer/vendor content.',
+        sub: 'Private until published to customer/vendor content.',
         fields: [
           { id: 'key', label: 'Asset key · use feature.page.placement.name', type: 'text', required: true, value: file.name.replace(/\\.[^.]+$/, '').toLowerCase().replace(/[^a-z0-9]+/g, '.') },
           { id: 'feature', label: 'Feature', type: 'select', options: ['Goodies', 'Stayz', 'Flyz', 'Konsoliss', 'Woulib', 'Wallet', 'Frenzies', 'Wantiss home'], value: 'Goodies', required: true },
@@ -354,7 +360,7 @@ export function ContentScreen() {
           ...displayBanners.filter((banner) => banner.st === 'In review' || banner.st === 'Draft').map((banner) => ({ key: 'banner-' + banner.id, main: banner.t, sub: 'Banner · ' + banner.svc, right: <OutlineBtn onPress={() => stageContentDraft('approval.' + banner.id, banner.id, { item_type: 'banner', proposed_action: 'review', item_id: banner.id })}>Stage review</OutlineBtn> })),
           ...displayPromotions.filter((promotion) => promotion.st === 'In review' || promotion.st === 'Draft').map((promotion) => ({ key: 'promotion-' + promotion.id, main: promotion.n, sub: 'Promotion · ' + promotion.svc, right: <OutlineBtn onPress={() => stageContentDraft('approval.' + promotion.id, promotion.id, { item_type: 'promotion', proposed_action: 'review', item_id: promotion.id })}>Stage review</OutlineBtn> })),
         ]} />
-        <Txt size={9.5} mut style={{ marginTop: 8 }}>These are draft proposals only. A real approval queue needs a dedicated server-side review endpoint.</Txt>
+        <Txt size={9.5} mut style={{ marginTop: 8 }}>Proposals only; live approval workflow is not connected.</Txt>
       </Section> : null}
 
       {activeSection === 'History' ? <Section title="Publishing history (read-only)">
@@ -393,8 +399,12 @@ export function ContentScreen() {
       ) : null}
 
       {activeSection === 'Editor' ? <Section title="Customer page editor">
-        <FeaturePicker options={customerFeatures} value={customerFeature} onChange={setCustomerFeature} />
-        <OutlineBtn primary onPress={() => go('editor', { editorFeature: customerFeature })}><View style={{ flexDirection: 'row', alignItems: 'center', gap: 4 }}>{`Open ${customerFeature} page editor`}<AppIcon name="chevron-right" size={12} /></View></OutlineBtn>
+        <SelectMenu label="Page group" options={['Main', 'Services']} value={editorGroup} onChange={(group) => {
+          setEditorGroup(group);
+          setCustomerFeature(group === 'Main' ? 'Authentication pages' : 'Goodies');
+        }} />
+        <FeaturePicker label={editorGroup === 'Main' ? 'Main page' : 'Service'} options={editorPagesByGroup[editorGroup]} value={customerFeature} onChange={setCustomerFeature} />
+        <OutlineBtn primary onPress={() => go('editor', { editorFeature: editorTarget(customerFeature) })}><View style={{ flexDirection: 'row', alignItems: 'center', gap: 4 }}>{`Open ${customerFeature} editor`}<AppIcon name="chevron-right" size={12} /></View></OutlineBtn>
       </Section> : null}
 
       {activeSection === 'CMS versions' ? (
