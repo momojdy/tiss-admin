@@ -245,7 +245,7 @@ export function AccountSheet({ onClose }: { onClose: () => void }) {
         <CardTitle title="My activity" />
         <ListRows empty="No activity yet." rows={mineLog.map((a, i) => ({ key: String(i), main: a[0], sub: a[2] }))} />
       </Card>
-      {secLv(7) > 0 ? <OutlineBtn onPress={() => { closeAll(); openDrawer((close) => <SettingsSheet onClose={close} />); }}><View style={{ flexDirection: 'row', alignItems: 'center', gap: 4 }}><AppIcon name="settings" size={14} /><Txt size={10.1} weight={500}>Settings</Txt></View></OutlineBtn> : null}
+      {secLv(7) > 0 ? <OutlineBtn onPress={() => { closeAll(); openDrawer((close) => <SettingsSheet onClose={close} />); }}><Txt size={10.1} weight={500}>Settings</Txt></OutlineBtn> : null}
       <OutlineBtn onPress={() => { closeAll(); leaveApp(); bump(); }}>Sign out</OutlineBtn>
     </DrawerBody>
   );
