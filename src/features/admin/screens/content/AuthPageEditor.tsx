@@ -1,6 +1,7 @@
 import { useCallback, useEffect, useState } from 'react';
 import { Image, TextInput, View } from 'react-native';
 import * as ImagePicker from 'expo-image-picker';
+import * as DocumentPicker from 'expo-document-picker';
 import { supabase } from '../../lib/supabase';
 import { listCmsAssets, publishCmsAsset, publishCmsVersion, saveCmsVersion, uploadCmsAsset } from '../../lib/adminBackend';
 import { useTheme } from '../../theme/ThemeContext';
@@ -108,22 +109,57 @@ export function AuthPageEditor({ canEdit, canPublish }: { canEdit: boolean; canP
     google: { key: 'wantiss.auth.google', payloadKey: 'google_asset_key' as const, label: 'Google sign-in button image' },
     apple: { key: 'wantiss.auth.apple', payloadKey: 'apple_asset_key' as const, label: 'Apple sign-in button image' },
   };
-  const uploadAuthAsset = async (slot: AuthAssetSlot) => {
+  const uploadAuthAsset = async (slot: AuthAssetSlot, source: 'photos' | 'files') => {
     if (!canEdit || busy) return;
     setError(''); setNotice('');
     try {
-      const result = await ImagePicker.launchImageLibraryAsync({ mediaTypes: ['images'], allowsEditing: true, quality: 0.9 });
-      if (result.canceled || !result.assets?.[0]) return;
-      const file = result.assets[0];
-      const contentType = file.mimeType || 'image/jpeg';
-      const byteSize = file.fileSize || 0;
+      let uri = '';
+      let fileName = slot + '-auth-asset';
+      let contentType = 'image/jpeg';
+      let byteSize = 0;
+
+      if (source === 'photos') {
+        const result = await ImagePicker.launchImageLibraryAsync({
+          mediaTypes: ['images'],
+          allowsEditing: true,
+          quality: 0.9,
+        });
+        if (result.canceled || !result.assets?.[0]) return;
+        const file = result.assets[0];
+        uri = file.uri;
+        fileName = file.fileName || fileName;
+        contentType = file.mimeType || contentType;
+        byteSize = file.fileSize || 0;
+      } else {
+        const result = await DocumentPicker.getDocumentAsync({
+          type: 'image/*',
+          multiple: false,
+          copyToCacheDirectory: true,
+        });
+        if (result.canceled || !result.assets?.[0]) return;
+        const file = result.assets[0];
+        uri = file.uri;
+        fileName = file.name || fileName;
+        contentType = file.mimeType || contentType;
+        byteSize = file.size || 0;
+      }
+
+      if (!byteSize) {
+        const response = await fetch(uri);
+        if (!response.ok) throw new Error('The selected image could not be read. Choose another image.');
+        byteSize = (await response.blob()).size;
+      }
       if (!byteSize) throw new Error('The selected image size could not be read. Choose another image.');
+      if (!['image/jpeg', 'image/png', 'image/webp', 'image/gif'].includes(contentType)) {
+        throw new Error('Choose a JPEG, PNG, WebP, or GIF image. If your photo is HEIC/HEIF, export it as JPEG first.');
+      }
+
       setBusy(slot);
       const config = assetConfig[slot];
       const assetKey = config.key + '.' + crypto.randomUUID();
       const id = await uploadCmsAsset({
-        key: assetKey, uri: file.uri, fileName: file.fileName || slot + '-auth-asset',
-        contentType, byteSize, altText: { en: config.label }, status: 'draft',
+        key: assetKey, uri, fileName, contentType, byteSize,
+        altText: { en: config.label }, status: 'draft',
       });
       if (slot === 'logo') { setLogoAssetId(id); setLogoPreview(file.uri); }
       if (slot === 'google') { setGoogleAssetId(id); setGooglePreview(file.uri); }
@@ -179,7 +215,12 @@ export function AuthPageEditor({ canEdit, canPublish }: { canEdit: boolean; canP
       {preview ? <Image source={{ uri: preview }} resizeMode="contain" style={{ width: 100, height: 64, borderRadius: 8, backgroundColor: '#FFFFFF' }} /> : <View style={{ width: 100, height: 64, borderRadius: 8, backgroundColor: c.inset, alignItems: 'center', justifyContent: 'center' }}><Txt size={10} mut>No custom image</Txt></View>}
       <View style={{ flex: 1, minWidth: 160, gap: 6 }}>
         <Txt size={11}>{title}</Txt>
-        <OutlineBtn onPress={() => { void uploadAuthAsset(slot); }} disabled={!canEdit || !!busy}>{busy === slot ? 'Uploading…' : 'Choose image from photo library'}</OutlineBtn>
+        <OutlineBtn onPress={() => { void uploadAuthAsset(slot, 'photos'); }} disabled={!canEdit || !!busy}>
+          {busy === slot ? 'Uploading…' : 'Choose from Photos / Live Photos'}
+        </OutlineBtn>
+        <OutlineBtn onPress={() => { void uploadAuthAsset(slot, 'files'); }} disabled={!canEdit || !!busy}>
+          Choose from Files
+        </OutlineBtn>
         {assetId ? <OutlineBtn onPress={() => { void publishAuthAsset(slot); }} disabled={!canPublish || !!busy}>{busy === 'publish-' + slot ? 'Publishing…' : 'Publish image asset'}</OutlineBtn> : null}
       </View>
     </View>
@@ -205,7 +246,7 @@ export function AuthPageEditor({ canEdit, canPublish }: { canEdit: boolean; canP
         {input('subtitle', 'Optional header subtitle', true)}
       </Section>
       <Section title="Google and Apple sign-in images">
-        <Txt size={10.5} mut>Optional image overrides for the existing social sign-in buttons. Leave these empty to keep the current built-in Google and Apple icons. Uploading images does not change the sign-in actions.</Txt>
+        <Txt size={10.5} mut>Choose each button image from your photo library (including the image version of a Live Photo) or from Files. Upload the image, publish that image asset, then save and publish the page draft. The existing Google and Apple sign-in actions stay unchanged. Supported formats: JPEG, PNG, WebP, and GIF.</Txt>
         {renderAssetControl('google', 'Google sign-in image', googlePreview, googleAssetId)}
         {renderAssetControl('apple', 'Apple sign-in image', applePreview, appleAssetId)}
       </Section>
