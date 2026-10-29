@@ -97,6 +97,16 @@ export function CustomerPageEditorScreen() {
     if (requestedFeature) {
       setActualGoodiesPreview(requested === 'goodies');
       setActualAuthEditor(requested === 'auth' || requested === 'authentication');
+      if (requested === 'auth' || requested === 'authentication') {
+        setPageGroup('Main');
+        setPageChoice('Authentication pages');
+      } else if (requested === 'goodies') {
+        setPageGroup('Services');
+        setPageChoice('Goodies');
+      } else if (requested === 'wantiss home') {
+        setPageGroup('Main');
+        setPageChoice('Home page');
+      }
     }
     if (!requestedFeature) return;
     if (requested === 'auth' || requested === 'authentication') {
