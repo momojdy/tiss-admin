@@ -1,6 +1,6 @@
 import { useCallback, useEffect, useState } from 'react';
 import { Image, TextInput, View } from 'react-native';
-import { AuthPagePreview } from './AuthPagePreview';
+import { AuthPagePreview, type AuthTarget } from './AuthPagePreview';
 import * as ImagePicker from 'expo-image-picker';
 import * as DocumentPicker from 'expo-document-picker';
 import { supabase } from '../../lib/supabase';
@@ -41,6 +41,25 @@ const DEFAULTS = {
 };
 
 type AuthDraft = typeof DEFAULTS;
+type AuthAssetSlot = 'logo' | 'google' | 'apple';
+type TargetField = { key: keyof AuthDraft; label: string; multiline?: boolean };
+const TARGETS: Record<AuthTarget, { title: string; fields: TargetField[]; asset?: AuthAssetSlot }> = {
+  logo: { title: 'Logo', fields: [], asset: 'logo' },
+  headline: { title: 'Header title', fields: [{ key: 'headline', label: 'Header title (optional)' }] },
+  subtitle: { title: 'Header subtitle', fields: [{ key: 'subtitle', label: 'Header subtitle (optional)', multiline: true }] },
+  buyer: { title: 'Buyer toggle', fields: [{ key: 'buyer_label', label: 'Buyer toggle label' }, { key: 'primary_color', label: 'Primary accent color (hex, e.g. #BF008E)' }] },
+  business: { title: 'Business toggle', fields: [{ key: 'business_label', label: 'Business toggle label' }, { key: 'primary_color', label: 'Primary accent color (hex, e.g. #BF008E)' }] },
+  space: { title: 'Business Space label', fields: [{ key: 'business_space_label', label: 'Business Space label' }] },
+  email: { title: 'Email field', fields: [{ key: 'email_placeholder', label: 'Email field placeholder' }] },
+  password: { title: 'Password field', fields: [{ key: 'password_placeholder', label: 'Password field placeholder' }] },
+  fullName: { title: 'Full name field', fields: [{ key: 'full_name_placeholder', label: 'Full name field placeholder' }] },
+  businessName: { title: 'Business name field', fields: [{ key: 'business_name_placeholder', label: 'Business name field placeholder' }] },
+  forgot: { title: 'Forgot password link', fields: [{ key: 'forgot_password_label', label: 'Forgot password link' }, { key: 'link_color', label: 'Link color (hex, e.g. #9D315B)' }] },
+  google: { title: 'Google sign-in button', fields: [], asset: 'google' },
+  apple: { title: 'Apple sign-in button', fields: [], asset: 'apple' },
+  submit: { title: 'Main button', fields: [{ key: 'sign_in_button', label: 'Sign-in button' }, { key: 'sign_up_button', label: 'Sign-up button' }, { key: 'primary_color', label: 'Primary accent color (hex, e.g. #BF008E)' }] },
+  bottom: { title: 'Register / sign-in prompt', fields: [{ key: 'register_prompt', label: 'Register prompt' }, { key: 'register_link', label: 'Register link text' }, { key: 'login_prompt', label: 'Existing-account prompt' }, { key: 'login_link', label: 'Sign-in link text' }, { key: 'link_color', label: 'Link color (hex, e.g. #9D315B)' }] },
+};
 const COLUMNS = 'id,version,status,payload';
 
 export function AuthPageEditor({ canEdit, canPublish }: { canEdit: boolean; canPublish: boolean }) {
@@ -59,6 +78,8 @@ export function AuthPageEditor({ canEdit, canPublish }: { canEdit: boolean; canP
   const [busy, setBusy] = useState<string>('');
   const [error, setError] = useState('');
   const [notice, setNotice] = useState('');
+  const [mode, setMode] = useState<'Manual editor' | 'Phone preview'>('Manual editor');
+  const [selected, setSelected] = useState<AuthTarget | null>(null);
 
   const load = useCallback(async () => {
     setLoading(true); setError('');
@@ -104,7 +125,6 @@ export function AuthPageEditor({ canEdit, canPublish }: { canEdit: boolean; canP
   };
   const dirty = JSON.stringify(draft) !== baseline;
 
-  type AuthAssetSlot = 'logo' | 'google' | 'apple';
   const assetConfig = {
     logo: { key: LOGO_KEY, payloadKey: 'logo_asset_key' as const, label: 'Wantiss authentication page logo' },
     google: { key: 'wantiss.auth.google', payloadKey: 'google_asset_key' as const, label: 'Google sign-in button image' },
@@ -228,12 +248,22 @@ export function AuthPageEditor({ canEdit, canPublish }: { canEdit: boolean; canP
   );
 
   const fieldStyle = { borderWidth: 1, borderColor: c.bd, borderRadius: 10, paddingHorizontal: 10, paddingVertical: 9, marginTop: 5, marginBottom: 9, color: c.ink, backgroundColor: c.card, fontSize: 12 } as const;
+  const isColorKey = (key: keyof AuthDraft) => key === 'primary_color' || key === 'link_color';
   const input = (key: keyof AuthDraft, label: string, multiline = false) => (
     <View key={key} style={{ marginTop: 5 }}>
       <Txt size={10.5} mut>{label}</Txt>
-      <TextInput value={String(draft[key] ?? '')} onChangeText={(value) => update(key, value)} editable={canEdit && !busy} multiline={multiline} style={[fieldStyle, multiline ? { minHeight: 64, textAlignVertical: 'top' } : null]} />
+      <View style={{ flexDirection: 'row', alignItems: 'center', gap: 8 }}>
+        <TextInput value={String(draft[key] ?? '')} onChangeText={(value) => update(key, value)} editable={canEdit && !busy} multiline={multiline} autoCapitalize={isColorKey(key) ? 'none' : undefined} style={[fieldStyle, { flex: 1 }, multiline ? { minHeight: 64, textAlignVertical: 'top' } : null]} />
+        {isColorKey(key) ? <View style={{ width: 28, height: 28, borderRadius: 8, borderWidth: 1, borderColor: c.bd, backgroundColor: /^#[0-9a-fA-F]{6}$/.test(String(draft[key])) ? String(draft[key]) : 'transparent' }} /> : null}
+      </View>
     </View>
   );
+
+  const manual = mode === 'Manual editor';
+  const editOnPhone = manual && canEdit;
+  const target = selected ? TARGETS[selected] : null;
+  const assetState = (slot: AuthAssetSlot) => slot === 'logo' ? { preview: logoPreview, id: logoAssetId } : slot === 'google' ? { preview: googlePreview, id: googleAssetId } : { preview: applePreview, id: appleAssetId };
+  const switchMode = (next: 'Manual editor' | 'Phone preview') => { setMode(next); setSelected(null); };
 
   return (
     <View>
@@ -241,11 +271,26 @@ export function AuthPageEditor({ canEdit, canPublish }: { canEdit: boolean; canP
       <Txt size={11} mut style={{ marginBottom: 10 }}>Edit the existing sign-in and registration page. Authentication actions and validation remain in the customer app; this editor only changes published presentation content.</Txt>
       {error ? <Card><Txt size={11} color={c.or}>{error}</Txt></Card> : null}
       {notice ? <Card><Txt size={11} color={c.ink}>{notice}</Txt></Card> : null}
-      <Section title="Authentication phone preview">
-        <View style={{ alignItems: 'center', paddingVertical: 6 }}>
-          <AuthPagePreview copy={draft} logoUrl={logoPreview} googleUrl={googlePreview} appleUrl={applePreview} />
+      <Section title="Authentication page" right={<View style={{ flexDirection: 'row', flexWrap: 'wrap', gap: 5 }}>
+        <OutlineBtn primary={manual} onPress={() => switchMode('Manual editor')}>Manual editor</OutlineBtn>
+        <OutlineBtn primary={!manual} onPress={() => switchMode('Phone preview')}>Phone preview</OutlineBtn>
+      </View>}>
+        <Txt size={10} mut>{manual ? (canEdit ? 'Tap any element on the phone to edit it, or change everything from the lists below.' : 'View access only: editing is disabled.') : 'Preview only. Switch between sign in, register, buyer and business above the phone.'}</Txt>
+        <View style={{ alignItems: 'center', paddingVertical: 8 }}>
+          <AuthPagePreview copy={draft} logoUrl={logoPreview} googleUrl={googlePreview} appleUrl={applePreview} editMode={editOnPhone} selected={selected} onSelect={setSelected} />
         </View>
       </Section>
+      {editOnPhone && target && selected ? (
+        <Section title={target.title}>
+          {target.fields.map((field) => input(field.key, field.label, field.multiline))}
+          {target.asset ? renderAssetControl(target.asset, target.title === 'Logo' ? 'Wantiss logo' : target.title.replace(' button', ' image'), assetState(target.asset).preview, assetState(target.asset).id) : null}
+          <View style={{ flexDirection: 'row', flexWrap: 'wrap', gap: 6, marginTop: 8 }}>
+            <OutlineBtn onPress={() => setSelected(null)}>Done</OutlineBtn>
+          </View>
+        </Section>
+      ) : null}
+      {manual ? (
+        <>
       <Section title="Logo and header">
         {renderAssetControl('logo', 'Wantiss logo', logoPreview, logoAssetId)}
         {input('headline', 'Optional header title')}
@@ -274,6 +319,8 @@ export function AuthPageEditor({ canEdit, canPublish }: { canEdit: boolean; canP
         {input('primary_color', 'Primary accent color (hex, e.g. #BF008E)')}
         {input('link_color', 'Link color (hex, e.g. #9D315B)')}
       </Section>
+        </>
+      ) : null}
       <Section title="Draft and publishing">
         <Txt size={10.5} mut>{loading ? 'Loading current CMS version…' : row ? 'Current version: ' + row.version + ' · ' + row.status : 'No CMS version exists yet. Saving creates the first draft.'}</Txt>
         <View style={{ flexDirection: 'row', flexWrap: 'wrap', gap: 8, marginTop: 8 }}>

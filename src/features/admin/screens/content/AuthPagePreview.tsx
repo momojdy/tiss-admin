@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, type ReactNode } from 'react';
 import { Image, Pressable, Text, View, useWindowDimensions } from 'react-native';
 import { LinearGradient } from 'expo-linear-gradient';
 import Svg, { Path } from 'react-native-svg';
@@ -12,6 +12,7 @@ const FIELD_TEXT = '#9A4B68';
 const DARK = '#14181B';
 const PAGE_BG = '#F1F4F8';
 const RED = '#FF0000';
+const SELECT = '#FD802E';
 const LOGO_URL = 'https://raw.githubusercontent.com/momojdy/tiss_icons_assets/refs/heads/main/WantisslogoOuterless.PNG';
 const GOOGLE_PNG = 'https://www.gstatic.com/firebasejs/ui/2.0.0/images/auth/google.png';
 
@@ -22,6 +23,7 @@ const BEZEL = 7;
 const MAX_SCALE = 0.82;
 
 export type AuthPreviewCopy = Record<string, string | undefined>;
+export type AuthTarget = 'logo' | 'headline' | 'subtitle' | 'buyer' | 'business' | 'space' | 'email' | 'password' | 'fullName' | 'businessName' | 'forgot' | 'google' | 'apple' | 'submit' | 'bottom';
 
 const safeColor = (value: unknown, fallback: string) =>
   typeof value === 'string' && /^#[0-9a-fA-F]{6}$/.test(value.trim()) ? value.trim() : fallback;
@@ -44,20 +46,16 @@ function Icon({ name, color = FIELD_TEXT, size = 24 }: { name: keyof typeof ICON
   );
 }
 
-function Field({ top, placeholder, icon, suffix }: { top: number; placeholder: string; icon: keyof typeof ICONS; suffix?: boolean }) {
-  return (
-    <View style={{ paddingTop: top, paddingBottom: 8, paddingHorizontal: 8 }}>
-      <View style={{ height: 60, backgroundColor: FIELD_BG, borderRadius: 15, flexDirection: 'row', alignItems: 'center', paddingLeft: 2 }}>
-        <View style={{ width: 48, alignItems: 'center' }}><Icon name={icon} /></View>
-        <Text style={{ flex: 1, fontSize: 18, color: FIELD_TEXT }} numberOfLines={1}>{placeholder}</Text>
-        {suffix ? <View style={{ width: 48, alignItems: 'center' }}><Icon name="eye" /></View> : null}
-      </View>
-    </View>
-  );
-}
-
-/** Phone preview of the customer sign-in / registration page, driven by the unsaved draft. */
-export function AuthPagePreview({ copy, logoUrl, googleUrl, appleUrl }: { copy: AuthPreviewCopy; logoUrl?: string; googleUrl?: string; appleUrl?: string }) {
+/** Phone preview of the customer sign-in / registration page, driven by the unsaved draft. In edit mode every element is tappable. */
+export function AuthPagePreview({ copy, logoUrl, googleUrl, appleUrl, editMode = false, selected = null, onSelect }: {
+  copy: AuthPreviewCopy;
+  logoUrl?: string;
+  googleUrl?: string;
+  appleUrl?: string;
+  editMode?: boolean;
+  selected?: AuthTarget | null;
+  onSelect?: (target: AuthTarget) => void;
+}) {
   const { width } = useWindowDimensions();
   const scale = Math.min(MAX_SCALE, Math.max(0.5, (width - 48) / (SCREEN_W + BEZEL * 2)));
   const [vendor, setVendor] = useState(false);
@@ -71,34 +69,61 @@ export function AuthPagePreview({ copy, logoUrl, googleUrl, appleUrl }: { copy: 
   const t = (value: string | undefined, fallback: string) => (value && value.length ? value : fallback);
 
   const setRole = (next: boolean) => { setVendor(next); setStep(0); };
-  const setMode = () => { setRegister((v) => !v); setStep(0); };
+  const pick = (target: AuthTarget) => onSelect?.(target);
 
-  const submit = (label: string) => (
-    <View style={{ paddingHorizontal: 15, paddingTop: 20 }}>
+  /** Makes an element tappable in edit mode and outlines it when selected. */
+  const sel = (target: AuthTarget, node: ReactNode, radius = 12) => {
+    if (!editMode) return node;
+    return (
+      <Pressable onPress={() => pick(target)} accessibilityRole="button" accessibilityLabel={'Edit ' + target}>
+        {node}
+        {selected === target ? <View pointerEvents="none" style={{ position: 'absolute', top: -3, left: -3, right: -3, bottom: -3, borderWidth: 2, borderStyle: 'dashed', borderColor: SELECT, borderRadius: radius }} /> : null}
+      </Pressable>
+    );
+  };
+
+  const field = (target: AuthTarget, top: number, placeholder: string, icon: keyof typeof ICONS, suffix = false) => (
+    <View style={{ paddingTop: top, paddingBottom: 8, paddingHorizontal: 8 }}>
+      {sel(target,
+        <View style={{ height: 60, backgroundColor: FIELD_BG, borderRadius: 15, flexDirection: 'row', alignItems: 'center', paddingLeft: 2 }}>
+          <View style={{ width: 48, alignItems: 'center' }}><Icon name={icon} /></View>
+          <Text style={{ flex: 1, fontSize: 18, color: FIELD_TEXT }} numberOfLines={1}>{placeholder}</Text>
+          {suffix ? <View style={{ width: 48, alignItems: 'center' }}><Icon name="eye" /></View> : null}
+        </View>, 15)}
+    </View>
+  );
+
+  const submit = (label: string) => {
+    const button = (
       <View style={{ height: 60, borderRadius: 15, backgroundColor: accent, alignItems: 'center', justifyContent: 'center', flexDirection: 'row', gap: 8 }}>
         <Text style={{ fontSize: 18, fontWeight: '600', color: '#fff' }}>{label}</Text>
         {label === 'Next' ? <Icon name="arrow" color="#fff" size={22} /> : null}
       </View>
-    </View>
-  );
+    );
+    // "Next" is fixed app text: in edit mode it just moves to the next registration step.
+    return (
+      <View style={{ paddingHorizontal: 15, paddingTop: 20 }}>
+        {label === 'Next' ? <Pressable onPress={() => setStep(1)}>{button}</Pressable> : sel('submit', button, 15)}
+      </View>
+    );
+  };
+
+  const socialButton = (target: AuthTarget, children: ReactNode) => sel(target,
+    <View style={{ width: 100, height: 50, borderWidth: 0.5, borderColor: FIELD_TEXT, borderRadius: 10, alignItems: 'center', justifyContent: 'center', backgroundColor: '#fff' }}>{children}</View>, 10);
 
   const credentials = (submitLabel: string) => (
     <View>
-      <Field top={15} placeholder={t(copy.email_placeholder, 'Email')} icon="mail" />
-      <Field top={12} placeholder={t(copy.password_placeholder, 'Password')} icon="lock" suffix />
+      {field('email', 15, t(copy.email_placeholder, 'Email'), 'mail')}
+      {field('password', 12, t(copy.password_placeholder, 'Password'), 'lock', true)}
       <View style={{ paddingTop: 8, paddingHorizontal: 15, alignItems: 'flex-end' }}>
-        <Text style={{ padding: 8, fontSize: 14, fontWeight: '600', color: linkAccent }}>{t(copy.forgot_password_label, 'Forgot password?')}</Text>
+        {sel('forgot', <Text style={{ padding: 8, fontSize: 14, fontWeight: '600', color: linkAccent }}>{t(copy.forgot_password_label, 'Forgot password?')}</Text>, 8)}
       </View>
       <View style={{ paddingTop: 15, flexDirection: 'row', justifyContent: 'center' }}>
-        <View style={{ width: 100, height: 50, borderWidth: 0.5, borderColor: FIELD_TEXT, borderRadius: 10, alignItems: 'center', justifyContent: 'center', backgroundColor: '#fff' }}>
-          <Image source={{ uri: googleUrl || GOOGLE_PNG }} style={{ width: 22, height: 22 }} resizeMode="contain" />
-        </View>
+        {socialButton('google', <Image source={{ uri: googleUrl || GOOGLE_PNG }} style={{ width: 22, height: 22 }} resizeMode="contain" />)}
         <View style={{ width: 90 }} />
-        <View style={{ width: 100, height: 50, borderWidth: 0.5, borderColor: FIELD_TEXT, borderRadius: 10, alignItems: 'center', justifyContent: 'center', backgroundColor: '#fff' }}>
-          {appleUrl
-            ? <Image source={{ uri: appleUrl }} style={{ width: 25, height: 25 }} resizeMode="contain" />
-            : <Svg width={25} height={25} viewBox="0 0 24 24"><Path d={APPLE} fill="#000" /></Svg>}
-        </View>
+        {socialButton('apple', appleUrl
+          ? <Image source={{ uri: appleUrl }} style={{ width: 25, height: 25 }} resizeMode="contain" />
+          : <Svg width={25} height={25} viewBox="0 0 24 24"><Path d={APPLE} fill="#000" /></Svg>)}
       </View>
       {submit(submitLabel)}
     </View>
@@ -106,58 +131,73 @@ export function AuthPagePreview({ copy, logoUrl, googleUrl, appleUrl }: { copy: 
 
   const body = register && vendor
     ? (step === 0
-      ? <View><Field top={15} placeholder={t(copy.full_name_placeholder, 'Full Name')} icon="user" /><Field top={12} placeholder={t(copy.business_name_placeholder, 'Business Name (optional)')} icon="building" /><Pressable onPress={() => setStep(1)}>{submit('Next')}</Pressable></View>
+      ? <View>{field('fullName', 15, t(copy.full_name_placeholder, 'Full Name'), 'user')}{field('businessName', 12, t(copy.business_name_placeholder, 'Business Name (optional)'), 'building')}{submit('Next')}</View>
       : credentials(t(copy.sign_up_button, 'Sign Up')))
     : credentials(register ? t(copy.sign_up_button, 'Sign Up') : t(copy.sign_in_button, 'Sign in'));
 
   const dot = (active: boolean) => <View style={{ width: 7, height: 7, borderRadius: 3.5, backgroundColor: active ? accent : TOGGLE_BG }} />;
 
+  const chip = (label: string, active: boolean, onPress: () => void) => (
+    <Pressable key={label} onPress={onPress} accessibilityRole="button" style={{ borderRadius: 16, paddingHorizontal: 11, paddingVertical: 6, backgroundColor: active ? SELECT : '#F1F1F2' }}>
+      <Text style={{ fontSize: 10, fontWeight: '700', color: active ? '#fff' : '#1B1B1F' }}>{label}</Text>
+    </Pressable>
+  );
+
+  const toggle = (target: 'buyer' | 'business', label: string, active: boolean) => (
+    <Pressable
+      onPress={() => { setRole(target === 'business'); if (editMode) pick(target); }}
+      style={{ flex: 1, height: 44, borderRadius: 10, alignItems: 'center', justifyContent: 'center', backgroundColor: active ? accent : 'transparent' }}
+    >
+      <Text style={{ fontSize: 16, fontWeight: '600', color: active ? '#fff' : TOGGLE_OFF }}>{label}</Text>
+      {editMode && selected === target ? <View pointerEvents="none" style={{ position: 'absolute', top: -3, left: -3, right: -3, bottom: -3, borderWidth: 2, borderStyle: 'dashed', borderColor: SELECT, borderRadius: 12 }} /> : null}
+    </Pressable>
+  );
+
+  // In edit mode an empty header still needs something to tap, so show a faint placeholder.
+  const headerText = (target: 'headline' | 'subtitle', value: string, style: object, hint: string) => {
+    if (!value && !editMode) return null;
+    return sel(target, <Text style={[style, !value ? { opacity: 0.45, fontStyle: 'italic' } : null]}>{value || hint}</Text>, 8);
+  };
+
   return (
     <View style={{ alignItems: 'center', width: '100%' }}>
       <View style={{ flexDirection: 'row', flexWrap: 'wrap', gap: 6, marginBottom: 8, justifyContent: 'center' }}>
-        {([['Sign in', false], ['Register', true]] as const).map(([label, value]) => (
-          <Pressable key={label} onPress={() => { setRegister(value); setStep(0); }} accessibilityRole="button" style={{ borderRadius: 16, paddingHorizontal: 11, paddingVertical: 6, backgroundColor: register === value ? '#FD802E' : '#F1F1F2' }}>
-            <Text style={{ fontSize: 10, fontWeight: '700', color: register === value ? '#fff' : '#1B1B1F' }}>{label}</Text>
-          </Pressable>
-        ))}
-        {([['Buyer', false], ['Business', true]] as const).map(([label, value]) => (
-          <Pressable key={label} onPress={() => setRole(value)} accessibilityRole="button" style={{ borderRadius: 16, paddingHorizontal: 11, paddingVertical: 6, backgroundColor: vendor === value ? '#FD802E' : '#F1F1F2' }}>
-            <Text style={{ fontSize: 10, fontWeight: '700', color: vendor === value ? '#fff' : '#1B1B1F' }}>{label}</Text>
-          </Pressable>
-        ))}
+        {chip('Sign in', !register, () => { setRegister(false); setStep(0); })}
+        {chip('Register', register, () => { setRegister(true); setStep(0); })}
+        {chip('Buyer', !vendor, () => setRole(false))}
+        {chip('Business', vendor, () => setRole(true))}
       </View>
       <View style={{ width: SCREEN_W * scale + BEZEL * 2, height: SCREEN_H * scale + BEZEL * 2, borderRadius: 30, borderWidth: BEZEL, borderColor: '#252529', overflow: 'hidden', backgroundColor: PAGE_BG }}>
         <View pointerEvents="box-none" style={{ position: 'absolute', left: 0, top: 0, width: SCREEN_W, height: SCREEN_H, transform: [{ translateX: -(SCREEN_W * (1 - scale)) / 2 }, { translateY: -(SCREEN_H * (1 - scale)) / 2 }, { scale }] }}>
           <View style={{ flex: 1, backgroundColor: PAGE_BG }}>
-            <LinearGradient colors={['#F7DDEB', '#FBEAF3', '#FFF5E9']} locations={[0, 0.85, 0.925]} start={{ x: 1, y: 1 }} end={{ x: 0, y: 0 }} style={{ position: 'absolute', top: 0, left: 0, right: 0, height: 356 }} pointerEvents="none">
+            <LinearGradient colors={['#F7DDEB', '#FBEAF3', '#FFF5E9']} locations={[0, 0.85, 0.925]} start={{ x: 1, y: 1 }} end={{ x: 0, y: 0 }} style={{ position: 'absolute', top: 0, left: 0, right: 0, height: 356 }} pointerEvents={editMode ? 'box-none' : 'none'}>
               <View style={{ flex: 1, paddingLeft: 10, paddingTop: 50, paddingRight: 30, paddingBottom: 25 }}>
-                <Image source={{ uri: logoUrl || LOGO_URL }} style={{ width: '100%', height: headline || subtitle ? '72%' : '100%', borderRadius: 8 }} resizeMode="contain" />
-                {headline ? <Text style={{ color: DARK, fontSize: 18, fontWeight: '700', textAlign: 'center', marginTop: 3 }}>{headline}</Text> : null}
-                {subtitle ? <Text style={{ color: FIELD_TEXT, fontSize: 12, textAlign: 'center', marginTop: 2 }}>{subtitle}</Text> : null}
+                {sel('logo', <Image source={{ uri: logoUrl || LOGO_URL }} style={{ width: '100%', height: headline || subtitle || editMode ? 202 : 281, borderRadius: 8 }} resizeMode="contain" />, 8)}
+                {headerText('headline', headline, { color: DARK, fontSize: 18, fontWeight: '700', textAlign: 'center', marginTop: 3 }, 'Add header title')}
+                {headerText('subtitle', subtitle, { color: FIELD_TEXT, fontSize: 12, textAlign: 'center', marginTop: 2 }, 'Add header subtitle')}
               </View>
             </LinearGradient>
             <View style={{ position: 'absolute', top: 300, left: 15, right: 15 }}>
               <View style={{ height: 470, backgroundColor: '#fff', borderRadius: 20, paddingHorizontal: 15, paddingTop: 24, overflow: 'hidden' }}>
                 <View style={{ paddingHorizontal: 8 }}>
                   <View style={{ height: 50, flexDirection: 'row', backgroundColor: TOGGLE_BG, borderRadius: 12, padding: 2 }}>
-                    <Pressable onPress={() => setRole(false)} style={{ flex: 1, height: 44, borderRadius: 10, alignItems: 'center', justifyContent: 'center', backgroundColor: !vendor ? accent : 'transparent' }}>
-                      <Text style={{ fontSize: 16, fontWeight: '600', color: !vendor ? '#fff' : TOGGLE_OFF }}>{t(copy.buyer_label, 'Buyer')}</Text>
-                    </Pressable>
-                    <Pressable onPress={() => setRole(true)} style={{ flex: 1, height: 44, borderRadius: 10, alignItems: 'center', justifyContent: 'center', backgroundColor: vendor ? accent : 'transparent' }}>
-                      <Text style={{ fontSize: 16, fontWeight: '600', color: vendor ? '#fff' : TOGGLE_OFF }}>{t(copy.business_label, 'B&P 2P')}</Text>
-                    </Pressable>
+                    {toggle('buyer', t(copy.buyer_label, 'Buyer'), !vendor)}
+                    {toggle('business', t(copy.business_label, 'B&P 2P'), vendor)}
                   </View>
                 </View>
-                {vendor ? <View style={{ height: 25, justifyContent: 'center', paddingLeft: '50%', alignItems: 'center' }}><Text style={{ fontSize: 13, color: RED }}>{t(copy.business_space_label, 'Business Space')}</Text></View> : null}
+                {vendor ? <View style={{ height: 25, justifyContent: 'center', paddingLeft: '50%', alignItems: 'center' }}>{sel('space', <Text style={{ fontSize: 13, color: RED }}>{t(copy.business_space_label, 'Business Space')}</Text>, 6)}</View> : null}
                 {register && vendor ? <View style={{ paddingTop: 5, flexDirection: 'row', justifyContent: 'center', alignItems: 'center', gap: 7 }}><Pressable onPress={() => setStep(0)}>{dot(step === 0)}</Pressable><Pressable onPress={() => setStep(1)}>{dot(step === 1)}</Pressable></View> : null}
                 {body}
               </View>
-              <Pressable onPress={setMode} style={{ paddingTop: 5, paddingBottom: 10, alignItems: 'center' }}>
-                <Text style={{ textAlign: 'center', fontSize: 15, color: DARK }}>
-                  {register ? t(copy.login_prompt, 'Already have an account? ') : t(copy.register_prompt, "Don't have an account? ")}
-                  <Text style={{ fontSize: 14.5, fontWeight: '600', color: linkAccent }}>{register ? t(copy.login_link, 'Sign in') : t(copy.register_link, 'Register')}</Text>
-                </Text>
-              </Pressable>
+              <View style={{ paddingTop: 5, paddingBottom: 10, alignItems: 'center' }}>
+                {sel('bottom',
+                  <Pressable disabled={editMode} onPress={() => { setRegister((v) => !v); setStep(0); }}>
+                    <Text style={{ textAlign: 'center', fontSize: 15, color: DARK }}>
+                      {register ? t(copy.login_prompt, 'Already have an account? ') : t(copy.register_prompt, "Don't have an account? ")}
+                      <Text style={{ fontSize: 14.5, fontWeight: '600', color: linkAccent }}>{register ? t(copy.login_link, 'Sign in') : t(copy.register_link, 'Register')}</Text>
+                    </Text>
+                  </Pressable>, 8)}
+              </View>
             </View>
           </View>
         </View>
