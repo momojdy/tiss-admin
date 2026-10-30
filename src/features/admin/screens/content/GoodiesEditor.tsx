@@ -352,23 +352,35 @@ export function GoodiesEditor({ canEdit, canPublish }: { canEdit: boolean; canPu
               <Txt size={9.5} mut>Emoji</Txt>
               <TextInput value={String(item.emoji || '')} onChangeText={setEmoji} style={fieldStyle} placeholder="Emoji" />
               <Txt size={9.5} mut>Image</Txt>
-              <Txt size={10} style={{ marginTop: 3 }}>{currentImageText}</Txt>
-              <View style={{ flexDirection: 'row', flexWrap: 'wrap', gap: 6, marginTop: 6 }}>
+              <View style={{ flexDirection: 'row', alignItems: 'center', gap: 12, flexWrap: 'wrap', marginTop: 8 }}>
+                {thumbnailFor(item, selection.kind) ? <Image source={{ uri: thumbnailFor(item, selection.kind) }} resizeMode="contain" style={{ width: 100, height: 64, borderRadius: 8, backgroundColor: '#FFFFFF' }} /> : <View style={{ width: 100, height: 64, borderRadius: 8, backgroundColor: c.inset, alignItems: 'center', justifyContent: 'center' }}><Txt size={10} mut>{item.emoji || 'No image'}</Txt></View>}
+                <View style={{ flex: 1, minWidth: 160 }}>
+                  <Txt size={11} weight={500}>Current image</Txt>
+                  <Txt size={9.5} mut>{currentImageText}</Txt>
+                </View>
+              </View>
+              <View style={{ flexDirection: 'row', flexWrap: 'wrap', gap: 6, marginTop: 8 }}>
                 <OutlineBtn onPress={() => { void uploadHomeImage('photos'); }} disabled={!canEdit || !!assetBusy}>{assetBusy === 'photos' ? 'Uploading…' : 'Choose from Photos / Live Photos'}</OutlineBtn>
                 <OutlineBtn onPress={() => { void uploadHomeImage('files'); }} disabled={!canEdit || !!assetBusy}>Choose from Files</OutlineBtn>
               </View>
               {currentImage?.assetKey && pendingAssets[currentImage.assetKey] ? <View style={{ marginTop: 5 }}><OutlineBtn onPress={() => { void publishHomeImage(currentImage.assetKey); }} disabled={!canPublish || !!assetBusy}>{assetBusy === 'publish' ? 'Publishing image…' : 'Publish image'}</OutlineBtn></View> : null}
               {assetNote ? <Txt size={9.5} color={c.or} style={{ marginTop: 3 }}>{assetNote}</Txt> : null}
-              <View style={{ marginTop: 6 }}>
-                {assets.slice(0, 20).map((asset) => (
-                  <Pressable key={asset.id} onPress={() => pickAsset(asset)} accessibilityRole="button" style={{ flexDirection: 'row', alignItems: 'center', gap: 8, paddingVertical: 5, borderBottomWidth: 1, borderBottomColor: c.bd }}>
-                    {assetUrls[asset.asset_key] ? <Image source={{ uri: assetUrls[asset.asset_key] }} style={{ width: 34, height: 34, borderRadius: 8 }} resizeMode="cover" /> : <View style={{ width: 34, height: 34, borderRadius: 8, backgroundColor: c.inset }} />}
-                    <View style={{ flex: 1 }}>
-                      <Txt size={10.5}>{asset.asset_key}</Txt>
-                      <Txt size={9.5} mut>{asset.status === 'published' ? 'Published' : 'Draft (publish it before publishing this content)'}</Txt>
-                    </View>
-                  </Pressable>
-                ))}
+              <View style={{ marginTop: 10 }}>
+                <Txt size={10.5} weight={500}>Choose an existing CMS image</Txt>
+                <Txt size={9.5} mut style={{ marginTop: 2, marginBottom: 5 }}>Select an image to use it for this item. The preview updates immediately.</Txt>
+                {assets.slice(0, 20).map((asset) => {
+                  const active = currentImage?.assetKey === asset.asset_key || currentImage?.asset_key === asset.asset_key;
+                  return (
+                    <Pressable key={asset.id} onPress={() => pickAsset(asset)} accessibilityRole="button" accessibilityLabel={'Select image ' + asset.asset_key} style={{ flexDirection: 'row', alignItems: 'center', gap: 12, flexWrap: 'wrap', paddingVertical: 8, paddingHorizontal: 7, marginBottom: 5, borderWidth: active ? 2 : 1, borderColor: active ? c.ink : c.bd, borderRadius: 10, backgroundColor: active ? c.inset : c.card }}>
+                      {assetUrls[asset.asset_key] ? <Image source={{ uri: assetUrls[asset.asset_key] }} resizeMode="contain" style={{ width: 100, height: 64, borderRadius: 8, backgroundColor: '#FFFFFF' }} /> : <View style={{ width: 100, height: 64, borderRadius: 8, backgroundColor: c.inset, alignItems: 'center', justifyContent: 'center' }}><Txt size={10} mut>No preview</Txt></View>}
+                      <View style={{ flex: 1, minWidth: 150 }}>
+                        <Txt size={10.5} weight={500}>{asset.asset_key}</Txt>
+                        <Txt size={9.5} mut>{asset.status === 'published' ? 'Published image' : 'Draft image · publish before publishing Home content'}</Txt>
+                        {active ? <Txt size={9.5} weight={500}>Currently selected ✓</Txt> : <Txt size={9.5} mut>Tap to select</Txt>}
+                      </View>
+                    </Pressable>
+                  );
+                })}
                 {!assets.length ? <Txt size={10} mut>No image assets found yet. Choose an image above or upload it in Content Studio.</Txt> : null}
               </View>
               <Txt size={9.5} mut style={{ marginTop: 8 }}>Or use an external https link (not managed by the CMS)</Txt>
@@ -379,8 +391,8 @@ export function GoodiesEditor({ canEdit, canPublish }: { canEdit: boolean; canPu
               </View>
             </View>
           )}
-          <View style={{ flexDirection: 'row', flexWrap: 'wrap', gap: 6, marginTop: 6 }}>
-            <OutlineBtn onPress={() => setSelection(null)}>Done</OutlineBtn>
+          <View style={{ flexDirection: 'row', flexWrap: 'wrap', gap: 6, marginTop: 8 }}>
+            <OutlineBtn primary onPress={() => setSelection(null)}>Done editing this item</OutlineBtn>
           </View>
         </Section>
       ) : null}
