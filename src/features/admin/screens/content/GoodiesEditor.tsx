@@ -129,6 +129,21 @@ export function GoodiesEditor({ canEdit, canPublish }: { canEdit: boolean; canPu
   });
   const setEmoji = (value: string) => edit((next) => { const target = selection && findItem(next, selection); if (target) target.emoji = value; });
   const setImage = (image: any) => edit((next) => { const target = selection && findItem(next, selection); if (target) target[imageKey] = image; });
+  const setMeta = (kind: GoodiesSelection['kind'], id: string, key: string, value: string) => edit((next) => {
+    const target = findItem(next, { kind, id, field: 'title' });
+    if (target) target[key] = key === 'ord' ? (Number(value) || 0) : value;
+  });
+  const metaInput = (kind: GoodiesSelection['kind'], entry: any, key: string, label: string) => (
+    <View style={{ flex: 1, minWidth: 120, marginTop: 6 }}>
+      <Txt size={9.5} mut>{label}</Txt>
+      <TextInput value={String(entry[key] ?? '')} onChangeText={(value) => setMeta(kind, entry.id, key, value)} editable={canEdit && !busy && !assetBusy} style={fieldStyle} />
+    </View>
+  );
+  const toggleLive = (kind: GoodiesSelection['kind'], entry: any, key: string, active: string, inactive: string) => (
+    <OutlineBtn onPress={() => setMeta(kind, entry.id, key, entry[key] === active ? inactive : active)} disabled={!canEdit || !!busy || !!assetBusy}>
+      {entry[key] === active ? 'Hide' : 'Show'}
+    </OutlineBtn>
+  );
   const createLabel = () => edit((next) => {
     if (!selection || selection.kind !== 'label' || findItem(next, selection)) return;
     next.labels.push({ id: selection.id, label: selection.id, t: { en: { v: '', s: 'draft' } } });
@@ -310,11 +325,13 @@ export function GoodiesEditor({ canEdit, canPublish }: { canEdit: boolean; canPu
             {(draft.modes || []).map((entry: any, index: number) => (
               <View key={entry.id} style={{ marginTop: 8, paddingTop: 8, borderTopWidth: 1, borderTopColor: c.bd }}>
                 <Txt size={11} weight={500}>{'Service tile ' + (index + 1) + ' · ' + readText(entry.title)}</Txt>
-                <View style={{ flexDirection: 'row', flexWrap: 'wrap', gap: 5, marginTop: 5 }}>
+                <View style={{ flexDirection: 'row', flexWrap: 'wrap', gap: 5, marginTop: 5, alignItems: 'center' }}>
                   <OutlineBtn onPress={() => select({ kind: 'mode', id: entry.id, field: 'title' })}>Title</OutlineBtn>
                   <OutlineBtn onPress={() => select({ kind: 'mode', id: entry.id, field: 'sub' })}>Subtitle</OutlineBtn>
                   <OutlineBtn onPress={() => select({ kind: 'mode', id: entry.id, field: 'art' })}>Image / icon</OutlineBtn>
+                  {toggleLive('mode', entry, 'st', 'Live', 'Hidden')}
                 </View>
+                {metaInput('mode', entry, 'cat', 'Tap destination category')}
               </View>
             ))}
             {!draft.modes?.length ? <Txt size={10} mut style={{ marginTop: 6 }}>No service tiles are configured.</Txt> : null}
@@ -327,10 +344,12 @@ export function GoodiesEditor({ canEdit, canPublish }: { canEdit: boolean; canPu
                   <Txt size={10.5} weight={500}>{readText(entry.name) || entry.id}</Txt>
                   <Txt size={9.5} mut>{entry.st === 'on' ? 'Visible' : 'Hidden'} · {entry.id}</Txt>
                 </View>
-                <View style={{ flexDirection: 'row', flexWrap: 'wrap', gap: 4 }}>
+                <View style={{ flexDirection: 'row', flexWrap: 'wrap', gap: 4, alignItems: 'center' }}>
                   <OutlineBtn onPress={() => select({ kind: 'category', id: entry.id, field: 'title' })}>Name</OutlineBtn>
                   <OutlineBtn onPress={() => select({ kind: 'category', id: entry.id, field: 'art' })}>Artwork</OutlineBtn>
+                  {toggleLive('category', entry, 'st', 'on', 'off')}
                 </View>
+                {metaInput('category', entry, 'ord', 'Display order')}
               </View>
             ))}
             {!draft.cats?.length ? <Txt size={10} mut style={{ marginTop: 6 }}>No categories are configured.</Txt> : null}
@@ -341,11 +360,20 @@ export function GoodiesEditor({ canEdit, canPublish }: { canEdit: boolean; canPu
               <View key={entry.id} style={{ marginTop: 8, paddingTop: 8, borderTopWidth: 1, borderTopColor: c.bd }}>
                 <Txt size={11} weight={500}>{'Promotion ' + (index + 1) + ' · ' + readText(entry.title)}</Txt>
                 <Txt size={9.5} mut>{entry.st || 'Unspecified status'} · {entry.id}</Txt>
-                <View style={{ flexDirection: 'row', flexWrap: 'wrap', gap: 5, marginTop: 5 }}>
+                <View style={{ flexDirection: 'row', flexWrap: 'wrap', gap: 5, marginTop: 5, alignItems: 'center' }}>
                   <OutlineBtn onPress={() => select({ kind: 'promo', id: entry.id, field: 'title' })}>Title</OutlineBtn>
                   <OutlineBtn onPress={() => select({ kind: 'promo', id: entry.id, field: 'sub' })}>Subtitle</OutlineBtn>
                   <OutlineBtn onPress={() => select({ kind: 'promo', id: entry.id, field: 'btn' })}>Button</OutlineBtn>
                   <OutlineBtn onPress={() => select({ kind: 'promo', id: entry.id, field: 'art' })}>Image / icon</OutlineBtn>
+                  {toggleLive('promo', entry, 'st', 'Live', 'Hidden')}
+                </View>
+                <View style={{ flexDirection: 'row', flexWrap: 'wrap', gap: 8 }}>
+                  {metaInput('promo', entry, 'target', 'Tap destination')}
+                  {metaInput('promo', entry, 'color', 'Card style (plum / orange / green)')}
+                  {metaInput('promo', entry, 'aud', 'Audience')}
+                  {metaInput('promo', entry, 'ord', 'Display order')}
+                  {metaInput('promo', entry, 'from', 'Start date (YYYY-MM-DD)')}
+                  {metaInput('promo', entry, 'to', 'End date (YYYY-MM-DD)')}
                 </View>
               </View>
             ))}
