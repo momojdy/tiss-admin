@@ -1,4 +1,4 @@
-import React, {useEffect, useMemo, useState} from 'react';
+import React, {useEffect, useMemo, useRef, useState} from 'react';
 import {PanResponder, View, StyleSheet} from 'react-native';
 import {LinearGradient} from 'expo-linear-gradient';
 import {Txt} from '../../ui/Txt';
@@ -15,12 +15,14 @@ export function PromoColorPicker({value,onChange,disabled=false}:{value:string;o
   const [hsv,setHsv]=useState(()=>hexToHsv(initial));
   const [size,setSize]=useState({w:280,h:150});
   const [hueWidth,setHueWidth]=useState(280);
+  const hsvRef=useRef(hsv); hsvRef.current=hsv;
+  const onChangeRef=useRef(onChange); onChangeRef.current=onChange;
   useEffect(()=>{setHsv(hexToHsv(validHex(value)?value:(PRESETS[value]||PRESETS.plum)));},[value]);
   const hex=hsvToHex(hsv.h,hsv.s,hsv.v);
   const areaResponder=useMemo(()=>PanResponder.create({onStartShouldSetPanResponder:()=>!disabled,onMoveShouldSetPanResponder:()=>!disabled,onPanResponderGrant:e=>pickArea(e.nativeEvent.locationX,e.nativeEvent.locationY),onPanResponderMove:e=>pickArea(e.nativeEvent.locationX,e.nativeEvent.locationY)}),[disabled,size]);
   const hueResponder=useMemo(()=>PanResponder.create({onStartShouldSetPanResponder:()=>!disabled,onMoveShouldSetPanResponder:()=>!disabled,onPanResponderGrant:e=>pickHue(e.nativeEvent.locationX),onPanResponderMove:e=>pickHue(e.nativeEvent.locationX)}),[disabled,hueWidth]);
-  function pickArea(x:number,y:number){const s=clamp(x/Math.max(1,size.w)),v=1-clamp(y/Math.max(1,size.h));setHsv(old=>{const next={...old,s,v};onChange(hsvToHex(next.h,next.s,next.v));return next;});}
-  function pickHue(x:number){const h=clamp(x/Math.max(1,hueWidth))*360;setHsv(old=>{const next={...old,h};onChange(hsvToHex(next.h,next.s,next.v));return next;});}
+  function pickArea(x:number,y:number){const saturation=clamp(x/Math.max(1,size.w)),brightness=1-clamp(y/Math.max(1,size.h));const next={...hsvRef.current,s:saturation,v:brightness};hsvRef.current=next;setHsv(next);onChangeRef.current(hsvToHex(next.h,next.s,next.v));}
+  function pickHue(x:number){const hue=clamp(x/Math.max(1,hueWidth))*360;const next={...hsvRef.current,h:hue};hsvRef.current=next;setHsv(next);onChangeRef.current(hsvToHex(next.h,next.s,next.v));}
   return <View style={{marginTop:8}}>
     <Txt size={9.5} mut>Drag to choose any color</Txt>
     <View onLayout={e=>setSize({w:e.nativeEvent.layout.width,h:e.nativeEvent.layout.height})} {...areaResponder.panHandlers} style={{height:150,borderRadius:10,overflow:'hidden',marginTop:6,backgroundColor:hsvToHex(hsv.h,1,1)}}>
