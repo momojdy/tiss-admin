@@ -11,6 +11,7 @@ import { Card, Section } from '../../ui/Card';
 import { OutlineBtn } from '../../ui/Controls';
 import { Txt } from '../../ui/Txt';
 import { GoodiesConsumerPreview } from './GoodiesConsumerPreview';
+import { GoodiesBuilderConfigEditor } from './GoodiesBuilderConfigEditor';
 import { PromoColorPicker } from './PromoColorPicker';
 import type { GoodiesSelection } from '../../goodiesConsumer/editContext';
 import {
@@ -24,6 +25,35 @@ const ASSET_BUCKET = 'wantiss-cms-assets';
 
 const listKeyFor = (kind: GoodiesSelection['kind']) => (kind === 'mode' ? 'modes' : kind === 'promo' ? 'promos' : kind === 'category' ? 'cats' : 'labels');
 const textKeyFor = (sel: GoodiesSelection) => (sel.kind === 'label' ? 't' : sel.kind === 'category' ? 'name' : sel.field);
+const PAGE_ORDER = ['Home, browse & discovery', 'Store, products & reviews', 'Cart, deals & coupons', 'Checkout, delivery & payment', 'Orders, actions & validation', 'Build Your Own & ingredients', 'Account, notifications & help', 'Store chat & messages', 'Scheduling & delivery', 'Reviews & ratings', 'Addresses', 'Contact numbers', 'Group orders', 'Courier, cart & wallet sheets', 'Shared sheets & modal actions', 'Order tracking steps', 'Screen reader labels', 'Other Goodies pages & shared messages'];
+
+const labelPage = (id: string) => {
+  const key = id.replace(/^lbl\./, '').toLowerCase();
+  const groups: Array<[RegExp, string]> = [
+    [/^a11y/, 'Screen reader labels'],
+    [/^stage/, 'Order tracking steps'],
+    [/^(chat|message|conversation|storechat|storemessage|contact)/, 'Store chat & messages'],
+    [/^sheet(group|invite|sharedcart|member|subtotal|host|waiting|noMembers|endGroup|viewCart)/, 'Group orders'],
+    [/^sheet(schedule|chooseDay|scheduledMinimum|availableTimes|exactTime|hour|minute|apply|chooseStore|noScheduleClosed|chooseWithinHours|chooseFutureTime|scheduledFor)/, 'Scheduling & delivery'],
+    [/^sheet(contactNumber|phone|editNumber|removeNumber|sameWantissPhone)/, 'Contact numbers'],
+    [/^sheet(review|orderNotFound|pickRating|submitReview|reviewComment)/, 'Reviews & ratings'],
+    [/^sheet(address|deliverTo)/, 'Addresses'],
+    [/^sheet(courier|wallet|topup|demoMoney|clearCart|cancelOrder)/, 'Courier, cart & wallet sheets'],
+    [/^sheetAuto/, 'Shared sheets & modal actions'],
+    [/^sheet/, 'Shared sheets & modal actions'],
+    [/^(byo|builder|ingredient|custom|size)/, 'Build Your Own & ingredients'],
+    [/^(cart|basket|coupon|promo|deal)/, 'Cart, deals & coupons'],
+    [/^(checkout|payment|wallet|tip|fee|delivery|pickup|schedule|address)/, 'Checkout, delivery & payment'],
+    [/^(order|track|tracking|history|cancel|reorder|confirm|action)/, 'Orders, actions & validation'],
+    [/^(product|item|detail|review|rating|store|shop|card)/, 'Store, products & reviews'],
+    [/^(account|profile|notif|help|support|privacy|legal|faq|settings)/, 'Account, notifications & help'],
+    [/^(search|browse|home|cat|filter|sort|mode|tile|promo|popular)/, 'Home, browse & discovery'],
+  ];
+  return groups.find(([pattern]) => pattern.test(key))?.[1] || 'Other Goodies pages & shared messages';
+};
+
+const HOME_LABEL_IDS = ['lbl.search', 'lbl.coupons', 'lbl.coupons2', 'lbl.flash', 'lbl.again', 'lbl.recent', 'lbl.popular', 'lbl.produce', 'lbl.haitian', 'lbl.trending'];
+
 const readText = (value: any): string => (typeof value === 'string' ? value : String(value?.en?.v ?? ''));
 const fieldName: Record<string, string> = { title: 'Title', sub: 'Subtitle', btn: 'Button text', text: 'Text', art: 'Emoji and image' };
 const kindName: Record<string, string> = { mode: 'Service tile', promo: 'Promotion', category: 'Category', label: 'Text' };
@@ -48,6 +78,7 @@ export function GoodiesEditor({ canEdit, canPublish }: { canEdit: boolean; canPu
   const [pendingAssets, setPendingAssets] = useState<Record<string, string>>({});
   const [assetBusy, setAssetBusy] = useState('');
   const [linkText, setLinkText] = useState('');
+  const [pageChoice, setPageChoice] = useState('');
 
   const clean = useMemo(() => (draft ? sanitizeForSave(draft) : null), [draft]);
   const dirty = !!clean && stable(clean) !== baseline;
@@ -70,7 +101,10 @@ export function GoodiesEditor({ canEdit, canPublish }: { canEdit: boolean; canPu
         const errors = validateGoodiesDraft(latest.payload);
         if (errors.length) throw new Error('Version ' + latest.version + ' (' + latest.status + ') is not valid Goodies content. ' + errors[0]);
         const opened = clone(latest.payload);
-        setDraft(opened); setRow(latest); setBaseline(stable(sanitizeForSave(opened))); setSource(latest.status === 'published' ? 'published' : 'draft'); setSelection(null);
+        /* Newly added text fields appear in the editor with their default wording; saving keeps them. */
+        const known = new Set((opened.labels || []).map((entry: any) => entry.id));
+        opened.labels = [...(opened.labels || []), ...buildStarterDraft().labels.filter((entry: any) => !known.has(entry.id))];
+        setDraft(opened); setRow(latest); setBaseline(stable(sanitizeForSave(latest.payload))); setSource(latest.status === 'published' ? 'published' : 'draft'); setSelection(null);
       }
       setLoadState('ready');
     } catch (e) {
@@ -114,6 +148,25 @@ export function GoodiesEditor({ canEdit, canPublish }: { canEdit: boolean; canPu
     change(next);
     setDraft(next); setNotice(null); setConfirmPublish(false);
   };
+  const setLabelText = (id: string, value: string) => edit((next) => {
+    const target = (next.labels || []).find((entry: any) => entry.id === id);
+    if (!target) return;
+    const holder = target.t && typeof target.t === 'object' ? target.t : {};
+    holder.en = { v: value, s: 'draft' };
+    target.t = holder;
+  });
+  const pageGroups = useMemo(() => {
+    const grouped = new Map<string, any[]>();
+    (draft?.labels || []).filter((entry: any) => !HOME_LABEL_IDS.includes(String(entry.id))).forEach((entry: any) => {
+      const page = labelPage(String(entry.id || ''));
+      if (!grouped.has(page)) grouped.set(page, []);
+      grouped.get(page)!.push(entry);
+    });
+    const rank = (name: string) => { const i = PAGE_ORDER.indexOf(name); return i < 0 ? 99 : i; };
+    return Array.from(grouped.entries()).sort(([a], [b]) => rank(a) - rank(b) || a.localeCompare(b));
+  }, [draft?.labels]);
+  const activePage = pageGroups.some(([page]) => page === pageChoice) ? pageChoice : '';
+  const activeEntries = pageGroups.find(([page]) => page === activePage)?.[1] || [];
   const findItem = (d: any, sel: GoodiesSelection) => (d?.[listKeyFor(sel.kind)] || []).find((entry: any) => entry.id === sel.id);
   const item = selection && draft ? findItem(draft, selection) : null;
   const imageKey = selection ? imageKeyFor(listKeyFor(selection.kind)) : 'img';
@@ -471,7 +524,7 @@ export function GoodiesEditor({ canEdit, canPublish }: { canEdit: boolean; canPu
           </Section>
           <Section title="Home · Text and section headings">
             <Txt size={10} mut>Manage the search placeholder, offer-card text and Home section headings.</Txt>
-            {(draft.labels || []).map((entry: any) => (
+            {(draft.labels || []).filter((entry: any) => HOME_LABEL_IDS.includes(String(entry.id))).map((entry: any) => (
               <View key={entry.id} style={{ flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', gap: 8, paddingVertical: 6, borderTopWidth: 1, borderTopColor: c.bd }}>
                 <View style={{ flex: 1 }}>
                   <Txt size={10.5} weight={500}>{entry.label || entry.id}</Txt>
@@ -482,6 +535,21 @@ export function GoodiesEditor({ canEdit, canPublish }: { canEdit: boolean; canPu
             ))}
             {!draft.labels?.length ? <Txt size={10} mut style={{ marginTop: 6 }}>No Home text fields are configured.</Txt> : null}
           </Section>
+          <Section title="Other pages · Text">
+            <Txt size={10} mut style={{ marginBottom: 8 }}>Choose a page, then edit its text below. Changes stay in this draft until you save and publish.</Txt>
+            <View style={{ flexDirection: 'row', flexWrap: 'wrap', gap: 6 }}>
+              {pageGroups.map(([page, entries]) => (
+                <OutlineBtn key={page} primary={activePage === page} onPress={() => setPageChoice(activePage === page ? '' : page)}>{page + ' (' + entries.length + ')'}</OutlineBtn>
+              ))}
+            </View>
+            {activeEntries.map((entry: any) => (
+              <View key={entry.id} style={{ marginTop: 8, paddingTop: 6, borderTopWidth: 1, borderTopColor: c.bd }}>
+                <Txt size={10.5} mut>{entry.label || entry.id}</Txt>
+                <TextInput value={readText(entry.t)} onChangeText={(value) => setLabelText(entry.id, value)} editable={canEdit && !busy} multiline={readText(entry.t).length > 60} style={[fieldStyle, readText(entry.t).length > 60 ? { minHeight: 64, textAlignVertical: 'top' } : null]} placeholder="Text customers see" />
+              </View>
+            ))}
+          </Section>
+          <GoodiesBuilderConfigEditor canEdit={canEdit} />
         </>
       ) : null}
     </View>
