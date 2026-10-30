@@ -280,9 +280,11 @@ export function HomePageEditor({ canEdit, canPublish }: { canEdit: boolean; canP
       </Section>
       {editOnPhone && selectedConfig ? (
         <Section title={selectedConfig.title}>
+          <View style={{ borderWidth: 2, borderStyle: 'dashed', borderColor: '#BF008E', borderRadius: 12, padding: 10 }}>
           {targetBody(selectedConfig)}
           <View style={{ flexDirection: 'row', flexWrap: 'wrap', gap: 6, marginTop: 8 }}>
             <OutlineBtn onPress={() => setSelected(null)}>Done</OutlineBtn>
+          </View>
           </View>
         </Section>
       ) : null}
