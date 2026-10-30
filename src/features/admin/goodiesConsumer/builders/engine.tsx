@@ -72,7 +72,7 @@ export async function loadBuilders() {
   }
   bsave(); emit();
 }
-const bsave = () => {try {AsyncStorage.setItem(BKEY, JSON.stringify(BYO));} catch (e) {}};
+const bsave = () => {if (previewOnly) return; try {AsyncStorage.setItem(BKEY, JSON.stringify(BYO));} catch (e) {}};
 const bFor = (sid: string) => BYO.cfg[sid] || [];
 export const bGet = (sid: string, id: string) => bFor(sid).filter(b => b.id === id)[0];
 export const units = (g: BGroup, d: any): string[] => {const a = d.sel && d.sel[g.id]; return Array.isArray(a) ? a : [];};
@@ -220,6 +220,7 @@ function animateCommit(b: Builder, ln: any) {
   setTimeout(() => {if (BD && BD.busy && !BD.added) {BD.assembling = 0; bzCommit(b, ln);}}, 1050);
 }
 export function bzAddOrder() {
+  if (previewOnly) {toast('This is a preview. Orders cannot be placed here.'); return;}
   const b = BD && bGet(BD.sid, BD.bid); if (!b || BD.added || BD.busy) return;
   const ck = bCheck(b, BD); if (!ck.ok) {toast(ck.errs[0] || ck.conf[0]); return;}
   BD.busy = 1; const ln = bLine(b, BD, BD.q), c = S.cart;
