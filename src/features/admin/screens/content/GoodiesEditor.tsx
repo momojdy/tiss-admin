@@ -1,7 +1,9 @@
 import { useCallback, useEffect, useMemo, useState } from 'react';
 import { Image, Pressable, TextInput, View } from 'react-native';
+import * as ImagePicker from 'expo-image-picker';
+import * as DocumentPicker from 'expo-document-picker';
 import { supabase } from '../../lib/supabase';
-import { listCmsAssets, publishCmsVersion, saveCmsVersion } from '../../lib/adminBackend';
+import { listCmsAssets, publishCmsAsset, publishCmsVersion, saveCmsVersion, uploadCmsAsset } from '../../lib/adminBackend';
 import { fetchPublishedWantissContent } from '../../lib/wantissCms';
 import { useTheme } from '../../theme/ThemeContext';
 import { clone } from '../../lib/clone';
@@ -42,6 +44,8 @@ export function GoodiesEditor({ canEdit, canPublish }: { canEdit: boolean; canPu
   const [assets, setAssets] = useState<any[]>([]);
   const [assetUrls, setAssetUrls] = useState<Record<string, string>>({});
   const [assetNote, setAssetNote] = useState('');
+  const [pendingAssets, setPendingAssets] = useState<Record<string, string>>({});
+  const [assetBusy, setAssetBusy] = useState('');
   const [linkText, setLinkText] = useState('');
 
   const clean = useMemo(() => (draft ? sanitizeForSave(draft) : null), [draft]);
@@ -130,6 +134,53 @@ export function GoodiesEditor({ canEdit, canPublish }: { canEdit: boolean; canPu
     next.labels.push({ id: selection.id, label: selection.id, t: { en: { v: '', s: 'draft' } } });
   });
   const pickAsset = (asset: any) => setImage({ assetKey: asset.asset_key, w: asset.width || undefined, h: asset.height || undefined });
+
+  const uploadHomeImage = async (source: 'photos' | 'files') => {
+    if (!selection || !canEdit || assetBusy) return;
+    setAssetNote('');
+    try {
+      let uri = '', fileName = selection.id + '-goodies-home-image', contentType = 'image/jpeg', byteSize = 0;
+      if (source === 'photos') {
+        const result = await ImagePicker.launchImageLibraryAsync({ mediaTypes: ['images'], allowsEditing: true, quality: 0.9 });
+        if (result.canceled || !result.assets?.[0]) return;
+        const file = result.assets[0]; uri = file.uri; fileName = file.fileName || fileName; contentType = file.mimeType || contentType; byteSize = file.fileSize || 0;
+      } else {
+        const result = await DocumentPicker.getDocumentAsync({ type: 'image/*', multiple: false, copyToCacheDirectory: true });
+        if (result.canceled || !result.assets?.[0]) return;
+        const file = result.assets[0]; uri = file.uri; fileName = file.name || fileName; contentType = file.mimeType || contentType; byteSize = file.size || 0;
+      }
+      if (!byteSize) {
+        const response = await fetch(uri);
+        if (!response.ok) throw new Error('The selected image could not be read. Choose another image.');
+        byteSize = (await response.blob()).size;
+      }
+      if (!['image/jpeg', 'image/png', 'image/webp', 'image/gif'].includes(contentType)) throw new Error('Choose a JPEG, PNG, WebP, or GIF image. Export HEIC/HEIF photos as JPEG first.');
+      if (!byteSize) throw new Error('The selected image size could not be read.');
+      setAssetBusy(source);
+      const key = 'wantiss.goodies.home.' + selection.kind + '.' + selection.id + '.' + crypto.randomUUID();
+      const id = await uploadCmsAsset({ key, uri, fileName, contentType, byteSize, altText: { en: 'Goodies Home ' + selection.kind + ' image' }, status: 'draft' });
+      setPendingAssets((current) => ({ ...current, [key]: id }));
+      setImage({ assetKey: key });
+      await loadAssets();
+      setAssetNote('Image uploaded as a private draft. Publish the image before publishing the Home content.');
+    } catch (e) {
+      setAssetNote(e instanceof Error ? e.message : 'The image could not be uploaded.');
+    } finally { setAssetBusy(''); }
+  };
+
+  const publishHomeImage = async (key: string) => {
+    const id = pendingAssets[key];
+    if (!id || !canPublish || assetBusy) return;
+    setAssetBusy('publish'); setAssetNote('');
+    try {
+      await publishCmsAsset(id);
+      setPendingAssets((current) => { const next = { ...current }; delete next[key]; return next; });
+      await loadAssets();
+      setAssetNote('Image published. Save the Home draft, then publish the Home content.');
+    } catch (e) { setAssetNote(e instanceof Error ? e.message : 'The image could not be published.'); }
+    finally { setAssetBusy(''); }
+  };
+
   const applyLink = () => {
     const url = linkText.trim();
     if (!url) return;
@@ -332,6 +383,11 @@ export function GoodiesEditor({ canEdit, canPublish }: { canEdit: boolean; canPu
               <TextInput value={String(item.emoji || '')} onChangeText={setEmoji} style={fieldStyle} placeholder="Emoji" />
               <Txt size={9.5} mut>Image</Txt>
               <Txt size={10} style={{ marginTop: 3 }}>{currentImageText}</Txt>
+              <View style={{ flexDirection: 'row', flexWrap: 'wrap', gap: 6, marginTop: 6 }}>
+                <OutlineBtn onPress={() => { void uploadHomeImage('photos'); }} disabled={!canEdit || !!assetBusy}>{assetBusy === 'photos' ? 'Uploading…' : 'Choose from Photos / Live Photos'}</OutlineBtn>
+                <OutlineBtn onPress={() => { void uploadHomeImage('files'); }} disabled={!canEdit || !!assetBusy}>Choose from Files</OutlineBtn>
+              </View>
+              {currentImage?.assetKey && pendingAssets[currentImage.assetKey] ? <View style={{ marginTop: 5 }}><OutlineBtn onPress={() => { void publishHomeImage(currentImage.assetKey); }} disabled={!canPublish || !!assetBusy}>{assetBusy === 'publish' ? 'Publishing image…' : 'Publish image'}</OutlineBtn></View> : null}
               {assetNote ? <Txt size={9.5} color={c.or} style={{ marginTop: 3 }}>{assetNote}</Txt> : null}
               <View style={{ marginTop: 6 }}>
                 {assets.slice(0, 20).map((asset) => (
@@ -343,7 +399,7 @@ export function GoodiesEditor({ canEdit, canPublish }: { canEdit: boolean; canPu
                     </View>
                   </Pressable>
                 ))}
-                {!assets.length ? <Txt size={10} mut>No image assets found. Upload images in Content Studio, then press Reload.</Txt> : null}
+                {!assets.length ? <Txt size={10} mut>No image assets found yet. Choose an image above or upload it in Content Studio.</Txt> : null}
               </View>
               <Txt size={9.5} mut style={{ marginTop: 8 }}>Or use an external https link (not managed by the CMS)</Txt>
               <TextInput value={linkText} onChangeText={setLinkText} style={fieldStyle} placeholder="https://…" autoCapitalize="none" autoCorrect={false} />
