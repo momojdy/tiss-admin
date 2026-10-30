@@ -12,7 +12,7 @@ const GOLD = '#DAAE67';
 const LAVENDER = '#A789B1';
 const INK = 'rgba(0,0,0,0.87)';
 const NAV_MUTED = '#9A96A3';
-const SELECT = '#FD802E';
+const SELECT = MAGENTA;
 const BASE = 'https://raw.githubusercontent.com/momojdy/tiss_icons_assets/refs/heads/main/';
 const LOGO = BASE + 'WantisslogoOuterless.PNG';
 
