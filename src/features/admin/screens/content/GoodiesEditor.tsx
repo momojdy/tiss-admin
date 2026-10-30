@@ -140,7 +140,13 @@ export function GoodiesEditor({ canEdit, canPublish }: { canEdit: boolean; canPu
 
   useEffect(() => { void load(); void loadAssets(); }, [load, loadAssets]);
 
-  const select = useCallback((target: GoodiesSelection) => { setSelection(target); setLinkText(''); }, []);
+  const select = useCallback((target: GoodiesSelection) => {
+    setSelection(target);
+    setLinkText('');
+    // Opening the matching page group keeps the manual editor aligned with
+    // the element selected in the phone, including Build Your Own labels.
+    if (target.kind === 'label') setPageChoice(labelPage(target.id));
+  }, []);
 
   const edit = (change: (next: any) => void) => {
     if (!draft || !editMode) return;
