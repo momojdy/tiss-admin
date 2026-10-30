@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useState } from 'react';
+import { useCallback, useEffect, useMemo, useState } from 'react';
 import { TextInput, View } from 'react-native';
 import { supabase } from '../../lib/supabase';
 import { useTheme } from '../../theme/ThemeContext';
@@ -30,6 +30,9 @@ export function GoodiesBuilderConfigEditor({ canEdit }: { canEdit: boolean }) {
   const [artworkItems, setArtworkItems] = useState<any[]>([]);
   const [artworkSearch, setArtworkSearch] = useState('');
   const [artworkError, setArtworkError] = useState('');
+  const [libraryOpenGroup, setLibraryOpenGroup] = useState<number | null>(null);
+  const [librarySearch, setLibrarySearch] = useState('');
+  const [requestedIngredient, setRequestedIngredient] = useState('');
 
   const load = useCallback(async () => {
     setLoading(true); setError(''); setNotice('');
@@ -97,6 +100,28 @@ export function GoodiesBuilderConfigEditor({ canEdit }: { canEdit: boolean }) {
   };
 
   const patch = (p: Partial<BuilderRow>) => setSelected((current) => current ? { ...current, ...p } : current);
+  const ingredientLibrary = useMemo(() => {
+    const type = selected?.config?.type === 'burger' || selected?.config?.type === 'pizza' ? selected.config.type : 'custom';
+    const template: any = TEMPLATES[type];
+    return (template?.groups || []).map((group: any) => ({
+      name: String(group.name || 'Ingredients'),
+      items: (group.items || []).map((item: any) => ({ ...item, groupName: String(group.name || 'Ingredients') })),
+    }));
+  }, [selected?.config?.type]);
+  const addLibraryIngredient = (gi: number, source: any) => {
+    if (!selected || !canEdit || saving) return;
+    const newItem = { id: 'ingredient-' + Date.now().toString(36) + '-' + Math.random().toString(36).slice(2, 6), name: String(source.name || ''), price: Math.max(0, Number(source.price) || 0), free: !!source.free, avail: true, assetId: source.assetId || null, col: source.col || '#D9A441' };
+    patchConfig({ groups: (selected.config?.groups || []).map((x: any, j: number) => j === gi ? { ...x, items: [...(x.items || []), newItem] } : x) });
+    setNotice('Ingredient added to this group. Save the builder to keep the change.');
+  };
+  const addRequestedIngredient = (gi: number) => {
+    const name = requestedIngredient.trim();
+    if (!name || !selected || !canEdit || saving) return;
+    const newItem = { id: 'requested-' + Date.now().toString(36), name, price: 0, free: true, avail: true, assetId: null, col: '#D9A441', requestNote: 'Added from a restaurant ingredient request' };
+    patchConfig({ groups: (selected.config?.groups || []).map((x: any, j: number) => j === gi ? { ...x, items: [...(x.items || []), newItem] } : x) });
+    setRequestedIngredient('');
+    setNotice('Requested ingredient added as a draft. Review its price and availability, then save the builder.');
+  };
   const patchConfig = (p: Record<string, any>) => setSelected((current) => current ? { ...current, config: { ...current.config, ...p } } : current);
   const fieldStyle = { borderWidth: 1, borderColor: c.bd, borderRadius: 9, paddingHorizontal: 9, paddingVertical: 7, marginTop: 4, marginBottom: 7, color: c.ink, backgroundColor: c.card, fontSize: 11 } as const;
   const input = (label: string, value: any, onChangeText: (v: string) => void, keyboardType?: 'default' | 'decimal-pad' | 'number-pad', multiline = false) => (
@@ -129,8 +154,8 @@ export function GoodiesBuilderConfigEditor({ canEdit }: { canEdit: boolean }) {
   );
 
   return (
-    <Section title="Build Your Own · store configurations">
-      <Txt size={10} mut style={{ marginBottom: 8 }}>Manage each store's actual builder data—not just customer-facing labels. Changes include builder pricing, sizes, ingredient groups, required choices, selection limits, availability, and ingredient artwork IDs.</Txt>
+    <Section title="Build Your Own setup">
+      <Txt size={10} mut style={{ marginBottom: 8 }}>Choose a business, edit its pizza, burger or custom builder, then manage the exact sections and ingredients customers can select.</Txt>
       <View style={{ flexDirection: 'row', flexWrap: 'wrap', gap: 6, marginBottom: 8 }}>
         <OutlineBtn onPress={() => { void load(); }} disabled={loading || saving}>{loading ? 'Loading…' : 'Reload builders'}</OutlineBtn>
       </View>
@@ -218,8 +243,28 @@ export function GoodiesBuilderConfigEditor({ canEdit }: { canEdit: boolean }) {
               </View>
               <View style={{ flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', marginTop: 8, marginBottom: 4 }}>
                 <Txt size={10.5} weight={600}>Ingredients ({(group.items || []).length})</Txt>
-                <OutlineBtn disabled={!canEdit || saving} onPress={() => patchConfig({ groups: selected.config.groups.map((x: any, j: number) => j === gi ? { ...x, items: [...(x.items || []), { id: 'item-' + Date.now().toString(36), name: '', price: 0, free: true, avail: true, assetId: null, col: '#D9A441' }] } : x) })}>Add ingredient</OutlineBtn>
+                <View style={{ flexDirection: 'row', flexWrap: 'wrap', gap: 5 }}>
+                  <OutlineBtn disabled={!canEdit || saving} onPress={() => patchConfig({ groups: selected.config.groups.map((x: any, j: number) => j === gi ? { ...x, items: [...(x.items || []), { id: 'item-' + Date.now().toString(36), name: '', price: 0, free: true, avail: true, assetId: null, col: '#D9A441' }] } : x) })}>Add manually</OutlineBtn>
+                  <OutlineBtn primary={libraryOpenGroup === gi} disabled={!canEdit || saving} onPress={() => { setLibraryOpenGroup(libraryOpenGroup === gi ? null : gi); setLibrarySearch(''); }}>Add from ingredient list</OutlineBtn>
+                </View>
               </View>
+              {libraryOpenGroup === gi ? (
+                <View style={{ borderWidth: 1, borderColor: c.bd, borderRadius: 9, padding: 8, marginBottom: 8, backgroundColor: c.card }}>
+                  <Txt size={10.5} weight={600}>Ingredient library · {group.name || 'this section'}</Txt>
+                  <Txt size={9.5} mut style={{ marginTop: 2, marginBottom: 5 }}>Choose an ingredient from the {selected.config?.type === 'burger' ? 'burger' : selected.config?.type === 'pizza' ? 'pizza' : 'starter'} list. You can edit its name and price after adding it.</Txt>
+                  <TextInput value={librarySearch} onChangeText={setLibrarySearch} placeholder="Search ingredients…" placeholderTextColor={c.mut} style={fieldStyle} />
+                  {ingredientLibrary.flatMap((sourceGroup: any) => sourceGroup.items.filter((ingredient: any) => !librarySearch.trim() || (ingredient.name + ' ' + sourceGroup.name).toLowerCase().includes(librarySearch.trim().toLowerCase())).map((ingredient: any) => ({ ...ingredient, sourceGroup: sourceGroup.name }))).map((ingredient: any, index: number) => (
+                    <OutlineBtn key={ingredient.sourceGroup + ':' + ingredient.name + ':' + index} disabled={!canEdit || saving} onPress={() => addLibraryIngredient(gi, ingredient)}>
+                      {ingredient.name + ' · ' + ingredient.sourceGroup + (ingredient.free ? ' · included' : ' · +' + Number(ingredient.price || 0).toFixed(2))}
+                    </OutlineBtn>
+                  ))}
+                  {!ingredientLibrary.some((sourceGroup: any) => sourceGroup.items.some((ingredient: any) => !librarySearch.trim() || (ingredient.name + ' ' + sourceGroup.name).toLowerCase().includes(librarySearch.trim().toLowerCase()))) ? <Txt size={9.5} mut>No matching ingredients in this list.</Txt> : null}
+                  <Txt size={10.5} weight={600} style={{ marginTop: 10 }}>Add an ingredient from a restaurant request</Txt>
+                  <TextInput value={requestedIngredient} onChangeText={setRequestedIngredient} placeholder="Type the requested ingredient name…" placeholderTextColor={c.mut} style={fieldStyle} />
+                  <OutlineBtn disabled={!canEdit || saving || !requestedIngredient.trim()} onPress={() => addRequestedIngredient(gi)}>Add requested ingredient</OutlineBtn>
+                  <OutlineBtn onPress={() => setLibraryOpenGroup(null)} disabled={saving}>Close ingredient list</OutlineBtn>
+                </View>
+              ) : null}
               {(group.items || []).map((item: any, ii: number) => (
                 <View key={item.id || ii} style={{ borderTopWidth: 1, borderColor: c.bd, paddingTop: 7, marginTop: 3 }}>
                   <View style={{ flexDirection: 'row', flexWrap: 'wrap', gap: 8 }}>
