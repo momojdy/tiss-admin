@@ -6,7 +6,7 @@ import {SvgXml} from 'react-native-svg';
 import {LinearGradient} from 'expo-linear-gradient';
 import {Icon} from '../components/Icon';
 import {T, Circ, Cta, Empty, Stepper, useTheme} from '../components/ui';
-import {S, STB, money, cnt, emit} from '../store';
+import {S, STB, money, cnt, emit, push} from '../store';
 import {back, browse, go, tab} from '../actions';
 import {Sel} from '../editContext';
 import {ASSETS, LAYOUT, label} from '../content';
@@ -256,8 +256,31 @@ export function ByoFoot() {
   );
 }
 
+function ByoCatalog({sid}: {sid: string}) {
+  const th = useTheme();
+  const builders = (BYO.cfg[sid] || []).filter((item) => item.enabled && item.available);
+  return <View style={{flex: 1}}>
+    <Header title="Build Your Own" sub={STB[sid]?.n || 'Choose what to customize'} onBack={back} />
+    <ScrollView contentContainerStyle={{paddingHorizontal: 16, paddingBottom: 28, gap: 14}} showsVerticalScrollIndicator={false}>
+      <View style={{padding: 16, borderRadius: 18, backgroundColor: th.soft}}><T size={13} color={th.mut}>Choose a creation below. Each one has its own ingredients, selection rules and pricing.</T></View>
+      {builders.map((item) => <View key={item.id} style={{borderWidth: 1, borderColor: th.line, borderRadius: 18, overflow: 'hidden', backgroundColor: th.card}}>
+        <View style={{backgroundColor: '#2C4A5B', padding: 16, flexDirection: 'row', alignItems: 'center', gap: 12}}>
+          <View style={{width: 58, height: 58, borderRadius: 16, backgroundColor: 'rgba(255,255,255,.12)', alignItems: 'center', justifyContent: 'center'}}><Text style={{fontSize: 34}}>{item.emoji || '🍽️'}</Text></View>
+          <View style={{flex: 1}}><T size={17} weight="800" color="#FFFFFF">{item.name}</T><T size={12} color="#E4EAF0">{item.desc || 'Customize it your way'}</T><T size={12} weight="700" color="#FFFFFF" style={{marginTop: 4}}>From {money(item.base)}</T></View>
+        </View>
+        <View style={{padding: 14}}>
+          {item.groups.map((group) => <View key={group.id} style={{marginBottom: 10}}><T size={12} weight="800">{group.name}</T><View style={{flexDirection: 'row', flexWrap: 'wrap', gap: 6, marginTop: 6}}>{group.items.filter((ingredient) => ingredient.avail).slice(0, 8).map((ingredient) => <View key={ingredient.id} style={{paddingHorizontal: 9, paddingVertical: 5, borderRadius: 12, backgroundColor: th.soft, flexDirection: 'row', alignItems: 'center', gap: 5}}><View style={{width: 8, height: 8, borderRadius: 4, backgroundColor: ingredient.col || th.br}} /><T size={11.5}>{ingredient.name}</T>{ingredient.price > 0 ? <T size={10.5} color={th.mut}>+{money(ingredient.price)}</T> : null}</View>)}</View></View>)}
+          <Cta label={'Customize ' + item.name} onPress={() => push('byo', sid + '|' + item.id)} />
+        </View>
+      </View>)}
+      {!builders.length ? <Empty emoji="🍽️" title="No builders available" text="Add a pizza, burger or custom builder in Build Your Own · store configurations." /> : null}
+    </ScrollView>
+  </View>;
+}
+
 export function ByoScreen({p}: {p: string}) {
   const th = useTheme(), a = (p || '').split('|'), sid = a[0], b = bGet(sid, a[1]);
+  if (a[1] === '__catalog__' && STB[sid]) return <ByoCatalog sid={sid} />;
   if (!b || !STB[sid]) return <View><Header title={label('lbl.byoTitle', 'Builder')} onBack={back} /><Empty emoji="🍽️" title={label('lbl.byoUnavailableTitle', 'This builder is not available')} text={label('lbl.byoUnavailableText', 'The store may have turned it off.')} button={label('lbl.byoBackGoodies', 'Back to Goodies')} onPress={browse} /></View>;
   if (!BD || BD.bid !== b.id || BD.sid !== sid) setBD(bDraft(b, sid));
   if (BD.added) return <ByoDone b={b} />;
