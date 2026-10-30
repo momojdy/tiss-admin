@@ -1,1 +1,1 @@
-export const GOODIES_MODULES = ['Overview', 'Products and catalog', 'Categories', 'Merchants', 'Product review', 'Orders', 'Promotions', 'Support', 'Analytics', 'Settings'] as const;
+export const GOODIES_MODULES = ['Overview', 'Goodies assets', 'Categories', 'Merchants', 'Product review', 'Orders', 'Promotions', 'Support', 'Analytics', 'Settings'] as const;
