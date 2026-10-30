@@ -275,6 +275,25 @@ export function GoodiesEditor({ canEdit, canPublish }: { canEdit: boolean; canPu
   };
   const thumbnail = (entry: any, kind: GoodiesSelection['kind']) => {
     const uri = thumbnailFor(entry, kind);
+    return uri ? <Image source={{ uri }} resizeMode="cover" style={{ width: 54, height: 46, borderRadius: 8, backgroundColor: c.inset }} /> : <View style={{ width: 54, height: 46, borderRadius: 8, backgroundColor: c.inset, alignItems: 'center', justifyContent: 'center' }}><Txt size={8.5} mut>{entry?.emoji || 'No image'}</Txt></View>;
+  };
+  const promoColors = [{ id: 'plum', label: 'Plum', colors: ['#7B3FE4', '#A56BFF'] }, { id: 'orange', label: 'Orange', colors: ['#FD802E', '#FFA35C'] }, { id: 'green', label: 'Green', colors: ['#1F7A5A', '#2FB584'] }] as const;
+  const setPromoColor = (entry: any, color: string) => setMeta('promo', entry, 'color', color);
+  const promoColorPicker = (entry: any) => (
+    <View style={{ marginTop: 8 }}>
+      <Txt size={9.5} mut>Promotion card color</Txt>
+      <View style={{ flexDirection: 'row', flexWrap: 'wrap', gap: 7, marginTop: 6 }}>
+        {promoColors.map((option) => <Pressable key={option.id} accessibilityRole="button" accessibilityLabel={'Set ' + option.label + ' promotion color'} onPress={() => setPromoColor(entry, option.id)} style={{ flexDirection: 'row', alignItems: 'center', gap: 6, paddingVertical: 6, paddingHorizontal: 9, borderRadius: 18, borderWidth: entry.color === option.id ? 2 : 1, borderColor: entry.color === option.id ? c.ink : c.bd, backgroundColor: c.card }}><View style={{ width: 28, height: 18, borderRadius: 6, backgroundColor: option.colors[0], borderWidth: 1, borderColor: option.colors[1] }} /><Txt size={10} weight={entry.color === option.id ? 700 : 400}>{option.label}</Txt>{entry.color === option.id ? <Txt size={10}>✓</Txt> : null}</Pressable>)}
+      </View>
+    </View>
+  );
+  const thumbnailFor = (entry: any, kind: GoodiesSelection['kind']) => {
+    const image = entry?.[imageKeyFor(listKeyFor(kind))];
+    const key = image?.assetKey || image?.asset_key;
+    return (key && assetUrls[key]) || image?.url || image?.data || '';
+  };
+  const thumbnail = (entry: any, kind: GoodiesSelection['kind']) => {
+    const uri = thumbnailFor(entry, kind);
     return uri ? <Image source={{ uri }} resizeMode="cover" style={{ width: 54, height: 46, borderRadius: 8, backgroundColor: c.inset }} /> : <View style={{ width: 54, height: 46, borderRadius: 8, backgroundColor: c.inset, alignItems: 'center', justifyContent: 'center' }}><Txt size={8.5} mut>No image</Txt></View>;
   };
 
@@ -431,9 +450,10 @@ export function GoodiesEditor({ canEdit, canPublish }: { canEdit: boolean; canPu
                   <OutlineBtn onPress={() => select({ kind: 'promo', id: entry.id, field: 'art' })}>Image / icon</OutlineBtn>
                   {toggleLive('promo', entry, 'st', 'Live', 'Hidden')}
                 </View>
+                {promoColorPicker(entry)}
                 <View style={{ flexDirection: 'row', flexWrap: 'wrap', gap: 8 }}>
                   {metaInput('promo', entry, 'target', 'Tap destination')}
-                  {metaInput('promo', entry, 'color', 'Card style (plum / orange / green)')}
+
                   {metaInput('promo', entry, 'aud', 'Audience')}
                   {metaInput('promo', entry, 'ord', 'Display order')}
                   {metaInput('promo', entry, 'from', 'Start date (YYYY-MM-DD)')}
