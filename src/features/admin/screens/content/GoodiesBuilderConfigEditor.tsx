@@ -2,7 +2,7 @@ import { useCallback, useEffect, useMemo, useState } from 'react';
 import { TextInput, View } from 'react-native';
 import { supabase } from '../../lib/supabase';
 import { useTheme } from '../../theme/ThemeContext';
-import { Card, Section } from '../../ui/Card';
+import { Section } from '../../ui/Card';
 import { OutlineBtn } from '../../ui/Controls';
 import { Txt } from '../../ui/Txt';
 import { TEMPLATES } from '../../goodiesConsumer/builders/templates';
@@ -96,7 +96,7 @@ export function GoodiesBuilderConfigEditor({ canEdit }: { canEdit: boolean }) {
       })),
     };
     setSelected({ business_id: business.business_id, business_name: business.business_name, builder_id: id, config, enabled: false, updated_at: new Date().toISOString() });
-    setError(''); setNotice('Starter template loaded as a disabled draft. Review its prices and ingredients, then save and enable it when ready.');
+    setError(''); setNotice('New builder draft created. Review its settings before saving.');
   };
 
   const patch = (p: Partial<BuilderRow>) => setSelected((current) => current ? { ...current, ...p } : current);
@@ -154,15 +154,10 @@ export function GoodiesBuilderConfigEditor({ canEdit }: { canEdit: boolean }) {
   );
 
   return (
-    <Section title="Build Your Own setup">
-      <Txt size={10} mut style={{ marginBottom: 8 }}>Choose a business, edit its pizza, burger or custom builder, then manage the exact sections and ingredients customers can select.</Txt>
-      <View style={{ flexDirection: 'row', flexWrap: 'wrap', gap: 6, marginBottom: 8 }}>
-        <OutlineBtn onPress={() => { void load(); }} disabled={loading || saving}>{loading ? 'Loading…' : 'Reload builders'}</OutlineBtn>
-      </View>
-      {error ? <Card><Txt size={10.5} color={c.or}>{error}</Txt></Card> : null}
-      {notice ? <Card><Txt size={10.5}>{notice}</Txt></Card> : null}
-      {!rows.length && !loading && !error ? <Txt size={10} mut>No saved store builders exist yet. You can create the first builder for a business below.</Txt> : null}
-      <Txt size={11} weight={600} style={{ marginTop: 8, marginBottom: 5 }}>Businesses · create a builder</Txt>
+    <Section title="Build Your Own">
+      {error ? <Txt size={10.5} color={c.or} style={{ marginBottom: 7 }}>{error}</Txt> : null}
+      {notice ? <Txt size={10} mut style={{ marginBottom: 7 }}>{notice}</Txt> : null}
+      {businesses.length ? <Txt size={10.5} weight={600} style={{ marginTop: 3, marginBottom: 5 }}>Create a builder</Txt> : null}
       {businesses.map((business) => (
         <View key={business.business_id} style={{ borderWidth: 1, borderColor: c.bd, borderRadius: 10, padding: 8, marginBottom: 6, flexDirection: 'row', alignItems: 'center', gap: 8 }}>
           <View style={{ flex: 1 }}>
@@ -176,7 +171,7 @@ export function GoodiesBuilderConfigEditor({ canEdit }: { canEdit: boolean }) {
           </View>
         </View>
       ))}
-      <Txt size={11} weight={600} style={{ marginTop: 10, marginBottom: 5 }}>Saved builder configurations</Txt>
+      {rows.length ? <Txt size={10.5} weight={600} style={{ marginTop: 10, marginBottom: 5 }}>Saved builders</Txt> : null}
       {rows.map((row) => (
         <View key={row.business_id + ':' + row.builder_id} style={{ borderWidth: 1, borderColor: c.bd, borderRadius: 10, padding: 9, marginBottom: 7 }}>
           <View style={{ flexDirection: 'row', alignItems: 'center', gap: 8 }}>
