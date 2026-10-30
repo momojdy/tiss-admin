@@ -287,16 +287,6 @@ export function GoodiesEditor({ canEdit, canPublish }: { canEdit: boolean; canPu
       </View>
     </View>
   );
-  const thumbnailFor = (entry: any, kind: GoodiesSelection['kind']) => {
-    const image = entry?.[imageKeyFor(listKeyFor(kind))];
-    const key = image?.assetKey || image?.asset_key;
-    return (key && assetUrls[key]) || image?.url || image?.data || '';
-  };
-  const thumbnail = (entry: any, kind: GoodiesSelection['kind']) => {
-    const uri = thumbnailFor(entry, kind);
-    return uri ? <Image source={{ uri }} resizeMode="cover" style={{ width: 54, height: 46, borderRadius: 8, backgroundColor: c.inset }} /> : <View style={{ width: 54, height: 46, borderRadius: 8, backgroundColor: c.inset, alignItems: 'center', justifyContent: 'center' }}><Txt size={8.5} mut>No image</Txt></View>;
-  };
-
   return (
     <View>
       <Section title="Goodies content" right={<View style={{ flexDirection: 'row', flexWrap: 'wrap', gap: 5 }}>
