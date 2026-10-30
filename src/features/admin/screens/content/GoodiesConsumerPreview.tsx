@@ -2,6 +2,7 @@ import React, { useCallback, useEffect, useLayoutEffect, useMemo } from 'react';
 import { Pressable, ScrollView, Text, View } from 'react-native';
 import { GoodiesApp } from '../../goodiesConsumer/GoodiesApp';
 import { emit, IT, S, STB, useGoodies, setPreviewOnly, setEditLocked } from '../../goodiesConsumer/store';
+import { BYO } from '../../goodiesConsumer/builders/engine';
 import { applyContent, clearContent, setDraftControlled } from '../../goodiesConsumer/content';
 import { resolveForRender } from '../../goodiesConsumer/draft';
 import { EditContext, type GoodiesSelection } from '../../goodiesConsumer/editContext';
@@ -59,7 +60,9 @@ export function GoodiesConsumerPreview({ editMode = false, contentDraft, assetUr
   const navigate = useCallback((route: string) => {
     const storeId = Object.keys(STB)[0] || 's12';
     const itemId = Object.keys(IT)[0] || '';
-    const param = route === 'store' || route === 'byo' ? storeId : route === 'product' ? itemId : undefined;
+    const builderStore = Object.keys(STB).find((id) => (BYO.cfg[id] || []).some((b: any) => b.enabled));
+    const builderParam = builderStore ? builderStore + '|' + (BYO.cfg[builderStore] || []).find((b: any) => b.enabled).id : storeId + '|';
+    const param = route === 'store' ? storeId : route === 'byo' ? builderParam : route === 'product' ? itemId : undefined;
     const now = Date.now();
     S.stack = route === 'home'
       ? [{ r: 'home', u: now }]
