@@ -282,10 +282,12 @@ export function AuthPageEditor({ canEdit, canPublish }: { canEdit: boolean; canP
       </Section>
       {editOnPhone && target && selected ? (
         <Section title={target.title}>
+          <View style={{ borderWidth: 2, borderStyle: 'dashed', borderColor: '#BF008E', borderRadius: 12, padding: 10 }}>
           {target.fields.map((field) => input(field.key, field.label, field.multiline))}
           {target.asset ? renderAssetControl(target.asset, target.title === 'Logo' ? 'Wantiss logo' : target.title.replace(' button', ' image'), assetState(target.asset).preview, assetState(target.asset).id) : null}
           <View style={{ flexDirection: 'row', flexWrap: 'wrap', gap: 6, marginTop: 8 }}>
             <OutlineBtn onPress={() => setSelected(null)}>Done</OutlineBtn>
+          </View>
           </View>
         </Section>
       ) : null}
