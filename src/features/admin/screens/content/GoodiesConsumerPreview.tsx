@@ -5,6 +5,7 @@ import { emit, IT, S, STB, useGoodies, setPreviewOnly, setEditLocked } from '../
 import { applyContent, clearContent, setDraftControlled } from '../../goodiesConsumer/content';
 import { resolveForRender } from '../../goodiesConsumer/draft';
 import { EditContext, type GoodiesSelection } from '../../goodiesConsumer/editContext';
+import { PhoneFrame } from './PhoneFrame';
 
 const orange = '#FD802E';
 const ink = '#1B1B1F';
@@ -87,11 +88,11 @@ export function GoodiesConsumerPreview({ editMode = false, contentDraft, assetUr
           })}
         </ScrollView> : null}
       </View>
-      <View style={{ width: '100%', maxWidth: 404, height: 720, borderRadius: 30, borderWidth: 7, borderColor: '#252529', overflow: 'hidden', backgroundColor: '#FFFFFF' }}>
+      <PhoneFrame background="#FFFFFF">
         <EditContext.Provider value={editValue}>
           <GoodiesApp embedded previewMode />
         </EditContext.Provider>
-      </View>
+      </PhoneFrame>
     </View>
   );
 }
