@@ -338,6 +338,7 @@ export function GoodiesEditor({ canEdit, canPublish }: { canEdit: boolean; canPu
 
       {editMode && selection ? (
         <Section title={kindName[selection.kind] + ' · ' + fieldName[selection.field]}>
+          <View style={{ borderWidth: 2, borderStyle: 'dashed', borderColor: '#FD802E', borderRadius: 12, padding: 10 }}>
           {!item ? (
             <View>
               {selection.kind === 'label' ? <View style={{ marginTop: 8 }}><OutlineBtn primary onPress={createLabel}>Create editable text</OutlineBtn></View> : null}
@@ -393,6 +394,7 @@ export function GoodiesEditor({ canEdit, canPublish }: { canEdit: boolean; canPu
           )}
           <View style={{ flexDirection: 'row', flexWrap: 'wrap', gap: 6, marginTop: 8 }}>
             <OutlineBtn primary onPress={() => setSelection(null)}>Done editing this item</OutlineBtn>
+          </View>
           </View>
         </Section>
       ) : null}
