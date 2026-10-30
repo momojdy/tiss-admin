@@ -14,7 +14,7 @@ const FIELD_TEXT = '#9A4B68';
 const DARK = '#14181B';
 const PAGE_BG = '#F1F4F8';
 const RED = '#FF0000';
-const SELECT = '#FD802E';
+const SELECT = PINK;
 const LOGO_URL = 'https://raw.githubusercontent.com/momojdy/tiss_icons_assets/refs/heads/main/WantisslogoOuterless.PNG';
 const GOOGLE_PNG = 'https://www.gstatic.com/firebasejs/ui/2.0.0/images/auth/google.png';
 
