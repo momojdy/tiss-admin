@@ -280,7 +280,7 @@ function ByoCatalog({sid}: {sid: string}) {
 
 export function ByoScreen({p}: {p: string}) {
   const th = useTheme(), a = (p || '').split('|'), sid = a[0], b = bGet(sid, a[1]);
-  if (a[1] === '__catalog__' && STB[sid]) return <ByoCatalog sid={sid} />;
+  if (a[1] === '__catalog__' && STB[sid]) { if (BD) setBD(null); return <ByoCatalog sid={sid} />; }
   if (!b || !STB[sid]) return <View><Header title={label('lbl.byoTitle', 'Builder')} onBack={back} /><Empty emoji="🍽️" title={label('lbl.byoUnavailableTitle', 'This builder is not available')} text={label('lbl.byoUnavailableText', 'The store may have turned it off.')} button={label('lbl.byoBackGoodies', 'Back to Goodies')} onPress={browse} /></View>;
   if (!BD || BD.bid !== b.id || BD.sid !== sid) setBD(bDraft(b, sid));
   if (BD.added) return <ByoDone b={b} />;
