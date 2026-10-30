@@ -46,8 +46,8 @@ function Mode({id, title, sub, emoji, image, onPress, grad, bg, fg, small}: any)
 
 function promoGradient(kind: string): [string, string] {
   const preset = PROMO[kind as keyof typeof PROMO];
-  if (preset) return preset;
-  if (!/^#[0-9a-fA-F]{6}$/.test(kind)) return PROMO.plum;
+  if (preset) return [preset[0], preset[1]];
+  if (!/^#[0-9a-fA-F]{6}$/.test(kind)) return [PROMO.plum[0], PROMO.plum[1]];
   const hex = kind.slice(1);
   const rgb = [0, 2, 4].map(i => parseInt(hex.slice(i, i + 2), 16));
   const lighter = rgb.map(v => Math.round(v + (255 - v) * 0.24));
