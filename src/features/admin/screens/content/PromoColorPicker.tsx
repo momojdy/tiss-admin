@@ -1,4 +1,4 @@
-import React, {useMemo, useState} from 'react';
+import React, {useEffect, useMemo, useState} from 'react';
 import {PanResponder, View, StyleSheet} from 'react-native';
 import {LinearGradient} from 'expo-linear-gradient';
 import {Txt} from '../../ui/Txt';
@@ -15,6 +15,7 @@ export function PromoColorPicker({value,onChange,disabled=false}:{value:string;o
   const [hsv,setHsv]=useState(()=>hexToHsv(initial));
   const [size,setSize]=useState({w:280,h:150});
   const [hueWidth,setHueWidth]=useState(280);
+  useEffect(()=>{setHsv(hexToHsv(validHex(value)?value:(PRESETS[value]||PRESETS.plum)));},[value]);
   const hex=hsvToHex(hsv.h,hsv.s,hsv.v);
   const areaResponder=useMemo(()=>PanResponder.create({onStartShouldSetPanResponder:()=>!disabled,onMoveShouldSetPanResponder:()=>!disabled,onPanResponderGrant:e=>pickArea(e.nativeEvent.locationX,e.nativeEvent.locationY),onPanResponderMove:e=>pickArea(e.nativeEvent.locationX,e.nativeEvent.locationY)}),[disabled,size]);
   const hueResponder=useMemo(()=>PanResponder.create({onStartShouldSetPanResponder:()=>!disabled,onMoveShouldSetPanResponder:()=>!disabled,onPanResponderGrant:e=>pickHue(e.nativeEvent.locationX),onPanResponderMove:e=>pickHue(e.nativeEvent.locationX)}),[disabled,hueWidth]);
