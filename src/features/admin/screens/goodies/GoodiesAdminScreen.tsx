@@ -16,10 +16,11 @@ import { OutlineBtn, Pill, SelectMenu, StatusPill } from '../../ui/Controls';
 import { ListRows } from '../../ui/Lists';
 import { Txt } from '../../ui/Txt';
 import { GOODIES_MODULES } from './modules';
+import { GoodiesAssetLibrary } from './GoodiesAssetLibrary';
 
 /** Canonical Goodies configuration reference, not a live snapshot; production changes use server-side drafts. */
 const data = goodiesSeed as any;
-const moduleMap: Record<string, string> = { Overview: 'Overview', 'Products and catalog': 'Library', Categories: 'Categories', Merchants: 'Merchants', 'Product review': 'Product review', Orders: 'Orders', Promotions: 'Promos', Support: 'Support', Analytics: 'Analytics', Settings: 'Settings' };
+const moduleMap: Record<string, string> = { Overview: 'Overview', 'Goodies assets': 'Library', Categories: 'Categories', Merchants: 'Merchants', 'Product review': 'Product review', Orders: 'Orders', Promotions: 'Promos', Support: 'Support', Analytics: 'Analytics', Settings: 'Settings' };
 const modules = GOODIES_MODULES;
 const languages = ['en', 'fr', 'ht', 'es', 'zh'];
 
@@ -111,7 +112,7 @@ export function GoodiesAdminScreen() {
       ...data.promos.map((x: any) => ({ ...x, _kind: 'promo', _field: 'title', _title: x.title?.en?.v || x.id, _sub: (x.sub?.en?.v || x.aud || 'Goodies promotion') + (x.target ? ' · Target: ' + x.target : '') })),
     ];
     if (moduleLabel === 'Categories') return data.cats.map((x: any) => ({ ...x, _kind: 'category', _field: 'name', _title: x.name?.en?.v || x.id, _sub: x.st + ' · ' + (x.stores || 0) + ' stores' }));
-    if (moduleLabel === 'Library' || moduleLabel === 'Product review') return data.lib.map((x: any) => ({ ...x, _kind: 'library', _field: 'name', _title: x.name?.en?.v || x.id, _sub: (moduleLabel === 'Product review' ? 'Catalog review · ' : '') + x.role + ' · ' + x.b + ' · ' + x.st }));
+    if (moduleLabel === 'Product review') return data.lib.map((x: any) => ({ ...x, _kind: 'library', _field: 'name', _title: x.name?.en?.v || x.id, _sub: (moduleLabel === 'Product review' ? 'Catalog review · ' : '') + x.role + ' · ' + x.b + ' · ' + x.st }));
     if (moduleLabel === 'Requests') return data.reqs.map((x: any) => ({ ...x, _kind: 'request', _field: 'note', _title: x.name, _sub: x.vendor + ' · ' + x.st + ' · ' + x.b }));
     if (moduleLabel === 'Promos') return [...data.promos, ...data.coupons].map((x: any) => ({ ...x, _kind: 'promo', _field: x.title ? 'title' : 'desc', _title: x.title?.en?.v || x.code || x.id, _sub: (x.st || 'Draft') + ' · ' + (x.aud || x.store || 'Goodies') + (x.target ? ' · Target: ' + x.target : '') }));
     if (moduleLabel === 'Merchants') return [];
@@ -172,7 +173,7 @@ export function GoodiesAdminScreen() {
           <Section title="Goodies health">
             <ListRows rows={[
               { key: 'promos', main: 'Promotion references', sub: 'Not connected yet.', right: String(data.promos.filter((item: any) => item.st === 'Live').length) + ' refs', onPress: () => setModule('Promotions') },
-              { key: 'missing', main: 'Missing translations', sub: 'English, French, Haitian Creole, Spanish and Chinese', right: '—', onPress: () => setModule('Products and catalog') },
+              { key: 'missing', main: 'Missing translations', sub: 'English, French, Haitian Creole, Spanish and Chinese', right: '—', onPress: () => setModule('Goodies assets') },
               { key: 'assets', main: 'Assets without uploaded images', sub: 'Reference catalog definitions', right: String(data.lib.length), onPress: () => setModule('Products and catalog') },
               { key: 'restricted', main: 'Restricted-goods rules', sub: 'Review service requirements', right: '—', onPress: () => setModule('Settings') },
             ]} />
@@ -204,6 +205,8 @@ export function GoodiesAdminScreen() {
           ]} />
           <Txt size={9.5} mut style={{ marginTop: 8 }}>Not connected yet.</Txt>
         </Section>
+      ) : moduleLabel === 'Library' ? (
+        <GoodiesAssetLibrary />
       ) : moduleLabel === 'Fees' ? (
         <Section title="Fees and rules">
           <Txt size={10.1} mut style={{ marginBottom: 8 }}>Not connected yet.</Txt>
