@@ -44,7 +44,17 @@ function Mode({id, title, sub, emoji, image, onPress, grad, bg, fg, small}: any)
   }
 }
 
-function promoGradient(kind: string): [string, string] {\n  const preset = PROMO[kind as keyof typeof PROMO];\n  if (preset) return preset;\n  if (!/^#[0-9a-fA-F]{6}$/.test(kind)) return PROMO.plum;\n  const hex = kind.slice(1);\n  const rgb = [0, 2, 4].map(i => parseInt(hex.slice(i, i + 2), 16));\n  const lighter = rgb.map(v => Math.round(v + (255 - v) * 0.24));\n  return [kind, '#' + lighter.map(v => v.toString(16).padStart(2, '0')).join('').toUpperCase()];\n}\n\nfunction PromoCard({id, kind, title, sub, btn, emoji, image, target}: {id?: string; kind: string; title: string; sub: string; btn: string; emoji: string; image?: string | null; target?: string}) {
+function promoGradient(kind: string): [string, string] {
+  const preset = PROMO[kind as keyof typeof PROMO];
+  if (preset) return preset;
+  if (!/^#[0-9a-fA-F]{6}$/.test(kind)) return PROMO.plum;
+  const hex = kind.slice(1);
+  const rgb = [0, 2, 4].map(i => parseInt(hex.slice(i, i + 2), 16));
+  const lighter = rgb.map(v => Math.round(v + (255 - v) * 0.24));
+  return [kind, '#' + lighter.map(v => v.toString(16).padStart(2, '0')).join('').toUpperCase()];
+}
+
+function PromoCard({id, kind, title, sub, btn, emoji, image, target}: {id?: string; kind: string; title: string; sub: string; btn: string; emoji: string; image?: string | null; target?: string}) {
   const ed = useEditing() && !!id;
   const wrap = (field: 'title' | 'sub' | 'btn' | 'art', node: any, style?: any) => id ? <Sel sel={{kind: 'promo', id, field}} style={style}>{node}</Sel> : node;
   const btnBox: any = {position: 'absolute', left: 16, bottom: 8};
@@ -55,6 +65,7 @@ function promoGradient(kind: string): [string, string] {\n  const preset = PROMO
     ? <Image source={{uri: image}} style={ed ? {width: '100%', height: '100%'} : imgBox} resizeMode="contain" />
     : <Text style={ed ? {fontSize: 78, lineHeight: 78, textAlign: 'center'} : emojiBox}>{emoji}</Text>;
   const artBox: any = image ? imgBox : {position: 'absolute', right: 8, bottom: 0, width: 98, height: 78};
+  const gradient = promoGradient(kind);
   return (
     <Pressable onPress={() => ui.sheet({kind: 'promo', p: kind === 'orange' ? 'points' : kind === 'green' ? 'produce' : 'free', custom: {title, sub, btn, emoji, target}})}>
       <Grad colors={gradient} angle={110} style={{width: 300, height: 124, borderRadius: 18, padding: 12, overflow: 'hidden'}}>
@@ -100,7 +111,8 @@ export function Home({onExit}: {onExit?: () => void}) {
         <Icon name="search" size={18} color={th.mut} /><Sel sel={{kind: 'label', id: 'lbl.search', field: 'text'}}><T size={14.5} color={th.mut}>{label('lbl.search', tr('searchPh'))}</T></Sel>
       </Pressable>
       <View style={{flexDirection: 'row', gap: 10, paddingHorizontal: 16, paddingTop: 16}}>
-        <View style={{flex: 1.25}}><Mode id={md && md[0] ? md[0].id : undefined} grad title={(md && md[0] ? md[0].title : tr('foodDelivery')).replace(' ', '\n')} sub={md && md[0] ? md[0].sub : tr('hotFresh')} emoji={md && md[0] ? md[0].emoji : '🍛'} image={md && md[0] ? md[0].image : null} onPress={() => go('catlist', md && md[0] ? md[0].cat : 'restaurants')} /></View>
+        <View style={{flex: 1.25}}><Mode id={md && md[0] ? md[0].id : undefined} grad title={(md && md[0] ? md[0].title : tr('foodDelivery')).replace(' ', '
+')} sub={md && md[0] ? md[0].sub : tr('hotFresh')} emoji={md && md[0] ? md[0].emoji : '🍛'} image={md && md[0] ? md[0].image : null} onPress={() => go('catlist', md && md[0] ? md[0].cat : 'restaurants')} /></View>
         <View style={{flex: 1, gap: 10}}>
           <Mode id={md && md[1] ? md[1].id : undefined} small bg={th.m2bg} fg={th.m2fg} title={md && md[1] ? md[1].title : tr('groceries')} emoji={md && md[1] ? md[1].emoji : '🛒'} image={md && md[1] ? md[1].image : null} onPress={() => go('catlist', md && md[1] ? md[1].cat : 'groceries')} />
           <Mode id={md && md[2] ? md[2].id : undefined} small bg={th.m3bg} fg={th.m3fg} title={md && md[2] ? md[2].title : tr('drugstore')} emoji={md && md[2] ? md[2].emoji : '💊'} image={md && md[2] ? md[2].image : null} onPress={() => go('catlist', md && md[2] ? md[2].cat : 'drugstore')} />
