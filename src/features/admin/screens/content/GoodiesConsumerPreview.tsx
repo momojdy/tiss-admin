@@ -36,6 +36,9 @@ export function GoodiesConsumerPreview({ editMode = false, contentDraft, assetUr
   setDraftControlled(true);
   useGoodies();
 
+  // A local-only sample store keeps the real customer Build Your Own screen
+  // available in Admin even when no live business has published a builder.
+  const previewBuilders = useMemo(() => [fromTemplate('pizza'), fromTemplate('burger')], []);
   const resolved = useMemo(() => {
     if (!contentDraft) return null;
     try { return resolveForRender(contentDraft, assetUrls); } catch { return null; }
@@ -58,15 +61,22 @@ export function GoodiesConsumerPreview({ editMode = false, contentDraft, assetUr
   useEffect(() => () => { setDraftControlled(false); void clearContent(); }, []);
 
   const navigate = useCallback((route: string) => {
-    const storeId = Object.keys(STB)[0] || 's12';
     const itemId = Object.keys(IT)[0] || '';
-    /* With no live builder configured, show the template builders so the admin can still see the screen. */
-    if (!Object.keys(STB).some((id) => (BYO.cfg[id] || []).some((b: any) => b.enabled))) {
-      const first = Object.keys(STB)[0];
-      if (first) { BYO.cfg[first] = [fromTemplate('pizza'), fromTemplate('burger')]; }
+    const liveStoreId = Object.keys(STB).find((id) => (BYO.cfg[id] || []).some((b: any) => b.enabled && b.available));
+    const liveBuilder = liveStoreId ? (BYO.cfg[liveStoreId] || []).find((b: any) => b.enabled && b.available) : null;
+    const storeId = Object.keys(STB)[0] || 's12';
+    let builderParam = '';
+    if (liveStoreId && liveBuilder) {
+      builderParam = liveStoreId + '|' + liveBuilder.id;
+    } else {
+      // This is deliberately an in-memory preview fixture, not a store config.
+      // It never asks the admin to create or enable a real business builder.
+      const previewStoreId = '__admin_goodies_builder_preview__';
+      STB[previewStoreId] = { id: previewStoreId, n: 'Build Your Own preview', open: true } as any;
+      BYO.store[previewStoreId] = true;
+      BYO.cfg[previewStoreId] = previewBuilders;
+      builderParam = previewStoreId + '|' + previewBuilders[0].id;
     }
-    const builderStore = Object.keys(STB).find((id) => (BYO.cfg[id] || []).some((b: any) => b.enabled));
-    const builderParam = builderStore ? builderStore + '|' + (BYO.cfg[builderStore] || []).find((b: any) => b.enabled).id : storeId + '|';
     const param = route === 'store' ? storeId : route === 'byo' ? builderParam : route === 'product' ? itemId : undefined;
     const now = Date.now();
     S.stack = route === 'home'
