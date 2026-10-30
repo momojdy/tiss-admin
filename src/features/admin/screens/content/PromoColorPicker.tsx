@@ -96,16 +96,11 @@ export function PromoColorPicker({
 
   const updateRgb = (channel: 'r' | 'g' | 'b', text: string) => {
     const digits = text.replace(/[^0-9]/g, '').slice(0, 3);
-    setRgbInput((current) => {
-      const next = { ...current, [channel]: digits === '' ? 0 : Math.min(255, Number(digits)) };
-      if (digits !== '') onChange(rgbToHex(next.r, next.g, next.b));
-      return next;
-    });
-    setHexInput((current) => {
-      const parsed = hexToRgb(current);
-      const next = { ...parsed, [channel]: digits === '' ? 0 : Math.min(255, Number(digits)) };
-      return rgbToHex(next.r, next.g, next.b);
-    });
+    const next = { ...rgbInput, [channel]: digits === '' ? 0 : Math.min(255, Number(digits)) };
+    setRgbInput(next);
+    const nextHex = rgbToHex(next.r, next.g, next.b);
+    setHexInput(nextHex);
+    onChange(nextHex);
     setHexError('');
   };
 
