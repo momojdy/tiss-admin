@@ -252,6 +252,69 @@ export function GoodiesEditor({ canEdit, canPublish }: { canEdit: boolean; canPu
         </View>
       </Section>
 
+      {editMode && draft ? (
+        <>
+          <Section title="Home · Service tiles">
+            <Txt size={10} mut>Manage the three main service cards shown near the top of Home. Select a field to edit it below.</Txt>
+            {(draft.modes || []).map((entry: any, index: number) => (
+              <View key={entry.id} style={{ marginTop: 8, paddingTop: 8, borderTopWidth: 1, borderTopColor: c.bd }}>
+                <Txt size={11} weight={500}>{'Service tile ' + (index + 1) + ' · ' + readText(entry.title)}</Txt>
+                <View style={{ flexDirection: 'row', flexWrap: 'wrap', gap: 5, marginTop: 5 }}>
+                  <OutlineBtn onPress={() => select({ kind: 'mode', id: entry.id, field: 'title' })}>Title</OutlineBtn>
+                  <OutlineBtn onPress={() => select({ kind: 'mode', id: entry.id, field: 'sub' })}>Subtitle</OutlineBtn>
+                  <OutlineBtn onPress={() => select({ kind: 'mode', id: entry.id, field: 'art' })}>Image / icon</OutlineBtn>
+                </View>
+              </View>
+            ))}
+            {!draft.modes?.length ? <Txt size={10} mut style={{ marginTop: 6 }}>No service tiles are configured.</Txt> : null}
+          </Section>
+          <Section title="Home · Categories">
+            <Txt size={10} mut>Manage category names and artwork displayed in the Home category row.</Txt>
+            {(draft.cats || []).slice().sort((a: any, b: any) => Number(a.ord || 0) - Number(b.ord || 0)).map((entry: any) => (
+              <View key={entry.id} style={{ flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', gap: 8, paddingVertical: 6, borderTopWidth: 1, borderTopColor: c.bd }}>
+                <View style={{ flex: 1 }}>
+                  <Txt size={10.5} weight={500}>{readText(entry.name) || entry.id}</Txt>
+                  <Txt size={9.5} mut>{entry.st === 'on' ? 'Visible' : 'Hidden'} · {entry.id}</Txt>
+                </View>
+                <View style={{ flexDirection: 'row', flexWrap: 'wrap', gap: 4 }}>
+                  <OutlineBtn onPress={() => select({ kind: 'category', id: entry.id, field: 'title' })}>Name</OutlineBtn>
+                  <OutlineBtn onPress={() => select({ kind: 'category', id: entry.id, field: 'art' })}>Artwork</OutlineBtn>
+                </View>
+              </View>
+            ))}
+            {!draft.cats?.length ? <Txt size={10} mut style={{ marginTop: 6 }}>No categories are configured.</Txt> : null}
+          </Section>
+          <Section title="Home · Promotion cards">
+            <Txt size={10} mut>Manage each promotional card's title, subtitle, button text and artwork.</Txt>
+            {(draft.promos || []).slice().sort((a: any, b: any) => Number(a.ord || 0) - Number(b.ord || 0)).map((entry: any, index: number) => (
+              <View key={entry.id} style={{ marginTop: 8, paddingTop: 8, borderTopWidth: 1, borderTopColor: c.bd }}>
+                <Txt size={11} weight={500}>{'Promotion ' + (index + 1) + ' · ' + readText(entry.title)}</Txt>
+                <Txt size={9.5} mut>{entry.st || 'Unspecified status'} · {entry.id}</Txt>
+                <View style={{ flexDirection: 'row', flexWrap: 'wrap', gap: 5, marginTop: 5 }}>
+                  <OutlineBtn onPress={() => select({ kind: 'promo', id: entry.id, field: 'title' })}>Title</OutlineBtn>
+                  <OutlineBtn onPress={() => select({ kind: 'promo', id: entry.id, field: 'sub' })}>Subtitle</OutlineBtn>
+                  <OutlineBtn onPress={() => select({ kind: 'promo', id: entry.id, field: 'btn' })}>Button</OutlineBtn>
+                  <OutlineBtn onPress={() => select({ kind: 'promo', id: entry.id, field: 'art' })}>Image / icon</OutlineBtn>
+                </View>
+              </View>
+            ))}
+            {!draft.promos?.length ? <Txt size={10} mut style={{ marginTop: 6 }}>No promotion cards are configured.</Txt> : null}
+          </Section>
+          <Section title="Home · Text and section headings">
+            <Txt size={10} mut>Manage the search placeholder, offer-card text and Home section headings.</Txt>
+            {(draft.labels || []).map((entry: any) => (
+              <View key={entry.id} style={{ flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', gap: 8, paddingVertical: 6, borderTopWidth: 1, borderTopColor: c.bd }}>
+                <View style={{ flex: 1 }}>
+                  <Txt size={10.5} weight={500}>{entry.label || entry.id}</Txt>
+                  <Txt size={9.5} mut>{readText(entry.t) || 'No English text yet'}</Txt>
+                </View>
+                <OutlineBtn onPress={() => select({ kind: 'label', id: entry.id, field: 'text' })}>Edit text</OutlineBtn>
+              </View>
+            ))}
+            {!draft.labels?.length ? <Txt size={10} mut style={{ marginTop: 6 }}>No Home text fields are configured.</Txt> : null}
+          </Section>
+        </>
+      ) : null}
       {editMode && selection ? (
         <Section title={kindName[selection.kind] + ' · ' + fieldName[selection.field]}>
           {!item ? (
