@@ -1,4 +1,4 @@
-
+/* Build Your Own screen. Port of v24 vByo, bzStage, bgView, pzView, bzOpts, bzRev, bzFoot, vByoDone. */
 import React, {useEffect, useMemo, useRef} from 'react';
 import {useSafeAreaInsets} from 'react-native-safe-area-context';
 import {View, Text, Pressable, ScrollView, Image, Animated, Easing, TextInput} from 'react-native';
@@ -8,10 +8,11 @@ import {Icon} from '../components/Icon';
 import {T, Circ, Cta, Empty, Stepper, useTheme} from '../components/ui';
 import {S, STB, money, cnt, emit} from '../store';
 import {back, browse, go, tab} from '../actions';
-import {ASSETS, LAYOUT} from '../content';
+import {ASSETS, LAYOUT, label} from '../content';
 import {BD, Builder, BItem, bGet, bDraft, setBD, units, itemOf, bBreak, bCheck, bzDirty, BYO, bzAdd, bzSub, bzSize, bzUndo, bzQty, bzNote, bzResetAsk, bzAddOrder, bzCancel, bzAnother, bzShop} from './engine';
 import {PSZ, bzr, hs, clamp, shade, pizzaBase, defsXml, shreds, iconXml, hasSymbol} from './pizzaArt';
 
+/* ---------- asset helpers (Admin library ids) ---------- */
 const key = (assetId: string | null) => (assetId || '').replace(/^(burger|pizza)\./, '');
 const isBun = (it: BItem) => /^(bun_|lettuce_wrap)/.test(key(it.assetId));
 const isSeason = (it: BItem) => /^(pepper_|spice_)/.test(key(it.assetId));
@@ -31,7 +32,7 @@ export const pizzaArtOf = (it: BItem) => {
   return ['pepperoni', 'mushroom', 'olives', 'basil', 'peppers', 'tomato', 'mozzarella'].includes(k) ? k : 'generic';
 };
 
-/* Layer tables provide fallbacks; Admin layout metadata overrides them. */
+/* v24 layer tables, overridden by Admin layout metadata when present */
 const RKt: any = {lwb: .5, lwt: 11, sauce: 1, patty: 6, cheese: 7, shred: 7.4, bacon: 8, lettuce: 9, pickle: 9.5, cucumber: 9.55, avocado: 9.6, mushroom: 9.65, pineapple: 9.7, jalapeno: 9.75, generic: 9.8, tomato: 10, egg: 10.4, caramel: 10.7, onion: 10.8, pepper: 11.2, spice: 11.4};
 const Wt: any = {lwb: 178, lwt: 178, patty: 184, cheese: 160, shred: 154, lettuce: 176, tomato: 152, onion: 144, caramel: 148, pickle: 134, cucumber: 136, jalapeno: 120, pineapple: 140, avocado: 156, mushroom: 150, bacon: 158, egg: 152, sauce: 112, generic: 146, pepper: 70, spice: 65};
 const Kt: any = {lwb: .2, lwt: .12, patty: .13, cheese: .035, shred: .035, lettuce: .07, tomato: .055, onion: .04, caramel: .045, pickle: .045, cucumber: .045, jalapeno: .045, pineapple: .05, avocado: .05, mushroom: .05, bacon: .055, egg: .055, sauce: .02, generic: .05, pepper: .025, spice: .02};
@@ -97,7 +98,7 @@ function Flakes() {
   );
 }
 
-/* Show fallback burger artwork if a required Admin layer is missing. */
+/* v24 vector burger, used when the Admin library is missing a needed layer (shown, never silently) */
 function BurgerFallback({b}: {b: Builder}) {
   const th = useTheme();
   let bun: BItem | null = null; let L: BItem[] = [];
@@ -120,9 +121,10 @@ function BurgerFallback({b}: {b: Builder}) {
   const topY = cur - 38; o += `<path d="M16 ${cur}Q16 ${topY} 125 ${topY}Q234 ${topY} 234 ${cur}Z" fill="${bc}"/><path d="M40 ${cur - 12}Q60 ${topY + 8} 100 ${topY + 6}" stroke="#fff" stroke-opacity=".28" stroke-width="5" fill="none" stroke-linecap="round"/>`;
   [[80, cur - 22], [120, cur - 28], [160, cur - 24], [100, cur - 12], [150, cur - 14], [190, cur - 14]].forEach(p => {o += `<ellipse cx="${p[0]}" cy="${p[1]}" rx="4" ry="2.2" fill="#FFF3D6" opacity=".8" transform="rotate(-20 ${p[0]} ${p[1]})"/>`;});
   const vb = `0 ${topY - 6} 250 ${tot - topY + 8}`, hgt = Math.min(210, 190 * (tot - topY + 8) / 250);
-  return <View style={{alignItems: 'center'}}><SvgXml width={190} height={hgt} xml={`<svg xmlns="http://www.w3.org/2000/svg" viewBox="${vb}">${o}</svg>`} /><T size={10.5} color="rgba(255,255,255,.6)" style={{marginTop: 6}}>Preview drawing. Photo layers appear once uploaded in Admin.</T></View>;
+  return <View style={{alignItems: 'center'}}><SvgXml width={190} height={hgt} xml={`<svg xmlns="http://www.w3.org/2000/svg" viewBox="${vb}">${o}</svg>`} /><T size={10.5} color="rgba(255,255,255,.6)" style={{marginTop: 6}}>{label("lbl.byoAuto3ROGT8", "Preview drawing. Photo layers appear once uploaded in Admin.")}</T></View>;
 }
 
+/* ---------- pizza ---------- */
 const PZ_ORDER = ['crust', 'sauce', 'cheese', 'meat', 'veg'];
 const pzRole = (it: BItem) => {const k = key(it.assetId); return /_crust$/.test(k) ? 0 : /_sauce$/.test(k) ? 1 : ['mozzarella', 'cheddar', 'parmesan'].includes(k) ? 2 : ['pepperoni', 'sausage', 'bacon'].includes(k) ? 3 : 4;};
 function pizzaPieces(b: Builder, d: any) {
@@ -158,20 +160,21 @@ function CustomPlate({b}: {b: Builder}) {
   return (
     <View style={{alignItems: 'center', paddingHorizontal: 16}}>
       <Text style={{fontSize: 84, lineHeight: 92}}>{b.emoji}</Text>
-      <View style={{flexDirection: 'row', flexWrap: 'wrap', gap: 6, justifyContent: 'center', marginTop: 8}}>{(names.length ? names : ['Pick your options below']).map((x, i) => <View key={i} style={{backgroundColor: 'rgba(255,255,255,.12)', borderRadius: 14, paddingHorizontal: 10, paddingVertical: 5}}><T size={12.5} color="#F5F5F5">{x}</T></View>)}</View>
+      <View style={{flexDirection: 'row', flexWrap: 'wrap', gap: 6, justifyContent: 'center', marginTop: 8}}>{(names.length ? names : [label('lbl.byoPickBelow', 'Pick your options below')]).map((x, i) => <View key={i} style={{backgroundColor: 'rgba(255,255,255,.12)', borderRadius: 14, paddingHorizontal: 10, paddingVertical: 5}}><T size={12.5} color="#F5F5F5">{x}</T></View>)}</View>
     </View>
   );
 }
 export function Stage({b, fin}: {b: Builder; fin?: boolean}) {
   return (
     <LinearGradient colors={['#2C4A5B', '#233D4C']} style={{marginHorizontal: 16, borderRadius: 24, height: 300, flexShrink: 0, alignItems: 'center', justifyContent: 'center', paddingVertical: b.type === 'burger' ? 8 : 14, overflow: 'visible'}}>
-      <Pressable accessibilityLabel="Undo last change" disabled={!BD.hist.length} onPress={bzUndo} style={{position: 'absolute', left: 10, top: 10, width: 40, height: 40, borderRadius: 20, backgroundColor: '#2E4D5F', borderWidth: 1, borderColor: 'rgba(255,255,255,.14)', alignItems: 'center', justifyContent: 'center', zIndex: 20, opacity: BD.hist.length ? 1 : 0.3}}><Icon name="undo" size={20} color="#F5F5F5" /></Pressable>
+      <Pressable accessibilityLabel={label('lbl.byoUndo', 'Undo last change')} disabled={!BD.hist.length} onPress={bzUndo} style={{position: 'absolute', left: 10, top: 10, width: 40, height: 40, borderRadius: 20, backgroundColor: '#2E4D5F', borderWidth: 1, borderColor: 'rgba(255,255,255,.14)', alignItems: 'center', justifyContent: 'center', zIndex: 20, opacity: BD.hist.length ? 1 : 0.3}}><Icon name="undo" size={20} color="#F5F5F5" /></Pressable>
       {b.type === 'pizza' ? <PizzaStage b={b} /> : b.type === 'burger' ? <BurgerStage b={b} fin={!!fin || !!BD.assembling} /> : <CustomPlate b={b} />}
     </LinearGradient>
   );
 }
 
-const hint = (g: any) => {const rq = g.req || g.min > 0, mn = rq ? Math.max(1, g.min) : 0; if (g.kind === 'one') return 'Choose 1 · ' + (rq ? 'Required' : 'Optional'); return (mn ? 'Choose ' + mn + (g.max > mn ? ' to ' + g.max : '') : 'Up to ' + g.max) + ' · ' + (rq ? 'Required' : 'Optional');};
+/* ---------- options ---------- */
+const hint = (g: any) => {const rq = g.req || g.min > 0, mn = rq ? Math.max(1, g.min) : 0, status = rq ? label('lbl.byoRequired', 'Required') : label('lbl.byoOptional', 'Optional'); if (g.kind === 'one') return label('lbl.byoChooseOne', 'Choose 1') + ' · ' + status; return (mn ? label('lbl.byoChoose', 'Choose') + ' ' + mn + (g.max > mn ? ' ' + label('lbl.byoTo', 'to') + ' ' + g.max : '') : label('lbl.byoUpTo', 'Up to') + ' ' + g.max) + ' · ' + status;};
 function TileIcon({it, type}: {it: BItem; type: string}) {
   const th = useTheme(), a = thumbAsset(it, type);
   if (a) return <Image source={{uri: a.u}} style={{width: 42, height: 42}} resizeMode="contain" />;
@@ -179,7 +182,7 @@ function TileIcon({it, type}: {it: BItem; type: string}) {
   return <View style={{width: 26, height: 26, borderRadius: 13, backgroundColor: it.col, borderWidth: 2, borderColor: 'rgba(0,0,0,.12)'}} />;
 }
 function OptTile({b, g, it}: {b: Builder; g: any; it: BItem}) {
-  const th = useTheme(), us = units(g, BD), q = us.filter(x => x === it.id).length, on = q > 0, free = it.free || it.price === 0, lab = !it.avail ? 'Unavailable' : free ? 'Free' : g.kind === 'many' && us.length < g.inc ? 'Free' : '+' + money(it.price);
+  const th = useTheme(), us = units(g, BD), q = us.filter(x => x === it.id).length, on = q > 0, free = it.free || it.price === 0, lab = !it.avail ? label('lbl.byoUnavailableOption', label('lbl.byoUnavailableOption', 'Unavailable')) : free ? label('lbl.byoFree', 'Free') : g.kind === 'many' && us.length < g.inc ? label('lbl.byoFree', 'Free') : '+' + money(it.price);
   return (
     <View style={{width: 96, opacity: it.avail ? 1 : 0.45}}>
       <Pressable accessibilityRole="button" accessibilityLabel={it.name + ', ' + lab + (on ? ', selected ' + q : '')} accessibilityState={{selected: on, disabled: !it.avail}} disabled={!it.avail} onPress={() => bzAdd(g.id, it.id)} style={{alignItems: 'center', gap: 4, paddingTop: 10, paddingBottom: 8, paddingHorizontal: 4, borderRadius: 16, borderWidth: 2, borderColor: on ? th.br : th.line, backgroundColor: on ? th.brt : th.card, minHeight: 100}}>
@@ -188,7 +191,7 @@ function OptTile({b, g, it}: {b: Builder; g: any; it: BItem}) {
         <T size={11.5} color={on ? th.brd : th.mut} weight={on ? '700' : undefined}>{lab}</T>
       </Pressable>
       {on ? <View style={{position: 'absolute', top: -4, right: -4, minWidth: 22, height: 22, paddingHorizontal: 5, borderRadius: 11, backgroundColor: th.br, alignItems: 'center', justifyContent: 'center', borderWidth: 2, borderColor: th.bg}}><T size={12} weight="800" color="#fff">{q > 1 ? '×' + q : '✓'}</T></View> : null}
-      {on && g.kind === 'many' ? <Pressable accessibilityLabel={'Remove one ' + it.name} onPress={() => bzSub(g.id, it.id)} style={{position: 'absolute', top: -6, left: -6, width: 30, height: 30, borderRadius: 15, backgroundColor: th.bg, borderWidth: 2, borderColor: th.br, alignItems: 'center', justifyContent: 'center'}}><T size={18} weight="800">−</T></Pressable> : null}
+      {on && g.kind === 'many' ? <Pressable accessibilityLabel={label('lbl.byoRemoveOne', 'Remove one {item}').replace('{item}', it.name)} onPress={() => bzSub(g.id, it.id)} style={{position: 'absolute', top: -6, left: -6, width: 30, height: 30, borderRadius: 15, backgroundColor: th.bg, borderWidth: 2, borderColor: th.br, alignItems: 'center', justifyContent: 'center'}}><T size={18} weight="800">−</T></Pressable> : null}
     </View>
   );
 }
@@ -198,10 +201,10 @@ function Options({b}: {b: Builder}) {
     <View>
       {b.sizes.length ? (
         <View style={{marginTop: 18}}>
-          <View style={{flexDirection: 'row', justifyContent: 'space-between', alignItems: 'baseline', marginBottom: 8}}><T size={16} weight="800">Size</T><T size={12} color={th.mut}>Choose 1 · Required</T></View>
+          <View style={{flexDirection: 'row', justifyContent: 'space-between', alignItems: 'baseline', marginBottom: 8}}><T size={16} weight="800">{label('lbl.byoSize', 'Size')}</T><T size={12} color={th.mut}>{label('lbl.byoChooseOne', 'Choose 1') + ' · ' + label('lbl.byoRequired', 'Required')}</T></View>
           <View style={{flexDirection: 'row', gap: 8}}>{b.sizes.map(sz => (
             <Pressable key={sz.id} disabled={!sz.avail} onPress={() => bzSize(sz.id)} accessibilityState={{selected: BD.size === sz.id}} style={{flex: 1, paddingVertical: 10, paddingHorizontal: 4, borderRadius: 14, borderWidth: 2, borderColor: BD.size === sz.id ? th.br : th.line, backgroundColor: BD.size === sz.id ? th.brt : th.card, alignItems: 'center', gap: 2, opacity: sz.avail ? 1 : 0.45}}>
-              <T size={14} weight="800">{sz.name}</T><T size={11.5} color={th.mut}>{sz.avail ? (sz.add ? '+' + money(sz.add) : 'Base price') : 'Unavailable'}</T>
+              <T size={14} weight="800">{sz.name}</T><T size={11.5} color={th.mut}>{sz.avail ? (sz.add ? '+' + money(sz.add) : label('lbl.byoBasePrice', 'Base price')) : label('lbl.byoUnavailableOption', 'Unavailable')}</T>
             </Pressable>))}</View>
         </View>
       ) : null}
@@ -221,12 +224,12 @@ function Review({b}: {b: Builder}) {
   const R = (a: string, c: string, strong?: boolean) => <View style={{flexDirection: 'row', justifyContent: 'space-between', gap: 10, marginVertical: 5, ...(strong ? {borderTopWidth: 1, borderStyle: 'dashed', borderTopColor: th.line, paddingTop: 8, marginTop: 8} : {})}}><T size={strong ? 16 : 13.5} weight={strong ? '800' : undefined} style={{flexShrink: 1}}>{a}</T><T size={strong ? 16 : 13.5} weight={strong ? '800' : undefined} color={strong ? th.ink : th.mut}>{c}</T></View>;
   return (
     <View style={{marginTop: 20, borderWidth: 1, borderColor: th.line, borderRadius: 18, padding: 14, backgroundColor: th.card}}>
-      <View style={{flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', marginBottom: 8}}><T size={15} weight="800">Your order</T>{bzDirty() && !BD.edit ? <Pressable onPress={bzResetAsk}><T size={12.5} weight="700" color={th.br}>Start over</T></Pressable> : null}</View>
+      <View style={{flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', marginBottom: 8}}><T size={15} weight="800">{label('lbl.byoYourOrder', 'Your order')}</T>{bzDirty() && !BD.edit ? <Pressable onPress={bzResetAsk}><T size={12.5} weight="700" color={th.br}>{label('lbl.byoStartOver', 'Start over')}</T></Pressable> : null}</View>
       {R(b.name + (br.size ? ' — ' + br.size.name : ''), money(b.base + (br.size ? br.size.add : 0)))}
-      {br.lines.map((L: any) => <View key={L.gid}><T size={11.5} weight="800" color={th.mut} style={{marginTop: 8, letterSpacing: 0.4}}>{String(L.gname).toUpperCase()}</T>{L.items.map((i: any) => <View key={i.id}>{R((i.qty > 1 ? i.qty + '× ' : '') + i.name, i.charge > 0 ? '+' + money(i.charge) : i.inc ? 'Included' : 'Free')}</View>)}</View>)}
-      {R('Item price', money(br.total), true)}
-      {BD.edit && BD.snap != null && br.total !== BD.snap ? <View style={{backgroundColor: th.brt, borderWidth: 1, borderColor: th.br, borderRadius: 12, padding: 10, marginTop: 10}}><T size={13}>Prices changed since you added this item (was {money(BD.snap)}, now {money(br.total)}). Saving applies the new price.</T></View> : null}
-      {ck.conf.length ? <View style={{backgroundColor: th.brt, borderWidth: 1, borderColor: th.br, borderRadius: 12, padding: 10, marginTop: 10}}><T size={13} weight="800">Some choices changed</T>{ck.conf.map(x => <T key={x} size={13}>• {x}</T>)}<T size={13}>Please remove or replace them to continue. We did not change anything for you.</T></View> : null}
+      {br.lines.map((L: any) => <View key={L.gid}><T size={11.5} weight="800" color={th.mut} style={{marginTop: 8, letterSpacing: 0.4}}>{String(L.gname).toUpperCase()}</T>{L.items.map((i: any) => <View key={i.id}>{R((i.qty > 1 ? i.qty + '× ' : '') + i.name, i.charge > 0 ? '+' + money(i.charge) : i.inc ? label('lbl.byoIncluded', 'Included') : label('lbl.byoFree', 'Free'))}</View>)}</View>)}
+      {R(label('lbl.byoItemPrice', 'Item price'), money(br.total), true)}
+      {BD.edit && BD.snap != null && br.total !== BD.snap ? <View style={{backgroundColor: th.brt, borderWidth: 1, borderColor: th.br, borderRadius: 12, padding: 10, marginTop: 10}}><T size={13}>{label('lbl.byoPriceChanged', 'Prices changed since you added this item')} (was {money(BD.snap)}, now {money(br.total)}). Saving applies the new price.</T></View> : null}
+      {ck.conf.length ? <View style={{backgroundColor: th.brt, borderWidth: 1, borderColor: th.br, borderRadius: 12, padding: 10, marginTop: 10}}><T size={13} weight="800">{label('lbl.byoChoicesChanged', 'Some choices changed')}</T>{ck.conf.map(x => <T key={x} size={13}>• {x}</T>)}<T size={13}>{label('lbl.byoReplaceChoices', 'Please remove or replace them to continue. We did not change anything for you.')}</T></View> : null}
     </View>
   );
 }
@@ -239,31 +242,31 @@ export function ByoFoot() {
       {why ? <T size={12.5} color={th.red} align="center" style={{marginBottom: 8}}>{why}</T> : null}
       <View style={{flexDirection: 'row', alignItems: 'center', gap: 12}}>
         <Stepper q={BD.q} onMinus={() => bzQty(-1)} onPlus={() => bzQty(1)} />
-        <View style={{flex: 1}}><Cta label={(BD.edit ? 'Save changes' : 'Add to Order') + ' · ' + money(tot)} disabled={!ck.ok || !!BD.busy} onPress={bzAddOrder} /></View>
+        <View style={{flex: 1}}><Cta label={(BD.edit ? label('lbl.byoSaveChanges', 'Save changes') : label('lbl.byoAddOrder', 'Add to Order')) + ' · ' + money(tot)} disabled={!ck.ok || !!BD.busy} onPress={bzAddOrder} /></View>
       </View>
-      {BD.edit ? <View style={{marginTop: 8}}><Cta small ghost label="Cancel" onPress={bzCancel} /></View> : null}
+      {BD.edit ? <View style={{marginTop: 8}}><Cta small ghost label={label('lbl.byoCancel', 'Cancel')} onPress={bzCancel} /></View> : null}
     </View>
   );
 }
 
 export function ByoScreen({p}: {p: string}) {
   const th = useTheme(), a = (p || '').split('|'), sid = a[0], b = bGet(sid, a[1]);
-  if (!b || !STB[sid]) return <View><Header title="Builder" onBack={back} /><Empty emoji="🍽️" title="This builder is not available" text="The store may have turned it off." button="Back to Goodies" onPress={browse} /></View>;
+  if (!b || !STB[sid]) return <View><Header title={label('lbl.byoTitle', 'Builder')} onBack={back} /><Empty emoji="🍽️" title={label('lbl.byoUnavailableTitle', 'This builder is not available')} text={label('lbl.byoUnavailableText', 'The store may have turned it off.')} button={label('lbl.byoBackGoodies', 'Back to Goodies')} onPress={browse} /></View>;
   if (!BD || BD.bid !== b.id || BD.sid !== sid) setBD(bDraft(b, sid));
   if (BD.added) return <ByoDone b={b} />;
   const s = STB[sid], un = !b.enabled || !b.available || BYO.store[sid] === false || !s.open;
   return (
     <View style={{flex: 1}}>
-      <Header title={b.name} sub={s.n + (BD.edit ? ' · Editing item' : '')} onBack={back} />
+      <Header title={b.name} sub={s.n + (BD.edit ? ' · ' + label('lbl.byoEditingItem', 'Editing item') : '')} onBack={back} />
       <Stage b={b} />
       <ScrollView style={{flex: 1}} contentContainerStyle={{paddingHorizontal: 16, paddingTop: 15, paddingBottom: 20}} keyboardShouldPersistTaps="handled" showsVerticalScrollIndicator={false}>
-        {un ? <Warn><T weight="800" size={13}>Currently unavailable. </T><T size={13}>{s.open ? 'The store paused this item.' : s.n + ' is closed.'} You can look, but it cannot be added right now.</T></Warn> : null}
-        {BD.resumed ? <Warn><T size={13}>Resuming the draft you left earlier.</T></Warn> : null}
+        {un ? <Warn><T weight="800" size={13}>{label('lbl.byoCurrentlyUnavailable', 'Currently unavailable.')} </T><T size={13}>{s.open ? label('lbl.byoStorePaused', 'The store paused this item.') : label('lbl.byoStoreClosed', '{store} is closed.').replace('{store}', s.n)} {label('lbl.byoCannotAdd', 'You can look, but it cannot be added right now.')}</T></Warn> : null}
+        {BD.resumed ? <Warn><T size={13}>{label('lbl.byoResumeDraft', 'Resuming the draft you left earlier.')}</T></Warn> : null}
         <Options b={b} />
         {b.notes ? (
           <View style={{marginTop: 18}}>
-            <T size={14} weight="700" style={{marginBottom: 6}}>Anything else we should know?</T>
-            <TextInput value={BD.note} onChangeText={bzNote} maxLength={200} multiline placeholder="E.g. light sauce, cut into 8 slices…" placeholderTextColor={th.mut} style={{minHeight: 64, fontSize: 15, color: th.ink, backgroundColor: th.soft, borderWidth: 1, borderColor: th.line, borderRadius: 12, padding: 12, textAlignVertical: 'top'}} />
+            <T size={14} weight="700" style={{marginBottom: 6}}>{label('lbl.byoNotesPrompt', 'Anything else we should know?')}</T>
+            <TextInput value={BD.note} onChangeText={bzNote} maxLength={200} multiline placeholder={label('lbl.byoNotesPlaceholder', 'E.g. light sauce, cut into 8 slices…')} placeholderTextColor={th.mut} style={{minHeight: 64, fontSize: 15, color: th.ink, backgroundColor: th.soft, borderWidth: 1, borderColor: th.line, borderRadius: 12, padding: 12, textAlignVertical: 'top'}} />
             <T size={12} color={th.mut} align="right" style={{marginTop: 3}}>{BD.note.length}/200</T>
           </View>
         ) : null}
@@ -279,7 +282,7 @@ function Header({title, sub, onBack}: {title: string; sub?: string; onBack: () =
     <>
       <View style={{height: 100, justifyContent: 'flex-end', paddingTop: ins.top, paddingHorizontal: 16, paddingBottom: 10}}>
         <View style={{height: 40, flexDirection: 'row', alignItems: 'center', gap: 10}}>
-          <Circ icon="chevL" label="Back" onPress={onBack} />
+          <Circ icon="chevL" label={label('lbl.byoBack', 'Back')} onPress={onBack} />
           <View style={{flex: 1, justifyContent: 'center'}}><T size={20} weight="800" style={{lineHeight: 22}}>{title}</T>{sub ? <T size={12} color={th.mut}>{sub}</T> : null}</View>
         </View>
       </View>
@@ -292,13 +295,13 @@ function ByoDone({b}: {b: Builder}) {
   const th = useTheme();
   return (
     <View>
-      <Header title="Added to your order" onBack={back} />
+      <Header title={label('lbl.byoAddedHeading', 'Added to your order')} onBack={back} />
       <View style={{alignItems: 'center', paddingTop: 30, paddingHorizontal: 20}}>
         {b.type === 'burger' ? <LinearGradient colors={['#2C4A5B', '#233D4C']} style={{alignSelf: 'stretch', borderRadius: 24, paddingVertical: 8, alignItems: 'center'}}><BurgerStage b={b} fin /></LinearGradient> : <Text style={{fontSize: 64}}>✅</Text>}
-        <T size={24} weight="800" style={{marginTop: 10}}>Added to your order!</T>
+        <T size={24} weight="800" style={{marginTop: 10}}>{label('lbl.byoAddedSuccess', 'Added to your order!')}</T>
         <T color={th.mut} style={{marginTop: 4}}>{BD.added.n} · {BD.added.q} × {money(BD.added.p)}</T>
-        <T size={13} color={th.mut} align="center" style={{marginTop: 6}}>Nothing has been ordered yet. Add more, or review your cart when you are ready.</T>
-        <View style={{alignSelf: 'stretch', marginTop: 20, gap: 10}}><Cta label="Customize Another" onPress={bzAnother} /><Cta ghost label="Continue Shopping" onPress={bzShop} /><Cta ghost label={'View Cart (' + cnt() + ')'} onPress={() => go('cart')} /></View>
+        <T size={13} color={th.mut} align="center" style={{marginTop: 6}}>{label('lbl.byoAddedExplanation', 'Nothing has been ordered yet. Add more, or review your cart when you are ready.')}</T>
+        <View style={{alignSelf: 'stretch', marginTop: 20, gap: 10}}><Cta label={label('lbl.byoCustomizeAnother', 'Customize Another')} onPress={bzAnother} /><Cta ghost label={label('lbl.byoContinueShopping', 'Continue Shopping')} onPress={bzShop} /><Cta ghost label={label('lbl.byoViewCart', 'View Cart') + ' (' + cnt() + ')'} onPress={() => go('cart')} /></View>
       </View>
     </View>
   );

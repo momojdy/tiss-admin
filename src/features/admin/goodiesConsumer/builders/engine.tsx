@@ -36,7 +36,7 @@ function bClean(b: any): Builder | null {
   } catch (e) {return null;}
 }
 /* template -> builder with fresh ids */
-function fromTemplate(type: 'pizza' | 'burger' | 'custom'): Builder {
+export function fromTemplate(type: 'pizza' | 'burger' | 'custom'): Builder {
   const t = TEMPLATES[type];
   return bClean({
     id: rid(), type, name: t.name, desc: t.desc, emoji: t.emoji, base: t.base, notes: true,
