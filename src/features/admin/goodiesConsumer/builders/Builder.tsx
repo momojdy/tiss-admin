@@ -201,6 +201,7 @@ function OptTile({b, g, it}: {b: Builder; g: any; it: BItem}) {
     </View>
   );
 }
+const builderLabelSlug = (value: string) => String(value || '').toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/^-|-$/g, '');
 function Options({b}: {b: Builder}) {
   const th = useTheme();
   return (
@@ -217,7 +218,7 @@ function Options({b}: {b: Builder}) {
       {b.groups.map(g => {const us = units(g, BD); return (
         <View key={g.id} style={{marginTop: 18}}>
           <View style={{flexDirection: 'row', justifyContent: 'space-between', alignItems: 'baseline', gap: 8, marginBottom: 8}}>
-            <T size={16} weight="800" style={{flexShrink: 1}}>{g.name}{g.kind === 'many' ? <T size={12} color={th.mut} weight="400">{'  ' + us.length + '/' + g.max}</T> : null}</T>
+            <View style={{flexDirection: 'row', alignItems: 'baseline', flexShrink: 1}}><ByoLabel id={'lbl.byoGroup.' + builderLabelSlug(g.name)} fallback={g.name} size={16} weight="800" />{g.kind === 'many' ? <T size={12} color={th.mut} weight="400">{'  ' + us.length + '/' + g.max}</T> : null}</View>
             <T size={12} color={th.mut} align="right">{hint(g)}</T>
           </View>
           <ScrollView horizontal showsHorizontalScrollIndicator={false} style={{marginHorizontal: -16}} contentContainerStyle={{paddingHorizontal: 16, paddingTop: 10, paddingBottom: 6, gap: 10}}>{g.items.map(it => <OptTile key={it.id} b={b} g={g} it={it} />)}</ScrollView>
