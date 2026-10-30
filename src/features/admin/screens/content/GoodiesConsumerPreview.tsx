@@ -83,7 +83,7 @@ export function GoodiesConsumerPreview({ editMode = false, contentDraft, assetUr
       ? [{ r: 'home', u: now }]
       : [{ r: 'home', u: now - 1 }, { r: route, p: param, u: now }];
     emit();
-  }, []);
+  }, [previewBuilders]);
 
   const editValue = useMemo(() => (editMode ? { selected: selectedTarget, select: onSelectTarget } : null), [editMode, selectedTarget, onSelectTarget]);
 
