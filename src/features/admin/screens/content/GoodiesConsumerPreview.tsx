@@ -82,9 +82,9 @@ export function GoodiesConsumerPreview({ editMode = false, contentDraft, assetUr
       <View style={{ width: '100%', maxWidth: 390, marginBottom: 10, paddingHorizontal: 4 }}>
         <Text style={{ color: ink, fontSize: 12, fontWeight: '800' }}>{editMode ? 'Edit actual Goodies consumer screen' : 'Actual Goodies consumer screens'}</Text>
         <Text style={{ color: muted, fontSize: 10, lineHeight: 15, marginTop: 3 }}>
-          {editMode ? 'Scroll the phone and tap an element to select it. Navigation is paused while editing.' : 'Rendered from the consumer app source using the current draft. Placing orders is disabled in this preview.'}
+          {editMode ? 'Use the screen tabs to open a page, then tap editable text in the phone to select its matching field.' : 'Rendered from the consumer app source using the current draft. Placing orders is disabled in this preview.'}
         </Text>
-        {!editMode ? <ScrollView horizontal showsHorizontalScrollIndicator={false} contentContainerStyle={{ gap: 6, paddingVertical: 10 }}>
+        <ScrollView horizontal showsHorizontalScrollIndicator={false} contentContainerStyle={{ gap: 6, paddingVertical: 10 }}>
           {screens.map((screen) => {
             const active = S.stack?.[S.stack.length - 1]?.r === screen.key;
             return (
@@ -94,7 +94,7 @@ export function GoodiesConsumerPreview({ editMode = false, contentDraft, assetUr
               </Pressable>
             );
           })}
-        </ScrollView> : null}
+        </ScrollView>
       </View>
       <PhoneFrame background="#FFFFFF">
         <EditContext.Provider value={editValue}>
