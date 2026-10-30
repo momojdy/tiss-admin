@@ -62,21 +62,14 @@ export function GoodiesConsumerPreview({ editMode = false, contentDraft, assetUr
 
   const navigate = useCallback((route: string) => {
     const itemId = Object.keys(IT)[0] || '';
-    const liveStoreId = Object.keys(STB).find((id) => (BYO.cfg[id] || []).some((b: any) => b.enabled && b.available));
-    const liveBuilder = liveStoreId ? (BYO.cfg[liveStoreId] || []).find((b: any) => b.enabled && b.available) : null;
-    const storeId = Object.keys(STB)[0] || 's12';
-    let builderParam = '';
-    if (liveStoreId && liveBuilder) {
-      builderParam = liveStoreId + '|' + liveBuilder.id;
-    } else {
-      // This is deliberately an in-memory preview fixture, not a store config.
-      // It never asks the admin to create or enable a real business builder.
-      const previewStoreId = '__admin_goodies_builder_preview__';
-      STB[previewStoreId] = { id: previewStoreId, n: 'Build Your Own preview', open: true } as any;
-      BYO.store[previewStoreId] = true;
-      BYO.cfg[previewStoreId] = previewBuilders;
-      builderParam = previewStoreId + '|' + previewBuilders[0].id;
-    }
+    const storeId = Object.keys(STB).find((id) => !id.startsWith('__admin_goodies_')) || 's12';
+    // Always show a local catalog with separate pizza and burger sections. This
+    // fixture is preview-only and does not depend on live store configuration.
+    const previewStoreId = '__admin_goodies_builder_preview__';
+    STB[previewStoreId] = { id: previewStoreId, n: 'Build Your Own preview', open: true } as any;
+    BYO.store[previewStoreId] = true;
+    BYO.cfg[previewStoreId] = previewBuilders;
+    const builderParam = previewStoreId + '|__catalog__';
     const param = route === 'store' ? storeId : route === 'byo' ? builderParam : route === 'product' ? itemId : undefined;
     const now = Date.now();
     S.stack = route === 'home'
