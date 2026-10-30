@@ -278,7 +278,7 @@ export function GoodiesEditor({ canEdit, canPublish }: { canEdit: boolean; canPu
     return uri ? <Image source={{ uri }} resizeMode="cover" style={{ width: 54, height: 46, borderRadius: 8, backgroundColor: c.inset }} /> : <View style={{ width: 54, height: 46, borderRadius: 8, backgroundColor: c.inset, alignItems: 'center', justifyContent: 'center' }}><Txt size={8.5} mut>{entry?.emoji || 'No image'}</Txt></View>;
   };
   const promoColors = [{ id: 'plum', label: 'Plum', colors: ['#7B3FE4', '#A56BFF'] }, { id: 'orange', label: 'Orange', colors: ['#FD802E', '#FFA35C'] }, { id: 'green', label: 'Green', colors: ['#1F7A5A', '#2FB584'] }] as const;
-  const setPromoColor = (entry: any, color: string) => setMeta('promo', entry, 'color', color);
+  const setPromoColor = (entry: any, color: string) => setMeta('promo', entry.id, 'color', color);
   const promoColorPicker = (entry: any) => (
     <View style={{ marginTop: 8 }}>
       <Txt size={9.5} mut>Promotion card color</Txt>
