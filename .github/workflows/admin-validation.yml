@@ -17,3 +17,7 @@ jobs:
           cache: npm
       - run: npm ci
       - run: npm run typecheck
+      - name: Bundle Android application
+        run: npx expo export --platform android --output-dir dist/android
+      - name: Bundle iOS application
+        run: npx expo export --platform ios --output-dir dist/ios
