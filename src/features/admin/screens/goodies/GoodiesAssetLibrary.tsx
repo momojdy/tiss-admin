@@ -18,7 +18,7 @@ const SOURCES = [
   { list: 'lib', section: 'Build Your Own · Ingredient artwork', nameKey: 'name' },
 ] as const;
 const UNUSED = 'Uploaded, not used on any page yet';
-const ORDER = [...SOURCES.map((s) => s.section), UNUSED];
+const ORDER = [...SOURCES.map((s) => s.section), 'Products · Product images', 'Build Your Own · Pizza builder', 'Build Your Own · Burger builder', UNUSED];
 
 const text = (value: any, fallback: string) => (typeof value === 'string' ? value : value?.en?.v) || fallback;
 
@@ -64,8 +64,19 @@ export function GoodiesAssetLibrary() {
         });
       });
       byKey.forEach((asset, key) => {
-        if (used.has(key) || !key.toLowerCase().includes('goodies')) return;
-        next.push({ id: 'unused:' + key, section: UNUSED, name: key, assetKey: key, url: '', status: asset.status });
+        // Include every image uploaded through Goodies, even when it is not
+        // currently referenced by a draft or published content item.
+        if (used.has(key) || !/^wantiss\\.goodies\\./i.test(key)) return;
+        const normalized = key.toLowerCase();
+        let section = UNUSED;
+        if (/\\.home\\.(mode|service)/.test(normalized)) section = 'Home · Service tiles';
+        else if (/\\.home\\.(cat|category)/.test(normalized)) section = 'Home · Categories';
+        else if (/\\.home\\.(promo|promotion)/.test(normalized)) section = 'Home · Promotion cards';
+        else if (/\\.product/.test(normalized)) section = 'Products · Product images';
+        else if (/\\.builder\\.pizza|\\.pizza\\.builder/.test(normalized)) section = 'Build Your Own · Pizza builder';
+        else if (/\\.builder\\.burger|\\.burger\\.builder/.test(normalized)) section = 'Build Your Own · Burger builder';
+        else if (/\\.(lib|ingredient|ingredients)/.test(normalized)) section = 'Build Your Own · Ingredient artwork';
+        next.push({ id: 'unused:' + key, section, name: key, assetKey: key, url: '', status: asset.status });
       });
       setEntries(next);
 
@@ -94,7 +105,7 @@ export function GoodiesAssetLibrary() {
 
   return (
     <Section title="Goodies assets">
-      <Txt size={10} mut lh={1.4}>Every image used in Goodies, grouped by the page and section it appears in. Upload or replace images in the Goodies content editor.</Txt>
+      <Txt size={10} mut lh={1.4}>All images uploaded for Goodies, grouped by the page or section they belong to. Upload or replace images in the Goodies content editor.</Txt>
       <TextInput value={search} onChangeText={setSearch} placeholder="Search by name or section…" placeholderTextColor={c.mut} style={{ borderWidth: 1, borderColor: c.bd, borderRadius: 10, paddingHorizontal: 10, paddingVertical: 9, color: c.ink, backgroundColor: c.card, fontSize: 12, marginTop: 10, marginBottom: 8 }} />
       <View style={{ flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', marginBottom: 8 }}>
         <Txt size={9.5} mut>{entries.length} image{entries.length === 1 ? '' : 's'}</Txt>
