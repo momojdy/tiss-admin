@@ -108,7 +108,7 @@ export function GoodiesAdminScreen() {
   };
   const switchRow=(title:string,sub:string,on:boolean,set:(v:boolean)=>void)=><Pressable onPress={()=>set(!on)} style={{...card,flexDirection:'row',alignItems:'center',justifyContent:'space-between',marginBottom:8}}><View style={{flex:1,paddingRight:10}}><Text style={valueStyle}>{title}</Text><Text style={{fontSize:11,color:'#697466',marginTop:3}}>{sub}</Text></View><Text style={{fontWeight:'800',color:on?'#286A35':'#8B554B'}}>{on?'ON':'OFF'}</Text></Pressable>;
 
-  return <ScrollView style={{flex:1,backgroundColor:c?.bg||'#F6F7F4'}} contentContainerStyle={{padding:16,paddingBottom:36}}>
+  return <ScrollView style={{flex:1,backgroundColor:c?.inset||'#F6F7F4'}} contentContainerStyle={{padding:16,paddingBottom:36}}>
     <View style={{flexDirection:'row',alignItems:'center',justifyContent:'space-between',marginBottom:12}}>
       <View><Text style={{fontSize:20,fontWeight:'800',color:'#172316'}}>Goodies Admin</Text><Text style={{fontSize:11,color:'#697466'}}>Live merchant, catalogue, order and payment controls</Text></View>
       <Pressable onPress={()=>void reload()} style={btn('#E9EEE6')}><Text style={{fontSize:12,fontWeight:'700',color:'#344531'}}>Refresh</Text></Pressable>
