@@ -121,14 +121,14 @@ export function GoodiesBuilderConfigEditor({ canEdit }: { canEdit: boolean }) {
   }, [selected?.config?.type, library]);
   const addLibraryIngredient = (gi: number, source: any) => {
     if (!selected || !canEdit || saving) return;
-    const newItem = { id: 'ingredient-' + Date.now().toString(36) + '-' + Math.random().toString(36).slice(2, 6), name: String(source.name || ''), price: Math.max(0, Number(source.price) || 0), free: !!source.free, avail: true, assetId: source.assetId || null, assetKey: source.assetKey || null, col: source.col || '#D9A441' };
+    const newItem = { id: 'ingredient-' + Date.now().toString(36) + '-' + Math.random().toString(36).slice(2, 6), name: String(source.name || ''), price: 0, free: false, avail: false, assetId: source.assetId || null, assetKey: source.assetKey || null, col: source.col || '#D9A441' };
     patchConfig({ groups: (selected.config?.groups || []).map((x: any, j: number) => j === gi ? { ...x, items: [...(x.items || []), newItem] } : x) });
     setNotice('Ingredient added to this group. Save the builder to keep the change.');
   };
   const addRequestedIngredient = (gi: number) => {
     const name = requestedIngredient.trim();
     if (!name || !selected || !canEdit || saving) return;
-    const newItem = { id: 'requested-' + Date.now().toString(36), name, price: 0, free: true, avail: true, assetId: null, col: '#D9A441', requestNote: 'Added from a restaurant ingredient request' };
+    const newItem = { id: 'requested-' + Date.now().toString(36), name, price: 0, free: false, avail: false, assetId: null, col: '#D9A441', requestNote: 'Added from a restaurant ingredient request' };
     patchConfig({ groups: (selected.config?.groups || []).map((x: any, j: number) => j === gi ? { ...x, items: [...(x.items || []), newItem] } : x) });
     setRequestedIngredient('');
     setNotice('Requested ingredient added as a draft. Review its price and availability, then save the builder.');
@@ -254,18 +254,18 @@ export function GoodiesBuilderConfigEditor({ canEdit }: { canEdit: boolean }) {
               <View style={{ flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', marginTop: 8, marginBottom: 4 }}>
                 <Txt size={10.5} weight={600}>Ingredients ({(group.items || []).length})</Txt>
                 <View style={{ flexDirection: 'row', flexWrap: 'wrap', gap: 5 }}>
-                  <OutlineBtn disabled={!canEdit || saving} onPress={() => patchConfig({ groups: selected.config.groups.map((x: any, j: number) => j === gi ? { ...x, items: [...(x.items || []), { id: 'item-' + Date.now().toString(36), name: '', price: 0, free: true, avail: true, assetId: null, col: '#D9A441' }] } : x) })}>Add manually</OutlineBtn>
+                  <OutlineBtn disabled={!canEdit || saving} onPress={() => patchConfig({ groups: selected.config.groups.map((x: any, j: number) => j === gi ? { ...x, items: [...(x.items || []), { id: 'item-' + Date.now().toString(36), name: '', price: 0, free: false, avail: false, assetId: null, col: '#D9A441' }] } : x) })}>Add manually</OutlineBtn>
                   <OutlineBtn primary={libraryOpenGroup === gi} disabled={!canEdit || saving} onPress={() => { setLibraryOpenGroup(libraryOpenGroup === gi ? null : gi); setLibrarySearch(''); }}>Add from ingredient list</OutlineBtn>
                 </View>
               </View>
               {libraryOpenGroup === gi ? (
                 <View style={{ borderWidth: 1, borderColor: c.bd, borderRadius: 9, padding: 8, marginBottom: 8, backgroundColor: c.card }}>
                   <Txt size={10.5} weight={600}>Ingredient library · {group.name || 'this section'}</Txt>
-                  <Txt size={9.5} mut style={{ marginTop: 2, marginBottom: 5 }}>Choose an ingredient from the {selected.config?.type === 'burger' ? 'burger' : selected.config?.type === 'pizza' ? 'pizza' : 'starter'} list, including ones Wantiss approved. You can edit its name, price and color after adding it.</Txt>
+                  <Txt size={9.5} mut style={{ marginTop: 2, marginBottom: 5 }}>Choose an ingredient from the {selected.config?.type === 'burger' ? 'burger' : selected.config?.type === 'pizza' ? 'pizza' : 'starter'} list, including ones Wantiss approved. Set its price and availability in your vendor dashboard.</Txt>
                   <TextInput value={librarySearch} onChangeText={setLibrarySearch} placeholder="Search ingredients…" placeholderTextColor={c.mut} style={fieldStyle} />
                   {ingredientLibrary.flatMap((sourceGroup: any) => sourceGroup.items.filter((ingredient: any) => !librarySearch.trim() || (ingredient.name + ' ' + sourceGroup.name).toLowerCase().includes(librarySearch.trim().toLowerCase())).map((ingredient: any) => ({ ...ingredient, sourceGroup: sourceGroup.name }))).map((ingredient: any, index: number) => (
                     <OutlineBtn key={ingredient.sourceGroup + ':' + ingredient.name + ':' + index} disabled={!canEdit || saving} onPress={() => addLibraryIngredient(gi, ingredient)}>
-                      {ingredient.name + ' · ' + ingredient.sourceGroup + (ingredient.free ? ' · included' : ' · +' + Number(ingredient.price || 0).toFixed(2))}
+                      {ingredient.name + ' · ' + ingredient.sourceGroup}
                     </OutlineBtn>
                   ))}
                   {!ingredientLibrary.some((sourceGroup: any) => sourceGroup.items.some((ingredient: any) => !librarySearch.trim() || (ingredient.name + ' ' + sourceGroup.name).toLowerCase().includes(librarySearch.trim().toLowerCase()))) ? <Txt size={9.5} mut>No matching ingredients in this list.</Txt> : null}
@@ -279,8 +279,7 @@ export function GoodiesBuilderConfigEditor({ canEdit }: { canEdit: boolean }) {
                 <View key={item.id || ii} style={{ borderTopWidth: 1, borderColor: c.bd, paddingTop: 7, marginTop: 3 }}>
                   <View style={{ flexDirection: 'row', flexWrap: 'wrap', gap: 8 }}>
                     {input('Ingredient name', item.name, (v) => patchConfig({ groups: selected.config.groups.map((x: any, j: number) => j === gi ? { ...x, items: x.items.map((it: any, k: number) => k === ii ? { ...it, name: v } : it) } : x) }))}
-                    {input('Price', item.price, (v) => patchConfig({ groups: selected.config.groups.map((x: any, j: number) => j === gi ? { ...x, items: x.items.map((it: any, k: number) => k === ii ? { ...it, price: Math.max(0, Number(v) || 0) } : it) } : x) }), 'decimal-pad')}
-                    {input('Max per customer', item.max ?? '', (v) => patchConfig({ groups: selected.config.groups.map((x: any, j: number) => j === gi ? { ...x, items: x.items.map((it: any, k: number) => k === ii ? { ...it, max: v.trim() ? Math.max(1, Number(v) || 1) : undefined } : it) } : x) }), 'number-pad')}
+                                        {input('Max per customer', item.max ?? '', (v) => patchConfig({ groups: selected.config.groups.map((x: any, j: number) => j === gi ? { ...x, items: x.items.map((it: any, k: number) => k === ii ? { ...it, max: v.trim() ? Math.max(1, Number(v) || 1) : undefined } : it) } : x) }), 'number-pad')}
                     <View style={{ flexBasis: '100%', minWidth: 220 }}>
                       <Txt size={9.5} mut>Artwork selection · current: {item.assetId || 'No artwork selected'}</Txt>
                       <TextInput value={artworkSearch} onChangeText={setArtworkSearch} placeholder="Search published ingredient artwork…" placeholderTextColor={c.mut} style={fieldStyle} />
@@ -295,8 +294,7 @@ export function GoodiesBuilderConfigEditor({ canEdit }: { canEdit: boolean }) {
                     </View>
                   </View>
                   <View style={{ flexDirection: 'row', flexWrap: 'wrap', gap: 6 }}>
-                    {toggle('Free', !!item.free, (v) => patchConfig({ groups: selected.config.groups.map((x: any, j: number) => j === gi ? { ...x, items: x.items.map((it: any, k: number) => k === ii ? { ...it, free: v, price: v ? 0 : it.price } : it) } : x) }))}
-                    {toggle('Available', item.avail !== false, (v) => patchConfig({ groups: selected.config.groups.map((x: any, j: number) => j === gi ? { ...x, items: x.items.map((it: any, k: number) => k === ii ? { ...it, avail: v } : it) } : x) }))}
+                    <Txt size={9.5} mut>Price and availability are managed by the vendor in their dashboard.</Txt>
                     <OutlineBtn disabled={!canEdit || saving} onPress={() => patchConfig({ groups: selected.config.groups.map((x: any, j: number) => j === gi ? { ...x, items: x.items.filter((_: any, k: number) => k !== ii) } : x) })}>Remove ingredient</OutlineBtn>
                     <OutlineBtn primary={colorOpen === item.id} onPress={() => setColorOpen(colorOpen === item.id ? '' : String(item.id))}>Card color</OutlineBtn>
                   </View>
