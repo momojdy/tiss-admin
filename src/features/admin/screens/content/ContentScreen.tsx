@@ -82,7 +82,7 @@ export function ContentScreen() {
     title: 'Create content version',
     fields: [
       { id: 'key', label: 'Content key', type: 'text', required: true, placeholder: 'goodies.home.hero' },
-      { id: 'locale', label: 'Locale', type: 'select', options: ['en', 'fr', 'ht', 'es', 'zh'], value: 'en', required: true },
+      { id: 'locale', label: 'Locale', type: 'select', options: ['en', 'fr', 'ht', 'es', 'zh-Hans'], value: 'en', required: true },
       { id: 'payload', label: 'Content payload (JSON)', type: 'textarea', required: true, value: '{}' },
     ],
     buttons: [{ label: 'Save version', key: 'save', primary: true }],
