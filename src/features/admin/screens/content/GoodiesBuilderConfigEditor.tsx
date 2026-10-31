@@ -110,7 +110,7 @@ export function GoodiesBuilderConfigEditor({ canEdit }: { canEdit: boolean }) {
 
   const patch = (p: Partial<BuilderRow>) => setSelected((current) => current ? { ...current, ...p } : current);
   const ingredientLibrary = useMemo(() => {
-    const type = selected?.config?.type === 'burger' || selected?.config?.type === 'pizza' ? selected.config.type : 'custom';
+    const type: 'burger' | 'pizza' | 'custom' = selected?.config?.type === 'burger' || selected?.config?.type === 'pizza' ? selected.config.type : 'custom';
     const template: any = TEMPLATES[type];
     const groups = (template?.groups || []).map((group: any) => ({
       name: String(group.name || 'Ingredients'),
