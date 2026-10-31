@@ -9,7 +9,7 @@ import {GoodiesAssetLibrary} from './GoodiesAssetLibrary';
 type Dashboard = {stats:any;merchants:any[];products:any[];orders:any[]};
 const MODULES=['Overview','Merchants','Product review','Orders','Couriers','Fees','Analytics','Goodies assets','Content editor'];
 const money=(v:any)=>new Intl.NumberFormat('en-US',{style:'currency',currency:'USD'}).format(Number(v)||0);
-const card={backgroundColor:'#fff',borderWidth:1,borderColor:'#E1E6DE',borderRadius:14,padding:14,marginBottom:10} as const;
+const cardStyle={backgroundColor:'#fff',borderWidth:1,borderColor:'#E1E6DE',borderRadius:14,padding:14,marginBottom:10} as const;
 const btn=(bg:string)=>({paddingVertical:10,paddingHorizontal:12,borderRadius:10,backgroundColor:bg,alignItems:'center' as const});
 const labelStyle={fontSize:12,color:'#687365',marginBottom:4} as const;
 const valueStyle={fontSize:14,fontWeight:'700' as const,color:'#1B2619'};
@@ -106,7 +106,7 @@ export function GoodiesAdminScreen() {
     if(error)toast(error.message);else toast('Goodies payment and fee policy updated.');
     setBusy('');
   };
-  const switchRow=(title:string,sub:string,on:boolean,set:(v:boolean)=>void)=><Pressable onPress={()=>set(!on)} style={{...card,flexDirection:'row',alignItems:'center',justifyContent:'space-between',marginBottom:8}}><View style={{flex:1,paddingRight:10}}><Text style={valueStyle}>{title}</Text><Text style={{fontSize:11,color:'#697466',marginTop:3}}>{sub}</Text></View><Text style={{fontWeight:'800',color:on?'#286A35':'#8B554B'}}>{on?'ON':'OFF'}</Text></Pressable>;
+  const switchRow=(title:string,sub:string,on:boolean,set:(v:boolean)=>void)=><Pressable onPress={()=>set(!on)} style={{...cardStyle,flexDirection:'row',alignItems:'center',justifyContent:'space-between',marginBottom:8}}><View style={{flex:1,paddingRight:10}}><Text style={valueStyle}>{title}</Text><Text style={{fontSize:11,color:'#697466',marginTop:3}}>{sub}</Text></View><Text style={{fontWeight:'800',color:on?'#286A35':'#8B554B'}}>{on?'ON':'OFF'}</Text></Pressable>;
 
   return <ScrollView style={{flex:1,backgroundColor:c?.inset||'#F6F7F4'}} contentContainerStyle={{padding:16,paddingBottom:36}}>
     <View style={{flexDirection:'row',alignItems:'center',justifyContent:'space-between',marginBottom:12}}>
@@ -119,14 +119,14 @@ export function GoodiesAdminScreen() {
     {loading?<Text style={{padding:20,color:'#697466'}}>Loading live Goodies data…</Text>:null}
     {module==='Overview'?<>
       <View style={{flexDirection:'row',flexWrap:'wrap',gap:8}}>
-        {Object.entries({Stores:dashboard.stats.stores??0,'Live stores':dashboard.stats.live_stores??0,Products:dashboard.stats.products??0,'Awaiting review':dashboard.stats.pending_products??0,Orders:dashboard.stats.orders??0,'Open orders':dashboard.stats.open_orders??0}).map(([k,v])=><View key={k} style={{...card,width:'48%',marginBottom:0}}><Text style={labelStyle}>{k}</Text><Text style={{fontSize:24,fontWeight:'800',color:'#1B2619'}}>{String(v)}</Text></View>)}
+        {Object.entries({Stores:dashboard.stats.stores??0,'Live stores':dashboard.stats.live_stores??0,Products:dashboard.stats.products??0,'Awaiting review':dashboard.stats.pending_products??0,Orders:dashboard.stats.orders??0,'Open orders':dashboard.stats.open_orders??0}).map(([k,v])=><View key={k} style={{...cardStyle,width:'48%',marginBottom:0}}><Text style={labelStyle}>{k}</Text><Text style={{fontSize:24,fontWeight:'800',color:'#1B2619'}}>{String(v)}</Text></View>)}
       </View>
-      <View style={{...card,marginTop:10}}><Text style={valueStyle}>Gross order value</Text><Text style={{fontSize:23,fontWeight:'800',marginTop:5,color:'#1B2619'}}>{money(dashboard.stats.gross_total)}</Text><Text style={{fontSize:11,color:'#697466',marginTop:4}}>Includes paid and pay-on-receipt orders.</Text></View>
+      <View style={{...cardStyle,marginTop:10}}><Text style={valueStyle}>Gross order value</Text><Text style={{fontSize:23,fontWeight:'800',marginTop:5,color:'#1B2619'}}>{money(dashboard.stats.gross_total)}</Text><Text style={{fontSize:11,color:'#697466',marginTop:4}}>Includes paid and pay-on-receipt orders.</Text></View>
       <Pressable onPress={()=>go('content')} style={btn('#294E2C')}><Text style={{color:'#fff',fontWeight:'800'}}>Open Goodies Content Editor</Text></Pressable>
     </>:null}
     {module==='Merchants'?<>
       <Text style={{fontSize:12,color:'#687365',marginBottom:10}}>Live records from Goodies store schedules and business verification.</Text>
-      {!dashboard.merchants.length?<Text style={labelStyle}>No Goodies merchants registered yet.</Text>:dashboard.merchants.map(m=><View key={m.business_id} style={card}>
+      {!dashboard.merchants.length?<Text style={labelStyle}>No Goodies merchants registered yet.</Text>:dashboard.merchants.map(m=><View key={m.business_id} style={cardStyle}>
         <Text style={valueStyle}>{m.name||'Unnamed store'}</Text><Text style={labelStyle}>{m.category||'Uncategorised'} · {m.city||'City not set'} · Verification: {m.verification}</Text>
         <Text style={{fontSize:12,color:'#596554',marginBottom:8}}>Delivery: {m.delivery_pricing_mode==='distance'?'Distance-based':'Fixed'} · {money(m.delivery_fee)} · COD {m.accept_cash_on_delivery?'enabled':'disabled'}</Text>
         {m.verification!=='verified'?<Pressable disabled={busy===m.business_id} onPress={()=>void verifyMerchant(m,'verified')} style={{...btn('#E8F2E5'),marginBottom:7}}><Text style={{fontWeight:'800',color:'#28552B'}}>Verify merchant</Text></Pressable>:null}
@@ -138,7 +138,7 @@ export function GoodiesAdminScreen() {
     </>:null}
     {module==='Product review'?<>
       <Text style={{fontSize:12,color:'#687365',marginBottom:10}}>New vendor products remain hidden from customers until approved.</Text>
-      {!dashboard.products.length?<Text style={labelStyle}>No products submitted yet.</Text>:dashboard.products.map(p=><View key={p.id} style={card}>
+      {!dashboard.products.length?<Text style={labelStyle}>No products submitted yet.</Text>:dashboard.products.map(p=><View key={p.id} style={cardStyle}>
         <View style={{flexDirection:'row',justifyContent:'space-between'}}><Text style={valueStyle}>{p.name}</Text><Text style={{fontSize:11,fontWeight:'800',color:p.review_status==='pending'?'#9B5A27':p.review_status==='approved'?'#286A35':'#9B4036'}}>{p.review_status}</Text></View>
         <Text style={labelStyle}>{p.store_name||'Store'} · {money(p.price)} · Stock {p.stock}</Text>
         {p.description?<Text style={{fontSize:12,color:'#5F6B5A',marginBottom:8}}>{p.description}</Text>:null}
@@ -146,7 +146,7 @@ export function GoodiesAdminScreen() {
       </View>)}
     </>:null}
     {module==='Orders'?<>
-      {!dashboard.orders.length?<Text style={labelStyle}>No Goodies orders recorded yet.</Text>:dashboard.orders.map(o=><View key={o.id} style={card}>
+      {!dashboard.orders.length?<Text style={labelStyle}>No Goodies orders recorded yet.</Text>:dashboard.orders.map(o=><View key={o.id} style={cardStyle}>
         <View style={{flexDirection:'row',justifyContent:'space-between'}}><Text style={valueStyle}>{o.order_code}</Text><Text style={{fontSize:11,fontWeight:'800',color:'#48653F'}}>{o.status}</Text></View>
         <Text style={labelStyle}>{o.store_name||o.store_id} · {dateText(o.created_at)}</Text>
         <Text style={{fontSize:12,color:'#596554'}}>{o.payment_method} · {o.payment_status} · {money(o.total)}</Text>
@@ -157,13 +157,13 @@ export function GoodiesAdminScreen() {
     </>:null}
     {module==='Couriers'?<>
       <Text style={{fontSize:12,color:'#687365',marginBottom:10}}>Approve existing Wantiss accounts for Goodies courier work. Only approved couriers can go online, receive assignments, share GPS or accept COD.</Text>
-      {!courierCandidates.length?<Text style={labelStyle}>No accounts found.</Text>:courierCandidates.map(person=><View key={person.courier_id} style={card}>
+      {!courierCandidates.length?<Text style={labelStyle}>No accounts found.</Text>:courierCandidates.map(person=><View key={person.courier_id} style={cardStyle}>
         <Text style={valueStyle}>{person.full_name||'Wantiss account'}</Text><Text style={labelStyle}>{person.phone_number||'No phone number'} · {person.courier_id}</Text>
         <Pressable disabled={!!busy} onPress={()=>void setCourierAccess(person,!person.already_added)} style={btn(person.already_added?'#F7EAE8':'#E8F2E5')}><Text style={{fontWeight:'800',color:person.already_added?'#8D3932':'#28552B'}}>{busy===person.courier_id?'Saving…':person.already_added?'Remove courier access':'Approve as Goodies courier'}</Text></Pressable>
       </View>)}
     </>:null}
     {module==='Fees'?<>
-      <View style={card}>
+      <View style={cardStyle}>
         <Text style={valueStyle}>Service fee (USD)</Text><TextInput value={fee} onChangeText={setFee} keyboardType="decimal-pad" style={{borderWidth:1,borderColor:'#DCE4D7',borderRadius:10,padding:11,marginTop:8,color:'#1B2619'}}/>
         <Text style={{...labelStyle,marginTop:12}}>Courier tip presets (comma-separated USD amounts)</Text><TextInput value={tips} onChangeText={setTips} style={{borderWidth:1,borderColor:'#DCE4D7',borderRadius:10,padding:11,color:'#1B2619'}}/>
       </View>
@@ -176,7 +176,7 @@ export function GoodiesAdminScreen() {
     </>:null}
     {module==='Analytics'?<>
       <Pressable onPress={()=>void loadAnalytics()} style={{...btn('#E9EEE6'),marginBottom:10}}><Text style={{fontWeight:'700',color:'#344531'}}>Refresh analytics</Text></Pressable>
-      {analytics?<View style={card}>
+      {analytics?<View style={cardStyle}>
         {Object.entries({'Orders (30 days)':analytics.orders_30d,'Gross value (30 days)':money(analytics.gross_30d),'Average order':money(analytics.average_order)}).map(([k,v])=><View key={k} style={{paddingVertical:8,borderBottomWidth:1,borderBottomColor:'#EEF0EC'}}><Text style={labelStyle}>{k}</Text><Text style={valueStyle}>{String(v)}</Text></View>)}
         <Text style={{...valueStyle,marginTop:12}}>By order status</Text>{Object.entries(analytics.by_status||{}).map(([k,v])=><Text key={k} style={{fontSize:12,color:'#596554',marginTop:5}}>{k}: {String(v)}</Text>)}
         <Text style={{...valueStyle,marginTop:12}}>By payment method</Text>{Object.entries(analytics.by_payment||{}).map(([k,v])=><Text key={k} style={{fontSize:12,color:'#596554',marginTop:5}}>{k}: {String(v)}</Text>)}
