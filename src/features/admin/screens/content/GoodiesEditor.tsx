@@ -55,7 +55,7 @@ const labelPage = (id: string) => {
 
 const HOME_LABEL_IDS = ['lbl.search', 'lbl.coupons', 'lbl.coupons2', 'lbl.flash', 'lbl.again', 'lbl.recent', 'lbl.popular', 'lbl.produce', 'lbl.haitian', 'lbl.trending'];
 
-const readText = (value: any): string => (typeof value === 'string' ? value : String(value?.en?.v ?? ''));
+const readText = (value: any, language = 'en'): string => (typeof value === 'string' ? value : String(value?.[language]?.v ?? ''));
 const fieldName: Record<string, string> = { title: 'Title', sub: 'Subtitle', btn: 'Button text', text: 'Text', art: 'Emoji and image' };
 const kindName: Record<string, string> = { mode: 'Service tile', promo: 'Promotion', category: 'Category', label: 'Text' };
 
@@ -69,6 +69,7 @@ export function GoodiesEditor({ canEdit, canPublish }: { canEdit: boolean; canPu
   const [source, setSource] = useState<'none' | 'draft' | 'published' | 'starter'>('none');
   const [row, setRow] = useState<Row | null>(null);
   const [selection, setSelection] = useState<GoodiesSelection | null>(null);
+  const [editLanguage, setEditLanguage] = useState<'en'|'fr'|'ht'|'es'|'zh'>('en');
   const [mode, setMode] = useState<'Edit' | 'Preview'>('Edit');
   const [busy, setBusy] = useState<'' | 'save' | 'publish'>('');
   const [notice, setNotice] = useState<Notice | null>(null);
@@ -207,7 +208,7 @@ export function GoodiesEditor({ canEdit, canPublish }: { canEdit: boolean; canPu
   );
   const createLabel = () => edit((next) => {
     if (!selection || selection.kind !== 'label' || findItem(next, selection)) return;
-    next.labels.push({ id: selection.id, label: selection.id, t: { en: { v: '', s: 'draft' } } });
+    next.labels.push({ id: selection.id, label: selection.id, t: { en: { v: '', s: 'draft' }, fr: {v:'',s:'missing'}, ht: {v:'',s:'missing'}, es: {v:'',s:'missing'}, zh: {v:'',s:'missing'} } });
   });
   const pickAsset = (asset: any) => setImage({ assetKey: asset.asset_key, w: asset.width || undefined, h: asset.height || undefined });
 
@@ -400,6 +401,9 @@ export function GoodiesEditor({ canEdit, canPublish }: { canEdit: boolean; canPu
 
       {editMode && selection ? (
         <Section title={kindName[selection.kind] + ' · ' + fieldName[selection.field]}>
+          <View style={{ flexDirection: 'row', flexWrap: 'wrap', gap: 6, marginBottom: 10 }}>
+            {(['en','fr','ht','es','zh'] as const).map((lang) => <OutlineBtn key={lang} primary={editLanguage===lang} onPress={()=>setEditLanguage(lang)}>{({en:'English',fr:'Français',ht:'Kreyòl',es:'Español',zh:'中文'} as any)[lang]}</OutlineBtn>)}
+          </View>
           <View style={{ borderWidth: 2, borderStyle: 'dashed', borderColor: '#FD802E', borderRadius: 12, padding: 10 }}>
           {!item ? (
             <View>
@@ -408,7 +412,7 @@ export function GoodiesEditor({ canEdit, canPublish }: { canEdit: boolean; canPu
           ) : selection.field !== 'art' ? (
             <View>
               <Txt size={9.5} mut>{fieldName[selection.field]}</Txt>
-              <TextInput value={readText(item[textKeyFor(selection)])} onChangeText={setText} style={fieldStyle} placeholder={fieldName[selection.field]} />
+              <TextInput value={readText(item[textKeyFor(selection)], editLanguage)} onChangeText={setText} style={fieldStyle} placeholder={fieldName[selection.field]} />
             </View>
           ) : (
             <View>
@@ -543,6 +547,9 @@ export function GoodiesEditor({ canEdit, canPublish }: { canEdit: boolean; canPu
             {!draft.labels?.length ? <Txt size={10} mut style={{ marginTop: 6 }}>No Home text fields are configured.</Txt> : null}
           </Section>
           <Section title="Other pages · Text">
+            <View style={{ flexDirection: 'row', flexWrap: 'wrap', gap: 6, marginBottom: 10 }}>
+            {(['en','fr','ht','es','zh'] as const).map((lang) => <OutlineBtn key={lang} primary={editLanguage===lang} onPress={()=>setEditLanguage(lang)}>{({en:'English',fr:'Français',ht:'Kreyòl',es:'Español',zh:'中文'} as any)[lang]}</OutlineBtn>)}
+          </View>
             <Txt size={10} mut style={{ marginBottom: 8 }}>Choose a page, then edit its text below. Changes stay in this draft until you save and publish.</Txt>
             <View style={{ flexDirection: 'row', flexWrap: 'wrap', gap: 6 }}>
               {pageGroups.map(([page, entries]) => (
@@ -552,7 +559,7 @@ export function GoodiesEditor({ canEdit, canPublish }: { canEdit: boolean; canPu
             {activeEntries.map((entry: any) => (
               <View key={entry.id} style={{ marginTop: 8, paddingTop: 6, borderTopWidth: 1, borderTopColor: c.bd }}>
                 <Txt size={10.5} mut>{entry.label || entry.id}</Txt>
-                <TextInput value={readText(entry.t)} onChangeText={(value) => setLabelText(entry.id, value)} editable={canEdit && !busy} multiline={readText(entry.t).length > 60} style={[fieldStyle, readText(entry.t).length > 60 ? { minHeight: 64, textAlignVertical: 'top' } : null]} placeholder="Text customers see" />
+                <TextInput value={readText(entry.t, editLanguage)} onChangeText={(value) => setLabelText(entry.id, value)} editable={canEdit && !busy} multiline={readText(entry.t).length > 60} style={[fieldStyle, readText(entry.t).length > 60 ? { minHeight: 64, textAlignVertical: 'top' } : null]} placeholder={'Text customers see in ' + editLanguage.toUpperCase()} />
               </View>
             ))}
           </Section>
