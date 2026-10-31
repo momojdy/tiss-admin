@@ -1,233 +1,148 @@
-import { useState } from 'react';
-import { View } from 'react-native';
-import { db, dataMode, ui, bump, useDb } from '../../state/db';
-import goodiesSeed from '../../data/goodiesSeed.json';
-import { can } from '../../state/access';
-import { REQ } from '../../state/requirements';
-import { saveCmsVersion } from '../../lib/adminBackend';
-import { useNav } from '../../shell/Nav';
-import { useForm } from '../../ui/FormSheet';
-import { useToast } from '../../ui/Toast';
-import { useTheme } from '../../theme/ThemeContext';
-import { Card, Section } from '../../ui/Card';
-import { Heading } from '../../ui/Heading';
-import { AppIcon } from '../../ui/AppIcon';
-import { OutlineBtn, Pill, SelectMenu, StatusPill } from '../../ui/Controls';
-import { ListRows } from '../../ui/Lists';
-import { Txt } from '../../ui/Txt';
-import { GOODIES_MODULES } from './modules';
-import { GoodiesAssetLibrary } from './GoodiesAssetLibrary';
+import React, {useCallback, useEffect, useState} from 'react';
+import {Alert, Pressable, ScrollView, Text, TextInput, View} from 'react-native';
+import {supabase} from '../../lib/supabase';
+import {useNav} from '../../shell/Nav';
+import {useToast} from '../../ui/Toast';
+import {useTheme} from '../../theme/ThemeContext';
+import {GoodiesAssetLibrary} from './GoodiesAssetLibrary';
 
-/** Canonical Goodies configuration reference, not a live snapshot; production changes use server-side drafts. */
-const data = goodiesSeed as any;
-const moduleMap: Record<string, string> = { Overview: 'Overview', 'Goodies assets': 'Library', Categories: 'Categories', Merchants: 'Merchants', 'Product review': 'Product review', Orders: 'Orders', Promotions: 'Promos', Support: 'Support', Analytics: 'Analytics', Settings: 'Settings' };
-const modules = GOODIES_MODULES;
-const languages = ['en', 'fr', 'ht', 'es', 'zh'];
-
-function englishValue(record: any, field: string) {
-  const value = record?.[field];
-  if (value && typeof value === 'object' && value.en && typeof value.en.v === 'string') return value.en.v;
-  if (typeof value === 'string' || typeof value === 'number') return String(value);
-  return '';
-}
-function localizedStatus(record: any, field: string) {
-  const value = record?.[field];
-  if (!value || typeof value !== 'object') return '—';
-  return languages.map((lang) => value[lang]?.s || 'missing').filter((status) => status === 'missing').length + ' missing locales';
-}
+type Dashboard = {stats:any;merchants:any[];products:any[];orders:any[]};
+const MODULES=['Overview','Merchants','Product review','Orders','Fees','Analytics','Goodies assets','Content editor'];
+const money=(v:any)=>new Intl.NumberFormat('en-US',{style:'currency',currency:'USD'}).format(Number(v)||0);
+const card={backgroundColor:'#fff',borderWidth:1,borderColor:'#E1E6DE',borderRadius:14,padding:14,marginBottom:10} as const;
+const btn=(bg:string)=>({paddingVertical:10,paddingHorizontal:12,borderRadius:10,backgroundColor:bg,alignItems:'center' as const});
+const labelStyle={fontSize:12,color:'#687365',marginBottom:4} as const;
+const valueStyle={fontSize:14,fontWeight:'700' as const,color:'#1B2619'};
 
 export function GoodiesAdminScreen() {
-  useDb();
-  const { c } = useTheme();
-  const { go } = useNav();
-  const form = useForm();
-  const toast = useToast();
-  const [filter, setFilter] = useState('All');
-  const moduleLabel = String(ui.gz || 'Overview');
-  const moduleName = Object.keys(moduleMap).find((name) => moduleMap[name] === moduleLabel) || 'Overview';
-  const setModule = (name: string) => { ui.gz = moduleMap[name] || 'Overview'; ui.wsvc = 'Goodies'; setFilter('All'); bump(); };
-  const saveDraft = (key: string, payload: Record<string, unknown>) => saveCmsVersion({ key: 'goodies.' + key, locale: 'en', payload, status: 'draft' });
+  const {go}=useNav(); const toast=useToast(); const {c}=useTheme();
+  const [module,setModule]=useState('Overview');
+  const [dashboard,setDashboard]=useState<Dashboard>({stats:{},merchants:[],products:[],orders:[]});
+  const [analytics,setAnalytics]=useState<any>(null);
+  const [loading,setLoading]=useState(false);
+  const [busy,setBusy]=useState('');
+  const [fee,setFee]=useState('0');
+  const [firstFree,setFirstFree]=useState(false);
+  const [wallet,setWallet]=useState(true);
+  const [card,setCard]=useState(true);
+  const [cash,setCash]=useState(true);
+  const [tips,setTips]=useState('0,1,2,3');
 
-  const editTextRecord = (record: any, title: string, field: string) => {
-    if (!can(...REQ.content)) { toast('You need Content edit access to stage a Goodies draft.'); return; }
-    const current = englishValue(record, field);
-    form({
-      title: 'Edit · ' + title,
-      sub: 'Review the proposed change before publishing.',
-      fields: [
-        { id: 'value', label: 'English text', type: 'textarea', value: current, required: true, maxLength: 1000 },
-        { id: 'status', label: 'Draft status', type: 'select', options: ['Draft', 'Needs review'], value: 'Draft', required: true },
-        { id: 'reason', label: 'Change reason', type: 'textarea', required: true },
-      ],
-      buttons: [{ label: 'Save private draft', key: 'save', primary: true }],
-      onSubmit: async (_key, values) => {
-        const value = String(values.value || '').trim();
-        const reason = String(values.reason || '').trim();
-        if (!value) return 'English text cannot be empty.';
-        if (!reason) return 'Enter a change reason for the audit trail.';
-        const original = JSON.parse(JSON.stringify(record));
-        const fieldValue = original[field];
-        if (fieldValue && typeof fieldValue === 'object' && fieldValue.en) {
-          fieldValue.en.v = value;
-          fieldValue.en.s = 'draft';
-        } else original[field] = value;
-        try {
-          await saveDraft(String(record.id || title.toLowerCase().replace(/[^a-z0-9]+/g, '.')), { record: original, change_reason: reason, draft_status: values.status, module: moduleName });
-          toast('Goodies draft saved. Live content is unchanged.');
-        } catch (error) {
-          return error instanceof Error ? error.message : 'Goodies draft could not be saved.';
-        }
-      },
-    });
+  const reload=useCallback(async()=>{
+    setLoading(true);
+    try {
+      const [{data,error},cms]=await Promise.all([
+        supabase.rpc('goodies_admin_dashboard'),
+        supabase.from('wantiss_cms_content').select('payload').eq('content_key','goodies.content').eq('locale','en').eq('status','published').order('version',{ascending:false}).limit(1).maybeSingle()
+      ]);
+      if(error)throw error;
+      const d=(data||{}) as Dashboard;
+      setDashboard({stats:d.stats||{},merchants:d.merchants||[],products:d.products||[],orders:d.orders||[]});
+      const f=cms.data?.payload?.fees||{};
+      setFee(String(f.svc??0));setFirstFree(!!f.first);
+      setWallet(!!(f.pay?.Wallet??true));setCard(!!(f.pay?.Card??true));setCash(!!(f.pay?.Cash??true));
+      setTips(String(f.tips??'0,1,2,3'));
+    } catch(e:any){toast(e?.message||'Could not load Goodies administration.');}
+    finally{setLoading(false);}
+  },[toast]);
+  useEffect(()=>{void reload();},[reload]);
+  const loadAnalytics=async()=>{
+    setBusy('analytics');
+    const {data,error}=await supabase.rpc('goodies_admin_analytics');
+    if(error)toast(error.message);else setAnalytics(data);
+    setBusy('');
   };
-
-  const editRecordStatus = (record: any, title: string, statusKey: string, options: string[]) => {
-    if (!can(...REQ.content)) { toast('You need Content edit access to stage a Goodies draft.'); return; }
-    form({
-      title: title,
-      sub: 'Stage the proposed status change for review.',
-      fields: [
-        { id: 'status', label: 'Proposed status', type: 'select', options, value: String(record[statusKey] || options[0]), required: true },
-        { id: 'reason', label: 'Reason', type: 'textarea', required: true },
-      ],
-      buttons: [{ label: 'Save proposed change', key: 'save', primary: true }],
-      onSubmit: async (_key, values) => {
-        const reason = String(values.reason || '').trim();
-        if (!reason) return 'Enter a reason for the audit trail.';
-        try {
-          await saveDraft(String(record.id || title.toLowerCase().replace(/[^a-z0-9]+/g, '.')), { record: { ...record, [statusKey]: values.status }, change_reason: reason, module: moduleName, proposed_only: true });
-          toast('Saved as private draft.');
-        } catch (error) {
-          return error instanceof Error ? error.message : 'Proposed change could not be saved.';
-        }
-      },
-    });
+  useEffect(()=>{if(module==='Analytics')void loadAnalytics();},[module]);
+  const setMerchant=async(item:any)=>{
+    setBusy(item.business_id);
+    const {error}=await supabase.rpc('goodies_admin_set_merchant_status',{p_business_id:item.business_id,p_live:!item.is_live});
+    if(error)toast(error.message);else{toast(item.is_live?'Store taken offline':'Store is live');await reload();}
+    setBusy('');
   };
-
-  const openMerchant = (item: any) => { go('people', { ps: 'Accounts' }); toast('Opened People to review ' + item.n + '.'); };
-
-  const itemsForModule = (): any[] => {
-    if (moduleLabel === 'Home') return [
-      ...data.modes.map((x: any) => ({ ...x, _kind: 'mode', _field: 'title', _title: x.title?.en?.v || x.id, _sub: x.sub?.en?.v || 'Home mode' })),
-      ...data.promos.map((x: any) => ({ ...x, _kind: 'promo', _field: 'title', _title: x.title?.en?.v || x.id, _sub: (x.sub?.en?.v || x.aud || 'Goodies promotion') + (x.target ? ' · Target: ' + x.target : '') })),
-    ];
-    if (moduleLabel === 'Categories') return data.cats.map((x: any) => ({ ...x, _kind: 'category', _field: 'name', _title: x.name?.en?.v || x.id, _sub: x.st + ' · ' + (x.stores || 0) + ' stores' }));
-    if (moduleLabel === 'Product review') return data.lib.map((x: any) => ({ ...x, _kind: 'library', _field: 'name', _title: x.name?.en?.v || x.id, _sub: (moduleLabel === 'Product review' ? 'Catalog review · ' : '') + x.role + ' · ' + x.b + ' · ' + x.st }));
-    if (moduleLabel === 'Requests') return data.reqs.map((x: any) => ({ ...x, _kind: 'request', _field: 'note', _title: x.name, _sub: x.vendor + ' · ' + x.st + ' · ' + x.b }));
-    if (moduleLabel === 'Promos') return [...data.promos, ...data.coupons].map((x: any) => ({ ...x, _kind: 'promo', _field: x.title ? 'title' : 'desc', _title: x.title?.en?.v || x.code || x.id, _sub: (x.st || 'Draft') + ' · ' + (x.aud || x.store || 'Goodies') + (x.target ? ' · Target: ' + x.target : '') }));
-    if (moduleLabel === 'Merchants') return [];
-    if (moduleLabel === 'Orders') return dataMode === 'live' ? db.INV.filter((transaction) => transaction.f.toLowerCase().includes('goodies')).map((transaction: any) => ({ ...transaction, _kind: 'order', _field: '', _title: transaction.id + ' · ' + transaction.f, _sub: transaction.u + ' · ' + transaction.a.toFixed(2) + ' · ' + transaction.s })) : [];
-    if (moduleLabel === 'Analytics') return [];
-    if (moduleLabel === 'Fees') return Object.entries(data.fees).map(([key, value]) => ({ id: key, _kind: 'fee', _field: 'value', _title: key, _sub: Array.isArray(value) ? value.join(' · ') : String(value), value }));
-    if (moduleLabel === 'Restricted') return [
-      ...(data.rg.prohibited || []).map((x: any, i: number) => ({ ...x, id: x.id || 'prohibited.' + i, _kind: 'restricted', _field: 'n', _title: x.n || x.id || 'Restricted item', _sub: x.src || 'Platform rule' })),
-      ...(data.rg.docs || []).map((x: any, i: number) => ({ ...x, id: x.id || 'document.' + i, _kind: 'restricted', _field: 'doc', _title: x.doc || 'Required document', _sub: x.cat || 'All services' })),
-      ...(data.rg.texts || []).map((x: any) => ({ ...x, _kind: 'restricted', _field: 't', _title: x.label || x.id, _sub: englishValue(x, 't'), crit: x.crit })),
-    ];
-    if (moduleLabel === 'Texts') return [...data.labels, ...data.stages, ...data.notifs].map((x: any) => ({ ...x, _kind: 'text', _field: x.t ? 't' : 'title', _title: x.label || x.id, _sub: englishValue(x, x.t ? 't' : 'title') }));
-    if (moduleLabel === 'Support') return [...data.faq, ...data.topics, ...data.legal].map((x: any) => ({ ...x, _kind: 'support', _field: x.q ? 'q' : x.t ? 't' : 'name', _title: x.q?.en?.v || x.t?.en?.v || x.name?.en?.v || x.id, _sub: x.st || 'Support content' }));
-    return [];
+  const reviewProduct=async(item:any,status:'approved'|'rejected')=>{
+    setBusy(item.id);
+    const {error}=await supabase.rpc('goodies_admin_review_product',{p_product_id:item.id,p_status:status,p_note:null});
+    if(error)toast(error.message);else{toast(status==='approved'?'Product approved':'Product rejected');await reload();}
+    setBusy('');
   };
-
-  const allItems = itemsForModule();
-  const visible = filter === 'All' ? allItems : allItems.filter((item) => String(item.st || item.status || '').toLowerCase() === filter.toLowerCase());
-
-  const onItem = (item: any) => {
-    const textField = ['mode', 'promo', 'category', 'library', 'text', 'support', 'restricted'].includes(item._kind) ? item._field : '';
-    if (textField) editTextRecord(item, item._title, textField);
-    else if (item._kind === 'request') editRecordStatus(item, 'Ingredient request · ' + item._title, 'st', ['Submitted', 'Approved', 'Denied', 'Needs info']);
-    else if (item._kind === 'fee') {
-      form({ title: 'Fee or rule · ' + item._title, sub: 'Stage a proposed change for review.', fields: [{ id: 'value', label: 'Proposed value', type: 'text', value: item._sub, required: true }, { id: 'reason', label: 'Reason', type: 'textarea', required: true }], buttons: [{ label: 'Save draft', key: 'save', primary: true }], onSubmit: async (_key, values) => {
-        const reason = String(values.reason || '').trim();
-        if (!reason) return 'Enter a reason.';
-        try { await saveDraft(String(item.id), { proposed_value: String(values.value), change_reason: reason, module: moduleName, proposed_only: true }); toast('Fee/rule draft saved; no live fee changed.'); }
-        catch (error) { return error instanceof Error ? error.message : 'Draft could not be saved.'; }
-      } });
-    } else if (item._kind === 'merchant') {
-      openMerchant(item);
-    } else if (item._kind === 'order') {
-      go('finance', { fv: 'Transactions' });
-      toast('Opened Finance to review the Goodies transaction.');
-    } else editRecordStatus(item, item._title, 'st', ['Live', 'Draft', 'Scheduled', 'Archived']);
+  const saveFees=async()=>{
+    const amount=Number(fee);
+    const tipValues=tips.split(',').map(x=>Number(x.trim())).filter(x=>Number.isFinite(x));
+    if(!Number.isFinite(amount)||amount<0||amount>1000){toast('Enter a valid service fee.');return;}
+    if(!tipValues.length||tipValues.some(x=>x<0||x>1000)){toast('Enter valid comma-separated tip amounts.');return;}
+    setBusy('fees');
+    const {error}=await supabase.rpc('goodies_admin_update_fee_policy',{p_service_fee:amount,p_first_order_free:firstFree,p_wallet_enabled:wallet,p_card_enabled:card,p_cash_enabled:cash,p_tips:tipValues});
+    if(error)toast(error.message);else toast('Goodies payment and fee policy updated.');
+    setBusy('');
   };
+  const switchRow=(title:string,sub:string,on:boolean,set:(v:boolean)=>void)=><Pressable onPress={()=>set(!on)} style={{...card,flexDirection:'row',alignItems:'center',justifyContent:'space-between',marginBottom:8}}><View style={{flex:1,paddingRight:10}}><Text style={valueStyle}>{title}</Text><Text style={{fontSize:11,color:'#697466',marginTop:3}}>{sub}</Text></View><Text style={{fontWeight:'800',color:on?'#286A35':'#8B554B'}}>{on?'ON':'OFF'}</Text></Pressable>;
 
-
-
-  return (
-    <View>
-      <View style={{ flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', marginBottom: 4 }}>
-        <View style={{ flex: 1 }}><Heading title="Goodies Admin workspace" /></View>
-        <OutlineBtn onPress={() => go('content')}><View style={{ flexDirection: 'row', alignItems: 'center', gap: 4 }}>CMS<AppIcon name="chevron-right" size={12} /></View></OutlineBtn>
-      </View>
-      <View style={{ flexDirection: 'row', flexWrap: 'wrap', gap: 7, marginBottom: 10 }}>
-        <SelectMenu label="Goodies section" options={modules} value={moduleName} onChange={setModule} />
-      </View>
-
-      {moduleLabel === 'Overview' ? (
-        <>
-          <Heading title="" kpis={[
-            { icon: 'building-2', value: data.cats.length, label: 'Configured categories' },
-            { icon: 'clipboard-list', value: data.lib.length, label: 'Builder definitions' },
-            { icon: 'clock-alert', value: data.reqs.length, label: 'Request reference entries' },
-          ]} />
-          <Section title="Goodies health">
-            <ListRows rows={[
-              { key: 'promos', main: 'Promotion references', sub: 'Not connected yet.', right: String(data.promos.filter((item: any) => item.st === 'Live').length) + ' refs', onPress: () => setModule('Promotions') },
-              { key: 'missing', main: 'Missing translations', sub: 'English, French, Haitian Creole, Spanish and Chinese', right: '—', onPress: () => setModule('Goodies assets') },
-              { key: 'assets', main: 'Assets without uploaded images', sub: 'Reference catalog definitions', right: String(data.lib.length), onPress: () => setModule('Products and catalog') },
-              { key: 'restricted', main: 'Restricted-goods rules', sub: 'Review service requirements', right: '—', onPress: () => setModule('Settings') },
-            ]} />
-          </Section>
-          <Section title="Needs review">
-            <ListRows rows={[
-              { key: 'req', main: 'Ingredient requests', sub: 'Not connected yet.', right: String(data.reqs.length) + ' refs', onPress: () => setModule('Product review') },
-              { key: 'library', main: 'Builder library', sub: 'Manage ingredients, extras and product assets', right: '—', onPress: () => setModule('Products and catalog') },
-              { key: 'content', main: 'Customer home content', sub: 'Modes, promotions, labels and category order', right: <View style={{ flexDirection: 'row', alignItems: 'center', gap: 4 }}>Open<AppIcon name="chevron-right" size={12} /></View>, onPress: () => setModule('Products and catalog') },
-            ]} />
-          </Section>
-        </>
-      ) : moduleLabel === 'Settings' ? (
-        <Section title="Goodies settings">
-          <Txt size={11} mut lh={1.4}>Read-only until the server connection is ready.</Txt>
-          <ListRows rows={[
-            { key: 'fees', main: 'Fees and rules', sub: 'Not connected yet.', right: 'Read-only' },
-            { key: 'restricted', main: 'Restricted goods', sub: 'Enforcement remains server-side.', right: 'Read-only' },
-            { key: 'publish', main: 'Publishing permissions', sub: 'Publishing requires an authorized server action.', right: 'Protected' },
-          ]} />
-        </Section>
-      ) : moduleLabel === 'Analytics' ? (
-        <Section title="Goodies analytics">
-          <ListRows rows={[
-            { key: 'orders', main: 'Goodies transactions', right: dataMode === 'live' ? String(db.INV.filter((tx) => tx.f.toLowerCase().includes('goodies')).length) : '—', onPress: () => go('finance', { fv: 'Transactions' }) },
-            { key: 'promos', main: 'Live Goodies promotions', right: '—', onPress: () => setModule('Promotions') },
-            { key: 'catalog', main: 'Builder library items', right: '—', onPress: () => setModule('Products and catalog') },
-            { key: 'requests', main: 'Ingredient requests awaiting review', right: '—', onPress: () => setModule('Product review') },
-          ]} />
-          <Txt size={9.5} mut style={{ marginTop: 8 }}>Not connected yet.</Txt>
-        </Section>
-      ) : moduleLabel === 'Library' ? (
-        <GoodiesAssetLibrary />
-      ) : moduleLabel === 'Fees' ? (
-        <Section title="Fees and rules">
-          <Txt size={10.1} mut style={{ marginBottom: 8 }}>Not connected yet.</Txt>
-          <ListRows rows={visible.map((item) => ({ key: item.id, main: item._title, sub: item._sub, right: <View style={{ flexDirection: 'row', alignItems: 'center', gap: 4 }}>Edit<AppIcon name="chevron-right" size={12} /></View>, onPress: () => onItem(item) }))} />
-        </Section>
-      ) : (
-        <Section title={moduleName} right={<Pill onPress={() => setFilter(filter === 'All' ? 'Live' : 'All')}>{filter === 'All' ? 'Filter live' : 'Show all'}</Pill>}>
-          <Txt size={9.5} mut style={{ marginBottom: 8 }}>Configuration is shown for reference. Live merchant, order and request data are not connected.</Txt>
-          <ListRows empty="No records in this section." rows={visible.map((item) => ({
-            key: String(item.id),
-            main: item._title,
-            sub: item._sub,
-            right: <View style={{ alignItems: 'flex-end', gap: 3 }}>{item.st ? <StatusPill label={String(item.st)} small /> : null}<View style={{ flexDirection: 'row', alignItems: 'center', gap: 4 }}><Txt size={9.5} mut>Open</Txt><AppIcon name="chevron-right" size={12} /></View></View>,
-            onPress: () => onItem(item),
-          }))} />
-        </Section>
-      )}
-      <Card style={{ marginTop: 2 }}>
-        <Txt size={10.1} weight={500}>Publishing boundary</Txt>
-        <Txt size={9.5} mut lh={1.4}>goodiesSeed.json is retained as Goodies feature configuration and reference metadata, including the builder catalog structure, localization statuses, promotion targets, Wallet links, fee/rule definitions and support copy. It is not treated as authoritative live order, merchant, or analytics data; those records must come from authorized Goodies endpoints.</Txt>
-      </Card>
+  return <ScrollView style={{flex:1,backgroundColor:c?.bg||'#F6F7F4'}} contentContainerStyle={{padding:16,paddingBottom:36}}>
+    <View style={{flexDirection:'row',alignItems:'center',justifyContent:'space-between',marginBottom:12}}>
+      <View><Text style={{fontSize:20,fontWeight:'800',color:'#172316'}}>Goodies Admin</Text><Text style={{fontSize:11,color:'#697466'}}>Live merchant, catalogue, order and payment controls</Text></View>
+      <Pressable onPress={()=>void reload()} style={btn('#E9EEE6')}><Text style={{fontSize:12,fontWeight:'700',color:'#344531'}}>Refresh</Text></Pressable>
     </View>
-  );
+    <ScrollView horizontal showsHorizontalScrollIndicator={false} style={{marginBottom:14}}>
+      <View style={{flexDirection:'row',gap:7}}>{MODULES.map(x=><Pressable key={x} onPress={()=>setModule(x)} style={{paddingHorizontal:12,paddingVertical:9,borderRadius:20,backgroundColor:module===x?'#294E2C':'#E8ECE5'}}><Text style={{fontSize:12,fontWeight:'700',color:module===x?'#fff':'#344531'}}>{x}</Text></Pressable>)}</View>
+    </ScrollView>
+    {loading?<Text style={{padding:20,color:'#697466'}}>Loading live Goodies data…</Text>:null}
+    {module==='Overview'?<>
+      <View style={{flexDirection:'row',flexWrap:'wrap',gap:8}}>
+        {Object.entries({Stores:dashboard.stats.stores??0,'Live stores':dashboard.stats.live_stores??0,Products:dashboard.stats.products??0,'Awaiting review':dashboard.stats.pending_products??0,Orders:dashboard.stats.orders??0,'Open orders':dashboard.stats.open_orders??0}).map(([k,v])=><View key={k} style={{...card,width:'48%',marginBottom:0}}><Text style={labelStyle}>{k}</Text><Text style={{fontSize:24,fontWeight:'800',color:'#1B2619'}}>{String(v)}</Text></View>)}
+      </View>
+      <View style={{...card,marginTop:10}}><Text style={valueStyle}>Gross order value</Text><Text style={{fontSize:23,fontWeight:'800',marginTop:5,color:'#1B2619'}}>{money(dashboard.stats.gross_total)}</Text><Text style={{fontSize:11,color:'#697466',marginTop:4}}>Includes paid and pay-on-receipt orders.</Text></View>
+      <Pressable onPress={()=>go('content')} style={btn('#294E2C')}><Text style={{color:'#fff',fontWeight:'800'}}>Open Goodies Content Editor</Text></Pressable>
+    </>:null}
+    {module==='Merchants'?<>
+      <Text style={{fontSize:12,color:'#687365',marginBottom:10}}>Live records from Goodies store schedules and business verification.</Text>
+      {!dashboard.merchants.length?<Text style={labelStyle}>No Goodies merchants registered yet.</Text>:dashboard.merchants.map(m=><View key={m.business_id} style={card}>
+        <Text style={valueStyle}>{m.name||'Unnamed store'}</Text><Text style={labelStyle}>{m.category||'Uncategorised'} · {m.city||'City not set'} · Verification: {m.verification}</Text>
+        <Text style={{fontSize:12,color:'#596554',marginBottom:8}}>Delivery: {m.delivery_pricing_mode==='distance'?'Distance-based':'Fixed'} · {money(m.delivery_fee)} · COD {m.accept_cash_on_delivery?'enabled':'disabled'}</Text>
+        <Pressable disabled={busy===m.business_id||(!m.is_live&&m.verification!=='verified')} onPress={()=>void setMerchant(m)} style={btn(m.is_live?'#F7EAE8':'#E8F2E5')}><Text style={{fontWeight:'800',color:m.is_live?'#8D3932':'#28552B'}}>{busy===m.business_id?'Saving…':m.is_live?'Take store offline':'Publish store live'}</Text></Pressable>
+        {!m.is_live&&m.verification!=='verified'?<Text style={{fontSize:11,color:'#9B5A27',marginTop:6}}>Verification is required before publishing.</Text>:null}
+      </View>)}
+    </>:null}
+    {module==='Product review'?<>
+      <Text style={{fontSize:12,color:'#687365',marginBottom:10}}>New vendor products remain hidden from customers until approved.</Text>
+      {!dashboard.products.length?<Text style={labelStyle}>No products submitted yet.</Text>:dashboard.products.map(p=><View key={p.id} style={card}>
+        <View style={{flexDirection:'row',justifyContent:'space-between'}}><Text style={valueStyle}>{p.name}</Text><Text style={{fontSize:11,fontWeight:'800',color:p.review_status==='pending'?'#9B5A27':p.review_status==='approved'?'#286A35':'#9B4036'}}>{p.review_status}</Text></View>
+        <Text style={labelStyle}>{p.store_name||'Store'} · {money(p.price)} · Stock {p.stock}</Text>
+        {p.description?<Text style={{fontSize:12,color:'#5F6B5A',marginBottom:8}}>{p.description}</Text>:null}
+        {p.review_status==='pending'?<View style={{flexDirection:'row',gap:8}}><Pressable disabled={!!busy} onPress={()=>void reviewProduct(p,'approved')} style={{...btn('#E8F2E5'),flex:1}}><Text style={{fontWeight:'800',color:'#28552B'}}>Approve</Text></Pressable><Pressable disabled={!!busy} onPress={()=>void reviewProduct(p,'rejected')} style={{...btn('#F7EAE8'),flex:1}}><Text style={{fontWeight:'800',color:'#8D3932'}}>Reject</Text></Pressable></View>:null}
+      </View>)}
+    </>:null}
+    {module==='Orders'?<>
+      {!dashboard.orders.length?<Text style={labelStyle}>No Goodies orders recorded yet.</Text>:dashboard.orders.map(o=><View key={o.id} style={card}>
+        <View style={{flexDirection:'row',justifyContent:'space-between'}}><Text style={valueStyle}>{o.order_code}</Text><Text style={{fontSize:11,fontWeight:'800',color:'#48653F'}}>{o.status}</Text></View>
+        <Text style={labelStyle}>{o.store_name||o.store_id} · {dateText(o.created_at)}</Text>
+        <Text style={{fontSize:12,color:'#596554'}}>{o.payment_method} · {o.payment_status} · {money(o.total)}</Text>
+        {o.scheduled_for?<Text style={{fontSize:12,color:'#596554'}}>Scheduled: {dateText(o.scheduled_for)}</Text>:null}
+        {o.courier_id?<Text style={{fontSize:12,color:'#596554'}}>Courier assigned</Text>:null}
+      </View>)}
+    </>:null}
+    {module==='Fees'?<>
+      <View style={card}>
+        <Text style={valueStyle}>Service fee (USD)</Text><TextInput value={fee} onChangeText={setFee} keyboardType="decimal-pad" style={{borderWidth:1,borderColor:'#DCE4D7',borderRadius:10,padding:11,marginTop:8,color:'#1B2619'}}/>
+        <Text style={{...labelStyle,marginTop:12}}>Courier tip presets (comma-separated USD amounts)</Text><TextInput value={tips} onChangeText={setTips} style={{borderWidth:1,borderColor:'#DCE4D7',borderRadius:10,padding:11,color:'#1B2619'}}/>
+      </View>
+      {switchRow('First order free delivery','Waive the delivery fee on the customer’s first Goodies order.',firstFree,setFirstFree)}
+      {switchRow('Wantiss Wallet','Default Goodies payment method.',wallet,setWallet)}
+      {switchRow('Credit / debit card','Enable saved-card checkout.',card,setCard)}
+      {switchRow('Cash on delivery','Global switch only. Checkout also requires merchant and courier consent.',cash,setCash)}
+      <Pressable disabled={busy==='fees'} onPress={()=>void saveFees()} style={btn('#294E2C')}><Text style={{color:'#fff',fontWeight:'800'}}>{busy==='fees'?'Saving…':'Save live fee and payment policy'}</Text></Pressable>
+      <Text style={{fontSize:11,color:'#697466',marginTop:8}}>MonCash remains disabled until its Goodies payment integration is available. Store and courier COD permissions remain separate and are checked server-side.</Text>
+    </>:null}
+    {module==='Analytics'?<>
+      <Pressable onPress={()=>void loadAnalytics()} style={{...btn('#E9EEE6'),marginBottom:10}}><Text style={{fontWeight:'700',color:'#344531'}}>Refresh analytics</Text></Pressable>
+      {analytics?<View style={card}>
+        {Object.entries({'Orders (30 days)':analytics.orders_30d,'Gross value (30 days)':money(analytics.gross_30d),'Average order':money(analytics.average_order)}).map(([k,v])=><View key={k} style={{paddingVertical:8,borderBottomWidth:1,borderBottomColor:'#EEF0EC'}}><Text style={labelStyle}>{k}</Text><Text style={valueStyle}>{String(v)}</Text></View>)}
+        <Text style={{...valueStyle,marginTop:12}}>By order status</Text>{Object.entries(analytics.by_status||{}).map(([k,v])=><Text key={k} style={{fontSize:12,color:'#596554',marginTop:5}}>{k}: {String(v)}</Text>)}
+        <Text style={{...valueStyle,marginTop:12}}>By payment method</Text>{Object.entries(analytics.by_payment||{}).map(([k,v])=><Text key={k} style={{fontSize:12,color:'#596554',marginTop:5}}>{k}: {String(v)}</Text>)}
+      </View>:<Text style={labelStyle}>Loading analytics…</Text>}
+    </>:null}
+    {module==='Goodies assets'?<GoodiesAssetLibrary/>:null}
+    {module==='Content editor'?<Pressable onPress={()=>go('content')} style={btn('#294E2C')}><Text style={{color:'#fff',fontWeight:'800'}}>Open Goodies Content Editor</Text></Pressable>:null}
+  </ScrollView>;
 }
+
+const dateText=(v:string|null)=>v?new Date(v).toLocaleString():'—';
