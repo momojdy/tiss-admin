@@ -69,7 +69,7 @@ export function GoodiesEditor({ canEdit, canPublish }: { canEdit: boolean; canPu
   const [source, setSource] = useState<'none' | 'draft' | 'published' | 'starter'>('none');
   const [row, setRow] = useState<Row | null>(null);
   const [selection, setSelection] = useState<GoodiesSelection | null>(null);
-  const [editLanguage, setEditLanguage] = useState<'en'|'fr'|'ht'|'es'|'zh'>('en');
+  const [editLanguage, setEditLanguage] = useState<'en'|'fr'|'ht'|'es'|'zh-Hans'>('en');
   const [mode, setMode] = useState<'Edit' | 'Preview'>('Edit');
   const [busy, setBusy] = useState<'' | 'save' | 'publish'>('');
   const [notice, setNotice] = useState<Notice | null>(null);
@@ -402,7 +402,7 @@ export function GoodiesEditor({ canEdit, canPublish }: { canEdit: boolean; canPu
       {editMode && selection ? (
         <Section title={kindName[selection.kind] + ' · ' + fieldName[selection.field]}>
           <View style={{ flexDirection: 'row', flexWrap: 'wrap', gap: 6, marginBottom: 10 }}>
-            {(['en','fr','ht','es','zh'] as const).map((lang) => <OutlineBtn key={lang} primary={editLanguage===lang} onPress={()=>setEditLanguage(lang)}>{({en:'English',fr:'Français',ht:'Kreyòl',es:'Español',zh:'中文'} as any)[lang]}</OutlineBtn>)}
+            {(['en','fr','ht','es','zh-Hans'] as const).map((lang) => <OutlineBtn key={lang} primary={editLanguage===lang} onPress={()=>setEditLanguage(lang)}>{({en:'English',fr:'Français',ht:'Kreyòl',es:'Español','zh-Hans':'中文'} as any)[lang]}</OutlineBtn>)}
           </View>
           <View style={{ borderWidth: 2, borderStyle: 'dashed', borderColor: '#FD802E', borderRadius: 12, padding: 10 }}>
           {!item ? (
