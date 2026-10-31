@@ -66,16 +66,16 @@ export function GoodiesAssetLibrary() {
       byKey.forEach((asset, key) => {
         // Include every image uploaded through Goodies, even when it is not
         // currently referenced by a draft or published content item.
-        if (used.has(key) || !/^wantiss\\.goodies\\./i.test(key)) return;
+        if (used.has(key) || !/^wantiss\.goodies\./i.test(key)) return;
         const normalized = key.toLowerCase();
         let section = UNUSED;
-        if (/\\.home\\.(mode|service)/.test(normalized)) section = 'Home · Service tiles';
-        else if (/\\.home\\.(cat|category)/.test(normalized)) section = 'Home · Categories';
-        else if (/\\.home\\.(promo|promotion)/.test(normalized)) section = 'Home · Promotion cards';
-        else if (/\\.product/.test(normalized)) section = 'Products · Product images';
-        else if (/\\.builder\\.pizza|\\.pizza\\.builder/.test(normalized)) section = 'Build Your Own · Pizza builder';
-        else if (/\\.builder\\.burger|\\.burger\\.builder/.test(normalized)) section = 'Build Your Own · Burger builder';
-        else if (/\\.(lib|ingredient|ingredients)/.test(normalized)) section = 'Build Your Own · Ingredient artwork';
+        if (/\.home\.(mode|service)/.test(normalized)) section = 'Home · Service tiles';
+        else if (/\.home\.(cat|category)/.test(normalized)) section = 'Home · Categories';
+        else if (/\.home\.(promo|promotion)/.test(normalized)) section = 'Home · Promotion cards';
+        else if (/\.product/.test(normalized)) section = 'Products · Product images';
+        else if (/\.builder\.pizza|\.pizza\.builder/.test(normalized)) section = 'Build Your Own · Pizza builder';
+        else if (/\.builder\.burger|\.burger\.builder/.test(normalized)) section = 'Build Your Own · Burger builder';
+        else if (/\.(lib|ingredient|ingredients)/.test(normalized)) section = 'Build Your Own · Ingredient artwork';
         next.push({ id: 'unused:' + key, section, name: key, assetKey: key, url: '', status: asset.status });
       });
       setEntries(next);
