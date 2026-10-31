@@ -123,7 +123,7 @@ export function GoodiesIngredientRequests({ canEdit }: { canEdit: boolean }) {
   });
 
   const field = { borderWidth: 1, borderColor: c.bd, borderRadius: 9, paddingHorizontal: 9, paddingVertical: 7, marginTop: 4, marginBottom: 7, color: c.ink, backgroundColor: c.card, fontSize: 11 } as const;
-  const thumb = (uri?: string) => uri ? <Image source={{ uri }} resizeMode="contain" style={{ width: 72, height: 72, borderRadius: 8, backgroundColor: '#FFFFFF' }} /> : <View style={{ width: 72, height: 72, borderRadius: 8, backgroundColor: c.bg, alignItems: 'center', justifyContent: 'center' }}><Txt size={8.5} mut>No photo</Txt></View>;
+  const thumb = (uri?: string) => uri ? <Image source={{ uri }} resizeMode="contain" style={{ width: 72, height: 72, borderRadius: 8, backgroundColor: '#FFFFFF' }} /> : <View style={{ width: 72, height: 72, borderRadius: 8, backgroundColor: c.inset, alignItems: 'center', justifyContent: 'center' }}><Txt size={8.5} mut>No photo</Txt></View>;
   const shown = requests.filter((r) => showAll || r.status === 'submitted' || r.status === 'needs_info');
   const off = !canEdit || !!busy;
 
