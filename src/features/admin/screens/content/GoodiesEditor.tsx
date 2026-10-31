@@ -11,7 +11,6 @@ import { Card, Section } from '../../ui/Card';
 import { OutlineBtn } from '../../ui/Controls';
 import { Txt } from '../../ui/Txt';
 import { GoodiesConsumerPreview } from './GoodiesConsumerPreview';
-import { GoodiesBuilderConfigEditor } from './GoodiesBuilderConfigEditor';
 import { PromoColorPicker } from './PromoColorPicker';
 import type { GoodiesSelection } from '../../goodiesConsumer/editContext';
 import {
@@ -555,7 +554,6 @@ export function GoodiesEditor({ canEdit, canPublish }: { canEdit: boolean; canPu
               </View>
             ))}
           </Section>
-          <GoodiesBuilderConfigEditor canEdit={canEdit} />
         </>
       ) : null}
     </View>
