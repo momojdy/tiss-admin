@@ -47,6 +47,19 @@ export function GoodiesAdminScreen() {
     finally{setLoading(false);}
   },[toast]);
   useEffect(()=>{void reload();},[reload]);
+  const loadCouriers=async()=>{
+    setBusy('couriers');
+    const {data,error}=await supabase.rpc('goodies_admin_list_courier_candidates');
+    if(error)toast(error.message);else setCourierCandidates(data||[]);
+    setBusy('');
+  };
+  useEffect(()=>{if(module==='Couriers')void loadCouriers();},[module]);
+  const setCourierAccess=async(item:any,enabled:boolean)=>{
+    setBusy(item.courier_id);
+    const {error}=await supabase.rpc(enabled?'goodies_admin_add_courier':'goodies_admin_remove_courier',{p_courier_id:item.courier_id});
+    if(error)toast(error.message);else{toast(enabled?'Courier access approved':'Courier access removed');await loadCouriers();}
+    setBusy('');
+  };
   const loadAnalytics=async()=>{
     setBusy('analytics');
     const {data,error}=await supabase.rpc('goodies_admin_analytics');
@@ -140,6 +153,13 @@ export function GoodiesAdminScreen() {
         {o.scheduled_for?<Text style={{fontSize:12,color:'#596554'}}>Scheduled: {dateText(o.scheduled_for)}</Text>:null}
         {o.courier_id?<Text style={{fontSize:12,color:'#596554'}}>Courier assigned</Text>:null}
         {!['completed','cancelled','declined','expired'].includes(o.status)?<Pressable disabled={busy===o.id} onPress={()=>cancelOrder(o)} style={{...btn('#F7EAE8'),marginTop:8}}><Text style={{fontWeight:'800',color:'#8D3932'}}>Cancel order</Text></Pressable>:null}
+      </View>)}
+    </>:null}
+    {module==='Couriers'?<>
+      <Text style={{fontSize:12,color:'#687365',marginBottom:10}}>Approve existing Wantiss accounts for Goodies courier work. Only approved couriers can go online, receive assignments, share GPS or accept COD.</Text>
+      {!courierCandidates.length?<Text style={labelStyle}>No accounts found.</Text>:courierCandidates.map(person=><View key={person.courier_id} style={card}>
+        <Text style={valueStyle}>{person.full_name||'Wantiss account'}</Text><Text style={labelStyle}>{person.phone_number||'No phone number'} · {person.courier_id}</Text>
+        <Pressable disabled={!!busy} onPress={()=>void setCourierAccess(person,!person.already_added)} style={btn(person.already_added?'#F7EAE8':'#E8F2E5')}><Text style={{fontWeight:'800',color:person.already_added?'#8D3932':'#28552B'}}>{busy===person.courier_id?'Saving…':person.already_added?'Remove courier access':'Approve as Goodies courier'}</Text></Pressable>
       </View>)}
     </>:null}
     {module==='Fees'?<>
