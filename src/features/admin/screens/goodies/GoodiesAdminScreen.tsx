@@ -7,7 +7,7 @@ import {useTheme} from '../../theme/ThemeContext';
 import {GoodiesAssetLibrary} from './GoodiesAssetLibrary';
 
 type Dashboard = {stats:any;merchants:any[];products:any[];orders:any[]};
-const MODULES=['Overview','Merchants','Product review','Orders','Fees','Analytics','Goodies assets','Content editor'];
+const MODULES=['Overview','Merchants','Product review','Orders','Couriers','Fees','Analytics','Goodies assets','Content editor'];
 const money=(v:any)=>new Intl.NumberFormat('en-US',{style:'currency',currency:'USD'}).format(Number(v)||0);
 const card={backgroundColor:'#fff',borderWidth:1,borderColor:'#E1E6DE',borderRadius:14,padding:14,marginBottom:10} as const;
 const btn=(bg:string)=>({paddingVertical:10,paddingHorizontal:12,borderRadius:10,backgroundColor:bg,alignItems:'center' as const});
@@ -19,6 +19,7 @@ export function GoodiesAdminScreen() {
   const [module,setModule]=useState('Overview');
   const [dashboard,setDashboard]=useState<Dashboard>({stats:{},merchants:[],products:[],orders:[]});
   const [analytics,setAnalytics]=useState<any>(null);
+  const [courierCandidates,setCourierCandidates]=useState<any[]>([]);
   const [loading,setLoading]=useState(false);
   const [busy,setBusy]=useState('');
   const [fee,setFee]=useState('0');
