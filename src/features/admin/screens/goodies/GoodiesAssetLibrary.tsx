@@ -124,7 +124,7 @@ export function GoodiesAssetLibrary() {
               const uri = urls[e.assetKey] || e.url;
               return (
                 <View key={e.id} style={{ width: '31%', minWidth: 92, borderWidth: 1, borderColor: c.bd, borderRadius: 10, overflow: 'hidden', backgroundColor: c.card }}>
-                  {uri ? <Image source={{ uri }} resizeMode="contain" style={{ width: '100%', height: 92, backgroundColor: '#FFFFFF' }} /> : <View style={{ height: 92, alignItems: 'center', justifyContent: 'center', backgroundColor: c.bg }}><Txt size={9} mut>Preview unavailable</Txt></View>}
+                  {uri ? <Image source={{ uri }} resizeMode="contain" style={{ width: '100%', height: 92, backgroundColor: '#FFFFFF' }} /> : <View style={{ height: 92, alignItems: 'center', justifyContent: 'center', backgroundColor: c.inset }}><Txt size={9} mut>Preview unavailable</Txt></View>}
                   <View style={{ padding: 6, gap: 2 }}>
                     <Txt size={9.5} weight={600} numberOfLines={2}>{e.name}</Txt>
                     <Txt size={8.5} mut numberOfLines={2}>{e.section}</Txt>
