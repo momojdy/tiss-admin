@@ -122,7 +122,7 @@ export function GoodiesAdminScreen() {
         {Object.entries({Stores:dashboard.stats.stores??0,'Live stores':dashboard.stats.live_stores??0,Products:dashboard.stats.products??0,'Awaiting review':dashboard.stats.pending_products??0,Orders:dashboard.stats.orders??0,'Open orders':dashboard.stats.open_orders??0}).map(([k,v])=><View key={k} style={{...cardStyle,width:'48%',marginBottom:0}}><Text style={labelStyle}>{k}</Text><Text style={{fontSize:24,fontWeight:'800',color:'#1B2619'}}>{String(v)}</Text></View>)}
       </View>
       <View style={{...cardStyle,marginTop:10}}><Text style={valueStyle}>Gross order value</Text><Text style={{fontSize:23,fontWeight:'800',marginTop:5,color:'#1B2619'}}>{money(dashboard.stats.gross_total)}</Text><Text style={{fontSize:11,color:'#697466',marginTop:4}}>Includes paid and pay-on-receipt orders.</Text></View>
-      <Pressable onPress={()=>go('content')} style={btn('#294E2C')}><Text style={{color:'#fff',fontWeight:'800'}}>Open Goodies Content Editor</Text></Pressable>
+      <Pressable onPress={()=>go('editor',{editorFeature:'Goodies'})} style={btn('#294E2C')}><Text style={{color:'#fff',fontWeight:'800'}}>Open Goodies Content Editor</Text></Pressable>
     </>:null}
     {module==='Merchants'?<>
       <Text style={{fontSize:12,color:'#687365',marginBottom:10}}>Live records from Goodies store schedules and business verification.</Text>
@@ -183,7 +183,7 @@ export function GoodiesAdminScreen() {
       </View>:<Text style={labelStyle}>Loading analytics…</Text>}
     </>:null}
     {module==='Goodies assets'?<GoodiesAssetLibrary/>:null}
-    {module==='Content editor'?<Pressable onPress={()=>go('content')} style={btn('#294E2C')}><Text style={{color:'#fff',fontWeight:'800'}}>Open Goodies Content Editor</Text></Pressable>:null}
+    {module==='Content editor'?<Pressable onPress={()=>go('editor',{editorFeature:'Goodies'})} style={btn('#294E2C')}><Text style={{color:'#fff',fontWeight:'800'}}>Open Goodies Content Editor</Text></Pressable>:null}
   </ScrollView>;
 }
 
