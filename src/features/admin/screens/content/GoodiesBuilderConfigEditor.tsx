@@ -99,8 +99,8 @@ export function GoodiesBuilderConfigEditor({ canEdit }: { canEdit: boolean }) {
         req: !!group.req, min: Math.max(0, Number(group.min) || 0), max: Math.max(1, Number(group.max) || 1),
         inc: Math.max(0, Number(group.inc) || 0), me: Math.max(1, Number(group.me) || 1),
         items: (Array.isArray(group.items) ? group.items : []).map((item: any, ii: number) => ({
-          id: 'ingredient-' + stamp + '-' + gi + '-' + ii, name: String(item.name || ''), price: Math.max(0, Number(item.price) || 0),
-          free: !!item.free, avail: true, assetId: item.assetId || null, col: item.col || '#D9A441', ...(item.max ? { max: Math.max(1, Number(item.max) || 1) } : {}),
+          id: 'ingredient-' + stamp + '-' + gi + '-' + ii, name: String(item.name || ''), price: 0,
+          free: false, avail: false, assetId: item.assetId || null, col: item.col || '#D9A441', ...(item.max ? { max: Math.max(1, Number(item.max) || 1) } : {}),
         })),
       })),
     };
