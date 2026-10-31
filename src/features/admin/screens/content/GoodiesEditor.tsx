@@ -232,7 +232,7 @@ export function GoodiesEditor({ canEdit, canPublish }: { canEdit: boolean; canPu
   );
   const createLabel = () => edit((next) => {
     if (!selection || selection.kind !== 'label' || findItem(next, selection)) return;
-    next.labels.push({ id: selection.id, label: selection.id, t: { en: { v: '', s: 'draft' }, fr: {v:'',s:'missing'}, ht: {v:'',s:'missing'}, es: {v:'',s:'missing'}, zh: {v:'',s:'missing'} } });
+    next.labels.push({ id: selection.id, label: selection.id, t: { en: { v: '', s: 'draft' }, fr: {v:'',s:'missing'}, ht: {v:'',s:'missing'}, es: {v:'',s:'missing'}, 'zh-Hans': {v:'',s:'missing'} } });
   });
   const pickAsset = (asset: any) => setImage({ assetKey: asset.asset_key, w: asset.width || undefined, h: asset.height || undefined });
 
@@ -574,7 +574,7 @@ export function GoodiesEditor({ canEdit, canPublish }: { canEdit: boolean; canPu
           </Section>
           <Section title="Other pages · Text">
             <View style={{ flexDirection: 'row', flexWrap: 'wrap', gap: 6, marginBottom: 10 }}>
-            {(['en','fr','ht','es','zh'] as const).map((lang) => <OutlineBtn key={lang} primary={editLanguage===lang} onPress={()=>setEditLanguage(lang)}>{({en:'English',fr:'Français',ht:'Kreyòl',es:'Español',zh:'中文'} as any)[lang]}</OutlineBtn>)}
+            {(['en','fr','ht','es','zh-Hans'] as const).map((lang) => <OutlineBtn key={lang} primary={editLanguage===lang} onPress={()=>setEditLanguage(lang)}>{({en:'English',fr:'Français',ht:'Kreyòl',es:'Español','zh-Hans':'中文'} as any)[lang]}</OutlineBtn>)}
           </View>
             <Txt size={10} mut style={{ marginBottom: 8 }}>Choose a page, then edit its text below. Changes stay in this draft until you save and publish.</Txt>
             <View style={{ flexDirection: 'row', flexWrap: 'wrap', gap: 6 }}>
