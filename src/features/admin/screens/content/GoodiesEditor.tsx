@@ -160,7 +160,7 @@ export function GoodiesEditor({ canEdit, canPublish }: { canEdit: boolean; canPu
     const target = (next.labels || []).find((entry: any) => entry.id === id);
     if (!target) return;
     const holder = target.t && typeof target.t === 'object' ? target.t : {};
-    holder.en = { v: value, s: 'draft' };
+    holder[editLanguage] = { v: value, s: value.trim() ? 'draft' : 'missing' };
     target.t = holder;
   });
   const pageGroups = useMemo(() => {
@@ -186,9 +186,33 @@ export function GoodiesEditor({ canEdit, canPublish }: { canEdit: boolean; canPu
     const key = textKeyFor(selection);
     const current = target[key];
     const holder = current && typeof current === 'object' ? current : {};
-    holder.en = { v: value, s: 'draft' };
+    holder[editLanguage] = { v: value, s: value.trim() ? 'draft' : 'missing' };
     target[key] = holder;
   });
+  const setSelectedTranslationReviewed = (reviewed: boolean) => edit((next) => {
+    if (!selection) return;
+    const target = findItem(next, selection);
+    if (!target) return;
+    const key = textKeyFor(selection);
+    const holder = target[key] && typeof target[key] === 'object' ? target[key] : {};
+    const entry = holder[editLanguage] || {v:'',s:'missing'};
+    if (!String(entry.v || '').trim()) return;
+    holder[editLanguage] = {...entry,s:reviewed?'reviewed':'draft'};
+    target[key] = holder;
+  });
+  const setLabelTranslationReviewed = (id: string, reviewed: boolean) => edit((next) => {
+    const target=(next.labels||[]).find((entry:any)=>entry.id===id);
+    if(!target)return;
+    const holder=target.t&&typeof target.t==='object'?target.t:{};
+    const entry=holder[editLanguage]||{v:'',s:'missing'};
+    if(!String(entry.v||'').trim())return;
+    holder[editLanguage]={...entry,s:reviewed?'reviewed':'draft'};
+    target.t=holder;
+  });
+  const localeCoverage = useMemo(() => {
+    const entries=draft?.labels||[];
+    return {total:entries.length,filled:entries.filter((x:any)=>String(x.t?.[editLanguage]?.v||'').trim()).length,reviewed:entries.filter((x:any)=>x.t?.[editLanguage]?.s==='reviewed').length};
+  },[draft?.labels,editLanguage]);
   const setEmoji = (value: string) => edit((next) => { const target = selection && findItem(next, selection); if (target) target.emoji = value; });
   const setImage = (image: any) => edit((next) => { const target = selection && findItem(next, selection); if (target) target[imageKey] = image; });
   const setMeta = (kind: GoodiesSelection['kind'], id: string, key: string, value: string) => edit((next) => {
@@ -404,6 +428,7 @@ export function GoodiesEditor({ canEdit, canPublish }: { canEdit: boolean; canPu
           <View style={{ flexDirection: 'row', flexWrap: 'wrap', gap: 6, marginBottom: 10 }}>
             {(['en','fr','ht','es','zh-Hans'] as const).map((lang) => <OutlineBtn key={lang} primary={editLanguage===lang} onPress={()=>setEditLanguage(lang)}>{({en:'English',fr:'Français',ht:'Kreyòl',es:'Español','zh-Hans':'中文'} as any)[lang]}</OutlineBtn>)}
           </View>
+          <Txt size={9.5} mut style={{marginBottom:8}}>{localeCoverage.filled}/{localeCoverage.total} labels translated · {localeCoverage.reviewed} marked reviewed in this language</Txt>
           <View style={{ borderWidth: 2, borderStyle: 'dashed', borderColor: '#FD802E', borderRadius: 12, padding: 10 }}>
           {!item ? (
             <View>
@@ -413,6 +438,7 @@ export function GoodiesEditor({ canEdit, canPublish }: { canEdit: boolean; canPu
             <View>
               <Txt size={9.5} mut>{fieldName[selection.field]}</Txt>
               <TextInput value={readText(item[textKeyFor(selection)], editLanguage)} onChangeText={setText} style={fieldStyle} placeholder={fieldName[selection.field]} />
+              <View style={{marginTop:7,alignSelf:'flex-start'}}><OutlineBtn onPress={()=>setSelectedTranslationReviewed(item[textKeyFor(selection)]?.[editLanguage]?.s!=='reviewed')} disabled={!canEdit || !readText(item[textKeyFor(selection)],editLanguage).trim()}>{item[textKeyFor(selection)]?.[editLanguage]?.s==='reviewed'?'Marked reviewed':'Mark this translation reviewed'}</OutlineBtn></View>
             </View>
           ) : (
             <View>
@@ -559,7 +585,8 @@ export function GoodiesEditor({ canEdit, canPublish }: { canEdit: boolean; canPu
             {activeEntries.map((entry: any) => (
               <View key={entry.id} style={{ marginTop: 8, paddingTop: 6, borderTopWidth: 1, borderTopColor: c.bd }}>
                 <Txt size={10.5} mut>{entry.label || entry.id}</Txt>
-                <TextInput value={readText(entry.t, editLanguage)} onChangeText={(value) => setLabelText(entry.id, value)} editable={canEdit && !busy} multiline={readText(entry.t).length > 60} style={[fieldStyle, readText(entry.t).length > 60 ? { minHeight: 64, textAlignVertical: 'top' } : null]} placeholder={'Text customers see in ' + editLanguage.toUpperCase()} />
+                <TextInput value={readText(entry.t, editLanguage)} onChangeText={(value) => setLabelText(entry.id, value)} editable={canEdit && !busy} multiline={readText(entry.t,editLanguage).length > 60} style={[fieldStyle, readText(entry.t,editLanguage).length > 60 ? { minHeight: 64, textAlignVertical: 'top' } : null]} placeholder={'Text customers see in ' + editLanguage.toUpperCase()} />
+                <View style={{marginTop:6,alignSelf:'flex-start'}}><OutlineBtn onPress={()=>setLabelTranslationReviewed(entry.id,entry.t?.[editLanguage]?.s!=='reviewed')} disabled={!canEdit || !String(entry.t?.[editLanguage]?.v||'').trim()}>{entry.t?.[editLanguage]?.s==='reviewed'?'Reviewed':'Mark reviewed'}</OutlineBtn></View>
               </View>
             ))}
           </Section>
