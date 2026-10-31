@@ -59,6 +59,23 @@ export function GoodiesAdminScreen() {
     if(error)toast(error.message);else{toast(item.is_live?'Store taken offline':'Store is live');await reload();}
     setBusy('');
   };
+  const verifyMerchant=async(item:any,status:'verified'|'rejected')=>{
+    setBusy(item.business_id);
+    const {error}=await supabase.rpc('goodies_admin_set_merchant_verification',{p_business_id:item.business_id,p_status:status});
+    if(error)toast(error.message);else{toast(status==='verified'?'Merchant verified':'Merchant rejected');await reload();}
+    setBusy('');
+  };
+  const cancelOrder=(item:any)=>{
+    Alert.alert('Cancel Goodies order', 'Cancel '+item.order_code+'? Stock will be restored and eligible payments will be refunded.',[
+      {text:'Keep order',style:'cancel'},
+      {text:'Cancel order',style:'destructive',onPress:()=>{void (async()=>{
+        setBusy(item.id);
+        const {error}=await supabase.rpc('goodies_admin_cancel_order',{p_order_id:item.id,p_reason:'The order was cancelled by Wantiss support.'});
+        if(error)toast(error.message);else{toast('Order cancelled; refund processing was triggered where applicable.');await reload();}
+        setBusy('');
+      })();}}
+    ]);
+  };
   const reviewProduct=async(item:any,status:'approved'|'rejected')=>{
     setBusy(item.id);
     const {error}=await supabase.rpc('goodies_admin_review_product',{p_product_id:item.id,p_status:status,p_note:null});
@@ -98,8 +115,11 @@ export function GoodiesAdminScreen() {
       {!dashboard.merchants.length?<Text style={labelStyle}>No Goodies merchants registered yet.</Text>:dashboard.merchants.map(m=><View key={m.business_id} style={card}>
         <Text style={valueStyle}>{m.name||'Unnamed store'}</Text><Text style={labelStyle}>{m.category||'Uncategorised'} · {m.city||'City not set'} · Verification: {m.verification}</Text>
         <Text style={{fontSize:12,color:'#596554',marginBottom:8}}>Delivery: {m.delivery_pricing_mode==='distance'?'Distance-based':'Fixed'} · {money(m.delivery_fee)} · COD {m.accept_cash_on_delivery?'enabled':'disabled'}</Text>
-        <Pressable disabled={busy===m.business_id||(!m.is_live&&m.verification!=='verified')} onPress={()=>void setMerchant(m)} style={btn(m.is_live?'#F7EAE8':'#E8F2E5')}><Text style={{fontWeight:'800',color:m.is_live?'#8D3932':'#28552B'}}>{busy===m.business_id?'Saving…':m.is_live?'Take store offline':'Publish store live'}</Text></Pressable>
-        {!m.is_live&&m.verification!=='verified'?<Text style={{fontSize:11,color:'#9B5A27',marginTop:6}}>Verification is required before publishing.</Text>:null}
+        {m.verification!=='verified'?<Pressable disabled={busy===m.business_id} onPress={()=>void verifyMerchant(m,'verified')} style={{...btn('#E8F2E5'),marginBottom:7}}><Text style={{fontWeight:'800',color:'#28552B'}}>Verify merchant</Text></Pressable>:null}
+        <View style={{flexDirection:'row',gap:8}}>
+          <Pressable disabled={busy===m.business_id||(!m.is_live&&m.verification!=='verified')} onPress={()=>void setMerchant(m)} style={{...btn(m.is_live?'#F7EAE8':'#E8F2E5'),flex:1}}><Text style={{fontWeight:'800',color:m.is_live?'#8D3932':'#28552B'}}>{busy===m.business_id?'Saving…':m.is_live?'Take store offline':'Publish store live'}</Text></Pressable>
+          {m.verification==='verified'?<Pressable disabled={busy===m.business_id} onPress={()=>void verifyMerchant(m,'rejected')} style={btn('#F7EAE8')}><Text style={{fontWeight:'800',color:'#8D3932'}}>Revoke</Text></Pressable>:null}
+        </View>
       </View>)}
     </>:null}
     {module==='Product review'?<>
@@ -118,6 +138,7 @@ export function GoodiesAdminScreen() {
         <Text style={{fontSize:12,color:'#596554'}}>{o.payment_method} · {o.payment_status} · {money(o.total)}</Text>
         {o.scheduled_for?<Text style={{fontSize:12,color:'#596554'}}>Scheduled: {dateText(o.scheduled_for)}</Text>:null}
         {o.courier_id?<Text style={{fontSize:12,color:'#596554'}}>Courier assigned</Text>:null}
+        {!['completed','cancelled','declined','expired'].includes(o.status)?<Pressable disabled={busy===o.id} onPress={()=>cancelOrder(o)} style={{...btn('#F7EAE8'),marginTop:8}}><Text style={{fontWeight:'800',color:'#8D3932'}}>Cancel order</Text></Pressable>:null}
       </View>)}
     </>:null}
     {module==='Fees'?<>
