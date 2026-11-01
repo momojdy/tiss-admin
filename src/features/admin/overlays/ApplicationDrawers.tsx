@@ -40,7 +40,6 @@ export function ApplicationDrawer({ id, close }: { id: string; close: () => void
   const guard = useGuard();
   const toast = useToast();
   const { closeAll } = useOverlay();
-  const finish = useFinish();
   const nav = useNav();
   const [serverDocs, setServerDocs] = useState<BusinessApplicationDocument[]>([]);
   const [docsLoading, setDocsLoading] = useState(true);
@@ -73,7 +72,7 @@ export function ApplicationDrawer({ id, close }: { id: string; close: () => void
   };
   if (!a) return null;
   const closed = a.st >= 3;
-  const status = (db.STG[a.st] || a.s || 'Pending review') + (a.hold ? ' · on hold' : '') + (a.esc ? ' · escalated' : '');
+  const status = db.STG[a.st] || a.s || 'Pending review';
 
   const chooseBusiness = () => {
     if (!can(...REQ.review)) { toast('You do not have permission to link applications.'); return; }
@@ -97,40 +96,22 @@ export function ApplicationDrawer({ id, close }: { id: string; close: () => void
     if (docsLoading || docsError || bad.length) { form({ title: 'Cannot approve yet', fields: [], buttons: [], sub: docsLoading ? 'Loading server documents. Try again in a moment.' : docsError ? 'The server document list could not be verified. Approval is blocked until the server can be checked.' : 'Upload and verify these required documents first: ' + bad.map((x) => x[1]).join(', ') + '.' }); return; }
     form({ title: 'Approve ' + a.n, fields: [{ id: 'n', label: 'Note (optional)', type: 'textarea' }], buttons: [{ label: 'Approve', key: 's', primary: true }],
       sub: `Service: ${a.s}. Result: Approved. The business can publish listings in this service.`,
-      onSubmit: async (_k, v) => { await reviewBusinessApplication(a.id, 'approved', String(v.n || '')); a.st = 3; finish(a, 'Approved by ' + session.view, 'Approved · ' + a.n); void hydrateAdminState().catch(() => undefined); } });
+      onSubmit: async (_k, v) => { await reviewBusinessApplication(a.id, 'approved', String(v.n || '')); await hydrateAdminState(); closeAll(); toast('Approved · ' + a.n); } });
   };
   const reject = () => form({ title: 'Reject ' + a.n, fields: [
     { id: 'r', label: 'Reason', type: 'select', options: ['Documents invalid', 'Out of scope', 'Fraud risk', 'Other'], required: true },
     { id: 'm', label: 'Message to applicant', type: 'textarea', required: true },
     { id: 'f', label: 'Final rejection (applicant cannot resubmit)', type: 'check' }],
     buttons: [{ label: 'Reject', key: 's', primary: true }], sub: 'The applicant is notified with your message.',
-    onSubmit: async (_k, v) => { await reviewBusinessApplication(a.id, 'rejected', String(v.r) + ': ' + String(v.m), !!v.f); a.st = 4; finish(a, (v.f ? 'Rejected (final) · ' : 'Rejected · ') + v.r, 'Rejected · ' + a.n); void hydrateAdminState().catch(() => undefined); } });
-  const requestInfo = () => form({ title: 'Request information', fields: [
-    { id: 'd', label: 'Requirement', type: 'select', options: NM, required: true, value: (a.d.find((x) => x[1] !== 'verified') ?? [NM[0]])[0] },
-    { id: 'm', label: 'What needs to change', type: 'textarea', required: true }, { id: 'due', label: 'Reply by', type: 'date', required: true }],
-    buttons: [{ label: 'Send request', key: 's', primary: true }], sub: 'Preview: “Please resubmit the item above by the date shown.”',
-    onSubmit: (_k, v) => { const d = a.d.find((x) => x[0] === v.d); if (d) d[1] = 'missing'; a.st = 2; a.due = String(v.due); finish(a, 'Information requested · ' + v.d, 'Request sent to ' + a.n); } });
-  const hold = () => { a.hold = a.hold ? 0 : 1; finish(a, a.hold ? 'Put on hold' : 'Resumed'); };
-  const escalate = () => { if (a.esc) return; form({ title: 'Escalate ' + a.n, fields: [{ id: 'r', label: 'Reason', type: 'textarea', required: true }], buttons: [{ label: 'Escalate', key: 's', primary: true }],
-    sub: 'Escalations appear in the notification centre.', onSubmit: (_k, v) => { a.esc = 1; db.NS.unshift({ t: 'Escalated · ' + a.n, w: 'just now', f: 'crit unread', d: 'app', v: id }); finish(a, 'Escalated · ' + v.r); } }); };
-  const assign = () => form({ title: 'Assign ' + a.n, fields: [
-    { id: 'o', label: 'Reviewer', type: 'select', options: db.STAFF.map((s) => s.n), required: true, value: a.o === 'Unassigned' ? 'momo' : a.o },
-    { id: 'due', label: 'Due date', type: 'date' }, { id: 'n', label: 'Note', type: 'textarea' }],
-    buttons: [{ label: 'Assign', key: 's', primary: true }], sub: 'Current owner: ' + a.o,
-    onSubmit: (_k, v) => { a.o = String(v.o); a.due = String(v.due || a.due); finish(a, 'Assigned to ' + v.o); } });
-  const addNote = () => form({ title: 'Add internal note', fields: [{ id: 'n', label: 'Note (staff only)', type: 'textarea', required: true }], buttons: [{ label: 'Save note', key: 's', primary: true }],
-    onSubmit: (_k, v) => { (a.notes as unknown[][]).push([session.view, v.n]); bump(); toast('Note saved'); } });
+    onSubmit: async (_k, v) => { await reviewBusinessApplication(a.id, 'rejected', String(v.r) + ': ' + String(v.m), !!v.f); await hydrateAdminState(); closeAll(); toast((v.f ? 'Rejected permanently · ' : 'Rejected · ') + a.n); } });
+
 
   const edit = can(...REQ.review), approveOk = can(...REQ.approve);
   const actions = closed ? null : (
     <>
       {!a.businessId && businessCandidates.length && edit ? <OutlineBtn onPress={guard(REQ.review, chooseBusiness)}>Link business</OutlineBtn> : null}
       {approveOk ? <OutlineBtn primary onPress={guard(REQ.approve, approve)}>Approve</OutlineBtn> : null}
-      {edit ? <OutlineBtn onPress={guard(REQ.review, requestInfo)}>Request info</OutlineBtn> : null}
       {approveOk ? <OutlineBtn onPress={guard(REQ.approve, reject)}>Reject</OutlineBtn> : null}
-      {edit ? <OutlineBtn onPress={guard(REQ.review, hold)}>{a.hold ? 'Resume' : 'Hold'}</OutlineBtn> : null}
-      {edit ? <OutlineBtn onPress={guard(REQ.review, assign)}>Assign</OutlineBtn> : null}
-      {edit ? <OutlineBtn onPress={guard(REQ.review, escalate)}>{a.esc ? 'Escalated' : 'Escalate'}</OutlineBtn> : null}
     </>
   );
   return (
@@ -139,12 +120,12 @@ export function ApplicationDrawer({ id, close }: { id: string; close: () => void
         <StatusPill label={status} tone={STATUS_TONE[db.STG[a.st] || a.s] || STATUS_TONE.pending} />
         <Txt size={10.6} mut>{a.id + ' · ' + a.s}</Txt>
       </View>
-      <KeyValue rows={[['Waiting', a.age + ' day' + (a.age === 1 ? '' : 's')], ['Owner', a.o], ['Due', a.due || 'Not set'], ['Documents', docsText(a) + ' verified'], ...(a.businessId ? [['Business ID', a.businessId] as [string,string]] : [])]} />
+      <KeyValue rows={[['Waiting', a.age + ' day' + (a.age === 1 ? '' : 's')], ['Documents', docsText(a) + ' verified'], ...(a.businessId ? [['Business ID', a.businessId] as [string,string]] : [])]} />
       <Section title="Business link">
         {a.businessId ? <Txt size={12} mut>Linked to the applicant-owned business shown above.</Txt> : businessesLoading ? <Txt size={12} mut>Loading applicant businesses…</Txt> : businessesError ? <Txt size={12} mut>{businessesError}</Txt> : businessCandidates.length ? <><Txt size={12} mut>Choose the exact business this application belongs to before approval.</Txt><ListRows rows={businessCandidates.map((b) => ({ key: b.business_id, main: b.business_name, sub: b.member_role, right: <AppIcon name="chevron-right" size={12} />, onPress: chooseBusiness }))} /></> : <Txt size={12} mut>No existing business membership was found. A new business workspace will be created only if this application is approved.</Txt>}
       </Section>
       <Section title="Requirements">
-        <ListRows empty={a.d.length === 0 ? "No document records are available from the server yet. Approval stays blocked until the required documents are submitted and verified." : "No documents."} rows={a.d.map((x, i) => ({ main: x[0], right: <View style={{ flexDirection: 'row', alignItems: 'center', gap: 4 }}><StatusPill label={x[1]} /><AppIcon name="chevron-right" size={12} /></View>, onPress: () => open('doc', id + ':' + i) }))} />
+        <ListRows empty={a.d.length === 0 ? "No document records are available from the server yet. Approval stays blocked until the required documents are submitted and verified." : "No documents."} rows={a.d.map((x) => ({ main: x[0], right: <View style={{ flexDirection: 'row', alignItems: 'center', gap: 4 }}><StatusPill label={x[1]} /></View> }))} />
       </Section>
       <Section title="Server-submitted documents">
         {docsLoading ? <Txt size={12} mut>Loading application documents…</Txt> : docsError ? <Txt size={12} color="#B42318">{docsError}</Txt> : serverDocs.length ? serverDocs.map((doc) => (
@@ -178,13 +159,6 @@ export function ApplicationDrawer({ id, close }: { id: string; close: () => void
             </ButtonRow>
           </Card>
         )) : <Txt size={12} mut>No application documents have been submitted. Approval remains blocked until the business licence, tax ID, and owner ID are uploaded and verified.</Txt>}
-      </Section>
-      <Section title="Review timeline">
-        <ListRows rows={a.log.slice().reverse().map((l) => ({ main: l[1], right: l[0] }))} />
-      </Section>
-      <Section title="Internal notes">
-        {(a.notes as unknown[][]).length ? (a.notes as unknown[][]).map((n, i) => <Txt key={i} size={12} style={{ marginBottom: 4 }}><Txt size={12} weight={600}>{String(n[0])}</Txt>{' · ' + String(n[1])}</Txt>) : <Txt size={12} mut>No notes yet.</Txt>}
-        {edit ? <ButtonRow><OutlineBtn onPress={guard(REQ.review, addNote)}>+ Add note</OutlineBtn></ButtonRow> : null}
       </Section>
       <Card style={{ marginVertical: 8 }}>
         <ListRows rows={[{ main: 'Open business profile', right: <AppIcon name="chevron-right" size={12} />, onPress: () => { closeAll(); nav.go('business'); } }]} />
