@@ -300,6 +300,38 @@ export function AccountDrawer({ id, close }: { id: string; close: () => void }) 
       },
     });
   };
+  const restrictGoodies = (kind: 'Suspension' | 'Ban') => {
+    const ban = kind === 'Ban';
+    if (!(ban ? canBan : canSusp)) { toast('You do not have permission for this action.'); return; }
+    if (!a.id) { toast('This customer is not linked to a Supabase user.'); return; }
+    form({
+      title: ban ? 'Permanently ban from Goodies · ' + a.n : 'Suspend Goodies access · ' + a.n,
+      sub: ban ? 'This permanently blocks this customer from Goodies only. Their Wantiss account, wallet, other features and existing order history remain.' : 'This pauses Goodies only. Their Wantiss account, wallet, other features and existing order history remain.',
+      fields: [
+        {id:'rs',label:'Reason',type:'select',options:RESTRICT_REASONS,required:true},
+        {id:'nt',label:ban?'Evidence and internal notes':'Internal notes (not shown to the customer)',type:'textarea',required:ban},
+        ...(!ban?[{id:'en',label:'End date (leave empty to keep suspended until lifted)',type:'date' as const}]:[]),
+        {id:'nf',label:'Notify the customer',type:'check',value:true},
+        ...(ban?[{id:'cf',label:'Type BAN to confirm',type:'text' as const,required:true}]:[]),
+      ],
+      buttons:[{label:ban?'Permanently ban from Goodies':'Suspend Goodies access',key:'s',primary:true}],
+      onSubmit:async(_k,v)=>{
+        if(!(ban?canBan:canSusp))return 'You do not have permission for this action.';
+        if(ban&&String(v.cf||'')!=='BAN')return 'Type BAN in capitals to confirm.';
+        const end=String(v.en||'');
+        if(!ban&&end&&end<TODAY)return 'The end date cannot be in the past.';
+        try{
+          await applyAccountRestrictionBackend({
+            userId:a.id,kind,scope:'Goodies',reason:String(v.rs),notes:String(v.nt||''),
+            startsAt:new Date().toISOString(),endsAt:!ban&&end?new Date(end+'T23:59:59.999Z').toISOString():null,
+            notifyUser:!!v.nf,
+          });
+          await hydrateAdminState();
+          done((ban?'Permanently banned from Goodies · ':'Goodies suspended · ')+a.n);
+        }catch(e){return e instanceof Error?e.message:'The Goodies restriction could not be saved.';}
+      },
+    });
+  };
   const pause = () => { if (s === 'Banned') { toast('This account is already banned'); return; } restrict('Suspension', false); };
   const ban = () => { if (s === 'Banned') { toast('This account is already banned'); return; } restrict('Ban', false); };
 
@@ -339,6 +371,8 @@ export function AccountDrawer({ id, close }: { id: string; close: () => void }) 
     <>
       {canSusp ? <OutlineBtn primary onPress={pause}>Pause account</OutlineBtn> : <Txt size={9.5} mut style={{ marginBottom: 6 }}>Pause: needs Customer support, Review staff or Super Admin</Txt>}
       {a.type !== 'Customer' && canSusp ? <OutlineBtn onPress={() => restrict('Suspension', true)}>Restrict one service</OutlineBtn> : null}
+      {a.type === 'Customer' && canSusp ? <OutlineBtn onPress={() => restrictGoodies('Suspension')}>Suspend Goodies access</OutlineBtn> : null}
+      {a.type === 'Customer' && canBan ? <OutlineBtn onPress={() => restrictGoodies('Ban')}>Permanently ban from Goodies</OutlineBtn> : null}
       {canBan ? <OutlineBtn onPress={ban}>Ban account</OutlineBtn> : <Txt size={9.5} mut style={{ marginBottom: 6 }}>Ban: Super Admin only</Txt>}
       {s === 'Banned' && canBan ? <OutlineBtn onPress={() => { markAppeal(a); done('Appeal logged. Status: In review'); }}>Mark appeal received</OutlineBtn> : null}
       {s === 'In review' && canBan ? <OutlineBtn onPress={uphold}>Uphold ban</OutlineBtn> : null}
