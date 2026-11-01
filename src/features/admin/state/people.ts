@@ -8,7 +8,7 @@ export const svcNames = () => db.SVC.map((s) => s[0]);
 export const accById = (id: string) => db.ACC.find((a) => a.id === id);
 export const accHist = (a: Account, by: string, action: string, txt: string, internal = '') =>
   a.hist.push({ when: TODAY, by, action, txt, internal });
-export const scopeTxt = (r: Restriction) => (r.scope === 'all' ? 'Entire Wantiss account' : r.scope);
+export const scopeTxt = (r: Restriction) => r.scope === 'all' ? 'Entire Wantiss account' : r.scope === 'GoodiesCustomer' ? 'Goodies customer access' : r.scope;
 
 export type AccStatus = 'Active' | 'Suspended' | 'Banned' | 'In review' | 'Restricted';
 export const accStatus = (a: Account): AccStatus =>
