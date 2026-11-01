@@ -87,6 +87,10 @@ export function ApplicationDrawer({ id, close }: { id: string; close: () => void
         catch (error) { return error instanceof Error ? error.message : 'The business could not be linked.'; }
       } });
   };
+  const startReview = () => form({ title: 'Start application review · ' + a.n, fields: [{ id: 'n', label: 'Internal review note (optional)', type: 'textarea' }], buttons: [{ label: 'Start review', key: 's', primary: true }],
+    onSubmit: async (_k, v) => { await reviewBusinessApplication(a.id, 'in_review', String(v.n || '')); await hydrateAdminState(); closeAll(); toast('Review started · ' + a.n); } });
+  const requestInfo = () => form({ title: 'Request information · ' + a.n, fields: [{ id: 'm', label: 'Message to applicant', type: 'textarea', required: true }], buttons: [{ label: 'Send request', key: 's', primary: true }], sub: 'The applicant can upload or replace documents and resubmit the application.',
+    onSubmit: async (_k, v) => { await reviewBusinessApplication(a.id, 'needs_info', String(v.m)); await hydrateAdminState(); closeAll(); toast('Information requested · ' + a.n); } });
   const approve = () => {
     if (!a.businessId && businessCandidates.length) { form({ title: 'Business link required', fields: [], buttons: [], sub: 'This applicant has multiple business memberships. Link this application to the correct business before approving it.' }); return; }
     const requiredDocs: [BusinessApplicationDocument['document_type'], string][] = [
@@ -110,6 +114,8 @@ export function ApplicationDrawer({ id, close }: { id: string; close: () => void
   const actions = closed ? null : (
     <>
       {!a.businessId && businessCandidates.length && edit ? <OutlineBtn onPress={guard(REQ.review, chooseBusiness)}>Link business</OutlineBtn> : null}
+      {(a.st === 0 || a.st === 2) && edit ? <OutlineBtn onPress={guard(REQ.review, startReview)}>Start review</OutlineBtn> : null}
+      {(a.st === 0 || a.st === 1) && edit ? <OutlineBtn onPress={guard(REQ.review, requestInfo)}>Request info</OutlineBtn> : null}
       {approveOk ? <OutlineBtn primary onPress={guard(REQ.approve, approve)}>Approve</OutlineBtn> : null}
       {approveOk ? <OutlineBtn onPress={guard(REQ.approve, reject)}>Reject</OutlineBtn> : null}
     </>
