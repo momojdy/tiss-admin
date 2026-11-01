@@ -36,7 +36,7 @@ export function NotificationsSheet({ onClose }: { onClose: () => void }) {
   }, []);
   const l = [...serverNotices, ...myNotices()].filter((n) => f === 'All' || (f === 'Unread' ? (n.serverId ? !n.read : isUnread(n)) : n.f.includes('mine') || n.to !== undefined || !!n.serverId));
   return (
-    <DrawerBody title="Notifications" onClose={onClose} actions={<OutlineBtn onPress={() => { markAllRead(); bump(); }}>Mark all read</OutlineBtn>}>
+    <DrawerBody title="Notifications" onClose={onClose} actions={<OutlineBtn onPress={() => { markAllRead(); void supabase.auth.getUser().then(({ data }) => data.user?.id ? supabase.from('notifications').update({ read: true }).eq('user_id', data.user.id).eq('notification_type', 'goodies_ingredient_request') : undefined); setServerNotices((rows) => rows.map((row) => ({ ...row, read: true, f: '' }))); bump(); }}>Mark all read</OutlineBtn>}>
       <Chips options={FILTERS} value={f} onChange={setF} />
       <ListRows empty="Nothing here." rows={l.map((n, i) => ({
         key: String(i) + n.t,
