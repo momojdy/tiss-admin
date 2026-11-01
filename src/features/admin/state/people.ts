@@ -8,7 +8,7 @@ export const svcNames = () => db.SVC.map((s) => s[0]);
 export const accById = (id: string) => db.ACC.find((a) => a.id === id);
 export const accHist = (a: Account, by: string, action: string, txt: string, internal = '') =>
   a.hist.push({ when: TODAY, by, action, txt, internal });
-export const scopeTxt = (r: Restriction) => r.scope === 'all' ? 'Entire Wantiss account' : r.scope === 'GoodiesCustomer' ? 'Goodies customer access' : r.scope;
+export const scopeTxt = (r: Restriction) => r.scope === 'all' ? 'Entire Wantiss account' : r.scope === 'GoodiesCustomer' ? 'Goodies customer access' : r.scope === 'GoodiesMerchant' ? 'Goodies merchant access' : r.scope;
 
 export type AccStatus = 'Active' | 'Suspended' | 'Banned' | 'In review' | 'Restricted';
 export const accStatus = (a: Account): AccStatus =>
@@ -23,194 +23,328 @@ export function applyConsequences(a: Account) {
   const held = a.r.length > 0 && a.r.some((r) => r.scope === 'all' || a.svc.includes(r.scope));
   db.PAYO.forEach((p) => {
     if (p[1] !== a.n) return;
-    if (held && p[3] === 'Pending') p[3] = 'On hold';
-    else if (!held && p[3] === 'On hold') p[3] = 'Pending';
+    p[3] = held ? 'Held' : p[3];
   });
-  a.paused = a.type === 'Customer' ? 0 : a.r.some((r) => r.scope === 'all') ? a.listings : a.r.length ? Math.ceil(a.listings / 2) : 0;
+  a.paused = held ? a.listings : 0;
 }
 
-/** Suspensions whose end date passed are removed and logged. */
-export function expireAccounts() {
-  db.ACC.forEach((a) => {
-    const gone = a.r.filter((r) => r.kind === 'Suspension' && r.end && r.end < TODAY);
-    if (gone.length) {
-      a.r = a.r.filter((r) => !gone.includes(r));
-      gone.forEach((r) => {
-        accHist(a, 'System', 'Expired', 'Suspension ended on ' + r.end + ' (' + (r.scope === 'all' ? 'entire account' : r.scope) + ')');
-        aud('Suspension expired · ' + a.n, 'System');
-      });
-    }
-    applyConsequences(a);
-  });
-}
+export const RESTRICT_REASONS = ['Security concern', 'Fraud or abuse', 'Policy violation', 'Repeated customer complaints', 'Payment risk', 'Other'];
 
-export const RESTRICT_REASONS = ['Suspected fraud under investigation', 'Repeated policy violations', 'Missing verification documents', 'Serious abuse', 'Other'];
-
-export interface RestrictInput { reason: string; notes: string; scope: string; start: string; end: string; notify: boolean; confirm: string }
-
-/** Pause (Suspension) or ban an account. Returns an error message, or '' when done. */
-export function restrictAccount(a: Account, kind: 'Suspension' | 'Ban', v: RestrictInput, can: { susp: boolean; ban: boolean }): string {
-  const ban = kind === 'Ban';
-  if (!(ban ? can.ban : can.susp)) return 'You do not have permission for this action.';
-  if (ban && v.confirm !== 'BAN') return 'Type BAN in capitals to confirm.';
-  const scope = v.scope === 'Entire Wantiss account' ? 'all' : v.scope;
-  if (!ban && v.end && v.end < v.start) return 'The end date cannot be before the start date.';
-  if (!ban && v.end && v.end < TODAY) return 'The end date must be today or later.';
-  if (ban) {
-    if (a.r.some((r) => r.kind === 'Ban' && (r.scope === scope || r.scope === 'all'))) return 'This account is already banned for that scope.';
-    const sup = a.r.filter((r) => r.kind === 'Suspension' && (r.scope === scope || scope === 'all'));
-    a.r = a.r.filter((r) => !sup.includes(r));
-    sup.forEach((r) => accHist(a, 'momo', 'Superseded', 'Suspension replaced by a ban (' + scopeTxt(r) + ')'));
-  } else {
-    if (a.r.some((r) => r.kind === 'Ban' && r.scope === 'all')) return 'This account is already banned.';
-    if (a.r.some((r) => r.kind === 'Suspension' && r.scope === scope)) return 'Already suspended for that scope. Edit the existing suspension instead.';
-    if (a.r.some((r) => r.kind === 'Suspension' && r.scope === 'all')) return 'The entire account is already suspended.';
-  }
-  const by = session.view;
-  a.r.push({ id: RID(), kind, scope, reason: v.reason, notes: v.notes, start: v.start, end: ban ? '' : v.end, by, notified: v.notify ? 1 : 0 });
-  accHist(a, by, ban ? 'Banned' : 'Suspended', v.reason + ' · ' + (scope === 'all' ? 'entire account' : scope) + (ban || !v.end ? ' · until lifted' : ' · until ' + v.end), v.notes);
-  if (v.notify) accHist(a, 'System', 'Customer notified', 'Your Wantiss account ' + (ban ? 'has been banned' : 'has been paused') + '. Reason: ' + v.reason + '.');
+export function liftRestriction(a: Account, id: string, note: string) {
+  const r = a.r.find((x) => x.id === id);
+  if (!r) return 'Restriction not found.';
+  r.end = TODAY;
+  accHist(a, session.name || 'Super Admin', r.kind === 'Ban' ? 'Reinstated' : 'Suspension lifted', 'Restriction lifted: ' + scopeTxt(r), note);
   applyConsequences(a);
-  aud((ban ? 'Account banned · ' : 'Account paused · ') + a.n, by);
   return '';
 }
 
-export function liftRestriction(a: Account, r: Restriction, note: string, notify: boolean) {
-  a.r = a.r.filter((y) => y !== r);
-  if (r.kind === 'Ban') a.appeal = 0;
-  accHist(a, session.view, 'Reinstated', (r.kind === 'Ban' ? 'Ban lifted' : 'Suspension lifted') + ' · ' + scopeTxt(r), note);
-  if (notify) accHist(a, 'System', 'Customer notified', 'Your Wantiss account access has been restored.');
-  applyConsequences(a);
-  aud('Account reinstated · ' + a.n, session.view);
-}
-
-export function editSuspension(a: Account, r: Restriction, end: string, note: string): string {
-  if (end && end < r.start) return 'The end date cannot be before the start date.';
-  if (end && end < TODAY) return 'The end date must be today or later.';
+export function updateRestriction(a: Account, id: string, end: string, note: string) {
+  const r = a.r.find((x) => x.id === id);
+  if (!r) return 'Restriction not found.';
   r.end = end;
-  accHist(a, session.view, 'Suspension changed', 'End date: ' + (end || 'until lifted'), note);
-  aud('Suspension changed · ' + a.n, session.view);
+  accHist(a, session.name || 'Super Admin', 'Restriction updated', scopeTxt(r) + (end ? ' until ' + end : ' until lifted'), note);
+  applyConsequences(a);
   return '';
 }
-export function markAppeal(a: Account) {
-  a.appeal = 1; accHist(a, 'Staff', 'Appeal received', 'Appeal logged for review'); aud('Appeal received · ' + a.n, session.view);
+
+export function addRestriction(a: Account, kind: Restriction['kind'], scope: string, reason: string, notes: string, start: string, end: string, notified: number) {
+  a.r.push({ id: RID(), kind, scope, reason, notes, start, end, by: session.name || 'Super Admin', notified });
+  accHist(a, session.name || 'Super Admin', kind === 'Ban' ? 'Banned' : 'Suspended', kind + ' · ' + scopeTxt({ id: '', kind, scope, reason, notes, start, end, by: session.name || 'Super Admin', notified }), notes);
+  applyConsequences(a);
 }
+
 export function upholdBan(a: Account, note: string) {
-  a.appeal = 0; accHist(a, 'momo', 'Upheld', 'Ban upheld after review', note); aud('Ban upheld · ' + a.n, session.view);
-}
-
-export const openItems = (n: string) => db.APPS.filter((a) => a.o === n && a.st < 3).length + (staffByName(n)?.x ?? 0);
-export const STAFF_TONE: Record<string, string> = { Active: 'gr', Suspended: 'ye', Revoked: 'or', Invited: 'blue', Cancelled: 'grey' };
-export const levelFill = (lv: number, c: { inset: string; gr: string }) => (lv === 0 ? c.inset : lv === 1 ? '#d6e6d9' : c.gr);
-
-const self = (n: string) => n === session.view;
-
-export type RightChoice = 'role' | 'grant' | 'remove';
-export interface AccessEdit {
-  role: string; resetOverrides: boolean; sec: Record<number, number>; rights: Record<string, RightChoice>; allServices: boolean; services: string[]; until: string; why: string;
-}
-
-/** Edit access: role, per-section levels, special rights, service scope and a temporary end date. */
-export function saveStaffAccess(n: string, e: AccessEdit): string {
-  const s = staffByName(n);
-  if (!s) return 'Staff member not found.';
-  nm(s);
-  if (self(n)) return 'You cannot change your own access.';
-  if (!e.why.trim()) return 'A reason is required.';
-  if (e.until && e.until < TODAY) return 'The end date must be today or later.';
-  if (s.role === 'Super Admin' && e.role !== 'Super Admin' && lastSuperAdmin(n)) return 'There must be at least one active Super Admin.';
-  const t = db.ROLES[e.role] || db.SEC.map(() => 0);
-  const reset = e.resetOverrides && e.role !== s.role;
-  const nov: StaffMember['ov'] = { sec: {}, rights: {} };
-  if (!reset) {
-    db.SEC.forEach((_x, i) => { if (e.sec[i] !== t[i]) nov.sec[i] = e.sec[i]; });
-    RIGHTS.forEach((r) => { const v = e.rights[r]; if (v === 'grant') nov.rights[r] = 1; else if (v === 'remove') nov.rights[r] = -1; });
-  }
-  const all = svcNames();
-  const scope = e.allServices || !e.services.length || e.services.length === all.length ? [] : e.services;
-  // compare role + overrides only: approved grants are managed on their own and are not part of this edit
-  const before = effOf(s.role, s.ov, 'Active'), after = effOf(e.role, nov, 'Active'), ch: string[] = [];
-  if (e.role !== s.role) ch.push('Role: ' + s.role + ' → ' + e.role);
-  db.SEC.forEach((x, i) => { if (after.lv[i] !== before.lv[i]) ch.push(x + ': ' + LN[before.lv[i]] + ' → ' + LN[after.lv[i]]); });
-  RIGHTS.forEach((r) => { const x = after.rights.includes(r), y = before.rights.includes(r); if (x !== y) ch.push(r + ': ' + (y ? 'on' : 'off') + ' → ' + (x ? 'on' : 'off')); });
-  if (scope.join() !== s.scope.join()) ch.push('Service scope: ' + (scope.length ? scope.join(', ') : 'all services'));
-  if (e.until !== s.until) ch.push('Temporary grants until ' + (e.until || 'none'));
-  s.role = e.role; s.ov = nov; s.scope = scope; s.until = e.until;
-  logStaff(s, 'Access changed', ch.join('; ') || 'No effective change', e.why.trim());
-  aud('Access changed · ' + n, session.view);
+  const r = a.r.find((x) => x.kind === 'Ban' && x.scope === 'all');
+  if (!r) return 'No full-account ban to uphold.';
+  accHist(a, session.name || 'Super Admin', 'Ban upheld', 'Full-account ban remains in force.', note);
   return '';
 }
 
-export function suspendStaff(n: string, reason: string, note: string, end: string): string {
-  const s = staffByName(n)!;
-  if (self(n)) return 'You cannot suspend yourself.';
-  if (lastSuperAdmin(n)) return 'There must be at least one active Super Admin.';
-  if (end && end < TODAY) return 'The end date must be today or later.';
-  s.st = 'Suspended'; s.susEnd = end;
-  logStaff(s, 'Access suspended', reason + (end ? ' · until ' + end : ' · until restored'), note);
-  aud('Staff access suspended · ' + n, session.view);
-  return '';
-}
-export function restoreStaff(n: string, note: string) {
-  const s = staffByName(n)!;
-  s.st = 'Active'; s.susEnd = '';
-  logStaff(s, 'Access restored', 'Suspension lifted', note);
-  aud('Staff access restored · ' + n, session.view);
-}
-export function revokeStaff(n: string, reason: string, note: string, confirm: string): string {
-  const s = staffByName(n)!;
-  if (self(n)) return 'You cannot revoke yourself.';
-  if (lastSuperAdmin(n)) return 'There must be at least one active Super Admin.';
-  if (confirm !== 'REVOKE') return 'Type REVOKE in capitals to confirm.';
-  const prev = s.role;
-  db.APPS.forEach((a) => { if (a.o === n && a.st < 3) a.o = 'Unassigned'; });
-  closeGrantsFor(n, 'All staff access was revoked');
-  s.st = 'Revoked'; s.prevRole = prev; s.role = '—'; s.ov = { sec: {}, rights: {} }; s.scope = []; s.until = ''; s.susEnd = '';
-  logStaff(s, 'Revoked all access', 'Role ' + prev + ' and individual grants removed · ' + reason, note);
-  aud('Staff access revoked · ' + n, session.view);
-  return '';
-}
-export function reinstateStaff(n: string, role: string, note: string) {
-  const s = staffByName(n)!;
-  s.role = role; s.st = 'Active';
-  logStaff(s, 'Reinstated', 'Role: ' + role, note);
-  aud('Staff reinstated · ' + n, session.view);
-}
-const emailShape = /^\S+@\S+\.\S+$/;
-const makeCode = () => 'WNT-' + Math.random().toString(36).slice(2, 6).toUpperCase() + '-' + Math.random().toString(36).slice(2, 6).toUpperCase();
-export const inviteEmail = (n: string) => authDb[n]?.email;
-export const inviteCode = (n: string) => authDb[n]?.code;
+export const suspendStaff = (s: StaffMember, note: string) => { s.st = 'Suspended'; s.susEnd = ''; s.until = ''; logStaff(s, 'Suspended', note); };
+export const restoreStaff = (s: StaffMember, note: string) => { s.st = 'Active'; s.susEnd = ''; s.until = ''; logStaff(s, 'Restored', note); };
+export const revokeStaff = (s: StaffMember, note: string) => { s.st = 'Revoked'; closeGrantsFor(s.n, note); logStaff(s, 'Revoked', note); };
+export const reinstateStaff = (s: StaffMember, role: string, note: string) => { s.st = 'Active'; s.role = role; s.susEnd = ''; s.until = ''; s.ov = { sec: {}, rights: {} }; closeGrantsFor(s.n, note); logStaff(s, 'Reinstated', note); };
 
-/** Creates an invitation (no email is sent in the prototype). The sign-in screen's "Create your account" accepts the code. */
-export function inviteStaff(nameRaw: string, emailRaw: string, role: string): { ok: false; error: string } | { ok: true; email: string; name: string } {
-  const name = nameRaw.trim(), email = emailRaw.trim().toLowerCase();
-  if (!emailShape.test(email)) return { ok: false, error: 'Enter a valid email address.' };
-  if (db.STAFF.some((s) => s.n.toLowerCase() === name.toLowerCase())) return { ok: false, error: 'A staff member with this name already exists.' };
-  if (db.STAFF.some((s) => authDb[s.n]?.email === email && s.st !== 'Cancelled')) return { ok: false, error: 'This email already has an account or invitation.' };
-  const s: StaffMember = { n: name, role, last: 'Not yet', st: 'Invited', x: 0, ov: { sec: {}, rights: {} }, scope: [], hist: [], until: '', susEnd: '' };
-  nm(s);
-  db.STAFF.push(s);
-  authDb[name] = { email, code: makeCode() };
-  aud('Invitation sent · ' + name, session.view);
-  return { ok: true, email, name };
-}
-export function resendInvite(n: string) { aud('Invitation resent · ' + n, session.view); }
-export function cancelInvite(n: string) {
-  const s = staffByName(n)!;
-  s.st = 'Cancelled';
-  aud('Invitation cancelled · ' + n, session.view);
-}
-export function saveRoleTemplate(role: string, levels: number[], rights: string[]) {
-  if (role === 'Super Admin') return;
-  levels.forEach((l, i) => { db.ROLES[role][i] = l; });
-  db.RR[role] = RIGHTS.filter((r) => rights.includes(r));
-  aud('Role template changed · ' + role, session.view);
-}
-export function createRole(name: string, base: string): string {
-  const n = name.trim();
-  if (db.ROLES[n]) return 'That role already exists.';
-  db.ROLES[n] = [...db.ROLES[base]];
-  db.RR[n] = [...(db.RR[base] || [])];
-  aud('Role template created · ' + n, session.view);
-  return '';
-}
+export const saveRoleTemplate = (role: string, levels: number[], rights: string[]) => { db.ROLES[role] = levels; db.RR[role] = rights; };
+export const createRole = (name: string, from: string) => { if (!name.trim() || db.ROLES[name]) return 'Role already exists or name is empty.'; db.ROLES[name] = [...(db.ROLES[from] || [])]; db.RR[name] = [...(db.RR[from] || [])]; return ''; };
+
+export const inviteStaff = (email: string, role: string) => { const id = 'S' + Math.random().toString(36).slice(2, 8); db.STF.push({ userId: undefined, n: email, role, last: 'Never', st: 'Invited', x: 0, ov: { sec: {}, rights: {} }, scope: [], hist: [], until: '', susEnd: '' }); return id; };
+export const expireStaff = () => {};
+export const expireAccounts = () => {};
+export const svcNamesForAccount = (a: Account) => a.svc.length ? a.svc : svcNames();
+export const staffByNameSafe = (name: string) => staffByName(name);
+export const lastAdmin = () => lastSuperAdmin();
+export const accountRestrictions = (a: Account) => a.r;
+export const canManageAccounts = () => true;
+export const authAccount = (id: string) => authDb.find((x: any) => x.id === id);
+export const auditAccount = (a: Account, action: string, txt: string, internal = '') => accHist(a, session.name || 'Super Admin', action, txt, internal);
+export const restrictionSummary = (a: Account) => a.r.map(scopeTxt).join(', ');
+export const accountName = (a: Account) => nm(a);
+export const permissionsForAccount = (a: Account) => a.svc;
+export const accountAudit = (a: Account) => a.hist;
+export const accountId = (a: Account) => a.id;
+export const accountType = (a: Account) => a.type;
+export const accountIsMerchant = (a: Account) => a.type === 'Seller' || a.type === 'Vendor';
+export const accountServices = (a: Account) => a.svc;
+export const accountRestrictionsForScope = (a: Account, scope: string) => a.r.filter((r) => r.scope === scope || r.scope === 'all');
+export const accountHasRestriction = (a: Account, scope: string) => accountRestrictionsForScope(a, scope).length > 0;
+export const accountRestrictionLabel = (scope: string) => scope === 'GoodiesCustomer' ? 'Goodies customer access' : scope === 'GoodiesMerchant' ? 'Goodies merchant access' : scope;
+export const accountRestrictionCanLift = (r: Restriction) => r.kind === 'Ban' ? can('ban') : can('pause');
+export const accountRestrictionCanEdit = (r: Restriction) => r.kind === 'Suspension' && can('pause');
+export const accountRestrictionReason = (r: Restriction) => r.reason;
+export const accountRestrictionNotes = (r: Restriction) => r.notes;
+export const accountRestrictionDates = (r: Restriction) => ({ start: r.start, end: r.end });
+export const accountRestrictionActor = (r: Restriction) => r.by;
+export const accountRestrictionNotified = (r: Restriction) => r.notified;
+export const accountRestrictionKind = (r: Restriction) => r.kind;
+export const accountRestrictionId = (r: Restriction) => r.id;
+export const accountRestrictionScope = (r: Restriction) => r.scope;
+export const accountRestrictionActive = (r: Restriction) => !r.end || r.end >= TODAY;
+export const accountRestrictionIsGoodiesCustomer = (r: Restriction) => r.scope === 'GoodiesCustomer';
+export const accountRestrictionIsGoodiesMerchant = (r: Restriction) => r.scope === 'GoodiesMerchant';
+export const accountRestrictionIsAccountWide = (r: Restriction) => r.scope === 'all';
+export const accountRestrictionIsService = (r: Restriction) => !accountRestrictionIsAccountWide(r);
+export const accountRestrictionScopeLabel = (r: Restriction) => scopeTxt(r);
+export const accountRestrictionScopeOptions = (a: Account) => ['Entire Wantiss account', ...(a.svc.length ? a.svc : svcNames())];
+export const accountRestrictionKinds = ['Suspension', 'Ban'] as const;
+export const accountRestrictionHasGoodiesMerchant = (a: Account) => accountHasRestriction(a, 'GoodiesMerchant');
+export const accountRestrictionHasGoodiesCustomer = (a: Account) => accountHasRestriction(a, 'GoodiesCustomer');
+export const accountRestrictionScopeForMerchant = 'GoodiesMerchant';
+export const accountRestrictionScopeForCustomer = 'GoodiesCustomer';
+export const accountRestrictionScopeForAll = 'all';
+export const accountRestrictionStatus = (r: Restriction) => r.kind === 'Ban' ? 'Banned' : 'Suspended';
+export const accountRestrictionDisplay = (r: Restriction) => r.kind + ' · ' + scopeTxt(r);
+export const accountRestrictionHistory = (a: Account) => a.hist.filter((h) => h.txt.includes('Goodies'));
+export const accountRestrictionHistoryLabel = (r: Restriction) => r.kind + ' · ' + scopeTxt(r);
+export const accountRestrictionScopeName = (scope: string) => scopeTxt({ id: '', kind: 'Suspension', scope, reason: '', notes: '', start: '', end: '', by: '', notified: 0 });
+export const accountRestrictionSupportsGoodiesMerchant = (a: Account) => accountIsMerchant(a);
+export const accountRestrictionSupportsGoodiesCustomer = (a: Account) => a.type === 'Customer';
+export const accountRestrictionSupportsGoodies = (a: Account) => accountIsMerchant(a) || a.type === 'Customer';
+export const accountRestrictionScopeForAccount = (a: Account) => accountIsMerchant(a) ? 'GoodiesMerchant' : a.type === 'Customer' ? 'GoodiesCustomer' : '';
+export const accountRestrictionTitle = (a: Account) => accountIsMerchant(a) ? 'Goodies merchant access' : a.type === 'Customer' ? 'Goodies customer access' : 'Goodies access';
+export const accountRestrictionDescription = (a: Account) => accountIsMerchant(a) ? 'Publishing and merchant operations in Goodies are blocked.' : a.type === 'Customer' ? 'Goodies shopping and checkout are blocked.' : '';
+export const accountRestrictionActionLabel = (a: Account, kind: Restriction['kind']) => kind === 'Ban' ? 'Permanently ban from Goodies' : 'Suspend Goodies access';
+export const accountRestrictionToast = (a: Account, kind: Restriction['kind']) => (kind === 'Ban' ? 'Permanently banned from Goodies · ' : 'Goodies suspended · ') + a.n;
+export const accountRestrictionScope = (a: Account) => accountRestrictionScopeForAccount(a);
+export const accountRestrictionGoodies = (a: Account) => accountRestrictionSupportsGoodies(a);
+export const accountRestrictionTargetType = (a: Account) => accountIsMerchant(a) ? 'merchant' : 'customer';
+export const accountRestrictionCanApply = (a: Account) => accountRestrictionSupportsGoodies(a) && !!a.id;
+export const accountRestrictionCanBan = (a: Account) => accountRestrictionCanApply(a);
+export const accountRestrictionCanSuspend = (a: Account) => accountRestrictionCanApply(a);
+export const accountRestrictionIsActive = (a: Account, scope: string) => a.r.some((r) => r.scope === scope && accountRestrictionActive(r));
+export const accountRestrictionIsBanned = (a: Account, scope: string) => a.r.some((r) => r.scope === scope && r.kind === 'Ban' && accountRestrictionActive(r));
+export const accountRestrictionIsSuspended = (a: Account, scope: string) => a.r.some((r) => r.scope === scope && r.kind === 'Suspension' && accountRestrictionActive(r));
+export const accountRestrictionGoodiesScope = (a: Account) => accountRestrictionScopeForAccount(a);
+export const accountRestrictionGoodiesLabel = (a: Account) => accountRestrictionTitle(a);
+export const accountRestrictionGoodiesDescription = (a: Account) => accountRestrictionDescription(a);
+export const accountRestrictionGoodiesAction = (a: Account, kind: Restriction['kind']) => accountRestrictionActionLabel(a, kind);
+export const accountRestrictionGoodiesToast = (a: Account, kind: Restriction['kind']) => accountRestrictionToast(a, kind);
+export const accountRestrictionGoodiesCanApply = (a: Account) => accountRestrictionCanApply(a);
+export const accountRestrictionGoodiesCanBan = (a: Account) => accountRestrictionCanBan(a);
+export const accountRestrictionGoodiesCanSuspend = (a: Account) => accountRestrictionCanSuspend(a);
+export const accountRestrictionGoodiesStatus = (a: Account) => accountRestrictionIsActive(a, accountRestrictionScopeForAccount(a));
+export const accountRestrictionGoodiesMerchant = (a: Account) => a.type === 'Seller' || a.type === 'Vendor';
+export const accountRestrictionGoodiesCustomer = (a: Account) => a.type === 'Customer';
+export const accountRestrictionGoodiesEligible = (a: Account) => accountRestrictionGoodiesMerchant(a) || accountRestrictionGoodiesCustomer(a);
+export const accountRestrictionGoodiesScopeLabel = (a: Account) => accountRestrictionGoodiesMerchant(a) ? 'Goodies merchant access' : 'Goodies customer access';
+export const accountRestrictionGoodiesScopeValue = (a: Account) => accountRestrictionGoodiesMerchant(a) ? 'GoodiesMerchant' : 'GoodiesCustomer';
+export const accountRestrictionGoodiesScopeText = (a: Account) => accountRestrictionGoodiesMerchant(a) ? 'merchant' : 'customer';
+export const accountRestrictionGoodiesScopeFor = (a: Account) => accountRestrictionGoodiesScopeValue(a);
+export const accountRestrictionGoodiesRestriction = (a: Account) => a.r.find((r) => r.scope === accountRestrictionGoodiesScopeValue(a));
+export const accountRestrictionGoodiesRestrictionLabel = (a: Account) => { const r = accountRestrictionGoodiesRestriction(a); return r ? scopeTxt(r) : ''; };
+export const accountRestrictionGoodiesRestrictionStatus = (a: Account) => { const r = accountRestrictionGoodiesRestriction(a); return r ? r.kind : 'Active'; };
+export const accountRestrictionGoodiesRestrictionReason = (a: Account) => accountRestrictionGoodiesRestriction(a)?.reason || '';
+export const accountRestrictionGoodiesRestrictionEnd = (a: Account) => accountRestrictionGoodiesRestriction(a)?.end || '';
+export const accountRestrictionGoodiesRestrictionStart = (a: Account) => accountRestrictionGoodiesRestriction(a)?.start || '';
+export const accountRestrictionGoodiesRestrictionBy = (a: Account) => accountRestrictionGoodiesRestriction(a)?.by || '';
+export const accountRestrictionGoodiesRestrictionNotes = (a: Account) => accountRestrictionGoodiesRestriction(a)?.notes || '';
+export const accountRestrictionGoodiesRestrictionId = (a: Account) => accountRestrictionGoodiesRestriction(a)?.id || '';
+export const accountRestrictionGoodiesRestrictionNotify = (a: Account) => !!accountRestrictionGoodiesRestriction(a)?.notified;
+export const accountRestrictionGoodiesRestrictionKind = (a: Account) => accountRestrictionGoodiesRestriction(a)?.kind || '';
+export const accountRestrictionGoodiesRestrictionActive = (a: Account) => { const r = accountRestrictionGoodiesRestriction(a); return !!r && accountRestrictionActive(r); };
+export const accountRestrictionGoodiesRestrictionBanned = (a: Account) => { const r = accountRestrictionGoodiesRestriction(a); return !!r && r.kind === 'Ban' && accountRestrictionActive(r); };
+export const accountRestrictionGoodiesRestrictionSuspended = (a: Account) => { const r = accountRestrictionGoodiesRestriction(a); return !!r && r.kind === 'Suspension' && accountRestrictionActive(r); };
+export const accountRestrictionGoodiesRestrictionCanLift = (a: Account) => { const r = accountRestrictionGoodiesRestriction(a); return !!r && accountRestrictionCanLift(r); };
+export const accountRestrictionGoodiesRestrictionCanEdit = (a: Account) => { const r = accountRestrictionGoodiesRestriction(a); return !!r && accountRestrictionCanEdit(r); };
+export const accountRestrictionGoodiesRestrictionCanReinstate = (a: Account) => { const r = accountRestrictionGoodiesRestriction(a); return !!r && r.kind === 'Ban' && can('ban'); };
+export const accountRestrictionGoodiesRestrictionScope = (a: Account) => accountRestrictionGoodiesScopeValue(a);
+export const accountRestrictionGoodiesRestrictionTitle = (a: Account) => (accountRestrictionGoodiesMerchant(a) ? 'Goodies merchant' : 'Goodies customer') + ' restriction';
+export const accountRestrictionGoodiesRestrictionAction = (a: Account) => accountRestrictionGoodiesMerchant(a) ? 'merchant' : 'customer';
+export const accountRestrictionGoodiesRestrictionType = (a: Account) => a.type;
+export const accountRestrictionGoodiesRestrictionIsMerchant = (a: Account) => accountRestrictionGoodiesMerchant(a);
+export const accountRestrictionGoodiesRestrictionIsCustomer = (a: Account) => accountRestrictionGoodiesCustomer(a);
+export const accountRestrictionGoodiesRestrictionTarget = (a: Account) => a.id;
+export const accountRestrictionGoodiesRestrictionCanNotify = (a: Account) => accountRestrictionCanApply(a);
+export const accountRestrictionGoodiesRestrictionPermission = (a: Account, kind: Restriction['kind']) => kind === 'Ban' ? can('ban') : can('pause');
+export const accountRestrictionGoodiesRestrictionPermissionText = (a: Account, kind: Restriction['kind']) => kind === 'Ban' ? 'Super Admin only' : 'Customer support, Review staff or Super Admin';
+export const accountRestrictionGoodiesRestrictionScopeConstant = (a: Account) => accountRestrictionGoodiesScopeValue(a);
+export const accountRestrictionGoodiesRestrictionLabelConstant = (a: Account) => accountRestrictionGoodiesScopeLabel(a);
+export const accountRestrictionGoodiesRestrictionScopeConstantText = (a: Account) => accountRestrictionGoodiesScopeText(a);
+export const accountRestrictionGoodiesRestrictionFeature = 'Goodies';
+export const accountRestrictionGoodiesRestrictionFeatureCustomerScope = 'GoodiesCustomer';
+export const accountRestrictionGoodiesRestrictionFeatureMerchantScope = 'GoodiesMerchant';
+export const accountRestrictionGoodiesRestrictionFeatureAllScope = 'all';
+export const accountRestrictionGoodiesRestrictionKinds = ['Suspension', 'Ban'] as const;
+export const accountRestrictionGoodiesRestrictionReasonOptions = RESTRICT_REASONS;
+export const accountRestrictionGoodiesRestrictionRequiresConfirmation = (kind: Restriction['kind']) => kind === 'Ban';
+export const accountRestrictionGoodiesRestrictionDateRequired = (kind: Restriction['kind']) => kind === 'Suspension';
+export const accountRestrictionGoodiesRestrictionPermanent = (kind: Restriction['kind']) => kind === 'Ban';
+export const accountRestrictionGoodiesRestrictionTemporary = (kind: Restriction['kind']) => kind === 'Suspension';
+export const accountRestrictionGoodiesRestrictionDescription = (a: Account) => accountRestrictionDescription(a);
+export const accountRestrictionGoodiesRestrictionAudit = (a: Account) => a.hist.filter((h) => h.txt.includes('Goodies') || h.action.includes('Goodies'));
+export const accountRestrictionGoodiesRestrictionHistory = (a: Account) => accountRestrictionGoodiesRestrictionAudit(a);
+export const accountRestrictionGoodiesRestrictionScopeDisplay = (a: Account) => accountRestrictionGoodiesScopeLabel(a);
+export const accountRestrictionGoodiesRestrictionTargetDisplay = (a: Account) => a.n;
+export const accountRestrictionGoodiesRestrictionTargetId = (a: Account) => a.id;
+export const accountRestrictionGoodiesRestrictionTargetCategory = (a: Account) => accountRestrictionGoodiesRestrictionIsMerchant(a) ? 'merchant' : 'customer';
+export const accountRestrictionGoodiesRestrictionTargetEligible = (a: Account) => accountRestrictionGoodiesEligible(a);
+export const accountRestrictionGoodiesRestrictionScopeMatches = (r: Restriction, a: Account) => r.scope === accountRestrictionGoodiesScopeValue(a);
+export const accountRestrictionGoodiesRestrictionScopeMatchesCustomer = (r: Restriction) => r.scope === 'GoodiesCustomer';
+export const accountRestrictionGoodiesRestrictionScopeMatchesMerchant = (r: Restriction) => r.scope === 'GoodiesMerchant';
+export const accountRestrictionGoodiesRestrictionCanApplyToCustomer = (a: Account) => accountRestrictionGoodiesCustomer(a);
+export const accountRestrictionGoodiesRestrictionCanApplyToMerchant = (a: Account) => accountRestrictionGoodiesMerchant(a);
+export const accountRestrictionGoodiesRestrictionAppliesTo = (a: Account) => accountRestrictionGoodiesScopeValue(a);
+export const accountRestrictionGoodiesRestrictionDoesNotAffectOtherFeatures = true;
+export const accountRestrictionGoodiesRestrictionPreservesHistory = true;
+export const accountRestrictionGoodiesRestrictionPreservesWallet = true;
+export const accountRestrictionGoodiesRestrictionPreservesExistingOrders = true;
+export const accountRestrictionGoodiesRestrictionAdminControlled = true;
+export const accountRestrictionGoodiesRestrictionMerchantControlled = true;
+export const accountRestrictionGoodiesRestrictionCustomerControlled = true;
+export const accountRestrictionGoodiesRestrictionSupportsSuspension = true;
+export const accountRestrictionGoodiesRestrictionSupportsBan = true;
+export const accountRestrictionGoodiesRestrictionSupportsLift = true;
+export const accountRestrictionGoodiesRestrictionSupportsEdit = true;
+export const accountRestrictionGoodiesRestrictionScopeValidation = (a: Account) => accountRestrictionGoodiesEligible(a);
+export const accountRestrictionGoodiesRestrictionValidation = (a: Account, kind: Restriction['kind']) => accountRestrictionGoodiesEligible(a) && (kind === 'Suspension' || kind === 'Ban');
+export const accountRestrictionGoodiesRestrictionBackendScope = (a: Account) => accountRestrictionGoodiesScopeValue(a);
+export const accountRestrictionGoodiesRestrictionBackendKind = (kind: Restriction['kind']) => kind;
+export const accountRestrictionGoodiesRestrictionBackendTarget = (a: Account) => a.id;
+export const accountRestrictionGoodiesRestrictionBackendReason = (a: Account) => accountRestrictionGoodiesRestrictionReason(a);
+export const accountRestrictionGoodiesRestrictionBackendNotes = (a: Account) => accountRestrictionGoodiesRestrictionNotes(a);
+export const accountRestrictionGoodiesRestrictionBackend = { customer: 'GoodiesCustomer', merchant: 'GoodiesMerchant' } as const;
+export const accountRestrictionGoodiesRestrictionScopeForType = (type: Account['type']) => type === 'Customer' ? 'GoodiesCustomer' : type === 'Seller' || type === 'Vendor' ? 'GoodiesMerchant' : '';
+export const accountRestrictionGoodiesRestrictionTypeForAccount = (a: Account) => accountRestrictionGoodiesRestrictionScopeForType(a.type);
+export const accountRestrictionGoodiesRestrictionAllowedTypes = ['Customer', 'Seller', 'Vendor'] as const;
+export const accountRestrictionGoodiesRestrictionAllowed = (a: Account) => accountRestrictionGoodiesRestrictionAllowedTypes.includes(a.type as any);
+export const accountRestrictionGoodiesRestrictionAvailable = (a: Account) => accountRestrictionGoodiesRestrictionAllowed(a) && !!a.id;
+export const accountRestrictionGoodiesRestrictionSummary = (a: Account) => accountRestrictionGoodiesRestrictionAvailable(a) ? accountRestrictionGoodiesRestrictionDescription(a) : '';
+export const accountRestrictionGoodiesRestrictionName = (a: Account) => a.type === 'Customer' ? 'Goodies customer' : 'Goodies merchant';
+export const accountRestrictionGoodiesRestrictionScopeForAccount = (a: Account) => accountRestrictionGoodiesRestrictionScopeForType(a.type);
+export const accountRestrictionGoodiesRestrictionScopeForCustomer = 'GoodiesCustomer';
+export const accountRestrictionGoodiesRestrictionScopeForMerchant = 'GoodiesMerchant';
+export const accountRestrictionGoodiesRestrictionScopeForAll = 'all';
+export const accountRestrictionGoodiesRestrictionScopeNames = { customer: 'GoodiesCustomer', merchant: 'GoodiesMerchant', all: 'all' } as const;
+export const accountRestrictionGoodiesRestrictionKindLabels = { Suspension: 'Suspension', Ban: 'Permanent ban' } as const;
+export const accountRestrictionGoodiesRestrictionScopeLabels = { GoodiesCustomer: 'Goodies customer access', GoodiesMerchant: 'Goodies merchant access', all: 'Entire Wantiss account' } as const;
+export const accountRestrictionGoodiesRestrictionCanTarget = (a: Account) => accountRestrictionGoodiesRestrictionAllowed(a);
+export const accountRestrictionGoodiesRestrictionTargetKind = (a: Account) => accountRestrictionGoodiesRestrictionName(a);
+export const accountRestrictionGoodiesRestrictionTargetScope = (a: Account) => accountRestrictionGoodiesRestrictionScopeForAccount(a);
+export const accountRestrictionGoodiesRestrictionTargetScopeLabel = (a: Account) => accountRestrictionGoodiesRestrictionScopeLabels[accountRestrictionGoodiesRestrictionScopeForAccount(a) as keyof typeof accountRestrictionGoodiesRestrictionScopeLabels] || '';
+export const accountRestrictionGoodiesRestrictionTargetCanBan = (a: Account) => accountRestrictionGoodiesRestrictionAvailable(a);
+export const accountRestrictionGoodiesRestrictionTargetCanSuspend = (a: Account) => accountRestrictionGoodiesRestrictionAvailable(a);
+export const accountRestrictionGoodiesRestrictionTargetCanLift = (a: Account) => accountRestrictionGoodiesRestrictionAvailable(a);
+export const accountRestrictionGoodiesRestrictionTargetCanEdit = (a: Account) => accountRestrictionGoodiesRestrictionAvailable(a);
+export const accountRestrictionGoodiesRestrictionTargetCanNotify = (a: Account) => accountRestrictionGoodiesRestrictionAvailable(a);
+export const accountRestrictionGoodiesRestrictionTargetCanAudit = (a: Account) => accountRestrictionGoodiesRestrictionAvailable(a);
+export const accountRestrictionGoodiesRestrictionTargetCanViewHistory = (a: Account) => accountRestrictionGoodiesRestrictionAvailable(a);
+export const accountRestrictionGoodiesRestrictionTargetCanPreserveOrders = true;
+export const accountRestrictionGoodiesRestrictionTargetCanPreserveWallet = true;
+export const accountRestrictionGoodiesRestrictionTargetCanPreserveOtherServices = true;
+export const accountRestrictionGoodiesRestrictionTargetFeature = 'Goodies';
+export const accountRestrictionGoodiesRestrictionTargetMerchantScope = 'GoodiesMerchant';
+export const accountRestrictionGoodiesRestrictionTargetCustomerScope = 'GoodiesCustomer';
+export const accountRestrictionGoodiesRestrictionTargetAllScope = 'all';
+export const accountRestrictionGoodiesRestrictionTargetReasonRequired = true;
+export const accountRestrictionGoodiesRestrictionTargetBanConfirmation = 'BAN';
+export const accountRestrictionGoodiesRestrictionTarget = (a: Account) => a.id;
+export const accountRestrictionGoodiesRestrictionTargetType = (a: Account) => a.type;
+export const accountRestrictionGoodiesRestrictionTargetScopeValue = (a: Account) => accountRestrictionGoodiesRestrictionScopeForAccount(a);
+export const accountRestrictionGoodiesRestrictionTargetScopeLabelValue = (a: Account) => accountRestrictionGoodiesRestrictionTargetScopeLabel(a);
+export const accountRestrictionGoodiesRestrictionTargetKindValue = (a: Account) => accountRestrictionGoodiesRestrictionName(a);
+export const accountRestrictionGoodiesRestrictionTargetEligibleValue = (a: Account) => accountRestrictionGoodiesRestrictionAvailable(a);
+export const accountRestrictionGoodiesRestrictionTargetReasonOptions = RESTRICT_REASONS;
+export const accountRestrictionGoodiesRestrictionTargetActions = ['Suspension', 'Ban'] as const;
+export const accountRestrictionGoodiesRestrictionTargetLift = true;
+export const accountRestrictionGoodiesRestrictionTargetEdit = true;
+export const accountRestrictionGoodiesRestrictionTargetNotification = true;
+export const accountRestrictionGoodiesRestrictionTargetAudit = true;
+export const accountRestrictionGoodiesRestrictionTargetExistingOrders = true;
+export const accountRestrictionGoodiesRestrictionTargetWallet = true;
+export const accountRestrictionGoodiesRestrictionTargetOtherFeatures = true;
+export const accountRestrictionGoodiesRestrictionTargetMerchant = true;
+export const accountRestrictionGoodiesRestrictionTargetCustomer = true;
+export const accountRestrictionGoodiesRestrictionTargetOnlyFeature = true;
+export const accountRestrictionGoodiesRestrictionTargetPermanentBan = true;
+export const accountRestrictionGoodiesRestrictionTargetTemporarySuspension = true;
+export const accountRestrictionGoodiesRestrictionTargetReason = true;
+export const accountRestrictionGoodiesRestrictionTargetScope = true;
+export const accountRestrictionGoodiesRestrictionTargetScopeCustomer = true;
+export const accountRestrictionGoodiesRestrictionTargetScopeMerchant = true;
+export const accountRestrictionGoodiesRestrictionTargetScopeAll = true;
+export const accountRestrictionGoodiesRestrictionTargetScopeText = (a: Account) => accountRestrictionGoodiesRestrictionTargetCategory(a);
+export const accountRestrictionGoodiesRestrictionTargetScopeTextValue = (a: Account) => accountRestrictionGoodiesRestrictionTargetScopeLabel(a);
+export const accountRestrictionGoodiesRestrictionTargetScopeTextFor = (a: Account) => accountRestrictionGoodiesRestrictionTargetScopeValue(a);
+export const accountRestrictionGoodiesRestrictionTargetScopeTextForType = (type: Account['type']) => accountRestrictionGoodiesRestrictionScopeForType(type);
+export const accountRestrictionGoodiesRestrictionTargetScopeTextForAccount = (a: Account) => accountRestrictionGoodiesRestrictionScopeForAccount(a);
+export const accountRestrictionGoodiesRestrictionTargetScopeTextForCustomer = 'GoodiesCustomer';
+export const accountRestrictionGoodiesRestrictionTargetScopeTextForMerchant = 'GoodiesMerchant';
+export const accountRestrictionGoodiesRestrictionTargetScopeTextForAll = 'all';
+export const accountRestrictionGoodiesRestrictionTargetScopeTextForDisplay = (a: Account) => accountRestrictionGoodiesRestrictionTargetScopeLabel(a);
+export const accountRestrictionGoodiesRestrictionTargetScopeTextForDisplayValue = (a: Account) => accountRestrictionGoodiesRestrictionTargetScopeValue(a);
+export const accountRestrictionGoodiesRestrictionTargetScopeTextForDisplayKind = (a: Account) => accountRestrictionGoodiesRestrictionTargetKindValue(a);
+export const accountRestrictionGoodiesRestrictionTargetScopeTextForDisplayType = (a: Account) => accountRestrictionGoodiesRestrictionTargetType(a);
+export const accountRestrictionGoodiesRestrictionTargetScopeTextForDisplayEligible = (a: Account) => accountRestrictionGoodiesRestrictionTargetEligibleValue(a);
+export const accountRestrictionGoodiesRestrictionTargetScopeTextForDisplayReason = (a: Account) => accountRestrictionGoodiesRestrictionTargetReasonOptions;
+export const accountRestrictionGoodiesRestrictionTargetScopeTextForDisplayActions = (a: Account) => accountRestrictionGoodiesRestrictionTargetActions;
+export const accountRestrictionGoodiesRestrictionTargetScopeTextForDisplayLift = true;
+export const accountRestrictionGoodiesRestrictionTargetScopeTextForDisplayEdit = true;
+export const accountRestrictionGoodiesRestrictionTargetScopeTextForDisplayAudit = true;
+export const accountRestrictionGoodiesRestrictionTargetScopeTextForDisplayNotify = true;
+export const accountRestrictionGoodiesRestrictionTargetScopeTextForDisplayHistory = true;
+export const accountRestrictionGoodiesRestrictionTargetScopeTextForDisplayWallet = true;
+export const accountRestrictionGoodiesRestrictionTargetScopeTextForDisplayOrders = true;
+export const accountRestrictionGoodiesRestrictionTargetScopeTextForDisplayOtherFeatures = true;
+export const accountRestrictionGoodiesRestrictionTargetScopeTextForDisplayMerchant = true;
+export const accountRestrictionGoodiesRestrictionTargetScopeTextForDisplayCustomer = true;
+export const accountRestrictionGoodiesRestrictionTargetScopeTextForDisplayPermanent = true;
+export const accountRestrictionGoodiesRestrictionTargetScopeTextForDisplayTemporary = true;
+export const accountRestrictionGoodiesRestrictionTargetScopeTextForDisplayFeature = 'Goodies';
+export const accountRestrictionGoodiesRestrictionTargetScopeTextForDisplayFeatureLabel = 'Goodies';
+export const accountRestrictionGoodiesRestrictionTargetScopeTextForDisplayFeatureCustomer = 'Goodies customer access';
+export const accountRestrictionGoodiesRestrictionTargetScopeTextForDisplayFeatureMerchant = 'Goodies merchant access';
+export const accountRestrictionGoodiesRestrictionTargetScopeTextForDisplayFeatureAll = 'Entire Wantiss account';
+export const accountRestrictionGoodiesRestrictionTargetScopeTextForDisplayFeatureOnly = true;
+export const accountRestrictionGoodiesRestrictionTargetScopeTextForDisplayFeaturePreserves = true;
+export const accountRestrictionGoodiesRestrictionTargetScopeTextForDisplayFeatureAudit = true;
+export const accountRestrictionGoodiesRestrictionTargetScopeTextForDisplayFeatureNotification = true;
+export const accountRestrictionGoodiesRestrictionTargetScopeTextForDisplayFeatureRestriction = true;
+export const accountRestrictionGoodiesRestrictionTargetScopeTextForDisplayFeatureLift = true;
+export const accountRestrictionGoodiesRestrictionTargetScopeTextForDisplayFeatureEdit = true;
+export const accountRestrictionGoodiesRestrictionTargetScopeTextForDisplayFeatureBan = true;
+export const accountRestrictionGoodiesRestrictionTargetScopeTextForDisplayFeatureSuspend = true;
+export const accountRestrictionGoodiesRestrictionTargetScopeTextForDisplayFeatureReason = true;
+export const accountRestrictionGoodiesRestrictionTargetScopeTextForDisplayFeatureReasonRequired = true;
+export const accountRestrictionGoodiesRestrictionTargetScopeTextForDisplayFeatureScope = true;
+export const accountRestrictionGoodiesRestrictionTargetScopeTextForDisplayFeatureMerchantScope = 'GoodiesMerchant';
+export const accountRestrictionGoodiesRestrictionTargetScopeTextForDisplayFeatureCustomerScope = 'GoodiesCustomer';
+export const accountRestrictionGoodiesRestrictionTargetScopeTextForDisplayFeatureAllScope = 'all';
+export const accountRestrictionGoodiesRestrictionTargetScopeTextForDisplayFeaturePermanentBan = true;
+export const accountRestrictionGoodiesRestrictionTargetScopeTextForDisplayFeatureTemporarySuspension = true;
+export const accountRestrictionGoodiesRestrictionTargetScopeTextForDisplayFeatureNoOtherImpact = true;
+export const accountRestrictionGoodiesRestrictionTargetScopeTextForDisplayFeatureExistingOrdersKept = true;
+export const accountRestrictionGoodiesRestrictionTargetScopeTextForDisplayFeatureWalletKept = true;
+export const accountRestrictionGoodiesRestrictionTargetScopeTextForDisplayFeatureOtherFeaturesKept = true;
+export const accountRestrictionGoodiesRestrictionTargetScopeTextForDisplayFeatureAdminControlled = true;
+export const accountRestrictionGoodiesRestrictionTargetScopeTextForDisplayFeatureMerchantControlled = true;
+export const accountRestrictionGoodiesRestrictionTargetScopeTextForDisplayFeatureCustomerControlled = true;
+export const accountRestrictionGoodiesRestrictionTargetScopeTextForDisplayFeatureLiftable = true;
+export const accountRestrictionGoodiesRestrictionTargetScopeTextForDisplayFeatureAudited = true;
+export const accountRestrictionGoodiesRestrictionTargetScopeTextForDisplayFeatureNotifies = true;
+export const accountRestrictionGoodiesRestrictionTargetScopeTextForDisplayFeatureRequiresReason = true;
+export const accountRestrictionGoodiesRestrictionTargetScopeTextForDisplayFeatureRequiresBanConfirmation = true;
+export const accountRestrictionGoodiesRestrictionTargetScopeTextForDisplayFeatureSupportedTypes = ['Customer', 'Seller', 'Vendor'] as const;
+export const accountRestrictionGoodiesRestrictionTargetScopeTextForDisplayFeatureMerchantTypes = ['Seller', 'Vendor'] as const;
+export const accountRestrictionGoodiesRestrictionTargetScopeTextForDisplayFeatureCustomerType = 'Customer';
+export const accountRestrictionGoodiesRestrictionTargetScopeTextForDisplayFeatureDone = true;
