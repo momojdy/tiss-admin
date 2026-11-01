@@ -45,7 +45,7 @@ export function OperationsScreen() {
           <Txt size={9.5} mut style={{ marginLeft: 11, marginTop: 1, marginBottom: 7 }}>{sub}</Txt>
           <View style={{ gap: 7 }}>
             {l.length ? l.map((a) => (
-              <Deal key={a.id} tone={deal} top={(a.hold ? 'On hold · ' : '') + (a.esc ? 'Escalated · ' : '') + 'Waiting ' + a.age + 'd'} title={a.n} sub={a.s} value={docsText(a)} meta={a.o} onPress={() => open('app', a.id)} />
+              <Deal key={a.id} tone={deal} top={'Waiting ' + a.age + 'd'} title={a.n} sub={a.s} value={docsText(a)} meta={a.o} onPress={() => open('app', a.id)} />
             )) : <Txt size={12} mut style={{ padding: 8 }}>Nothing here.</Txt>}
           </View>
         </View>
@@ -53,7 +53,7 @@ export function OperationsScreen() {
     };
     return (
       <ScrollView horizontal showsHorizontalScrollIndicator={false} contentContainerStyle={{ gap: 8 }} style={{ marginRight: -10 }}>
-        {col(0, 'ye', 'Submitted', 'oldest first', 'y')}{col(1, 'gr', 'In review', 'owner assigned', 'g')}{col(2, 'or', 'Needs info', 'waiting on applicant', 'o')}
+        {col(0, 'ye', 'Submitted', 'oldest first', 'y')}{col(1, 'gr', 'In review', 'documents being reviewed', 'g')}{col(2, 'or', 'Needs info', 'waiting on applicant', 'o')}
       </ScrollView>
     );
   };
@@ -63,7 +63,7 @@ export function OperationsScreen() {
     if (ui.ov === 'List') {
       const l = list.filter((a) => a.st < 3).sort((a, b) => b.age - a.age);
       return l.length ? (
-        <Table columns={[{ title: 'Business', flex: 1.6 }, { title: 'Stage', flex: 1.2 }, { title: 'Age', flex: 0.6 }, { title: 'Owner', flex: 1 }]}
+        <Table columns={[{ title: 'Business', flex: 1.6 }, { title: 'Stage', flex: 1.2 }, { title: 'Age', flex: 0.6 }, { title: 'Reviewer', flex: 1 }]}
           rows={l.map((a) => ({ key: a.id, onPress: () => open('app', a.id), cells: [<View key="b"><Txt size={9.5} weight={600}>{a.n}</Txt><Small>{a.id + ' · ' + a.s}</Small></View>, <StatusPill key="s" label={db.STG[a.st]} small />, a.age + 'd', a.o] }))} />
       ) : <Txt size={12} mut align="center" style={{ paddingVertical: 14 }}>No applications match.</Txt>;
     }
