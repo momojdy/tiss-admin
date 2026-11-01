@@ -90,7 +90,7 @@ export async function assignApplicationBusiness(applicationId: string, businessI
   if (error) throw new Error(error.code === '42501' ? 'You do not have permission to link this application.' : error.message);
 }
 
-export async function reviewBusinessApplication(id: string, status: 'approved' | 'rejected' | 'pending', note: string, finalRejection = false) {
+export async function reviewBusinessApplication(id: string, status: 'approved' | 'rejected' | 'pending' | 'in_review' | 'needs_info', note: string, finalRejection = false) {
   const { error } = await supabase.rpc('wantiss_admin_review_business_application', {
     p_application_id: id, p_status: status, p_review_note: note, p_final_rejection: finalRejection,
   });
