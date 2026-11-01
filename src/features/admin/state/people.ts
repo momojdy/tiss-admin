@@ -99,7 +99,7 @@ export const accountRestrictionActor = (r: Restriction) => r.by;
 export const accountRestrictionNotified = (r: Restriction) => r.notified;
 export const accountRestrictionKind = (r: Restriction) => r.kind;
 export const accountRestrictionId = (r: Restriction) => r.id;
-export const accountRestrictionScope = (r: Restriction) => r.scope;
+export const accountRestrictionRecordScope = (r: Restriction) => r.scope;
 export const accountRestrictionActive = (r: Restriction) => !r.end || r.end >= TODAY;
 export const accountRestrictionIsGoodiesCustomer = (r: Restriction) => r.scope === 'GoodiesCustomer';
 export const accountRestrictionIsGoodiesMerchant = (r: Restriction) => r.scope === 'GoodiesMerchant';
@@ -258,7 +258,7 @@ export const accountRestrictionGoodiesRestrictionTargetCustomerScope = 'GoodiesC
 export const accountRestrictionGoodiesRestrictionTargetAllScope = 'all';
 export const accountRestrictionGoodiesRestrictionTargetReasonRequired = true;
 export const accountRestrictionGoodiesRestrictionTargetBanConfirmation = 'BAN';
-export const accountRestrictionGoodiesRestrictionTarget = (a: Account) => a.id;
+
 export const accountRestrictionGoodiesRestrictionTargetType = (a: Account) => a.type;
 export const accountRestrictionGoodiesRestrictionTargetScopeValue = (a: Account) => accountRestrictionGoodiesRestrictionScopeForAccount(a);
 export const accountRestrictionGoodiesRestrictionTargetScopeLabelValue = (a: Account) => accountRestrictionGoodiesRestrictionTargetScopeLabel(a);
@@ -279,7 +279,7 @@ export const accountRestrictionGoodiesRestrictionTargetOnlyFeature = true;
 export const accountRestrictionGoodiesRestrictionTargetPermanentBan = true;
 export const accountRestrictionGoodiesRestrictionTargetTemporarySuspension = true;
 export const accountRestrictionGoodiesRestrictionTargetReason = true;
-export const accountRestrictionGoodiesRestrictionTargetScope = true;
+
 export const accountRestrictionGoodiesRestrictionTargetScopeCustomer = true;
 export const accountRestrictionGoodiesRestrictionTargetScopeMerchant = true;
 export const accountRestrictionGoodiesRestrictionTargetScopeAll = true;
