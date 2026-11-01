@@ -3,7 +3,7 @@
 export type DocStatus = 'verified' | 'pending' | 'rejected' | 'missing' | 'expired';
 
 export interface Application {
-  id: string; n: string; s: string; st: number; age: number; o: string;
+  id: string; userId?: string; businessId?: string; n: string; s: string; st: number; age: number; o: string;
   d: [string, DocStatus][]; hold: number; esc: number; due: string;
   notes: { by: string; when: string; txt: string }[] | string[][] | unknown[];
   log: [string, string][];
