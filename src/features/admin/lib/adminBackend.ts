@@ -79,6 +79,17 @@ export async function loadAdminDomain(domain: AdminDomain): Promise<Record<strin
   if (error) throw new Error(error.code === '42501' ? 'You do not have permission to view this data.' : 'Admin data is unavailable.');
   return Array.isArray(data?.items) ? data.items : [];
 }
+export interface ApplicantBusiness { business_id: string; business_name: string; member_role: string }
+export async function listApplicationBusinesses(applicationId: string): Promise<ApplicantBusiness[]> {
+  const { data, error } = await supabase.rpc('wantiss_admin_application_businesses', { p_application_id: applicationId });
+  if (error) throw new Error(error.code === '42501' ? 'You do not have permission to view applicant businesses.' : error.message);
+  return (data || []) as ApplicantBusiness[];
+}
+export async function assignApplicationBusiness(applicationId: string, businessId: string) {
+  const { error } = await supabase.rpc('wantiss_admin_assign_business_application', { p_application_id: applicationId, p_business_id: businessId });
+  if (error) throw new Error(error.code === '42501' ? 'You do not have permission to link this application.' : error.message);
+}
+
 export async function reviewBusinessApplication(id: string, status: 'approved' | 'rejected' | 'pending', note: string, finalRejection = false) {
   const { error } = await supabase.rpc('wantiss_admin_review_business_application', {
     p_application_id: id, p_status: status, p_review_note: note, p_final_rejection: finalRejection,
@@ -118,7 +129,7 @@ export async function getBusinessApplicationDocumentUrl(storagePath: string): Pr
   return data.signedUrl;
 }
 export type BusinessVerification = 'pending' | 'verified' | 'restricted';
-/** Marks a business verified, pending or restricted. Anything but verified also unpublishes its Goodies store. The server checks the operations permission and writes the audit entry. */
+/** Updates general business verification independently from Goodies store publication. */
 export async function setBusinessVerification(businessId: string, status: BusinessVerification, reason: string) {
   const { error } = await supabase.rpc('wantiss_admin_set_business_verification', {
     p_business: businessId, p_status: status, p_reason: reason,
