@@ -322,7 +322,7 @@ export function AccountDrawer({ id, close }: { id: string; close: () => void }) 
         if(!ban&&end&&end<TODAY)return 'The end date cannot be in the past.';
         try{
           await applyAccountRestrictionBackend({
-            userId:a.id,kind,scope:'Goodies',reason:String(v.rs),notes:String(v.nt||''),
+            userId:a.id,kind,scope:'GoodiesCustomer',reason:String(v.rs),notes:String(v.nt||''),
             startsAt:new Date().toISOString(),endsAt:!ban&&end?new Date(end+'T23:59:59.999Z').toISOString():null,
             notifyUser:!!v.nf,
           });
