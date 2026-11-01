@@ -52,7 +52,7 @@ export async function hydrateAdminState() {
     id: str(x.id), userId: str(x.user_id), businessId: str(x.business_id), n: str(x.business_name), s: normalizedStatus(x.status), st: applicationStage(x.status),
     age: Math.max(0, Math.floor((Date.now() - Date.parse(str(x.created_at))) / 86400000)),
     createdAt: str(x.created_at), reviewedAt: str(x.reviewed_at || ''),
-    o: (db.STAFF.find((staff) => staff.userId === str(x.reviewed_by))?.n || (x.reviewed_by ? 'Reviewed' : 'Unassigned')), d: (Array.isArray(x.documents) ? x.documents : []).map((doc: any) => [doc.document_type === 'business_licence' ? 'Business licence' : doc.document_type === 'tax_id' ? 'Tax ID' : doc.document_type === 'owner_id' ? 'Owner ID' : str(doc.document_type), str(doc.status)] as [string, Application['d'][number][1]]), hold: 0, esc: 0, due: '',
+    o: (staff.find((staffRecord) => staffRecord.user_id === str(x.reviewed_by))?.display_name || (x.reviewed_by ? 'Reviewed' : 'Unassigned')), d: (Array.isArray(x.documents) ? x.documents : []).map((doc: any) => [doc.document_type === 'business_licence' ? 'Business licence' : doc.document_type === 'tax_id' ? 'Tax ID' : doc.document_type === 'owner_id' ? 'Owner ID' : str(doc.document_type), str(doc.status)] as [string, Application['d'][number][1]]), hold: 0, esc: 0, due: '',
     notes: x.review_note ? [{ by: 'Reviewer', when: date(x.reviewed_at), txt: str(x.review_note) }] : [],
     log: [],
   }));
