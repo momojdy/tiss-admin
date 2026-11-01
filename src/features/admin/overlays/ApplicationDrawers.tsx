@@ -13,7 +13,7 @@ import { Txt } from '../ui/Txt';
 import { AppIcon } from '../ui/AppIcon';
 import { useTheme } from '../theme/ThemeContext';
 import { shareText } from '../lib/csv';
-import { getBusinessApplicationDocumentUrl, listBusinessApplicationDocuments, reviewBusinessApplication, setBusinessApplicationDocumentStatus, type BusinessApplicationDocument } from '../lib/adminBackend';
+import { assignApplicationBusiness, getBusinessApplicationDocumentUrl, listApplicationBusinesses, listBusinessApplicationDocuments, reviewBusinessApplication, setBusinessApplicationDocumentStatus, type ApplicantBusiness, type BusinessApplicationDocument } from '../lib/adminBackend';
 import { hydrateAdminState } from '../lib/hydrateAdminState';
 import { drawers, useOpen } from './registry';
 import { useNav } from '../shell/Nav';
@@ -45,6 +45,9 @@ export function ApplicationDrawer({ id, close }: { id: string; close: () => void
   const [serverDocs, setServerDocs] = useState<BusinessApplicationDocument[]>([]);
   const [docsLoading, setDocsLoading] = useState(true);
   const [docsError, setDocsError] = useState('');
+  const [businessCandidates, setBusinessCandidates] = useState<ApplicantBusiness[]>([]);
+  const [businessesLoading, setBusinessesLoading] = useState(false);
+  const [businessesError, setBusinessesError] = useState('');
   useEffect(() => {
     let alive = true;
     setDocsLoading(true); setDocsError('');
@@ -53,6 +56,15 @@ export function ApplicationDrawer({ id, close }: { id: string; close: () => void
       .finally(() => { if (alive) setDocsLoading(false); });
     return () => { alive = false; };
   }, [id]);
+  useEffect(() => {
+    let alive = true;
+    if (!a?.userId || a.businessId) { setBusinessCandidates([]); setBusinessesLoading(false); return; }
+    setBusinessesLoading(true); setBusinessesError('');
+    listApplicationBusinesses(id).then((items) => { if (alive) setBusinessCandidates(items); })
+      .catch((error) => { if (alive) setBusinessesError(error instanceof Error ? error.message : 'Applicant businesses could not be loaded.'); })
+      .finally(() => { if (alive) setBusinessesLoading(false); });
+    return () => { alive = false; };
+  }, [id, a?.userId, a?.businessId]);
   const reloadServerDocs = async () => {
     setDocsLoading(true); setDocsError('');
     try { setServerDocs(await listBusinessApplicationDocuments(id)); }
@@ -63,7 +75,21 @@ export function ApplicationDrawer({ id, close }: { id: string; close: () => void
   const closed = a.st >= 3;
   const status = (db.STG[a.st] || a.s || 'Pending review') + (a.hold ? ' · on hold' : '') + (a.esc ? ' · escalated' : '');
 
+  const chooseBusiness = () => {
+    if (!can(...REQ.review)) { toast('You do not have permission to link applications.'); return; }
+    const options = businessCandidates.map((b) => `${b.business_name} · ${b.business_id}`);
+    if (!options.length) return;
+    form({ title: 'Link application to business', fields: [{ id: 'business', label: 'Applicant-owned business', type: 'select', options, required: true, value: options[0] }], buttons: [{ label: 'Link business', key: 's', primary: true }],
+      sub: 'Choose the exact business this application belongs to. The system will not guess from the applicant’s other memberships.',
+      onSubmit: async (_k, v) => {
+        const selected = businessCandidates.find((b) => `${b.business_name} · ${b.business_id}` === String(v.business));
+        if (!selected) return 'Choose a valid business workspace.';
+        try { await assignApplicationBusiness(id, selected.business_id); await hydrateAdminState(); closeAll(); open('app', id); toast('Application linked to ' + selected.business_name); }
+        catch (error) { return error instanceof Error ? error.message : 'The business could not be linked.'; }
+      } });
+  };
   const approve = () => {
+    if (!a.businessId && businessCandidates.length) { form({ title: 'Business link required', fields: [], buttons: [], sub: 'This applicant has multiple business memberships. Link this application to the correct business before approving it.' }); return; }
     const requiredDocs: [BusinessApplicationDocument['document_type'], string][] = [
       ['business_licence', 'Business licence'], ['tax_id', 'Tax ID'], ['owner_id', 'Owner ID'],
     ];
@@ -98,6 +124,7 @@ export function ApplicationDrawer({ id, close }: { id: string; close: () => void
   const edit = can(...REQ.review), approveOk = can(...REQ.approve);
   const actions = closed ? null : (
     <>
+      {!a.businessId && businessCandidates.length && edit ? <OutlineBtn onPress={guard(REQ.review, chooseBusiness)}>Link business</OutlineBtn> : null}
       {approveOk ? <OutlineBtn primary onPress={guard(REQ.approve, approve)}>Approve</OutlineBtn> : null}
       {edit ? <OutlineBtn onPress={guard(REQ.review, requestInfo)}>Request info</OutlineBtn> : null}
       {approveOk ? <OutlineBtn onPress={guard(REQ.approve, reject)}>Reject</OutlineBtn> : null}
@@ -112,7 +139,10 @@ export function ApplicationDrawer({ id, close }: { id: string; close: () => void
         <StatusPill label={status} tone={STATUS_TONE[db.STG[a.st] || a.s] || STATUS_TONE.pending} />
         <Txt size={10.6} mut>{a.id + ' · ' + a.s}</Txt>
       </View>
-      <KeyValue rows={[['Waiting', a.age + ' day' + (a.age === 1 ? '' : 's')], ['Owner', a.o], ['Due', a.due || 'Not set'], ['Documents', docsText(a) + ' verified']]} />
+      <KeyValue rows={[['Waiting', a.age + ' day' + (a.age === 1 ? '' : 's')], ['Owner', a.o], ['Due', a.due || 'Not set'], ['Documents', docsText(a) + ' verified'], ...(a.businessId ? [['Business ID', a.businessId] as [string,string]] : [])]} />
+      <Section title="Business link">
+        {a.businessId ? <Txt size={12} mut>Linked to the applicant-owned business shown above.</Txt> : businessesLoading ? <Txt size={12} mut>Loading applicant businesses…</Txt> : businessesError ? <Txt size={12} mut>{businessesError}</Txt> : businessCandidates.length ? <><Txt size={12} mut>Choose the exact business this application belongs to before approval.</Txt><ListRows rows={businessCandidates.map((b) => ({ key: b.business_id, main: b.business_name, sub: b.member_role, right: <AppIcon name="chevron-right" size={12} />, onPress: chooseBusiness }))} /></> : <Txt size={12} mut>No existing business membership was found. A new business workspace will be created only if this application is approved.</Txt>}
+      </Section>
       <Section title="Requirements">
         <ListRows empty={a.d.length === 0 ? "No document records are available from the server yet. Approval stays blocked until the required documents are submitted and verified." : "No documents."} rows={a.d.map((x, i) => ({ main: x[0], right: <View style={{ flexDirection: 'row', alignItems: 'center', gap: 4 }}><StatusPill label={x[1]} /><AppIcon name="chevron-right" size={12} /></View>, onPress: () => open('doc', id + ':' + i) }))} />
       </Section>
