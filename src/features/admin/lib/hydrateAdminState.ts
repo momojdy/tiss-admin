@@ -20,7 +20,7 @@ const normalizedStatus = (value: unknown) => {
 const applicationStage = (value: unknown) => {
   const raw = str(value).trim().toLowerCase().replace(/[_-]+/g, ' ');
   if (raw === 'approved') return 3;
-  if (raw === 'rejected' || raw === 'declined') return 4;
+  if (raw === 'rejected' || raw === 'declined' || raw === 'restricted') return 4;
   if (raw.includes('needs info') || raw.includes('need information')) return 2;
   if (raw.includes('review')) return 1;
   if (raw === 'submitted' || raw === 'pending' || raw === 'new') return 0;
