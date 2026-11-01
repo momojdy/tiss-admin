@@ -73,12 +73,6 @@ export function GoodiesAdminScreen() {
     if(error)toast(error.message);else{toast(item.is_live?'Store taken offline':'Store is live');await reload();}
     setBusy('');
   };
-  const verifyMerchant=async(item:any,status:'verified'|'rejected')=>{
-    setBusy(item.business_id);
-    const {error}=await supabase.rpc('goodies_admin_set_merchant_verification',{p_business_id:item.business_id,p_status:status});
-    if(error)toast(error.message);else{toast(status==='verified'?'Merchant verified':'Merchant rejected');await reload();}
-    setBusy('');
-  };
   const cancelOrder=(item:any)=>{
     Alert.alert('Cancel Goodies order', 'Cancel '+item.order_code+'? Stock will be restored and eligible payments will be refunded.',[
       {text:'Keep order',style:'cancel'},
@@ -125,15 +119,11 @@ export function GoodiesAdminScreen() {
       <Pressable onPress={()=>go('editor',{editorFeature:'Goodies'})} style={btn('#294E2C')}><Text style={{color:'#fff',fontWeight:'800'}}>Open Goodies Content Editor</Text></Pressable>
     </>:null}
     {module==='Merchants'?<>
-      <Text style={{fontSize:12,color:'#687365',marginBottom:10}}>Live records from Goodies store schedules and business verification.</Text>
+      <Text style={{fontSize:12,color:'#687365',marginBottom:10}}>Live records from Goodies store schedules.</Text>
       {!dashboard.merchants.length?<Text style={labelStyle}>No Goodies merchants registered yet.</Text>:dashboard.merchants.map(m=><View key={m.business_id} style={cardStyle}>
-        <Text style={valueStyle}>{m.name||'Unnamed store'}</Text><Text style={labelStyle}>{m.category||'Uncategorised'} · {m.city||'City not set'} · Verification: {m.verification}</Text>
+        <Text style={valueStyle}>{m.name||'Unnamed store'}</Text><Text style={labelStyle}>{m.category||'Uncategorised'} · {m.city||'City not set'} · {m.is_live?'Live':'Not live'}</Text>
         <Text style={{fontSize:12,color:'#596554',marginBottom:8}}>Delivery: {m.delivery_pricing_mode==='distance'?'Distance-based':'Fixed'} · {money(m.delivery_fee)} · COD {m.accept_cash_on_delivery?'enabled':'disabled'}</Text>
-        {m.verification!=='verified'?<Pressable disabled={busy===m.business_id} onPress={()=>void verifyMerchant(m,'verified')} style={{...btn('#E8F2E5'),marginBottom:7}}><Text style={{fontWeight:'800',color:'#28552B'}}>Verify merchant</Text></Pressable>:null}
-        <View style={{flexDirection:'row',gap:8}}>
-          <Pressable disabled={busy===m.business_id||(!m.is_live&&m.verification!=='verified')} onPress={()=>void setMerchant(m)} style={{...btn(m.is_live?'#F7EAE8':'#E8F2E5'),flex:1}}><Text style={{fontWeight:'800',color:m.is_live?'#8D3932':'#28552B'}}>{busy===m.business_id?'Saving…':m.is_live?'Take store offline':'Publish store live'}</Text></Pressable>
-          {m.verification==='verified'?<Pressable disabled={busy===m.business_id} onPress={()=>void verifyMerchant(m,'rejected')} style={btn('#F7EAE8')}><Text style={{fontWeight:'800',color:'#8D3932'}}>Revoke</Text></Pressable>:null}
-        </View>
+        {m.is_live?<Pressable disabled={busy===m.business_id} onPress={()=>void setMerchant(m)} style={btn('#F7EAE8')}><Text style={{fontWeight:'800',color:'#8D3932'}}>{busy===m.business_id?'Saving…':'Take store offline'}</Text></Pressable>:<Text style={labelStyle}>The vendor can publish this store from Business Space.</Text>}
       </View>)}
     </>:null}
     {module==='Product review'?<>
