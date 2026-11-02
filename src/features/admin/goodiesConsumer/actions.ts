@@ -143,12 +143,12 @@ export async function placeOrder() {
   if (!pk && (!a || !a.t)) {toast('Choose a delivery address'); S.cs = 0; emit(); return;}
   const ct = ctOf();
   if (!phoneOK(ct.ph)) {toast('Choose a valid contact number'); S.cs = 0; emit(); return;}
-  if (!providerInfo.demo) await refreshPaymentOptions();
-  if (!providerInfo.demo && S.pay === 'wallet' && !S.hasWallet) {toast('Your Wantiss wallet is not available. Create a wallet or choose another payment method.'); push('payments'); return;}
-  if (!providerInfo.demo && S.pay === 'wallet' && S.wallet < t.total) {toast('Insufficient Wantiss wallet balance. Add funds or choose a saved card or cash.'); push('payments'); return;}
+  if (!demo) await refreshPaymentOptions();
+  if (!demo && S.pay === 'wallet' && !S.hasWallet) {toast('Your Wantiss wallet is not available. Create a wallet or choose another payment method.'); push('payments'); return;}
+  if (!demo && S.pay === 'wallet' && S.wallet < t.total) {toast('Insufficient Wantiss wallet balance. Add funds or choose a saved card or cash.'); push('payments'); return;}
   const alc = hasAlcohol();
   if (alc && !S.alcConsent) {toast('Please confirm the alcohol rules to continue'); return;}
-  if (alc && !S.hasWallet) {toast('Create your Wantiss wallet first. Refunds for alcohol orders go there.'); push('payments'); return;}
+  if (!previewOnly && alc && !S.hasWallet) {toast('Create your Wantiss wallet first. Refunds for alcohol orders go there.'); push('payments'); return;}
   if (S.promo && t.perr) {S.promo = ''; toast('Your promo code no longer applies. Totals updated'); emit(); return;}
   if (S.sch && S.sch < Date.now()) {S.sch = 0; S.cs = 1; toast('That time has passed. Pick another'); emit(); return;}
   if (!previewOnly && providerInfo.demo && S.pay === 'wallet' && S.wallet < t.total) {toast('Wallet balance is too low. Top up or pick another method.'); push('payments'); return;}
@@ -163,7 +163,7 @@ export async function placeOrder() {
   let id: string;
   do {id = 'GD' + Math.floor(1000 + Math.random() * 9000);} while (S.orders.some((x: any) => x.id === id));
   let backendOrderId: string | null = null;
-  if (!providerInfo.demo) {
+  if (!demo) {
     // Live: the server validates the store, mode, schedule and totals, and assigns the order code.
     const r2 = (n: number) => Math.round(n * 100) / 100;
     const orderPayload = {
