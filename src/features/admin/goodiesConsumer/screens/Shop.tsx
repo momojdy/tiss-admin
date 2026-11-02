@@ -254,13 +254,14 @@ export function Checkout() {
     <View>
       <Bar title="Checkout" onBack={back} />
       <View style={{paddingHorizontal: 16}}>
+        {previewOnly ? <Card style={{borderColor: th.br, marginBottom: 10}}><T weight="800">DEMO PREVIEW · NO PAYMENT</T><T size={12.5} color={th.mut} style={{marginTop: 3}}>You can explore every checkout step and complete the confirmation screen. This preview never charges a card, debits a wallet or sends an order.</T></Card> : null}
         <View style={{flexDirection: 'row', gap: 6, marginBottom: 6}}>{stp.map((x, n) => <View key={x} style={{flex: 1, alignItems: 'center'}}><View style={{height: 5, borderRadius: 3, alignSelf: 'stretch', backgroundColor: n <= S.cs ? th.br : th.line}} /><T size={11.5} weight={n === S.cs ? '800' : '500'} style={{marginTop: 5}}>{x}</T></View>)}</View>
         {body}
       </View>
     </View>
   );
 }
-export const CheckoutFoot = () => <Cta label={S.cs === 3 ? 'Place order · ' + money(totals().total) : 'Continue'} disabled={S.cs === 3 && hasAlcohol() && !S.alcConsent} onPress={S.cs === 3 ? placeOrder : checkoutNext} />;
+export const CheckoutFoot = () => <Cta label={S.cs === 3 ? (previewOnly ? 'Complete demo checkout · ' : 'Place order · ') + money(totals().total) : 'Continue'} disabled={S.cs === 3 && hasAlcohol() && !S.alcConsent} onPress={S.cs === 3 ? placeOrder : checkoutNext} />;
 
 export function Confirm({id}: {id: string}) {
   const th = useTheme(), o = S.orders.filter((x: any) => x.id === id)[0];
