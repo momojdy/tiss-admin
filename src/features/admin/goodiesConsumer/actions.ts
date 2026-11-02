@@ -111,11 +111,11 @@ export function checkoutNext() {
   if (S.cs === 0 && !phoneOK(ctOf().ph)) {toast('Choose a valid contact number'); return;}
   if (S.cs === 1 && S.sch && S.sch < Date.now()) {S.sch = 0; toast('That time has passed. Pick another'); emit(); return;}
   if (S.cs === 1 && !STB[S.cart.sid!]?.open && (!STB[S.cart.sid!]?.acceptScheduledOrders || !S.sch || S.sch <= Date.now())) {toast('This store is closed. Choose a future opening-time slot to continue.'); emit(); return;}
-  if (S.cs === 2 && S.pay === 'card' && !S.cards.length) {push('payments'); return;}
+  if (!previewOnly && S.cs === 2 && S.pay === 'card' && !S.cards.length) {push('payments'); return;}
   S.cs++; emit();
 }
 export function setPay(p: string) {
-  if (p === 'card' && !S.cards.length) {push('payments'); return;}
+  if (!previewOnly && p === 'card' && !S.cards.length) {push('payments'); return;}
   S.pay = p;
   if (p === 'card' && !S.cards.some((card: any) => card.id === S.selectedCardId)) S.selectedCardId = (S.cards.find((card: any) => card.isDefault) || S.cards[0])?.id || '';
   save(); emit();
@@ -125,11 +125,11 @@ export function setCard(id: string) {
   S.selectedCardId = id; save(); emit();
 }
 export async function placeOrder() {
-  if (previewOnly) { toast('Placing orders is disabled in the admin preview.'); return; }
   if (S.busy) return;
+  const demo = previewOnly || providerInfo.demo;
   const t = totals(), st = t.st!;
   if (!S.cart.lines.length) {toast('Your cart is empty'); return;}
-  if (!providerInfo.demo) {
+  if (!demo) {
     if (!['cash', 'wallet', 'card'].includes(S.pay)) {toast('Choose Wantiss Wallet, a saved card, or cash.'); S.cs = 2; emit(); return;}
     if (S.pay === 'card' && !S.cards.length) {toast('Add a saved card before checking out.'); push('payments'); return;}
     // The ID check result cannot be recorded yet, so age-restricted orders stay blocked in live mode.
@@ -151,15 +151,15 @@ export async function placeOrder() {
   if (alc && !S.hasWallet) {toast('Create your Wantiss wallet first. Refunds for alcohol orders go there.'); push('payments'); return;}
   if (S.promo && t.perr) {S.promo = ''; toast('Your promo code no longer applies. Totals updated'); emit(); return;}
   if (S.sch && S.sch < Date.now()) {S.sch = 0; S.cs = 1; toast('That time has passed. Pick another'); emit(); return;}
-  if (providerInfo.demo && S.pay === 'wallet' && S.wallet < t.total) {toast('Wallet balance is too low. Top up or pick another method.'); push('payments'); return;}
-  if (providerInfo.demo && S.pay === 'card') {
+  if (!previewOnly && providerInfo.demo && S.pay === 'wallet' && S.wallet < t.total) {toast('Wallet balance is too low. Top up or pick another method.'); push('payments'); return;}
+  if (demo && S.pay === 'card') {
     if (!S.cards.length) {push('payments'); return;}
     if (S.cards[0].l4 === '0002') {toast('Card declined (demo). Your cart is safe. Try another method.'); S.cs = 2; emit(); return;}
   }
   /* Demo orders are local; live wallet/card orders use authenticated server payment flows below. */
   S.busy = 1; emit();
   const selectedCard: any = S.cards.find((card: any) => card.id === S.selectedCardId) || S.cards.find((card: any) => card.isDefault) || S.cards[0];
-  const pl: any = {wallet: 'Wallet', moncash: 'MonCash', card: 'Card •••• ' + (selectedCard ? selectedCard.l4 : ''), cash: 'Cash'}[S.pay as string];
+  const pl: any = (previewOnly ? {wallet: 'Demo Wallet', moncash: 'Demo MonCash', card: 'Demo card •••• ' + (selectedCard ? selectedCard.l4 : '4242'), cash: 'Demo cash'} : {wallet: 'Wallet', moncash: 'MonCash', card: 'Card •••• ' + (selectedCard ? selectedCard.l4 : ''), cash: 'Cash'})[S.pay as string];
   let id: string;
   do {id = 'GD' + Math.floor(1000 + Math.random() * 9000);} while (S.orders.some((x: any) => x.id === id));
   let backendOrderId: string | null = null;
@@ -192,7 +192,7 @@ export async function placeOrder() {
     backendOrderId = row.id; id = row.order_code || id;
     if (S.pay === 'wallet') await refreshPaymentOptions();
   }
-  if (providerInfo.demo && S.pay === 'wallet') S.wallet -= t.total;
+  if (!previewOnly && providerInfo.demo && S.pay === 'wallet') S.wallet -= t.total;
   const o = {
     id, backendId: backendOrderId, serverStatus: backendOrderId ? (S.sch && S.sch > Date.now() ? 'scheduled' : 'placed') : null, sid: S.cart.sid, lines: S.cart.lines.map((l: any) => ({k: l.k, id: l.id, n: l.n, e: l.e, p: l.p, q: l.q, d: l.d, nt: l.nt, byo: l.byo})),
     sn: st.n, sub: t.sub, fee: t.fee, svc: t.svc, disc: t.disc, tip: t.tip, total: t.total, t0: Date.now(), st: 0, rated: 0, cx: 0, pk,
@@ -202,7 +202,7 @@ export async function placeOrder() {
   };
   S.orders.unshift(o);
   S.cart = {sid: null, lines: []}; S.promo = ''; S.tip = 0; S.note = ''; S.sch = 0; S.cs = 0; S.cc = 'w'; S.alcConsent = false;
-  if (!backendOrderId) S.notifs.unshift({id: Date.now() + Math.random(), t: 'Order ' + o.id + ' placed', d: 'Demo order sent to ' + st.n + '. Tap to track it.', r: 'track', p: o.id, u: 1});
+  if (!backendOrderId) S.notifs.unshift({id: Date.now() + Math.random(), t: 'Demo order ' + o.id, d: previewOnly ? 'Preview only. No order was sent to the shop and no payment was taken.' : 'Demo order sent to ' + st.n + '. Tap to track it.', r: 'track', p: o.id, u: 1});
   S.stack = [{r: 'home', u: Date.now()}, {r: 'confirm', p: o.id, u: Date.now() + 1}];
   S.busy = 0; toast(backendOrderId ? 'Order sent to the store' : 'Demo order placed!'); save(); emit();
   if (backendOrderId) void refreshLiveSchedules(); /* stock was reserved on the server */
