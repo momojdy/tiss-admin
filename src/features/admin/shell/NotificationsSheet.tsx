@@ -5,6 +5,7 @@ import { bump, useDb } from '../state/db';
 import { expireStaff } from '../state/access';
 import { isUnread, markAllRead, markRead, myNotices } from '../state/notices';
 import { useOpen } from '../overlays/registry';
+import { useNav } from './Nav';
 import { Chips, Dot, OutlineBtn } from '../ui/Controls';
 import { DrawerBody } from '../ui/Overlay';
 import { ListRows } from '../ui/Lists';
@@ -17,6 +18,7 @@ export function NotificationsSheet({ onClose }: { onClose: () => void }) {
   useDb();
   expireStaff();
   const open = useOpen();
+  const { go } = useNav();
   const [f, setF] = useState<(typeof FILTERS)[number]>('All');
   const [serverNotices, setServerNotices] = useState<any[]>([]);
   useEffect(() => {
@@ -42,7 +44,7 @@ export function NotificationsSheet({ onClose }: { onClose: () => void }) {
         key: String(i) + n.t,
         main: <View style={{ flexDirection: 'row', alignItems: 'center' }}>{isUnread(n) ? <Dot color={n.f.includes('crit') ? 'or' : 'gr'} /> : null}<Txt size={10.1} weight={isUnread(n) ? 600 : 400} style={{ flex: 1 }}>{n.t}</Txt></View>,
         sub: n.w,
-        onPress: () => { if (n.serverId) { void supabase.from('notifications').update({ read: true }).eq('id', n.serverId); setServerNotices((rows) => rows.map((row) => row.serverId === n.serverId ? { ...row, read: true, f: '' } : row)); } else markRead(n); bump(); open(n.d, n.v); },
+        onPress: () => { if (n.serverId) { void supabase.from('notifications').update({ read: true }).eq('id', n.serverId); setServerNotices((rows) => rows.map((row) => row.serverId === n.serverId ? { ...row, read: true, f: '' } : row)); } else markRead(n); bump(); if (n.d === 'goodiesIngredientRequests') { go('editor', { editorFeature: 'Goodies' }); return; } open(n.d, n.v); },
       }))} />
     </DrawerBody>
   );
