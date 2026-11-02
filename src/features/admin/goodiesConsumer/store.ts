@@ -115,7 +115,7 @@ function liveStore(r: any, items: Item[]): Store {
     id, businessId: String(r.business_id), c: r.category || 'groceries', e: CAT_EMOJI[r.category] || '🛍️', bg: bgOf(id), r: 0, rv: 0, km: 0, km0: 0,
     eta: eMin + '–' + eMax, eta0: eMin + '–' + eMax, fee: Number(r.delivery_fee) || 0, min: Number(r.min_order) || 0,
     pr: r.promo || '', k: r.kind || '', it: items, open: st.open, h: st.h, nx: st.nx, far: false, live: true,
-    logo: r.logo_url || null, cover: r.cover_url || null, acceptScheduledOrders: !!r.accept_scheduled_orders,
+    logo: r.logo_url || null, cover: r.cover_url || null, thumbnail: r.thumbnail_url || null, acceptScheduledOrders: !!r.accept_scheduled_orders,
     scheduledOrderStartMinutes: Number(r.scheduled_order_start_minutes ?? 60), scheduleHours: r.hours || undefined,
     businessName: r.business_name || '', businessDescription: r.description || '', businessPhone: r.phone || '', businessEmail: r.email || '', businessWebsite: r.website || '',
     businessAddress: r.address || '', businessCity: r.city || '', businessCountry: r.country || '', businessDeliveryModes: Array.isArray(r.delivery_modes) ? r.delivery_modes : [], businessLogoUrl: r.logo_url || '',
@@ -135,7 +135,7 @@ let liveTimer: any = null;
 export async function refreshLiveSchedules() {
   try {
     const {data: rows, error} = await supabase.from('goodies_store_schedules')
-      .select('business_id,store_id,business_name,description,phone,email,website,address,city,country,delivery_modes,logo_url,cover_url,hours,accept_scheduled_orders,scheduled_order_start_minutes,category,kind,min_order,delivery_fee,eta_min,eta_max,promo,names')
+      .select('business_id,store_id,business_name,description,phone,email,website,address,city,country,delivery_modes,logo_url,cover_url,thumbnail_url,hours,accept_scheduled_orders,scheduled_order_start_minutes,category,kind,min_order,delivery_fee,eta_min,eta_max,promo,names')
       .eq('is_live', true);
     if (error) throw error;
     const stores: any[] = rows || [], prods: any[] = [];
