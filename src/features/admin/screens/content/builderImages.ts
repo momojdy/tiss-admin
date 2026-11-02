@@ -4,8 +4,6 @@ import { supabase } from '../../lib/supabase';
 import { createAssetUploadId, listCmsAssets, publishCmsAsset, uploadCmsAsset } from '../../lib/adminBackend';
 
 const BUCKET = 'wantiss-cms-assets';
-const TYPES = ['image/jpeg', 'image/png', 'image/webp', 'image/gif'];
-
 /** Short-lived preview links for uploaded pictures, looked up by asset key. */
 export async function signedUrlsForKeys(keys: string[]): Promise<Record<string, string>> {
   if (!keys.length) return {};
@@ -42,7 +40,6 @@ export async function chooseAndUploadIngredientImage(source: 'photos' | 'files',
     if (!response.ok) throw new Error('The selected image could not be read. Choose another image.');
     byteSize = (await response.blob()).size;
   }
-  if (!TYPES.includes(contentType)) throw new Error('Choose a JPEG, PNG, WebP, or GIF image. Export HEIC/HEIF photos as JPEG first.');
   if (!byteSize) throw new Error('The selected image size could not be read.');
   const key = 'wantiss.goodies.byo.' + itemId + '.' + createAssetUploadId();
   const id = await uploadCmsAsset({ key, uri, fileName, contentType, byteSize, altText: { en: 'Build Your Own ingredient picture' }, status: 'draft' });
