@@ -109,6 +109,9 @@ export function GoodiesConsumerPreview({ editMode = false, contentDraft, assetUr
       S.as = 1;
       S.pf = { ...S.pf, n: 'Demo customer', ph: '2025550100' };
       S.cc = 'w'; S.mode = 'delivery'; S.pay = 'cash'; S.cs = 0; S.sch = 0; S.tip = 0; S.note = '';
+      S.hasWallet = true; S.wallet = 25;
+      S.cards = [{ id: 'preview-demo-card', b: 'Demo card', l4: '4242', expiryMonth: 12, expiryYear: 2030, isDefault: true }];
+      S.selectedCardId = 'preview-demo-card';
     }
     const now = Date.now();
     S.stack = route === 'home'
