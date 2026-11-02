@@ -43,7 +43,12 @@ export function LivePayments() {
   }, []);
 
   const load = useCallback(async () => {
-    if (previewOnly) { setState('signedout'); return; }
+    if (previewOnly) {
+      S.hasWallet = true; S.wallet = 0;
+      S.cards = [{id: 'preview-demo-card', b: 'Demo card', l4: '4242', expiryMonth: 12, expiryYear: 2030, isDefault: true}];
+      S.selectedCardId = 'preview-demo-card';
+      setState('ready'); loaded.current = true; return;
+    }
     if (!loaded.current) setState('loading');
     try {
       const {data: auth, error: authError} = await supabase.auth.getUser();
@@ -143,11 +148,12 @@ export function LivePayments() {
   return (<View>
     <Bar title="Wallet and payments" onBack={back} />
     <View style={{paddingHorizontal: 16}}>
+      {previewOnly ? <Card style={{borderColor: th.br, marginBottom: 12}}><T weight="800">Demo preview only</T><T size={12.5} color={th.mut} style={{marginTop: 4}}>Sample wallet and card details for editing checkout screens. No real balance, saved card, charge or payment request is used.</T></Card> : null}
       {S.hasWallet ? (
         <View style={{borderRadius: 18, padding: 14, backgroundColor: th.br, marginBottom: 12}}>
-          <T size={13} color="#fff" style={{opacity: 0.9}}>Wantiss Wallet</T>
+          <T size={13} color="#fff" style={{opacity: 0.9}}>{previewOnly ? 'Demo Wantiss Wallet' : 'Wantiss Wallet'}</T>
           <T size={34} weight="800" color="#fff" style={{marginTop: 4, marginBottom: 14}}>{money(S.wallet)}</T>
-          <Pressable accessibilityRole="button" onPress={() => toast('Wallet top-up is not available yet.')} style={{height: 44, borderRadius: 16, backgroundColor: '#fff', alignItems: 'center', justifyContent: 'center'}}><T size={15} weight="800" color={th.brd}>Top up (coming soon)</T></Pressable>
+          <Pressable accessibilityRole="button" onPress={() => toast(previewOnly ? 'Demo preview only. No funds can be added.' : 'Wallet top-up is not available yet.')} style={{height: 44, borderRadius: 16, backgroundColor: '#fff', alignItems: 'center', justifyContent: 'center'}}><T size={15} weight="800" color={th.brd}>Top up (coming soon)</T></Pressable>
         </View>
       ) : (
         <Card>
@@ -184,7 +190,7 @@ export function LivePayments() {
           <T size={13} color={th.mut} align="center" style={{marginTop: 4, lineHeight: 19}}>Saved cards will appear here and can be used at checkout.</T>
         </Card>
       )}
-      <Cta ghost label="+ Add a card" onPress={() => toast('Adding cards is not available yet.')} />
+      <Cta ghost label={previewOnly ? 'Demo card · no real card attached' : '+ Add a card'} disabled={previewOnly} onPress={() => toast('Adding cards is not available yet.')} />
       <T size={12} color={th.mut} style={{marginTop: 10}}>Only the brand, last 4 digits and expiry are shown.</T>
     </View>
   </View>);
