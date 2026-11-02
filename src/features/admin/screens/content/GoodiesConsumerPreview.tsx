@@ -89,6 +89,27 @@ export function GoodiesConsumerPreview({ editMode = false, contentDraft, assetUr
     BYO.cfg[previewStoreId] = previewBuilders;
     const chosen = previewBuilders.find((builder: any) => builder.id === (builderId || selectedBuilder?.id)) || previewBuilders[0];
     const param = route === 'store' ? storeId : route === 'byo' ? previewStoreId + '|' + chosen.id : route === 'product' ? itemId : undefined;
+    if (route === 'checkout') {
+      // A local-only fixture gives the checkout editor a complete journey without
+      // loading a real customer's cart, wallet, address or payment methods.
+      const checkoutStoreId = '__admin_goodies_checkout_preview__';
+      const checkoutItemId = '__admin_goodies_checkout_item__';
+      STB[checkoutStoreId] = {
+        id: checkoutStoreId, n: 'Demo Goodies shop', c: 'groceries', e: '🛍️', bg: 'bg0',
+        r: 0, rv: 0, km: 0, km0: 0, eta: '20–30', eta0: '20–30', fee: 0, min: 0,
+        pr: '', k: 'Demo store', it: [], open: 1, h: 'Open for demo', nx: 'Demo preview',
+        far: false, live: false, acceptScheduledOrders: true,
+      } as any;
+      IT[checkoutItemId] = {
+        id: checkoutItemId, s: checkoutStoreId, n: 'Demo checkout item', p: 5.99,
+        e: '🥭', stock: 1, oos: 0, d: 'Preview-only item', al: '', w: false, restriction: 'none',
+      } as any;
+      S.cart = { sid: checkoutStoreId, lines: [{ k: checkoutItemId, id: checkoutItemId, n: 'Demo checkout item', e: '🥭', p: 5.99, q: 1, d: 'Preview item' }] };
+      S.addr = [{ id: 1, l: 'Demo delivery address', t: '123 Demo Street', apt: '', inst: '', def: 1, z: 0, cc: 'US' }];
+      S.as = 1;
+      S.pf = { ...S.pf, n: 'Demo customer', ph: '2025550100' };
+      S.cc = 'w'; S.mode = 'delivery'; S.pay = 'cash'; S.cs = 0; S.sch = 0; S.tip = 0; S.note = '';
+    }
     const now = Date.now();
     S.stack = route === 'home'
       ? [{ r: 'home', u: now }]
