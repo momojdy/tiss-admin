@@ -62,6 +62,8 @@ export const staffByName = (n: string) => db.STAFF.find((s) => s.n === n);
 export const me = (): StaffMember => staffByName(session.view) || db.STAFF[0];
 export const realMe = (): StaffMember | undefined => (session.who ? staffByName(session.who) : undefined);
 export const hasRight = (r: string) => session.userId ? session.status === 'active' && (session.role === 'super_admin' || permissionLevel(r.toLowerCase().replace(/[^a-z0-9]+/g, '.')) >= 1) : acs(me()).rights.includes(r);
+/** Numeric permission level for a single server-granted right (0 none, 1 view, 2 edit, 3 manage). */
+export const rightLevel = (r: string) => session.userId ? session.status !== 'active' ? 0 : session.role === 'super_admin' ? 3 : permissionLevel(r.toLowerCase().replace(/[^a-z0-9]+/g, '.')) : acs(me()).rights.includes(r) ? 2 : 0;
 export const secLv = (i: number) => {
   if (!session.userId) return acs(me()).lv[i] ?? 0;
   if (session.status !== 'active') return 0;
