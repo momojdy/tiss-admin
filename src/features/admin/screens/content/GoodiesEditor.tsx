@@ -249,7 +249,7 @@ export function GoodiesEditor({ canEdit, canPublish }: { canEdit: boolean; canPu
     if (target) target[key] = key === 'ord' ? (Number(value) || 0) : value;
   });
   const metaInput = (kind: GoodiesSelection['kind'], entry: any, key: string, label: string) => (
-    <View style={{ flex: 1, minWidth: 120, marginTop: 6 }}>
+    <View style={{ width: key === 'ord' ? 104 : undefined, maxWidth: key === 'ord' ? 104 : undefined, flex: key === 'ord' ? 0 : 1, flexShrink: 1, minWidth: 0, marginTop: 6 }}>
       <Txt size={9.5} mut>{label}</Txt>
       <TextInput value={String(entry[key] ?? '')} onChangeText={(value) => setMeta(kind, entry.id, key, value)} editable={canEdit && !busy && !assetBusy} keyboardType={key === 'ord' ? 'number-pad' : 'default'} maxLength={key === 'ord' ? 4 : undefined} style={[fieldStyle, key === 'ord' ? { width: '100%', minWidth: 0, textAlign: 'center', paddingHorizontal: 6 } : null]} />
     </View>
