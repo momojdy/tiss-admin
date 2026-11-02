@@ -284,7 +284,6 @@ export function GoodiesEditor({ canEdit, canPublish }: { canEdit: boolean; canPu
         if (!response.ok) throw new Error('The selected image could not be read. Choose another image.');
         byteSize = (await response.blob()).size;
       }
-      if (!['image/jpeg', 'image/png', 'image/webp', 'image/gif'].includes(contentType)) throw new Error('Choose a JPEG, PNG, WebP, or GIF image. Export HEIC/HEIF photos as JPEG first.');
       if (!byteSize) throw new Error('The selected image size could not be read.');
       setAssetBusy(source);
       const key = 'wantiss.goodies.home.' + selection.kind + '.' + selection.id + '.' + createAssetUploadId();
