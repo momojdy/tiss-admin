@@ -166,7 +166,7 @@ function CustomPlate({b}: {b: Builder}) {
   return (
     <View style={{alignItems: 'center', paddingHorizontal: 16}}>
       <Text style={{fontSize: 84, lineHeight: 92}}>{b.emoji}</Text>
-      <View style={{flexDirection: 'row', flexWrap: 'wrap', gap: 6, justifyContent: 'center', marginTop: 8}}>{(names.length ? names : [label('lbl.byoPickBelow', 'Pick your options below')]).map((x, i) => <View key={i} style={{backgroundColor: 'rgba(255,255,255,.12)', borderRadius: 14, paddingHorizontal: 10, paddingVertical: 5}}><T size={12.5} color="#F5F5F5">{x}</T></View>)}</View>
+      <View style={{flexDirection: 'row', flexWrap: 'wrap', gap: 6, justifyContent: 'center', marginTop: 8}}>{(names.length ? names : [label('lbl.byoPickBelow', 'Pick your options below')]).map((x, i) => <View key={i} style={{backgroundColor: 'rgba(255,255,255,.12)', borderRadius: 14, paddingHorizontal: 10, paddingVertical: 5}}>{names.length ? <T size={12.5} color="#F5F5F5">{x}</T> : <ByoLabel id="lbl.byoPickBelow" fallback="Pick your options below" size={12.5} color="#F5F5F5" />}</View>)}</View>
     </View>
   );
 }
@@ -249,9 +249,9 @@ export function ByoFoot() {
       {why ? <T size={12.5} color={th.red} align="center" style={{marginBottom: 8}}>{why}</T> : null}
       <View style={{flexDirection: 'row', alignItems: 'center', gap: 12}}>
         <Stepper q={BD.q} onMinus={() => bzQty(-1)} onPlus={() => bzQty(1)} />
-        <View style={{flex: 1}}><Cta label={(BD.edit ? label('lbl.byoSaveChanges', 'Save changes') : label('lbl.byoAddOrder', 'Add to Order')) + ' · ' + money(tot)} disabled={!ck.ok || !!BD.busy} onPress={bzAddOrder} /></View>
+        <View style={{flex: 1}}><Sel sel={{kind: 'label', id: BD.edit ? 'lbl.byoSaveChanges' : 'lbl.byoAddOrder', field: 'text'}}><Cta label={(BD.edit ? label('lbl.byoSaveChanges', 'Save changes') : label('lbl.byoAddOrder', 'Add to Order')) + ' · ' + money(tot)} disabled={!ck.ok || !!BD.busy} onPress={bzAddOrder} /></Sel></View>
       </View>
-      {BD.edit ? <View style={{marginTop: 8}}><Cta small ghost label={label('lbl.byoCancel', 'Cancel')} onPress={bzCancel} /></View> : null}
+      {BD.edit ? <View style={{marginTop: 8}}><Sel sel={{kind: 'label', id: 'lbl.byoCancel', field: 'text'}}><Cta small ghost label={label('lbl.byoCancel', 'Cancel')} onPress={bzCancel} /></Sel></View> : null}
     </View>
   );
 }
@@ -296,7 +296,7 @@ export function ByoScreen({p}: {p: string}) {
         {b.notes ? (
           <View style={{marginTop: 18}}>
             <ByoLabel id="lbl.byoNotesPrompt" fallback="Anything else we should know?" size={14} weight="700" style={{marginBottom: 6}} />
-            <TextInput value={BD.note} onChangeText={bzNote} maxLength={200} multiline placeholder={label('lbl.byoNotesPlaceholder', 'E.g. light sauce, cut into 8 slices…')} placeholderTextColor={th.mut} style={{minHeight: 64, fontSize: 15, color: th.ink, backgroundColor: th.soft, borderWidth: 1, borderColor: th.line, borderRadius: 12, padding: 12, textAlignVertical: 'top'}} />
+            <Sel sel={{kind: 'label', id: 'lbl.byoNotesPlaceholder', field: 'text'}}><TextInput value={BD.note} onChangeText={bzNote} maxLength={200} multiline placeholder={label('lbl.byoNotesPlaceholder', 'E.g. light sauce, cut into 8 slices…')} placeholderTextColor={th.mut} style={{minHeight: 64, fontSize: 15, color: th.ink, backgroundColor: th.soft, borderWidth: 1, borderColor: th.line, borderRadius: 12, padding: 12, textAlignVertical: 'top'}} /></Sel>
             <T size={12} color={th.mut} align="right" style={{marginTop: 3}}>{BD.note.length}/200</T>
           </View>
         ) : null}
