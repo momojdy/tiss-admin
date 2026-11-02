@@ -2,10 +2,10 @@ import React, { useCallback, useEffect, useLayoutEffect, useMemo, useState } fro
 import { Pressable, ScrollView, Text, View } from 'react-native';
 import { GoodiesApp } from '../../goodiesConsumer/GoodiesApp';
 import { emit, IT, S, STB, useGoodies, setPreviewOnly, setEditLocked } from '../../goodiesConsumer/store';
-import { BYO, fromTemplate } from '../../goodiesConsumer/builders/engine';
+import { BYO, bClean, fromTemplate, setBD } from '../../goodiesConsumer/builders/engine';
 import { applyContent, clearContent, setDraftControlled } from '../../goodiesConsumer/content';
 import { resolveForRender } from '../../goodiesConsumer/draft';
-import { EditContext, type GoodiesSelection } from '../../goodiesConsumer/editContext';
+import { EditContext, type BuilderTarget, type GoodiesSelection } from '../../goodiesConsumer/editContext';
 import { PhoneFrame } from './PhoneFrame';
 
 const orange = '#FD802E';
@@ -23,12 +23,16 @@ const screens = [
 ] as const;
 
 /** Renders a resolved copy of the editor-owned draft and prevents consumer loading from overwriting it. */
-export function GoodiesConsumerPreview({ editMode = false, contentDraft, assetUrls, selectedTarget, onSelectTarget }: {
+export function GoodiesConsumerPreview({ editMode = false, contentDraft, assetUrls, selectedTarget, onSelectTarget, savedBuilders, builderTarget, onPickBuilder }: {
   editMode?: boolean;
   contentDraft: any | null;
   assetUrls: Record<string, string>;
   selectedTarget: GoodiesSelection | null;
   onSelectTarget: (target: GoodiesSelection) => void;
+  /** Saved builder configs from the server. When present they replace the built-in samples. */
+  savedBuilders?: any[];
+  builderTarget?: BuilderTarget | null;
+  onPickBuilder?: (target: BuilderTarget) => void;
 }) {
   // Establish the safety boundaries before child screens can mount their effects.
   setPreviewOnly(true);
@@ -37,10 +41,22 @@ export function GoodiesConsumerPreview({ editMode = false, contentDraft, assetUr
 
   // A local-only sample store keeps the real customer Build Your Own screen
   // available in Admin even when no live business has published a builder.
-  const previewBuilders = useMemo(() => [fromTemplate('pizza'), fromTemplate('burger')], []);
+  const sampleBuilders = useMemo(() => [fromTemplate('pizza'), fromTemplate('burger')], []);
+  const previewBuilders = useMemo(() => {
+    const saved = (savedBuilders || []).map((config) => bClean(config)).filter(Boolean) as any[];
+    return saved.length ? saved : sampleBuilders;
+  }, [savedBuilders, sampleBuilders]);
   const [builderMenuOpen, setBuilderMenuOpen] = useState(false);
   const [selectedBuilderId, setSelectedBuilderId] = useState('');
   const selectedBuilder = previewBuilders.find((builder: any) => builder.id === selectedBuilderId) || previewBuilders[0];
+  // Keep the preview store in step with edits and drop the old in-progress order so removed items cannot linger.
+  useEffect(() => {
+    const previewStoreId = '__admin_goodies_builder_preview__';
+    if (!BYO.cfg[previewStoreId]) return;
+    BYO.cfg[previewStoreId] = previewBuilders;
+    setBD(null);
+    emit();
+  }, [previewBuilders]);
   const resolved = useMemo(() => {
     if (!contentDraft) return null;
     try { return resolveForRender(contentDraft, assetUrls); } catch { return null; }
@@ -80,7 +96,7 @@ export function GoodiesConsumerPreview({ editMode = false, contentDraft, assetUr
     emit();
   }, [previewBuilders, selectedBuilder]);
 
-  const editValue = useMemo(() => (editMode ? { selected: selectedTarget, select: onSelectTarget } : null), [editMode, selectedTarget, onSelectTarget]);
+  const editValue = useMemo(() => (editMode ? { selected: selectedTarget, select: onSelectTarget, pick: onPickBuilder, picked: builderTarget || null } : null), [editMode, selectedTarget, onSelectTarget, onPickBuilder, builderTarget]);
 
   return (
     <View style={{ width: '100%', alignItems: 'center' }}>

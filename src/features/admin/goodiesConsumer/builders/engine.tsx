@@ -17,7 +17,7 @@ export type BItem = {id: string; name: string; price: number; free: boolean; ava
 type BGroup = {id: string; name: string; kind: 'one' | 'many'; req: boolean; min: number; max: number; inc: number; me: number; items: BItem[]};
 export type Builder = {id: string; type: 'pizza' | 'burger' | 'custom'; name: string; desc: string; emoji: string; enabled: boolean; available: boolean; base: number; notes: boolean; sizes: {id: string; name: string; add: number; avail: boolean}[]; groups: BGroup[]};
 
-function bClean(b: any): Builder | null {
+export function bClean(b: any): Builder | null {
   try {
     if (!b || typeof b !== 'object' || !b.id || ['pizza', 'burger', 'custom'].indexOf(b.type) < 0) return null;
     const num = (v: any) => Math.max(0, parseFloat(v) || 0);

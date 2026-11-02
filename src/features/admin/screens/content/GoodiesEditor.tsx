@@ -12,6 +12,7 @@ import { OutlineBtn } from '../../ui/Controls';
 import { Txt } from '../../ui/Txt';
 import { GoodiesConsumerPreview } from './GoodiesConsumerPreview';
 import { GoodiesBuilderConfigEditor } from './GoodiesBuilderConfigEditor';
+import type { BuilderTarget } from '../../goodiesConsumer/editContext';
 import { GoodiesIngredientRequests } from './GoodiesIngredientRequests';
 import { PromoColorPicker } from './PromoColorPicker';
 import type { GoodiesSelection } from '../../goodiesConsumer/editContext';
@@ -81,6 +82,9 @@ export function GoodiesEditor({ canEdit, canPublish }: { canEdit: boolean; canPu
   const [assetBusy, setAssetBusy] = useState('');
   const [linkText, setLinkText] = useState('');
   const [pageChoice, setPageChoice] = useState('');
+  const [byoRows, setByoRows] = useState<any[]>([]);
+  const [byoDraft, setByoDraft] = useState<any | null>(null);
+  const [byoFocus, setByoFocus] = useState<BuilderTarget | null>(null);
 
   const clean = useMemo(() => (draft ? sanitizeForSave(draft) : null), [draft]);
   const dirty = !!clean && stable(clean) !== baseline;
@@ -142,7 +146,13 @@ export function GoodiesEditor({ canEdit, canPublish }: { canEdit: boolean; canPu
 
   useEffect(() => { void load(); void loadAssets(); }, [load, loadAssets]);
 
+  const pickBuilder = useCallback((target: BuilderTarget) => {
+    setSelection(null);
+    setByoFocus({ ...target });
+  }, []);
+
   const select = useCallback((target: GoodiesSelection) => {
+    setByoFocus(null);
     setSelection(target);
     setLinkText('');
     // Opening the matching page group keeps the manual editor aligned with
@@ -176,6 +186,11 @@ export function GoodiesEditor({ canEdit, canPublish }: { canEdit: boolean; canPu
   const activePage = pageGroups.some(([page]) => page === pageChoice) ? pageChoice : '';
   const activeEntries = pageGroups.find(([page]) => page === activePage)?.[1] || [];
   const findItem = (d: any, sel: GoodiesSelection) => (d?.[listKeyFor(sel.kind)] || []).find((entry: any) => entry.id === sel.id);
+  /** Saved builders as the phone shows them: the one being edited replaces its saved copy, so changes appear before saving. */
+  const previewBuilderConfigs = useMemo(() => byoRows.map((row: any) => {
+    const live = byoDraft && byoDraft.builder_id === row.builder_id && byoDraft.business_id === row.business_id ? byoDraft : row;
+    return { ...(live.config || {}), id: row.builder_id, enabled: true, available: true };
+  }), [byoRows, byoDraft]);
   const item = selection && draft ? findItem(draft, selection) : null;
   const imageKey = selection ? imageKeyFor(listKeyFor(selection.kind)) : 'img';
 
@@ -418,10 +433,12 @@ export function GoodiesEditor({ canEdit, canPublish }: { canEdit: boolean; canPu
       <Section title="Goodies phone preview">
         <View style={{ alignItems: 'center', paddingVertical: 6 }}>
           {loadState === 'loading' && !draft ? <Txt size={10.5} mut>Loading Goodies content…</Txt> : (
-            <GoodiesConsumerPreview editMode={editMode} contentDraft={draft} assetUrls={assetUrls} selectedTarget={selection} onSelectTarget={select} />
+            <GoodiesConsumerPreview editMode={editMode} contentDraft={draft} assetUrls={assetUrls} selectedTarget={selection} onSelectTarget={select} savedBuilders={previewBuilderConfigs} builderTarget={byoFocus} onPickBuilder={pickBuilder} />
           )}
         </View>
       </Section>
+
+      {editMode ? <GoodiesBuilderConfigEditor canEdit={canEdit} focus={byoFocus} onRows={setByoRows} onDraft={setByoDraft} /> : null}
 
       {editMode && selection ? (
         <Section title={kindName[selection.kind] + ' · ' + fieldName[selection.field]}>
@@ -590,7 +607,6 @@ export function GoodiesEditor({ canEdit, canPublish }: { canEdit: boolean; canPu
               </View>
             ))}
           </Section>
-          <GoodiesBuilderConfigEditor canEdit={canEdit} />
           <GoodiesIngredientRequests canEdit={canEdit} />
         </>
       ) : null}

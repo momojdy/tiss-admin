@@ -8,7 +8,7 @@ import {Icon} from '../components/Icon';
 import {T, Circ, Cta, Empty, Stepper, useTheme} from '../components/ui';
 import {S, STB, money, cnt, emit, push} from '../store';
 import {back, browse, go, tab} from '../actions';
-import {Sel} from '../editContext';
+import {Sel, BSel, AddChip} from '../editContext';
 import {ASSETS, LAYOUT, label} from '../content';
 import {BD, Builder, BItem, bGet, bDraft, setBD, units, itemOf, bBreak, bCheck, bzDirty, BYO, bzAdd, bzSub, bzSize, bzUndo, bzQty, bzNote, bzResetAsk, bzAddOrder, bzCancel, bzAnother, bzShop} from './engine';
 import {PSZ, bzr, hs, clamp, shade, pizzaBase, defsXml, shreds, iconXml, hasSymbol} from './pizzaArt';
@@ -221,7 +221,8 @@ function Options({b}: {b: Builder}) {
             <View style={{flexDirection: 'row', alignItems: 'baseline', flexShrink: 1}}><ByoLabel id={'lbl.byoGroup.' + builderLabelSlug(g.name)} fallback={g.name} size={16} weight="800" />{g.kind === 'many' ? <T size={12} color={th.mut} weight="400">{'  ' + us.length + '/' + g.max}</T> : null}</View>
             <T size={12} color={th.mut} align="right">{hint(g)}</T>
           </View>
-          <ScrollView horizontal showsHorizontalScrollIndicator={false} style={{marginHorizontal: -16}} contentContainerStyle={{paddingHorizontal: 16, paddingTop: 10, paddingBottom: 6, gap: 10}}>{g.items.map(it => <OptTile key={it.id} b={b} g={g} it={it} />)}</ScrollView>
+          <ScrollView horizontal showsHorizontalScrollIndicator={false} style={{marginHorizontal: -16}} contentContainerStyle={{paddingHorizontal: 16, paddingTop: 10, paddingBottom: 6, gap: 10}}>{g.items.map(it => <BSel key={it.id} target={{builderId: b.id, part: 'ingredient', groupId: g.id, itemId: it.id}}><OptTile b={b} g={g} it={it} /></BSel>)}</ScrollView>
+          <View style={{flexDirection: 'row', flexWrap: 'wrap', gap: 8}}><AddChip target={{builderId: b.id, part: 'group', groupId: g.id}} label="Edit section" /><AddChip target={{builderId: b.id, part: 'addIngredient', groupId: g.id}} label="Add ingredient" /></View>
         </View>);})}
     </View>
   );
@@ -287,12 +288,13 @@ export function ByoScreen({p}: {p: string}) {
   const s = STB[sid], un = !b.enabled || !b.available || BYO.store[sid] === false || !s.open;
   return (
     <View style={{flex: 1}}>
-      <Header title={b.name} sub={s.n + (BD.edit ? ' · ' + label('lbl.byoEditingItem', 'Editing item') : '')} onBack={back} />
+      <BSel target={{builderId: b.id, part: 'builder'}}><Header title={b.name} sub={s.n + (BD.edit ? ' · ' + label('lbl.byoEditingItem', 'Editing item') : '')} onBack={back} /></BSel>
       <Stage b={b} />
       <ScrollView style={{flex: 1}} contentContainerStyle={{paddingHorizontal: 16, paddingTop: 15, paddingBottom: 20}} keyboardShouldPersistTaps="handled" showsVerticalScrollIndicator={false}>
         {un ? <Warn><T weight="800" size={13}>{label('lbl.byoCurrentlyUnavailable', 'Currently unavailable.')} </T><T size={13}>{s.open ? label('lbl.byoStorePaused', 'The store paused this item.') : label('lbl.byoStoreClosed', '{store} is closed.').replace('{store}', s.n)} {label('lbl.byoCannotAdd', 'You can look, but it cannot be added right now.')}</T></Warn> : null}
         {BD.resumed ? <Warn><T size={13}>{label('lbl.byoResumeDraft', 'Resuming the draft you left earlier.')}</T></Warn> : null}
         <Options b={b} />
+        <AddChip target={{builderId: b.id, part: 'addGroup'}} label="Add section" />
         {b.notes ? (
           <View style={{marginTop: 18}}>
             <ByoLabel id="lbl.byoNotesPrompt" fallback="Anything else we should know?" size={14} weight="700" style={{marginBottom: 6}} />

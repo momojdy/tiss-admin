@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useMemo, useState } from 'react';
+import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { TextInput, View } from 'react-native';
 import { supabase } from '../../lib/supabase';
 import { useTheme } from '../../theme/ThemeContext';
@@ -7,6 +7,7 @@ import { OutlineBtn } from '../../ui/Controls';
 import { Txt } from '../../ui/Txt';
 import { TEMPLATES } from '../../goodiesConsumer/builders/templates';
 import { PromoColorPicker } from './PromoColorPicker';
+import type { BuilderTarget } from '../../goodiesConsumer/editContext';
 
 type BusinessRow = { business_id: string; business_name: string; goodies_store_id: string | null; is_live: boolean };
 
@@ -19,7 +20,13 @@ type BuilderRow = {
   updated_at: string;
 };
 
-export function GoodiesBuilderConfigEditor({ canEdit }: { canEdit: boolean }) {
+export function GoodiesBuilderConfigEditor({ canEdit, focus = null, onRows, onDraft }: {
+  canEdit: boolean;
+  /** The builder part the admin last tapped in the phone preview. */
+  focus?: BuilderTarget | null;
+  onRows?: (rows: BuilderRow[]) => void;
+  onDraft?: (row: BuilderRow | null) => void;
+}) {
   const { c } = useTheme();
   const [rows, setRows] = useState<BuilderRow[]>([]);
   const [businesses, setBusinesses] = useState<BusinessRow[]>([]);
@@ -36,6 +43,10 @@ export function GoodiesBuilderConfigEditor({ canEdit }: { canEdit: boolean }) {
   const [requestedIngredient, setRequestedIngredient] = useState('');
   const [library, setLibrary] = useState<any[]>([]);
   const [colorOpen, setColorOpen] = useState('');
+  const [focusGroup, setFocusGroup] = useState<string | null>(null);
+  const [focusItem, setFocusItem] = useState<string | null>(null);
+  const [merchantRequests, setMerchantRequests] = useState<any[]>([]);
+  const handledFocus = useRef<BuilderTarget | null>(null);
 
   const load = useCallback(async () => {
     setLoading(true); setError(''); setNotice('');
@@ -62,6 +73,43 @@ export function GoodiesBuilderConfigEditor({ canEdit }: { canEdit: boolean }) {
     setLibrary((Array.isArray(data) ? data : []).filter((x: any) => x.active));
   }, []);
   useEffect(() => { void loadLibrary(); }, [loadLibrary]);
+
+  const loadMerchantRequests = useCallback(async () => {
+    const { data } = await supabase.rpc('wantiss_admin_list_ingredient_requests');
+    setMerchantRequests(Array.isArray(data) ? data : []);
+  }, []);
+  useEffect(() => { void loadMerchantRequests(); }, [loadMerchantRequests]);
+
+  useEffect(() => { onRows?.(rows); }, [rows]);
+  useEffect(() => { onDraft?.(selected); }, [selected]);
+
+  // A tap in the phone preview opens that builder here and narrows the editor to the tapped part.
+  useEffect(() => {
+    if (!focus || handledFocus.current === focus) return;
+    const row = rows.find((r) => r.builder_id === focus.builderId);
+    if (!row) {
+      if (!loading && rows.length) { handledFocus.current = focus; setNotice(''); setError('This is a sample builder, so it cannot be edited. Create a builder for a business first, then tap it in the phone.'); }
+      return;
+    }
+    handledFocus.current = focus;
+    setError('');
+    const base: BuilderRow = selected && selected.builder_id === focus.builderId ? selected : JSON.parse(JSON.stringify(row));
+    let next = base;
+    setFocusGroup(null); setFocusItem(null);
+    if (focus.part === 'group' || focus.part === 'ingredient' || focus.part === 'addIngredient') setFocusGroup(focus.groupId || null);
+    if (focus.part === 'ingredient') setFocusItem(focus.itemId || null);
+    if (focus.part === 'addIngredient') {
+      const index = (base.config?.groups || []).findIndex((g: any) => g.id === focus.groupId);
+      setLibraryOpenGroup(index >= 0 ? index : null); setLibrarySearch('');
+    }
+    if (focus.part === 'addGroup' && canEdit) {
+      const group = { id: 'group-' + Date.now().toString(36), name: '', kind: 'many', req: false, min: 0, max: 1, inc: 0, me: 1, items: [] };
+      next = { ...base, config: { ...base.config, groups: [...(base.config?.groups || []), group] } };
+      setFocusGroup(group.id);
+      setNotice('New section added. Name it, add ingredients, then save the builder.');
+    }
+    setSelected(next);
+  }, [focus, rows]);
 
   useEffect(() => {
     let active = true;
@@ -125,6 +173,17 @@ export function GoodiesBuilderConfigEditor({ canEdit }: { canEdit: boolean }) {
     patchConfig({ groups: (selected.config?.groups || []).map((x: any, j: number) => j === gi ? { ...x, items: [...(x.items || []), newItem] } : x) });
     setNotice('Ingredient added to this group. Save the builder to keep the change.');
   };
+  const requestsForBusiness = useMemo(() => merchantRequests.filter((r: any) => selected && r.business_id === selected.business_id && r.status !== 'rejected'), [merchantRequests, selected?.business_id]);
+  const addMerchantRequest = (gi: number, request: any) => {
+    if (!selected || !canEdit || saving) return;
+    const groupItems = (selected.config?.groups || [])[gi]?.items || [];
+    const id = 'requested-' + String(request.id).slice(0, 8);
+    if (groupItems.some((x: any) => x.id === id)) { setNotice('That merchant request is already in this group.'); return; }
+    const lib = library.find((x: any) => x.request_id === request.id || x.id === request.library_id);
+    const newItem = { id, name: String(request.name || ''), price: 0, free: false, avail: false, assetId: lib?.id || null, assetKey: lib?.asset_key || null, col: '#D9A441', requestNote: 'Merchant request (' + request.status + ')' };
+    patchConfig({ groups: (selected.config?.groups || []).map((x: any, j: number) => j === gi ? { ...x, items: [...(x.items || []), newItem] } : x) });
+    setNotice('Merchant request added to this group' + (lib ? ' with its approved artwork' : ' as a draft without artwork') + '. Save the builder to keep it.');
+  };
   const addRequestedIngredient = (gi: number) => {
     const name = requestedIngredient.trim();
     if (!name || !selected || !canEdit || saving) return;
@@ -168,8 +227,8 @@ export function GoodiesBuilderConfigEditor({ canEdit }: { canEdit: boolean }) {
     <Section title="Build Your Own">
       {error ? <Txt size={10.5} color={c.or} style={{ marginBottom: 7 }}>{error}</Txt> : null}
       {notice ? <Txt size={10} mut style={{ marginBottom: 7 }}>{notice}</Txt> : null}
-      {businesses.length ? <Txt size={10.5} weight={600} style={{ marginTop: 3, marginBottom: 5 }}>Create a builder</Txt> : null}
-      {businesses.map((business) => (
+      {!selected && businesses.length ? <Txt size={10.5} weight={600} style={{ marginTop: 3, marginBottom: 5 }}>Create a builder</Txt> : null}
+      {(selected ? [] : businesses).map((business) => (
         <View key={business.business_id} style={{ borderWidth: 1, borderColor: c.bd, borderRadius: 10, padding: 8, marginBottom: 6, flexDirection: 'row', alignItems: 'center', gap: 8 }}>
           <View style={{ flex: 1 }}>
             <Txt size={10.5} weight={500}>{business.business_name}</Txt>
@@ -182,8 +241,8 @@ export function GoodiesBuilderConfigEditor({ canEdit }: { canEdit: boolean }) {
           </View>
         </View>
       ))}
-      {rows.length ? <Txt size={10.5} weight={600} style={{ marginTop: 10, marginBottom: 5 }}>Saved builders</Txt> : null}
-      {rows.map((row) => (
+      {!selected && rows.length ? <Txt size={10.5} weight={600} style={{ marginTop: 10, marginBottom: 5 }}>Saved builders</Txt> : null}
+      {(selected ? [] : rows).map((row) => (
         <View key={row.business_id + ':' + row.builder_id} style={{ borderWidth: 1, borderColor: c.bd, borderRadius: 10, padding: 9, marginBottom: 7 }}>
           <View style={{ flexDirection: 'row', alignItems: 'center', gap: 8 }}>
             <View style={{ flex: 1 }}>
@@ -199,6 +258,8 @@ export function GoodiesBuilderConfigEditor({ canEdit }: { canEdit: boolean }) {
         <View style={{ borderWidth: 1, borderColor: c.bd, borderRadius: 12, padding: 10, marginTop: 4 }}>
           <Txt size={12} weight={600}>{selected.business_name} · Build Your Own</Txt>
           <Txt size={9.5} mut style={{ marginTop: 2 }}>Builder ID: {selected.builder_id}</Txt>
+          {focusGroup || focusItem ? <View style={{ alignSelf: 'flex-start', marginTop: 6 }}><OutlineBtn onPress={() => { setFocusGroup(null); setFocusItem(null); }}>Show whole builder</OutlineBtn></View> : null}
+          {!focusGroup ? (<>
           <View style={{ flexDirection: 'row', flexWrap: 'wrap', gap: 8, marginTop: 10 }}>
             {input('Builder name', selected.config?.name, (v) => patchConfig({ name: v }))}
             {input('Type', selected.config?.type, (v) => patchConfig({ type: v }))}
@@ -234,11 +295,12 @@ export function GoodiesBuilderConfigEditor({ canEdit }: { canEdit: boolean }) {
             </View>
           ))}
 
+          </>) : null}
           <View style={{ flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', marginTop: 12, marginBottom: 5 }}>
             <Txt size={11} weight={600}>Ingredient groups</Txt>
             <OutlineBtn disabled={!canEdit || saving} onPress={() => patchConfig({ groups: [...(selected.config?.groups || []), { id: 'group-' + Date.now().toString(36), name: '', kind: 'many', req: false, min: 0, max: 1, inc: 0, me: 1, items: [] }] })}>Add group</OutlineBtn>
           </View>
-          {(selected.config?.groups || []).map((group: any, gi: number) => (
+          {(selected.config?.groups || []).map((group: any, gi: number) => (focusGroup && group.id !== focusGroup) ? null : (
             <View key={group.id || gi} style={{ borderWidth: 1, borderColor: c.bd, borderRadius: 9, padding: 8, marginTop: 7 }}>
               {input('Group name', group.name, (v) => patchConfig({ groups: selected.config.groups.map((x: any, j: number) => j === gi ? { ...x, name: v } : x) }))}
               <View style={{ flexDirection: 'row', flexWrap: 'wrap', gap: 6, marginBottom: 4 }}>
@@ -269,13 +331,17 @@ export function GoodiesBuilderConfigEditor({ canEdit }: { canEdit: boolean }) {
                     </OutlineBtn>
                   ))}
                   {!ingredientLibrary.some((sourceGroup: any) => sourceGroup.items.some((ingredient: any) => !librarySearch.trim() || (ingredient.name + ' ' + sourceGroup.name).toLowerCase().includes(librarySearch.trim().toLowerCase()))) ? <Txt size={9.5} mut>No matching ingredients in this list.</Txt> : null}
-                  <Txt size={10.5} weight={600} style={{ marginTop: 10 }}>Add an ingredient from a restaurant request</Txt>
+                  <Txt size={10.5} weight={600} style={{ marginTop: 10 }}>Requests from this merchant</Txt>
+                  {requestsForBusiness.length ? requestsForBusiness.map((request: any) => (
+                    <OutlineBtn key={request.id} disabled={!canEdit || saving} onPress={() => addMerchantRequest(gi, request)}>{'Add · ' + request.name + ' · ' + request.status}</OutlineBtn>
+                  )) : <Txt size={9.5} mut>No requests from this merchant.</Txt>}
+                  <Txt size={10.5} weight={600} style={{ marginTop: 10 }}>Add an ingredient by name</Txt>
                   <TextInput value={requestedIngredient} onChangeText={setRequestedIngredient} placeholder="Type the requested ingredient name…" placeholderTextColor={c.mut} style={fieldStyle} />
                   <OutlineBtn disabled={!canEdit || saving || !requestedIngredient.trim()} onPress={() => addRequestedIngredient(gi)}>Add requested ingredient</OutlineBtn>
                   <OutlineBtn onPress={() => setLibraryOpenGroup(null)} disabled={saving}>Close ingredient list</OutlineBtn>
                 </View>
               ) : null}
-              {(group.items || []).map((item: any, ii: number) => (
+              {(group.items || []).map((item: any, ii: number) => (focusItem && item.id !== focusItem) ? null : (
                 <View key={item.id || ii} style={{ borderTopWidth: 1, borderColor: c.bd, paddingTop: 7, marginTop: 3 }}>
                   <View style={{ flexDirection: 'row', flexWrap: 'wrap', gap: 8 }}>
                     {input('Ingredient name', item.name, (v) => patchConfig({ groups: selected.config.groups.map((x: any, j: number) => j === gi ? { ...x, items: x.items.map((it: any, k: number) => k === ii ? { ...it, name: v } : it) } : x) }))}
