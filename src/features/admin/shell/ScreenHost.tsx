@@ -1,6 +1,6 @@
 import { ReactNode } from 'react';
 import { View } from 'react-native';
-import { secLv, SCREEN_SECTION } from '../state/access';
+import { secLv, SCREEN_SECTION, rightLevel } from '../state/access';
 import { useDb } from '../state/db';
 import { useRequestAccess } from '../overlays/GrantDrawers';
 import { Card } from '../ui/Card';
@@ -21,6 +21,7 @@ import { CustomerPageEditorScreen } from '../screens/content/CustomerPageEditorS
 import { BusinessDetailsScreen } from '../screens/ecosystem/BusinessDetailsScreen';
 import { PotssyAdminScreen } from '../screens/potssy/PotssyAdminScreen';
 import { BrandingScreen } from '../screens/content/BrandingScreen';
+import { GoodiesIngredientRequests } from '../screens/content/GoodiesIngredientRequests';
 
 /** Unported screens render a placeholder until implemented. */
 const SCREENS: Partial<Record<ScreenId, () => ReactNode>> = {
@@ -38,6 +39,7 @@ const SCREENS: Partial<Record<ScreenId, () => ReactNode>> = {
   business: () => <BusinessDetailsScreen />,
   potssy: () => <PotssyAdminScreen />,
   branding: () => <BrandingScreen />,
+  goodiesRequests: () => <GoodiesIngredientRequests canEdit={rightLevel('goodies.requests') >= 2} />,
 };
 
 function NoAccess({ sec }: { sec: number }) {
@@ -66,7 +68,7 @@ function NotPorted({ id }: { id: ScreenId }) {
 export function ScreenHost() {
   useDb();
   const { screen } = useNav();
-  const allowed = secLv(SCREEN_SECTION[screen]) > 0;
+  const allowed = screen === 'goodiesRequests' ? rightLevel('goodies.requests') > 0 : secLv(SCREEN_SECTION[screen]) > 0;
   const render = SCREENS[screen];
   return <View>{!allowed ? <NoAccess sec={SCREEN_SECTION[screen]} /> : render ? render() : <NotPorted id={screen} />}</View>;
 }
