@@ -10,7 +10,7 @@ export interface Item {
 export interface Store {
   id: string; businessId?: string; n: string; c: string; e: string; bg: string; r: number; rv: number; km: number; eta: string; fee: number; min: number;
   pr: string; k: string; it: Item[]; km0: number; eta0: string; open: number; h: string; nx: string; far?: boolean; live?: boolean;
-  logo?: string | null; cover?: string | null; acceptScheduledOrders?: boolean; scheduledOrderStartMinutes?: number; scheduleHours?: Record<string, {open: string; close: string; closed: boolean}>; businessName?: string; businessDescription?: string; businessPhone?: string; businessEmail?: string; businessWebsite?: string; businessAddress?: string; businessCity?: string; businessCountry?: string; businessDeliveryModes?: string[]; businessLogoUrl?: string;
+  logo?: string | null; cover?: string | null; thumbnail?: string | null; acceptScheduledOrders?: boolean; scheduledOrderStartMinutes?: number; scheduleHours?: Record<string, {open: string; close: string; closed: boolean}>; businessName?: string; businessDescription?: string; businessPhone?: string; businessEmail?: string; businessWebsite?: string; businessAddress?: string; businessCity?: string; businessCountry?: string; businessDeliveryModes?: string[]; businessLogoUrl?: string;
 }
 export interface Promo {c: string; t: string; d: string; min: number; ty: 'pct' | 'ship'; v?: number; st?: string}
 export interface Address {id: number; l: string; t: string; apt: string; inst: string; def: number; z: number; cc?: string}
