@@ -3,7 +3,7 @@ import { Image, Pressable, TextInput, View } from 'react-native';
 import * as ImagePicker from 'expo-image-picker';
 import * as DocumentPicker from 'expo-document-picker';
 import { supabase } from '../../lib/supabase';
-import { listCmsAssets, publishCmsAsset, publishCmsVersion, saveCmsVersion, uploadCmsAsset } from '../../lib/adminBackend';
+import { createAssetUploadId, listCmsAssets, publishCmsAsset, publishCmsVersion, saveCmsVersion, uploadCmsAsset } from '../../lib/adminBackend';
 import { fetchPublishedWantissContent } from '../../lib/wantissCms';
 import { useTheme } from '../../theme/ThemeContext';
 import { clone } from '../../lib/clone';
@@ -251,7 +251,7 @@ export function GoodiesEditor({ canEdit, canPublish }: { canEdit: boolean; canPu
   const metaInput = (kind: GoodiesSelection['kind'], entry: any, key: string, label: string) => (
     <View style={{ flex: 1, minWidth: 120, marginTop: 6 }}>
       <Txt size={9.5} mut>{label}</Txt>
-      <TextInput value={String(entry[key] ?? '')} onChangeText={(value) => setMeta(kind, entry.id, key, value)} editable={canEdit && !busy && !assetBusy} style={fieldStyle} />
+      <TextInput value={String(entry[key] ?? '')} onChangeText={(value) => setMeta(kind, entry.id, key, value)} editable={canEdit && !busy && !assetBusy} keyboardType={key === 'ord' ? 'number-pad' : 'default'} maxLength={key === 'ord' ? 4 : undefined} style={[fieldStyle, key === 'ord' ? { width: '100%', minWidth: 0, textAlign: 'center', paddingHorizontal: 6 } : null]} />
     </View>
   );
   const toggleLive = (kind: GoodiesSelection['kind'], entry: any, key: string, active: string, inactive: string) => (
@@ -287,7 +287,7 @@ export function GoodiesEditor({ canEdit, canPublish }: { canEdit: boolean; canPu
       if (!['image/jpeg', 'image/png', 'image/webp', 'image/gif'].includes(contentType)) throw new Error('Choose a JPEG, PNG, WebP, or GIF image. Export HEIC/HEIF photos as JPEG first.');
       if (!byteSize) throw new Error('The selected image size could not be read.');
       setAssetBusy(source);
-      const key = 'wantiss.goodies.home.' + selection.kind + '.' + selection.id + '.' + crypto.randomUUID();
+      const key = 'wantiss.goodies.home.' + selection.kind + '.' + selection.id + '.' + createAssetUploadId();
       const id = await uploadCmsAsset({ key, uri, fileName, contentType, byteSize, altText: { en: 'Goodies Home ' + selection.kind + ' image' }, status: 'draft' });
       setPendingAssets((current) => ({ ...current, [key]: id }));
       setImage({ assetKey: key });
