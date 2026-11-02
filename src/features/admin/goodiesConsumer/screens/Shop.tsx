@@ -201,7 +201,7 @@ const IcBox = ({icon}: {icon: string}) => {const th = useTheme(); return <View s
 export function Checkout() {
   useEffect(() => { void refreshLiveSchedules(); void refreshPaymentOptions(); }, []);
   const th = useTheme(), t = totals(), pk = isPk(), a = addr(), st = t.st!, stp = ['Delivery', 'Time', 'Payment', 'Review'];
-  const PAYON: any = fees().pay, allPays: [string, string, string, string][] = [['wallet', 'Wantiss Wallet', S.hasWallet ? 'Balance ' + money(S.wallet) : 'Wallet not created', 'wallet'], ['moncash', 'MonCash', 'Not available for live Goodies orders', 'phone'], ['card', 'Credit / debit card', S.cards.length ? S.cards.length + ' saved card' + (S.cards.length === 1 ? '' : 's') : 'Add a card in Wallet settings', 'card'], ['cash', 'Cash on ' + (pk ? 'pickup' : 'delivery'), 'Pay when you receive it', 'bag']], pays = allPays.filter(p => PAYON[({wallet: 'Wallet', moncash: 'MonCash', card: 'Card', cash: 'Cash'} as any)[p[0]]] && (providerInfo.demo || p[0] !== 'moncash'));
+  const PAYON: any = fees().pay, allPays: [string, string, string, string][] = [['wallet', 'Wantiss Wallet', S.hasWallet ? 'Balance ' + money(S.wallet) : 'Wallet not created', 'wallet'], ['moncash', 'MonCash', 'Not available for live Goodies orders', 'phone'], ['card', 'Credit / debit card', S.cards.length ? S.cards.length + ' saved card' + (S.cards.length === 1 ? '' : 's') : 'Add a card in Wallet settings', 'card'], ['cash', 'Cash on ' + (pk ? 'pickup' : 'delivery'), 'Pay when you receive it', 'bag']], pays = allPays.filter(p => PAYON[({wallet: 'Wallet', moncash: 'MonCash', card: 'Card', cash: 'Cash'} as any)[p[0]]] && (previewOnly || providerInfo.demo || p[0] !== 'moncash'));
   const ct = ctOf();
   let body: any = null;
   if (S.cs === 0) body = (<>
@@ -242,7 +242,7 @@ export function Checkout() {
         <Row><Icon name="card" size={20} color={th.ink} /><View style={{flex: 1}}><T size={13.5} weight="700">{card.b} •••• {card.l4}{card.isDefault ? ' · Default' : ''}</T><T size={11.5} color={th.mut}>{card.expiryMonth && card.expiryYear ? 'Expires ' + String(card.expiryMonth).padStart(2,'0') + '/' + card.expiryYear : 'Saved securely with Stripe'}</T></View></Row>
       </Radio>) : <><Empty title="No saved cards" text="Add a card in Wallet settings to pay for Goodies orders." /><Cta label="Add a card" onPress={() => go('payments')} /></>}
     </Card> : null}
-    {!providerInfo.demo ? <T size={12} color={th.mut}>{S.pay === 'card' ? 'Your saved card is authorized and charged securely by Stripe. If authorization fails, your order will not be placed.' : 'Wantiss Wallet payments debit your available balance.'}</T> : <T size={12} color={th.mut}>Demo only. No real payment is taken.</T>}
+    {!previewOnly && !providerInfo.demo ? <T size={12} color={th.mut}>{S.pay === 'card' ? 'Your saved card is authorized and charged securely by Stripe. If authorization fails, your order will not be placed.' : 'Wantiss Wallet payments debit your available balance.'}</T> : <T size={12} color={th.mut}>Demo preview only. No real payment is taken and no order is sent to a shop.</T>}
   </>);
   if (S.cs === 3) body = (<>
     <Card><T weight="700">{st.n}</T>{S.cart.lines.map((l: any) => <Row key={l.k} sp style={{marginTop: 8, alignItems: 'flex-start'}}><View style={{flex: 1}}><T size={14}>{l.q}× {l.n}</T>{l.d ? <T size={12} color={th.mut}>{l.d}</T> : null}</View><T size={14}>{money(l.p * l.q)}</T></Row>)}</Card>
@@ -264,12 +264,12 @@ export const CheckoutFoot = () => <Cta label={S.cs === 3 ? 'Place order · ' + m
 
 export function Confirm({id}: {id: string}) {
   const th = useTheme(), o = S.orders.filter((x: any) => x.id === id)[0];
-  if (!o || !o.backendId || !STB[o.sid]) return <View><Bar title="Order" onBack={back} /><Empty emoji="📦" title="Order unavailable" text="This order is not available from the live Wantiss order service." button="Go home" onPress={browse} /></View>;
+  if (!o || (!o.backendId && !previewOnly) || !STB[o.sid]) return <View><Bar title="Order" onBack={back} /><Empty emoji="📦" title="Order unavailable" text="This order is not available from the live Wantiss order service." button="Go home" onPress={browse} /></View>;
   return (
     <View style={{paddingHorizontal: 16, paddingTop: 50, alignItems: 'center'}}>
       <Text style={{fontSize: 70}}>✅</Text>
-      <T size={24} weight="800" style={{marginTop: 10, marginBottom: 4}}>Order placed</T>
-      <T color={th.mut} align="center">Order {o.id} with {STB[o.sid].n}.</T>
+      <T size={24} weight="800" style={{marginTop: 10, marginBottom: 4}}>{previewOnly ? 'Demo checkout completed' : 'Order placed'}</T>
+      <T color={th.mut} align="center">{previewOnly ? 'Preview only · no real order was sent and no payment was taken.' : 'Order ' + o.id + ' with ' + STB[o.sid].n + '.'}</T>
       <View style={{alignSelf: 'stretch', marginTop: 20}}>
         <Sum rows={o.lines.map((l: any) => [l.q + '× ' + l.n, money(l.p * l.q)])} total={['Total', money(o.total)]} />
         <Cta label="Track order" onPress={() => go('track', o.id)} /><View style={{height: 10}} /><Cta ghost label="Back to Goodies" onPress={() => tab('home')} />
