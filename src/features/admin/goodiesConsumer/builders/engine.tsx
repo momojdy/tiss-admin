@@ -3,6 +3,7 @@ import React from 'react';
 import {View, Pressable} from 'react-native';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import {supabase} from '../../lib/supabase';
+import {fetchPublishedWantissContent} from '../../lib/wantissCms';
 import {previewOnly, S, STB, ui, toast, emit, save, push, navBack, cur, hooks, money} from '../store';
 import {TEMPLATES} from './templates';
 import {T, useTheme, Tile} from '../components/ui';
@@ -13,7 +14,7 @@ const r2 = (n: number) => Math.round(n * 100) / 100;
 const cl = <X,>(o: X): X => JSON.parse(JSON.stringify(o));
 const rid = () => Math.random().toString(36).slice(2, 10);
 
-export type BItem = {id: string; name: string; price: number; free: boolean; avail: boolean; assetId: string | null; col: string; max?: number};
+export type BItem = {id: string; name: string; price: number; free: boolean; avail: boolean; assetId: string | null; col: string; max?: number; img?: {assetKey?: string; data?: string}; bg?: string};
 type BGroup = {id: string; name: string; kind: 'one' | 'many'; req: boolean; min: number; max: number; inc: number; me: number; items: BItem[]};
 export type Builder = {id: string; type: 'pizza' | 'burger' | 'custom'; name: string; desc: string; emoji: string; enabled: boolean; available: boolean; base: number; notes: boolean; sizes: {id: string; name: string; add: number; avail: boolean}[]; groups: BGroup[]};
 
@@ -29,7 +30,7 @@ export function bClean(b: any): Builder | null {
         const one = g.kind === 'one', max = one ? 1 : Math.max(1, parseInt(g.max, 10) || 1);
         return {
           id: String(g.id), name: String(g.name || 'Options').slice(0, 40), kind: one ? 'one' : 'many', req: !!g.req, min: one ? (g.req ? 1 : 0) : Math.max(0, parseInt(g.min, 10) || 0), max, inc: one ? 0 : Math.max(0, parseInt(g.inc, 10) || 0), me: one ? 1 : Math.max(1, parseInt(g.me, 10) || max),
-          items: (Array.isArray(g.items) ? g.items : []).filter((i: any) => i && i.id).map((i: any) => ({id: String(i.id), name: String(i.name || 'Item').slice(0, 40), price: num(i.price), free: !!i.free, avail: i.avail !== false, assetId: i.assetId ? String(i.assetId) : null, col: /^#[0-9a-f]{6}$/i.test(i.col) ? i.col : '#D9A441', max: i.max ? Math.max(1, parseInt(i.max, 10) || 1) : undefined})),
+          items: (Array.isArray(g.items) ? g.items : []).filter((i: any) => i && i.id).map((i: any) => ({id: String(i.id), name: String(i.name || 'Item').slice(0, 40), price: num(i.price), free: !!i.free, avail: i.avail !== false, assetId: i.assetId ? String(i.assetId) : null, col: /^#[0-9a-f]{6}$/i.test(i.col) ? i.col : '#D9A441', max: i.max ? Math.max(1, parseInt(i.max, 10) || 1) : undefined, img: i.img && typeof i.img === 'object' ? {assetKey: i.img.assetKey ? String(i.img.assetKey) : undefined, data: typeof i.img.data === 'string' ? i.img.data : undefined} : undefined, bg: /^#[0-9a-f]{6}$/i.test(i.bg) ? i.bg : undefined})),
         };
       }),
     };
@@ -65,6 +66,15 @@ export async function loadBuilders() {
         const rows = (data || []).filter((row: any) => row.business_id === store.businessId);
         BYO.cfg[store.id] = rows.map((row: any) => bClean(row.config)).filter((b: Builder | null): b is Builder => !!b && b.enabled && b.available);
       }
+      // Ingredient pictures the admin uploaded are published assets; attach their links.
+      try {
+        const remote = await fetchPublishedWantissContent('en');
+        const urlByKey = new Map(remote.assets.map((a: any) => [a.asset_key, a.url]));
+        Object.values(BYO.cfg).forEach((list) => list.forEach((b) => b.groups.forEach((g) => g.items.forEach((it) => {
+          const url = it.img?.assetKey ? urlByKey.get(it.img.assetKey) : undefined;
+          if (it.img && url) it.img.data = String(url);
+        }))));
+      } catch (e) {}
     }
   } catch (e) {
     // If the live builder read fails, fail closed: don't offer locally cached custom items.

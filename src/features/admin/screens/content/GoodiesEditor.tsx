@@ -14,6 +14,7 @@ import { GoodiesConsumerPreview } from './GoodiesConsumerPreview';
 import { GoodiesBuilderConfigEditor } from './GoodiesBuilderConfigEditor';
 import type { BuilderTarget } from '../../goodiesConsumer/editContext';
 import { GoodiesIngredientRequests } from './GoodiesIngredientRequests';
+import { signedUrlsForKeys } from './builderImages';
 import { PromoColorPicker } from './PromoColorPicker';
 import type { GoodiesSelection } from '../../goodiesConsumer/editContext';
 import {
@@ -85,6 +86,7 @@ export function GoodiesEditor({ canEdit, canPublish }: { canEdit: boolean; canPu
   const [byoRows, setByoRows] = useState<any[]>([]);
   const [byoDraft, setByoDraft] = useState<any | null>(null);
   const [byoFocus, setByoFocus] = useState<BuilderTarget | null>(null);
+  const [byoUrls, setByoUrls] = useState<Record<string, string>>({});
 
   const clean = useMemo(() => (draft ? sanitizeForSave(draft) : null), [draft]);
   const dirty = !!clean && stable(clean) !== baseline;
@@ -189,8 +191,19 @@ export function GoodiesEditor({ canEdit, canPublish }: { canEdit: boolean; canPu
   /** Saved builders as the phone shows them: the one being edited replaces its saved copy, so changes appear before saving. */
   const previewBuilderConfigs = useMemo(() => byoRows.map((row: any) => {
     const live = byoDraft && byoDraft.builder_id === row.builder_id && byoDraft.business_id === row.business_id ? byoDraft : row;
-    return { ...(live.config || {}), id: row.builder_id, enabled: true, available: true };
-  }), [byoRows, byoDraft]);
+    const groups = (live.config?.groups || []).map((g: any) => ({ ...g, items: (g.items || []).map((it: any) => (it?.img?.assetKey && byoUrls[it.img.assetKey] ? { ...it, img: { ...it.img, data: byoUrls[it.img.assetKey] } } : it)) }));
+    return { ...(live.config || {}), groups, id: row.builder_id, enabled: true, available: true };
+  }), [byoRows, byoDraft, byoUrls]);
+  // Pictures uploaded for ingredients: fetch preview links for any not loaded yet.
+  useEffect(() => {
+    const keys = new Set<string>();
+    [...byoRows.map((r: any) => r.config), byoDraft?.config].forEach((cfg: any) => (cfg?.groups || []).forEach((g: any) => (g.items || []).forEach((it: any) => { if (it?.img?.assetKey) keys.add(it.img.assetKey); })));
+    const missing = Array.from(keys).filter((k) => !byoUrls[k]);
+    if (!missing.length) return;
+    let live = true;
+    signedUrlsForKeys(missing).then((found) => { if (live && Object.keys(found).length) setByoUrls((current) => ({ ...current, ...found })); }).catch(() => {});
+    return () => { live = false; };
+  }, [byoRows, byoDraft]);
   const item = selection && draft ? findItem(draft, selection) : null;
   const imageKey = selection ? imageKeyFor(listKeyFor(selection.kind)) : 'img';
 
@@ -413,6 +426,13 @@ export function GoodiesEditor({ canEdit, canPublish }: { canEdit: boolean; canPu
             </View>
           </View>
         ) : null}
+        {editMode ? (
+          <View style={{ marginTop: 10 }}>
+            <Txt size={11} weight={500}>Header stripe color</Txt>
+            <Txt size={9.5} mut style={{ marginBottom: 6 }}>The stripe under the title on every Goodies page.</Txt>
+            <PromoColorPicker value={String(draft?.stripe || '#FD802E')} onChange={(hex) => edit((next) => { next.stripe = hex; })} disabled={!canEdit || !!busy} />
+          </View>
+        ) : null}
         {!canEdit ? <Txt size={9.5} color={c.or} style={{ marginTop: 6 }}>View access only: editing and saving are disabled.</Txt> : null}
       </Section>
 
@@ -438,7 +458,7 @@ export function GoodiesEditor({ canEdit, canPublish }: { canEdit: boolean; canPu
         </View>
       </Section>
 
-      {editMode ? <GoodiesBuilderConfigEditor canEdit={canEdit} focus={byoFocus} onRows={setByoRows} onDraft={setByoDraft} /> : null}
+      {editMode ? <GoodiesBuilderConfigEditor canEdit={canEdit} focus={byoFocus} imageUrls={byoUrls} onRows={setByoRows} onDraft={setByoDraft} onClose={() => setByoFocus(null)} /> : null}
 
       {editMode && selection ? (
         <Section title={kindName[selection.kind] + ' · ' + fieldName[selection.field]}>

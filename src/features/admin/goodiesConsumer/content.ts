@@ -11,6 +11,9 @@ export let C: any = null; /* raw Admin export, or null = use seed */
 const subs = new Set<() => void>();
 export const onContent = (f: () => void) => {subs.add(f); return () => {subs.delete(f);};};
 
+/** The orange stripe under every Goodies header. Admin can change it in the Goodies content. */
+export const stripeColor = (): string => (C && typeof C.stripe === 'string' && /^#[0-9a-f]{6}$/i.test(C.stripe) ? C.stripe : '#FD802E');
+
 export function applyContent(json: any) {
   if (!json || json.v !== 5) throw new Error('This is not a Wantiss Admin Goodies export (version 5).');
   C = json;

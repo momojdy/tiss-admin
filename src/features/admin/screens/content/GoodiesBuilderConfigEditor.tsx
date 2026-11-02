@@ -1,384 +1,184 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
-import { TextInput, View } from 'react-native';
+import { Image, TextInput, View } from 'react-native';
 import { supabase } from '../../lib/supabase';
 import { useTheme } from '../../theme/ThemeContext';
 import { Section } from '../../ui/Card';
 import { OutlineBtn } from '../../ui/Controls';
 import { Txt } from '../../ui/Txt';
-import { TEMPLATES } from '../../goodiesConsumer/builders/templates';
 import { PromoColorPicker } from './PromoColorPicker';
+import { chooseAndUploadIngredientImage } from './builderImages';
 import type { BuilderTarget } from '../../goodiesConsumer/editContext';
 
-type BusinessRow = { business_id: string; business_name: string; goodies_store_id: string | null; is_live: boolean };
+type BuilderRow = { business_id: string; business_name: string; builder_id: string; config: any; enabled: boolean; updated_at: string };
+type Part = { part: 'builder' | 'group' | 'ingredient'; groupId?: string; itemId?: string; isNew?: boolean };
 
-type BuilderRow = {
-  business_id: string;
-  business_name: string;
-  builder_id: string;
-  config: any;
-  enabled: boolean;
-  updated_at: string;
-};
-
-export function GoodiesBuilderConfigEditor({ canEdit, focus = null, onRows, onDraft }: {
+/**
+ * Small editor under the phone. It shows only the part that was tapped:
+ * the builder title, a section name, or one ingredient (picture, name, card color).
+ * Minimum / maximum picks, prices and availability belong to the merchant and are not shown.
+ */
+export function GoodiesBuilderConfigEditor({ canEdit, focus = null, imageUrls = {}, onRows, onDraft, onClose }: {
   canEdit: boolean;
-  /** The builder part the admin last tapped in the phone preview. */
   focus?: BuilderTarget | null;
+  imageUrls?: Record<string, string>;
   onRows?: (rows: BuilderRow[]) => void;
   onDraft?: (row: BuilderRow | null) => void;
+  onClose?: () => void;
 }) {
   const { c } = useTheme();
   const [rows, setRows] = useState<BuilderRow[]>([]);
-  const [businesses, setBusinesses] = useState<BusinessRow[]>([]);
   const [selected, setSelected] = useState<BuilderRow | null>(null);
-  const [loading, setLoading] = useState(false);
+  const [part, setPart] = useState<Part | null>(null);
   const [saving, setSaving] = useState(false);
+  const [busy, setBusy] = useState('');
   const [error, setError] = useState('');
   const [notice, setNotice] = useState('');
-  const [artworkItems, setArtworkItems] = useState<any[]>([]);
-  const [artworkSearch, setArtworkSearch] = useState('');
-  const [artworkError, setArtworkError] = useState('');
-  const [libraryOpenGroup, setLibraryOpenGroup] = useState<number | null>(null);
-  const [librarySearch, setLibrarySearch] = useState('');
-  const [requestedIngredient, setRequestedIngredient] = useState('');
   const [library, setLibrary] = useState<any[]>([]);
-  const [colorOpen, setColorOpen] = useState('');
-  const [focusGroup, setFocusGroup] = useState<string | null>(null);
-  const [focusItem, setFocusItem] = useState<string | null>(null);
-  const [merchantRequests, setMerchantRequests] = useState<any[]>([]);
-  const handledFocus = useRef<BuilderTarget | null>(null);
+  const [requests, setRequests] = useState<any[]>([]);
+  const handled = useRef<BuilderTarget | null>(null);
 
   const load = useCallback(async () => {
-    setLoading(true); setError(''); setNotice('');
     try {
-      const [builderResult, businessResult] = await Promise.all([
-        supabase.rpc('wantiss_admin_list_goodies_builder_configs'),
-        supabase.rpc('wantiss_admin_list_goodies_builder_businesses'),
-      ]);
-      if (builderResult.error) throw builderResult.error;
-      if (businessResult.error) throw businessResult.error;
-      const next = (Array.isArray(builderResult.data) ? builderResult.data : []) as BuilderRow[];
-      setRows(next);
-      setBusinesses((Array.isArray(businessResult.data) ? businessResult.data : []) as BusinessRow[]);
-      setSelected((current) => current ? next.find((r) => r.business_id === current.business_id && r.builder_id === current.builder_id) || current : null);
-    } catch (e) {
-      setError(e instanceof Error ? e.message : 'Builder configurations could not be loaded.');
-    } finally { setLoading(false); }
+      const { data, error: rpcError } = await supabase.rpc('wantiss_admin_list_goodies_builder_configs');
+      if (rpcError) throw rpcError;
+      setRows(Array.isArray(data) ? (data as BuilderRow[]) : []);
+    } catch (e) { setError((e as any)?.message || 'Builders could not be loaded.'); }
   }, []);
-
   useEffect(() => { void load(); }, [load]);
-
-  const loadLibrary = useCallback(async () => {
-    const { data } = await supabase.rpc('wantiss_admin_list_library_ingredients');
-    setLibrary((Array.isArray(data) ? data : []).filter((x: any) => x.active));
+  useEffect(() => {
+    (async () => {
+      const [lib, req] = await Promise.all([supabase.rpc('wantiss_admin_list_library_ingredients'), supabase.rpc('wantiss_admin_list_ingredient_requests')]);
+      setLibrary(Array.isArray(lib.data) ? lib.data : []);
+      setRequests(Array.isArray(req.data) ? req.data : []);
+    })().catch(() => {});
   }, []);
-  useEffect(() => { void loadLibrary(); }, [loadLibrary]);
-
-  const loadMerchantRequests = useCallback(async () => {
-    const { data } = await supabase.rpc('wantiss_admin_list_ingredient_requests');
-    setMerchantRequests(Array.isArray(data) ? data : []);
-  }, []);
-  useEffect(() => { void loadMerchantRequests(); }, [loadMerchantRequests]);
-
   useEffect(() => { onRows?.(rows); }, [rows]);
   useEffect(() => { onDraft?.(selected); }, [selected]);
 
-  // A tap in the phone preview opens that builder here and narrows the editor to the tapped part.
+  // Open the part that was tapped in the phone. New sections / ingredients start empty and are kept only when saved.
   useEffect(() => {
-    if (!focus || handledFocus.current === focus) return;
+    if (!focus || handled.current === focus) return;
     const row = rows.find((r) => r.builder_id === focus.builderId);
     if (!row) {
-      if (!loading && rows.length) { handledFocus.current = focus; setNotice(''); setError('This is a sample builder, so it cannot be edited. Create a builder for a business first, then tap it in the phone.'); }
+      if (rows.length) { handled.current = focus; setPart(null); setError('This is a sample, not one of your saved builders, so it cannot be edited.'); }
       return;
     }
-    handledFocus.current = focus;
-    setError('');
-    const base: BuilderRow = selected && selected.builder_id === focus.builderId ? selected : JSON.parse(JSON.stringify(row));
-    let next = base;
-    setFocusGroup(null); setFocusItem(null);
-    if (focus.part === 'group' || focus.part === 'ingredient' || focus.part === 'addIngredient') setFocusGroup(focus.groupId || null);
-    if (focus.part === 'ingredient') setFocusItem(focus.itemId || null);
+    handled.current = focus; setError(''); setNotice('');
+    const adding = focus.part === 'addGroup' || focus.part === 'addIngredient';
+    if (adding && !canEdit) { setPart(null); setError('View access only: editing and saving are disabled.'); return; }
+    let base: BuilderRow = selected && selected.builder_id === focus.builderId ? selected : JSON.parse(JSON.stringify(row));
+    let next: Part = { part: focus.part === 'addGroup' ? 'group' : focus.part === 'addIngredient' ? 'ingredient' : focus.part, groupId: focus.groupId, itemId: focus.itemId };
+    if (focus.part === 'addGroup') {
+      const group = { id: 'group-' + Date.now().toString(36), name: '', kind: 'many', req: false, min: 0, max: 10, inc: 0, me: 1, items: [] };
+      base = { ...base, config: { ...base.config, groups: [...(base.config?.groups || []), group] } };
+      next = { part: 'group', groupId: group.id, isNew: true };
+    }
     if (focus.part === 'addIngredient') {
-      const index = (base.config?.groups || []).findIndex((g: any) => g.id === focus.groupId);
-      setLibraryOpenGroup(index >= 0 ? index : null); setLibrarySearch('');
+      const item = { id: 'item-' + Date.now().toString(36), name: '', price: 0, free: false, avail: false, assetId: null, col: '#D9A441' };
+      base = { ...base, config: { ...base.config, groups: (base.config?.groups || []).map((g: any) => g.id === focus.groupId ? { ...g, items: [...(g.items || []), item] } : g) } };
+      next = { part: 'ingredient', groupId: focus.groupId, itemId: item.id, isNew: true };
     }
-    if (focus.part === 'addGroup' && canEdit) {
-      const group = { id: 'group-' + Date.now().toString(36), name: '', kind: 'many', req: false, min: 0, max: 1, inc: 0, me: 1, items: [] };
-      next = { ...base, config: { ...base.config, groups: [...(base.config?.groups || []), group] } };
-      setFocusGroup(group.id);
-      setNotice('New section added. Name it, add ingredients, then save the builder.');
-    }
-    setSelected(next);
+    setSelected(base); setPart(next);
   }, [focus, rows]);
 
-  useEffect(() => {
-    let active = true;
-    (async () => {
-      try {
-        const { data, error } = await supabase.from('wantiss_cms_content')
-          .select('payload,version,content_key')
-          .in('content_key', ['goodies.content', 'goodies'])
-          .eq('locale', 'en').eq('status', 'published')
-          .order('version', { ascending: false }).limit(20);
-        if (error) throw error;
-        const row = (data || []).find((x: any) => Array.isArray(x.payload?.lib));
-        const items = (row?.payload?.lib || []).filter((x: any) => x && x.id && x.st !== 'off')
-          .map((x: any) => ({ id: String(x.id), name: String(x.name?.en?.v || x.name || x.id), status: x.st || 'on' }));
-        if (active) { setArtworkItems(items); setArtworkError(''); }
-      } catch (e) {
-        if (active) setArtworkError(e instanceof Error ? e.message : 'Published artwork library could not be loaded.');
-      }
-    })();
-    return () => { active = false; };
-  }, []);
+  const patchBuilder = (p: Record<string, any>) => setSelected((cur) => cur && { ...cur, config: { ...cur.config, ...p } });
+  const patchGroup = (gid: string, change: (g: any) => any) => setSelected((cur) => cur && { ...cur, config: { ...cur.config, groups: (cur.config?.groups || []).map((g: any) => g.id === gid ? change(g) : g) } });
+  const patchItem = (gid: string, iid: string, p: Record<string, any>) => patchGroup(gid, (g) => ({ ...g, items: (g.items || []).map((it: any) => it.id === iid ? { ...it, ...p } : it) }));
 
-  const createFromTemplate = (business: BusinessRow, type: 'burger' | 'pizza' | 'custom') => {
-    const template: any = TEMPLATES[type];
-    const stamp = Date.now().toString(36);
-    const id = 'admin-' + type + '-' + stamp;
-    const config = {
-      id, type: template.type || type, name: template.name || ('New ' + type), desc: template.desc || '', emoji: template.emoji || '✨',
-      base: template.base ?? 0, enabled: false, available: false, notes: true,
-      sizes: (Array.isArray(template.sizes) ? template.sizes : []).map((size: any, i: number) => ({
-        id: 'size-' + stamp + '-' + i, name: String(size.name || 'Size ' + (i + 1)), add: size.add ?? 0, avail: true,
-      })),
-      groups: (Array.isArray(template.groups) ? template.groups : []).map((group: any, gi: number) => ({
-        id: 'group-' + stamp + '-' + gi, name: String(group.name || 'Ingredients'), kind: group.kind === 'one' ? 'one' : 'many',
-        req: !!group.req, min: Math.max(0, Number(group.min) || 0), max: Math.max(1, Number(group.max) || 1),
-        inc: Math.max(0, Number(group.inc) || 0), me: Math.max(1, Number(group.me) || 1),
-        items: (Array.isArray(group.items) ? group.items : []).map((item: any, ii: number) => ({
-          id: 'ingredient-' + stamp + '-' + gi + '-' + ii, name: String(item.name || ''), price: 0,
-          free: false, avail: false, assetId: item.assetId || null, col: item.col || '#D9A441', ...(item.max ? { max: Math.max(1, Number(item.max) || 1) } : {}),
-        })),
-      })),
-    };
-    setSelected({ business_id: business.business_id, business_name: business.business_name, builder_id: id, config, enabled: false, updated_at: new Date().toISOString() });
-    setError(''); setNotice('New builder draft created. Review its settings before saving.');
-  };
+  const group = (selected?.config?.groups || []).find((g: any) => g.id === part?.groupId);
+  const item = (group?.items || []).find((it: any) => it.id === part?.itemId);
+  const requestsHere = useMemo(() => requests.filter((r: any) => selected && r.business_id === selected.business_id && r.status !== 'rejected'), [requests, selected?.business_id]);
 
-  const patch = (p: Partial<BuilderRow>) => setSelected((current) => current ? { ...current, ...p } : current);
-  const ingredientLibrary = useMemo(() => {
-    const type: 'burger' | 'pizza' | 'custom' = selected?.config?.type === 'burger' || selected?.config?.type === 'pizza' ? selected.config.type : 'custom';
-    const template: any = TEMPLATES[type];
-    const groups = (template?.groups || []).map((group: any) => ({
-      name: String(group.name || 'Ingredients'),
-      items: (group.items || []).map((item: any) => ({ ...item, groupName: String(group.name || 'Ingredients') })),
-    }));
-    const approved = library.filter((x: any) => x.builder === type).map((x: any) => ({ name: x.name, price: 0, free: false, assetId: x.id, assetKey: x.asset_key || null, col: '#D9A441' }));
-    return approved.length ? [...groups, { name: 'Added by Wantiss', items: approved }] : groups;
-  }, [selected?.config?.type, library]);
-  const addLibraryIngredient = (gi: number, source: any) => {
-    if (!selected || !canEdit || saving) return;
-    const newItem = { id: 'ingredient-' + Date.now().toString(36) + '-' + Math.random().toString(36).slice(2, 6), name: String(source.name || ''), price: 0, free: false, avail: false, assetId: source.assetId || null, assetKey: source.assetKey || null, col: source.col || '#D9A441' };
-    patchConfig({ groups: (selected.config?.groups || []).map((x: any, j: number) => j === gi ? { ...x, items: [...(x.items || []), newItem] } : x) });
-    setNotice('Ingredient added to this group. Save the builder to keep the change.');
-  };
-  const requestsForBusiness = useMemo(() => merchantRequests.filter((r: any) => selected && r.business_id === selected.business_id && r.status !== 'rejected'), [merchantRequests, selected?.business_id]);
-  const addMerchantRequest = (gi: number, request: any) => {
-    if (!selected || !canEdit || saving) return;
-    const groupItems = (selected.config?.groups || [])[gi]?.items || [];
-    const id = 'requested-' + String(request.id).slice(0, 8);
-    if (groupItems.some((x: any) => x.id === id)) { setNotice('That merchant request is already in this group.'); return; }
-    const lib = library.find((x: any) => x.request_id === request.id || x.id === request.library_id);
-    const newItem = { id, name: String(request.name || ''), price: 0, free: false, avail: false, assetId: lib?.id || null, assetKey: lib?.asset_key || null, col: '#D9A441', requestNote: 'Merchant request (' + request.status + ')' };
-    patchConfig({ groups: (selected.config?.groups || []).map((x: any, j: number) => j === gi ? { ...x, items: [...(x.items || []), newItem] } : x) });
-    setNotice('Merchant request added to this group' + (lib ? ' with its approved artwork' : ' as a draft without artwork') + '. Save the builder to keep it.');
-  };
-  const addRequestedIngredient = (gi: number) => {
-    const name = requestedIngredient.trim();
-    if (!name || !selected || !canEdit || saving) return;
-    const newItem = { id: 'requested-' + Date.now().toString(36), name, price: 0, free: false, avail: false, assetId: null, col: '#D9A441', requestNote: 'Added from a restaurant ingredient request' };
-    patchConfig({ groups: (selected.config?.groups || []).map((x: any, j: number) => j === gi ? { ...x, items: [...(x.items || []), newItem] } : x) });
-    setRequestedIngredient('');
-    setNotice('Requested ingredient added as a draft. Review its price and availability, then save the builder.');
-  };
-  const patchConfig = (p: Record<string, any>) => setSelected((current) => current ? { ...current, config: { ...current.config, ...p } } : current);
-  const fieldStyle = { borderWidth: 1, borderColor: c.bd, borderRadius: 9, paddingHorizontal: 9, paddingVertical: 7, marginTop: 4, marginBottom: 7, color: c.ink, backgroundColor: c.card, fontSize: 11 } as const;
-  const input = (label: string, value: any, onChangeText: (v: string) => void, keyboardType?: 'default' | 'decimal-pad' | 'number-pad', multiline = false) => (
-    <View style={{ flex: 1, minWidth: 110 }}>
-      <Txt size={9.5} mut>{label}</Txt>
-      <TextInput value={String(value ?? '')} onChangeText={onChangeText} keyboardType={keyboardType || 'default'} multiline={multiline} style={[fieldStyle, multiline ? { minHeight: 58, textAlignVertical: 'top' as const } : null]} />
-    </View>
-  );
-  const save = async () => {
-    if (!selected || !canEdit || saving) return;
+  const persist = async (row: BuilderRow) => {
+    const names = [row.config?.name, ...(row.config?.groups || []).flatMap((g: any) => [g.name, ...(g.items || []).map((i: any) => i.name)])];
+    if (names.some((n: any) => !String(n || '').trim())) { setError('Give every title, section and ingredient a name first.'); return false; }
     setSaving(true); setError(''); setNotice('');
     try {
-      const config = selected.config || {};
-      config.id = selected.builder_id;
+      const config = { ...row.config, id: row.builder_id };
       const { error: rpcError } = await supabase.rpc('wantiss_admin_save_goodies_builder_config', {
-        p_business_id: selected.business_id,
-        p_builder_id: selected.builder_id,
-        p_config: config,
-        p_enabled: !!selected.enabled,
+        p_business_id: row.business_id, p_builder_id: row.builder_id, p_config: config, p_enabled: !!row.enabled,
       });
       if (rpcError) throw rpcError;
-      setNotice('Builder and ingredient configuration saved.');
-      await load();
-    } catch (e) {
-      setError(e instanceof Error ? e.message : 'Builder configuration could not be saved.');
-    } finally { setSaving(false); }
+      setSelected({ ...row, config }); setNotice('Saved.'); await load(); return true;
+    } catch (e) { setError((e as any)?.message || 'It could not be saved.'); return false; }
+    finally { setSaving(false); }
   };
-  const toggle = (label: string, value: boolean, change: (v: boolean) => void) => (
-    <OutlineBtn primary={value} onPress={() => change(!value)} disabled={!canEdit || saving}>{label}: {value ? 'Yes' : 'No'}</OutlineBtn>
+  const save = () => { if (selected && canEdit && !saving) void persist(selected); };
+  const close = () => { setPart(null); setSelected(null); setNotice(''); setError(''); onClose?.(); };
+  const remove = async () => {
+    if (!selected || !part || !canEdit || saving) return;
+    const config = part.part === 'ingredient'
+      ? { ...selected.config, groups: (selected.config?.groups || []).map((g: any) => g.id === part.groupId ? { ...g, items: (g.items || []).filter((i: any) => i.id !== part.itemId) } : g) }
+      : { ...selected.config, groups: (selected.config?.groups || []).filter((g: any) => g.id !== part.groupId) };
+    if (await persist({ ...selected, config })) close();
+  };
+  const upload = async (source: 'photos' | 'files') => {
+    if (!canEdit || busy || !part?.groupId || !part.itemId) return;
+    setBusy(source); setError('');
+    try {
+      const key = await chooseAndUploadIngredientImage(source, part.itemId);
+      if (key) { patchItem(part.groupId, part.itemId, { img: { assetKey: key } }); setNotice('Picture added. Tap Save to keep it.'); }
+    } catch (e) { setError(e instanceof Error ? e.message : 'The picture could not be uploaded.'); }
+    finally { setBusy(''); }
+  };
+  const useRequest = (request: any) => {
+    if (!part?.groupId || !part.itemId) return;
+    const lib = library.find((x: any) => x.request_id === request.id || x.id === request.library_id);
+    patchItem(part.groupId, part.itemId, { name: String(request.name || ''), img: lib?.asset_key ? { assetKey: lib.asset_key } : undefined });
+    setNotice(lib?.asset_key ? 'Merchant request added with its approved picture.' : 'Merchant request added. Add a picture, then Save.');
+  };
+
+  if (!part && !error) return null;
+  const field = { borderWidth: 1, borderColor: c.bd, borderRadius: 9, paddingHorizontal: 10, paddingVertical: 9, marginTop: 4, marginBottom: 10, color: c.ink, backgroundColor: c.card, fontSize: 13 } as const;
+  const nameInput = (label: string, value: string, onChange: (v: string) => void) => (
+    <View>
+      <Txt size={10} mut>{label}</Txt>
+      <TextInput value={value} onChangeText={onChange} editable={canEdit && !saving} placeholder={label} placeholderTextColor={c.mut} style={field} />
+    </View>
   );
+  const url = item?.img?.assetKey ? imageUrls[item.img.assetKey] : '';
+  const title = !part ? 'Build Your Own' : part.part === 'builder' ? 'Title' : part.part === 'group' ? 'Section' : 'Ingredient';
 
   return (
-    <Section title="Build Your Own">
-      {error ? <Txt size={10.5} color={c.or} style={{ marginBottom: 7 }}>{error}</Txt> : null}
-      {notice ? <Txt size={10} mut style={{ marginBottom: 7 }}>{notice}</Txt> : null}
-      {!selected && businesses.length ? <Txt size={10.5} weight={600} style={{ marginTop: 3, marginBottom: 5 }}>Create a builder</Txt> : null}
-      {(selected ? [] : businesses).map((business) => (
-        <View key={business.business_id} style={{ borderWidth: 1, borderColor: c.bd, borderRadius: 10, padding: 8, marginBottom: 6, flexDirection: 'row', alignItems: 'center', gap: 8 }}>
-          <View style={{ flex: 1 }}>
-            <Txt size={10.5} weight={500}>{business.business_name}</Txt>
-            <Txt size={9} mut>{business.goodies_store_id ? 'Goodies store ID: ' + business.goodies_store_id : 'No Goodies store mapping yet'} · {business.is_live ? 'Live' : 'Not live'}</Txt>
-          </View>
-          <View style={{ flexDirection: 'row', flexWrap: 'wrap', gap: 5 }}>
-            <OutlineBtn disabled={!canEdit || saving} onPress={() => createFromTemplate(business, 'burger')}>Add burger</OutlineBtn>
-            <OutlineBtn disabled={!canEdit || saving} onPress={() => createFromTemplate(business, 'pizza')}>Add pizza</OutlineBtn>
-            <OutlineBtn disabled={!canEdit || saving} onPress={() => createFromTemplate(business, 'custom')}>Add custom</OutlineBtn>
-          </View>
-        </View>
-      ))}
-      {!selected && rows.length ? <Txt size={10.5} weight={600} style={{ marginTop: 10, marginBottom: 5 }}>Saved builders</Txt> : null}
-      {(selected ? [] : rows).map((row) => (
-        <View key={row.business_id + ':' + row.builder_id} style={{ borderWidth: 1, borderColor: c.bd, borderRadius: 10, padding: 9, marginBottom: 7 }}>
-          <View style={{ flexDirection: 'row', alignItems: 'center', gap: 8 }}>
-            <View style={{ flex: 1 }}>
-              <Txt size={11} weight={600}>{row.config?.name || row.builder_id}</Txt>
-              <Txt size={9.5} mut>{row.business_name} · {row.config?.type || 'custom'} · {(row.config?.groups || []).length} groups · {(row.config?.groups || []).reduce((n: number, g: any) => n + (g.items || []).length, 0)} ingredients</Txt>
-              <Txt size={9} mut>{row.enabled ? 'Available to customers' : 'Not currently published'}</Txt>
+    <Section title={title}>
+      {error ? <Txt size={10.5} color={c.or} style={{ marginBottom: 8 }}>{error}</Txt> : null}
+      {notice ? <Txt size={10} mut style={{ marginBottom: 8 }}>{notice}</Txt> : null}
+      {!canEdit && part ? <Txt size={9.5} color={c.or} style={{ marginBottom: 8 }}>View access only: editing and saving are disabled.</Txt> : null}
+      {part?.part === 'builder' ? nameInput('Title', String(selected?.config?.name ?? ''), (v) => patchBuilder({ name: v })) : null}
+      {part?.part === 'group' && group ? nameInput('Section name', String(group.name ?? ''), (v) => patchGroup(group.id, (g) => ({ ...g, name: v }))) : null}
+      {part?.part === 'ingredient' && group && item ? (
+        <View>
+          <View style={{ flexDirection: 'row', alignItems: 'center', gap: 12, flexWrap: 'wrap', marginBottom: 12 }}>
+            {url ? <Image source={{ uri: url }} resizeMode="contain" style={{ width: 96, height: 64, borderRadius: 10, backgroundColor: item.bg || '#F4F4F5' }} />
+              : <View style={{ width: 96, height: 64, borderRadius: 10, backgroundColor: item.bg || c.inset, alignItems: 'center', justifyContent: 'center' }}><Txt size={9.5} mut>{item.img?.assetKey ? 'Picture saved' : 'No picture'}</Txt></View>}
+            <View style={{ flex: 1, minWidth: 150, gap: 6 }}>
+              <OutlineBtn onPress={() => { void upload('photos'); }} disabled={!canEdit || !!busy}>{busy === 'photos' ? 'Uploading…' : 'Choose from Photos / Live Photos'}</OutlineBtn>
+              <OutlineBtn onPress={() => { void upload('files'); }} disabled={!canEdit || !!busy}>{busy === 'files' ? 'Uploading…' : 'Choose from Files'}</OutlineBtn>
+              {item.img?.assetKey ? <OutlineBtn onPress={() => patchItem(group.id, item.id, { img: undefined })} disabled={!canEdit || !!busy}>Remove picture</OutlineBtn> : null}
             </View>
-            <OutlineBtn primary={selected?.business_id === row.business_id && selected?.builder_id === row.builder_id} onPress={() => { setSelected(JSON.parse(JSON.stringify(row))); setError(''); setNotice(''); }}>Edit configuration</OutlineBtn>
           </View>
-        </View>
-      ))}
-      {selected ? (
-        <View style={{ borderWidth: 1, borderColor: c.bd, borderRadius: 12, padding: 10, marginTop: 4 }}>
-          <Txt size={12} weight={600}>{selected.business_name} · Build Your Own</Txt>
-          <Txt size={9.5} mut style={{ marginTop: 2 }}>Builder ID: {selected.builder_id}</Txt>
-          {focusGroup || focusItem ? <View style={{ alignSelf: 'flex-start', marginTop: 6 }}><OutlineBtn onPress={() => { setFocusGroup(null); setFocusItem(null); }}>Show whole builder</OutlineBtn></View> : null}
-          {!focusGroup ? (<>
-          <View style={{ flexDirection: 'row', flexWrap: 'wrap', gap: 8, marginTop: 10 }}>
-            {input('Builder name', selected.config?.name, (v) => patchConfig({ name: v }))}
-            {input('Type', selected.config?.type, (v) => patchConfig({ type: v }))}
-            {input('Emoji', selected.config?.emoji, (v) => patchConfig({ emoji: v }))}
-            {input('Base price', selected.config?.base, (v) => patchConfig({ base: v }), 'decimal-pad')}
+          {nameInput('Ingredient name', String(item.name ?? ''), (v) => patchItem(group.id, item.id, { name: v }))}
+          <Txt size={10} mut>Card color</Txt>
+          <View style={{ marginTop: 4, marginBottom: 10 }}>
+            <PromoColorPicker value={String(item.bg || '#F4F4F5')} onChange={(hex) => patchItem(group.id, item.id, { bg: hex })} disabled={!canEdit || saving} />
           </View>
-          {input('Description', selected.config?.desc, (v) => patchConfig({ desc: v }), 'default', true)}
-          <Txt size={9.5} mut>Builder card color</Txt>
-          <View style={{ marginTop: 4, marginBottom: 8 }}>
-            <PromoColorPicker value={String(selected.config?.color || '#FD802E')} onChange={(hex) => patchConfig({ color: hex })} disabled={!canEdit || saving} />
-          </View>
-          <View style={{ flexDirection: 'row', flexWrap: 'wrap', gap: 6, marginBottom: 8 }}>
-            {toggle('Config enabled', !!selected.config?.enabled, (v) => patchConfig({ enabled: v }))}
-            {toggle('Available now', !!selected.config?.available, (v) => patchConfig({ available: v }))}
-            {toggle('Special instructions', !!selected.config?.notes, (v) => patchConfig({ notes: v }))}
-            {toggle('Published to customers', !!selected.enabled, (v) => patch({ enabled: v }))}
-          </View>
-
-          <View style={{ flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', marginTop: 8, marginBottom: 5 }}>
-            <Txt size={11} weight={600}>Sizes</Txt>
-            <OutlineBtn disabled={!canEdit || saving} onPress={() => patchConfig({ sizes: [...(selected.config?.sizes || []), { id: 'size-' + Date.now().toString(36), name: '', add: '0', avail: true }] })}>Add size</OutlineBtn>
-          </View>
-          {(selected.config?.sizes || []).map((size: any, i: number) => (
-            <View key={size.id || i} style={{ borderTopWidth: 1, borderColor: c.bd, paddingTop: 7, marginTop: 3 }}>
-              <View style={{ flexDirection: 'row', flexWrap: 'wrap', gap: 8 }}>
-                {input('Size name', size.name, (v) => patchConfig({ sizes: selected.config.sizes.map((x: any, j: number) => j === i ? { ...x, name: v } : x) }))}
-                {input('Extra price', size.add, (v) => patchConfig({ sizes: selected.config.sizes.map((x: any, j: number) => j === i ? { ...x, add: v } : x) }), 'decimal-pad')}
-              </View>
-              <View style={{ flexDirection: 'row', flexWrap: 'wrap', gap: 6 }}>
-                {toggle('Size available', size.avail !== false, (v) => patchConfig({ sizes: selected.config.sizes.map((x: any, j: number) => j === i ? { ...x, avail: v } : x) }))}
-                <OutlineBtn disabled={!canEdit || saving} onPress={() => patchConfig({ sizes: selected.config.sizes.filter((_: any, j: number) => j !== i) })}>Remove size</OutlineBtn>
+          {part.isNew && requestsHere.length ? (
+            <View style={{ marginBottom: 10 }}>
+              <Txt size={10} mut>Or use a request from this merchant</Txt>
+              <View style={{ flexDirection: 'row', flexWrap: 'wrap', gap: 6, marginTop: 5 }}>
+                {requestsHere.map((request: any) => <OutlineBtn key={request.id} onPress={() => useRequest(request)} disabled={!canEdit || saving}>{request.name + ' · ' + request.status}</OutlineBtn>)}
               </View>
             </View>
-          ))}
-
-          </>) : null}
-          <View style={{ flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', marginTop: 12, marginBottom: 5 }}>
-            <Txt size={11} weight={600}>Ingredient groups</Txt>
-            <OutlineBtn disabled={!canEdit || saving} onPress={() => patchConfig({ groups: [...(selected.config?.groups || []), { id: 'group-' + Date.now().toString(36), name: '', kind: 'many', req: false, min: 0, max: 1, inc: 0, me: 1, items: [] }] })}>Add group</OutlineBtn>
-          </View>
-          {(selected.config?.groups || []).map((group: any, gi: number) => (focusGroup && group.id !== focusGroup) ? null : (
-            <View key={group.id || gi} style={{ borderWidth: 1, borderColor: c.bd, borderRadius: 9, padding: 8, marginTop: 7 }}>
-              {input('Group name', group.name, (v) => patchConfig({ groups: selected.config.groups.map((x: any, j: number) => j === gi ? { ...x, name: v } : x) }))}
-              <View style={{ flexDirection: 'row', flexWrap: 'wrap', gap: 6, marginBottom: 4 }}>
-                {toggle('Required', !!group.req, (v) => patchConfig({ groups: selected.config.groups.map((x: any, j: number) => j === gi ? { ...x, req: v, min: v ? Math.max(1, Number(x.min) || 0) : x.min } : x) }))}
-                {toggle('Pick one', group.kind === 'one', (v) => patchConfig({ groups: selected.config.groups.map((x: any, j: number) => j === gi ? { ...x, kind: v ? 'one' : 'many', max: v ? 1 : Math.max(1, Number(x.max) || 1) } : x) }))}
-              </View>
-              <View style={{ flexDirection: 'row', flexWrap: 'wrap', gap: 8 }}>
-                {input('Minimum picks', group.min, (v) => patchConfig({ groups: selected.config.groups.map((x: any, j: number) => j === gi ? { ...x, min: Math.max(0, Number(v) || 0) } : x) }), 'number-pad')}
-                {input('Maximum picks', group.max, (v) => patchConfig({ groups: selected.config.groups.map((x: any, j: number) => j === gi ? { ...x, max: Math.max(1, Number(v) || 1) } : x) }), 'number-pad')}
-                {input('Included free', group.inc, (v) => patchConfig({ groups: selected.config.groups.map((x: any, j: number) => j === gi ? { ...x, inc: Math.max(0, Number(v) || 0) } : x) }), 'number-pad')}
-                {input('Max same ingredient', group.me, (v) => patchConfig({ groups: selected.config.groups.map((x: any, j: number) => j === gi ? { ...x, me: Math.max(1, Number(v) || 1) } : x) }), 'number-pad')}
-              </View>
-              <View style={{ flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', marginTop: 8, marginBottom: 4 }}>
-                <Txt size={10.5} weight={600}>Ingredients ({(group.items || []).length})</Txt>
-                <View style={{ flexDirection: 'row', flexWrap: 'wrap', gap: 5 }}>
-                  <OutlineBtn disabled={!canEdit || saving} onPress={() => patchConfig({ groups: selected.config.groups.map((x: any, j: number) => j === gi ? { ...x, items: [...(x.items || []), { id: 'item-' + Date.now().toString(36), name: '', price: 0, free: false, avail: false, assetId: null, col: '#D9A441' }] } : x) })}>Add manually</OutlineBtn>
-                  <OutlineBtn primary={libraryOpenGroup === gi} disabled={!canEdit || saving} onPress={() => { setLibraryOpenGroup(libraryOpenGroup === gi ? null : gi); setLibrarySearch(''); }}>Add from ingredient list</OutlineBtn>
-                </View>
-              </View>
-              {libraryOpenGroup === gi ? (
-                <View style={{ borderWidth: 1, borderColor: c.bd, borderRadius: 9, padding: 8, marginBottom: 8, backgroundColor: c.card }}>
-                  <Txt size={10.5} weight={600}>Ingredient library · {group.name || 'this section'}</Txt>
-                  <Txt size={9.5} mut style={{ marginTop: 2, marginBottom: 5 }}>Choose an ingredient from the {selected.config?.type === 'burger' ? 'burger' : selected.config?.type === 'pizza' ? 'pizza' : 'starter'} list, including ones Wantiss approved. Set its price and availability in your vendor dashboard.</Txt>
-                  <TextInput value={librarySearch} onChangeText={setLibrarySearch} placeholder="Search ingredients…" placeholderTextColor={c.mut} style={fieldStyle} />
-                  {ingredientLibrary.flatMap((sourceGroup: any) => sourceGroup.items.filter((ingredient: any) => !librarySearch.trim() || (ingredient.name + ' ' + sourceGroup.name).toLowerCase().includes(librarySearch.trim().toLowerCase())).map((ingredient: any) => ({ ...ingredient, sourceGroup: sourceGroup.name }))).map((ingredient: any, index: number) => (
-                    <OutlineBtn key={ingredient.sourceGroup + ':' + ingredient.name + ':' + index} disabled={!canEdit || saving} onPress={() => addLibraryIngredient(gi, ingredient)}>
-                      {ingredient.name + ' · ' + ingredient.sourceGroup}
-                    </OutlineBtn>
-                  ))}
-                  {!ingredientLibrary.some((sourceGroup: any) => sourceGroup.items.some((ingredient: any) => !librarySearch.trim() || (ingredient.name + ' ' + sourceGroup.name).toLowerCase().includes(librarySearch.trim().toLowerCase()))) ? <Txt size={9.5} mut>No matching ingredients in this list.</Txt> : null}
-                  <Txt size={10.5} weight={600} style={{ marginTop: 10 }}>Requests from this merchant</Txt>
-                  {requestsForBusiness.length ? requestsForBusiness.map((request: any) => (
-                    <OutlineBtn key={request.id} disabled={!canEdit || saving} onPress={() => addMerchantRequest(gi, request)}>{'Add · ' + request.name + ' · ' + request.status}</OutlineBtn>
-                  )) : <Txt size={9.5} mut>No requests from this merchant.</Txt>}
-                  <Txt size={10.5} weight={600} style={{ marginTop: 10 }}>Add an ingredient by name</Txt>
-                  <TextInput value={requestedIngredient} onChangeText={setRequestedIngredient} placeholder="Type the requested ingredient name…" placeholderTextColor={c.mut} style={fieldStyle} />
-                  <OutlineBtn disabled={!canEdit || saving || !requestedIngredient.trim()} onPress={() => addRequestedIngredient(gi)}>Add requested ingredient</OutlineBtn>
-                  <OutlineBtn onPress={() => setLibraryOpenGroup(null)} disabled={saving}>Close ingredient list</OutlineBtn>
-                </View>
-              ) : null}
-              {(group.items || []).map((item: any, ii: number) => (focusItem && item.id !== focusItem) ? null : (
-                <View key={item.id || ii} style={{ borderTopWidth: 1, borderColor: c.bd, paddingTop: 7, marginTop: 3 }}>
-                  <View style={{ flexDirection: 'row', flexWrap: 'wrap', gap: 8 }}>
-                    {input('Ingredient name', item.name, (v) => patchConfig({ groups: selected.config.groups.map((x: any, j: number) => j === gi ? { ...x, items: x.items.map((it: any, k: number) => k === ii ? { ...it, name: v } : it) } : x) }))}
-                                        {input('Max per customer', item.max ?? '', (v) => patchConfig({ groups: selected.config.groups.map((x: any, j: number) => j === gi ? { ...x, items: x.items.map((it: any, k: number) => k === ii ? { ...it, max: v.trim() ? Math.max(1, Number(v) || 1) : undefined } : it) } : x) }), 'number-pad')}
-                    <View style={{ flexBasis: '100%', minWidth: 220 }}>
-                      <Txt size={9.5} mut>Artwork selection · current: {item.assetId || 'No artwork selected'}</Txt>
-                      <TextInput value={artworkSearch} onChangeText={setArtworkSearch} placeholder="Search published ingredient artwork…" placeholderTextColor={c.mut} style={fieldStyle} />
-                      {artworkError ? <Txt size={9} color={c.or}>{artworkError}</Txt> : null}
-                      {!artworkItems.length && !artworkError ? <Txt size={9} mut>Load published Goodies content to select artwork.</Txt> : null}
-                      {artworkItems.filter((asset) => !artworkSearch.trim() || (asset.id + ' ' + asset.name).toLowerCase().includes(artworkSearch.trim().toLowerCase())).map((asset) => (
-                        <OutlineBtn key={asset.id} primary={item.assetId === asset.id} disabled={!canEdit || saving} onPress={() => patchConfig({ groups: selected.config.groups.map((x: any, j: number) => j === gi ? { ...x, items: x.items.map((it: any, k: number) => k === ii ? { ...it, assetId: asset.id } : it) } : x) })}>
-                          {(item.assetId === asset.id ? 'Selected · ' : '') + asset.name + ' (' + asset.id + ')'}
-                        </OutlineBtn>
-                      ))}
-                      {item.assetId ? <OutlineBtn disabled={!canEdit || saving} onPress={() => patchConfig({ groups: selected.config.groups.map((x: any, j: number) => j === gi ? { ...x, items: x.items.map((it: any, k: number) => k === ii ? { ...it, assetId: null } : it) } : x) })}>Clear artwork</OutlineBtn> : null}
-                    </View>
-                  </View>
-                  <View style={{ flexDirection: 'row', flexWrap: 'wrap', gap: 6 }}>
-                    <Txt size={9.5} mut>Price and availability are managed by the vendor in their dashboard.</Txt>
-                    <OutlineBtn disabled={!canEdit || saving} onPress={() => patchConfig({ groups: selected.config.groups.map((x: any, j: number) => j === gi ? { ...x, items: x.items.filter((_: any, k: number) => k !== ii) } : x) })}>Remove ingredient</OutlineBtn>
-                    <OutlineBtn primary={colorOpen === item.id} onPress={() => setColorOpen(colorOpen === item.id ? '' : String(item.id))}>Card color</OutlineBtn>
-                  </View>
-                  {colorOpen === item.id ? <View style={{ marginTop: 6 }}><PromoColorPicker value={String(item.col || '#D9A441')} onChange={(hex) => patchConfig({ groups: selected.config.groups.map((x: any, j: number) => j === gi ? { ...x, items: x.items.map((it: any, k: number) => k === ii ? { ...it, col: hex } : it) } : x) })} disabled={!canEdit || saving} /></View> : null}
-                </View>
-              ))}
-              <View style={{ marginTop: 8 }}>
-                <OutlineBtn disabled={!canEdit || saving} onPress={() => patchConfig({ groups: selected.config.groups.filter((_: any, j: number) => j !== gi) })}>Remove group</OutlineBtn>
-              </View>
-            </View>
-          ))}
-          <View style={{ flexDirection: 'row', flexWrap: 'wrap', gap: 6, marginTop: 12 }}>
-            <OutlineBtn primary onPress={() => { void save(); }} disabled={!canEdit || saving}>{saving ? 'Saving…' : 'Save builder configuration'}</OutlineBtn>
-            <OutlineBtn onPress={() => setSelected(null)} disabled={saving}>Close editor</OutlineBtn>
-          </View>
+          ) : null}
         </View>
       ) : null}
-      {!canEdit ? <Txt size={9.5} mut>View-only access. Editing requires operations edit permission.</Txt> : null}
+      {part ? (
+        <View style={{ flexDirection: 'row', flexWrap: 'wrap', gap: 6 }}>
+          <OutlineBtn primary onPress={save} disabled={!canEdit || saving || !!busy}>{saving ? 'Saving…' : 'Save'}</OutlineBtn>
+          {part.part !== 'builder' ? <OutlineBtn onPress={() => { void remove(); }} disabled={!canEdit || saving || !!busy}>{part.part === 'group' ? 'Remove section' : 'Remove ingredient'}</OutlineBtn> : null}
+          <OutlineBtn onPress={close} disabled={saving}>Close</OutlineBtn>
+        </View>
+      ) : <OutlineBtn onPress={close}>Close</OutlineBtn>}
     </Section>
   );
 }

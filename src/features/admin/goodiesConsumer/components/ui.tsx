@@ -5,6 +5,7 @@ import {LinearGradient} from 'expo-linear-gradient';
 import {light, dark, Theme, BG} from '../theme';
 import {S, useGoodies, money, STB, PV, toast, ui} from '../store';
 import {Icon} from './Icon';
+import {stripeColor} from '../content';
 import {Sel, GoodiesSelection} from '../editContext';
 import {t as tr, ts} from '../i18n';
 
@@ -57,7 +58,7 @@ export function Bar({title, right, onBack, stripe = true}: {title: string; right
           {right}
         </View>
       </View>
-      {stripe ? <><View style={{height: 20, backgroundColor: '#FD802E'}} /><View style={{height: 15}} /></> : null}
+      {stripe ? <><View style={{height: 20, backgroundColor: stripeColor()}} /><View style={{height: 15}} /></> : null}
     </>
   );
 }
