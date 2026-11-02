@@ -150,28 +150,41 @@ export function createAssetUploadId() {
   return Date.now().toString(36) + '-' + Math.random().toString(36).slice(2) + '-' + Math.random().toString(36).slice(2);
 }
 
+function cmsImageType(fileName: string, reportedType: string, bytes: Uint8Array): string {
+  // Inspect the actual file first. iOS Files providers sometimes report text/plain
+  // for image documents even when the selected file contains a valid image.
+  if (bytes[0] === 0xff && bytes[1] === 0xd8 && bytes[2] === 0xff) return 'image/jpeg';
+  if (bytes[0] === 0x89 && bytes[1] === 0x50 && bytes[2] === 0x4e && bytes[3] === 0x47) return 'image/png';
+  if (bytes[0] === 0x47 && bytes[1] === 0x49 && bytes[2] === 0x46 && bytes[3] === 0x38) return 'image/gif';
+  if (bytes.length >= 12 && String.fromCharCode(...bytes.slice(0, 4)) === 'RIFF' && String.fromCharCode(...bytes.slice(8, 12)) === 'WEBP') return 'image/webp';
+  const extension = fileName.toLowerCase().split('.').pop() || '';
+  const byExtension: Record<string, string> = { jpg: 'image/jpeg', jpeg: 'image/jpeg', png: 'image/png', webp: 'image/webp', gif: 'image/gif', mp4: 'video/mp4' };
+  if (byExtension[extension]) return byExtension[extension];
+  if (['image/jpeg', 'image/png', 'image/webp', 'image/gif', 'video/mp4'].includes(reportedType)) return reportedType;
+  throw new Error('We could not identify this image file. Choose a JPEG, PNG, WebP, or GIF image from Photos or Files.');
+}
+
 export async function uploadCmsAsset(input: {
   key: string; uri: string; fileName: string; contentType: string; byteSize: number;
   altText?: Record<string, string>; status?: 'draft';
 }) {
-  if (!['image/jpeg', 'image/png', 'image/webp', 'image/gif', 'video/mp4'].includes(input.contentType)) {
-    throw new Error('This asset type is not supported.');
-  }
-  if (input.byteSize < 1 || input.byteSize > 10 * 1024 * 1024) throw new Error('Assets must be 10 MB or smaller.');
   const { data: { user } } = await supabase.auth.getUser();
   if (!user) throw new Error('Sign in before uploading assets.');
   const response = await fetch(input.uri);
   if (!response.ok) throw new Error('The selected asset could not be read.');
-  const blob = await response.blob();
+  const body = await response.arrayBuffer();
+  const byteSize = body.byteLength;
+  if (byteSize < 1 || byteSize > 10 * 1024 * 1024) throw new Error('Assets must be 10 MB or smaller.');
+  const contentType = cmsImageType(input.fileName, input.contentType, new Uint8Array(body));
   const safeName = input.fileName.replace(/[^a-zA-Z0-9._-]/g, '_').slice(-100) || 'asset';
   const path = user.id + '/' + createAssetUploadId() + '-' + safeName;
-  const { error: uploadError } = await supabase.storage.from('wantiss-cms-assets').upload(path, blob, {
-    contentType: input.contentType, upsert: false,
+  const { error: uploadError } = await supabase.storage.from('wantiss-cms-assets').upload(path, body, {
+    contentType, upsert: false,
   });
   if (uploadError) throw new Error(uploadError.message);
   const { data, error } = await supabase.rpc('wantiss_admin_upsert_asset', {
-    p_asset_key: input.key, p_storage_path: path, p_content_type: input.contentType,
-    p_byte_size: input.byteSize, p_alt_text: input.altText || {}, p_status: 'draft',
+    p_asset_key: input.key, p_storage_path: path, p_content_type: contentType,
+    p_byte_size: byteSize, p_alt_text: input.altText || {}, p_status: 'draft',
   });
   if (error) {
     await supabase.storage.from('wantiss-cms-assets').remove([path]);
