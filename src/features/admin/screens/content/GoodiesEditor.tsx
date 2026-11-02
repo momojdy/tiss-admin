@@ -16,6 +16,7 @@ import type { BuilderTarget } from '../../goodiesConsumer/editContext';
 import { GoodiesIngredientRequests } from './GoodiesIngredientRequests';
 import { signedUrlsForKeys } from './builderImages';
 import { PromoColorPicker } from './PromoColorPicker';
+import { CollapsibleColorField } from './CollapsibleColorField';
 import type { GoodiesSelection } from '../../goodiesConsumer/editContext';
 import {
   GOODIES_CONTENT_KEY, buildStarterDraft, imageKeyFor, isSignedUrl, referencedAssetKeys, sanitizeForSave, stable, validateGoodiesDraft,
@@ -393,15 +394,19 @@ export function GoodiesEditor({ canEdit, canPublish }: { canEdit: boolean; canPu
   };
   const promoColors = [{ id: 'plum', label: 'Plum', colors: ['#7B3FE4', '#A56BFF'] }, { id: 'orange', label: 'Orange', colors: ['#FD802E', '#FFA35C'] }, { id: 'green', label: 'Green', colors: ['#1F7A5A', '#2FB584'] }] as const;
   const setPromoColor = (entry: any, color: string) => setMeta('promo', entry.id, 'color', color);
-  const promoColorPicker = (entry: any) => (
-    <View style={{ marginTop: 8 }}>
-      <Txt size={9.5} mut>Promotion card color</Txt>
-      <View style={{ flexDirection: 'row', flexWrap: 'wrap', gap: 7, marginTop: 6 }}>
-        {promoColors.map((option) => <Pressable key={option.id} accessibilityRole="button" accessibilityLabel={'Set ' + option.label + ' promotion color'} onPress={() => setPromoColor(entry, option.id)} style={{ flexDirection: 'row', alignItems: 'center', gap: 6, paddingVertical: 6, paddingHorizontal: 9, borderRadius: 18, borderWidth: entry.color === option.id ? 2 : 1, borderColor: entry.color === option.id ? c.ink : c.bd, backgroundColor: c.card }}><View style={{ width: 28, height: 18, borderRadius: 6, backgroundColor: option.colors[0], borderWidth: 1, borderColor: option.colors[1] }} /><Txt size={10} weight={entry.color === option.id ? 600 : 400}>{option.label}</Txt>{entry.color === option.id ? <Txt size={10}>✓</Txt> : null}</Pressable>)}
-      </View>
-      <PromoColorPicker value={String(entry.color || 'plum')} onChange={(color) => setPromoColor(entry, color)} disabled={!canEdit || !!busy || !!assetBusy} />
-    </View>
-  );
+  const promoColorPicker = (entry: any) => {
+    const previewColor = promoColors.find((option) => option.id === entry.color)?.colors[0] || '#7B3FE4';
+    return (
+      <CollapsibleColorField label="Promotion card color" value={previewColor} disabled={!canEdit || !!busy || !!assetBusy}>
+        <View style={{ gap: 8 }}>
+          <View style={{ flexDirection: 'row', flexWrap: 'wrap', gap: 7 }}>
+            {promoColors.map((option) => <Pressable key={option.id} accessibilityRole="button" accessibilityLabel={'Set ' + option.label + ' promotion color'} onPress={() => setPromoColor(entry, option.id)} style={{ flexDirection: 'row', alignItems: 'center', gap: 6, paddingVertical: 6, paddingHorizontal: 9, borderRadius: 18, borderWidth: entry.color === option.id ? 2 : 1, borderColor: entry.color === option.id ? c.ink : c.bd, backgroundColor: c.card }}><View style={{ width: 28, height: 18, borderRadius: 6, backgroundColor: option.colors[0], borderWidth: 1, borderColor: option.colors[1] }} /><Txt size={10} weight={entry.color === option.id ? 600 : 400}>{option.label}</Txt>{entry.color === option.id ? <Txt size={10}>✓</Txt> : null}</Pressable>)}
+          </View>
+          <PromoColorPicker value={String(entry.color || 'plum')} onChange={(color) => setPromoColor(entry, color)} disabled={!canEdit || !!busy || !!assetBusy} />
+        </View>
+      </CollapsibleColorField>
+    );
+  };
   return (
     <View>
       <Section title="Goodies content" right={<View style={{ flexDirection: 'row', flexWrap: 'wrap', gap: 5 }}>
@@ -428,9 +433,10 @@ export function GoodiesEditor({ canEdit, canPublish }: { canEdit: boolean; canPu
         ) : null}
         {editMode ? (
           <View style={{ marginTop: 10 }}>
-            <Txt size={11} weight={500}>Header stripe color</Txt>
-            <Txt size={9.5} mut style={{ marginBottom: 6 }}>The stripe under the title on every Goodies page.</Txt>
-            <PromoColorPicker value={String(draft?.stripe || '#FD802E')} onChange={(hex) => edit((next) => { next.stripe = hex; })} disabled={!canEdit || !!busy} />
+            <CollapsibleColorField label="Header stripe color" value={String(draft?.stripe || '#FD802E')} disabled={!canEdit || !!busy}>
+              <Txt size={9.5} mut style={{ marginBottom: 6 }}>The stripe under the title on every Goodies page.</Txt>
+              <PromoColorPicker value={String(draft?.stripe || '#FD802E')} onChange={(hex) => edit((next) => { next.stripe = hex; })} disabled={!canEdit || !!busy} />
+            </CollapsibleColorField>
           </View>
         ) : null}
         {!canEdit ? <Txt size={9.5} color={c.or} style={{ marginTop: 6 }}>View access only: editing and saving are disabled.</Txt> : null}
