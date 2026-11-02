@@ -7,7 +7,7 @@ import {useTheme} from '../../theme/ThemeContext';
 import {GoodiesAssetLibrary} from './GoodiesAssetLibrary';
 
 type Dashboard = {stats:any;merchants:any[];products:any[];orders:any[]};
-const MODULES=['Overview','Merchants','Product review','Orders','Couriers','Fees','Analytics','Goodies assets','Content editor'];
+const MODULES=['Overview','Merchants','Product review','Orders','Couriers','Fees','Delivery surcharge','Analytics','Goodies assets','Content editor'];
 const money=(v:any)=>new Intl.NumberFormat('en-US',{style:'currency',currency:'USD'}).format(Number(v)||0);
 const cardStyle={backgroundColor:'#fff',borderWidth:1,borderColor:'#E1E6DE',borderRadius:14,padding:14,marginBottom:10} as const;
 const btn=(bg:string)=>({paddingVertical:10,paddingHorizontal:12,borderRadius:10,backgroundColor:bg,alignItems:'center' as const});
@@ -28,6 +28,9 @@ export function GoodiesAdminScreen() {
   const [card,setCard]=useState(true);
   const [cash,setCash]=useState(true);
   const [tips,setTips]=useState('0,1,2,3');
+  const [additionalStoreSurchargeEnabled,setAdditionalStoreSurchargeEnabled]=useState(false);
+  const [additionalStoreFee,setAdditionalStoreFee]=useState('0');
+  const [extraDistancePerKm,setExtraDistancePerKm]=useState('0');
 
   const reload=useCallback(async()=>{
     setLoading(true);
@@ -43,6 +46,9 @@ export function GoodiesAdminScreen() {
       setFee(String(f.svc??0));setFirstFree(!!f.first);
       setWallet(!!(f.pay?.Wallet??true));setCard(!!(f.pay?.Card??true));setCash(!!(f.pay?.Cash??true));
       setTips(String(f.tips??'0,1,2,3'));
+      setAdditionalStoreSurchargeEnabled(!!f.additionalStoreSurchargeEnabled);
+      setAdditionalStoreFee(String(f.additionalStoreFee??0));
+      setExtraDistancePerKm(String(f.extraDistancePerKm??0));
     } catch(e:any){toast(e?.message||'Could not load Goodies administration.');}
     finally{setLoading(false);}
   },[toast]);
@@ -100,6 +106,21 @@ export function GoodiesAdminScreen() {
     if(error)toast(error.message);else toast('Goodies payment and fee policy updated.');
     setBusy('');
   };
+  const saveDeliverySurcharge=async()=>{
+    const flat=Number(additionalStoreFee), perKm=Number(extraDistancePerKm);
+    if(!Number.isFinite(flat)||flat<0||flat>1000||!Number.isFinite(perKm)||perKm<0||perKm>1000){
+      toast('Enter valid non-negative delivery surcharge amounts (maximum 1000).');return;
+    }
+    setBusy('delivery-surcharge');
+    const {error}=await supabase.rpc('goodies_admin_update_delivery_surcharge_policy',{
+      p_enabled:additionalStoreSurchargeEnabled,
+      p_additional_store_fee:flat,
+      p_extra_distance_per_km:perKm
+    });
+    if(error)toast(error.message);else toast('Delivery surcharge settings saved and published.');
+    setBusy('');
+    if(!error)await reload();
+  };
   const switchRow=(title:string,sub:string,on:boolean,set:(v:boolean)=>void)=><Pressable onPress={()=>set(!on)} style={{...cardStyle,flexDirection:'row',alignItems:'center',justifyContent:'space-between',marginBottom:8}}><View style={{flex:1,paddingRight:10}}><Text style={valueStyle}>{title}</Text><Text style={{fontSize:11,color:'#697466',marginTop:3}}>{sub}</Text></View><Text style={{fontWeight:'800',color:on?'#286A35':'#8B554B'}}>{on?'ON':'OFF'}</Text></Pressable>;
 
   return <ScrollView style={{flex:1,backgroundColor:c?.inset||'#F6F7F4'}} contentContainerStyle={{padding:16,paddingBottom:36}}>
@@ -151,6 +172,18 @@ export function GoodiesAdminScreen() {
         <Text style={valueStyle}>{person.full_name||'Wantiss account'}</Text><Text style={labelStyle}>{person.phone_number||'No phone number'} · {person.courier_id}</Text>
         <Pressable disabled={!!busy} onPress={()=>void setCourierAccess(person,!person.already_added)} style={btn(person.already_added?'#F7EAE8':'#E8F2E5')}><Text style={{fontWeight:'800',color:person.already_added?'#8D3932':'#28552B'}}>{busy===person.courier_id?'Saving…':person.already_added?'Remove courier access':'Approve as Goodies courier'}</Text></Pressable>
       </View>)}
+    </>:null}
+    {module==='Delivery surcharge'?<>
+      <View style={cardStyle}>
+        <Text style={valueStyle}>Additional-store delivery fee (USD)</Text>
+        <Text style={{fontSize:11,color:'#697466',marginTop:4}}>One flat fee for each additional store in a multi-store order. This amount is included in the final server-calculated delivery price.</Text>
+        <TextInput value={additionalStoreFee} onChangeText={setAdditionalStoreFee} keyboardType="decimal-pad" style={{borderWidth:1,borderColor:'#DCE4D7',borderRadius:10,padding:11,marginTop:8,color:'#1B2619'}}/>
+        <Text style={{...valueStyle,marginTop:14}}>Extra-distance rate per kilometre (USD)</Text>
+        <TextInput value={extraDistancePerKm} onChangeText={setExtraDistancePerKm} keyboardType="decimal-pad" style={{borderWidth:1,borderColor:'#DCE4D7',borderRadius:10,padding:11,marginTop:8,color:'#1B2619'}}/>
+      </View>
+      {switchRow('Enable additional-store surcharge','Apply the configured additional-store fee and extra-distance rate to eligible multi-store quotes.',additionalStoreSurchargeEnabled,setAdditionalStoreSurchargeEnabled)}
+      <Pressable disabled={busy==='delivery-surcharge'} onPress={()=>void saveDeliverySurcharge()} style={btn('#294E2C')}><Text style={{color:'#fff',fontWeight:'800'}}>{busy==='delivery-surcharge'?'Saving…':'Save and publish delivery surcharge'}</Text></Pressable>
+      <Text style={{fontSize:11,color:'#697466',marginTop:8}}>Settings are saved to published Supabase Goodies content. The customer app does not calculate or submit final delivery fees.</Text>
     </>:null}
     {module==='Fees'?<>
       <View style={cardStyle}>
