@@ -144,7 +144,15 @@ export function GoodiesBuilderConfigEditor({ canEdit, focus = null, imageUrls = 
       {error ? <Txt size={10.5} color={c.or} style={{ marginBottom: 8 }}>{error}</Txt> : null}
       {notice ? <Txt size={10} mut style={{ marginBottom: 8 }}>{notice}</Txt> : null}
       {!canEdit && part ? <Txt size={9.5} color={c.or} style={{ marginBottom: 8 }}>View access only: editing and saving are disabled.</Txt> : null}
-      {part?.part === 'builder' ? nameInput('Title', String(selected?.config?.name ?? ''), (v) => patchBuilder({ name: v })) : null}
+      {part?.part === 'builder' ? (
+        <View>
+          {nameInput('Title', String(selected?.config?.name ?? ''), (v) => patchBuilder({ name: v }))}
+          <Txt size={10} mut>Build Your Own artwork background color</Txt>
+          <View style={{ marginTop: 4, marginBottom: 10 }}>
+            <PromoColorPicker value={String(selected?.config?.stageBgColor || '#2C4A5B')} onChange={(hex) => patchBuilder({ stageBgColor: hex })} disabled={!canEdit || saving} />
+          </View>
+        </View>
+      ) : null}
       {part?.part === 'group' && group ? nameInput('Section name', String(group.name ?? ''), (v) => patchGroup(group.id, (g) => ({ ...g, name: v }))) : null}
       {part?.part === 'ingredient' && group && item ? (
         <View>
@@ -158,10 +166,7 @@ export function GoodiesBuilderConfigEditor({ canEdit, focus = null, imageUrls = 
             </View>
           </View>
           {nameInput('Ingredient name', String(item.name ?? ''), (v) => patchItem(group.id, item.id, { name: v }))}
-          <Txt size={10} mut>Card color</Txt>
-          <View style={{ marginTop: 4, marginBottom: 10 }}>
-            <PromoColorPicker value={String(item.bg || '#F4F4F5')} onChange={(hex) => patchItem(group.id, item.id, { bg: hex })} disabled={!canEdit || saving} />
-          </View>
+          
           {part.isNew && requestsHere.length ? (
             <View style={{ marginBottom: 10 }}>
               <Txt size={10} mut>Or use a request from this merchant</Txt>
