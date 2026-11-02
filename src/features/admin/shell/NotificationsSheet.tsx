@@ -44,7 +44,7 @@ export function NotificationsSheet({ onClose }: { onClose: () => void }) {
         key: String(i) + n.t,
         main: <View style={{ flexDirection: 'row', alignItems: 'center' }}>{isUnread(n) ? <Dot color={n.f.includes('crit') ? 'or' : 'gr'} /> : null}<Txt size={10.1} weight={isUnread(n) ? 600 : 400} style={{ flex: 1 }}>{n.t}</Txt></View>,
         sub: n.w,
-        onPress: () => { if (n.serverId) { void supabase.from('notifications').update({ read: true }).eq('id', n.serverId); setServerNotices((rows) => rows.map((row) => row.serverId === n.serverId ? { ...row, read: true, f: '' } : row)); } else markRead(n); bump(); if (n.d === 'goodiesIngredientRequests') { go('editor', { editorFeature: 'Goodies' }); return; } open(n.d, n.v); },
+        onPress: () => { if (n.serverId) { void supabase.from('notifications').update({ read: true }).eq('id', n.serverId); setServerNotices((rows) => rows.map((row) => row.serverId === n.serverId ? { ...row, read: true, f: '' } : row)); } else markRead(n); bump(); if (n.d === 'goodiesIngredientRequests') { go('goodiesRequests'); return; } open(n.d, n.v); },
       }))} />
     </DrawerBody>
   );
