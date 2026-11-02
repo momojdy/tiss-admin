@@ -1,5 +1,6 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { Image, TextInput, View } from 'react-native';
+import { CollapsibleColorField } from './CollapsibleColorField';
 import { supabase } from '../../lib/supabase';
 import { useTheme } from '../../theme/ThemeContext';
 import { Section } from '../../ui/Card';
@@ -140,17 +141,18 @@ export function GoodiesBuilderConfigEditor({ canEdit, focus = null, imageUrls = 
   const title = !part ? 'Build Your Own' : part.part === 'builder' ? 'Title' : part.part === 'group' ? 'Section' : 'Ingredient';
 
   return (
-    <Section title={title}>
+    <View style={{ borderWidth: 2, borderStyle: 'dashed', borderColor: '#FD802E', borderRadius: 14, padding: 10, marginTop: 10 }}>
+      <Txt size={9.5} weight={600} color={c.or} style={{ marginBottom: 6 }}>Selected Build Your Own field · edit below</Txt>
+      <Section title={title}>
       {error ? <Txt size={10.5} color={c.or} style={{ marginBottom: 8 }}>{error}</Txt> : null}
       {notice ? <Txt size={10} mut style={{ marginBottom: 8 }}>{notice}</Txt> : null}
       {!canEdit && part ? <Txt size={9.5} color={c.or} style={{ marginBottom: 8 }}>View access only: editing and saving are disabled.</Txt> : null}
       {part?.part === 'builder' ? (
         <View>
           {nameInput('Title', String(selected?.config?.name ?? ''), (v) => patchBuilder({ name: v }))}
-          <Txt size={10} mut>Build Your Own artwork background color</Txt>
-          <View style={{ marginTop: 4, marginBottom: 10 }}>
+          <CollapsibleColorField label="Artwork stage background" value={String(selected?.config?.stageBgColor || '#2C4A5B')} disabled={!canEdit || saving}>
             <PromoColorPicker value={String(selected?.config?.stageBgColor || '#2C4A5B')} onChange={(hex) => patchBuilder({ stageBgColor: hex })} disabled={!canEdit || saving} />
-          </View>
+          </CollapsibleColorField>
         </View>
       ) : null}
       {part?.part === 'group' && group ? nameInput('Section name', String(group.name ?? ''), (v) => patchGroup(group.id, (g) => ({ ...g, name: v }))) : null}
@@ -184,6 +186,7 @@ export function GoodiesBuilderConfigEditor({ canEdit, focus = null, imageUrls = 
           <OutlineBtn onPress={close} disabled={saving}>Close</OutlineBtn>
         </View>
       ) : <OutlineBtn onPress={close}>Close</OutlineBtn>}
-    </Section>
+      </Section>
+    </View>
   );
 }
