@@ -14,9 +14,9 @@ const r2 = (n: number) => Math.round(n * 100) / 100;
 const cl = <X,>(o: X): X => JSON.parse(JSON.stringify(o));
 const rid = () => Math.random().toString(36).slice(2, 10);
 
-export type BItem = {id: string; name: string; price: number; free: boolean; avail: boolean; assetId: string | null; col: string; max?: number; img?: {assetKey?: string; data?: string}; bg?: string};
+export type BItem = {id: string; name: string; price: number; free: boolean; avail: boolean; assetId: string | null; col: string; max?: number; img?: {assetKey?: string; data?: string}};
 type BGroup = {id: string; name: string; kind: 'one' | 'many'; req: boolean; min: number; max: number; inc: number; me: number; items: BItem[]};
-export type Builder = {id: string; type: 'pizza' | 'burger' | 'custom'; name: string; desc: string; emoji: string; enabled: boolean; available: boolean; base: number; notes: boolean; sizes: {id: string; name: string; add: number; avail: boolean}[]; groups: BGroup[]};
+export type Builder = {id: string; type: 'pizza' | 'burger' | 'custom'; name: string; desc: string; emoji: string; enabled: boolean; available: boolean; base: number; notes: boolean; stageBgColor?: string; sizes: {id: string; name: string; add: number; avail: boolean}[]; groups: BGroup[]};
 
 export function bClean(b: any): Builder | null {
   try {
@@ -24,13 +24,13 @@ export function bClean(b: any): Builder | null {
     const num = (v: any) => Math.max(0, parseFloat(v) || 0);
     return {
       id: String(b.id), type: b.type, name: String(b.name || 'Build Your Own').slice(0, 60), desc: String(b.desc || '').slice(0, 160), emoji: String(b.emoji || '🍽️').slice(0, 4),
-      enabled: b.enabled !== false, available: b.available !== false, base: num(b.base), notes: b.notes !== false,
+      enabled: b.enabled !== false, available: b.available !== false, base: num(b.base), notes: b.notes !== false, stageBgColor: /^#[0-9a-f]{6}$/i.test(b.stageBgColor) ? b.stageBgColor : '#2C4A5B',
       sizes: (Array.isArray(b.sizes) ? b.sizes : []).filter((s: any) => s && s.id).map((s: any) => ({id: String(s.id), name: String(s.name || 'Size').slice(0, 30), add: num(s.add), avail: s.avail !== false})),
       groups: (Array.isArray(b.groups) ? b.groups : []).filter((g: any) => g && g.id).map((g: any) => {
         const one = g.kind === 'one', max = one ? 1 : Math.max(1, parseInt(g.max, 10) || 1);
         return {
           id: String(g.id), name: String(g.name || 'Options').slice(0, 40), kind: one ? 'one' : 'many', req: !!g.req, min: one ? (g.req ? 1 : 0) : Math.max(0, parseInt(g.min, 10) || 0), max, inc: one ? 0 : Math.max(0, parseInt(g.inc, 10) || 0), me: one ? 1 : Math.max(1, parseInt(g.me, 10) || max),
-          items: (Array.isArray(g.items) ? g.items : []).filter((i: any) => i && i.id).map((i: any) => ({id: String(i.id), name: String(i.name || 'Item').slice(0, 40), price: num(i.price), free: !!i.free, avail: i.avail !== false, assetId: i.assetId ? String(i.assetId) : null, col: /^#[0-9a-f]{6}$/i.test(i.col) ? i.col : '#D9A441', max: i.max ? Math.max(1, parseInt(i.max, 10) || 1) : undefined, img: i.img && typeof i.img === 'object' ? {assetKey: i.img.assetKey ? String(i.img.assetKey) : undefined, data: typeof i.img.data === 'string' ? i.img.data : undefined} : undefined, bg: /^#[0-9a-f]{6}$/i.test(i.bg) ? i.bg : undefined})),
+          items: (Array.isArray(g.items) ? g.items : []).filter((i: any) => i && i.id).map((i: any) => ({id: String(i.id), name: String(i.name || 'Item').slice(0, 40), price: num(i.price), free: !!i.free, avail: i.avail !== false, assetId: i.assetId ? String(i.assetId) : null, col: /^#[0-9a-f]{6}$/i.test(i.col) ? i.col : '#D9A441', max: i.max ? Math.max(1, parseInt(i.max, 10) || 1) : undefined, img: i.img && typeof i.img === 'object' ? {assetKey: i.img.assetKey ? String(i.img.assetKey) : undefined, data: typeof i.img.data === 'string' ? i.img.data : undefined} : undefined})),
         };
       }),
     };
