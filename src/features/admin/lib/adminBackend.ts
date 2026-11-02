@@ -145,6 +145,11 @@ export async function saveCmsVersion(input: {
   if (error) throw new Error(error.code === '42501' ? 'You do not have permission to save this content state.' : error.message);
   return String(data);
 }
+/** React Native does not guarantee a global Web Crypto API; this is a unique asset identifier, not a security token. */
+export function createAssetUploadId() {
+  return Date.now().toString(36) + '-' + Math.random().toString(36).slice(2) + '-' + Math.random().toString(36).slice(2);
+}
+
 export async function uploadCmsAsset(input: {
   key: string; uri: string; fileName: string; contentType: string; byteSize: number;
   altText?: Record<string, string>; status?: 'draft';
@@ -159,7 +164,7 @@ export async function uploadCmsAsset(input: {
   if (!response.ok) throw new Error('The selected asset could not be read.');
   const blob = await response.blob();
   const safeName = input.fileName.replace(/[^a-zA-Z0-9._-]/g, '_').slice(-100) || 'asset';
-  const path = user.id + '/' + crypto.randomUUID() + '-' + safeName;
+  const path = user.id + '/' + createAssetUploadId() + '-' + safeName;
   const { error: uploadError } = await supabase.storage.from('wantiss-cms-assets').upload(path, blob, {
     contentType: input.contentType, upsert: false,
   });
