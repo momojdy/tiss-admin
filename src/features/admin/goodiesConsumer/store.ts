@@ -119,7 +119,14 @@ function liveStore(r: any, items: Item[]): Store {
     scheduledOrderStartMinutes: Number(r.scheduled_order_start_minutes ?? 60), scheduleHours: r.hours || undefined,
     businessName: r.business_name || '', businessDescription: r.description || '', businessPhone: r.phone || '', businessEmail: r.email || '', businessWebsite: r.website || '',
     businessAddress: r.address || '', businessCity: r.city || '', businessCountry: r.country || '', businessDeliveryModes: Array.isArray(r.delivery_modes) ? r.delivery_modes : [], businessLogoUrl: r.logo_url || '',
-    get n() {const t = names[S.lang]; return (typeof t === 'string' && t.trim()) || r.business_name || 'Store';},
+    get n() {
+      const selected = names[S.lang];
+      const fallback = [names.en, names.fr, names.ht, names.es, names['zh-Hans']]
+        .find((value: unknown) => typeof value === 'string' && value.trim());
+      // business_name identifies the business account/owner in this table, not
+      // the customer-facing shop name. Use the localized shop name instead.
+      return (typeof selected === 'string' && selected.trim()) || fallback || 'Store';
+    },
   } as Store;
   return store;
 }
