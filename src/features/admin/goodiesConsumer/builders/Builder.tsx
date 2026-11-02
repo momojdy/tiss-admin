@@ -172,10 +172,14 @@ function CustomPlate({b}: {b: Builder}) {
 }
 export function Stage({b, fin}: {b: Builder; fin?: boolean}) {
   return (
-    <LinearGradient colors={[b.stageBgColor || '#2C4A5B', b.stageBgColor || '#2C4A5B']} style={{marginHorizontal: 16, borderRadius: 24, height: 300, flexShrink: 0, alignItems: 'center', justifyContent: 'center', paddingVertical: b.type === 'burger' ? 8 : 14, overflow: 'visible'}}>
+    <View style={{marginHorizontal: 16, height: 300, flexShrink: 0, position: 'relative'}}>
+      <BSel target={{builderId: b.id, part: 'builder'}} style={{flex: 1}}>
+        <LinearGradient colors={[b.stageBgColor || '#2C4A5B', b.stageBgColor || '#2C4A5B']} style={{flex: 1, borderRadius: 24, alignItems: 'center', justifyContent: 'center', paddingVertical: b.type === 'burger' ? 8 : 14, overflow: 'visible'}}>
+          {b.type === 'pizza' ? <PizzaStage b={b} /> : b.type === 'burger' ? <BurgerStage b={b} fin={!!fin || !!BD.assembling} /> : <CustomPlate b={b} />}
+        </LinearGradient>
+      </BSel>
       <Pressable accessibilityLabel={label('lbl.byoUndo', 'Undo last change')} disabled={!BD.hist.length} onPress={bzUndo} style={{position: 'absolute', left: 10, top: 10, width: 40, height: 40, borderRadius: 20, backgroundColor: '#2E4D5F', borderWidth: 1, borderColor: 'rgba(255,255,255,.14)', alignItems: 'center', justifyContent: 'center', zIndex: 20, opacity: BD.hist.length ? 1 : 0.3}}><Icon name="undo" size={20} color="#F5F5F5" /></Pressable>
-      {b.type === 'pizza' ? <PizzaStage b={b} /> : b.type === 'burger' ? <BurgerStage b={b} fin={!!fin || !!BD.assembling} /> : <CustomPlate b={b} />}
-    </LinearGradient>
+    </View>
   );
 }
 
