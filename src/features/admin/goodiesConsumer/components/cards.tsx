@@ -1,5 +1,5 @@
 import React from 'react';
-import {View, Text, Pressable, useWindowDimensions} from 'react-native';
+import {View, Text, Pressable, useWindowDimensions, Image} from 'react-native';
 import {Icon} from './Icon';
 import {T, Grad, Tile, bgIdx, useTheme, Badge, heartBtn} from './ui';
 import {S, STB, PV, money, dp} from '../store';
@@ -57,7 +57,9 @@ export function VCard({s}: {s: Store}) {
     <View style={{width: 148, borderRadius: 18, backgroundColor: th.card, borderWidth: 1, borderColor: th.line, overflow: 'hidden'}}>
       <View>
         <Pressable accessibilityRole="link" onPress={() => go('store', s.id)}>
-          <Grad idx={bgIdx(s.bg)} style={{height: 108, alignItems: 'center', justifyContent: 'center'}}><Text style={{fontSize: 54}}>{s.e}</Text></Grad>
+          <Grad idx={bgIdx(s.bg)} style={{height: 108, alignItems: 'center', justifyContent: 'center', overflow: 'hidden'}}>
+            {s.cover || s.thumbnail || s.logo ? <Image source={{uri: s.cover || s.thumbnail || s.logo || ''}} style={{position: 'absolute', width: '100%', height: '100%'}} resizeMode="cover" /> : <Text style={{fontSize: 54}}>{s.e}</Text>}
+          </Grad>
         </Pressable>
         {heartBtn(s.id, saved, () => heart(s.id), saved ? 'Remove ' + s.n + ' from favorites' : 'Save ' + s.n + ' to favorites')}
       </View>
@@ -78,7 +80,7 @@ export function StoreCard({s}: {s: Store}) {
     <View>
       <Pressable accessibilityRole="link" onPress={() => go('store', s.id)}>
         <Grad idx={bgIdx(s.bg)} style={{height: 160, borderRadius: 18, alignItems: 'center', justifyContent: 'center', overflow: 'hidden'}}>
-          <Text style={{fontSize: 76}}>{s.e}</Text>
+          {s.cover || s.thumbnail || s.logo ? <Image source={{uri: s.cover || s.thumbnail || s.logo || ''}} style={{position: 'absolute', width: '100%', height: '100%'}} resizeMode="cover" /> : <Text style={{fontSize: 76}}>{s.e}</Text>}
           {s.pr ? <View style={{position: 'absolute', left: 0, top: 14, backgroundColor: th.br, borderTopRightRadius: 8, borderBottomRightRadius: 8, paddingVertical: 5, paddingLeft: 12, paddingRight: 10}}><T size={12} weight="800" color="#fff">{s.pr}</T></View> : null}
           {heartBtn(s.id, S.fav.indexOf(s.id) > -1, () => heart(s.id), S.fav.indexOf(s.id) > -1 ? 'Remove ' + s.n + ' from favorites' : 'Save ' + s.n + ' to favorites')}
           {!s.open ? pill(tr('closed') + ' · ' + s.nx) : s.far && !s.live ? pill('Pickup only at this address') : s.rv > 80 ? pill('🔥 ' + Math.round(s.rv * 0.95) + ' ordered today') : null}
