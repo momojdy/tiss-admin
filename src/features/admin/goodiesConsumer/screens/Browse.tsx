@@ -18,10 +18,11 @@ import {supabase} from '../../lib/supabase';
 const cname = (id: string) => catName(id);
 
 function CategoryIcon({art, emoji}: {art?: string | null; emoji: string}) {
+  const th = useTheme();
   const [failed, setFailed] = useState(false);
   useEffect(() => setFailed(false), [art]);
   return (
-    <View style={{width:48,height:48,borderRadius:24,backgroundColor:'#F4F4F5',alignItems:'center',justifyContent:'center',overflow:'hidden'}}>
+    <View style={{width:48,height:48,borderRadius:24,backgroundColor:th.soft,alignItems:'center',justifyContent:'center',overflow:'hidden'}}>
       {art && !failed
         ? <Image source={{uri:art}} style={{width:48,height:48}} resizeMode="cover" onError={() => setFailed(true)} />
         : <Text style={{fontSize:30}}>{emoji}</Text>}
