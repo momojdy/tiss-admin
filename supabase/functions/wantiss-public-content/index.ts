@@ -1,4 +1,5 @@
 import "jsr:@supabase/functions-js/edge-runtime.d.ts";
+const PUBLISHED_ASSET_URL_TTL_SECONDS = 60 * 60 * 24 * 7;
 import { createClient } from "npm:@supabase/supabase-js@2.117.2";
 const headers = {
   "Access-Control-Allow-Origin": "*",
@@ -21,13 +22,13 @@ Deno.serve(async (req: Request) => {
     .select("asset_key,storage_path,content_type,byte_size,alt_text").eq("status", "published");
   if (ae) return reply(503, { error: "Published assets are temporarily unavailable" });
   const publishedAssets = await Promise.all((assets || []).map(async asset => {
-    const { data, error } = await admin.storage.from("wantiss-cms-assets").createSignedUrl(asset.storage_path, 300);
+    const { data, error } = await admin.storage.from("wantiss-cms-assets").createSignedUrl(asset.storage_path, PUBLISHED_ASSET_URL_TTL_SECONDS);
     return error || !data?.signedUrl ? null : { asset_key: asset.asset_key, url: data.signedUrl, content_type: asset.content_type, byte_size: asset.byte_size, alt_text: asset.alt_text };
   }));
   const { data: brand } = await admin.from("wantiss_admin_branding").select("brand_name,logo_storage_path,wordmark_storage_path,updated_at").eq("id", 1).maybeSingle();
   const signBrandAsset = async (path: string | null | undefined) => {
     if (!path) return null;
-    const { data, error } = await admin.storage.from("wantiss-cms-assets").createSignedUrl(path, 300);
+    const { data, error } = await admin.storage.from("wantiss-cms-assets").createSignedUrl(path, PUBLISHED_ASSET_URL_TTL_SECONDS);
     return error || !data?.signedUrl ? null : data.signedUrl;
   };
   const branding = { name: brand?.brand_name || "Wantiss", logo_url: await signBrandAsset(brand?.logo_storage_path), wordmark_url: await signBrandAsset(brand?.wordmark_storage_path), updated_at: brand?.updated_at || null };
