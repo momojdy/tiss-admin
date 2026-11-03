@@ -1,5 +1,7 @@
 /* Shared published content provider. Draft content is never read by customer or vendor clients. */
 import {fetchPublishedWantissContent} from '../lib/wantissCms';
+import AsyncStorage from '@react-native-async-storage/async-storage';
+import {Image} from 'react-native';
 import {tx} from './i18n';
 import {contentHooks} from './store';
 import type {Txt} from './data/types';
@@ -28,34 +30,71 @@ export function applyContent(json: any) {
    must never fetch or reset C, otherwise it would overwrite the editor's draft. */
 let draftControlled = false;
 export const setDraftControlled = (value: boolean) => {draftControlled = value;};
-export async function loadContent() {
-  if (draftControlled) return;
-  try {
-    const remote = await fetchPublishedWantissContent('en');
-    const record = remote.content.find(x => x.content_key === 'goodies.content' || x.content_key === 'goodies');
-    const payload: any = record?.payload;
-    if (payload && payload.v === 5) {
-      const assetByKey = new Map(remote.assets.map(a => [a.asset_key, a.url]));
-      (payload.lib || []).forEach((item: any) => {
-        const key = item.img?.assetKey || item.img?.asset_key;
-        if (key && assetByKey.has(key)) item.img.data = assetByKey.get(key);
-      });
-      applyContent(payload);
-    } else {
-      C = null;
-      Object.keys(ASSETS).forEach(k => delete ASSETS[k]);
-      Object.keys(LAYOUT).forEach(k => delete LAYOUT[k]);
-      subs.forEach(f => f());
-    }
-  } catch {
-    C = null;
-    Object.keys(ASSETS).forEach(k => delete ASSETS[k]);
-    Object.keys(LAYOUT).forEach(k => delete LAYOUT[k]);
-    subs.forEach(f => f());
-  }
+const CONTENT_CACHE_KEY = 'admin-goodies-published-content-v5';
+let hydration: Promise<void> | null = null;
+let contentLoad: Promise<void> | null = null;
+async function hydrateContent() {
+  if (C) return;
+  if (!hydration) hydration = (async () => {
+    try {
+      const cached = await AsyncStorage.getItem(CONTENT_CACHE_KEY);
+      if (cached && !C) applyContent(JSON.parse(cached));
+    } catch { /* Ignore an unavailable or invalid cache; fetch published content below. */ }
+  })();
+  await hydration;
 }
-export async function importContent(text: string) { const j = JSON.parse(text); applyContent(j); }
-export async function clearContent() { C = null; Object.keys(ASSETS).forEach(k => delete ASSETS[k]); Object.keys(LAYOUT).forEach(k => delete LAYOUT[k]); subs.forEach(f => f()); }
+function prefetchContentImages(payload: any) {
+  const urls = [
+    ...(payload.cats || []).map((x: any) => x.art?.data),
+    ...(payload.modes || []).map((x: any) => x.img?.data || x.art?.data),
+    ...(payload.promos || []).map((x: any) => x.img?.data || x.art?.data),
+    ...(payload.lib || []).map((x: any) => x.img?.data),
+  ].filter((url: any): url is string => typeof url === 'string' && /^https?:\\/\\//i.test(url));
+  void Promise.all(Array.from(new Set(urls)).map(url => Image.prefetch(url).catch(() => false)));
+}
+/* Cached published content is applied first; the network refresh never blanks a usable
+   cache if the CMS is temporarily unavailable. Editor-owned drafts are never overwritten. */
+export function loadContent(): Promise<void> {
+  if (draftControlled) return Promise.resolve();
+  if (contentLoad) return contentLoad;
+  const request = (async () => {
+    await hydrateContent();
+    try {
+      const remote = await fetchPublishedWantissContent('en');
+      const record = remote.content.find(x => x.content_key === 'goodies.content' || x.content_key === 'goodies');
+      const payload: any = record?.payload;
+      if (payload && payload.v === 5) {
+        const assetByKey = new Map(remote.assets.map(a => [a.asset_key, a.url]));
+        (payload.lib || []).forEach((item: any) => {
+          const key = item.img?.assetKey || item.img?.asset_key;
+          if (key && assetByKey.has(key)) item.img.data = assetByKey.get(key);
+        });
+        applyContent(payload);
+        prefetchContentImages(payload);
+        try { await AsyncStorage.setItem(CONTENT_CACHE_KEY, JSON.stringify(payload)); } catch { /* Disk cache is optional. */ }
+      }
+    } catch {
+      // Keep the last published cache visible; a failed refresh must not erase it.
+    }
+  })();
+  const tracked = request.finally(() => { if (contentLoad === tracked) contentLoad = null; });
+  contentLoad = tracked;
+  return tracked;
+}
+export async function importContent(text: string) {
+  const json = JSON.parse(text);
+  applyContent(json);
+  prefetchContentImages(json);
+  try { await AsyncStorage.setItem(CONTENT_CACHE_KEY, JSON.stringify(json)); } catch { /* Optional persistence. */ }
+}
+export async function clearContent() {
+  C = null;
+  hydration = null;
+  try { await AsyncStorage.removeItem(CONTENT_CACHE_KEY); } catch { /* Ignore cache cleanup errors. */ }
+  Object.keys(ASSETS).forEach(k => delete ASSETS[k]);
+  Object.keys(LAYOUT).forEach(k => delete LAYOUT[k]);
+  subs.forEach(f => f());
+}
 export const hasContent = () => !!C;
 
 export function categories(): {id: string; name: Txt; emoji: string; art?: string | null}[] {
