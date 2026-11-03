@@ -134,7 +134,7 @@ export function Home({onExit}: {onExit?: () => void}) {
           <Icon name="chevR" size={16} color={th.ink} />
         </Pressable>
       </View>
-      <Sh sel={{kind: 'label', id: 'lbl.flash', field: 'text'}} title={'⚡ ' + label('lbl.flash', tr('flashDeals'))} right={<Countdown />} />
+      <Sh sel={{kind: 'label', id: 'lbl.flash', field: 'text'}} title={'⚡ ' + label('lbl.flash', tr('flashDeals'))} right={<Row style={{gap:10}}><Countdown /><Pressable accessibilityRole="button" onPress={() => go('flashdeals')}><T size={13} weight="800" color={th.br}>{tr('seeAll')}</T></Pressable></Row>} />
       <Rail>{dl.filter(d => IT[d[0]]).map(d => <Dish key={d[0]} i={IT[d[0]]} off={d[1]} left={d[2]} />)}</Rail>
       {os.length ? (<>
         <Sh sel={{kind: 'label', id: 'lbl.again', field: 'text'}} title={label('lbl.again', tr('orderAgain'))} link="History" onLink={() => tab('orders')} />
@@ -334,6 +334,25 @@ export function Search() {
       {head}
       <View style={{height: 8}} />
       {body}
+    </View>
+  );
+}
+
+export function FlashDeals() {
+  const th = useTheme();
+  const activeDeals = deals().filter(d => IT[d[0]]);
+  return (
+    <View>
+      <Bar title={label('lbl.flash', tr('flashDeals'))} onBack={back} />
+      <View style={{paddingHorizontal:16,paddingBottom:24}}>
+        <Row sp style={{marginBottom:14}}>
+          <T size={13} weight="700" color={th.mut}>Limited-time offers</T>
+          <Countdown />
+        </Row>
+        {activeDeals.length ? <View style={{flexDirection:'row',flexWrap:'wrap',gap:12}}>
+          {activeDeals.map(d => <Dish key={d[0]} i={IT[d[0]]} off={d[1]} left={d[2]} grid />)}
+        </View> : <Empty title="No flash deals available" text="Check back soon for limited-time offers." />}
+      </View>
     </View>
   );
 }
