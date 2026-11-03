@@ -312,9 +312,9 @@ function CtForm({id}: {id: any}) {
   const save_ = () => {
     const p = ph.trim();
     if (!phoneOK(p)) return toast('Enter a valid phone number (8 to 15 digits)');
-    const dg = p.replace(/\\D/g, '');
-    if (dg === S.pf.ph.replace(/\\D/g, '')) return toast('That is already your Wantiss number');
-    if (S.gc.some((x: any) => x.id != id && String(x.ph).replace(/\\D/g, '') === dg)) return toast('You already saved that number');
+    const dg = p.replace(/\D/g, '');
+    if (dg === S.pf.ph.replace(/\D/g, '')) return toast('That is already your Wantiss number');
+    if (S.gc.some((x: any) => x.id != id && String(x.ph).replace(/\D/g, '') === dg)) return toast('You already saved that number');
     const cc = S.gc.filter((x: any) => x.id == id)[0];
     if (cc) {cc.ph = p; cc.l = l.trim();} else {const n = {id: Date.now(), ph: p, l: l.trim()}; S.gc.push(n); S.cc = n.id;}
     toast('Number saved for Goodies checkout'); save(); emit(); ui.sheet({kind: 'contacts'});
