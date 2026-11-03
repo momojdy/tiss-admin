@@ -1,6 +1,7 @@
 import "jsr:@supabase/functions-js/edge-runtime.d.ts";
-const PUBLISHED_ASSET_URL_TTL_SECONDS = 60 * 60 * 24 * 7;
 import { createClient } from "npm:@supabase/supabase-js@2.117.2";
+
+const PUBLISHED_ASSET_URL_TTL_SECONDS = 60 * 60 * 24 * 7;
 const headers = {
   "Access-Control-Allow-Origin": "*",
   "Access-Control-Allow-Headers": "authorization, apikey, content-type, x-client-info",
