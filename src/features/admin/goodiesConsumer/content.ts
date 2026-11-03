@@ -106,7 +106,7 @@ export const label = (id: string, fallback: string) => {const l = C && C.labels 
 const live = (r: any) => {const n = new Date().toISOString().slice(0, 10); return r.st === 'Live' && (!r.from || r.from <= n) && (!r.to || r.to >= n);};
 export type PromoCard = {id: string; emoji: string; image?: string | null; color: string; title: string; sub: string; btn: string; target: string; newOnly: boolean};
 export function promoCards(): PromoCard[] | null {
-  if (!C) return [];
+  if (!C) return null;
   return C.promos.filter(live).sort((a: any, b: any) => a.ord - b.ord).map((p: any) => ({id: p.id, emoji: p.emoji, image: p.img?.data || p.art?.data || null, color: p.color, title: tx(p.title), sub: tx(p.sub), btn: tx(p.btn), target: p.target, newOnly: p.aud === 'New customers'}));
 }
 export function deals(): [string, number, number][] {
