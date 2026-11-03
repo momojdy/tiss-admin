@@ -5,6 +5,7 @@ import {Image} from 'react-native';
 import {tx} from './i18n';
 import {contentHooks} from './store';
 import type {Txt} from './data/types';
+import {CATS, DEALS} from './data/seed';
 
 export interface Asset {u: string; w: number; h: number; ver: number}
 export const ASSETS: Record<string, Asset> = {};
@@ -102,7 +103,7 @@ export async function clearContent() {
 export const hasContent = () => !!C;
 
 export function categories(): {id: string; name: Txt; emoji: string; art?: string | null}[] {
-  if (!C) return [];
+  if (!C) return CATS.map(c => ({id: c.id, name: c.name, emoji: c.emoji, art: c.art || null, home: c.home}));
   return C.cats.filter((c: any) => c.st === 'on').sort((a: any, b: any) => a.ord - b.ord).map((c: any) => ({id: c.id, name: c.name, emoji: c.emoji, art: c.art ? c.art.data : null, home: c.home}));
 }
 export const catName = (id: string) => {const c = categories().find(x => x.id === id); return c ? tx(c.name) : id === 'all' ? 'All stores' : id;};
@@ -114,7 +115,7 @@ export function promoCards(): PromoCard[] | null {
   return C.promos.filter(live).sort((a: any, b: any) => a.ord - b.ord).map((p: any) => ({id: p.id, emoji: p.emoji, image: p.img?.data || p.art?.data || null, color: p.color, title: tx(p.title), sub: tx(p.sub), btn: tx(p.btn), target: p.target, newOnly: p.aud === 'New customers'}));
 }
 export function deals(): [string, number, number][] {
-  if (!C) return [];
+  if (!C) return DEALS.map(d => [...d] as [string, number, number]);
   return C.deals.filter((d: any) => d.st === 'Live' && d.rs !== 'alcohol').map((d: any) => [d.item, d.pct, d.left]);
 }
 export function dealEnd(): number | null {return C && C.dealEnd ? new Date(C.dealEnd).getTime() : null;}
