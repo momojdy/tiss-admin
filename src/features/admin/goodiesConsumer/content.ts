@@ -49,7 +49,7 @@ function prefetchContentImages(payload: any) {
     ...(payload.modes || []).map((x: any) => x.img?.data || x.art?.data),
     ...(payload.promos || []).map((x: any) => x.img?.data || x.art?.data),
     ...(payload.lib || []).map((x: any) => x.img?.data),
-  ].filter((url: any): url is string => typeof url === 'string' && /^https?:\\/\\//i.test(url));
+  ].filter((url: any): url is string => typeof url === 'string' && /^https?:\/\//i.test(url));
   void Promise.all(Array.from(new Set(urls)).map(url => Image.prefetch(url).catch(() => false)));
 }
 /* Cached published content is applied first; the network refresh never blanks a usable
