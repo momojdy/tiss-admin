@@ -104,9 +104,10 @@ function Countdown() {
 export function Home({onExit}: {onExit?: () => void}) {
   const th = useTheme(), ins = useSafeAreaInsets();
   const [contentReady, setContentReady] = useState(hasContent());
+  const [, setContentVersion] = useState(0);
   useEffect(() => {
     let active = true;
-    const off = onContent(() => setContentReady(hasContent()));
+    const off = onContent(() => { setContentReady(hasContent()); setContentVersion(value => value + 1); });
     void loadContent().finally(() => { if (active) setContentReady(true); });
     return () => { active = false; off(); };
   }, []);
