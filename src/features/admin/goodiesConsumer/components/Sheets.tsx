@@ -1,5 +1,5 @@
 import React, {useState} from 'react';
-import {View, Text, Pressable, Modal, ScrollView, KeyboardAvoidingView, Platform, Share} from 'react-native';
+import {View, Text, Pressable, ScrollView, Share} from 'react-native';
 import {T, Cta, Row, Card, Badge, Input, Radio, SheetBox, useTheme} from './ui';
 import {Icon} from './Icon';
 import {S, STB, money, emit, save, toast, ui, addr, defAddr, done, phoneOK, fmtDay, fmtTime, alcAge} from '../store';
@@ -9,6 +9,7 @@ import {bzLeave, bzDiscard, bzReset2} from '../builders/engine';
 import {rgText, importContent, clearContent, hasContent} from '../content';
 import {TextInput, useWindowDimensions} from 'react-native';
 import {useSafeAreaInsets} from 'react-native-safe-area-context';
+import {BottomSheet, ConfirmDialog} from './Overlays';
 
 export function Sheets({sheet, close}: {sheet: any; close: () => void}) {
   const th = useTheme(), insets = useSafeAreaInsets(), {height: windowHeight} = useWindowDimensions();
@@ -78,18 +79,16 @@ export function Sheets({sheet, close}: {sheet: any; close: () => void}) {
   if (k === 'addr') content = (<><T size={20} weight="800" style={{marginBottom: 4}}>Deliver to</T><T size={12.5} color={th.mut} style={{marginBottom: 12}}>Choosing an address here only changes Goodies. Your Wantiss default stays the same.</T>{S.addr.map((a: any) => <Radio key={a.id} on={a.id === S.as} onPress={() => A.selectAddr(a.id)}><Row style={{gap: 6}}><T weight="700">{a.l}</T>{a.def ? <Badge green label="Wantiss default" /> : null}</Row><T size={12.5} color={th.mut}>{a.t}</T></Radio>)}<Cta ghost label="Manage addresses" onPress={() => {close(); A.go('addresses');}} /></>);
 
   const isRatingSheet = k === 'review' || k === 'driver-review';
-  return (
-    <Modal transparent animationType="slide" onRequestClose={close} statusBarTranslucent>
-      <KeyboardAvoidingView style={{flex: 1}} behavior={Platform.OS === 'ios' ? 'padding' : undefined} keyboardVerticalOffset={0}>
-        <View style={{flex:1, backgroundColor:'rgba(0,0,0,.5)', justifyContent:'flex-end'}}>
-          <Pressable onPress={close} accessibilityRole="button" accessibilityLabel="Close sheet" style={{position:'absolute',top:0,left:0,right:0,bottom:0}} />
-          <View style={{width:'100%', height: isRatingSheet ? Math.min(430, windowHeight * 0.68) : k==='schedule' ? Math.max(0, windowHeight - insets.top) : undefined, maxHeight: k==='schedule' ? Math.max(0, windowHeight - insets.top) : isRatingSheet ? windowHeight * 0.68 : k==='promo'&&sheet.custom ? '68%' : k==='sinfo'||k==='promo' ? '92%' : '90%', flexShrink:1, minHeight:0, marginBottom:0}}>
-            <SheetBox large={isRatingSheet || k === 'sinfo' || k === 'schedule' || (k === 'promo' && !sheet.custom)} compact={k === 'promo' && !!sheet.custom} onClose={close}><ScrollView style={{flex:1,minHeight:0}} contentContainerStyle={{paddingBottom:Math.max(16,insets.bottom),flexGrow:1}} nestedScrollEnabled keyboardShouldPersistTaps="handled" keyboardDismissMode="interactive" showsVerticalScrollIndicator={false}>{content}</ScrollView></SheetBox>
-          </View>
-        </View>
-      </KeyboardAvoidingView>
-    </Modal>
+  const isCenteredSheet = ['remove-item','clear','cancel','newcart','replace','byoleave','byoreset','alcrules'].includes(k);
+  const sheetBody = (
+    <View style={{width:'100%', height: isRatingSheet ? Math.min(430, windowHeight * 0.68) : k==='schedule' ? Math.max(0, windowHeight - insets.top) : undefined, maxHeight: k==='schedule' ? Math.max(0, windowHeight - insets.top) : isRatingSheet ? windowHeight * 0.68 : k==='promo'&&sheet.custom ? '68%' : k==='sinfo'||k==='promo' ? '92%' : isCenteredSheet?'60%':'90%', flexShrink:1, minHeight:0, marginBottom:0}}>
+      <SheetBox centered={isCenteredSheet || k === 'contacts' || k === 'ctform'} large={isRatingSheet || k === 'sinfo' || k === 'schedule' || (k === 'promo' && !sheet.custom)} compact={k === 'promo' && !!sheet.custom} onClose={close}>{k === 'ctform' ? content : <ScrollView style={{flex:1,minHeight:0}} contentContainerStyle={{paddingBottom:Math.max(16,insets.bottom),flexGrow:1}} nestedScrollEnabled keyboardShouldPersistTaps="handled" keyboardDismissMode="interactive" showsVerticalScrollIndicator={false}>{content}</ScrollView>}</SheetBox>
+    </View>
   );
+  if (isCenteredSheet) {
+    return <ConfirmDialog visible onClose={close} accessibilityLabel="Close dialog">{sheetBody}</ConfirmDialog>;
+  }
+  return <BottomSheet visible onClose={close} keyboardAware={k === 'contacts' || k === 'ctform'} maxHeight={k==='schedule' ? Math.max(0, windowHeight - insets.top) : k==='sinfo'||k==='promo' ? '92%' : isRatingSheet ? windowHeight * 0.68 : '90%'}>{sheetBody}</BottomSheet>;
 }
 
 function ScheduleSheet({close}: {close: () => void}) {
