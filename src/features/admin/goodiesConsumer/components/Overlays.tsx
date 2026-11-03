@@ -20,7 +20,7 @@ export function BottomSheet({visible, onClose, children, maxHeight = '90%', keyb
   return (
     <Modal transparent visible={visible} animationType="slide" onRequestClose={onClose} statusBarTranslucent>
       <KeyboardAvoidingView style={{flex: 1}} behavior={Platform.OS === 'ios' ? 'padding' : 'height'} keyboardVerticalOffset={Platform.OS === 'ios' ? 12 : 0}>
-        <View style={{flex: 1, backgroundColor: 'rgba(0,0,0,.5)', justifyContent: keyboardAware ? (keyboardVisible ? 'flex-start' : 'center') : 'flex-end', paddingTop: keyboardAware && keyboardVisible ? 28 : 0}}>
+        <View style={{flex: 1, backgroundColor: 'rgba(0,0,0,.5)', justifyContent: keyboardAware && keyboardVisible ? 'flex-start' : 'flex-end', paddingTop: keyboardAware && keyboardVisible ? 28 : 0}}>
           <Pressable accessibilityRole="button" accessibilityLabel="Close sheet" onPress={onClose} style={{position: 'absolute', top: 0, left: 0, right: 0, bottom: 0}} />
           <View style={{width: '100%', maxHeight: keyboardAware && keyboardVisible ? '68%' : maxHeight, flexShrink: 1, minHeight: 0}}>
             {children}
