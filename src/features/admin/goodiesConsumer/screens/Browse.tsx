@@ -16,6 +16,18 @@ import {MODE1, PROMO} from '../theme';
 import {supabase} from '../../lib/supabase';
 
 const cname = (id: string) => catName(id);
+
+function CategoryIcon({art, emoji}: {art?: string | null; emoji: string}) {
+  const [failed, setFailed] = useState(false);
+  useEffect(() => setFailed(false), [art]);
+  return (
+    <View style={{width:48,height:48,borderRadius:24,backgroundColor:'#F4F4F5',alignItems:'center',justifyContent:'center',overflow:'hidden'}}>
+      {art && !failed
+        ? <Image source={{uri:art}} style={{width:48,height:48}} resizeMode="cover" onError={() => setFailed(true)} />
+        : <Text style={{fontSize:30}}>{emoji}</Text>}
+    </View>
+  );
+}
 function Mode({id, title, sub, emoji, image, onPress, grad, bg, fg, small}: any) {
   const ed = useEditing();
   return (
@@ -129,7 +141,7 @@ export function Home({onExit}: {onExit?: () => void}) {
         {contentReady ? <Rail gap={14}>
           {CATS.map(c => (
             <Pressable key={c.id} onPress={() => go('catlist', c.id)} style={{width: 68, alignItems: 'center'}}>
-              <Sel sel={{kind: 'category', id: c.id, field: 'art'}}><View style={{width: 48, height: 48, borderRadius: 24, backgroundColor: th.soft, alignItems: 'center', justifyContent: 'center', overflow: 'hidden'}}>{c.art ? <Image source={{uri: c.art}} style={{width: 48, height: 48}} resizeMode="cover" onError={() => {}} /> : <Text style={{fontSize: 30}}>{c.emoji}</Text>}</View></Sel>
+              <Sel sel={{kind: 'category', id: c.id, field: 'art'}}><CategoryIcon art={c.art} emoji={c.emoji} /></Sel>
               <Sel sel={{kind: 'category', id: c.id, field: 'title'}}><T size={11.5} weight="600" align="center" style={{marginTop: 6, lineHeight: 14}}>{tx(c.name)}</T></Sel>
             </Pressable>
           ))}
