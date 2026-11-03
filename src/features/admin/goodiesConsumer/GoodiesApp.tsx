@@ -26,7 +26,7 @@ export function GoodiesApp({onExit, embedded = true, previewMode = false}: {onEx
   useGoodies();
   const th = useTheme(), ins = useSafeAreaInsets();
   const scroll = useRef<React.ElementRef<typeof ScrollView>>(null);
-  const [sheet, setSheet] = useState<any>(null), [toastTxt, setToastTxt] = useState('');
+  const [sheet, setSheet] = useState<any>(null), [toastTxt, setToastTxt] = useState(''), [refreshing, setRefreshing] = useState(false);
   const toastT = useRef<any>(null);
 
   ui.toast = (t: string) => {setToastTxt(t); clearTimeout(toastT.current); toastT.current = setTimeout(() => setToastTxt(''), 2300);};
