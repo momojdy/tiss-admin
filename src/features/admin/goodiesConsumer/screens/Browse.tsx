@@ -5,7 +5,7 @@ import {Icon} from '../components/Icon';
 import {T, Mut, Grad, Circ, Bar, Sh, Rail, Chip, Chips, Cta, Card, Row, Badge, Ttl, Empty, Tile, bgIdx, useTheme, heartBtn} from '../components/ui';
 import {Dish, VCard, StoreCard, ItemRow} from '../components/cards';
 import {S, ST, STB, IT, DEALS, PR, money, addr, cnt, unread, first, filt, FCH, emit, save, toast, ui} from '../store';
-import {categories, catName, label, promoCards, deals, dealEnd, coupons, modes, stripeColor} from '../content';
+import {categories, catName, label, promoCards, deals, dealEnd, coupons, modes, stripeColor, onContent, hasContent, loadContent} from '../content';
 import {DEFAULT_PROMOS} from '../data/defaultPromos';
 import {Image} from 'react-native';
 import {go, tab, back, browse, setFilter, setSub, clearFilters, usePromo, openNotif, readAll, heart, reorder} from '../actions';
@@ -89,7 +89,15 @@ function Countdown() {
 }
 
 export function Home({onExit}: {onExit?: () => void}) {
-  const th = useTheme(), ins = useSafeAreaInsets(), CATS = categories();
+  const th = useTheme(), ins = useSafeAreaInsets();
+  const [contentReady, setContentReady] = useState(hasContent());
+  useEffect(() => {
+    let active = true;
+    const off = onContent(() => setContentReady(hasContent()));
+    void loadContent().finally(() => { if (active) setContentReady(true); });
+    return () => { active = false; off(); };
+  }, []);
+  const CATS = categories();
   const seen: any = {}, os = S.orders.filter((o: any) => {if (seen[o.sid]) return false; seen[o.sid] = 1; return true;}).slice(0, 6);
   const cat = (c: string) => ST.filter(s => s.c === c).flatMap(s => s.it);
   const rv = S.rv.filter((id: string) => IT[id]).slice(0, 6), md = modes(), pc = promoCards(), dl = deals();
@@ -117,17 +125,21 @@ export function Home({onExit}: {onExit?: () => void}) {
           <Mode id={md && md[2] ? md[2].id : undefined} small bg={th.m3bg} fg={th.m3fg} title={md && md[2] ? md[2].title : tr('drugstore')} emoji={md && md[2] ? md[2].emoji : '💊'} image={md && md[2] ? md[2].image : null} onPress={() => go('catlist', md && md[2] ? md[2].cat : 'drugstore')} />
         </View>
       </View>
-      <View style={{marginTop: 18}}><Rail gap={14}>
-        {CATS.map(c => (
-          <Pressable key={c.id} onPress={() => go('catlist', c.id)} style={{width: 68, alignItems: 'center'}}>
-            <Sel sel={{kind: 'category', id: c.id, field: 'art'}}><View style={{width: 48, height: 48, borderRadius: 24, backgroundColor: th.soft, alignItems: 'center', justifyContent: 'center', overflow: 'hidden'}}>{c.art ? <Image source={{uri: c.art}} style={{width: 48, height: 48}} resizeMode="cover" /> : <Text style={{fontSize: 30}}>{c.emoji}</Text>}</View></Sel>
-            <Sel sel={{kind: 'category', id: c.id, field: 'title'}}><T size={11.5} weight="600" align="center" style={{marginTop: 6, lineHeight: 14}}>{tx(c.name)}</T></Sel>
-          </Pressable>
-        ))}
-      </Rail></View>
-      <View style={{marginTop: 20}}><Rail>
-        {pc ? pc.filter(x => !x.newOnly || first()).map(x => <PromoCard key={x.id} id={x.id} kind={x.color} title={x.title} sub={x.sub} btn={x.btn} emoji={x.emoji} image={x.image} target={x.target} />) : DEFAULT_PROMOS.filter((promo) => promo.aud !== 'New customers' || first()).map((promo) => <PromoCard key={promo.id} kind={promo.color} title={promo.title} sub={promo.sub} btn={promo.btn} emoji={promo.emoji} />)}
-      </Rail></View>
+      <View style={{marginTop: 18}}>
+        {contentReady ? <Rail gap={14}>
+          {CATS.map(c => (
+            <Pressable key={c.id} onPress={() => go('catlist', c.id)} style={{width: 68, alignItems: 'center'}}>
+              <Sel sel={{kind: 'category', id: c.id, field: 'art'}}><View style={{width: 48, height: 48, borderRadius: 24, backgroundColor: th.soft, alignItems: 'center', justifyContent: 'center', overflow: 'hidden'}}>{c.art ? <Image source={{uri: c.art}} style={{width: 48, height: 48}} resizeMode="cover" onError={() => {}} /> : <Text style={{fontSize: 30}}>{c.emoji}</Text>}</View></Sel>
+              <Sel sel={{kind: 'category', id: c.id, field: 'title'}}><T size={11.5} weight="600" align="center" style={{marginTop: 6, lineHeight: 14}}>{tx(c.name)}</T></Sel>
+            </Pressable>
+          ))}
+        </Rail> : <ScrollView horizontal showsHorizontalScrollIndicator={false} contentContainerStyle={{gap:10,paddingHorizontal:16}}>{Array.from({length:6},(_,i)=><View key={i} style={{width:68,alignItems:'center'}}><View style={{width:48,height:48,borderRadius:24,backgroundColor:th.soft}}/><View style={{width:42,height:7,borderRadius:4,backgroundColor:th.soft,marginTop:7}}/></View>)}</ScrollView>}
+      </View>
+      <View style={{marginTop: 20}}>
+        {contentReady ? <Rail>
+          {pc ? pc.filter(x => !x.newOnly || first()).map(x => <PromoCard key={x.id} id={x.id} kind={x.color} title={x.title} sub={x.sub} btn={x.btn} emoji={x.emoji} image={x.image} target={x.target} />) : DEFAULT_PROMOS.filter((promo) => promo.aud !== 'New customers' || first()).map((promo) => <PromoCard key={promo.id} kind={promo.color} title={promo.title} sub={promo.sub} btn={promo.btn} emoji={promo.emoji} />)}
+        </Rail> : <ScrollView horizontal showsHorizontalScrollIndicator={false} contentContainerStyle={{gap:12,paddingHorizontal:16}}>{[0,1].map(i=><View key={i} style={{width:300,height:124,borderRadius:18,backgroundColor:th.soft}}/>)}</ScrollView>}
+      </View>
       <View style={{paddingHorizontal: 16, marginTop: 10}}>
         <Pressable onPress={() => go('promos')} style={{flexDirection: 'row', alignItems: 'center', gap: 12, padding: 14, borderWidth: 1.5, borderColor: th.line, borderRadius: 16}}>
           <View style={{flex: 1}}><Sel sel={{kind: 'label', id: 'lbl.coupons', field: 'text'}}><T weight="700">{label('lbl.coupons', tr('couponsOffers'))}</T></Sel><Sel sel={{kind: 'label', id: 'lbl.coupons2', field: 'text'}}><T size={12.5} color={th.mut}>{label('lbl.coupons2', tr('codesCheckout'))}</T></Sel></View>
