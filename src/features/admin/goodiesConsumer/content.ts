@@ -38,7 +38,11 @@ async function hydrateContent() {
   if (!hydration) hydration = (async () => {
     try {
       const cached = await AsyncStorage.getItem(CONTENT_CACHE_KEY);
-      if (cached && !C) applyContent(JSON.parse(cached));
+      if (cached && !C) {
+        const payload = JSON.parse(cached);
+        applyContent(payload);
+        prefetchContentImages(payload);
+      }
     } catch { /* Ignore an unavailable or invalid cache; fetch published content below. */ }
   })();
   await hydration;
