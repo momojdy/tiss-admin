@@ -313,7 +313,7 @@ function ContactsSheet({close}: {close: () => void}) {
       <View key={r.id} style={{flexDirection: 'row', alignItems: 'center', gap: 8}}>
         <View style={{flex: 1}}><Radio on={S.cc === r.id} onPress={() => {S.cc = r.id; close(); save(); emit();}}><T weight="700">{r.ph}</T><View style={{marginTop: 3}}>{r.w ? <Badge green label="Default Wantiss number" /> : <T size={12.5} color={th.mut}>Goodies checkout number · {r.l}</T>}</View></Radio></View>
         {r.w ? null : <><Pressable accessibilityLabel="Edit number" onPress={() => ui.sheet({kind: 'ctform', id: r.id})}><T size={13} weight="700" color={th.br}>Edit</T></Pressable>
-        <Pressable accessibilityLabel="Remove number" onPress={() => {if (S.orders.some((o: any) => !done(o) && o.cid == r.id)) {toast('This number is used by an active order'); return;} S.gc = S.gc.filter((c: any) => c.id !== r.id); if (S.cc === r.id) S.cc = 'w'; toast('Number removed'); save(); emit(); ui.sheet({kind: 'contacts'});}}><Icon name="trash" size={18} color={th.red} /></Pressable></>}
+        <Pressable accessibilityLabel="Remove number" onPress={() => {if (S.orders.some((o: any) => !done(o) && o.cid == r.id)) {toast('This number is used by an active order'); return;} ui.sheet({kind: 'remove-number', numberLabel: r.l || r.ph, onConfirm: () => {S.gc = S.gc.filter((c: any) => c.id !== r.id); if (S.cc === r.id) S.cc = 'w'; toast('Number removed'); save(); emit(); ui.sheet({kind: 'contacts'});}});}}><Icon name="trash" size={18} color={th.red} /></Pressable></>}
       </View>
     ))}
     <Cta ghost label="+ Add another number" onPress={() => ui.sheet({kind: 'ctform', id: ''})} />
