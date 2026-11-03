@@ -138,7 +138,7 @@ export function GoodiesApp({onExit, embedded = true, previewMode = false}: {onEx
     <KeyboardAvoidingView style={{flex: 1, backgroundColor: th.bg}} behavior={Platform.OS === 'ios' ? 'padding' : 'height'} keyboardVerticalOffset={0} {...pan.panHandlers}>
       <StatusBar barStyle={th.dark ? 'light-content' : 'dark-content'} />
       <SafeAreaView style={{flex: 1}} edges={[]}>
-        {r === 'byo' || r === 'storechat' ? <View style={{flex: 1}}>{body}</View> : <ScrollView ref={scroll} keyboardShouldPersistTaps="handled" onScroll={e => {c.sy = e.nativeEvent.contentOffset.y;}} scrollEventThrottle={64} showsVerticalScrollIndicator={false} contentContainerStyle={{paddingBottom: showTabs ? 170 : footed ? 120 : 110}}>
+        {r === 'byo' || r === 'storechat' ? <View style={{flex: 1}}>{body}</View> : <ScrollView ref={scroll} keyboardShouldPersistTaps="handled" onScroll={e => {c.sy = e.nativeEvent.contentOffset.y;}} scrollEventThrottle={64} showsVerticalScrollIndicator={false} refreshControl={r === 'flashdeals' ? <RefreshControl refreshing={refreshing} onRefresh={() => {if (refreshing) return; setRefreshing(true); void loadContent().finally(() => setRefreshing(false));}} /> : undefined} contentContainerStyle={{paddingBottom: showTabs ? 170 : footed ? 120 : 110}}>
           {body}
         </ScrollView>}
       </SafeAreaView>
