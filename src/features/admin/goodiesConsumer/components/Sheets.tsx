@@ -28,6 +28,13 @@ export function Sheets({sheet, close}: {sheet: any; close: () => void}) {
   if (k === 'ctform') content = <CtForm key={sheet.id || 'new'} id={sheet.id} />;
   if (k === 'topup') content = (<><T size={20} weight="800">Top up wallet</T><T color={th.mut} style={{marginTop: 6, marginBottom: 14}}>Demo: no real money moves.</T><View style={{flexDirection: 'row', flexWrap: 'wrap', gap: 8}}>{[10, 20, 50, 100].map(v => <Pressable key={v} onPress={() => {S.wallet += v; close(); toast('Wallet topped up to ' + money(S.wallet)); save(); emit();}} style={{paddingVertical: 10, paddingHorizontal: 16, borderRadius: 18, backgroundColor: th.soft}}><T size={14} weight="700">+{money(v)}</T></Pressable>)}</View></>);
   if (k === 'replace') content = (<><T size={20} weight="800">Replace your cart?</T><T color={th.mut} style={{marginVertical: 8, marginBottom: 18}}>Your cart has items from {sheet.from}.</T><Cta label="Replace and reorder" onPress={A.runReorder} /><View style={{height: 10}} /><Cta ghost label="Keep current cart" onPress={close} /></>);
+  if (k === 'remove-number') content = (<>
+    <T size={20} weight="800">Remove this contact number?</T>
+    <T color={th.mut} style={{marginVertical: 8, marginBottom: 18}}>Remove {String(sheet.numberLabel || 'this number')} from your Goodies checkout contacts?</T>
+    <Cta label="Remove number" onPress={() => { void sheet.onConfirm?.(); }} />
+    <View style={{height: 10}} />
+    <Cta ghost label="Keep number" onPress={close} />
+  </>);
   if (k === 'remove-item') content = (<>
     <T size={20} weight="800">Remove this item?</T>
     <T color={th.mut} style={{marginVertical: 8, marginBottom: 18}}>Remove {String(sheet.itemName || 'this item')} from your cart?</T>
@@ -86,7 +93,7 @@ export function Sheets({sheet, close}: {sheet: any; close: () => void}) {
   if (k === 'addr') content = (<><T size={20} weight="800" style={{marginBottom: 4}}>Deliver to</T><T size={12.5} color={th.mut} style={{marginBottom: 12}}>Choosing an address here only changes Goodies. Your Wantiss default stays the same.</T>{S.addr.map((a: any) => <Radio key={a.id} on={a.id === S.as} onPress={() => A.selectAddr(a.id)}><Row style={{gap: 6}}><T weight="700">{a.l}</T>{a.def ? <Badge green label="Wantiss default" /> : null}</Row><T size={12.5} color={th.mut}>{a.t}</T></Radio>)}<Cta ghost label="Manage addresses" onPress={() => {close(); A.go('addresses');}} /></>);
 
   const isRatingSheet = k === 'review' || k === 'driver-review';
-  const isCenteredSheet = ['remove-item','clear','cancel','newcart','replace','byoleave','byoreset','alcrules'].includes(k);
+  const isCenteredSheet = ['remove-item','remove-number','clear','cancel','newcart','replace','byoleave','byoreset','alcrules'].includes(k);
   const sheetBody = (
     <View style={{width:'100%', height: isRatingSheet ? Math.min(430, windowHeight * 0.68) : k==='schedule' ? Math.max(0, windowHeight - insets.top) : undefined, maxHeight: k==='schedule' ? Math.max(0, windowHeight - insets.top) : isRatingSheet ? windowHeight * 0.68 : k==='promo'&&sheet.custom ? '68%' : k==='sinfo'||k==='promo' ? '92%' : isCenteredSheet?'60%':'90%', flexShrink:1, minHeight:0, marginBottom:0}}>
       <SheetBox centered={isCenteredSheet || k === 'contacts' || k === 'ctform'} large={isRatingSheet || k === 'sinfo' || k === 'schedule' || (k === 'promo' && !sheet.custom)} compact={k === 'promo' && !!sheet.custom} onClose={close}>{k === 'ctform' ? content : <ScrollView style={{flex:1,minHeight:0}} contentContainerStyle={{paddingBottom:Math.max(16,insets.bottom),flexGrow:1}} nestedScrollEnabled keyboardShouldPersistTaps="handled" keyboardDismissMode="interactive" showsVerticalScrollIndicator={false}>{content}</ScrollView>}</SheetBox>
