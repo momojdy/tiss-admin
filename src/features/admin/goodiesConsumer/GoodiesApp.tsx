@@ -7,7 +7,7 @@ import {T, Grad, Cta, Badge, Row, Input, Card, SheetBox, Ttl, Radio, useTheme, B
 import {S, ST, STB, load, save, emit, useGoodies, cur, cnt, totals, ui, toast, done, stage, notify, navBack, reset, applyZone, money, TL, TP, addr, push, setPreviewOnly, editLocked} from './store';
 import * as A from './actions';
 import {startGoodiesSync} from './serverSync';
-import {Home, Cats, CatList, Search, Promos, Notifs, Explore} from './screens/Browse';
+import {Home, Cats, CatList, Search, Promos, FlashDeals, Notifs, Explore} from './screens/Browse';
 import {Store, StoreReviews, Product, ProductFoot, Cart, Checkout, CheckoutFoot, Confirm, Track, Orders, Favs, Help} from './screens/Shop';
 import {Account} from './screens/Account';
 import {Sheets} from './components/Sheets';
@@ -108,6 +108,7 @@ export function GoodiesApp({onExit, embedded = true, previewMode = false}: {onEx
     case 'track': body = <Track id={c.p} />; break;
     case 'notifs': body = <Notifs />; break;
     case 'promos': body = <Promos />; break;
+    case 'flashdeals': body = <FlashDeals />; break;
     case 'favs': body = <Favs />; break;
     case 'byo': body = <ByoScreen p={c.p} />; break;
     case 'help': body = <Help />; break;
