@@ -366,6 +366,8 @@ export function Search() {
 
 export function FlashDeals() {
   const th = useTheme();
+  const [, setContentVersion] = useState(0);
+  useEffect(() => onContent(() => setContentVersion(value => value + 1)), []);
   const activeDeals = deals().filter(d => IT[d[0]]);
   return (
     <View>
