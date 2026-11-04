@@ -32,6 +32,7 @@ export function GoodiesAdminScreen() {
   const [additionalStoreSurchargeEnabled,setAdditionalStoreSurchargeEnabled]=useState(false);
   const [additionalStoreFee,setAdditionalStoreFee]=useState('0');
   const [extraDistancePerKm,setExtraDistancePerKm]=useState('0');
+  const [maxStops,setMaxStops]=useState('3');
 
   const reload=useCallback(async()=>{
     setLoading(true);
@@ -50,6 +51,7 @@ export function GoodiesAdminScreen() {
       setAdditionalStoreSurchargeEnabled(!!f.additionalStoreSurchargeEnabled);
       setAdditionalStoreFee(String(f.additionalStoreFee??0));
       setExtraDistancePerKm(String(f.extraDistancePerKm??0));
+      setMaxStops(String(f.maxStops??3));
     } catch(e:any){toast(e?.message||'Could not load Goodies administration.');}
     finally{setLoading(false);}
   },[toast]);
@@ -144,7 +146,8 @@ export function GoodiesAdminScreen() {
     setBusy('');
   };
   const saveDeliverySurcharge=async()=>{
-    const flat=Number(additionalStoreFee), perKm=Number(extraDistancePerKm);
+    const flat=Number(additionalStoreFee), perKm=Number(extraDistancePerKm), stops=Math.floor(Number(maxStops));
+    if(!Number.isFinite(stops)||stops<1||stops>8){toast('Enter a number of stores from 1 to 8.');return;}
     if(!Number.isFinite(flat)||flat<0||flat>1000||!Number.isFinite(perKm)||perKm<0||perKm>1000){
       toast('Enter valid non-negative delivery surcharge amounts (maximum 1000).');return;
     }
@@ -154,9 +157,10 @@ export function GoodiesAdminScreen() {
       p_additional_store_fee:flat,
       p_extra_distance_per_km:perKm
     });
-    if(error)toast(error.message);else toast('Delivery surcharge settings saved and published.');
+    const {error:stopsError}=error?{error:null}:await supabase.rpc('goodies_admin_update_max_stops',{p_max_stops:stops});
+    if(error||stopsError){console.warn('Delivery settings failed',error||stopsError);toast('Could not save the delivery settings. Please try again.');}else toast('Delivery settings saved and published.');
     setBusy('');
-    if(!error)await reload();
+    if(!error&&!stopsError)await reload();
   };
   const switchRow=(title:string,sub:string,on:boolean,set:(v:boolean)=>void)=><Pressable onPress={()=>set(!on)} style={{...cardStyle,flexDirection:'row',alignItems:'center',justifyContent:'space-between',marginBottom:8}}><View style={{flex:1,paddingRight:10}}><Text style={valueStyle}>{title}</Text><Text style={{fontSize:11,color:'#697466',marginTop:3}}>{sub}</Text></View><Text style={{fontWeight:'800',color:on?'#286A35':'#8B554B'}}>{on?'ON':'OFF'}</Text></Pressable>;
 
@@ -235,6 +239,9 @@ export function GoodiesAdminScreen() {
         <TextInput value={additionalStoreFee} onChangeText={setAdditionalStoreFee} keyboardType="decimal-pad" style={{borderWidth:1,borderColor:'#DCE4D7',borderRadius:10,padding:11,marginTop:8,color:'#1B2619'}}/>
         <Text style={{...valueStyle,marginTop:14}}>Extra-distance rate per kilometre (USD)</Text>
         <TextInput value={extraDistancePerKm} onChangeText={setExtraDistancePerKm} keyboardType="decimal-pad" style={{borderWidth:1,borderColor:'#DCE4D7',borderRadius:10,padding:11,marginTop:8,color:'#1B2619'}}/>
+        <Text style={{...valueStyle,marginTop:14}}>Maximum stores in one order</Text>
+        <Text style={{fontSize:11,color:'#697466',marginTop:4}}>How many different stores a customer can combine in one order (1 to 8).</Text>
+        <TextInput value={maxStops} onChangeText={setMaxStops} keyboardType="number-pad" style={{borderWidth:1,borderColor:'#DCE4D7',borderRadius:10,padding:11,marginTop:8,color:'#1B2619'}}/>
       </View>
       {switchRow('Enable additional-store surcharge','Apply the configured additional-store fee and extra-distance rate to eligible multi-store quotes.',additionalStoreSurchargeEnabled,setAdditionalStoreSurchargeEnabled)}
       <Pressable disabled={busy==='delivery-surcharge'} onPress={()=>void saveDeliverySurcharge()} style={btn('#294E2C')}><Text style={{color:'#fff',fontWeight:'800'}}>{busy==='delivery-surcharge'?'Saving…':'Save and publish delivery surcharge'}</Text></Pressable>
