@@ -1,5 +1,5 @@
 import React, {useCallback, useEffect, useState} from 'react';
-import {Alert, Pressable, ScrollView, Text, TextInput, View} from 'react-native';
+import {Alert, Image, Pressable, ScrollView, Text, TextInput, View} from 'react-native';
 import {supabase} from '../../lib/supabase';
 import {useNav} from '../../shell/Nav';
 import {useToast} from '../../ui/Toast';
@@ -7,7 +7,7 @@ import {useTheme} from '../../theme/ThemeContext';
 import {GoodiesAssetLibrary} from './GoodiesAssetLibrary';
 
 type Dashboard = {stats:any;merchants:any[];products:any[];orders:any[]};
-const MODULES=['Overview','Merchants','Product review','Orders','Couriers','Fees','Delivery surcharge','Analytics','Goodies assets','Content editor'];
+const MODULES=['Overview','Merchants','Product review','Orders','Delivery reports','Couriers','Fees','Delivery surcharge','Analytics','Goodies assets','Content editor'];
 const money=(v:any)=>new Intl.NumberFormat('en-US',{style:'currency',currency:'USD'}).format(Number(v)||0);
 const cardStyle={backgroundColor:'#fff',borderWidth:1,borderColor:'#E1E6DE',borderRadius:14,padding:14,marginBottom:10} as const;
 const btn=(bg:string)=>({paddingVertical:10,paddingHorizontal:12,borderRadius:10,backgroundColor:bg,alignItems:'center' as const});
@@ -20,6 +20,7 @@ export function GoodiesAdminScreen() {
   const [dashboard,setDashboard]=useState<Dashboard>({stats:{},merchants:[],products:[],orders:[]});
   const [analytics,setAnalytics]=useState<any>(null);
   const [courierCandidates,setCourierCandidates]=useState<any[]>([]);
+  const [reports,setReports]=useState<any[]>([]);
   const [loading,setLoading]=useState(false);
   const [busy,setBusy]=useState('');
   const [fee,setFee]=useState('0');
@@ -60,6 +61,26 @@ export function GoodiesAdminScreen() {
     setBusy('');
   };
   useEffect(()=>{if(module==='Couriers')void loadCouriers();},[module]);
+  const loadReports=async()=>{
+    setBusy('reports');
+    const {data,error}=await supabase.rpc('goodies_admin_list_delivery_reports');
+    if(error){console.warn('Delivery reports failed',error.message);toast('Could not load delivery reports.');}else setReports(data||[]);
+    setBusy('');
+  };
+  useEffect(()=>{if(module==='Delivery reports')void loadReports();},[module]);
+  const resolveReport=(item:any,resolution:'release'|'refund')=>{
+    Alert.alert(resolution==='refund'?'Refund the customer':'Confirm delivery',
+      resolution==='refund'?'Cancel '+item.order_code+' and refund '+money(item.total)+' to the customer?':'Mark '+item.order_code+' as delivered and release it to the store?',[
+      {text:'Back',style:'cancel'},
+      {text:resolution==='refund'?'Refund':'Confirm',style:resolution==='refund'?'destructive':'default',onPress:()=>{void (async()=>{
+        setBusy(item.order_id);
+        const {error}=await supabase.rpc('goodies_admin_resolve_delivery_dispute',{p_order_id:item.order_id,p_resolution:resolution});
+        if(error){console.warn('Resolve report failed',error.message);toast('Could not save this decision. Please try again.');}
+        else{toast(resolution==='refund'?'Customer refunded.':'Order marked as delivered.');await loadReports();}
+        setBusy('');
+      })();}}
+    ]);
+  };
   const setCourierAccess=async(item:any,enabled:boolean)=>{
     setBusy(item.courier_id);
     const {error}=await supabase.rpc(enabled?'goodies_admin_add_courier':'goodies_admin_remove_courier',{p_courier_id:item.courier_id});
@@ -164,6 +185,24 @@ export function GoodiesAdminScreen() {
         {o.scheduled_for?<Text style={{fontSize:12,color:'#596554'}}>Scheduled: {dateText(o.scheduled_for)}</Text>:null}
         {o.courier_id?<Text style={{fontSize:12,color:'#596554'}}>Courier assigned</Text>:null}
         {!['completed','cancelled','declined','expired'].includes(o.status)?<Pressable disabled={busy===o.id} onPress={()=>cancelOrder(o)} style={{...btn('#F7EAE8'),marginTop:8}}><Text style={{fontWeight:'800',color:'#8D3932'}}>Cancel order</Text></Pressable>:null}
+      </View>)}
+    </>:null}
+    {module==='Delivery reports'?<>
+      <Text style={{fontSize:12,color:'#687365',marginBottom:10}}>Problems reported by customers on orders the store delivered with its own driver. Open reports pause the order until you decide.</Text>
+      {busy==='reports'&&!reports.length?<Text style={labelStyle}>Loading…</Text>:null}
+      {busy!=='reports'&&!reports.length?<Text style={labelStyle}>No delivery reports.</Text>:null}
+      {reports.map(r=><View key={r.order_id} style={cardStyle}>
+        <View style={{flexDirection:'row',justifyContent:'space-between'}}><Text style={valueStyle}>{r.order_code}</Text><Text style={{fontSize:11,fontWeight:'800',color:r.report_status==='open'?'#9B5A27':r.report_status==='resolved_refund'?'#9B4036':'#286A35'}}>{r.report_status==='open'?'Open':r.report_status==='resolved_refund'?'Refunded':'Delivery confirmed'}</Text></View>
+        <Text style={labelStyle}>{r.store_name} · {money(r.total)} · {r.payment_method} · {r.payment_status}</Text>
+        <Text style={{fontSize:12,color:'#596554'}}>Customer: {r.customer_name}{r.customer_phone?' · '+r.customer_phone:''}</Text>
+        <Text style={{fontSize:12,color:'#596554'}}>Driver: {r.driver_name||'—'}{r.driver_phone?' · '+r.driver_phone:''}</Text>
+        <Text style={{fontSize:12,color:'#596554',marginBottom:6}}>Delivered {dateText(r.delivered_at)} · Reported {dateText(r.opened_at)}</Text>
+        <Text style={{fontSize:13,color:'#1B2619',marginBottom:8}}>“{r.reason}”</Text>
+        {r.proof_url?<Image source={{uri:r.proof_url}} style={{width:'100%',height:200,borderRadius:10,backgroundColor:'#EEF1EB',marginBottom:8}} resizeMode="cover"/>:<Text style={labelStyle}>No delivery photo.</Text>}
+        {r.report_status==='open'?<View style={{flexDirection:'row',gap:8}}>
+          <Pressable disabled={!!busy} onPress={()=>resolveReport(r,'release')} style={{...btn('#E8F2E5'),flex:1}}><Text style={{fontWeight:'800',color:'#28552B'}}>Delivery confirmed</Text></Pressable>
+          <Pressable disabled={!!busy} onPress={()=>resolveReport(r,'refund')} style={{...btn('#F7EAE8'),flex:1}}><Text style={{fontWeight:'800',color:'#8D3932'}}>Refund customer</Text></Pressable>
+        </View>:null}
       </View>)}
     </>:null}
     {module==='Couriers'?<>
