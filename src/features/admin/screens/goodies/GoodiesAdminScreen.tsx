@@ -152,15 +152,15 @@ export function GoodiesAdminScreen() {
       toast('Enter valid non-negative delivery surcharge amounts (maximum 1000).');return;
     }
     setBusy('delivery-surcharge');
-    const {error}=await supabase.rpc('goodies_admin_update_delivery_surcharge_policy',{
+    const {error}=await supabase.rpc('goodies_admin_update_multi_store_policy',{
       p_enabled:additionalStoreSurchargeEnabled,
       p_additional_store_fee:flat,
-      p_extra_distance_per_km:perKm
+      p_extra_distance_per_km:perKm,
+      p_max_stops:stops
     });
-    const {error:stopsError}=error?{error:null}:await supabase.rpc('goodies_admin_update_max_stops',{p_max_stops:stops});
-    if(error||stopsError){console.warn('Delivery settings failed',error||stopsError);toast('Could not save the delivery settings. Please try again.');}else toast('Delivery settings saved and published.');
+    if(error){console.warn('Delivery settings failed',error);toast('Could not save the delivery settings. Please try again.');}else toast('Delivery settings saved and published.');
     setBusy('');
-    if(!error&&!stopsError)await reload();
+    if(!error)await reload();
   };
   const switchRow=(title:string,sub:string,on:boolean,set:(v:boolean)=>void)=><Pressable onPress={()=>set(!on)} style={{...cardStyle,flexDirection:'row',alignItems:'center',justifyContent:'space-between',marginBottom:8}}><View style={{flex:1,paddingRight:10}}><Text style={valueStyle}>{title}</Text><Text style={{fontSize:11,color:'#697466',marginTop:3}}>{sub}</Text></View><Text style={{fontWeight:'800',color:on?'#286A35':'#8B554B'}}>{on?'ON':'OFF'}</Text></Pressable>;
 
