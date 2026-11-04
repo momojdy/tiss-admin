@@ -64,8 +64,11 @@ export function GoodiesAdminScreen() {
   const loadReports=async()=>{
     setBusy('reports');
     const {data,error}=await supabase.rpc('goodies_admin_list_delivery_reports');
-    if(error){console.warn('Delivery reports failed',error.message);toast('Could not load delivery reports.');}else setReports(data||[]);
+    if(error){console.warn('Delivery reports failed',error.message);toast('Could not load delivery reports.');setBusy('');return [];}
+    const rows=data||[];
+    setReports(rows);
     setBusy('');
+    return rows;
   };
   useEffect(()=>{if(module==='Delivery reports')void loadReports();},[module]);
   const resolveReport=(item:any,resolution:'release'|'refund')=>{
@@ -76,7 +79,20 @@ export function GoodiesAdminScreen() {
         setBusy(item.order_id);
         const {error}=await supabase.rpc('goodies_admin_resolve_delivery_dispute',{p_order_id:item.order_id,p_resolution:resolution});
         if(error){console.warn('Resolve report failed',error.message);toast('Could not save this decision. Please try again.');}
-        else{toast(resolution==='refund'?'Customer refunded.':'Order marked as delivered.');await loadReports();}
+        else{
+          const updated=await loadReports();
+          if(resolution==='release')toast('Order marked as delivered.');
+          else{
+            const latest=updated.find((r:any)=>r.order_id===item.order_id);
+            if(item.payment_method==='wallet')toast(latest?.payment_status==='refunded'?'Wallet refund completed.':'Refund decision saved. Check payment status.');
+            else if(item.payment_method==='card'){
+              if(latest?.payment_status==='refund_pending')toast('Card refund queued for processing.');
+              else if(latest?.payment_status==='refund_manual_review')toast('Card refund needs manual review.');
+              else if(latest?.payment_status==='refunded')toast('Card refund completed.');
+              else toast('Refund decision saved. Check payment status.');
+            }else toast('Refund decision saved.');
+          }
+        }
         setBusy('');
       })();}}
     ]);
@@ -192,7 +208,7 @@ export function GoodiesAdminScreen() {
       {busy==='reports'&&!reports.length?<Text style={labelStyle}>Loading…</Text>:null}
       {busy!=='reports'&&!reports.length?<Text style={labelStyle}>No delivery reports.</Text>:null}
       {reports.map(r=><View key={r.order_id} style={cardStyle}>
-        <View style={{flexDirection:'row',justifyContent:'space-between'}}><Text style={valueStyle}>{r.order_code}</Text><Text style={{fontSize:11,fontWeight:'800',color:r.report_status==='open'?'#9B5A27':r.report_status==='resolved_refund'?'#9B4036':'#286A35'}}>{r.report_status==='open'?'Open':r.report_status==='resolved_refund'?'Refunded':'Delivery confirmed'}</Text></View>
+        <View style={{flexDirection:'row',justifyContent:'space-between'}}><Text style={valueStyle}>{r.order_code}</Text><Text style={{fontSize:11,fontWeight:'800',color:r.report_status==='open'?'#9B5A27':r.report_status==='resolved_refund'?'#9B4036':'#286A35'}}>{r.report_status==='open'?'Open':r.report_status==='resolved_release'?'Delivery confirmed':r.payment_status==='refunded'?'Refunded':r.payment_status==='refund_pending'?'Refund pending':r.payment_status==='refund_manual_review'?'Refund review':'Decision recorded'}</Text></View>
         <Text style={labelStyle}>{r.store_name} · {money(r.total)} · {r.payment_method} · {r.payment_status}</Text>
         <Text style={{fontSize:12,color:'#596554'}}>Customer: {r.customer_name}{r.customer_phone?' · '+r.customer_phone:''}</Text>
         <Text style={{fontSize:12,color:'#596554'}}>Driver: {r.driver_name||'—'}{r.driver_phone?' · '+r.driver_phone:''}</Text>
