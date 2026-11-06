@@ -1,0 +1,37 @@
+
+> wantiss-admin-rn@0.12.0 typecheck
+> tsc --noEmit
+
+src/features/admin/overlays/PeopleDrawers.tsx(8,49): error TS2305: Module '"../state/people"' has no exported member 'cancelInvite'.
+src/features/admin/overlays/PeopleDrawers.tsx(8,75): error TS2305: Module '"../state/people"' has no exported member 'editSuspension'.
+src/features/admin/overlays/PeopleDrawers.tsx(8,107): error TS2305: Module '"../state/people"' has no exported member 'inviteCode'.
+src/features/admin/overlays/PeopleDrawers.tsx(8,119): error TS2305: Module '"../state/people"' has no exported member 'inviteEmail'.
+src/features/admin/overlays/PeopleDrawers.tsx(8,149): error TS2305: Module '"../state/people"' has no exported member 'markAppeal'.
+src/features/admin/overlays/PeopleDrawers.tsx(9,3): error TS2305: Module '"../state/people"' has no exported member 'openItems'.
+src/features/admin/overlays/PeopleDrawers.tsx(9,30): error TS2305: Module '"../state/people"' has no exported member 'resendInvite'.
+src/features/admin/overlays/PeopleDrawers.tsx(9,58): error TS2305: Module '"../state/people"' has no exported member 'restrictAccount'.
+src/features/admin/overlays/PeopleDrawers.tsx(9,124): error TS2305: Module '"../state/people"' has no exported member 'saveStaffAccess'.
+src/features/admin/overlays/PeopleDrawers.tsx(9,151): error TS2305: Module '"../state/people"' has no exported member 'STAFF_TONE'.
+src/features/admin/overlays/PeopleDrawers.tsx(10,29): error TS2305: Module '"../state/people"' has no exported member 'AccessEdit'.
+src/features/admin/overlays/PeopleDrawers.tsx(10,46): error TS2305: Module '"../state/people"' has no exported member 'RightChoice'.
+src/features/admin/screens/people/PeopleScreen.tsx(5,56): error TS2305: Module '"../../state/people"' has no exported member 'levelFill'.
+src/features/admin/screens/people/PeopleScreen.tsx(5,67): error TS2305: Module '"../../state/people"' has no exported member 'STAFF_TONE'.
+src/features/admin/state/people.ts(37,22): error TS2339: Property 'name' does not exist on type '{ who: string | null; view: string; last: number; userId: string | null; email: string | null; role: string | null; status: string | null; avatarUrl: string | null; }'.
+src/features/admin/state/people.ts(46,22): error TS2339: Property 'name' does not exist on type '{ who: string | null; view: string; last: number; userId: string | null; email: string | null; role: string | null; status: string | null; avatarUrl: string | null; }'.
+src/features/admin/state/people.ts(52,77): error TS2339: Property 'name' does not exist on type '{ who: string | null; view: string; last: number; userId: string | null; email: string | null; role: string | null; status: string | null; avatarUrl: string | null; }'.
+src/features/admin/state/people.ts(53,22): error TS2339: Property 'name' does not exist on type '{ who: string | null; view: string; last: number; userId: string | null; email: string | null; role: string | null; status: string | null; avatarUrl: string | null; }'.
+src/features/admin/state/people.ts(53,172): error TS2339: Property 'name' does not exist on type '{ who: string | null; view: string; last: number; userId: string | null; email: string | null; role: string | null; status: string | null; avatarUrl: string | null; }'.
+src/features/admin/state/people.ts(60,22): error TS2339: Property 'name' does not exist on type '{ who: string | null; view: string; last: number; userId: string | null; email: string | null; role: string | null; status: string | null; avatarUrl: string | null; }'.
+src/features/admin/state/people.ts(72,123): error TS2339: Property 'STF' does not exist on type '{ APPS: Application[]; INV: Transaction[]; SVC: ServiceRow[]; BIZ: BusinessSnapshot[]; MOD: Record<string, string>; STAFF: StaffMember[]; ... 41 more ...; reasons: string[]; }'.
+src/features/admin/state/people.ts(77,32): error TS2554: Expected 1 arguments, but got 0.
+src/features/admin/state/people.ts(80,51): error TS2349: This expression is not callable.
+  Type 'AuthRecord' has no call signatures.
+src/features/admin/state/people.ts(81,108): error TS2339: Property 'name' does not exist on type '{ who: string | null; view: string; last: number; userId: string | null; email: string | null; role: string | null; status: string | null; avatarUrl: string | null; }'.
+src/features/admin/state/people.ts(83,47): error TS2345: Argument of type 'Account' is not assignable to parameter of type 'StaffMember'.
+  Type 'Account' is missing the following properties from type 'StaffMember': role, last, st, x, and 4 more.
+src/features/admin/state/people.ts(93,81): error TS2304: Cannot find name 'can'.
+src/features/admin/state/people.ts(93,94): error TS2304: Cannot find name 'can'.
+src/features/admin/state/people.ts(94,89): error TS2304: Cannot find name 'can'.
+src/features/admin/state/people.ts(170,168): error TS2304: Cannot find name 'can'.
+src/features/admin/state/people.ts(179,123): error TS2304: Cannot find name 'can'.
+src/features/admin/state/people.ts(179,136): error TS2304: Cannot find name 'can'.
