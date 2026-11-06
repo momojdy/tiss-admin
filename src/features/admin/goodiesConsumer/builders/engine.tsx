@@ -1,3 +1,4 @@
+import {label as cmsText} from "../content";
 /** Goodies builder engine: validation, pricing, draft state and actions. */
 import React from 'react';
 import {View, Pressable} from 'react-native';
@@ -108,14 +109,14 @@ export function bBreak(b: Builder, d: any) {
 }
 export function bCheck(b: Builder, d: any) {
   const errs: string[] = [], conf: string[] = [], s = STB[d.sid];
-  if (!s || BYO.store[d.sid] === false || !b.enabled || !b.available) errs.push('This builder is currently unavailable'); else if (!s.open) errs.push(s.n + ' is closed right now');
-  if (b.sizes.length) {const sz = b.sizes.filter(x => x.id === d.size)[0]; if (!sz) errs.push('Choose a size'); else if (!sz.avail) conf.push(sz.name + ' is no longer available. Choose another size');}
+  if (!s || BYO.store[d.sid] === false || !b.enabled || !b.available) errs.push(cmsText("lbl.byoErrUnavailable", "This builder is currently unavailable")); else if (!s.open) errs.push(s.n + ' is closed right now');
+  if (b.sizes.length) {const sz = b.sizes.filter(x => x.id === d.size)[0]; if (!sz) errs.push(cmsText("lbl.byoErrChooseSize", "Choose a size")); else if (!sz.avail) conf.push(sz.name + ' is no longer available. Choose another size');}
   b.groups.forEach(g => {
     const us = units(g, d), mn = g.req || g.min > 0 ? Math.max(1, g.min) : 0; let live = 0; const c: any = {};
     us.forEach(id => {const it = itemOf(g, id); c[id] = (c[id] || 0) + 1; if (!it) conf.push('An item you chose in ' + g.name + ' was removed by the store'); else if (!it.avail) conf.push(it.name + ' is unavailable'); else live++;});
     if (live < mn) errs.push(mn === 1 ? 'Choose ' + g.name.toLowerCase() : 'Choose at least ' + mn + ' in ' + g.name);
     if (us.length > g.max) errs.push('Too many in ' + g.name + ' (max ' + g.max + ')');
-    Object.keys(c).forEach(id => {const it = itemOf(g, id); const lim = it ? limitOf(g, it) : g.me; if (c[id] > lim) errs.push('At most ' + lim + ' of ' + (it ? it.name : 'the same item') + ' in ' + g.name);});
+    Object.keys(c).forEach(id => {const it = itemOf(g, id); const lim = it ? limitOf(g, it) : g.me; if (c[id] > lim) errs.push('At most ' + lim + ' of ' + (it ? it.name : cmsText("lbl.byoErrSameItem", "the same item")) + ' in ' + g.name);});
   });
   return {errs, conf, ok: !errs.length && !conf.length};
 }
@@ -126,10 +127,10 @@ export function bLine(b: Builder, d: any, q: number) {
   return {k: 'byo|' + b.id + '|' + hs(JSON.stringify([d.size, sel, note, br.total])), id: 'byo:' + b.id, n: b.name + (br.size ? ' — ' + br.size.name : ''), e: b.emoji, p: br.total, q, d: bFlat(br), nt: note, byo: {sid: d.sid, bid: b.id, type: b.type, size: d.size, sel, lines: br.lines}};
 }
 export function lineBad(l: any): string {
-  if (!l.byo) return ''; const b = bGet(l.byo.sid, l.byo.bid); if (!b) return 'is no longer offered';
+  if (!l.byo) return ''; const b = bGet(l.byo.sid, l.byo.bid); if (!b) return cmsText("lbl.byoNoLongerOffered", "is no longer offered");
   const d = {sid: l.byo.sid, size: l.byo.size, sel: l.byo.sel}, ck = bCheck(b, d);
-  if (!ck.ok) return 'needs changes: ' + (ck.errs[0] || ck.conf[0]);
-  if (bBreak(b, d).total !== l.p) return 'has a new price. Open Edit to review it'; return '';
+  if (!ck.ok) return cmsText("lbl.byoNeedsChanges", "needs changes: ") + (ck.errs[0] || ck.conf[0]);
+  if (bBreak(b, d).total !== l.p) return cmsText("lbl.byoNewPrice", "has a new price. Open Edit to review it"); return '';
 }
 hooks.bGet = bGet; hooks.bCheck = bCheck; hooks.bLine = bLine; (hooks as any).lineBad = lineBad;
 
@@ -161,7 +162,7 @@ const upd = () => {bDraftSave(); emit();};
 
 function byoOpen(sid: string, bid: string) {
   const b = bGet(sid, bid);
-  if (!b || !b.enabled || !b.available || BYO.store[sid] === false) {toast('This builder is not available right now'); return;}
+  if (!b || !b.enabled || !b.available || BYO.store[sid] === false) {toast(cmsText("lbl.byoNotAvailableNow", "This builder is not available right now")); return;}
   if (!STB[sid].open) {toast(STB[sid].n + ' is closed right now'); return;}
   BD = bDraft(b, sid); push('byo', sid + '|' + b.id);
 }
@@ -204,24 +205,24 @@ export function bzShop() {
 export function bzEdit(k: string) {
   const l = S.cart.lines.filter((x: any) => x.k === k)[0]; if (!l || !l.byo) return;
   const b = bGet(l.byo.sid, l.byo.bid);
-  if (!b || !b.enabled || BYO.store[l.byo.sid] === false) {toast('This item can no longer be customized. You can remove it from your cart.'); return;}
+  if (!b || !b.enabled || BYO.store[l.byo.sid] === false) {toast(cmsText("lbl.byoNoLongerCustomizable", "This item can no longer be customized. You can remove it from your cart.")); return;}
   BD = {sid: l.byo.sid, bid: b.id, size: l.byo.size, sel: cl(l.byo.sel), note: l.nt || '', q: l.q, hist: [], added: null, busy: 0, leave: 0, edit: l.k, snap: l.p, resumed: 0, exploded: true, assembling: 0, seasoningPulse: 0};
   BD.orig = JSON.stringify([BD.size, BD.sel, BD.note, BD.q]); push('byo', l.byo.sid + '|' + b.id);
 }
 export function bzRemove(k: string) {
   const c = S.cart, i = c.lines.findIndex((x: any) => x.k === k); if (i < 0) return;
-  c.lines.splice(i, 1); if (!c.lines.length) {c.sid = null; S.promo = '';} toast('Removed from your cart'); save(); emit();
+  c.lines.splice(i, 1); if (!c.lines.length) {c.sid = null; S.promo = '';} toast(cmsText("lbl.byoRemovedFromCart", "Removed from your cart")); save(); emit();
 }
 function bzCommit(b: Builder, ln: any) {
   const c = S.cart; c.sid = BD.sid;
   if (BD.edit) {
     const i = c.lines.findIndex((x: any) => x.k === BD.edit);
-    if (i < 0) {toast('That item is no longer in your cart'); BD = null; navBack(); return;}
+    if (i < 0) {toast(cmsText("lbl.byoItemMissingCart", "That item is no longer in your cart")); BD = null; navBack(); return;}
     c.lines.splice(i, 1); const ex = c.lines.filter((x: any) => x.k === ln.k)[0]; if (ex) ex.q += ln.q; else c.lines.splice(i, 0, ln);
-    BD = null; toast('Item updated'); save(); navBack(); return;
+    BD = null; toast(cmsText("lbl.byoItemUpdated", "Item updated")); save(); navBack(); return;
   }
   const ex2 = c.lines.filter((x: any) => x.k === ln.k)[0]; if (ex2) ex2.q += ln.q; else c.lines.push(ln);
-  delete BYO.drafts[b.id]; bsave(); BD.added = {n: ln.n, q: ln.q, p: ln.p}; BD.busy = 0; S.bump = 1; toast('Added to your order!'); save(); emit();
+  delete BYO.drafts[b.id]; bsave(); BD.added = {n: ln.n, q: ln.q, p: ln.p}; BD.busy = 0; S.bump = 1; toast(cmsText("lbl.byoAddedSuccess", "Added to your order!")); save(); emit();
 }
 function animateCommit(b: Builder, ln: any) {
   if (!BD || BD.added) return;
@@ -259,9 +260,9 @@ function ByoRow({b, s}: {b: Builder; s: any}) {
       <Tile e={b.emoji} bg="bg3" />
       <View style={{flex: 1}}>
         <View style={{flexDirection: 'row', alignItems: 'center', gap: 6, flexWrap: 'wrap'}}><T weight="700">{b.name}</T><View style={{backgroundColor: th.brt, borderRadius: 9, paddingHorizontal: 8, paddingVertical: 2}}><T size={11} weight="800" color={th.brd}>Build your own</T></View></View>
-        <T size={12.5} color={th.mut}>{ok ? (b.desc || 'Customize it your way') + ' · from ' + money(b.base + mn) : 'Currently unavailable'}</T>
+        <T size={12.5} color={th.mut}>{ok ? (b.desc || cmsText("lbl.byoDefaultDesc", "Customize it your way")) + ' · from ' + money(b.base + mn) : cmsText("lbl.byoCardUnavailable", "Currently unavailable")}</T>
       </View>
-      {ok ? <View style={{backgroundColor: th.br, borderRadius: 14, paddingHorizontal: 14, paddingVertical: 8}}><T size={13} weight="800" color="#fff">{BYO.drafts[b.id] ? 'Resume' : 'Build'}</T></View> : null}
+      {ok ? <View style={{backgroundColor: th.br, borderRadius: 14, paddingHorizontal: 14, paddingVertical: 8}}><T size={13} weight="800" color="#fff">{BYO.drafts[b.id] ? cmsText("lbl.byoResume", "Resume") : cmsText("lbl.byoBuild", "Build")}</T></View> : null}
     </Pressable>
   );
 }

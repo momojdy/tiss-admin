@@ -1,3 +1,4 @@
+import {label as cmsText} from "../content";
 /* Build Your Own screen. Port of v24 vByo, bzStage, bgView, pzView, bzOpts, bzRev, bzFoot, vByoDone. */
 import React, {useEffect, useMemo, useRef} from 'react';
 import {useSafeAreaInsets} from 'react-native-safe-area-context';
@@ -196,7 +197,7 @@ function OptTile({b, g, it}: {b: Builder; g: any; it: BItem}) {
   const th = useTheme(), us = units(g, BD), q = us.filter(x => x === it.id).length, on = q > 0, free = it.free || it.price === 0, lab = !it.avail ? label('lbl.byoUnavailableOption', label('lbl.byoUnavailableOption', 'Unavailable')) : free ? label('lbl.byoFree', 'Free') : g.kind === 'many' && us.length < g.inc ? label('lbl.byoFree', 'Free') : '+' + money(it.price);
   return (
     <View style={{width: 96, opacity: it.avail ? 1 : 0.45}}>
-      <Pressable accessibilityRole="button" accessibilityLabel={it.name + ', ' + lab + (on ? ', selected ' + q : '')} accessibilityState={{selected: on, disabled: !it.avail}} disabled={!it.avail} onPress={() => bzAdd(g.id, it.id)} style={{alignItems: 'center', gap: 4, paddingTop: 10, paddingBottom: 8, paddingHorizontal: 4, borderRadius: 16, borderWidth: 2, borderColor: on ? th.br : th.line, backgroundColor: on ? th.brt : th.card, minHeight: 100}}>
+      <Pressable accessibilityRole="button" accessibilityLabel={it.name + ', ' + lab + (on ? cmsText("lbl.page.builders.Builder.93cf1314ca", ", selected ") + q : '')} accessibilityState={{selected: on, disabled: !it.avail}} disabled={!it.avail} onPress={() => bzAdd(g.id, it.id)} style={{alignItems: 'center', gap: 4, paddingTop: 10, paddingBottom: 8, paddingHorizontal: 4, borderRadius: 16, borderWidth: 2, borderColor: on ? th.br : th.line, backgroundColor: on ? th.brt : th.card, minHeight: 100}}>
         <View style={{width: 46, height: 46, borderRadius: 23, backgroundColor: th.soft, alignItems: 'center', justifyContent: 'center'}}><TileIcon it={it} type={b.type} /></View>
         <T size={12.5} weight="700" align="center" style={{lineHeight: 14}}>{it.name}</T>
         <T size={11.5} color={on ? th.brd : th.mut} weight={on ? '700' : undefined}>{lab}</T>
@@ -241,7 +242,7 @@ function Review({b}: {b: Builder}) {
       {R(b.name + (br.size ? ' — ' + br.size.name : ''), money(b.base + (br.size ? br.size.add : 0)))}
       {br.lines.map((L: any) => <View key={L.gid}><T size={11.5} weight="800" color={th.mut} style={{marginTop: 8, letterSpacing: 0.4}}>{String(L.gname).toUpperCase()}</T>{L.items.map((i: any) => <View key={i.id}>{R((i.qty > 1 ? i.qty + '× ' : '') + i.name, i.charge > 0 ? '+' + money(i.charge) : i.inc ? label('lbl.byoIncluded', 'Included') : label('lbl.byoFree', 'Free'))}</View>)}</View>)}
       {R(label('lbl.byoItemPrice', 'Item price'), money(br.total), true)}
-      {BD.edit && BD.snap != null && br.total !== BD.snap ? <View style={{backgroundColor: th.brt, borderWidth: 1, borderColor: th.br, borderRadius: 12, padding: 10, marginTop: 10}}><T size={13}>{label('lbl.byoPriceChanged', 'Prices changed since you added this item')} (was {money(BD.snap)}, now {money(br.total)}). Saving applies the new price.</T></View> : null}
+      {BD.edit && BD.snap != null && br.total !== BD.snap ? <View style={{backgroundColor: th.brt, borderWidth: 1, borderColor: th.br, borderRadius: 12, padding: 10, marginTop: 10}}><T size={13}>{label('lbl.byoPriceChanged', 'Prices changed since you added this item')} {cmsText("lbl.page.builders.Builder.80833997e8", " (was ")}{money(BD.snap)}{cmsText("lbl.page.builders.Builder.d133a1257f", ", now ")}{money(br.total)}{cmsText("lbl.page.builders.Builder.28ba08f1d3", "). Saving applies the new price.")}</T></View> : null}
       {ck.conf.length ? <View style={{backgroundColor: th.brt, borderWidth: 1, borderColor: th.br, borderRadius: 12, padding: 10, marginTop: 10}}><ByoLabel id="lbl.byoChoicesChanged" fallback="Some choices changed" size={13} weight="800" />{ck.conf.map(x => <T key={x} size={13}>• {x}</T>)}<T size={13}>{label('lbl.byoReplaceChoices', 'Please remove or replace them to continue. We did not change anything for you.')}</T></View> : null}
     </View>
   );

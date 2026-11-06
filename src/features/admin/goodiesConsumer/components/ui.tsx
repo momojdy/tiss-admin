@@ -1,3 +1,4 @@
+import {label as cmsText} from "../content";
 import React, {useMemo, useRef} from 'react';
 import {useSafeAreaInsets} from 'react-native-safe-area-context';
 import {View, Text, Pressable, ScrollView, TextInput, StyleSheet, ViewStyle, TextStyle, Image, PanResponder} from 'react-native';
@@ -6,14 +7,15 @@ import {light, dark, Theme, BG} from '../theme';
 import {S, useGoodies, money, STB, PV, toast, ui} from '../store';
 import {Icon} from './Icon';
 import {stripeColor} from '../content';
-import {Sel, GoodiesSelection} from '../editContext';
+import {Sel, GoodiesSelection, useEditableText} from '../editContext';
 import {t as tr, ts} from '../i18n';
 
 export const useTheme = (): Theme => {useGoodies(); return S.theme === 'dark' ? dark : light;};
 
 export function T({children, style, size = 14, weight, color, lines, align}: {children?: any; style?: TextStyle; size?: number; weight?: any; color?: string; lines?: number; align?: any}) {
   const th = useTheme();
-  return <Text numberOfLines={lines} style={[{fontSize: size, color: color || th.ink, fontWeight: weight}, align ? {textAlign: align} : null, style]}>{typeof children === 'string' ? ts(children) : children}</Text>;
+  const editable = useEditableText(children);
+  return <Text {...editable} numberOfLines={lines} style={[{fontSize: size, color: color || th.ink, fontWeight: weight}, align ? {textAlign: align} : null, style]}>{typeof children === 'string' ? ts(children) : children}</Text>;
 }
 export const Mut = (p: any) => {const th = useTheme(); return <T {...p} color={th.mut} />;};
 /* Prevent a stray string passed to a layout primitive from becoming a raw
@@ -49,6 +51,7 @@ export function Circ({icon, onPress, dot, count, label, color, fill = false}: {i
 
 export function Bar({title, right, onBack, stripe = true}: {title: string; right?: any; onBack: () => void; stripe?: boolean}) {
   const th = useTheme(), ins = useSafeAreaInsets();
+  const editableTitle = useEditableText(title);
   return (
     <>
       <View style={{height: 100, justifyContent: 'flex-end', paddingTop: ins.top, paddingHorizontal: 16, paddingBottom: 10, backgroundColor: th.bg}}>
@@ -154,7 +157,7 @@ export function Seg({list, on, onPick}: {list: [string, string][]; on: string; o
 export function Stepper({q, onMinus, onPlus}: {q: number; onMinus: () => void; onPlus: () => void}) {
   const th = useTheme();
   const b = (icon: string, f: () => void, lb: string) => <Pressable accessibilityLabel={lb} onPress={f} style={{width: 30, height: 30, borderRadius: 15, backgroundColor: th.card, alignItems: 'center', justifyContent: 'center'}}><Icon name={icon} size={16} color={th.ink} /></Pressable>;
-  return <View style={{flexDirection: 'row', alignItems: 'center', gap: 12, backgroundColor: th.soft, borderRadius: 20, padding: 4}}>{b('minus', onMinus, 'Less')}<T size={14} weight="800" style={{minWidth: 16, textAlign: 'center'}}>{q}</T>{b('plus', onPlus, 'More')}</View>;
+  return <View style={{flexDirection: 'row', alignItems: 'center', gap: 12, backgroundColor: th.soft, borderRadius: 20, padding: 4}}>{b('minus', onMinus, cmsText("lbl.a11yDecreaseQuantity", "Less"))}<T size={14} weight="800" style={{minWidth: 16, textAlign: 'center'}}>{q}</T>{b('plus', onPlus, cmsText("lbl.a11yIncreaseQuantity", "More"))}</View>;
 }
 
 export function Input({label, value, onChange, placeholder, multiline, keyboard}: {label?: string; value: string; onChange: (s: string) => void; placeholder?: string; multiline?: boolean; keyboard?: any}) {
@@ -186,7 +189,7 @@ export function SheetBox({children, large = false, compact = false, centered = f
     <View {...pan.panHandlers} style={{backgroundColor: th.bg, borderTopLeftRadius: 24, borderTopRightRadius: 24, borderBottomLeftRadius: centered ? 24 : 0, borderBottomRightRadius: centered ? 24 : 0, paddingHorizontal: 20, paddingTop: 10, paddingBottom: 20, height: compact || large ? '100%' : undefined, maxHeight: '100%', flexShrink: 1, minHeight: 0, overflow: 'hidden'}}>
       <View style={{height: 34, flexDirection: 'row', alignItems: 'center', justifyContent: 'center', marginBottom: 8}}>
         <View style={{width: 40, height: 4, borderRadius: 2, backgroundColor: th.line}} />
-        {onClose ? <Pressable accessibilityRole="button" accessibilityLabel="Close popup" onPress={onClose} hitSlop={12} style={{position: 'absolute', right: 0, top: 2, width: 30, height: 30, borderRadius: 15, alignItems: 'center', justifyContent: 'center', backgroundColor: th.soft}}><Text style={{fontSize: 20, lineHeight: 22, color: th.ink}}>×</Text></Pressable> : null}
+        {onClose ? <Pressable accessibilityRole="button" accessibilityLabel={cmsText("lbl.a11yClosePopup", "Close popup")} onPress={onClose} hitSlop={12} style={{position: 'absolute', right: 0, top: 2, width: 30, height: 30, borderRadius: 15, alignItems: 'center', justifyContent: 'center', backgroundColor: th.soft}}><Text style={{fontSize: 20, lineHeight: 22, color: th.ink}}>×</Text></Pressable> : null}
       </View>
       {safeChildren(children)}
     </View>
@@ -195,7 +198,7 @@ export function SheetBox({children, large = false, compact = false, centered = f
 
 export const heartBtn = (id: string, on: boolean, onPress: () => void, label?: string) => {
   return (
-    <Pressable accessibilityRole="button" accessibilityLabel={label || (on ? "Remove from favorites" : "Save to favorites")} onPress={onPress} style={{position: 'absolute', top: 10, right: 10, width: 34, height: 34, borderRadius: 17, backgroundColor: '#fff', alignItems: 'center', justifyContent: 'center'}}>
+    <Pressable accessibilityRole="button" accessibilityLabel={label || (on ? cmsText("lbl.a11yRemoveFavoriteShort", "Remove from favorites") : cmsText("lbl.a11ySaveFavoriteShort", "Save to favorites"))} onPress={onPress} style={{position: 'absolute', top: 10, right: 10, width: 34, height: 34, borderRadius: 17, backgroundColor: '#fff', alignItems: 'center', justifyContent: 'center'}}>
       <Icon name="heart" size={17} color={on ? '#FD802E' : '#1B1B1F'} fill={on} />
     </Pressable>
   );

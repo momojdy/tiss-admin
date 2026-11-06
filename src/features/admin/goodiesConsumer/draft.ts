@@ -3,6 +3,8 @@ import {CATS} from './data/seed';
 import {DEFAULT_PROMOS} from './data/defaultPromos';
 import {clone} from '../lib/clone';
 import {t as tr} from './i18n';
+import {requiredPlaceholders} from './contentEditing';
+import customerRestrictionCatalog from './customerRestrictionCatalog.json';
 import customerLabelCatalog from './customerLabelCatalog.json';
 
 export const GOODIES_CONTENT_KEY = 'goodies.content';
@@ -28,7 +30,7 @@ export function stable(value: any): string {
 /** The image object of an entry: categories use `art`, everything else `img`. */
 export const imageKeyFor = (list: string) => (list === 'cats' ? 'art' : 'img');
 
-export function validateGoodiesDraft(draft: any): string[] {
+export function validateGoodiesDraft(draft: any, strictText = false): string[] {
   const errors: string[] = [];
   if (!draft || typeof draft !== 'object' || Array.isArray(draft)) return ['The Goodies content must be an object.'];
   if (draft.v !== 5) errors.push('The Goodies content must be version 5.');
@@ -43,6 +45,34 @@ export function validateGoodiesDraft(draft: any): string[] {
       seen.add(item.id);
     });
   });
+  if (strictText) {
+  (Array.isArray(draft.labels) ? draft.labels : []).forEach((entry: any) => {
+    const source = customerLabelCatalog.find(field => field.id === entry.id);
+    // Existing search copy can intentionally be generic, without naming the store.
+    const expected = entry.id === 'lbl.storeSearch' ? [] : requiredPlaceholders(source?.text || '');
+    for (const [locale, translation] of Object.entries(entry.t || {})) {
+      const value = (translation as any)?.v;
+      if (typeof value !== 'string' || !value.trim()) continue;
+      const missing = expected.filter(token => !value.includes(token));
+      if (missing.length) errors.push(entry.id + ' (' + locale + ') must retain ' + missing.join(', ') + '.');
+    }
+  });
+  for (const entry of draft.rg?.texts || []) {
+    const source = customerRestrictionCatalog.find(field => field.id === entry.id);
+    for (const [locale, translation] of Object.entries(entry.t || {})) {
+      const value = (translation as any)?.v;
+      if (typeof value === 'string' && value.trim()) {
+        const missing = requiredPlaceholders(source?.text || '').filter(token=>!value.includes(token));
+        if(missing.length) errors.push(entry.id+' ('+locale+') must retain '+missing.join(', ')+'.');
+      }
+    }
+  }
+  if (Array.isArray(draft.legal)) {
+    const ids = draft.legal.map((entry: any) => entry.id);
+    if (new Set(ids).size !== ids.length) errors.push('Duplicate policy document key.');
+    draft.legal.forEach((entry: any) => { if (!['legal.terms','legal.privacy','legal.refund'].includes(entry.id)) errors.push('Use a supported policy key: legal.terms, legal.privacy or legal.refund.'); });
+  }
+  }
   if (stable(draft).indexOf('/storage/v1/object/sign/') > -1) errors.push('The content contains a temporary signed URL. Use an asset key instead.');
   return errors;
 }
@@ -854,8 +884,12 @@ export function buildStarterDraft(): any {
     promos,
     labels: [...labelDefs, ...customerLabelCatalog
       .filter(entry => !labelDefs.some(([id]) => id === entry.id))
-      .map(entry => [entry.id, entry.id.replace(/^lbl\./, ''), entry.text])]
+      .map(entry => [entry.id, entry.text.trim().slice(0, 90) || entry.id, entry.text])]
       .map(([id, label, text]) => ({id, label, t: txt(text)})),
+    faq: [],
+    topics: [],
+    legal: [],
+    rg: {live: false, texts: customerRestrictionCatalog.map(entry => ({id:entry.id,t:txt(entry.text)}))},
     deals: [],
     coupons: [],
     stages: [],

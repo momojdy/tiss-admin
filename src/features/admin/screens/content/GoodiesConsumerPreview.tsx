@@ -35,6 +35,12 @@ const screens = [
   { key: 'help', label: 'Help' },
   { key: 'contact', label: 'Contact' },
   { key: 'policies', label: 'Policies' },
+  { key: 'catlist', label: 'Store results' },
+  { key: 'reviews', label: 'Store reviews' },
+  { key: 'policy', label: 'Policy document' },
+  { key: 'storechat', label: 'Store conversation' },
+  { key: 'ndetail', label: 'Notification detail' },
+  { key: 'supdone', label: 'Support confirmation' },
 ] as const;
 
 /** Renders a resolved copy of the editor-owned draft and prevents consumer loading from overwriting it. */
@@ -104,7 +110,14 @@ export function GoodiesConsumerPreview({ editMode = false, contentDraft, assetUr
     BYO.store[previewStoreId] = true;
     BYO.cfg[previewStoreId] = previewBuilders;
     const chosen = previewBuilders.find((builder: any) => builder.id === (builderId || selectedBuilder?.id)) || previewBuilders[0];
-    let param = route === 'store' ? storeId : route === 'byo' ? previewStoreId + '|' + chosen.id : route === 'product' ? itemId : undefined;
+    let param: any = (route === 'store' || route === 'reviews' || route === 'storechat') ? storeId : route === 'byo' ? previewStoreId + '|' + chosen.id : route === 'product' ? itemId : undefined;
+    if (route === 'catlist') param = 'all';
+    if (route === 'policy') param = 'terms';
+    if (route === 'supdone') param = {ticket:'PREVIEW-ONLY'};
+    if (route === 'ndetail') {
+      param='__admin_goodies_notification_preview__';
+      S.notifs=[{id:param,t:'Sample notification',d:'Preview only. No notification was sent.',r:'promos',p:null,read:false},...S.notifs.filter((notice:any)=>notice.id!==param)] as any;
+    }
     if (route === 'confirm' || route === 'track') {
       const fixtureStore = '__admin_goodies_order_preview__';
       STB[fixtureStore] = {id: fixtureStore, n: 'Sample Goodies store', c: 'groceries', e: '🛍️', bg: 'bg0', r: 0, rv: 0, km: 0, eta: '20–30', fee: 0, min: 0, it: [], open: true, live: false} as any;

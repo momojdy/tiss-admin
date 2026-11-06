@@ -1,3 +1,4 @@
+import {label} from './content';
 
 import {useSyncExternalStore} from 'react';
 import AsyncStorage from '@react-native-async-storage/async-storage';
@@ -381,7 +382,7 @@ export function filt(list: Store[]) {
   if (f === 'near') l.sort((a, b) => a.km - b.km);
   return l;
 }
-export const FCH: [string, string][] = [['', 'All'], ['offers', 'Offers'], ['free', 'Free delivery'], ['top', 'Rating 4.5+'], ['fast', 'Under 30 min'], ['open', 'Open now'], ['near', 'Nearest']];
+export const FCH = (): [string, string][] => [['', label('lbl.filterAll', 'All')], ['offers', label('lbl.filterOffers', 'Offers')], ['free', label('lbl.filterFree', 'Free delivery')], ['top', label('lbl.filterTop', 'Rating 4.5+')], ['fast', label('lbl.filterFast', 'Under 30 min')], ['open', label('lbl.filterOpen', 'Open now')], ['near', label('lbl.filterNearest', 'Nearest')]];
 
 /* demo only: wipes local data */
 export async function resetDemo() {

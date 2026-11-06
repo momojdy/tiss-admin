@@ -1,3 +1,4 @@
+import {listAllCmsAssets} from './cmsAssetPagination';
 import { supabase } from './supabase';
 
 export type AccessLevel = 'view' | 'edit' | 'manage';
@@ -194,10 +195,9 @@ export async function uploadCmsAsset(input: {
 }
 
 export async function listCmsAssets() {
-  const { data, error } = await supabase.rpc('wantiss_admin_list_cms_assets');
-  if (error) throw new Error(error.code === '42501' ? 'You do not have permission to view assets.' : 'Assets are unavailable.');
-  return data || [];
+  return listAllCmsAssets(supabase);
 }
+
 export async function publishCmsVersion(id: string) {
   const { error } = await supabase.rpc('wantiss_admin_publish_cms_version', { p_content_id: id });
   if (error) throw new Error(error.code === '42501' ? 'Publishing requires content.publish manage permission.' : error.message);

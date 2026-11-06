@@ -5,6 +5,7 @@
    Machine drafts are never shown in production; the demo may show them so all five languages can be exercised. */
 import {S} from '../store';
 import type {LangCode, Txt} from '../data/types';
+import {interfaceText} from './interfaceContent';
 import {DICT} from './dict';
 
 export const LANGS: {code: LangCode; label: string}[] = [
@@ -36,7 +37,7 @@ export function t(key: string, vars?: Record<string, string | number>): string {
   const l: string = S.lang || DEFAULT_LANG;
   let s: string | undefined = l !== 'en' && allowed(l) ? drafts[l]?.[key] : undefined;
   if (l === 'ht' && !REVIEWED.includes('ht') && !cfg.showMachineDrafts) s = undefined; /* Creole needs human review */
-  s = s || en[key] || key;
+  s = interfaceText(key, l as LangCode, cfg.showMachineDrafts) || s || en[key] || key;
   if (vars) Object.keys(vars).forEach(k => (s = (s as string).replace(new RegExp('\\{' + k + '\\}', 'g'), String(vars[k]))));
   return s as string;
 }

@@ -1,9 +1,11 @@
 /* Edit selection stays isolated; outside edit mode, consumer elements render unchanged. */
+import {C} from './content';
+import {tx} from './i18n';
 import React, {createContext, useContext} from 'react';
 import {Pressable, Text, View, ViewStyle} from 'react-native';
 
 export type GoodiesField = 'title' | 'sub' | 'btn' | 'text' | 'art';
-export type GoodiesKind = 'mode' | 'promo' | 'category' | 'label';
+export type GoodiesKind = 'mode' | 'promo' | 'category' | 'label' | 'library';
 export type GoodiesSelection = {kind: GoodiesKind; id: string; field: GoodiesField};
 
 export const selKey = (s: GoodiesSelection) => s.kind + ':' + s.id + ':' + s.field;
@@ -54,4 +56,16 @@ export function AddChip({target, label}: {target: BuilderTarget; label: string})
       <Text style={{fontSize: 12, fontWeight: '800', color: '#FD802E'}}>{'+ ' + label}</Text>
     </Pressable>
   );
+}
+
+/** Resolve only an unambiguous platform text label; never select customer/vendor values by fuzzy match. */
+export function useEditableText(value: unknown) {
+  const context = useContext(EditContext);
+  if (!context || typeof value !== 'string') return {};
+  const matches = (C?.labels || []).filter((entry: any) => tx(entry.t) === value);
+  if (matches.length !== 1) return {};
+  return {onPress: (event: {stopPropagation: () => void}) => {
+    event.stopPropagation();
+    context.select({kind:'label',id:matches[0].id,field:'text'});
+  }};
 }
