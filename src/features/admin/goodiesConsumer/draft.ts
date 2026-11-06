@@ -3,6 +3,7 @@ import {CATS} from './data/seed';
 import {DEFAULT_PROMOS} from './data/defaultPromos';
 import {clone} from '../lib/clone';
 import {t as tr} from './i18n';
+import customerLabelCatalog from './customerLabelCatalog.json';
 
 export const GOODIES_CONTENT_KEY = 'goodies.content';
 export const IMAGE_LISTS = ['modes', 'promos', 'cats', 'lib'] as const;
@@ -236,6 +237,10 @@ export function buildStarterDraft(): any {
     ['lbl.orderUnavailable', 'Confirmation: unavailable heading', 'Order unavailable'],
     ['lbl.orderNotFound', 'Tracking: not found heading', 'Order not found'],
     ['lbl.orderLiveTracking', 'Tracking: live delivery route heading', 'Live delivery route'],
+    ['lbl.orderCourierRefreshFailed', 'Tracking: refresh failure', 'Courier tracking is temporarily unavailable. Retrying automatically.'],
+    ['lbl.orderCourierStale', 'Tracking: stale GPS', 'The courier GPS signal is temporarily stale. Waiting for a fresh location update.'],
+    ['lbl.orderCourierAwaitingGps', 'Tracking: first GPS update', 'Courier accepted. Waiting for the first GPS location.'],
+    ['lbl.orderRoadRouteUnavailable', 'Tracking: no road geometry', 'Road route unavailable. The map shows known locations only.'],
     ['lbl.orderTrackingUnavailable', 'Tracking: route unavailable heading', 'Live tracking unavailable'],
     ['lbl.orderPickupLocation', 'Tracking: pickup location heading', 'Pickup location'],
     ['lbl.orderPickupUnavailable', 'Tracking: pickup location unavailable', 'Live location unavailable'],
@@ -847,7 +852,10 @@ export function buildStarterDraft(): any {
     modes,
     cats: CATS.map((c, i) => ({id: c.id, st: 'on', ord: i + 1, emoji: c.emoji, home: c.home, name: txt(String(c.name)), art: null})),
     promos,
-    labels: labelDefs.map(([id, label, text]) => ({id, label, t: txt(text)})),
+    labels: [...labelDefs, ...customerLabelCatalog
+      .filter(entry => !labelDefs.some(([id]) => id === entry.id))
+      .map(entry => [entry.id, entry.id.replace(/^lbl\./, ''), entry.text])]
+      .map(([id, label, text]) => ({id, label, t: txt(text)})),
     deals: [],
     coupons: [],
     stages: [],

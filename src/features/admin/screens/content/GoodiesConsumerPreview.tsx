@@ -7,6 +7,7 @@ import { applyContent, clearContent, setDraftControlled } from '../../goodiesCon
 import { resolveForRender } from '../../goodiesConsumer/draft';
 import { EditContext, type BuilderTarget, type GoodiesSelection } from '../../goodiesConsumer/editContext';
 import { PhoneFrame } from './PhoneFrame';
+import { LANGS } from '../../goodiesConsumer/i18n';
 
 const orange = '#FD802E';
 const ink = '#1B1B1F';
@@ -20,6 +21,20 @@ const screens = [
   { key: 'store', label: 'Store' },
   { key: 'product', label: 'Product' },
   { key: 'checkout', label: 'Checkout' },
+  { key: 'search', label: 'Search' },
+  { key: 'explore', label: 'Explore' },
+  { key: 'promos', label: 'Promotions' },
+  { key: 'flashdeals', label: 'Flash deals' },
+  { key: 'favs', label: 'Favorites' },
+  { key: 'confirm', label: 'Confirmation' },
+  { key: 'track', label: 'Tracking' },
+  { key: 'notifs', label: 'Notifications' },
+  { key: 'profile', label: 'Profile' },
+  { key: 'addresses', label: 'Addresses' },
+  { key: 'payments', label: 'Payments' },
+  { key: 'help', label: 'Help' },
+  { key: 'contact', label: 'Contact' },
+  { key: 'policies', label: 'Policies' },
 ] as const;
 
 /** Renders a resolved copy of the editor-owned draft and prevents consumer loading from overwriting it. */
@@ -48,6 +63,7 @@ export function GoodiesConsumerPreview({ editMode = false, contentDraft, assetUr
   }, [savedBuilders, sampleBuilders]);
   const [builderMenuOpen, setBuilderMenuOpen] = useState(false);
   const [selectedBuilderId, setSelectedBuilderId] = useState('');
+  const [zoom, setZoom] = useState(1);
   const selectedBuilder = previewBuilders.find((builder: any) => builder.id === selectedBuilderId) || previewBuilders[0];
   // Keep the preview store in step with edits and drop the old in-progress order so removed items cannot linger.
   useEffect(() => {
@@ -125,10 +141,15 @@ export function GoodiesConsumerPreview({ editMode = false, contentDraft, assetUr
   return (
     <View style={{ width: '100%', alignItems: 'center' }}>
       <View style={{ width: '100%', maxWidth: 390, marginBottom: 10, paddingHorizontal: 4 }}>
-        <Text style={{ color: ink, fontSize: 12, fontWeight: '800' }}>{editMode ? 'Edit actual Goodies consumer screen' : 'Actual Goodies consumer screens'}</Text>
+        <Text style={{ color: ink, fontSize: 12, fontWeight: '800' }}>{editMode ? 'Edit Goodies content preview' : 'Goodies content preview'}</Text>
         <Text style={{ color: muted, fontSize: 10, lineHeight: 15, marginTop: 3 }}>
-          {editMode ? 'Use the screen tabs to open a page, then tap editable text in the phone to select its matching field.' : 'Rendered from the consumer app source using the current draft. Placing orders is disabled in this preview.'}
+          {editMode ? 'Use the screen tabs to open a page, then tap editable text in the phone to select its matching field.' : 'Rendered using the current draft and isolated sample data. Placing orders is disabled in this preview.'}
         </Text>
+        <Text style={{ color: muted, fontSize: 10, marginTop: 6 }}>Draft preview · Sample data only · Unreviewed translations may appear here; customers receive reviewed translations or English.</Text>
+        <ScrollView horizontal showsHorizontalScrollIndicator={false} contentContainerStyle={{ gap: 6, paddingVertical: 8 }}>
+          {LANGS.map(locale => <Pressable key={locale.code} accessibilityRole="button" accessibilityLabel={'Preview in ' + locale.label} accessibilityState={{selected: S.lang === locale.code}} onPress={() => {S.lang = locale.code; emit();}} style={{padding: 7, borderRadius: 12, backgroundColor: S.lang === locale.code ? orange : '#F1F1F2'}}><Text style={{fontSize: 10, color: S.lang === locale.code ? '#FFFFFF' : ink}}>{locale.label}</Text></Pressable>)}
+          {[0.75, 1, 1.25].map(value => <Pressable key={value} accessibilityRole="button" accessibilityLabel={'Preview zoom ' + Math.round(value * 100) + '%'} accessibilityState={{selected: zoom === value}} onPress={() => setZoom(value)} style={{padding: 7, borderRadius: 12, backgroundColor: zoom === value ? orange : '#F1F1F2'}}><Text style={{fontSize: 10, color: zoom === value ? '#FFFFFF' : ink}}>{Math.round(value * 100)}%</Text></Pressable>)}
+        </ScrollView>
         <ScrollView horizontal showsHorizontalScrollIndicator={false} contentContainerStyle={{ gap: 6, paddingVertical: 10 }}>
           {screens.map((screen) => {
             const active = S.stack?.[S.stack.length - 1]?.r === screen.key;
@@ -160,11 +181,13 @@ export function GoodiesConsumerPreview({ editMode = false, contentDraft, assetUr
           </View>
         ) : null}
       </View>
-      <PhoneFrame background="#FFFFFF">
+      <ScrollView horizontal contentContainerStyle={{flexGrow: 1, justifyContent: 'center'}}>
+      <PhoneFrame background="#FFFFFF" zoom={zoom}>
         <EditContext.Provider value={editValue}>
           <GoodiesApp embedded previewMode />
         </EditContext.Provider>
       </PhoneFrame>
+      </ScrollView>
     </View>
   );
 }
