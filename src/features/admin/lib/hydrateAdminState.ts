@@ -84,6 +84,7 @@ export async function hydrateAdminState() {
       start: r.starts_at.slice(0, 10), end: r.ends_at ? r.ends_at.slice(0, 10) : '',
       by: r.created_by, notified: r.notify_user ? 1 : 0,
     }));
+    account.appeal = restrictions.some(r => r.target_user_id === account.id && r.kind === 'Ban' && r.scope === 'all' && r.appeal_status === 'open') ? 1 : 0;
     account.paused = account.r.some(r => r.kind === 'Suspension' && (r.scope === 'all' || r.scope === 'Entire Wantiss account')) ? 1 : 0;
   });
 

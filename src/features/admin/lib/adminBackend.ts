@@ -227,10 +227,11 @@ export interface AdminAccountRestriction {
   created_by: string;
   notify_user: boolean;
   status: 'active' | 'lifted';
+  appeal_status?: 'none' | 'open' | 'upheld';
 }
 export async function listAccountRestrictions(): Promise<AdminAccountRestriction[]> {
   const { data, error } = await supabase.from('wantiss_admin_account_restrictions')
-    .select('id,target_user_id,kind,scope,reason,notes,starts_at,ends_at,created_by,notify_user,status')
+    .select('*')
     .eq('status', 'active').order('created_at', { ascending: false });
   if (error) throw new Error('Account restrictions are unavailable.');
   return data || [];
@@ -300,4 +301,11 @@ export async function reviewFinancialAction(id: string, decision: 'approve' | 'r
     p_action_id: id, p_decision: decision, p_reason: reason,
   });
   if (error) throw new Error(error.code === '42501' ? 'You do not have permission to review financial actions.' : error.message);
+}
+
+export async function recordRestrictionAppeal(restrictionId: string, action: 'receive' | 'uphold', reason: string) {
+  const {error} = await supabase.rpc('wantiss_admin_record_restriction_appeal', {
+    p_restriction_id: restrictionId, p_action: action, p_reason: reason.trim(),
+  });
+  if (error) throw new Error(error.code === '42501' ? 'Super Admin account-restriction permission is required.' : error.message);
 }

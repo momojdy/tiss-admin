@@ -1,6 +1,7 @@
 import { db, TODAY, aud, bump } from './db';
 import { GRANTS, liveGrantsFor } from './grantStore';
 import type { StaffMember } from '../data/types';
+import {permissionKey, requiredPermissionLevel, superAdminOnlyRight} from './permissionKeys';
 
 /** Who is signed in, and who the signed-in person is previewing. */
 export const session = {
@@ -43,8 +44,8 @@ export const acs = (s: StaffMember) => {
   if (session.userId) {
     if (session.status !== 'active') return { lv: db.SEC.map(() => 0), rights: [] as string[] };
     if (session.role === 'super_admin') return { lv: db.SEC.map(() => 2), rights: [...RIGHTS] };
-    const lv = db.SEC.map(section => Math.min(2, permissionLevel(section.toLowerCase().replace(/[^a-z0-9]+/g, '.').replace(/^\.+|\.+$/g, ''))));
-    const rights = RIGHTS.filter(right => permissionLevel(right.toLowerCase().replace(/[^a-z0-9]+/g, '.')) > 0);
+    const lv = db.SEC.map(section => Math.min(2, permissionLevel(permissionKey(section))));
+    const rights = RIGHTS.filter(right => !superAdminOnlyRight(right) && permissionLevel(permissionKey(right)) >= requiredPermissionLevel(right));
     return { lv, rights };
   }
   nm(s);
@@ -61,14 +62,14 @@ export const staffByName = (n: string) => db.STAFF.find((s) => s.n === n);
 /** The staff member the interface currently follows. */
 export const me = (): StaffMember => staffByName(session.view) || db.STAFF[0];
 export const realMe = (): StaffMember | undefined => (session.who ? staffByName(session.who) : undefined);
-export const hasRight = (r: string) => session.userId ? session.status === 'active' && (session.role === 'super_admin' || permissionLevel(r.toLowerCase().replace(/[^a-z0-9]+/g, '.')) >= 1) : acs(me()).rights.includes(r);
+export const hasRight = (r: string) => !!session.userId && session.status === 'active' && (session.role === 'super_admin' || (!superAdminOnlyRight(r) && permissionLevel(permissionKey(r)) >= requiredPermissionLevel(r)));
 /** Numeric permission level for a single server-granted right (0 none, 1 view, 2 edit, 3 manage). */
-export const rightLevel = (r: string) => session.userId ? session.status !== 'active' ? 0 : session.role === 'super_admin' ? 3 : permissionLevel(r.toLowerCase().replace(/[^a-z0-9]+/g, '.')) : acs(me()).rights.includes(r) ? 2 : 0;
+export const rightLevel = (r: string) => !session.userId || session.status !== 'active' ? 0 : session.role === 'super_admin' ? 3 : superAdminOnlyRight(r) ? 0 : permissionLevel(permissionKey(r));
 export const secLv = (i: number) => {
-  if (!session.userId) return acs(me()).lv[i] ?? 0;
+  if (!session.userId) return 0;
   if (session.status !== 'active') return 0;
   if (session.role === 'super_admin') return 2;
-  const key = String(db.SEC[i] || '').toLowerCase().replace(/[^a-z0-9]+/g, '.').replace(/^\.+|\.+$/g, '');
+  const key = permissionKey(String(db.SEC[i] || ''));
   return Math.min(2, permissionLevel(key));
 };
 

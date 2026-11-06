@@ -1,5 +1,6 @@
+import {recordRestrictionAppeal} from '../lib/adminBackend';
 import { aud, authDb, db, TODAY } from './db';
-import { effOf, lastSuperAdmin, LN, logStaff, nm, RIGHTS, session, staffByName } from './access';
+import { can, needs, lastSuperAdmin, logStaff, session, staffByName } from './access';
 import { closeGrantsFor } from './grants';
 import type { Account, Restriction, StaffMember } from '../data/types';
 
@@ -34,7 +35,7 @@ export function liftRestriction(a: Account, id: string, note: string) {
   const r = a.r.find((x) => x.id === id);
   if (!r) return 'Restriction not found.';
   r.end = TODAY;
-  accHist(a, session.name || 'Super Admin', r.kind === 'Ban' ? 'Reinstated' : 'Suspension lifted', 'Restriction lifted: ' + scopeTxt(r), note);
+  accHist(a, session.who || 'Super Admin', r.kind === 'Ban' ? 'Reinstated' : 'Suspension lifted', 'Restriction lifted: ' + scopeTxt(r), note);
   applyConsequences(a);
   return '';
 }
@@ -43,22 +44,27 @@ export function updateRestriction(a: Account, id: string, end: string, note: str
   const r = a.r.find((x) => x.id === id);
   if (!r) return 'Restriction not found.';
   r.end = end;
-  accHist(a, session.name || 'Super Admin', 'Restriction updated', scopeTxt(r) + (end ? ' until ' + end : ' until lifted'), note);
+  accHist(a, session.who || 'Super Admin', 'Restriction updated', scopeTxt(r) + (end ? ' until ' + end : ' until lifted'), note);
   applyConsequences(a);
   return '';
 }
 
 export function addRestriction(a: Account, kind: Restriction['kind'], scope: string, reason: string, notes: string, start: string, end: string, notified: number) {
-  a.r.push({ id: RID(), kind, scope, reason, notes, start, end, by: session.name || 'Super Admin', notified });
-  accHist(a, session.name || 'Super Admin', kind === 'Ban' ? 'Banned' : 'Suspended', kind + ' · ' + scopeTxt({ id: '', kind, scope, reason, notes, start, end, by: session.name || 'Super Admin', notified }), notes);
+  a.r.push({ id: RID(), kind, scope, reason, notes, start, end, by: session.who || 'Super Admin', notified });
+  accHist(a, session.who || 'Super Admin', kind === 'Ban' ? 'Banned' : 'Suspended', kind + ' · ' + scopeTxt({ id: '', kind, scope, reason, notes, start, end, by: session.who || 'Super Admin', notified }), notes);
   applyConsequences(a);
 }
 
-export function upholdBan(a: Account, note: string) {
-  const r = a.r.find((x) => x.kind === 'Ban' && x.scope === 'all');
-  if (!r) return 'No full-account ban to uphold.';
-  accHist(a, session.name || 'Super Admin', 'Ban upheld', 'Full-account ban remains in force.', note);
-  return '';
+/** Appeal state is written only by the authorized backend; callers refresh its snapshot. */
+export async function markAppeal(a: Account, note: string) {
+  const ban = a.r.find(r => r.kind === 'Ban' && r.scope === 'all');
+  if (!ban) throw new Error('No active full-account ban found.');
+  await recordRestrictionAppeal(ban.id, 'receive', note);
+}
+export async function upholdBan(a: Account, note: string) {
+  const ban = a.r.find(r => r.kind === 'Ban' && r.scope === 'all');
+  if (!ban) throw new Error('No active full-account ban found.');
+  await recordRestrictionAppeal(ban.id, 'uphold', note);
 }
 
 export const suspendStaff = (s: StaffMember, note: string) => { s.st = 'Suspended'; s.susEnd = ''; s.until = ''; logStaff(s, 'Suspended', note); };
@@ -69,18 +75,18 @@ export const reinstateStaff = (s: StaffMember, role: string, note: string) => { 
 export const saveRoleTemplate = (role: string, levels: number[], rights: string[]) => { db.ROLES[role] = levels; db.RR[role] = rights; };
 export const createRole = (name: string, from: string) => { if (!name.trim() || db.ROLES[name]) return 'Role already exists or name is empty.'; db.ROLES[name] = [...(db.ROLES[from] || [])]; db.RR[name] = [...(db.RR[from] || [])]; return ''; };
 
-export const inviteStaff = (email: string, role: string) => { const id = 'S' + Math.random().toString(36).slice(2, 8); db.STF.push({ userId: undefined, n: email, role, last: 'Never', st: 'Invited', x: 0, ov: { sec: {}, rights: {} }, scope: [], hist: [], until: '', susEnd: '' }); return id; };
+export const inviteStaff = (email: string, role: string) => { const id = 'S' + Math.random().toString(36).slice(2, 8); db.STAFF.push({ userId: undefined, n: email, role, last: 'Never', st: 'Invited', x: 0, ov: { sec: {}, rights: {} }, scope: [], hist: [], until: '', susEnd: '' }); return id; };
 export const expireStaff = () => {};
 export const expireAccounts = () => {};
 export const svcNamesForAccount = (a: Account) => a.svc.length ? a.svc : svcNames();
 export const staffByNameSafe = (name: string) => staffByName(name);
-export const lastAdmin = () => lastSuperAdmin();
+export const lastAdmin = () => lastSuperAdmin(session.who || session.view);
 export const accountRestrictions = (a: Account) => a.r;
-export const canManageAccounts = () => true;
-export const authAccount = (id: string) => authDb.find((x: any) => x.id === id);
-export const auditAccount = (a: Account, action: string, txt: string, internal = '') => accHist(a, session.name || 'Super Admin', action, txt, internal);
+export const canManageAccounts = () => !!session.userId && session.status === 'active' && (can(needs('Pause accounts')) || can(needs('Ban accounts')));
+export const authAccount = (id: string) => authDb[id];
+export const auditAccount = (a: Account, action: string, txt: string, internal = '') => accHist(a, session.who || 'Super Admin', action, txt, internal);
 export const restrictionSummary = (a: Account) => a.r.map(scopeTxt).join(', ');
-export const accountName = (a: Account) => nm(a);
+export const accountName = (a: Account) => a.n;
 export const permissionsForAccount = (a: Account) => a.svc;
 export const accountAudit = (a: Account) => a.hist;
 export const accountId = (a: Account) => a.id;
@@ -90,8 +96,8 @@ export const accountServices = (a: Account) => a.svc;
 export const accountRestrictionsForScope = (a: Account, scope: string) => a.r.filter((r) => r.scope === scope || r.scope === 'all');
 export const accountHasRestriction = (a: Account, scope: string) => accountRestrictionsForScope(a, scope).length > 0;
 export const accountRestrictionLabel = (scope: string) => scope === 'GoodiesCustomer' ? 'Goodies customer access' : scope === 'GoodiesMerchant' ? 'Goodies merchant access' : scope;
-export const accountRestrictionCanLift = (r: Restriction) => r.kind === 'Ban' ? can('ban') : can('pause');
-export const accountRestrictionCanEdit = (r: Restriction) => r.kind === 'Suspension' && can('pause');
+export const accountRestrictionCanLift = (r: Restriction) => r.kind === 'Ban' ? can(needs('Ban accounts')) : can(needs('Pause accounts'));
+export const accountRestrictionCanEdit = (r: Restriction) => r.kind === 'Suspension' && can(needs('Pause accounts'));
 export const accountRestrictionReason = (r: Restriction) => r.reason;
 export const accountRestrictionNotes = (r: Restriction) => r.notes;
 export const accountRestrictionDates = (r: Restriction) => ({ start: r.start, end: r.end });
@@ -167,7 +173,7 @@ export const accountRestrictionGoodiesRestrictionBanned = (a: Account) => { cons
 export const accountRestrictionGoodiesRestrictionSuspended = (a: Account) => { const r = accountRestrictionGoodiesRestriction(a); return !!r && r.kind === 'Suspension' && accountRestrictionActive(r); };
 export const accountRestrictionGoodiesRestrictionCanLift = (a: Account) => { const r = accountRestrictionGoodiesRestriction(a); return !!r && accountRestrictionCanLift(r); };
 export const accountRestrictionGoodiesRestrictionCanEdit = (a: Account) => { const r = accountRestrictionGoodiesRestriction(a); return !!r && accountRestrictionCanEdit(r); };
-export const accountRestrictionGoodiesRestrictionCanReinstate = (a: Account) => { const r = accountRestrictionGoodiesRestriction(a); return !!r && r.kind === 'Ban' && can('ban'); };
+export const accountRestrictionGoodiesRestrictionCanReinstate = (a: Account) => { const r = accountRestrictionGoodiesRestriction(a); return !!r && r.kind === 'Ban' && can(needs('Ban accounts')); };
 export const accountRestrictionGoodiesRestrictionScope = (a: Account) => accountRestrictionGoodiesScopeValue(a);
 export const accountRestrictionGoodiesRestrictionTitle = (a: Account) => (accountRestrictionGoodiesMerchant(a) ? 'Goodies merchant' : 'Goodies customer') + ' restriction';
 export const accountRestrictionGoodiesRestrictionAction = (a: Account) => accountRestrictionGoodiesMerchant(a) ? 'merchant' : 'customer';
@@ -176,7 +182,7 @@ export const accountRestrictionGoodiesRestrictionIsMerchant = (a: Account) => ac
 export const accountRestrictionGoodiesRestrictionIsCustomer = (a: Account) => accountRestrictionGoodiesCustomer(a);
 export const accountRestrictionGoodiesRestrictionTarget = (a: Account) => a.id;
 export const accountRestrictionGoodiesRestrictionCanNotify = (a: Account) => accountRestrictionCanApply(a);
-export const accountRestrictionGoodiesRestrictionPermission = (a: Account, kind: Restriction['kind']) => kind === 'Ban' ? can('ban') : can('pause');
+export const accountRestrictionGoodiesRestrictionPermission = (a: Account, kind: Restriction['kind']) => kind === 'Ban' ? can(needs('Ban accounts')) : can(needs('Pause accounts'));
 export const accountRestrictionGoodiesRestrictionPermissionText = (a: Account, kind: Restriction['kind']) => kind === 'Ban' ? 'Super Admin only' : 'Customer support, Review staff or Super Admin';
 export const accountRestrictionGoodiesRestrictionScopeConstant = (a: Account) => accountRestrictionGoodiesScopeValue(a);
 export const accountRestrictionGoodiesRestrictionLabelConstant = (a: Account) => accountRestrictionGoodiesScopeLabel(a);
@@ -348,3 +354,10 @@ export const accountRestrictionGoodiesRestrictionTargetScopeTextForDisplayFeatur
 export const accountRestrictionGoodiesRestrictionTargetScopeTextForDisplayFeatureMerchantTypes = ['Seller', 'Vendor'] as const;
 export const accountRestrictionGoodiesRestrictionTargetScopeTextForDisplayFeatureCustomerType = 'Customer';
 export const accountRestrictionGoodiesRestrictionTargetScopeTextForDisplayFeatureDone = true;
+
+/** Read-only projections of server-hydrated staff records. */
+export const inviteEmail = (name: string) => authDb[name]?.email;
+export const inviteCode = (name: string) => authDb[name]?.code;
+export const openItems = (name: string) => db.APPS.filter(a => a.o === name && a.st < 3).length + (staffByName(name)?.x || 0);
+export const STAFF_TONE: Record<StaffMember['st'], string> = {Active: 'gr', Suspended: 'ye', Revoked: 'or', Invited: 'blue', Cancelled: 'grey'};
+export const levelFill = (level: number, colors: {inset: string; gr: string}) => level === 0 ? colors.inset : level === 1 ? '#d6e6d9' : colors.gr;
