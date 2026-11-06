@@ -6,15 +6,29 @@ on:
   push:
     branches: [main, audit/shared-backend-foundation, goodies/production-readiness]
 
+defaults:
+  run:
+    working-directory: tiss-admin
+
 jobs:
   typecheck:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
+        with:
+          path: tiss-admin
+      - name: Checkout paired customer source for CMS parity tests
+        uses: actions/checkout@v4
+        with:
+          repository: momojdy/tiss_tiss_beta
+          ref: 7fba2bba8ef91dfef557935f5d410355deabcf60
+          path: tiss_tiss_beta
+          persist-credentials: false
       - uses: actions/setup-node@v4
         with:
           node-version: 22
           cache: npm
+          cache-dependency-path: tiss-admin/package-lock.json
       - run: npm ci
       - run: npm test
       - run: npm run typecheck
