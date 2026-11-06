@@ -1,0 +1,25 @@
+
+| (node:14520) Warning: The 'NO_COLOR' env is ignored due to the 'FORCE_COLOR' env being set.
+| (Use `node --trace-warnings ...` to show where the warning was created)
+| (node:14520) Warning: The 'NO_COLOR' env is ignored due to the 'FORCE_COLOR' env being set.
+| (Use `node --trace-warnings ...` to show where the warning was created)
+iOS Bundled 16941ms index.ts (971 modules)
+
+› Assets (9):
+node_modules/@expo-google-fonts/outfit/Outfit_100Thin.ttf (36KB)
+node_modules/@expo-google-fonts/outfit/Outfit_200ExtraLight.ttf (36KB)
+node_modules/@expo-google-fonts/outfit/Outfit_300Light.ttf (36KB)
+node_modules/@expo-google-fonts/outfit/Outfit_400Regular.ttf (36KB)
+node_modules/@expo-google-fonts/outfit/Outfit_500Medium.ttf (36KB)
+node_modules/@expo-google-fonts/outfit/Outfit_600SemiBold.ttf (36KB)
+node_modules/@expo-google-fonts/outfit/Outfit_700Bold.ttf (36KB)
+node_modules/@expo-google-fonts/outfit/Outfit_800ExtraBold.ttf (36KB)
+node_modules/@expo-google-fonts/outfit/Outfit_900Black.ttf (36KB)
+
+› ios bundles (1):
+_expo/static/js/ios/index-d65bb22d601ebacc9113618eb3630bfc.hbc (4MB)
+
+› Files (1):
+metadata.json (708B)
+
+Exported: /workspace/admin-cms-ios

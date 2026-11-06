@@ -43,3 +43,9 @@ The private-proof protocol requires coordinated viewer/vendor rollout and suppor
 client versions. Do not deploy it independently or make the private bucket public.
 No production database, secrets, financial records, charges, CMS publication or
 production-branch merge was changed during this work.
+
+Current CMS follow-up: all 33 customer route cases have manual page entries;
+1,246 platform text keys and existing FAQ/topic/policy/coupon/artwork fields are
+covered. Ten CMS regression tests and four access tests pass. See the customer
+repository `docs/goodies/CMS-COVERAGE.md` for evidence and explicit runtime limits.
+No production content was saved or published.
