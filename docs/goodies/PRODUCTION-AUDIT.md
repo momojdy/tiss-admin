@@ -1,3 +1,5 @@
+> Historical baseline audit. Subsequent candidate implementation and verification are documented in `momojdy/tiss_tiss_beta/docs/goodies/IMPLEMENTATION-STATUS.md`. Production deployment and full acceptance remain outstanding.
+
 # Goodies admin production-readiness audit — 6 November 2026
 
 **NOT PRODUCTION READY.** This audit made no application/UI or production changes.
