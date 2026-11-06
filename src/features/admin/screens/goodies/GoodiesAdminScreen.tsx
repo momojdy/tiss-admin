@@ -5,6 +5,7 @@ import {useNav} from '../../shell/Nav';
 import {useToast} from '../../ui/Toast';
 import {useTheme} from '../../theme/ThemeContext';
 import {GoodiesAssetLibrary} from './GoodiesAssetLibrary';
+import {resolveGoodiesDeliveryProof} from '../../lib/goodiesDeliveryProof';
 
 type Dashboard = {stats:any;merchants:any[];products:any[];orders:any[]};
 const MODULES=['Overview','Merchants','Product review','Orders','Delivery reports','Couriers','Fees','Delivery surcharge','Analytics','Goodies assets','Content editor'];
@@ -67,7 +68,10 @@ export function GoodiesAdminScreen() {
     setBusy('reports');
     const {data,error}=await supabase.rpc('goodies_admin_list_delivery_reports');
     if(error){console.warn('Delivery reports failed',error.message);toast('Could not load delivery reports.');setBusy('');return [];}
-    const rows=data||[];
+    const rows=await Promise.all((data||[]).map(async (row:any)=>{
+      try {return {...row,proof_url:await resolveGoodiesDeliveryProof(row.proof_url||''),proof_unavailable:false};}
+      catch {return {...row,proof_url:'',proof_unavailable:true};}
+    }));
     setReports(rows);
     setBusy('');
     return rows;
@@ -218,7 +222,7 @@ export function GoodiesAdminScreen() {
         <Text style={{fontSize:12,color:'#596554'}}>Driver: {r.driver_name||'—'}{r.driver_phone?' · '+r.driver_phone:''}</Text>
         <Text style={{fontSize:12,color:'#596554',marginBottom:6}}>Delivered {dateText(r.delivered_at)} · Reported {dateText(r.opened_at)}</Text>
         <Text style={{fontSize:13,color:'#1B2619',marginBottom:8}}>“{r.reason}”</Text>
-        {r.proof_url?<Image source={{uri:r.proof_url}} style={{width:'100%',height:200,borderRadius:10,backgroundColor:'#EEF1EB',marginBottom:8}} resizeMode="cover"/>:<Text style={labelStyle}>No delivery photo.</Text>}
+        {r.proof_url?<Image source={{uri:r.proof_url}} style={{width:'100%',height:200,borderRadius:10,backgroundColor:'#EEF1EB',marginBottom:8}} resizeMode="cover"/>:<Text style={labelStyle}>{r.proof_unavailable?'Delivery photo unavailable. Reload the reports to retry.':'No delivery photo.'}</Text>}
         {r.report_status==='open'?<View style={{flexDirection:'row',gap:8}}>
           <Pressable disabled={!!busy} onPress={()=>resolveReport(r,'release')} style={{...btn('#E8F2E5'),flex:1}}><Text style={{fontWeight:'800',color:'#28552B'}}>Delivery confirmed</Text></Pressable>
           <Pressable disabled={!!busy} onPress={()=>resolveReport(r,'refund')} style={{...btn('#F7EAE8'),flex:1}}><Text style={{fontWeight:'800',color:'#8D3932'}}>Refund customer</Text></Pressable>
