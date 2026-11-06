@@ -1,3 +1,4 @@
+import {goodiesPublicationErrors} from '../../goodiesConsumer/publicationReview';
 import customerPageCatalog from '../../goodiesConsumer/customerPageCatalog.json';
 import {mergeMissingLabels, setLocalizedText, contentTextValues} from '../../goodiesConsumer/contentEditing';
 import {GoodiesPageContentFields} from './GoodiesPageContentFields';
@@ -123,7 +124,7 @@ export function GoodiesEditor({ canEdit, canPublish }: { canEdit: boolean; canPu
       setLoadState('ready');
     } catch (e) {
       // Never replace existing content on a failure: the previous draft stays as it was.
-      setLoadError(e instanceof Error ? e.message : 'Goodies content could not be loaded.');
+      setLoadError('Goodies content could not be loaded.');
       setLoadState('error');
     }
   }, []);
@@ -143,14 +144,14 @@ export function GoodiesEditor({ canEdit, canPublish }: { canEdit: boolean; canPu
       const urlByPath = new Map<string, string>();
       for (let index=0; index<paths.length; index+=100) {
         const {data,error}=await supabase.storage.from(ASSET_BUCKET).createSignedUrls(paths.slice(index,index+100),3600);
-        if(error) throw new Error('Draft images cannot be previewed: '+error.message);
+        if(error) throw new Error('Draft images cannot be previewed. Please try again.');
         (data || []).forEach((entry:any)=>{if(entry?.path&&entry?.signedUrl)urlByPath.set(entry.path,entry.signedUrl);});
       }
       const next: Record<string, string> = {};
       byKey.forEach((a, key) => { const url = urlByPath.get(a.storage_path); if (url) next[key] = url; });
       setAssetUrls(next); setAssetNote('');
     } catch (e) {
-      setAssetNote(e instanceof Error ? e.message : 'Assets are unavailable.');
+      setAssetNote('Assets are unavailable.');
     }
   }, []);
 
@@ -297,7 +298,7 @@ export function GoodiesEditor({ canEdit, canPublish }: { canEdit: boolean; canPu
       await loadAssets();
       setAssetNote('Image uploaded as a private draft. Publish the image before publishing the Goodies content.');
     } catch (e) {
-      setAssetNote(e instanceof Error ? e.message : 'The image could not be uploaded.');
+      setAssetNote('The image could not be uploaded.');
     } finally { setAssetBusy(''); }
   };
 
@@ -310,7 +311,7 @@ export function GoodiesEditor({ canEdit, canPublish }: { canEdit: boolean; canPu
       setPendingAssets((current) => { const next = { ...current }; delete next[key]; return next; });
       await loadAssets();
       setAssetNote('Image published. Save the Goodies draft, then publish the Goodies content.');
-    } catch (e) { setAssetNote(e instanceof Error ? e.message : 'The image could not be published.'); }
+    } catch (e) { setAssetNote('The image could not be published.'); }
     finally { setAssetBusy(''); }
   };
 
@@ -350,12 +351,14 @@ export function GoodiesEditor({ canEdit, canPublish }: { canEdit: boolean; canPu
         setNotice({ tone: 'warn', text: 'Saved as version ' + saved.version + ' but the stored content differs from what was sent. Press Reload and review.' });
       }
     } catch (e) {
-      setNotice({ tone: 'error', text: 'Not saved. ' + (e instanceof Error ? e.message : 'The draft could not be saved.') });
+      setNotice({ tone: 'error', text: 'Not saved. ' + ('The draft could not be saved.') });
     } finally { setBusy(''); }
   };
 
   const publish = async () => {
     if (!canPublish || !row || row.status !== 'draft' || dirty || busy || !draft) return;
+    const reviewErrors = goodiesPublicationErrors(draft);
+    if(reviewErrors.length){setNotice({tone:'error',text:reviewErrors[0]});return;}
     setBusy('publish'); setNotice(null);
     try {
       const keys = referencedAssetKeys(draft);
@@ -375,7 +378,7 @@ export function GoodiesEditor({ canEdit, canPublish }: { canEdit: boolean; canPu
         ? { tone: 'ok', text: 'Published version ' + row.version + ' and confirmed on the public endpoint.' }
         : { tone: 'warn', text: 'Version ' + row.version + ' was published. The public endpoint caches for up to a minute, so press Reload shortly to confirm.' });
     } catch (e) {
-      setNotice({ tone: 'error', text: 'Not published. ' + (e instanceof Error ? e.message : 'Publishing failed.') });
+      setNotice({ tone: 'error', text: 'Not published. ' + ('Publishing failed.') });
     } finally { setBusy(''); setConfirmPublish(false); }
   };
 

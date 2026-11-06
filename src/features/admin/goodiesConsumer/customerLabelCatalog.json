@@ -204,27 +204,6 @@
     ]
   },
   {
-    "id": "lbl.accountDemoHeading",
-    "text": "Demo",
-    "pages": [
-      "Settings"
-    ]
-  },
-  {
-    "id": "lbl.accountDemoResetDone",
-    "text": "Demo data reset",
-    "pages": [
-      "Settings"
-    ]
-  },
-  {
-    "id": "lbl.accountDemoTicketSent",
-    "text": "Ticket {ticket} (demo). Your support request is not connected to a live support inbox yet.",
-    "pages": [
-      "Account subpages"
-    ]
-  },
-  {
     "id": "lbl.accountEdit",
     "text": "Edit",
     "pages": [
@@ -250,13 +229,6 @@
     "text": "Help and support",
     "pages": [
       "Profile"
-    ]
-  },
-  {
-    "id": "lbl.accountImportContent",
-    "text": "Import Admin content",
-    "pages": [
-      "Settings"
     ]
   },
   {
@@ -344,27 +316,6 @@
     ]
   },
   {
-    "id": "lbl.accountPasteAdminExport",
-    "text": "Paste the export from Wantiss Admin",
-    "pages": [
-      "Settings"
-    ]
-  },
-  {
-    "id": "lbl.accountResetDemo",
-    "text": "Reset Goodies demo data",
-    "pages": [
-      "Settings"
-    ]
-  },
-  {
-    "id": "lbl.accountResetDemoHint",
-    "text": "Clears orders, cart and checkout numbers",
-    "pages": [
-      "Settings"
-    ]
-  },
-  {
     "id": "lbl.accountSaveAddress",
     "text": "Save address",
     "pages": [
@@ -423,6 +374,13 @@
   {
     "id": "lbl.accountSupportSentTitle",
     "text": "Message sent",
+    "pages": [
+      "Account subpages"
+    ]
+  },
+  {
+    "id": "lbl.accountSupportTicketSent",
+    "text": "Your support request {ticket} has been sent. Keep this reference if you contact us again.",
     "pages": [
       "Account subpages"
     ]
@@ -941,6 +899,20 @@
     ]
   },
   {
+    "id": "lbl.addcard.networkFailed",
+    "text": "The secure card form could not load. Check your connection and try again.",
+    "pages": [
+      "Add card"
+    ]
+  },
+  {
+    "id": "lbl.addcard.retry",
+    "text": "Try again",
+    "pages": [
+      "Add card"
+    ]
+  },
+  {
     "id": "lbl.addcard.saveFailed",
     "text": "Your card could not be saved. Please check the details and try again.",
     "pages": [
@@ -1315,7 +1287,7 @@
   },
   {
     "id": "lbl.byoAuto3ROGT8",
-    "text": "Preview drawing. Photo layers appear once uploaded in Admin.",
+    "text": "Product illustration. Appearance may vary.",
     "pages": [
       "Build Your Own"
     ]
@@ -1783,6 +1755,13 @@
     ]
   },
   {
+    "id": "lbl.cardNetworkFailed",
+    "text": "Card verification could not load. Check your connection and try again.",
+    "pages": [
+      "Card verification"
+    ]
+  },
+  {
     "id": "lbl.cardNewStore",
     "text": "New store",
     "pages": [
@@ -1795,6 +1774,13 @@
     "text": "Pickup only at this address",
     "pages": [
       "Shared components"
+    ]
+  },
+  {
+    "id": "lbl.cardVerifying",
+    "text": "Securely verifying your card…",
+    "pages": [
+      "Card verification"
     ]
   },
   {
@@ -2030,6 +2016,29 @@
       "Shared navigation and access states",
       "Shared components",
       "Categories"
+    ]
+  },
+  {
+    "id": "lbl.catalogFailed",
+    "text": "Could not load stores",
+    "pages": [
+      "Shared navigation and access states",
+      "Home"
+    ]
+  },
+  {
+    "id": "lbl.catalogLoading",
+    "text": "Loading stores…",
+    "pages": [
+      "Home"
+    ]
+  },
+  {
+    "id": "lbl.catalogRetryHint",
+    "text": "Check your connection and try again.",
+    "pages": [
+      "Shared navigation and access states",
+      "Home"
     ]
   },
   {
@@ -2418,6 +2427,13 @@
     ]
   },
   {
+    "id": "lbl.checkoutRequestFailed",
+    "text": "Could not confirm the order. Check your order history before trying again.",
+    "pages": [
+      "Shared actions and validation"
+    ]
+  },
+  {
     "id": "lbl.checkoutReview",
     "text": "Review",
     "pages": [
@@ -2457,6 +2473,13 @@
     "text": "Note for the store",
     "pages": [
       "Checkout"
+    ]
+  },
+  {
+    "id": "lbl.checkoutSubmitting",
+    "text": "Placing order…",
+    "pages": [
+      "Shop · shared"
     ]
   },
   {
@@ -3132,6 +3155,15 @@
     "text": "This policy is not available yet",
     "pages": [
       "Account subpages"
+    ]
+  },
+  {
+    "id": "lbl.loadMore",
+    "text": "Load more",
+    "pages": [
+      "Store",
+      "Store reviews",
+      "Order history"
     ]
   },
   {
@@ -3920,6 +3952,20 @@
     ]
   },
   {
+    "id": "lbl.ordersLoading",
+    "text": "Loading orders…",
+    "pages": [
+      "Order history"
+    ]
+  },
+  {
+    "id": "lbl.ordersLoadingMore",
+    "text": "Loading orders…",
+    "pages": [
+      "Order history"
+    ]
+  },
+  {
     "id": "lbl.ordersNoActive",
     "text": "No active orders",
     "pages": [
@@ -3936,6 +3982,13 @@
   {
     "id": "lbl.ordersPast",
     "text": "Past",
+    "pages": [
+      "Order history"
+    ]
+  },
+  {
+    "id": "lbl.ordersRefreshFailed",
+    "text": "Could not refresh orders. Pull down to try again.",
     "pages": [
       "Order history"
     ]
@@ -4566,13 +4619,6 @@
     ]
   },
   {
-    "id": "lbl.page.components.Sheets.2e4d2c8b07",
-    "text": "Admin content is currently loaded.",
-    "pages": [
-      "Preview import"
-    ]
-  },
-  {
     "id": "lbl.page.components.Sheets.32e5ca77d4",
     "text": "Combined cart",
     "pages": [
@@ -4693,7 +4739,7 @@
   },
   {
     "id": "lbl.page.components.Sheets.59297174fd",
-    "text": "Create or join a server-backed group order first.",
+    "text": "Create or join a group order first.",
     "pages": [
       "Group orders"
     ]
@@ -4728,7 +4774,7 @@
   },
   {
     "id": "lbl.page.components.Sheets.6229019fe3",
-    "text": "Create a server-backed group order first.",
+    "text": "Create a group order first.",
     "pages": [
       "Group orders"
     ]
@@ -4773,13 +4819,6 @@
     "text": "Just now",
     "pages": [
       "Review sheet"
-    ]
-  },
-  {
-    "id": "lbl.page.components.Sheets.6832a279e5",
-    "text": "The built-in sample content is currently used.",
-    "pages": [
-      "Preview import"
     ]
   },
   {
@@ -5054,13 +5093,6 @@
     "text": " replaces them.",
     "pages": [
       "Sheets · newcart"
-    ]
-  },
-  {
-    "id": "lbl.page.components.Sheets.bc1e729ed8",
-    "text": "Paste the content exported from Wantiss Admin. It replaces promo cards, categories, labels, fees, age rules, texts and artwork in this demo. ",
-    "pages": [
-      "Preview import"
     ]
   },
   {
@@ -6952,6 +6984,13 @@
     ]
   },
   {
+    "id": "lbl.preferenceSaveFailed",
+    "text": "Could not save notification preferences. Please try again.",
+    "pages": [
+      "Shared actions and validation"
+    ]
+  },
+  {
     "id": "lbl.produce",
     "text": "Fresh produce",
     "pages": [
@@ -7191,10 +7230,82 @@
     ]
   },
   {
+    "id": "lbl.ratingsUnavailable",
+    "text": "Ratings unavailable",
+    "pages": [
+      "Shared components",
+      "Store",
+      "Store reviews",
+      "Product"
+    ]
+  },
+  {
     "id": "lbl.recent",
     "text": "Recently viewed",
     "pages": [
       "Home"
+    ]
+  },
+  {
+    "id": "lbl.retry",
+    "text": "Try again",
+    "pages": [
+      "Shared navigation and access states",
+      "Home",
+      "Card verification",
+      "Store",
+      "Store reviews"
+    ]
+  },
+  {
+    "id": "lbl.reviewCustomer",
+    "text": "Customer",
+    "pages": [
+      "Shared components"
+    ]
+  },
+  {
+    "id": "lbl.reviewSaveFailed",
+    "text": "Could not submit your review. Please try again.",
+    "pages": [
+      "Review sheet"
+    ]
+  },
+  {
+    "id": "lbl.reviewSaving",
+    "text": "Submitting…",
+    "pages": [
+      "Review sheet"
+    ]
+  },
+  {
+    "id": "lbl.reviewsFailed",
+    "text": "Could not load reviews",
+    "pages": [
+      "Store",
+      "Store reviews"
+    ]
+  },
+  {
+    "id": "lbl.reviewsLoading",
+    "text": "Loading reviews…",
+    "pages": [
+      "Store",
+      "Store reviews"
+    ]
+  },
+  {
+    "id": "lbl.reviewTooLong",
+    "text": "Keep your review under 1,000 characters.",
+    "pages": [
+      "Review sheet"
+    ]
+  },
+  {
+    "id": "lbl.reviewYou",
+    "text": "You",
+    "pages": [
+      "Shared components"
     ]
   },
   {
@@ -7362,13 +7473,6 @@
     ]
   },
   {
-    "id": "lbl.sheetAdminContentLoaded",
-    "text": "Admin content loaded",
-    "pages": [
-      "Preview import"
-    ]
-  },
-  {
     "id": "lbl.sheetAlcoholAccept",
     "text": "I understand",
     "pages": [
@@ -7404,24 +7508,10 @@
     ]
   },
   {
-    "id": "lbl.sheetAuto1DJ0R80",
-    "text": "Import Admin content",
-    "pages": [
-      "Preview import"
-    ]
-  },
-  {
     "id": "lbl.sheetAuto1DTRBEO",
     "text": "This clears your current choices. Items already in your cart are not affected.",
     "pages": [
       "Sheets · byoreset"
-    ]
-  },
-  {
-    "id": "lbl.sheetAuto1EXCTAI",
-    "text": "Import",
-    "pages": [
-      "Preview import"
     ]
   },
   {
@@ -7450,13 +7540,6 @@
     "text": "Back",
     "pages": [
       "Contact number form"
-    ]
-  },
-  {
-    "id": "lbl.sheetAuto1U4P0PS",
-    "text": "Go back to sample content",
-    "pages": [
-      "Preview import"
     ]
   },
   {
@@ -7492,13 +7575,6 @@
     "text": "• The courier checks your ID at the door. At a pickup, the shop checks it.",
     "pages": [
       "Sheets · alcrules"
-    ]
-  },
-  {
-    "id": "lbl.sheetAutoAED84A",
-    "text": "Paste JSON here",
-    "pages": [
-      "Preview import"
     ]
   },
   {
@@ -7849,13 +7925,6 @@
     ]
   },
   {
-    "id": "lbl.sheetInvalidJson",
-    "text": "That is not valid JSON",
-    "pages": [
-      "Preview import"
-    ]
-  },
-  {
     "id": "lbl.sheetInviteCode",
     "text": "GROUP INVITE CODE",
     "pages": [
@@ -8115,13 +8184,6 @@
     "text": "That is already your Wantiss number",
     "pages": [
       "Contact number form"
-    ]
-  },
-  {
-    "id": "lbl.sheetSampleContent",
-    "text": "Using sample content",
-    "pages": [
-      "Preview import"
     ]
   },
   {
@@ -8427,6 +8489,13 @@
     ]
   },
   {
+    "id": "lbl.startupFailed",
+    "text": "Goodies could not load",
+    "pages": [
+      "Shared navigation and access states"
+    ]
+  },
+  {
     "id": "lbl.stockRemaining",
     "text": " left",
     "pages": [
@@ -8473,6 +8542,7 @@
     "id": "lbl.storeBackToStores",
     "text": "Back to stores",
     "pages": [
+      "Store",
       "Store reviews"
     ]
   },
@@ -8649,7 +8719,11 @@
     "id": "lbl.storeNotFound",
     "text": "Store not found",
     "pages": [
-      "Store reviews"
+      "Home",
+      "Store",
+      "Store reviews",
+      "Order tracking",
+      "Order history"
     ]
   },
   {
@@ -8735,14 +8809,6 @@
     "id": "lbl.storeReviewsTitle",
     "text": "Store reviews",
     "pages": [
-      "Store reviews"
-    ]
-  },
-  {
-    "id": "lbl.storeSampleReview",
-    "text": "sample review",
-    "pages": [
-      "Store",
       "Store reviews"
     ]
   },

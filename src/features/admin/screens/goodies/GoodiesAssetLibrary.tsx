@@ -81,14 +81,15 @@ export function GoodiesAssetLibrary() {
       setEntries(next);
 
       const paths = Array.from(new Set(next.filter((e) => e.assetKey && byKey.get(e.assetKey)).map((e) => byKey.get(e.assetKey).storage_path)));
-      const signed = paths.length ? await supabase.storage.from(BUCKET).createSignedUrls(paths, 3600) : { data: [] as any[] };
+      const signed = paths.length ? await supabase.storage.from(BUCKET).createSignedUrls(paths, 3600) : { data: [] as any[], error: null };
+      if(signed.error || signed.data?.some(d=>d.error))throw new Error('Asset images could not be loaded.');
       const byPath = new Map<string, string>();
       (signed.data || []).forEach((d: any) => { if (d?.path && d?.signedUrl) byPath.set(d.path, d.signedUrl); });
       const map: Record<string, string> = {};
       next.forEach((e) => { const asset = byKey.get(e.assetKey); const url = asset && byPath.get(asset.storage_path); if (url) map[e.assetKey] = url; });
       setUrls(map);
     } catch (e) {
-      setError(e instanceof Error ? e.message : 'Goodies assets could not be loaded.');
+      setError('Goodies assets could not be loaded.');
       setEntries([]); setUrls({});
     } finally { setLoading(false); }
   }, []);

@@ -22,6 +22,8 @@ let serverGrants: { permission_key: string; access_level: string; expires_at: st
 export const setServerGrants = (rows: typeof serverGrants) => { serverGrants = rows; };
 const levelRank = (level: string) => level === 'manage' ? 3 : level === 'edit' ? 2 : level === 'view' ? 1 : 0;
 const permissionLevel = (key: string) => serverGrants.filter(g => g.permission_key === key && !g.revoked_at && (!g.expires_at || Date.parse(g.expires_at) > Date.now())).reduce((n, g) => Math.max(n, levelRank(g.access_level)), 0);
+/** Exact server permission level for controls that distinguish edit from manage. */
+export const hasServerPermission = (key: string, level: 'view'|'edit'|'manage') => !!session.userId && session.status === 'active' && (session.role === 'super_admin' || permissionLevel(key) >= levelRank(level));
 export const LN = ['None', 'View', 'Edit'];
 
 export const nm = (s: StaffMember): StaffMember => {

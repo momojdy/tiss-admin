@@ -92,3 +92,30 @@ test('asset listing reaches beyond the legacy 500-row cap and never reports part
  const failing={from(){const query={select(){return query;},order(){return query;},limit(){return query;},then(resolve,reject){return Promise.resolve({data:null,error:{code:'42501'}}).then(resolve,reject);}};return query;}};
  await assert.rejects(()=>listAllCmsAssets(failing),/permission/);
 });
+
+test('critical publication requires explicit review and never promotes translation status',()=>{
+ const {goodiesPublicationErrors}=loadModule(path.join(root,'publicationReview.ts'));
+ const value=draft.buildStarterDraft(),row=value.labels.find(r=>r.id==='lbl.checkoutReview');
+ for(const text of [...value.labels.map(r=>r.t),...(value.rg?.texts || []).map(r=>r.t)])for(const tr of Object.values(text || {}))if(tr?.v)tr.s='reviewed';
+ row.t=editing.setLocalizedText(row.t,'ht','Synthetic Creole draft');
+ assert.ok(goodiesPublicationErrors(value).some(e=>e.includes('ht')));assert.equal(row.t.ht.s,'draft');
+ row.t.ht.s='reviewed';assert.deepEqual(goodiesPublicationErrors(value),[]);
+ row.t.en={v:'Unreviewed English',s:'draft'};assert.ok(goodiesPublicationErrors(value).some(e=>e.includes('en')));
+ value.faq=[{q:{en:{v:'Question',s:'reviewed'}},a:{en:{v:'Answer coming soon.',s:'reviewed'}}}];
+ assert.ok(goodiesPublicationErrors(value).some(e=>e.includes('placeholder')));
+});
+
+test('all registered fields complete a local edit-save-review-serialization-consumer lookup round trip',()=>{
+ const {goodiesPublicationErrors}=loadModule(path.join(root,'publicationReview.ts'));
+ const consumer=path.resolve(__dirname,'../../tiss_tiss_beta/src/features/Goodies/i18n/resolveText.ts');
+ const {resolveGoodiesText}=loadModule(consumer),value=draft.buildStarterDraft();
+ for(const entry of value.labels)for(const locale of ['en','fr','ht','es','zh-Hans']){
+  entry.t=editing.setLocalizedText(entry.t,locale,`${locale} synthetic edit ${entry.id}`);
+  // Explicit synthetic reviewer action; this test does not certify real human translations.
+  entry.t[locale].s='reviewed';
+ }
+ for(const entry of value.rg?.texts || [])for(const tr of Object.values(entry.t || {}))if(tr?.v)tr.s='reviewed';
+ const serialized=JSON.parse(JSON.stringify(draft.sanitizeForSave(value)));
+ assert.deepEqual(goodiesPublicationErrors(serialized),[]);
+ for(const entry of serialized.labels)for(const locale of ['en','fr','ht','es','zh-Hans'])assert.equal(resolveGoodiesText(entry.t,locale),`${locale} synthetic edit ${entry.id}`);
+});

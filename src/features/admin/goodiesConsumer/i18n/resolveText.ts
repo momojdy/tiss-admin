@@ -6,5 +6,7 @@ export function resolveGoodiesText(value: Txt | string | null | undefined, local
   if (typeof value === 'string') return value;
   const entry = value[locale];
   const eligible = entry?.v && (entry.s === 'reviewed' || (allowDrafts && (locale !== 'ht' || entry.s !== 'missing')));
-  return eligible ? entry.v : value.en?.v || '';
+  const english = value.en;
+  const fallback = english?.s === 'draft' || english?.s === 'missing' ? '' : english?.v || '';
+  return eligible ? entry.v : fallback;
 }
