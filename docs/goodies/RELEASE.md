@@ -7,6 +7,12 @@ Continue on the existing `goodies/production-readiness` branch. Initial head:
 
 Implemented admin changes:
 
+- Correct canonical permission keys and deny signed-out/revoked/expired access.
+- Persist permanent-ban appeals through authorized audited backend actions; no local fake success.
+- Route product-submission notices to actual product review; show notification read failures.
+- Add editable reviewed-only notification templates to the existing CMS.
+- Four admin permission regression tests pass (`npm test`).
+
 - Align runtime packages/lockfile with Expo SDK 58 compatibility requirements.
 - Resolve private delivery-evidence references through authorized short-lived
   signed URLs, with an accurate unavailable-photo state.
@@ -21,7 +27,7 @@ Implemented admin changes:
 | --- | --- | --- |
 | Expo Doctor | PASS | `evidence/tiss-admin-doctor.log`, 20/20 |
 | Android/iOS JS/Hermes exports | PASS | Successful platform bundle logs |
-| TypeScript | FAIL | 31 unchanged baseline errors in people/staff modules; both diagnostic logs retained |
+| TypeScript | PASS | Shared people/staff errors repaired; current check exits 0 |
 | Private proof authorization | PASS | Targeted synthetic PostgreSQL migration tests in customer repository |
 | Live Storage signed URLs | NOT VERIFIED | Requires staging role accounts and actual Storage service |
 | Every admin action and restricted-staff boundary | NOT VERIFIED | Full authenticated role suite not run |
