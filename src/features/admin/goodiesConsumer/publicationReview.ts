@@ -6,6 +6,11 @@ export function goodiesPublicationErrors(draft: any): string[] {
   const check = (text: any, name: string) => {
     if (!text || typeof text !== 'object') return;
     for (const [locale, translation] of Object.entries(text) as [string, any][]) {
+      if (locale === 'ht' && translation?.s !== 'reviewed') {
+        const english = text.en;
+        if (typeof english?.v !== 'string' || !english.v.trim() || english.s !== 'reviewed') errors.push(`${name} needs reviewed English for Haitian Creole fallback.`);
+        continue;
+      }
       if (String(translation?.v || '').trim() && translation.s !== 'reviewed' && (locale !== 'en' || translation.s)) errors.push(`${name} (${locale}) needs review before publishing.`);
     }
   };

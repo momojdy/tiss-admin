@@ -98,7 +98,9 @@ test('critical publication requires explicit review and never promotes translati
  const value=draft.buildStarterDraft(),row=value.labels.find(r=>r.id==='lbl.checkoutReview');
  for(const text of [...value.labels.map(r=>r.t),...(value.rg?.texts || []).map(r=>r.t)])for(const tr of Object.values(text || {}))if(tr?.v)tr.s='reviewed';
  row.t=editing.setLocalizedText(row.t,'ht','Synthetic Creole draft');
- assert.ok(goodiesPublicationErrors(value).some(e=>e.includes('ht')));assert.equal(row.t.ht.s,'draft');
+ assert.deepEqual(goodiesPublicationErrors(value),[]);assert.equal(row.t.ht.s,'draft');
+ row.t.en={v:'Unreviewed fallback',s:'draft'};assert.ok(goodiesPublicationErrors(value).some(e=>e.includes('Haitian Creole fallback')));
+ row.t.en={v:'Review order',s:'reviewed'};
  row.t.ht.s='reviewed';assert.deepEqual(goodiesPublicationErrors(value),[]);
  row.t.en={v:'Unreviewed English',s:'draft'};assert.ok(goodiesPublicationErrors(value).some(e=>e.includes('en')));
  value.faq=[{q:{en:{v:'Question',s:'reviewed'}},a:{en:{v:'Answer coming soon.',s:'reviewed'}}}];
@@ -177,4 +179,25 @@ test('explicit field identities resolve duplicate and dynamic wording while ambi
  useEditableText('Total $5','dynamic').onPress({stopPropagation:()=>stopped++});assert.equal(selected.id,'dynamic');
  useEditableText('Continue').onPress({stopPropagation:()=>stopped++});assert.deepEqual(choices,['a','b']);assert.equal(stopped,3);
  assert.deepEqual(useEditableText('Private customer name'),{});
+});
+
+test('four approved languages can publish while unfinished Creole keeps its value/status and uses reviewed English',()=>{
+ const {goodiesPublicationErrors}=loadModule(path.join(root,'publicationReview.ts'));
+ for(const status of ['draft','missing',undefined,'unknown']){
+  const ht={v:'Synthetic pending Creole',...(status?{s:status}:{})};
+  const value={labels:[{id:'lbl.checkoutReview',t:{en:{v:'Review order',s:'reviewed'},fr:{v:'Vérifier',s:'reviewed'},es:{v:'Revisar',s:'reviewed'},'zh-Hans':{v:'确认',s:'reviewed'},ht}}]};
+  const before=JSON.stringify(value);assert.deepEqual(goodiesPublicationErrors(value),[]);assert.equal(JSON.stringify(value),before);
+  for(const english of [undefined,{v:'',s:'reviewed'},{v:'Unreviewed',s:'draft'},{v:'Unreviewed',s:'missing'},{v:'Legacy text'},{v:12,s:'reviewed'}]){
+   const changed=JSON.parse(before);changed.labels[0].t.en=english;assert.ok(goodiesPublicationErrors(changed).some(e=>e.includes('Haitian Creole fallback')));
+  }
+  for(const locale of ['fr','es','zh-Hans']){const changed=JSON.parse(before);changed.labels[0].t[locale].s='draft';assert.ok(goodiesPublicationErrors(changed).some(e=>e.includes('('+locale+')')));}
+ }
+});
+
+test('prepared four-language payload no longer fails review checks because of preserved Creole drafts',()=>{
+ const {goodiesPublicationErrors}=loadModule(path.join(root,'publicationReview.ts'));
+ const file=path.resolve(__dirname,'../../tiss_tiss_beta/docs/goodies/localization-release/publish-payload.json'),value=JSON.parse(fs.readFileSync(file));
+ const before=JSON.stringify(value),errors=goodiesPublicationErrors(value);
+ assert.ok(!errors.some(e=>e.includes('(ht)')||e.includes('Haitian Creole fallback')));
+ assert.equal(errors.filter(e=>e.includes('placeholder')).length,5);assert.equal(errors.length,5);assert.equal(JSON.stringify(value),before);
 });
