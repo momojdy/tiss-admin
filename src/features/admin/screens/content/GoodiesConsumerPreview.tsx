@@ -104,7 +104,18 @@ export function GoodiesConsumerPreview({ editMode = false, contentDraft, assetUr
     BYO.store[previewStoreId] = true;
     BYO.cfg[previewStoreId] = previewBuilders;
     const chosen = previewBuilders.find((builder: any) => builder.id === (builderId || selectedBuilder?.id)) || previewBuilders[0];
-    const param = route === 'store' ? storeId : route === 'byo' ? previewStoreId + '|' + chosen.id : route === 'product' ? itemId : undefined;
+    let param = route === 'store' ? storeId : route === 'byo' ? previewStoreId + '|' + chosen.id : route === 'product' ? itemId : undefined;
+    if (route === 'confirm' || route === 'track') {
+      const fixtureStore = '__admin_goodies_order_preview__';
+      STB[fixtureStore] = {id: fixtureStore, n: 'Sample Goodies store', c: 'groceries', e: '🛍️', bg: 'bg0', r: 0, rv: 0, km: 0, eta: '20–30', fee: 0, min: 0, it: [], open: true, live: false} as any;
+      param = '__admin_goodies_sample_order__';
+      const fixture = {id: param, backendId: param, serverStatus: 'accepted', sid: fixtureStore,
+        sn: 'Sample Goodies store', lines: [{id: '__preview_item__', k: '__preview_item__', n: 'Sample item', e: '🥭', p: 5, q: 1, d: ''}],
+        sub: 5, fee: 0, svc: 0, disc: 0, tip: 0, total: 5, t0: Date.now(), st: 1, rated: 0, cx: 0, pk: false,
+        addr: 'Sample delivery address', ad: {t: 'Sample delivery address', apt: ''}, ph: '2025550100',
+        pay: 'cash', payl: 'Preview only', note: '', sch: 0, promo: '', alc: null};
+      S.orders = [fixture, ...S.orders.filter((order: any) => order.id !== param)] as any;
+    }
     if (route === 'checkout') {
       // A local-only fixture gives the checkout editor a complete journey without
       // loading a real customer's cart, wallet, address or payment methods.
