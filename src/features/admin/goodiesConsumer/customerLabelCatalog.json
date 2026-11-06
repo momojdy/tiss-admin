@@ -1332,6 +1332,10 @@
     "text": "Help center"
   },
   {
+    "id": "lbl.languageSyncFailed",
+    "text": "Language changed on this device, but your account preference could not be saved. Please retry in Wantiss Settings."
+  },
+  {
     "id": "lbl.legalPolicyTitle",
     "text": "Policy"
   },
@@ -1350,6 +1354,198 @@
   {
     "id": "lbl.notifDefaultTitle",
     "text": "Goodies update"
+  },
+  {
+    "id": "lbl.notification.cardVerificationExpired.body",
+    "text": "{details}"
+  },
+  {
+    "id": "lbl.notification.cardVerificationExpired.title",
+    "text": "Goodies card verification expired"
+  },
+  {
+    "id": "lbl.notification.courierAccepted.body",
+    "text": "{details}"
+  },
+  {
+    "id": "lbl.notification.courierAccepted.title",
+    "text": "Courier accepted your order"
+  },
+  {
+    "id": "lbl.notification.courierDeclined.body",
+    "text": "{details}"
+  },
+  {
+    "id": "lbl.notification.courierDeclined.title",
+    "text": "Courier declined the offer"
+  },
+  {
+    "id": "lbl.notification.courierExpired.body",
+    "text": "{details}"
+  },
+  {
+    "id": "lbl.notification.courierExpired.title",
+    "text": "Courier offer expired"
+  },
+  {
+    "id": "lbl.notification.courierOffered.body",
+    "text": "{details}"
+  },
+  {
+    "id": "lbl.notification.courierOffered.title",
+    "text": "Courier offer sent"
+  },
+  {
+    "id": "lbl.notification.deliveryReported.body",
+    "text": "{details}"
+  },
+  {
+    "id": "lbl.notification.deliveryReported.title",
+    "text": "Delivery reported"
+  },
+  {
+    "id": "lbl.notification.disputeResolution.body",
+    "text": "{details}"
+  },
+  {
+    "id": "lbl.notification.disputeResolution.title",
+    "text": "Your report was reviewed"
+  },
+  {
+    "id": "lbl.notification.goodies_admin_product_submission.body",
+    "text": "{details}"
+  },
+  {
+    "id": "lbl.notification.goodies_admin_product_submission.title",
+    "text": "Goodies product awaiting review"
+  },
+  {
+    "id": "lbl.notification.goodies_vendor_product_review.body",
+    "text": "{details}"
+  },
+  {
+    "id": "lbl.notification.goodies_vendor_product_review.title",
+    "text": "Goodies product review"
+  },
+  {
+    "id": "lbl.notification.newVendorOrder.body",
+    "text": "{details}"
+  },
+  {
+    "id": "lbl.notification.newVendorOrder.title",
+    "text": "New Goodies order"
+  },
+  {
+    "id": "lbl.notification.orderAccepted.body",
+    "text": "{details}"
+  },
+  {
+    "id": "lbl.notification.orderAccepted.title",
+    "text": "Goodies order accepted"
+  },
+  {
+    "id": "lbl.notification.orderCancelled.body",
+    "text": "{details}"
+  },
+  {
+    "id": "lbl.notification.orderCancelled.title",
+    "text": "Goodies order cancelled"
+  },
+  {
+    "id": "lbl.notification.orderCompleted.body",
+    "text": "{details}"
+  },
+  {
+    "id": "lbl.notification.orderCompleted.title",
+    "text": "Goodies order completed"
+  },
+  {
+    "id": "lbl.notification.orderDeclined.body",
+    "text": "{details}"
+  },
+  {
+    "id": "lbl.notification.orderDeclined.title",
+    "text": "Store declined your Goodies order"
+  },
+  {
+    "id": "lbl.notification.orderExpired.body",
+    "text": "{details}"
+  },
+  {
+    "id": "lbl.notification.orderExpired.title",
+    "text": "Goodies order expired"
+  },
+  {
+    "id": "lbl.notification.orderPlaced.body",
+    "text": "{details}"
+  },
+  {
+    "id": "lbl.notification.orderPlaced.title",
+    "text": "Goodies order placed"
+  },
+  {
+    "id": "lbl.notification.orderPreparing.body",
+    "text": "{details}"
+  },
+  {
+    "id": "lbl.notification.orderPreparing.title",
+    "text": "Store is preparing your Goodies order"
+  },
+  {
+    "id": "lbl.notification.orderReady.body",
+    "text": "{details}"
+  },
+  {
+    "id": "lbl.notification.orderReady.title",
+    "text": "Goodies order is ready"
+  },
+  {
+    "id": "lbl.notification.orderScheduled.body",
+    "text": "{details}"
+  },
+  {
+    "id": "lbl.notification.orderScheduled.title",
+    "text": "Goodies order scheduled"
+  },
+  {
+    "id": "lbl.notification.ownDriverOnWay.body",
+    "text": "{details}"
+  },
+  {
+    "id": "lbl.notification.ownDriverOnWay.title",
+    "text": "Your order is on its way"
+  },
+  {
+    "id": "lbl.notification.paymentFailed.body",
+    "text": "{details}"
+  },
+  {
+    "id": "lbl.notification.paymentFailed.title",
+    "text": "Goodies payment failed"
+  },
+  {
+    "id": "lbl.notification.receiptConfirmation.body",
+    "text": "{details}"
+  },
+  {
+    "id": "lbl.notification.receiptConfirmation.title",
+    "text": "Did you receive your order?"
+  },
+  {
+    "id": "lbl.notification.restaurantCancelled.body",
+    "text": "{details}"
+  },
+  {
+    "id": "lbl.notification.restaurantCancelled.title",
+    "text": "Restaurant cancelled your Goodies order"
+  },
+  {
+    "id": "lbl.notification.scheduledOrderDue.body",
+    "text": "{details}"
+  },
+  {
+    "id": "lbl.notification.scheduledOrderDue.title",
+    "text": "Scheduled Goodies order is due"
   },
   {
     "id": "lbl.notifsEmpty",

@@ -29,11 +29,12 @@ const ASSET_BUCKET = 'wantiss-cms-assets';
 
 const listKeyFor = (kind: GoodiesSelection['kind']) => (kind === 'mode' ? 'modes' : kind === 'promo' ? 'promos' : kind === 'category' ? 'cats' : 'labels');
 const textKeyFor = (sel: GoodiesSelection) => (sel.kind === 'label' ? 't' : sel.kind === 'category' ? 'name' : sel.field);
-const PAGE_ORDER = ['Home, browse & discovery', 'Store, products & reviews', 'Cart, deals & coupons', 'Checkout, delivery & payment', 'Orders, actions & validation', 'Build Your Own & ingredients', 'Account, notifications & help', 'Store chat & messages', 'Scheduling & delivery', 'Reviews & ratings', 'Addresses', 'Contact numbers', 'Group orders', 'Courier, cart & wallet sheets', 'Shared sheets & modal actions', 'Order tracking steps', 'Screen reader labels', 'Other Goodies pages & shared messages'];
+const PAGE_ORDER = ['Home, browse & discovery', 'Store, products & reviews', 'Cart, deals & coupons', 'Checkout, delivery & payment', 'Orders, actions & validation', 'Build Your Own & ingredients', 'Account, notifications & help', 'Notification templates', 'Store chat & messages', 'Scheduling & delivery', 'Reviews & ratings', 'Addresses', 'Contact numbers', 'Group orders', 'Courier, cart & wallet sheets', 'Shared sheets & modal actions', 'Order tracking steps', 'Screen reader labels', 'Other Goodies pages & shared messages'];
 
 const labelPage = (id: string) => {
   const key = id.replace(/^lbl\./, '').toLowerCase();
   const groups: Array<[RegExp, string]> = [
+    [/^notification\./, 'Notification templates'],
     [/^a11y/, 'Screen reader labels'],
     [/^stage/, 'Order tracking steps'],
     [/^(chat|message|conversation|storechat|storemessage|contact)/, 'Store chat & messages'],

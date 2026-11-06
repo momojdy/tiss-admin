@@ -1,3 +1,4 @@
+import {ui as adminUi} from '../../state/db';
 import React, {useCallback, useEffect, useState} from 'react';
 import {Alert, Image, Pressable, ScrollView, Text, TextInput, View} from 'react-native';
 import {supabase} from '../../lib/supabase';
@@ -16,8 +17,9 @@ const labelStyle={fontSize:12,color:'#687365',marginBottom:4} as const;
 const valueStyle={fontSize:14,fontWeight:'700' as const,color:'#1B2619'};
 
 export function GoodiesAdminScreen() {
-  const {go}=useNav(); const toast=useToast(); const {c}=useTheme();
+  const {go,navKey}=useNav(); const toast=useToast(); const {c}=useTheme();
   const [module,setModule]=useState('Overview');
+  useEffect(()=>{const target=String(adminUi.goodiesModule||'');if(MODULES.includes(target)){setModule(target);delete adminUi.goodiesModule;}},[navKey]);
   const [dashboard,setDashboard]=useState<Dashboard>({stats:{},merchants:[],products:[],orders:[]});
   const [analytics,setAnalytics]=useState<any>(null);
   const [courierCandidates,setCourierCandidates]=useState<any[]>([]);
