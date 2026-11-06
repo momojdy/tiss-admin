@@ -119,3 +119,9 @@ test('all registered fields complete a local edit-save-review-serialization-cons
  assert.deepEqual(goodiesPublicationErrors(serialized),[]);
  for(const entry of serialized.labels)for(const locale of ['en','fr','ht','es','zh-Hans'])assert.equal(resolveGoodiesText(entry.t,locale),`${locale} synthetic edit ${entry.id}`);
 });
+
+test('store preview preserves the actual consumer hero geometry and asset behavior',()=>{
+ const files=[path.join(root,'screens/Shop.tsx'),path.resolve(__dirname,'../../tiss_tiss_beta/src/features/Goodies/screens/Shop.tsx')];
+ const declarations=files.map(file=>{const source=fs.readFileSync(file,'utf8'),ast=ts.createSourceFile(file,source,99,true);return ast.statements.find(n=>ts.isVariableStatement(n)&&n.declarationList.declarations.some(d=>d.name.getText(ast)==='Hero')).getText(ast);});
+ assert.equal(declarations[0],declarations[1]);
+});

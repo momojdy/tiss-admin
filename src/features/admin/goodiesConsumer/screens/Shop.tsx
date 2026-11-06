@@ -17,11 +17,11 @@ import Svg, {Path, Circle} from 'react-native-svg';
 
 
 const Hero = ({s, onBack, right}: any) => (
-  <Grad idx={bgIdx(s.bg)} style={{height: 180, alignItems: 'center', justifyContent: 'center'}}>
-    {s.cover || s.thumbnail || s.logo ? <Image source={{uri: s.cover || s.thumbnail || s.logo}} style={{width: '100%', height: 180, position: 'absolute'}} resizeMode="cover" /> : <Text style={{fontSize: 90}}>{s.e}</Text>}
+  <View style={{height: 220, overflow: 'hidden', backgroundColor: '#E8EDE5'}}>
+    {s.cover || s.thumbnail || s.logo ? <Image source={{uri: s.cover || s.thumbnail || s.logo}} style={{width: '100%', height: 220, position: 'absolute'}} resizeMode="cover" /> : <Grad idx={bgIdx(s.bg)} style={{height: 220, alignItems: 'center', justifyContent: 'center'}}><Text style={{fontSize: 90}}>{s.e}</Text></Grad>}
     <View style={{position: 'absolute', top: 50, left: 16}}><Circ icon="chevL" label={tr('back')} onPress={onBack} /></View>
     {right ? <View style={{position: 'absolute', top: 50, right: 16}}>{right}</View> : null}
-  </Grad>
+  </View>
 );
 
 export function Store({id}: {id: string}) {
