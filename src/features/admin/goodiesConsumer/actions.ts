@@ -1,6 +1,6 @@
 /* Goodies customer actions and their state transitions. */
 import {assertDemoOnly, providerInfo} from './providers';
-import {supabase} from '../lib/supabase';
+import {previewBackend as supabase} from './previewRuntime';
 import {
   hasAlcohol, alcAge, S, IT, STB, ui, toast, emit, save, push, reset, navBack, cartAdd, qtyIn, cnt, totals, pChk, isPk, addr, ctOf, phoneOK, reorderLines, money, hooks, done, cur, refreshLiveSchedules, contentHooks, previewOnly, editLocked,
 } from './store';

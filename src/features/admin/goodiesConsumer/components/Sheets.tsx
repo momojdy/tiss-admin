@@ -1,6 +1,8 @@
+import {GroupOrderModal} from '../screens/GroupOrders';
+import {EditableNativeText as Text} from '../EditableNativeText';
 import {label as cmsText} from "../content";
 import React, {useState} from 'react';
-import {View, Text, Pressable, ScrollView, Share} from 'react-native';
+import {View, Text as UnusedNativeText, Pressable, ScrollView, Share} from 'react-native';
 import {T, Cta, Row, Card, Badge, Input, Radio, SheetBox, useTheme} from './ui';
 import {Icon} from './Icon';
 import {S, STB, money, emit, save, toast, ui, addr, defAddr, done, phoneOK, fmtDay, fmtTime, alcAge} from '../store';
@@ -18,33 +20,33 @@ export function Sheets({sheet, close}: {sheet: any; close: () => void}) {
   const k = sheet.kind;
   const stars = (n: number, on: (v: number) => void) => <View style={{flexDirection: 'row', justifyContent: 'center', gap: 6, marginVertical: 10}}>{[1, 2, 3, 4, 5].map(v => <Pressable key={v} onPress={() => on(v)}><Icon name="star" size={32} color={n >= v ? '#FFB400' : th.line} fill /></Pressable>)}</View>;
   let content: any = null;
-  if (k === 'newcart') content = (<><T size={20} weight="800">{cmsText("lbl.sheetStartCart", "Start a new cart?")}</T><T color={th.mut} style={{marginVertical: 8, marginBottom: 18}}>{cmsText("lbl.page.components.Sheets.863cefd3c6", "Your cart has items from ")}{sheet.from}. Orders are placed with one store at a time, so adding from {sheet.to} {cmsText("lbl.page.components.Sheets.b9790d0477", " replaces them.")}</T><Cta label={cmsText("lbl.sheetReplace", "Replace and add")} onPress={A.newCart} /><View style={{height: 10}} /><Cta ghost label={cmsText("lbl.sheetKeepCart", "Keep current cart")} onPress={close} /></>);
-  if (k === 'byoleave') content = (<><T size={20} weight="800">{sheet.edit ? cmsText("lbl.sheetDiscardTitle", "Discard your changes?") : cmsText("lbl.sheetLeaveTitle", "Leave this builder?")}</T><T color={th.mut} style={{marginVertical: 8, marginBottom: 18}}>{sheet.edit ? cmsText("lbl.sheetDiscardText", "The item in your cart stays as it was.") : cmsText("lbl.sheetLeaveText", "Your choices can be saved as a draft so you can pick up where you left off.")}</T>{sheet.edit ? null : <><Cta label={cmsText("lbl.sheetBuilderSave", "Save draft and leave")} onPress={bzLeave} /><View style={{height: 10}} /></>}<Pressable onPress={bzDiscard} style={{height: 52, borderRadius: 16, backgroundColor: th.red, alignItems: 'center', justifyContent: 'center'}}><T size={15.5} weight="800" color="#fff">{cmsText("lbl.sheetDiscard", "Discard")}</T></Pressable><View style={{height: 10}} /><Cta ghost label={cmsText("lbl.sheetKeepEditing", "Keep editing")} onPress={close} /></>);
-  if (k === 'byoreset') content = (<><T size={20} weight="800">{cmsText("lbl.sheetStartOver", "Start over?")}</T><T color={th.mut} style={{marginVertical: 8, marginBottom: 18}}>{cmsText("lbl.sheetAuto1DTRBEO", "This clears your current choices. Items already in your cart are not affected.")}</T><Cta label={cmsText("lbl.sheetAutoT5109D", "Start over")} onPress={bzReset2} /><View style={{height: 10}} /><Cta ghost label={cmsText("lbl.sheetKeepEditing", "Keep editing")} onPress={close} /></>);
-  if (k === 'alcrules') { const a = alcAge(sheet.sid || (S.pend && S.pend[0] ? S.pend[0].s : null)); content = (<><View style={{alignItems: 'center', marginBottom: 6}}><Text style={{fontSize: 44}}>🪪</Text></View><T size={20} weight="800">{cmsText("lbl.sheetAlcoholRules", "Alcohol rules")}</T><T color={th.mut} style={{marginTop: 8, lineHeight: 21}}>{rgText('rg.rules', 'Alcohol is sold only to customers aged {age} or older. Minors may not buy alcohol. Valid government photo ID is required at delivery or pickup. If the ID check fails, you are refunded to your Wantiss wallet minus the delivery fee.', a.age)}</T><Card style={{marginTop: 12}}><T size={13.5}>{cmsText("lbl.page.components.Sheets.f6157ffbc2", "• Minimum age here: ")}<T weight="800">{a.age}</T></T><T size={13.5}>{cmsText("lbl.sheetAuto9O43A9", "• The courier checks your ID at the door. At a pickup, the shop checks it.")}</T><T size={13.5}>{cmsText("lbl.sheetAuto1JBCM1P", "• If it fails, you get a refund to your Wantiss wallet minus the delivery fee.")}</T></Card><View style={{height: 6}} /><Cta label={cmsText("lbl.sheetAlcoholAccept", "I understand")} onPress={A.alcAccept} /><View style={{height: 10}} /><Cta ghost label={cmsText("lbl.sheetAutoWFRFF9", "Cancel")} onPress={close} /></>); }
-  if (k === 'group-order') content = <GroupOrderSheet close={close} />;
+  if (k === 'newcart') content = (<><T cmsKey={"lbl.sheetStartCart"} size={20} weight="800">{cmsText("lbl.sheetStartCart", "Start a new cart?")}</T><T cmsKeys={["lbl.page.components.Sheets.863cefd3c6","lbl.page.components.Sheets.b9790d0477"]} color={th.mut} style={{marginVertical: 8, marginBottom: 18}}>{cmsText("lbl.page.components.Sheets.863cefd3c6", "Your cart has items from ")}{sheet.from}. Orders are placed with one store at a time, so adding from {sheet.to} {cmsText("lbl.page.components.Sheets.b9790d0477", " replaces them.")}</T><Cta cmsKey={"lbl.sheetReplace"} label={cmsText("lbl.sheetReplace", "Replace and add")} onPress={A.newCart} /><View style={{height: 10}} /><Cta cmsKey={"lbl.sheetKeepCart"} ghost label={cmsText("lbl.sheetKeepCart", "Keep current cart")} onPress={close} /></>);
+  if (k === 'byoleave') content = (<><T cmsKeys={["lbl.sheetDiscardTitle","lbl.sheetLeaveTitle"]} size={20} weight="800">{sheet.edit ? cmsText("lbl.sheetDiscardTitle", "Discard your changes?") : cmsText("lbl.sheetLeaveTitle", "Leave this builder?")}</T><T cmsKeys={["lbl.sheetDiscardText","lbl.sheetLeaveText"]} color={th.mut} style={{marginVertical: 8, marginBottom: 18}}>{sheet.edit ? cmsText("lbl.sheetDiscardText", "The item in your cart stays as it was.") : cmsText("lbl.sheetLeaveText", "Your choices can be saved as a draft so you can pick up where you left off.")}</T>{sheet.edit ? null : <><Cta cmsKey={"lbl.sheetBuilderSave"} label={cmsText("lbl.sheetBuilderSave", "Save draft and leave")} onPress={bzLeave} /><View style={{height: 10}} /></>}<Pressable onPress={bzDiscard} style={{height: 52, borderRadius: 16, backgroundColor: th.red, alignItems: 'center', justifyContent: 'center'}}><T cmsKey={"lbl.sheetDiscard"} size={15.5} weight="800" color="#fff">{cmsText("lbl.sheetDiscard", "Discard")}</T></Pressable><View style={{height: 10}} /><Cta cmsKey={"lbl.sheetKeepEditing"} ghost label={cmsText("lbl.sheetKeepEditing", "Keep editing")} onPress={close} /></>);
+  if (k === 'byoreset') content = (<><T cmsKey={"lbl.sheetStartOver"} size={20} weight="800">{cmsText("lbl.sheetStartOver", "Start over?")}</T><T cmsKey={"lbl.sheetAuto1DTRBEO"} color={th.mut} style={{marginVertical: 8, marginBottom: 18}}>{cmsText("lbl.sheetAuto1DTRBEO", "This clears your current choices. Items already in your cart are not affected.")}</T><Cta cmsKey={"lbl.sheetAutoT5109D"} label={cmsText("lbl.sheetAutoT5109D", "Start over")} onPress={bzReset2} /><View style={{height: 10}} /><Cta cmsKey={"lbl.sheetKeepEditing"} ghost label={cmsText("lbl.sheetKeepEditing", "Keep editing")} onPress={close} /></>);
+  if (k === 'alcrules') { const a = alcAge(sheet.sid || (S.pend && S.pend[0] ? S.pend[0].s : null)); content = (<><View style={{alignItems: 'center', marginBottom: 6}}><Text style={{fontSize: 44}}>🪪</Text></View><T cmsKey={"lbl.sheetAlcoholRules"} size={20} weight="800">{cmsText("lbl.sheetAlcoholRules", "Alcohol rules")}</T><T color={th.mut} style={{marginTop: 8, lineHeight: 21}}>{rgText('rg.rules', 'Alcohol is sold only to customers aged {age} or older. Minors may not buy alcohol. Valid government photo ID is required at delivery or pickup. If the ID check fails, you are refunded to your Wantiss wallet minus the delivery fee.', a.age)}</T><Card style={{marginTop: 12}}><T cmsKey={"lbl.page.components.Sheets.f6157ffbc2"} size={13.5}>{cmsText("lbl.page.components.Sheets.f6157ffbc2", "• Minimum age here: ")}<T weight="800">{a.age}</T></T><T cmsKey={"lbl.sheetAuto9O43A9"} size={13.5}>{cmsText("lbl.sheetAuto9O43A9", "• The courier checks your ID at the door. At a pickup, the shop checks it.")}</T><T cmsKey={"lbl.sheetAuto1JBCM1P"} size={13.5}>{cmsText("lbl.sheetAuto1JBCM1P", "• If it fails, you get a refund to your Wantiss wallet minus the delivery fee.")}</T></Card><View style={{height: 6}} /><Cta cmsKey={"lbl.sheetAlcoholAccept"} label={cmsText("lbl.sheetAlcoholAccept", "I understand")} onPress={A.alcAccept} /><View style={{height: 10}} /><Cta cmsKey={"lbl.sheetAutoWFRFF9"} ghost label={cmsText("lbl.sheetAutoWFRFF9", "Cancel")} onPress={close} /></>); }
+  if (k === 'group-order') return <GroupOrderModal close={close} storeId={String(sheet.storeId||S.cart.sid||'')} />;
   if (k === 'schedule') content = <ScheduleSheet close={close} />;
   if (k === 'import') content = <ImportSheet close={close} />;
   if (k === 'contacts') content = <ContactsSheet close={close} />;
   if (k === 'ctform') content = <CtForm key={sheet.id || 'new'} id={sheet.id} />;
-  if (k === 'topup') content = (<><T size={20} weight="800">{cmsText("lbl.sheetTopup", "Top up wallet")}</T><T color={th.mut} style={{marginTop: 6, marginBottom: 14}}>{cmsText("lbl.sheetDemoMoney", "Demo: no real money moves.")}</T><View style={{flexDirection: 'row', flexWrap: 'wrap', gap: 8}}>{[10, 20, 50, 100].map(v => <Pressable key={v} onPress={() => {S.wallet += v; close(); toast('Wallet topped up to ' + money(S.wallet)); save(); emit();}} style={{paddingVertical: 10, paddingHorizontal: 16, borderRadius: 18, backgroundColor: th.soft}}><T size={14} weight="700">+{money(v)}</T></Pressable>)}</View></>);
-  if (k === 'replace') content = (<><T size={20} weight="800">{cmsText("lbl.sheetReplaceCart", "Replace your cart?")}</T><T color={th.mut} style={{marginVertical: 8, marginBottom: 18}}>{cmsText("lbl.page.components.Sheets.863cefd3c6", "Your cart has items from ")}{sheet.from}.</T><Cta label={cmsText("lbl.sheetReorder", "Replace and reorder")} onPress={A.runReorder} /><View style={{height: 10}} /><Cta ghost label={cmsText("lbl.sheetKeepCart", "Keep current cart")} onPress={close} /></>);
+  if (k === 'topup') content = (<><T cmsKey={"lbl.sheetTopup"} size={20} weight="800">{cmsText("lbl.sheetTopup", "Top up wallet")}</T><T cmsKey={"lbl.sheetDemoMoney"} color={th.mut} style={{marginTop: 6, marginBottom: 14}}>{cmsText("lbl.sheetDemoMoney", "Demo: no real money moves.")}</T><View style={{flexDirection: 'row', flexWrap: 'wrap', gap: 8}}>{[10, 20, 50, 100].map(v => <Pressable key={v} onPress={() => {S.wallet += v; close(); toast('Wallet topped up to ' + money(S.wallet)); save(); emit();}} style={{paddingVertical: 10, paddingHorizontal: 16, borderRadius: 18, backgroundColor: th.soft}}><T size={14} weight="700">+{money(v)}</T></Pressable>)}</View></>);
+  if (k === 'replace') content = (<><T cmsKey={"lbl.sheetReplaceCart"} size={20} weight="800">{cmsText("lbl.sheetReplaceCart", "Replace your cart?")}</T><T cmsKey={"lbl.page.components.Sheets.863cefd3c6"} color={th.mut} style={{marginVertical: 8, marginBottom: 18}}>{cmsText("lbl.page.components.Sheets.863cefd3c6", "Your cart has items from ")}{sheet.from}.</T><Cta cmsKey={"lbl.sheetReorder"} label={cmsText("lbl.sheetReorder", "Replace and reorder")} onPress={A.runReorder} /><View style={{height: 10}} /><Cta cmsKey={"lbl.sheetKeepCart"} ghost label={cmsText("lbl.sheetKeepCart", "Keep current cart")} onPress={close} /></>);
   if (k === 'remove-number') content = (<>
-    <T size={20} weight="800">{cmsText("lbl.sheetRemoveNumberTitle", "Remove this contact number?")}</T>
-    <T color={th.mut} style={{marginVertical: 8, marginBottom: 18}}>Remove {String(sheet.numberLabel || cmsText("lbl.sheetNumberFallback", "this number"))} from your Goodies checkout contacts?</T>
+    <T cmsKey={"lbl.sheetRemoveNumberTitle"} size={20} weight="800">{cmsText("lbl.sheetRemoveNumberTitle", "Remove this contact number?")}</T>
+    <T cmsKey={"lbl.sheetNumberFallback"} color={th.mut} style={{marginVertical: 8, marginBottom: 18}}>Remove {String(sheet.numberLabel || cmsText("lbl.sheetNumberFallback", "this number"))} from your Goodies checkout contacts?</T>
     <Cta label="Remove number" onPress={() => { void sheet.onConfirm?.(); }} />
     <View style={{height: 10}} />
-    <Cta ghost label={cmsText("lbl.sheetKeepNumber", "Keep number")} onPress={close} />
+    <Cta cmsKey={"lbl.sheetKeepNumber"} ghost label={cmsText("lbl.sheetKeepNumber", "Keep number")} onPress={close} />
   </>);
   if (k === 'remove-item') content = (<>
-    <T size={20} weight="800">{cmsText("lbl.sheetRemoveItemTitle", "Remove this item?")}</T>
-    <T color={th.mut} style={{marginVertical: 8, marginBottom: 18}}>Remove {String(sheet.itemName || cmsText("lbl.sheetItemFallback", "this item"))} from your cart?</T>
-    <Cta label={cmsText("lbl.sheetRemoveItemConfirm", "Remove item")} onPress={() => { A.qty(String(sheet.lineKey), -1); close(); }} />
+    <T cmsKey={"lbl.sheetRemoveItemTitle"} size={20} weight="800">{cmsText("lbl.sheetRemoveItemTitle", "Remove this item?")}</T>
+    <T cmsKey={"lbl.sheetItemFallback"} color={th.mut} style={{marginVertical: 8, marginBottom: 18}}>Remove {String(sheet.itemName || cmsText("lbl.sheetItemFallback", "this item"))} from your cart?</T>
+    <Cta cmsKey={"lbl.sheetRemoveItemConfirm"} label={cmsText("lbl.sheetRemoveItemConfirm", "Remove item")} onPress={() => { A.qty(String(sheet.lineKey), -1); close(); }} />
     <View style={{height: 10}} />
-    <Cta ghost label={cmsText("lbl.sheetKeepItem", "Keep item")} onPress={close} />
+    <Cta cmsKey={"lbl.sheetKeepItem"} ghost label={cmsText("lbl.sheetKeepItem", "Keep item")} onPress={close} />
   </>);
-  if (k === 'clear') content = (<><T size={20} weight="800">{cmsText("lbl.sheetClearCart", "Clear your cart?")}</T><T color={th.mut} style={{marginVertical: 8, marginBottom: 18}}>{cmsText("lbl.sheetAuto1K2QIKR", "All items will be removed.")}</T><Pressable onPress={A.clearCart} style={{height: 52, borderRadius: 16, backgroundColor: th.red, alignItems: 'center', justifyContent: 'center'}}><T size={15.5} weight="800" color="#fff">{cmsText("lbl.sheetClearCartAction", "Clear cart")}</T></Pressable><View style={{height: 10}} /><Cta ghost label={cmsText("lbl.sheetAutoWFRFF9", "Cancel")} onPress={close} /></>);
-  if (k === 'cancel') content = (<><T size={20} weight="800">{cmsText("lbl.sheetCancelOrder", "Cancel this order?")}</T><T color={th.mut} style={{marginVertical: 8, marginBottom: 18}}>{cmsText("lbl.sheetAutoFMXIAY", "You can cancel until the store finishes preparing it.")}</T><Pressable onPress={() => A.cancelOrder(sheet.id)} style={{height: 52, borderRadius: 16, backgroundColor: th.red, alignItems: 'center', justifyContent: 'center'}}><T size={15.5} weight="800" color="#fff">{cmsText("lbl.sheetCancelConfirm", "Yes, cancel order")}</T></Pressable><View style={{height: 10}} /><Cta ghost label={cmsText("lbl.sheetAuto81YEJ2", "Keep order")} onPress={close} /></>);
+  if (k === 'clear') content = (<><T cmsKey={"lbl.sheetClearCart"} size={20} weight="800">{cmsText("lbl.sheetClearCart", "Clear your cart?")}</T><T cmsKey={"lbl.sheetAuto1K2QIKR"} color={th.mut} style={{marginVertical: 8, marginBottom: 18}}>{cmsText("lbl.sheetAuto1K2QIKR", "All items will be removed.")}</T><Pressable onPress={A.clearCart} style={{height: 52, borderRadius: 16, backgroundColor: th.red, alignItems: 'center', justifyContent: 'center'}}><T cmsKey={"lbl.sheetClearCartAction"} size={15.5} weight="800" color="#fff">{cmsText("lbl.sheetClearCartAction", "Clear cart")}</T></Pressable><View style={{height: 10}} /><Cta cmsKey={"lbl.sheetAutoWFRFF9"} ghost label={cmsText("lbl.sheetAutoWFRFF9", "Cancel")} onPress={close} /></>);
+  if (k === 'cancel') content = (<><T cmsKey={"lbl.sheetCancelOrder"} size={20} weight="800">{cmsText("lbl.sheetCancelOrder", "Cancel this order?")}</T><T cmsKey={"lbl.sheetAutoFMXIAY"} color={th.mut} style={{marginVertical: 8, marginBottom: 18}}>{cmsText("lbl.sheetAutoFMXIAY", "You can cancel until the store finishes preparing it.")}</T><Pressable onPress={() => A.cancelOrder(sheet.id)} style={{height: 52, borderRadius: 16, backgroundColor: th.red, alignItems: 'center', justifyContent: 'center'}}><T cmsKey={"lbl.sheetCancelConfirm"} size={15.5} weight="800" color="#fff">{cmsText("lbl.sheetCancelConfirm", "Yes, cancel order")}</T></Pressable><View style={{height: 10}} /><Cta cmsKey={"lbl.sheetAuto81YEJ2"} ghost label={cmsText("lbl.sheetAuto81YEJ2", "Keep order")} onPress={close} /></>);
   if (k === 'promo') {
     const d = PROMO_DETAIL[sheet.p as 'free' | 'points' | 'produce'], custom = sheet.custom || {};
     content = (<>
@@ -69,7 +71,7 @@ export function Sheets({sheet, close}: {sheet: any; close: () => void}) {
       <T color={th.mut} style={{marginTop: 6, marginBottom: 14, lineHeight: 21}}>{s.businessDescription || s.k}</T>
       <Card style={{padding: 16}}>
         <Row style={{gap: 10, alignItems: 'center', marginBottom: 10}}>
-          <Pressable accessibilityRole="button" accessibilityLabel={cmsText("lbl.sheetAutoC0Z21F", "Read store reviews")} onPress={() => {close(); A.go('reviews', sheet.id);}} style={{flex: 1}}><T size={13} color={th.br}>CUSTOMER REVIEWS</T><T size={18} weight="800">{s.rv > 0 ? '★ ' + s.r.toFixed(1) + ' (' + s.rv + ' reviews)' : cmsText("lbl.storeNoReviewsYet", "No reviews yet")}</T></Pressable>
+          <Pressable accessibilityRole="button" accessibilityLabel={cmsText("lbl.sheetAutoC0Z21F", "Read store reviews")} onPress={() => {close(); A.go('reviews', sheet.id);}} style={{flex: 1}}><T size={13} color={th.br}>CUSTOMER REVIEWS</T><T cmsKey={"lbl.storeNoReviewsYet"} size={18} weight="800">{s.rv > 0 ? '★ ' + s.r.toFixed(1) + ' (' + s.rv + ' reviews)' : cmsText("lbl.storeNoReviewsYet", "No reviews yet")}</T></Pressable>
           <Badge label={s.open ? cmsText("lbl.sheetOpenNow", "Open now") : cmsText("lbl.sheetClosedNow", "Closed now")} />
         </Row>
         {row(cmsText("lbl.storeOpeningHours", "Opening hours"), s.h)}
@@ -89,9 +91,9 @@ export function Sheets({sheet, close}: {sheet: any; close: () => void}) {
       </Card>
     </>);
   }
-  if (k === 'msg') content = (<><T size={20} weight="800" style={{marginBottom: 14}}>{cmsText("lbl.sheetCourierTitle", "Message courier")}</T><View style={{flexDirection: 'row', flexWrap: 'wrap', gap: 8}}>{[cmsText("lbl.sheetCourierAtGate", "I am at the gate"), cmsText("lbl.sheetCourierCall", "Please call me"), cmsText("lbl.sheetCourierDoor", "Leave it at the door"), cmsText("lbl.sheetCourierLate", "Running 5 min late")].map(x => <Pressable key={x} onPress={() => {close(); toast('Sent: ' + x);}} style={{paddingVertical: 9, paddingHorizontal: 14, borderRadius: 18, backgroundColor: th.soft}}><T size={13.5} weight="700">{x}</T></Pressable>)}</View></>);
+  if (k === 'msg') content = (<><T cmsKey={"lbl.sheetCourierTitle"} size={20} weight="800" style={{marginBottom: 14}}>{cmsText("lbl.sheetCourierTitle", "Message courier")}</T><View style={{flexDirection: 'row', flexWrap: 'wrap', gap: 8}}>{[cmsText("lbl.sheetCourierAtGate", "I am at the gate"), cmsText("lbl.sheetCourierCall", "Please call me"), cmsText("lbl.sheetCourierDoor", "Leave it at the door"), cmsText("lbl.sheetCourierLate", "Running 5 min late")].map(x => <Pressable key={x} onPress={() => {close(); toast('Sent: ' + x);}} style={{paddingVertical: 9, paddingHorizontal: 14, borderRadius: 18, backgroundColor: th.soft}}><T size={13.5} weight="700">{x}</T></Pressable>)}</View></>);
   if (k === 'review' || k === 'driver-review') content = <ReviewSheet key={String(sheet.id) + ':' + k} id={sheet.id} stars={stars} driver={k === 'driver-review'} initialStars={sheet.initialStars} />;
-  if (k === 'addr') content = (<><T size={20} weight="800" style={{marginBottom: 4}}>Deliver to</T><T size={12.5} color={th.mut} style={{marginBottom: 12}}>{cmsText("lbl.sheetAddressScope", "Choosing an address here only changes Goodies. Your Wantiss default stays the same.")}</T>{S.addr.map((a: any) => <Radio key={a.id} on={a.id === S.as} onPress={() => A.selectAddr(a.id)}><Row style={{gap: 6}}><T weight="700">{a.l}</T>{a.def ? <Badge green label={cmsText("lbl.sheetAutoCKTN2B", "Wantiss default")} /> : null}</Row><T size={12.5} color={th.mut}>{a.t}</T></Radio>)}<Cta ghost label={cmsText("lbl.sheetAuto16NJT2W", "Manage addresses")} onPress={() => {close(); A.go('addresses');}} /></>);
+  if (k === 'addr') content = (<><T size={20} weight="800" style={{marginBottom: 4}}>Deliver to</T><T cmsKey={"lbl.sheetAddressScope"} size={12.5} color={th.mut} style={{marginBottom: 12}}>{cmsText("lbl.sheetAddressScope", "Choosing an address here only changes Goodies. Your Wantiss default stays the same.")}</T>{S.addr.map((a: any) => <Radio key={a.id} on={a.id === S.as} onPress={() => A.selectAddr(a.id)}><Row style={{gap: 6}}><T weight="700">{a.l}</T>{a.def ? <Badge green label={cmsText("lbl.sheetAutoCKTN2B", "Wantiss default")} /> : null}</Row><T size={12.5} color={th.mut}>{a.t}</T></Radio>)}<Cta cmsKey={"lbl.sheetAuto16NJT2W"} ghost label={cmsText("lbl.sheetAuto16NJT2W", "Manage addresses")} onPress={() => {close(); A.go('addresses');}} /></>);
 
   const isRatingSheet = k === 'review' || k === 'driver-review';
   const isCenteredSheet = ['remove-item','remove-number','clear','cancel','newcart','replace','byoleave','byoreset','alcrules'].includes(k);
@@ -176,13 +178,13 @@ function ScheduleSheet({close}: {close: () => void}) {
     close();
   };
   return <>
-    <T size={21} weight="800">{cmsText("lbl.sheetScheduleTitle", "Schedule your order")}</T>
+    <T cmsKey={"lbl.sheetScheduleTitle"} size={21} weight="800">{cmsText("lbl.sheetScheduleTitle", "Schedule your order")}</T>
     <T size={12.5} color={th.mut} style={{marginTop:4,marginBottom:12}}>Choose delivery or pick-up, a date, and an available time.</T>
     <SegSchedule value={deliveryMode} onChange={setDeliveryMode}/>
-    <T size={14} weight="800" style={{marginTop:12,marginBottom:8}}>{cmsText("lbl.sheetChooseDay", "Choose a day")}</T>
+    <T cmsKey={"lbl.sheetChooseDay"} size={14} weight="800" style={{marginTop:12,marginBottom:8}}>{cmsText("lbl.sheetChooseDay", "Choose a day")}</T>
     <ScrollView horizontal showsHorizontalScrollIndicator={false} contentContainerStyle={{gap:8,paddingBottom:8}}>
       {Array.from({length:7},(_,i)=>{const d=new Date();d.setDate(d.getDate()+i);const active=dayOffset===i;return <Pressable key={i} onPress={()=>{setDayOffset(i);setSelectedTs(0);setCustomMode(false);}} style={{minWidth:74,paddingVertical:10,paddingHorizontal:10,borderRadius:14,backgroundColor:active?th.br:th.soft,alignItems:'center',borderWidth:1,borderColor:active?th.br:th.line}}>
-        <T size={11.5} weight="700" color={active?'#fff':th.mut}>{i===0?cmsText("lbl.page.components.Sheets.2b065c7c9c", "Today"):i===1?cmsText("lbl.page.components.Sheets.456a73bbce", "Tomorrow"):dayNames[d.getDay()].slice(0,3)}</T><T size={15} weight="800" color={active?'#fff':th.ink}>{d.getDate()}</T><T size={10.5} color={active?'#fff':th.mut}>{d.toLocaleDateString(undefined,{month:'short'})}</T>
+        <T cmsKeys={["lbl.page.components.Sheets.2b065c7c9c","lbl.page.components.Sheets.456a73bbce"]} size={11.5} weight="700" color={active?'#fff':th.mut}>{i===0?cmsText("lbl.page.components.Sheets.2b065c7c9c", "Today"):i===1?cmsText("lbl.page.components.Sheets.456a73bbce", "Tomorrow"):dayNames[d.getDay()].slice(0,3)}</T><T size={15} weight="800" color={active?'#fff':th.ink}>{d.getDate()}</T><T size={10.5} color={active?'#fff':th.mut}>{d.toLocaleDateString(undefined,{month:'short'})}</T>
       </Pressable>;})}
     </ScrollView>
     {store&&!store.open?<Card style={{marginTop:4,marginBottom:8,backgroundColor:th.brt,borderColor:th.br}}><T size={12.5} weight="700">Scheduled-order minimum</T><T size={12} color={th.mut}>{store.acceptScheduledOrders ? (opening ? 'Opening '+opening+' · '+lead+' minutes advance time. Only times after the minimum are selectable.' : 'Minimum advance time: '+lead+' minutes.') : 'This store is not accepting scheduled orders while closed.'}</T></Card>:null}
@@ -202,89 +204,24 @@ function ScheduleSheet({close}: {close: () => void}) {
     <View style={{flexDirection:'row',flexWrap:'wrap',gap:7,marginTop:8}}>
       {[0,5,10,15,20,25,30,35,40,45,50,55].map(m=><Pressable key={m} onPress={()=>{setCustomMinute(String(m).padStart(2,'0'));setCustomMode(true);setSelectedTs(0);}} style={{paddingHorizontal:10,paddingVertical:7,borderRadius:16,backgroundColor:Number(customMinute)===m&&customMode?th.brt:th.soft,borderWidth:Number(customMinute)===m&&customMode?1:0,borderColor:th.br}}><T size={11.5} weight="700">{String(m).padStart(2,'0')}</T></Pressable>)}
     </View>
-    {selected ? <T size={12.5} color={th.br} style={{marginTop:8}}>{cmsText("lbl.page.components.Sheets.1f153fd182", "Selected: ")}{fmtDay(new Date(selected))}, {fmtTime(new Date(selected))}</T>:null}
-    <View style={{height:12}}/><Cta label={cmsText("lbl.sheetApply", "Apply")} disabled={!selected} onPress={choose}/>
+    {selected ? <T cmsKey={"lbl.page.components.Sheets.1f153fd182"} size={12.5} color={th.br} style={{marginTop:8}}>{cmsText("lbl.page.components.Sheets.1f153fd182", "Selected: ")}{fmtDay(new Date(selected))}, {fmtTime(new Date(selected))}</T>:null}
+    <View style={{height:12}}/><Cta cmsKey={"lbl.sheetApply"} label={cmsText("lbl.sheetApply", "Apply")} disabled={!selected} onPress={choose}/>
   </>;
 }
 function SegSchedule({value,onChange}:{value:string;onChange:(v:string)=>void}) {
   const th=useTheme();
   return <View style={{flexDirection:'row',gap:8}}>
-    {(['delivery','pickup'] as const).map(v=><Pressable key={v} onPress={()=>onChange(v)} style={{flex:1,paddingVertical:11,borderRadius:13,alignItems:'center',backgroundColor:value===v?th.brt:th.soft,borderWidth:value===v?1:0,borderColor:th.br}}><T weight="800" color={value===v?th.br:th.ink}>{v==='delivery'?cmsText("lbl.page.components.Sheets.52bfe584a5", "Delivery"):cmsText("lbl.sheetPickup", "Pick-up")}</T></Pressable>)}
+    {(['delivery','pickup'] as const).map(v=><Pressable key={v} onPress={()=>onChange(v)} style={{flex:1,paddingVertical:11,borderRadius:13,alignItems:'center',backgroundColor:value===v?th.brt:th.soft,borderWidth:value===v?1:0,borderColor:th.br}}><T cmsKeys={["lbl.page.components.Sheets.52bfe584a5","lbl.sheetPickup"]} weight="800" color={value===v?th.br:th.ink}>{v==='delivery'?cmsText("lbl.page.components.Sheets.52bfe584a5", "Delivery"):cmsText("lbl.sheetPickup", "Pick-up")}</T></Pressable>)}
   </View>;
-}
-
-function GroupOrderSheet({close}: {close: () => void}) {
-  const th = useTheme();
-  const [name, setName] = useState('');
-  const [group, setGroup] = useState(() => {
-    if (S.groupOrder) return S.groupOrder;
-    const next = {code: 'GD' + Math.random().toString(36).slice(2, 7).toUpperCase(), host: S.pf.n || cmsText("lbl.page.components.Sheets.08b0419357", "You"), members: []};
-    S.groupOrder = next; save(); return next;
-  });
-  const saveGroup = (next: any) => { setGroup(next); S.groupOrder = next; save(); emit(); };
-  const groupSubtotal = S.cart.lines.reduce((sum: number, line: any) => sum + Number(line.p || 0) * Number(line.q || 0), 0);
-  const invite = async () => {
-    try {
-      await Share.share({message: 'Wantiss Goodies group-order invitation. Code: ' + group.code + '. Store: ' + (S.cart.sid && STB[S.cart.sid] ? STB[S.cart.sid].n : 'Choose a store together') + '. This is a demo invitation; please send your item choices to the host so they can add them to the shared cart.'});
-    } catch (_) { toast(cmsText("lbl.page.components.Sheets.4e91232d16", "Invite code: ") + group.code); }
-  };
-  return <>
-    <T size={21} weight="800">{cmsText("lbl.sheetGroupTitle", "Group order")}</T>
-    <T size={13} color={th.mut} style={{marginTop:5, marginBottom:12}}>Start a shared cart, invite friends, and coordinate everyone’s items before checkout.</T>
-    <Card style={{marginBottom:12}}>
-      <Row sp><View style={{flex:1}}><T size={11.5} weight="800" color={th.mut}>{cmsText("lbl.sheetInviteCode", "GROUP INVITE CODE")}</T><T size={22} weight="800">{group.code}</T></View><Cta small label={cmsText("lbl.sheetInvitePeople", "Invite people")} onPress={invite} /></Row>
-      <T size={12} color={th.mut} style={{marginTop:7}}>Sharing uses your phone’s share menu. This demo coordinates members locally; it does not create a server-hosted join link.</T>
-    </Card>
-    <Card style={{marginBottom:12}}>
-      <T size={14} weight="800">Shared cart</T>
-      {S.cart.lines.length ? S.cart.lines.map((line:any)=><Row key={line.k} sp style={{marginTop:8,alignItems:'flex-start'}}><View style={{flex:1}}><T size={13} weight="700">{line.q}× {line.n}</T>{line.d ? <T size={11.5} color={th.mut}>{line.d}</T> : null}</View><T size={13} weight="700">{money(line.p*line.q)}</T></Row>) : <T size={12.5} color={th.mut} style={{marginTop:7}}>Add items to the cart from the selected store. The host controls checkout.</T>}
-      <Row sp style={{marginTop:12,paddingTop:10,borderTopWidth:1,borderTopColor:th.line}}><T weight="800">{cmsText("lbl.sheetSubtotal", "Subtotal")}</T><T weight="800">{money(S.cart.lines.reduce((sum:number,line:any)=>sum+line.p*line.q,0))}</T></Row>
-      {S.cart.sid && STB[S.cart.sid] ? <T size={12} color={th.mut} style={{marginTop:5}}>Store: {STB[S.cart.sid].n}</T> : null}
-      <View style={{height:10}}/><Cta ghost label="View cart" onPress={()=>{close();A.go('cart');}} />
-    </Card>
-    <T size={15} weight="800" style={{marginBottom:7}}>{cmsText("lbl.sheetGroupMembers", "Group members")}</T>
-    <Row style={{gap:8, marginBottom:10}}>
-      <View style={{flex:1}}><Input value={name} onChange={setName} placeholder="Enter member name" /></View>
-      <View style={{width:88}}><Cta label="Add" onPress={() => {
-        const n=name.trim(); if(!n) {toast('Enter a member name'); return;}
-        if(group.members.some((m:any)=>m.name.toLowerCase()===n.toLowerCase())) {toast('That member is already in the group'); return;}
-        saveGroup({...group,members:[...group.members,{id:Date.now(),name:n,status:'Invited'}]}); setName('');
-      }} /></View>
-    </Row>
-    <Card>
-      <Row style={{gap:10, alignItems:'center', paddingVertical:4}}>
-        <View style={{width:38,height:38,borderRadius:19,backgroundColor:th.brt,alignItems:'center',justifyContent:'center'}}><Icon name="user" color={th.br} /></View>
-        <View style={{flex:1}}><T weight="800">{group.host || S.pf.n || cmsText("lbl.page.components.Sheets.08b0419357", "You")} (Host)</T><T size={12} color={th.mut}>Owns the group cart</T></View>
-        <Badge green label="Active" />
-      </Row>
-      {group.members.map((m:any)=><View key={m.id} style={{flexDirection:'row',alignItems:'center',gap:10,paddingVertical:10,borderTopWidth:1,borderTopColor:th.line}}>
-        <View style={{width:38,height:38,borderRadius:19,backgroundColor:th.soft,alignItems:'center',justifyContent:'center'}}><Icon name="user" color={th.mut} /></View>
-        <View style={{flex:1}}><T weight="700">{m.name}</T><T size={12} color={th.mut}>Waiting to add items</T></View>
-        <Badge label={m.status || cmsText("lbl.page.components.Sheets.63b17becd8", "Invited")} />
-        <Pressable accessibilityRole="button" accessibilityLabel={'Remove '+m.name} onPress={()=>saveGroup({...group,members:group.members.filter((x:any)=>x.id!==m.id)})}><Icon name="x" size={18} color={th.red}/></Pressable>
-      </View>)}
-      {!group.members.length ? <T size={13} color={th.mut} style={{paddingVertical:10}}>No members yet. Invite friends or add their names to plan the group.</T> : null}
-    </Card>
-    <View style={{height:12}}/>
-    <T size={15} weight="800" style={{marginBottom:7}}>Shared cart</T>
-    <Card>
-      {S.cart.lines.length ? S.cart.lines.map((line:any)=><Row key={line.k} sp style={{paddingVertical:7,alignItems:'flex-start'}}><View style={{flex:1}}><T weight="700">{line.q}× {line.n}</T>{line.d ? <T size={11.5} color={th.mut}>{line.d}</T> : null}</View><T weight="700">{money(line.p*line.q)}</T></Row>) : <T size={12.5} color={th.mut}>The host cart is empty. Add items from a store to start the group order.</T>}
-      <View style={{borderTopWidth:1,borderTopColor:th.line,marginTop:5,paddingTop:10}}><Row sp><T weight="800">{cmsText("lbl.page.components.Sheets.1d4382b0ce", "Items subtotal")}</T><T weight="800">{money(groupSubtotal)}</T></Row><T size={11.5} color={th.mut} style={{marginTop:4}}>Delivery and service fees are calculated at checkout.</T></View>
-    </Card>
-    <View style={{height:12}} />
-    <Cta label={cmsText("lbl.sheetDone", "Done")} onPress={close} />
-    <View style={{height:8}} />
-    <Cta ghost label={cmsText("lbl.sheetEndGroup", "End group order")} onPress={() => {S.groupOrder=null; save(); emit(); close(); toast('Group order ended');}} />
-  </>;
 }
 
 function ReviewSheet({id, stars, driver = false, initialStars = 0}: {id: string; stars: any; driver?: boolean; initialStars?: number}) {
   const [n, setN] = useState(initialStars || S.rt || 0), [t, setT] = useState('');
   return (<>
-    <T size={20} weight="800">{driver ? cmsText("lbl.orderRateDriver", "Rate your driver") : cmsText("lbl.orderRate", "Rate your order")}</T>{stars(n, setN)}
-    <Input value={t} onChange={setT} placeholder={cmsText("lbl.sheetReviewComment", "Add a comment (optional)")} multiline />
+    <T cmsKeys={["lbl.orderRateDriver","lbl.orderRate"]} size={20} weight="800">{driver ? cmsText("lbl.orderRateDriver", "Rate your driver") : cmsText("lbl.orderRate", "Rate your order")}</T>{stars(n, setN)}
+    <Input cmsPlaceholderKey={"lbl.sheetReviewComment"} value={t} onChange={setT} placeholder={cmsText("lbl.sheetReviewComment", "Add a comment (optional)")} multiline />
     <View style={{height: 12}} />
-    <Cta label={cmsText("lbl.sheetSubmitReview", "Submit review")} onPress={() => {
+    <Cta cmsKey={"lbl.sheetSubmitReview"} label={cmsText("lbl.sheetSubmitReview", "Submit review")} onPress={() => {
       const o = S.orders.filter((x: any) => x.id === id)[0];
       if (!o) {toast(cmsText("lbl.sheetOrderNotFound", "Order not found")); return;}
       if (!n) {toast(cmsText("lbl.sheetPickRating", "Pick a star rating")); return;}
@@ -308,16 +245,16 @@ function ContactsSheet({close}: {close: () => void}) {
   const th = useTheme();
   const rows = [{id: 'w', ph: S.pf.ph, l: 'Default Wantiss number', w: 1}].concat(S.gc.map((c: any) => ({id: c.id, ph: c.ph, l: c.l || cmsText("lbl.sheetGoodiesNumber", "Goodies number"), w: 0})));
   return (<>
-    <T size={20} weight="800" style={{marginBottom: 4}}>{cmsText("lbl.sheetContactNumber", "Contact number")}</T>
-    <T size={12.5} color={th.mut} style={{marginBottom: 12}}>{cmsText("lbl.sheetContactNumberHint", "We use this number for this order only. Your Wantiss account number is never changed here.")}</T>
+    <T cmsKey={"lbl.sheetContactNumber"} size={20} weight="800" style={{marginBottom: 4}}>{cmsText("lbl.sheetContactNumber", "Contact number")}</T>
+    <T cmsKey={"lbl.sheetContactNumberHint"} size={12.5} color={th.mut} style={{marginBottom: 12}}>{cmsText("lbl.sheetContactNumberHint", "We use this number for this order only. Your Wantiss account number is never changed here.")}</T>
     {rows.map((r: any) => (
       <View key={r.id} style={{flexDirection: 'row', alignItems: 'center', gap: 8}}>
-        <View style={{flex: 1}}><Radio on={S.cc === r.id} onPress={() => {S.cc = r.id; close(); save(); emit();}}><T weight="700">{r.ph}</T><View style={{marginTop: 3}}>{r.w ? <Badge green label="Default Wantiss number" /> : <T size={12.5} color={th.mut}>{cmsText("lbl.page.components.Sheets.a3e540df30", "Goodies checkout number · ")}{r.l}</T>}</View></Radio></View>
-        {r.w ? null : <><Pressable accessibilityLabel={cmsText("lbl.sheetEditNumber", "Edit number")} onPress={() => ui.sheet({kind: 'ctform', id: r.id})}><T size={13} weight="700" color={th.br}>{cmsText("lbl.sheetAuto1CISXZJ", "Edit")}</T></Pressable>
+        <View style={{flex: 1}}><Radio on={S.cc === r.id} onPress={() => {S.cc = r.id; close(); save(); emit();}}><T weight="700">{r.ph}</T><View style={{marginTop: 3}}>{r.w ? <Badge green label="Default Wantiss number" /> : <T cmsKey={"lbl.page.components.Sheets.a3e540df30"} size={12.5} color={th.mut}>{cmsText("lbl.page.components.Sheets.a3e540df30", "Goodies checkout number · ")}{r.l}</T>}</View></Radio></View>
+        {r.w ? null : <><Pressable accessibilityLabel={cmsText("lbl.sheetEditNumber", "Edit number")} onPress={() => ui.sheet({kind: 'ctform', id: r.id})}><T cmsKey={"lbl.sheetAuto1CISXZJ"} size={13} weight="700" color={th.br}>{cmsText("lbl.sheetAuto1CISXZJ", "Edit")}</T></Pressable>
         <Pressable accessibilityLabel="Remove number" onPress={() => {if (S.orders.some((o: any) => !done(o) && o.cid == r.id)) {toast(cmsText("lbl.sheetPhoneInUse", "This number is used by an active order")); return;} ui.sheet({kind: 'remove-number', numberLabel: r.l || r.ph, onConfirm: () => {S.gc = S.gc.filter((c: any) => c.id !== r.id); if (S.cc === r.id) S.cc = 'w'; toast(cmsText("lbl.sheetNumberRemoved", "Number removed")); save(); emit(); ui.sheet({kind: 'contacts'});}});}}><Icon name="trash" size={18} color={th.red} /></Pressable></>}
       </View>
     ))}
-    <Cta ghost label={cmsText("lbl.sheetAutoQWFBNT", "+ Add another number")} onPress={() => ui.sheet({kind: 'ctform', id: ''})} />
+    <Cta cmsKey={"lbl.sheetAutoQWFBNT"} ghost label={cmsText("lbl.sheetAutoQWFBNT", "+ Add another number")} onPress={() => ui.sheet({kind: 'ctform', id: ''})} />
   </>);
 }
 function CtForm({id}: {id: any}) {
@@ -334,11 +271,11 @@ function CtForm({id}: {id: any}) {
     toast(cmsText("lbl.sheetNumberSaved", "Number saved for Goodies checkout")); save(); emit(); ui.sheet({kind: 'contacts'});
   };
   return (<>
-    <T size={20} weight="800">{id ? cmsText("lbl.sheetAuto1CISXZJ", "Edit") : 'Add'} contact number</T>
-    <T size={12.5} color={th.mut} style={{marginTop: 3}}>{cmsText("lbl.sheetAutoLZBAF5", "Saved for Goodies checkout only. Your Wantiss account number is not changed here. Country-code management will be handled in Wantiss settings.")}</T>
-    <Input label={cmsText("lbl.sheetAuto5601C6", "Label (optional)")} value={l} onChange={setL} placeholder={cmsText("lbl.sheetAutoBBS3LN", "e.g. Partner, Office")} />
-    <Input label={cmsText("lbl.sheetAutoSTYZV6", "Phone number")} value={ph} onChange={setPh} placeholder={cmsText("lbl.sheetAuto1JJXA6W", "Enter phone number")} keyboard="phone-pad" />
-    <View style={{height: 14}} /><Cta label={cmsText("lbl.sheetAuto9HY80N", "Save number")} onPress={save_} /><View style={{height: 10}} /><Cta ghost label={cmsText("lbl.sheetAuto1LJ92XO", "Back")} onPress={() => ui.sheet({kind: 'contacts'})} />
+    <T cmsKey={"lbl.sheetAuto1CISXZJ"} size={20} weight="800">{id ? cmsText("lbl.sheetAuto1CISXZJ", "Edit") : 'Add'} contact number</T>
+    <T cmsKey={"lbl.sheetAutoLZBAF5"} size={12.5} color={th.mut} style={{marginTop: 3}}>{cmsText("lbl.sheetAutoLZBAF5", "Saved for Goodies checkout only. Your Wantiss account number is not changed here. Country-code management will be handled in Wantiss settings.")}</T>
+    <Input cmsKey={"lbl.sheetAuto5601C6"} cmsPlaceholderKey={"lbl.sheetAutoBBS3LN"} label={cmsText("lbl.sheetAuto5601C6", "Label (optional)")} value={l} onChange={setL} placeholder={cmsText("lbl.sheetAutoBBS3LN", "e.g. Partner, Office")} />
+    <Input cmsKey={"lbl.sheetAutoSTYZV6"} cmsPlaceholderKey={"lbl.sheetAuto1JJXA6W"} label={cmsText("lbl.sheetAutoSTYZV6", "Phone number")} value={ph} onChange={setPh} placeholder={cmsText("lbl.sheetAuto1JJXA6W", "Enter phone number")} keyboard="phone-pad" />
+    <View style={{height: 14}} /><Cta cmsKey={"lbl.sheetAuto9HY80N"} label={cmsText("lbl.sheetAuto9HY80N", "Save number")} onPress={save_} /><View style={{height: 10}} /><Cta cmsKey={"lbl.sheetAuto1LJ92XO"} ghost label={cmsText("lbl.sheetAuto1LJ92XO", "Back")} onPress={() => ui.sheet({kind: 'contacts'})} />
   </>);
 }
 
@@ -346,11 +283,11 @@ function CtForm({id}: {id: any}) {
 function ImportSheet({close}: {close: () => void}) {
   const th = useTheme(), [txt, setTxt] = useState('');
   return (<>
-    <T size={20} weight="800">{cmsText("lbl.sheetAuto1DJ0R80", "Import Admin content")}</T>
-    <T size={12.5} color={th.mut} style={{marginTop: 6, marginBottom: 10}}>{cmsText("lbl.page.components.Sheets.bc1e729ed8", "Paste the content exported from Wantiss Admin. It replaces promo cards, categories, labels, fees, age rules, texts and artwork in this demo. ")}{hasContent() ? cmsText("lbl.page.components.Sheets.2e4d2c8b07", "Admin content is currently loaded.") : cmsText("lbl.page.components.Sheets.6832a279e5", "The built-in sample content is currently used.")}</T>
+    <T cmsKey={"lbl.sheetAuto1DJ0R80"} size={20} weight="800">{cmsText("lbl.sheetAuto1DJ0R80", "Import Admin content")}</T>
+    <T cmsKeys={["lbl.page.components.Sheets.bc1e729ed8","lbl.page.components.Sheets.2e4d2c8b07","lbl.page.components.Sheets.6832a279e5"]} size={12.5} color={th.mut} style={{marginTop: 6, marginBottom: 10}}>{cmsText("lbl.page.components.Sheets.bc1e729ed8", "Paste the content exported from Wantiss Admin. It replaces promo cards, categories, labels, fees, age rules, texts and artwork in this demo. ")}{hasContent() ? cmsText("lbl.page.components.Sheets.2e4d2c8b07", "Admin content is currently loaded.") : cmsText("lbl.page.components.Sheets.6832a279e5", "The built-in sample content is currently used.")}</T>
     <TextInput value={txt} onChangeText={setTxt} multiline placeholder={cmsText("lbl.sheetAutoAED84A", "Paste JSON here")} placeholderTextColor={th.mut} style={{minHeight: 120, maxHeight: 220, fontSize: 12, color: th.ink, backgroundColor: th.soft, borderWidth: 1, borderColor: th.line, borderRadius: 12, padding: 10, textAlignVertical: 'top'}} />
     <View style={{height: 12}} />
-    <Cta label={cmsText("lbl.sheetAuto1EXCTAI", "Import")} onPress={async () => {try {await importContent(txt.trim()); close(); toast(cmsText("lbl.sheetAdminContentLoaded", "Admin content loaded")); emit();} catch (e: any) {toast(String(e && e.message ? e.message : cmsText("lbl.sheetInvalidJson", "That is not valid JSON")));}}} />
-    {hasContent() ? <><View style={{height: 10}} /><Cta ghost label={cmsText("lbl.sheetAuto1U4P0PS", "Go back to sample content")} onPress={async () => {await clearContent(); close(); toast(cmsText("lbl.sheetSampleContent", "Using sample content")); emit();}} /></> : null}
+    <Cta cmsKey={"lbl.sheetAuto1EXCTAI"} label={cmsText("lbl.sheetAuto1EXCTAI", "Import")} onPress={async () => {try {await importContent(txt.trim()); close(); toast(cmsText("lbl.sheetAdminContentLoaded", "Admin content loaded")); emit();} catch (e: any) {toast(String(e && e.message ? e.message : cmsText("lbl.sheetInvalidJson", "That is not valid JSON")));}}} />
+    {hasContent() ? <><View style={{height: 10}} /><Cta cmsKey={"lbl.sheetAuto1U4P0PS"} ghost label={cmsText("lbl.sheetAuto1U4P0PS", "Go back to sample content")} onPress={async () => {await clearContent(); close(); toast(cmsText("lbl.sheetSampleContent", "Using sample content")); emit();}} /></> : null}
   </>);
 }

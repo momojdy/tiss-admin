@@ -1,6 +1,6 @@
 /* Shared published content provider. Draft content is never read by customer or vendor clients. */
-import {fetchPublishedWantissContent} from '../lib/wantissCms';
-import AsyncStorage from '@react-native-async-storage/async-storage';
+import {previewPublishedContent as fetchPublishedWantissContent} from './previewRuntime';
+import {previewStorage as AsyncStorage} from './previewRuntime';
 import {Image} from 'react-native';
 import {setInterfaceContent} from './i18n/interfaceContent';
 import {tx} from './i18n';

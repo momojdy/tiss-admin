@@ -125,3 +125,56 @@ test('store preview preserves the actual consumer hero geometry and asset behavi
  const declarations=files.map(file=>{const source=fs.readFileSync(file,'utf8'),ast=ts.createSourceFile(file,source,99,true);return ast.statements.find(n=>ts.isVariableStatement(n)&&n.declarationList.declarations.some(d=>d.name.getText(ast)==='Hero')).getText(ast);});
  assert.equal(declarations[0],declarations[1]);
 });
+
+test('every customer route is available in the preview selector, including secure card and group pages',()=>{
+ const preview=fs.readFileSync(path.resolve(root,'../screens/content/GoodiesConsumerPreview.tsx'),'utf8');
+ assert.match(preview,/pageCatalog\.flatMap/);assert.match(preview,/key !== 'byo'/);assert.match(preview,/navigate\('byo'/);
+ const app=fs.readFileSync(path.join(root,'GoodiesApp.tsx'),'utf8');
+ for(const [route,component] of [['grouporder','GroupOrderPage'],['addcard','AddCard'],['cardauth','CardAuthentication']])assert.match(app,new RegExp("case '"+route+"': body = <"+component));
+ assert.equal(new Set(pages.flatMap(page=>page.routes)).size,33);
+ assert.doesNotMatch(preview,/if \(editMode\).*S\.stack/,'Enabling editing must preserve the selected page');
+});
+
+test('preview backend blocks writes, checkout, publication and provider calls without any network client',async()=>{
+ const runtime=loadModule(path.join(root,'previewRuntime.ts'));runtime.setPreviewScenario('default');
+ assert.ok((await runtime.previewBackend.from('goodies_orders').insert({amount:1})).error);
+ for(const rpc of ['goodies_checkout','goodies_group_order_checkout','issue_refund','publish_content'])assert.ok((await runtime.previewBackend.rpc(rpc,{})).error,rpc);
+ assert.ok((await runtime.previewBackend.functions.invoke('charge-card')).error);
+ assert.ok((await runtime.previewBackend.storage.from('proofs').upload('file','data')).error);
+ assert.equal((await runtime.previewBackend.rpc('goodies_group_order_create',{})).data.invite_code,'PREVIEW-ONLY');
+ runtime.setPreviewScenario('guest');assert.equal((await runtime.previewBackend.rpc('goodies_group_order_list_members')).data[0].role,'member');
+ runtime.setPreviewScenario('error');assert.ok((await runtime.previewBackend.rpc('goodies_group_order_get_status')).error);
+ runtime.setPreviewScenario('loading');const pending=runtime.previewBackend.rpc('goodies_group_order_get_status');
+ assert.equal(await Promise.race([pending.then(()=>false),Promise.resolve(true)]),true);
+ runtime.setPreviewScenario('default');
+ const walk=dir=>fs.readdirSync(dir,{withFileTypes:true}).flatMap(entry=>entry.isDirectory()?walk(path.join(dir,entry.name)):[path.join(dir,entry.name)]);
+ for(const file of walk(root).filter(file=>/\.tsx?$/.test(file))){const source=fs.readFileSync(file,'utf8');assert.doesNotMatch(source,/from ['"][^'"]*lib\/supabase['"]|from ['"]@react-native-async-storage\/async-storage['"]|from ['"][^'"]*lib\/wantissCms['"]/,file);}
+ const native=fs.readFileSync(path.join(root,'previewNative.tsx'),'utf8');
+ assert.doesNotMatch(native,/from ['"]react-native-webview['"]|eval\(|fetch\(/);
+ assert.match(native,/Payments are disabled/);assert.match(native,/Camera access is disabled/);
+});
+
+test('preview retains customer group/card visual attributes and records source provenance',()=>{
+ const manifest=require(path.join(root,'previewSourceManifest.json')),crypto=require('node:crypto');
+ for(const copy of manifest.copies)for(const origin of copy.origins){const source=fs.readFileSync(path.resolve(__dirname,'../../tiss_tiss_beta',origin.file));assert.equal(crypto.createHash('sha256').update(source).digest('hex'),origin.sha256,origin.file);}
+ function visualAttrs(file,onlyFunctions){const source=fs.readFileSync(file,'utf8'),ast=ts.createSourceFile(file,source,99,true),result=[];
+ const visit=node=>{if(ts.isJsxAttribute(node)&&['style','size','weight','color','height','width'].includes(node.name.getText(ast)))result.push(node.getText(ast));ts.forEachChild(node,visit);};
+ for(const node of ast.statements)if(!onlyFunctions||ts.isFunctionDeclaration(node)&&onlyFunctions.includes(node.name?.text))visit(node);return result;}
+ const customer=path.resolve(__dirname,'../../tiss_tiss_beta');
+ assert.deepEqual(visualAttrs(path.join(root,'screens/GroupOrders.tsx')),visualAttrs(path.join(customer,'src/features/Goodies/components/Sheets.tsx'),['GroupOrderModal','GroupOrderSheet','GroupOrderPage']));
+ assert.deepEqual(visualAttrs(path.join(root,'screens/AddCard.tsx')),visualAttrs(path.join(customer,'src/screens/Wallet/WalletAddNewCardScreen.tsx')));
+ assert.deepEqual(visualAttrs(path.join(root,'screens/CardAuthentication.tsx')),visualAttrs(path.join(customer,'src/features/Goodies/screens/CardAuthentication.tsx')));
+});
+
+test('explicit field identities resolve duplicate and dynamic wording while ambiguous legacy text opens a chooser',()=>{
+ let context=null;const rows=[{id:'a',t:'Continue'},{id:'b',t:'Continue'},{id:'dynamic',t:'Total {amount}'}];
+ const module={exports:{}},filename=path.join(root,'editContext.tsx'),code=ts.transpileModule(fs.readFileSync(filename,'utf8'),{compilerOptions:{jsx:ts.JsxEmit.React,module:ts.ModuleKind.CommonJS,esModuleInterop:true}}).outputText;
+ const req=id=>id==='react'?{createContext:()=>({}),useContext:()=>context}:id==='react-native'?{}:id==='./content'?{C:{labels:rows}}:id==='./i18n'?{tx:value=>value}:require(id);
+ vm.runInThisContext('(function(require,module,exports){'+code+'})')(req,module,module.exports);
+ const {useEditableText}=module.exports;assert.deepEqual(useEditableText('Continue','a'),{});
+ let selected,choices,stopped=0;context={select:value=>selected=value,choose:value=>choices=value};
+ useEditableText('Continue','b').onPress({stopPropagation:()=>stopped++});assert.equal(selected.id,'b');
+ useEditableText('Total $5','dynamic').onPress({stopPropagation:()=>stopped++});assert.equal(selected.id,'dynamic');
+ useEditableText('Continue').onPress({stopPropagation:()=>stopped++});assert.deepEqual(choices,['a','b']);assert.equal(stopped,3);
+ assert.deepEqual(useEditableText('Private customer name'),{});
+});

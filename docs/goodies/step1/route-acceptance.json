@@ -1,0 +1,269 @@
+{
+  "scope": "Local source and regression verification only; not a release certification",
+  "routes": [
+    {
+      "route": "wantiss",
+      "page": "Wantiss entry",
+      "registeredFields": 5,
+      "catalogAndSelector": "PASS",
+      "authenticatedVisualInteraction": "NOT VERIFIED",
+      "hostedEditPublishCustomerReload": "NOT VERIFIED"
+    },
+    {
+      "route": "home",
+      "page": "Home",
+      "registeredFields": 39,
+      "catalogAndSelector": "PASS",
+      "authenticatedVisualInteraction": "NOT VERIFIED",
+      "hostedEditPublishCustomerReload": "NOT VERIFIED"
+    },
+    {
+      "route": "cats",
+      "page": "Categories",
+      "registeredFields": 1,
+      "catalogAndSelector": "PASS",
+      "authenticatedVisualInteraction": "NOT VERIFIED",
+      "hostedEditPublishCustomerReload": "NOT VERIFIED"
+    },
+    {
+      "route": "orders",
+      "page": "Order history",
+      "registeredFields": 16,
+      "catalogAndSelector": "PASS",
+      "authenticatedVisualInteraction": "NOT VERIFIED",
+      "hostedEditPublishCustomerReload": "NOT VERIFIED"
+    },
+    {
+      "route": "cart",
+      "page": "Cart",
+      "registeredFields": 48,
+      "catalogAndSelector": "PASS",
+      "authenticatedVisualInteraction": "NOT VERIFIED",
+      "hostedEditPublishCustomerReload": "NOT VERIFIED"
+    },
+    {
+      "route": "grouporder",
+      "page": "Group orders",
+      "registeredFields": 118,
+      "catalogAndSelector": "PASS",
+      "authenticatedVisualInteraction": "NOT VERIFIED",
+      "hostedEditPublishCustomerReload": "NOT VERIFIED"
+    },
+    {
+      "route": "explore",
+      "page": "Explore",
+      "registeredFields": 20,
+      "catalogAndSelector": "PASS",
+      "authenticatedVisualInteraction": "NOT VERIFIED",
+      "hostedEditPublishCustomerReload": "NOT VERIFIED"
+    },
+    {
+      "route": "search",
+      "page": "Search",
+      "registeredFields": 38,
+      "catalogAndSelector": "PASS",
+      "authenticatedVisualInteraction": "NOT VERIFIED",
+      "hostedEditPublishCustomerReload": "NOT VERIFIED"
+    },
+    {
+      "route": "catlist",
+      "page": "Category / store results",
+      "registeredFields": 12,
+      "catalogAndSelector": "PASS",
+      "authenticatedVisualInteraction": "NOT VERIFIED",
+      "hostedEditPublishCustomerReload": "NOT VERIFIED"
+    },
+    {
+      "route": "store",
+      "page": "Store",
+      "registeredFields": 39,
+      "catalogAndSelector": "PASS",
+      "authenticatedVisualInteraction": "NOT VERIFIED",
+      "hostedEditPublishCustomerReload": "NOT VERIFIED"
+    },
+    {
+      "route": "reviews",
+      "page": "Store reviews",
+      "registeredFields": 18,
+      "catalogAndSelector": "PASS",
+      "authenticatedVisualInteraction": "NOT VERIFIED",
+      "hostedEditPublishCustomerReload": "NOT VERIFIED"
+    },
+    {
+      "route": "product",
+      "page": "Product",
+      "registeredFields": 28,
+      "catalogAndSelector": "PASS",
+      "authenticatedVisualInteraction": "NOT VERIFIED",
+      "hostedEditPublishCustomerReload": "NOT VERIFIED"
+    },
+    {
+      "route": "checkout",
+      "page": "Checkout",
+      "registeredFields": 103,
+      "catalogAndSelector": "PASS",
+      "authenticatedVisualInteraction": "NOT VERIFIED",
+      "hostedEditPublishCustomerReload": "NOT VERIFIED"
+    },
+    {
+      "route": "addcard",
+      "page": "Add card",
+      "registeredFields": 26,
+      "catalogAndSelector": "PASS",
+      "authenticatedVisualInteraction": "NOT VERIFIED",
+      "hostedEditPublishCustomerReload": "NOT VERIFIED"
+    },
+    {
+      "route": "cardauth",
+      "page": "Card verification",
+      "registeredFields": 11,
+      "catalogAndSelector": "PASS",
+      "authenticatedVisualInteraction": "NOT VERIFIED",
+      "hostedEditPublishCustomerReload": "NOT VERIFIED"
+    },
+    {
+      "route": "confirm",
+      "page": "Order confirmation",
+      "registeredFields": 10,
+      "catalogAndSelector": "PASS",
+      "authenticatedVisualInteraction": "NOT VERIFIED",
+      "hostedEditPublishCustomerReload": "NOT VERIFIED"
+    },
+    {
+      "route": "track",
+      "page": "Order tracking",
+      "registeredFields": 89,
+      "catalogAndSelector": "PASS",
+      "authenticatedVisualInteraction": "NOT VERIFIED",
+      "hostedEditPublishCustomerReload": "NOT VERIFIED"
+    },
+    {
+      "route": "notifs",
+      "page": "Notifications",
+      "registeredFields": 9,
+      "catalogAndSelector": "PASS",
+      "authenticatedVisualInteraction": "NOT VERIFIED",
+      "hostedEditPublishCustomerReload": "NOT VERIFIED"
+    },
+    {
+      "route": "promos",
+      "page": "Promotions",
+      "registeredFields": 5,
+      "catalogAndSelector": "PASS",
+      "authenticatedVisualInteraction": "NOT VERIFIED",
+      "hostedEditPublishCustomerReload": "NOT VERIFIED"
+    },
+    {
+      "route": "flashdeals",
+      "page": "Flash deals",
+      "registeredFields": 5,
+      "catalogAndSelector": "PASS",
+      "authenticatedVisualInteraction": "NOT VERIFIED",
+      "hostedEditPublishCustomerReload": "NOT VERIFIED"
+    },
+    {
+      "route": "favs",
+      "page": "Favorites",
+      "registeredFields": 6,
+      "catalogAndSelector": "PASS",
+      "authenticatedVisualInteraction": "NOT VERIFIED",
+      "hostedEditPublishCustomerReload": "NOT VERIFIED"
+    },
+    {
+      "route": "byo",
+      "page": "Build Your Own",
+      "registeredFields": 75,
+      "catalogAndSelector": "PASS",
+      "authenticatedVisualInteraction": "NOT VERIFIED",
+      "hostedEditPublishCustomerReload": "NOT VERIFIED"
+    },
+    {
+      "route": "help",
+      "page": "Help / FAQs",
+      "registeredFields": 4,
+      "catalogAndSelector": "PASS",
+      "authenticatedVisualInteraction": "NOT VERIFIED",
+      "hostedEditPublishCustomerReload": "NOT VERIFIED"
+    },
+    {
+      "route": "settings",
+      "page": "Settings",
+      "registeredFields": 15,
+      "catalogAndSelector": "PASS",
+      "authenticatedVisualInteraction": "NOT VERIFIED",
+      "hostedEditPublishCustomerReload": "NOT VERIFIED"
+    },
+    {
+      "route": "profile",
+      "page": "Profile",
+      "registeredFields": 10,
+      "catalogAndSelector": "PASS",
+      "authenticatedVisualInteraction": "NOT VERIFIED",
+      "hostedEditPublishCustomerReload": "NOT VERIFIED"
+    },
+    {
+      "route": "addresses",
+      "page": "Addresses",
+      "registeredFields": 43,
+      "catalogAndSelector": "PASS",
+      "authenticatedVisualInteraction": "NOT VERIFIED",
+      "hostedEditPublishCustomerReload": "NOT VERIFIED"
+    },
+    {
+      "route": "payments",
+      "page": "Payment methods",
+      "registeredFields": 29,
+      "catalogAndSelector": "PASS",
+      "authenticatedVisualInteraction": "NOT VERIFIED",
+      "hostedEditPublishCustomerReload": "NOT VERIFIED"
+    },
+    {
+      "route": "contact",
+      "page": "Contact support",
+      "registeredFields": 25,
+      "catalogAndSelector": "PASS",
+      "authenticatedVisualInteraction": "NOT VERIFIED",
+      "hostedEditPublishCustomerReload": "NOT VERIFIED"
+    },
+    {
+      "route": "storechat",
+      "page": "Store conversation",
+      "registeredFields": 16,
+      "catalogAndSelector": "PASS",
+      "authenticatedVisualInteraction": "NOT VERIFIED",
+      "hostedEditPublishCustomerReload": "NOT VERIFIED"
+    },
+    {
+      "route": "supdone",
+      "page": "Support confirmation",
+      "registeredFields": 5,
+      "catalogAndSelector": "PASS",
+      "authenticatedVisualInteraction": "NOT VERIFIED",
+      "hostedEditPublishCustomerReload": "NOT VERIFIED"
+    },
+    {
+      "route": "policies",
+      "page": "Policies",
+      "registeredFields": 4,
+      "catalogAndSelector": "PASS",
+      "authenticatedVisualInteraction": "NOT VERIFIED",
+      "hostedEditPublishCustomerReload": "NOT VERIFIED"
+    },
+    {
+      "route": "policy",
+      "page": "Policy document",
+      "registeredFields": 6,
+      "catalogAndSelector": "PASS",
+      "authenticatedVisualInteraction": "NOT VERIFIED",
+      "hostedEditPublishCustomerReload": "NOT VERIFIED"
+    },
+    {
+      "route": "ndetail",
+      "page": "Notification detail",
+      "registeredFields": 3,
+      "catalogAndSelector": "PASS",
+      "authenticatedVisualInteraction": "NOT VERIFIED",
+      "hostedEditPublishCustomerReload": "NOT VERIFIED"
+    }
+  ]
+}

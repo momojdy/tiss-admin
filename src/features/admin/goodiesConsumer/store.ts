@@ -1,8 +1,8 @@
 import {label} from './content';
 
 import {useSyncExternalStore} from 'react';
-import AsyncStorage from '@react-native-async-storage/async-storage';
-import {supabase} from '../lib/supabase';
+import {previewStorage as AsyncStorage} from './previewRuntime';
+import {previewBackend as supabase} from './previewRuntime';
 import {providerInfo} from './providers';
 import type {Store, Item, Address, CartLine, Order} from './data/types';
 import {STAGES_DELIVERY, STAGES_PICKUP} from './data/seed';

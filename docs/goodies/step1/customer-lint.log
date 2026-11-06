@@ -1,0 +1,4 @@
+
+> tiss_tiss_beta@1.10.0 lint
+> eslint src/features/Goodies/content.ts src/features/Goodies/components/Overlays.tsx
+

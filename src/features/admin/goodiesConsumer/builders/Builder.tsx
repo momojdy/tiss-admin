@@ -1,8 +1,9 @@
+import {EditableNativeText as Text} from '../EditableNativeText';
 import {label as cmsText} from "../content";
 /* Build Your Own screen. Port of v24 vByo, bzStage, bgView, pzView, bzOpts, bzRev, bzFoot, vByoDone. */
 import React, {useEffect, useMemo, useRef} from 'react';
 import {useSafeAreaInsets} from 'react-native-safe-area-context';
-import {View, Text, Pressable, ScrollView, Image, Animated, Easing, TextInput} from 'react-native';
+import {View, Text as UnusedNativeText, Pressable, ScrollView, Image, Animated, Easing, TextInput} from 'react-native';
 import {SvgXml} from 'react-native-svg';
 import {LinearGradient} from 'expo-linear-gradient';
 import {Icon} from '../components/Icon';
@@ -16,7 +17,7 @@ import {PSZ, bzr, hs, clamp, shade, pizzaBase, defsXml, shreds, iconXml, hasSymb
 
 /* CMS text is selectable in the admin phone preview. Selecting it opens the matching text field. */
 function ByoLabel({id, fallback, ...props}: {id: string; fallback: string; [key: string]: any}) {
-  return <Sel sel={{kind: 'label', id, field: 'text'}}><T {...props}>{label(id, fallback)}</T></Sel>;
+  return <Sel sel={{kind: 'label', id, field: 'text'}}><T cmsKey={id} {...props}>{label(id, fallback)}</T></Sel>;
 }
 
 /* ---------- asset helpers (Admin library ids) ---------- */
@@ -128,7 +129,7 @@ function BurgerFallback({b}: {b: Builder}) {
   const topY = cur - 38; o += `<path d="M16 ${cur}Q16 ${topY} 125 ${topY}Q234 ${topY} 234 ${cur}Z" fill="${bc}"/><path d="M40 ${cur - 12}Q60 ${topY + 8} 100 ${topY + 6}" stroke="#fff" stroke-opacity=".28" stroke-width="5" fill="none" stroke-linecap="round"/>`;
   [[80, cur - 22], [120, cur - 28], [160, cur - 24], [100, cur - 12], [150, cur - 14], [190, cur - 14]].forEach(p => {o += `<ellipse cx="${p[0]}" cy="${p[1]}" rx="4" ry="2.2" fill="#FFF3D6" opacity=".8" transform="rotate(-20 ${p[0]} ${p[1]})"/>`;});
   const vb = `0 ${topY - 6} 250 ${tot - topY + 8}`, hgt = Math.min(210, 190 * (tot - topY + 8) / 250);
-  return <View style={{alignItems: 'center'}}><SvgXml width={190} height={hgt} xml={`<svg xmlns="http://www.w3.org/2000/svg" viewBox="${vb}">${o}</svg>`} /><T size={10.5} color="rgba(255,255,255,.6)" style={{marginTop: 6}}>{label("lbl.byoAuto3ROGT8", "Preview drawing. Photo layers appear once uploaded in Admin.")}</T></View>;
+  return <View style={{alignItems: 'center'}}><SvgXml width={190} height={hgt} xml={`<svg xmlns="http://www.w3.org/2000/svg" viewBox="${vb}">${o}</svg>`} /><T cmsKey={"lbl.byoAuto3ROGT8"} size={10.5} color="rgba(255,255,255,.6)" style={{marginTop: 6}}>{label("lbl.byoAuto3ROGT8", "Preview drawing. Photo layers appear once uploaded in Admin.")}</T></View>;
 }
 
 /* ---------- pizza ---------- */
@@ -224,7 +225,7 @@ function Options({b}: {b: Builder}) {
       {b.groups.map(g => {const us = units(g, BD); return (
         <View key={g.id} style={{marginTop: 18}}>
           <View style={{flexDirection: 'row', justifyContent: 'space-between', alignItems: 'baseline', gap: 8, marginBottom: 8}}>
-            <View style={{flexDirection: 'row', alignItems: 'baseline', flexShrink: 1}}><BSel target={{builderId: b.id, part: 'group', groupId: g.id}}><T size={16} weight="800">{label('lbl.byoGroup.' + builderLabelSlug(g.name), g.name)}</T></BSel>{g.kind === 'many' ? <T size={12} color={th.mut} weight="400">{'  ' + us.length + '/' + g.max}</T> : null}</View>
+            <View style={{flexDirection: 'row', alignItems: 'baseline', flexShrink: 1}}><BSel target={{builderId: b.id, part: 'group', groupId: g.id}}><T cmsKey={'lbl.byoGroup.' + builderLabelSlug(g.name)} size={16} weight="800">{label('lbl.byoGroup.' + builderLabelSlug(g.name), g.name)}</T></BSel>{g.kind === 'many' ? <T size={12} color={th.mut} weight="400">{'  ' + us.length + '/' + g.max}</T> : null}</View>
             <T size={12} color={th.mut} align="right">{hint(g)}</T>
           </View>
           <ScrollView horizontal showsHorizontalScrollIndicator={false} style={{marginHorizontal: -16}} contentContainerStyle={{paddingHorizontal: 16, paddingTop: 10, paddingBottom: 6, gap: 10}}>{g.items.map(it => <BSel key={it.id} target={{builderId: b.id, part: 'ingredient', groupId: g.id, itemId: it.id}}><OptTile b={b} g={g} it={it} /></BSel>)}</ScrollView>
@@ -242,8 +243,8 @@ function Review({b}: {b: Builder}) {
       {R(b.name + (br.size ? ' — ' + br.size.name : ''), money(b.base + (br.size ? br.size.add : 0)))}
       {br.lines.map((L: any) => <View key={L.gid}><T size={11.5} weight="800" color={th.mut} style={{marginTop: 8, letterSpacing: 0.4}}>{String(L.gname).toUpperCase()}</T>{L.items.map((i: any) => <View key={i.id}>{R((i.qty > 1 ? i.qty + '× ' : '') + i.name, i.charge > 0 ? '+' + money(i.charge) : i.inc ? label('lbl.byoIncluded', 'Included') : label('lbl.byoFree', 'Free'))}</View>)}</View>)}
       {R(label('lbl.byoItemPrice', 'Item price'), money(br.total), true)}
-      {BD.edit && BD.snap != null && br.total !== BD.snap ? <View style={{backgroundColor: th.brt, borderWidth: 1, borderColor: th.br, borderRadius: 12, padding: 10, marginTop: 10}}><T size={13}>{label('lbl.byoPriceChanged', 'Prices changed since you added this item')} {cmsText("lbl.page.builders.Builder.80833997e8", " (was ")}{money(BD.snap)}{cmsText("lbl.page.builders.Builder.d133a1257f", ", now ")}{money(br.total)}{cmsText("lbl.page.builders.Builder.28ba08f1d3", "). Saving applies the new price.")}</T></View> : null}
-      {ck.conf.length ? <View style={{backgroundColor: th.brt, borderWidth: 1, borderColor: th.br, borderRadius: 12, padding: 10, marginTop: 10}}><ByoLabel id="lbl.byoChoicesChanged" fallback="Some choices changed" size={13} weight="800" />{ck.conf.map(x => <T key={x} size={13}>• {x}</T>)}<T size={13}>{label('lbl.byoReplaceChoices', 'Please remove or replace them to continue. We did not change anything for you.')}</T></View> : null}
+      {BD.edit && BD.snap != null && br.total !== BD.snap ? <View style={{backgroundColor: th.brt, borderWidth: 1, borderColor: th.br, borderRadius: 12, padding: 10, marginTop: 10}}><T cmsKeys={['lbl.byoPriceChanged',"lbl.page.builders.Builder.80833997e8","lbl.page.builders.Builder.d133a1257f","lbl.page.builders.Builder.28ba08f1d3"]} size={13}>{label('lbl.byoPriceChanged', 'Prices changed since you added this item')} {cmsText("lbl.page.builders.Builder.80833997e8", " (was ")}{money(BD.snap)}{cmsText("lbl.page.builders.Builder.d133a1257f", ", now ")}{money(br.total)}{cmsText("lbl.page.builders.Builder.28ba08f1d3", "). Saving applies the new price.")}</T></View> : null}
+      {ck.conf.length ? <View style={{backgroundColor: th.brt, borderWidth: 1, borderColor: th.br, borderRadius: 12, padding: 10, marginTop: 10}}><ByoLabel id="lbl.byoChoicesChanged" fallback="Some choices changed" size={13} weight="800" />{ck.conf.map(x => <T key={x} size={13}>• {x}</T>)}<T cmsKey={'lbl.byoReplaceChoices'} size={13}>{label('lbl.byoReplaceChoices', 'Please remove or replace them to continue. We did not change anything for you.')}</T></View> : null}
     </View>
   );
 }
@@ -256,9 +257,9 @@ export function ByoFoot() {
       {why ? <T size={12.5} color={th.red} align="center" style={{marginBottom: 8}}>{why}</T> : null}
       <View style={{flexDirection: 'row', alignItems: 'center', gap: 12}}>
         <Stepper q={BD.q} onMinus={() => bzQty(-1)} onPlus={() => bzQty(1)} />
-        <View style={{flex: 1}}><Sel sel={{kind: 'label', id: BD.edit ? 'lbl.byoSaveChanges' : 'lbl.byoAddOrder', field: 'text'}}><Cta label={(BD.edit ? label('lbl.byoSaveChanges', 'Save changes') : label('lbl.byoAddOrder', 'Add to Order')) + ' · ' + money(tot)} disabled={!ck.ok || !!BD.busy} onPress={bzAddOrder} /></Sel></View>
+        <View style={{flex: 1}}><Sel sel={{kind: 'label', id: BD.edit ? 'lbl.byoSaveChanges' : 'lbl.byoAddOrder', field: 'text'}}><Cta cmsKeys={['lbl.byoSaveChanges','lbl.byoAddOrder']} label={(BD.edit ? label('lbl.byoSaveChanges', 'Save changes') : label('lbl.byoAddOrder', 'Add to Order')) + ' · ' + money(tot)} disabled={!ck.ok || !!BD.busy} onPress={bzAddOrder} /></Sel></View>
       </View>
-      {BD.edit ? <View style={{marginTop: 8}}><Sel sel={{kind: 'label', id: 'lbl.byoCancel', field: 'text'}}><Cta small ghost label={label('lbl.byoCancel', 'Cancel')} onPress={bzCancel} /></Sel></View> : null}
+      {BD.edit ? <View style={{marginTop: 8}}><Sel sel={{kind: 'label', id: 'lbl.byoCancel', field: 'text'}}><Cta cmsKey={'lbl.byoCancel'} small ghost label={label('lbl.byoCancel', 'Cancel')} onPress={bzCancel} /></Sel></View> : null}
     </View>
   );
 }
@@ -297,8 +298,8 @@ export function ByoScreen({p}: {p: string}) {
       <BSel target={{builderId: b.id, part: 'builder'}}><Header title={b.name} sub={s.n + (BD.edit ? ' · ' + label('lbl.byoEditingItem', 'Editing item') : '')} onBack={back} /></BSel>
       <Stage b={b} />
       <ScrollView style={{flex: 1}} contentContainerStyle={{paddingHorizontal: 16, paddingTop: 15, paddingBottom: 20}} keyboardShouldPersistTaps="handled" showsVerticalScrollIndicator={false}>
-        {un ? <Warn><T weight="800" size={13}>{label('lbl.byoCurrentlyUnavailable', 'Currently unavailable.')} </T><T size={13}>{s.open ? label('lbl.byoStorePaused', 'The store paused this item.') : label('lbl.byoStoreClosed', '{store} is closed.').replace('{store}', s.n)} {label('lbl.byoCannotAdd', 'You can look, but it cannot be added right now.')}</T></Warn> : null}
-        {BD.resumed ? <Warn><T size={13}>{label('lbl.byoResumeDraft', 'Resuming the draft you left earlier.')}</T></Warn> : null}
+        {un ? <Warn><T cmsKey={'lbl.byoCurrentlyUnavailable'} weight="800" size={13}>{label('lbl.byoCurrentlyUnavailable', 'Currently unavailable.')} </T><T cmsKeys={['lbl.byoStorePaused','lbl.byoStoreClosed','lbl.byoCannotAdd']} size={13}>{s.open ? label('lbl.byoStorePaused', 'The store paused this item.') : label('lbl.byoStoreClosed', '{store} is closed.').replace('{store}', s.n)} {label('lbl.byoCannotAdd', 'You can look, but it cannot be added right now.')}</T></Warn> : null}
+        {BD.resumed ? <Warn><T cmsKey={'lbl.byoResumeDraft'} size={13}>{label('lbl.byoResumeDraft', 'Resuming the draft you left earlier.')}</T></Warn> : null}
         <Options b={b} />
         <AddChip target={{builderId: b.id, part: 'addGroup'}} label="Add section" />
         {b.notes ? (
@@ -339,7 +340,7 @@ function ByoDone({b}: {b: Builder}) {
         <ByoLabel id="lbl.byoAddedSuccess" fallback="Added to your order!" size={24} weight="800" style={{marginTop: 10}} />
         <T color={th.mut} style={{marginTop: 4}}>{BD.added.n} · {BD.added.q} × {money(BD.added.p)}</T>
         <ByoLabel id="lbl.byoAddedExplanation" fallback="Nothing has been ordered yet. Add more, or review your cart when you are ready." size={13} color={th.mut} align="center" style={{marginTop: 6}} />
-        <View style={{alignSelf: 'stretch', marginTop: 20, gap: 10}}><Cta label={label('lbl.byoCustomizeAnother', 'Customize Another')} onPress={bzAnother} /><Cta ghost label={label('lbl.byoContinueShopping', 'Continue Shopping')} onPress={bzShop} /><Cta ghost label={label('lbl.byoViewCart', 'View Cart') + ' (' + cnt() + ')'} onPress={() => go('cart')} /></View>
+        <View style={{alignSelf: 'stretch', marginTop: 20, gap: 10}}><Cta cmsKey={'lbl.byoCustomizeAnother'} label={label('lbl.byoCustomizeAnother', 'Customize Another')} onPress={bzAnother} /><Cta cmsKey={'lbl.byoContinueShopping'} ghost label={label('lbl.byoContinueShopping', 'Continue Shopping')} onPress={bzShop} /><Cta cmsKey={'lbl.byoViewCart'} ghost label={label('lbl.byoViewCart', 'View Cart') + ' (' + cnt() + ')'} onPress={() => go('cart')} /></View>
       </View>
     </View>
   );

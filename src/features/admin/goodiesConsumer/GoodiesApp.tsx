@@ -19,8 +19,12 @@ import {PROMO} from './theme';
 import {CATS} from './data/seed';
 import {t as tr} from './i18n';
 
+import {GroupOrderPage} from './screens/GroupOrders';
+import AddCard from './screens/AddCard';
+import {CardAuthentication} from './screens/CardAuthentication';
+
 const TABS = ['home', 'cats', 'orders', 'cart'];
-const NOCB = ['cart', 'checkout', 'confirm', 'track', 'notifs', 'storechat', 'settings', 'payments', 'help', 'contact', 'supdone', 'profile', 'addresses', 'product', 'wantiss', 'ndetail', 'policies', 'policy', 'byo', 'seller', 'sellerEdit'];
+const NOCB = ['grouporder', 'addcard', 'cardauth', 'cart', 'checkout', 'confirm', 'track', 'notifs', 'storechat', 'settings', 'payments', 'help', 'contact', 'supdone', 'profile', 'addresses', 'product', 'wantiss', 'ndetail', 'policies', 'policy', 'byo', 'seller', 'sellerEdit'];
 const FOOTED = ['product', 'checkout'];
 
 export function GoodiesApp({onExit, embedded = true, previewMode = false}: {onExit?: () => void; embedded?: boolean; previewMode?: boolean}) {
@@ -93,6 +97,9 @@ export function GoodiesApp({onExit, embedded = true, previewMode = false}: {onEx
 
   let body: any;
   switch (r) {
+    case 'grouporder': body = <GroupOrderPage onBack={handleBack} storeId={c.p} />; break;
+    case 'addcard': body = <AddCard contentLabel={cmsText} onBack={A.back} />; break;
+    case 'cardauth': body = <CardAuthentication clientSecret='__cms_preview__' publishableKey='__cms_preview__' onComplete={() => toast('Payments are disabled in the CMS preview.')} onCancel={A.back} />; break;
     case 'wantiss': body = <WantissEntry />; break;
     case 'home': body = <Home onExit={handleBack} />; break;
     case 'cats': body = <><TopBar title={tr('categories')} /><Cats /></>; break;
@@ -139,7 +146,7 @@ export function GoodiesApp({onExit, embedded = true, previewMode = false}: {onEx
     <KeyboardAvoidingView style={{flex: 1, backgroundColor: th.bg}} behavior={Platform.OS === 'ios' ? 'padding' : 'height'} keyboardVerticalOffset={0} {...pan.panHandlers}>
       <StatusBar barStyle={th.dark ? 'light-content' : 'dark-content'} />
       <SafeAreaView style={{flex: 1}} edges={[]}>
-        {r === 'byo' || r === 'storechat' ? <View style={{flex: 1}}>{body}</View> : <ScrollView ref={scroll} keyboardShouldPersistTaps="handled" onScroll={e => {c.sy = e.nativeEvent.contentOffset.y;}} scrollEventThrottle={64} showsVerticalScrollIndicator={false} refreshControl={r === 'flashdeals' ? <RefreshControl refreshing={refreshing} onRefresh={() => {if (refreshing) return; setRefreshing(true); void loadContent().finally(() => setRefreshing(false));}} /> : undefined} contentContainerStyle={{paddingBottom: showTabs ? 170 : footed ? 120 : 110}}>
+        {['byo','storechat','grouporder','addcard','cardauth'].includes(r) ? <View key={key} style={{flex: 1}}>{body}</View> : <ScrollView ref={scroll} keyboardShouldPersistTaps="handled" onScroll={e => {c.sy = e.nativeEvent.contentOffset.y;}} scrollEventThrottle={64} showsVerticalScrollIndicator={false} refreshControl={r === 'flashdeals' ? <RefreshControl refreshing={refreshing} onRefresh={() => {if (refreshing) return; setRefreshing(true); void loadContent().finally(() => setRefreshing(false));}} /> : undefined} contentContainerStyle={{paddingBottom: showTabs ? 170 : footed ? 120 : 110}}>
           {body}
         </ScrollView>}
       </SafeAreaView>

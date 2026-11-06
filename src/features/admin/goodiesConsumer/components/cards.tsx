@@ -1,6 +1,7 @@
+import {EditableNativeText as Text} from '../EditableNativeText';
 import {label as cmsText} from "../content";
 import React from 'react';
-import {View, Text, Pressable, useWindowDimensions, Image} from 'react-native';
+import {View, Text as UnusedNativeText, Pressable, useWindowDimensions, Image} from 'react-native';
 import {Icon} from './Icon';
 import {T, Grad, Tile, bgIdx, useTheme, Badge, heartBtn} from './ui';
 import {S, STB, PV, money, dp} from '../store';
@@ -37,7 +38,7 @@ export function Dish({i, off = 0, left, grid}: {i: Item; off?: number; left?: nu
         <Pressable accessibilityRole="link" onPress={() => openProduct(i.id, off)}>
           <T size={13.5} weight="700" lines={1}>{i.n}</T>
           <T size={11.5} color={th.mut} lines={1} style={{marginTop: 1}}>{s.n}</T>
-          {off && !i.oos ? <T size={11} weight="700" color={th.red} style={{marginTop: 5}}>{cmsText("lbl.page.components.cards.c42d075a71", "Only ")}{left} {cmsText("lbl.page.components.cards.bce319cfa7", " left")}</T> : null}
+          {off && !i.oos ? <T cmsKeys={["lbl.page.components.cards.c42d075a71","lbl.page.components.cards.bce319cfa7"]} size={11} weight="700" color={th.red} style={{marginTop: 5}}>{cmsText("lbl.page.components.cards.c42d075a71", "Only ")}{left} {cmsText("lbl.page.components.cards.bce319cfa7", " left")}</T> : null}
         </Pressable>
         <View style={{flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', marginTop: 8}}>
           <View style={{flexDirection: 'row', alignItems: 'baseline'}}>
@@ -68,7 +69,7 @@ export function VCard({s}: {s: Store}) {
         <T size={13.5} weight="700" lines={1}>{s.n}</T>
         <T size={11.5} color={th.mut} lines={1}>{s.k}</T>
         <View style={{flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', marginTop: 8}}>
-          {s.live && s.rv === 0 ? <T size={11.5} color={th.mut}>{cmsText("lbl.cardNewStore", "New store")}</T> : <Stars n={s.r.toFixed(1)} />}<T size={11.5} color={th.mut}>{s.eta} {cmsText("lbl.page.components.cards.2e75737a6b", " min")}</T>
+          {s.live && s.rv === 0 ? <T cmsKey={"lbl.cardNewStore"} size={11.5} color={th.mut}>{cmsText("lbl.cardNewStore", "New store")}</T> : <Stars n={s.r.toFixed(1)} />}<T cmsKey={"lbl.page.components.cards.2e75737a6b"} size={11.5} color={th.mut}>{s.eta} {cmsText("lbl.page.components.cards.2e75737a6b", " min")}</T>
         </View>
       </Pressable>
     </View>
@@ -85,7 +86,7 @@ export function StoreCard({s}: {s: Store}) {
           {s.pr ? <View style={{position: 'absolute', left: 0, top: 14, backgroundColor: th.br, borderTopRightRadius: 8, borderBottomRightRadius: 8, paddingVertical: 5, paddingLeft: 12, paddingRight: 10}}><T size={12} weight="800" color="#fff">{s.pr}</T></View> : null}
           {heartBtn(s.id, S.fav.indexOf(s.id) > -1, () => heart(s.id), S.fav.indexOf(s.id) > -1 ? 'Remove ' + s.n + ' from favorites' : 'Save ' + s.n + ' to favorites')}
           {!s.open ? pill(tr('closed') + ' · ' + s.nx) : s.far && !s.live ? pill(cmsText("lbl.cardPickupOnly", "Pickup only at this address")) : s.rv > 80 ? pill('🔥 ' + Math.round(s.rv * 0.95) + ' ordered today') : null}
-          <View style={{position: 'absolute', right: 10, bottom: 10, backgroundColor: '#fff', borderRadius: 12, paddingHorizontal: 10, paddingVertical: 5}}><T size={12} weight="700" color="#1B1B1F">{s.eta} {cmsText("lbl.page.components.cards.2e75737a6b", " min")}</T></View>
+          <View style={{position: 'absolute', right: 10, bottom: 10, backgroundColor: '#fff', borderRadius: 12, paddingHorizontal: 10, paddingVertical: 5}}><T cmsKey={"lbl.page.components.cards.2e75737a6b"} size={12} weight="700" color="#1B1B1F">{s.eta} {cmsText("lbl.page.components.cards.2e75737a6b", " min")}</T></View>
         </Grad>
       </Pressable>
       {PV[s.id] ? (
@@ -102,9 +103,9 @@ export function StoreCard({s}: {s: Store}) {
       <Pressable onPress={() => go('store', s.id)} style={{paddingTop: 10, paddingHorizontal: 2}}>
         <View style={{flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', gap: 8}}>
           <T size={16.5} weight="800" style={{flexShrink: 1}}>{s.n}</T>
-          {s.live && s.rv === 0 ? <T size={12} color={th.mut}>{cmsText("lbl.storeNoReviewsYet", "No reviews yet")}</T> : <View style={{flexDirection: 'row', alignItems: 'center', gap: 3}}><Icon name="star" size={13} color="#FFB400" fill /><T size={13} weight="700">{s.r.toFixed(1)} </T><T size={13} color={th.mut}>({s.rv})</T></View>}
+          {s.live && s.rv === 0 ? <T cmsKey={"lbl.storeNoReviewsYet"} size={12} color={th.mut}>{cmsText("lbl.storeNoReviewsYet", "No reviews yet")}</T> : <View style={{flexDirection: 'row', alignItems: 'center', gap: 3}}><Icon name="star" size={13} color="#FFB400" fill /><T size={13} weight="700">{s.r.toFixed(1)} </T><T size={13} color={th.mut}>({s.rv})</T></View>}
         </View>
-        <T size={13} color={th.mut} style={{marginTop: 3}}>{s.k} · {s.live ? cmsText("lbl.page.components.cards.04b9a4b3d2", "Distance unavailable") : s.km.toFixed(1) + ' km'}</T>
+        <T cmsKey={"lbl.page.components.cards.04b9a4b3d2"} size={13} color={th.mut} style={{marginTop: 3}}>{s.k} · {s.live ? cmsText("lbl.page.components.cards.04b9a4b3d2", "Distance unavailable") : s.km.toFixed(1) + ' km'}</T>
         {byoTag(s.id)}
         <T size={13} color={th.mut} style={{marginTop: 3}}>{s.fee === 0 ? <T size={13} weight="700" color={th.grn}>{tr('freeDelivery')}</T> : money(s.fee) + ' ' + tr('delivery')} · {tr('minOrder')} {money(s.min)}</T>
       </Pressable>

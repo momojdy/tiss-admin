@@ -2,9 +2,9 @@ import {label as cmsText} from "../content";
 /** Goodies builder engine: validation, pricing, draft state and actions. */
 import React from 'react';
 import {View, Pressable} from 'react-native';
-import AsyncStorage from '@react-native-async-storage/async-storage';
-import {supabase} from '../../lib/supabase';
-import {fetchPublishedWantissContent} from '../../lib/wantissCms';
+import {previewStorage as AsyncStorage} from '../previewRuntime';
+import {previewBackend as supabase} from '../previewRuntime';
+import {previewPublishedContent as fetchPublishedWantissContent} from '../previewRuntime';
 import {previewOnly, S, STB, ui, toast, emit, save, push, navBack, cur, hooks, money} from '../store';
 import {TEMPLATES} from './templates';
 import {T, useTheme, Tile} from '../components/ui';

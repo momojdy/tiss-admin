@@ -15,7 +15,7 @@ export const sameSel = (a: GoodiesSelection | null | undefined, b: GoodiesSelect
 export type BuilderTarget = {builderId: string; part: 'builder' | 'group' | 'ingredient' | 'addGroup' | 'addIngredient'; groupId?: string; itemId?: string};
 export const sameTarget = (a: BuilderTarget | null | undefined, b: BuilderTarget) => !!a && a.builderId === b.builderId && a.part === b.part && (a.groupId || '') === (b.groupId || '') && (a.itemId || '') === (b.itemId || '');
 
-type EditCtx = {selected: GoodiesSelection | null; select: (selection: GoodiesSelection) => void; pick?: (target: BuilderTarget) => void; picked?: BuilderTarget | null};
+type EditCtx = {selected: GoodiesSelection | null; select: (selection: GoodiesSelection) => void; pick?: (target: BuilderTarget) => void; picked?: BuilderTarget | null; choose?: (ids:string[])=>void};
 export const EditContext = createContext<EditCtx | null>(null);
 
 /** True only inside the admin editor's edit mode. */
@@ -59,13 +59,15 @@ export function AddChip({target, label}: {target: BuilderTarget; label: string})
 }
 
 /** Resolve only an unambiguous platform text label; never select customer/vendor values by fuzzy match. */
-export function useEditableText(value: unknown) {
+export function useEditableText(value: unknown, id?:string, ids?:string[]): {onPress?: (event:{stopPropagation:()=>void})=>void} {
   const context = useContext(EditContext);
-  if (!context || typeof value !== 'string') return {};
-  const matches = (C?.labels || []).filter((entry: any) => tx(entry.t) === value);
-  if (matches.length !== 1) return {};
-  return {onPress: (event: {stopPropagation: () => void}) => {
+  if (!context) return {};
+  const explicit=[...new Set([...(id?[id]:[]),...(ids||[])])].filter(key=>(C?.labels||[]).some((entry:any)=>entry.id===key));
+  const matches=explicit.length ? explicit : typeof value==='string' ? (C?.labels||[]).filter((entry:any)=>tx(entry.t)===value).map((entry:any)=>entry.id) : [];
+  if(!matches.length)return {};
+  return {onPress:event=>{
     event.stopPropagation();
-    context.select({kind:'label',id:matches[0].id,field:'text'});
+    if(matches.length===1)context.select({kind:'label',id:matches[0],field:'text'});
+    else context.choose?.(matches);
   }};
 }

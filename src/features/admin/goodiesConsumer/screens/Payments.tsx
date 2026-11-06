@@ -1,13 +1,14 @@
+import {EditableNativeText as Text} from '../EditableNativeText';
 import {label as cmsText} from "../content";
 /* Wantiss Wallet and saved cards for Goodies (live data).
    The shell (GoodiesApp) already scrolls every route except byo and storechat, so this screen must not add its own ScrollView. */
 import React, {useCallback, useEffect, useRef, useState} from 'react';
-import {View, Pressable, Text} from 'react-native';
+import {View, Pressable, Text as UnusedNativeText} from 'react-native';
 import {Icon} from '../components/Icon';
 import {T, Bar, Cta, Card, Row, Badge, Ttl, useTheme} from '../components/ui';
 import {S, money, emit, save, toast, previewOnly} from '../store';
 import {back, createWallet} from '../actions';
-import {supabase} from '../../lib/supabase';
+import {previewBackend as supabase} from '../previewRuntime';
 
 type LoadState = 'loading' | 'ready' | 'error' | 'signedout';
 
@@ -116,7 +117,7 @@ export function LivePayments() {
 
   if (state === 'loading') {
     return (<View>
-      <Bar title={cmsText("lbl.paymentsTitle", "Wallet and payments")} onBack={back} />
+      <Bar cmsKey={"lbl.paymentsTitle"} title={cmsText("lbl.paymentsTitle", "Wallet and payments")} onBack={back} />
       <View style={{paddingHorizontal: 16}}>
         <Skeleton h={120} /><Skeleton h={20} w={110} /><Skeleton h={64} /><Skeleton h={64} />
       </View>
@@ -124,30 +125,30 @@ export function LivePayments() {
   }
   if (state === 'signedout') {
     return (<View>
-      <Bar title={cmsText("lbl.paymentsTitle", "Wallet and payments")} onBack={back} />
+      <Bar cmsKey={"lbl.paymentsTitle"} title={cmsText("lbl.paymentsTitle", "Wallet and payments")} onBack={back} />
       <View style={{padding: 16, paddingTop: 40, alignItems: 'center'}}>
         <Text style={{fontSize: 52}}>🔒</Text>
-        <T size={18} weight="800" style={{marginTop: 8}}>{cmsText("lbl.paymentsSignIn", "Sign in to see your wallet")}</T>
-        <T size={13.5} color={th.mut} align="center" style={{marginVertical: 8, marginBottom: 18}}>{cmsText("lbl.paymentsSignedOut", "Your Wantiss wallet and saved cards are tied to your account.")}</T>
-        <View style={{alignSelf: 'stretch'}}><Cta ghost label={cmsText("lbl.paymentBack", "Back")} onPress={back} /></View>
+        <T cmsKey={"lbl.paymentsSignIn"} size={18} weight="800" style={{marginTop: 8}}>{cmsText("lbl.paymentsSignIn", "Sign in to see your wallet")}</T>
+        <T cmsKey={"lbl.paymentsSignedOut"} size={13.5} color={th.mut} align="center" style={{marginVertical: 8, marginBottom: 18}}>{cmsText("lbl.paymentsSignedOut", "Your Wantiss wallet and saved cards are tied to your account.")}</T>
+        <View style={{alignSelf: 'stretch'}}><Cta cmsKey={"lbl.paymentBack"} ghost label={cmsText("lbl.paymentBack", "Back")} onPress={back} /></View>
       </View>
     </View>);
   }
   if (state === 'error') {
     return (<View>
-      <Bar title={cmsText("lbl.paymentsTitle", "Wallet and payments")} onBack={back} />
+      <Bar cmsKey={"lbl.paymentsTitle"} title={cmsText("lbl.paymentsTitle", "Wallet and payments")} onBack={back} />
       <View style={{paddingHorizontal: 16}}>
         <Card style={{borderColor: th.red}}>
-          <T weight="800">{cmsText("lbl.paymentLoadError", "We couldn’t load your payment details")}</T>
+          <T cmsKey={"lbl.paymentLoadError"} weight="800">{cmsText("lbl.paymentLoadError", "We couldn’t load your payment details")}</T>
           <T size={13} color={th.red} style={{marginTop: 4}}>{problem}</T>
-          <View style={{marginTop: 12}}><Cta small label={cmsText("lbl.paymentRetry", "Try again")} onPress={() => {void load();}} /></View>
+          <View style={{marginTop: 12}}><Cta cmsKey={"lbl.paymentRetry"} small label={cmsText("lbl.paymentRetry", "Try again")} onPress={() => {void load();}} /></View>
         </Card>
       </View>
     </View>);
   }
 
   return (<View>
-    <Bar title={cmsText("lbl.paymentsTitle", "Wallet and payments")} onBack={back} />
+    <Bar cmsKey={"lbl.paymentsTitle"} title={cmsText("lbl.paymentsTitle", "Wallet and payments")} onBack={back} />
     <View style={{paddingHorizontal: 16}}>
       {previewOnly ? <Card style={{borderColor: th.br, marginBottom: 12}}><T weight="800">Demo preview only</T><T size={12.5} color={th.mut} style={{marginTop: 4}}>Sample wallet and card details for editing checkout screens. No real balance, saved card, charge or payment request is used.</T></Card> : null}
       {S.hasWallet ? (
@@ -158,9 +159,9 @@ export function LivePayments() {
         </View>
       ) : (
         <Card>
-          <Row style={{gap: 10}}><Text style={{fontSize: 30}}>👛</Text><View style={{flex: 1}}><T weight="800">{cmsText("lbl.paymentNoWallet", "No Wantiss wallet found")}</T></View></Row>
-          <T size={13} color={th.mut} style={{marginVertical: 6, lineHeight: 19}}>{cmsText("lbl.page.screens.Payments.44a062be63", "You haven’t created a wallet, or it was deleted. Create one to pay with it and to receive refunds. Your balance starts at ")}{money(0)}.</T>
-          <Cta small label={creating ? cmsText("lbl.page.screens.Payments.c79ed9492e", "Creating…") : cmsText("lbl.page.screens.Payments.40a49ea198", "Create wallet")} disabled={creating} onPress={() => {void makeWallet();}} />
+          <Row style={{gap: 10}}><Text style={{fontSize: 30}}>👛</Text><View style={{flex: 1}}><T cmsKey={"lbl.paymentNoWallet"} weight="800">{cmsText("lbl.paymentNoWallet", "No Wantiss wallet found")}</T></View></Row>
+          <T cmsKey={"lbl.page.screens.Payments.44a062be63"} size={13} color={th.mut} style={{marginVertical: 6, lineHeight: 19}}>{cmsText("lbl.page.screens.Payments.44a062be63", "You haven’t created a wallet, or it was deleted. Create one to pay with it and to receive refunds. Your balance starts at ")}{money(0)}.</T>
+          <Cta cmsKeys={["lbl.page.screens.Payments.c79ed9492e","lbl.page.screens.Payments.40a49ea198"]} small label={creating ? cmsText("lbl.page.screens.Payments.c79ed9492e", "Creating…") : cmsText("lbl.page.screens.Payments.40a49ea198", "Create wallet")} disabled={creating} onPress={() => {void makeWallet();}} />
         </Card>
       )}
 
@@ -171,27 +172,27 @@ export function LivePayments() {
             <Icon name="card" size={22} color={th.ink} />
             <View style={{flex: 1}}>
               <T weight="700">{c.b} •••• {c.l4}</T>
-              <T size={12.5} color={th.mut}>{expLabel(c) ? 'Expires ' + expLabel(c) : cmsText("lbl.page.screens.Payments.7e141e8f80", "Saved card")}</T>
+              <T cmsKey={"lbl.page.screens.Payments.7e141e8f80"} size={12.5} color={th.mut}>{expLabel(c) ? 'Expires ' + expLabel(c) : cmsText("lbl.page.screens.Payments.7e141e8f80", "Saved card")}</T>
             </View>
             {c.isDefault ? <Badge green label={cmsText("lbl.paymentDefaultCard", "Default")} /> : null}
             <Pressable accessibilityRole="button" accessibilityLabel={cmsText("lbl.paymentRemoveCard", "Remove card")} hitSlop={12} disabled={!!busyId} onPress={() => removeCard(c.id)}><Icon name="trash" size={18} color={th.red} /></Pressable>
           </Row>
           {(!c.isDefault || confirmId === c.id) ? (
             <Row style={{marginTop: 10, gap: 16}}>
-              {!c.isDefault ? <Pressable accessibilityRole="button" disabled={!!busyId} onPress={() => makeDefault(c.id)}><T size={13.5} weight="700" color={th.br}>{busyId === c.id ? cmsText("lbl.page.screens.Payments.dfe40efe92", "Updating…") : cmsText("lbl.page.screens.Payments.d09b4dd626", "Set as default")}</T></Pressable> : null}
-              {confirmId === c.id ? <Pressable accessibilityRole="button" disabled={!!busyId} onPress={() => removeCard(c.id)}><T size={13.5} weight="700" color={th.red}>{cmsText("lbl.paymentTapAgainRemove", "Tap again to remove")}</T></Pressable> : null}
-              {confirmId === c.id ? <Pressable accessibilityRole="button" onPress={() => setConfirmId('')}><T size={13.5} weight="700" color={th.mut}>{cmsText("lbl.paymentCancel", "Cancel")}</T></Pressable> : null}
+              {!c.isDefault ? <Pressable accessibilityRole="button" disabled={!!busyId} onPress={() => makeDefault(c.id)}><T cmsKeys={["lbl.page.screens.Payments.dfe40efe92","lbl.page.screens.Payments.d09b4dd626"]} size={13.5} weight="700" color={th.br}>{busyId === c.id ? cmsText("lbl.page.screens.Payments.dfe40efe92", "Updating…") : cmsText("lbl.page.screens.Payments.d09b4dd626", "Set as default")}</T></Pressable> : null}
+              {confirmId === c.id ? <Pressable accessibilityRole="button" disabled={!!busyId} onPress={() => removeCard(c.id)}><T cmsKey={"lbl.paymentTapAgainRemove"} size={13.5} weight="700" color={th.red}>{cmsText("lbl.paymentTapAgainRemove", "Tap again to remove")}</T></Pressable> : null}
+              {confirmId === c.id ? <Pressable accessibilityRole="button" onPress={() => setConfirmId('')}><T cmsKey={"lbl.paymentCancel"} size={13.5} weight="700" color={th.mut}>{cmsText("lbl.paymentCancel", "Cancel")}</T></Pressable> : null}
             </Row>
           ) : null}
         </Card>
       )) : (
         <Card style={{alignItems: 'center', paddingVertical: 22}}>
           <Text style={{fontSize: 40}}>💳</Text>
-          <T weight="800" style={{marginTop: 6}}>{cmsText("lbl.paymentNoCards", "No saved cards yet")}</T>
-          <T size={13} color={th.mut} align="center" style={{marginTop: 4, lineHeight: 19}}>{cmsText("lbl.paymentSavedCardsHint", "Saved cards will appear here and can be used at checkout.")}</T>
+          <T cmsKey={"lbl.paymentNoCards"} weight="800" style={{marginTop: 6}}>{cmsText("lbl.paymentNoCards", "No saved cards yet")}</T>
+          <T cmsKey={"lbl.paymentSavedCardsHint"} size={13} color={th.mut} align="center" style={{marginTop: 4, lineHeight: 19}}>{cmsText("lbl.paymentSavedCardsHint", "Saved cards will appear here and can be used at checkout.")}</T>
         </Card>
       )}
-      <Cta ghost label={previewOnly ? 'Demo card · no real card attached' : cmsText("lbl.paymentAddCard", "+ Add a card")} disabled={previewOnly} onPress={() => toast('Adding cards is not available yet.')} />
+      <Cta cmsKey={"lbl.paymentAddCard"} ghost label={previewOnly ? 'Demo card · no real card attached' : cmsText("lbl.paymentAddCard", "+ Add a card")} disabled={previewOnly} onPress={() => toast('Adding cards is not available yet.')} />
       <T size={12} color={th.mut} style={{marginTop: 10}}>Only the brand, last 4 digits and expiry are shown.</T>
     </View>
   </View>);
