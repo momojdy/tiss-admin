@@ -1,3 +1,4 @@
+import {GoodiesSettlementAdmin} from './GoodiesSettlementAdmin';
 import {ui as adminUi} from '../../state/db';
 import React, {useCallback, useEffect, useState} from 'react';
 import {Alert, Image, Pressable, ScrollView, Text, TextInput, View} from 'react-native';
@@ -9,7 +10,7 @@ import {GoodiesAssetLibrary} from './GoodiesAssetLibrary';
 import {resolveGoodiesDeliveryProof} from '../../lib/goodiesDeliveryProof';
 
 type Dashboard = {stats:any;merchants:any[];products:any[];orders:any[]};
-const MODULES=['Overview','Merchants','Product review','Customer reviews','Orders','Delivery reports','Couriers','Fees','Delivery surcharge','Analytics','Goodies assets','Content editor'];
+const MODULES=['Overview','Merchants','Product review','Customer reviews','Orders','Delivery reports','Couriers','Settlement','Fees','Delivery surcharge','Analytics','Goodies assets','Content editor'];
 const money=(v:any)=>new Intl.NumberFormat('en-US',{style:'currency',currency:'USD'}).format(Number(v)||0);
 const cardStyle={backgroundColor:'#fff',borderWidth:1,borderColor:'#E1E6DE',borderRadius:14,padding:14,marginBottom:10} as const;
 const btn=(bg:string)=>({paddingVertical:10,paddingHorizontal:12,borderRadius:10,backgroundColor:bg,alignItems:'center' as const});
@@ -222,6 +223,7 @@ export function GoodiesAdminScreen() {
     {loadError?<View style={cardStyle}><Text style={{color:'#8D3932'}}>{loadError}</Text></View>:null}
     {rejection?<View style={cardStyle}><Text style={valueStyle}>Reject {rejection.item.name}</Text><TextInput accessibilityLabel="Rejection reason" placeholder="Explain what the vendor needs to change" value={rejection.reason} maxLength={500} multiline onChangeText={reason=>setRejection({...rejection,reason})} style={{borderWidth:1,borderColor:'#E1E6DE',padding:12,marginVertical:10,borderRadius:10}} /><View style={{flexDirection:'row',gap:8}}><Pressable disabled={!!busy} onPress={()=>setRejection(null)} style={btn('#E9EEE6')}><Text>Back</Text></Pressable><Pressable disabled={!!busy||!rejection.reason.trim()} onPress={()=>void reviewProduct(rejection.item,'rejected',rejection.reason)} style={btn('#F7EAE8')}><Text>{busy?'Saving…':'Confirm rejection'}</Text></Pressable></View></View>:null}
     {loading?<Text style={{padding:20,color:'#697466'}}>Loading live Goodies data…</Text>:null}
+    {module==='Settlement'?<GoodiesSettlementAdmin/>:null}
     {module==='Overview'&&!loading&&!loadError?<>
       <View style={{flexDirection:'row',flexWrap:'wrap',gap:8}}>
         {Object.entries({Stores:dashboard.stats.stores??0,'Live stores':dashboard.stats.live_stores??0,Products:dashboard.stats.products??0,'Awaiting review':dashboard.stats.pending_products??0,Orders:dashboard.stats.orders??0,'Open orders':dashboard.stats.open_orders??0}).map(([k,v])=><View key={k} style={{...cardStyle,width:'48%',marginBottom:0}}><Text style={labelStyle}>{k}</Text><Text style={{fontSize:24,fontWeight:'800',color:'#1B2619'}}>{String(v)}</Text></View>)}
@@ -313,7 +315,7 @@ export function GoodiesAdminScreen() {
       {switchRow('Credit / debit card','Enable saved-card checkout.',card,setCard)}
       {switchRow('Cash on delivery','Global switch only. Checkout also requires merchant and courier consent.',cash,setCash)}
       <Pressable disabled={!feesLoaded||loading||!!busy} onPress={()=>void saveFees()} style={btn('#294E2C')}><Text style={{color:'#fff',fontWeight:'800'}}>{busy==='fees'?'Saving…':'Save live fee and payment policy'}</Text></Pressable>
-      <Text style={{fontSize:11,color:'#697466',marginTop:8}}>MonCash remains disabled until its Goodies payment integration is available. Store and courier COD permissions remain separate and are checked server-side.</Text>
+      <Text style={{fontSize:11,color:'#697466',marginTop:8}}>MonCash checkout is currently unavailable. Cash orders require the merchant to accept cash payments.</Text>
     </>:null}
     {module==='Analytics'?<>
       <Pressable onPress={()=>void loadAnalytics()} style={{...btn('#E9EEE6'),marginBottom:10}}><Text style={{fontWeight:'700',color:'#344531'}}>Refresh analytics</Text></Pressable>
