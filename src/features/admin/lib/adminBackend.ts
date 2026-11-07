@@ -35,10 +35,13 @@ export interface CmsContentRecord {
 }
 
 async function invoke<T>(name: string, body: Record<string, unknown>): Promise<T> {
-  const { data, error } = await supabase.functions.invoke(name, { body });
-  if (error) throw new Error(error.message || 'The server operation failed.');
-  if (data?.error) throw new Error(String(data.error));
-  return data as T;
+  try {
+    const { data, error } = await supabase.functions.invoke(name, { body });
+    if (error || data?.error) throw new Error('Admin request failed');
+    return data as T;
+  } catch {
+    throw new Error('Could not complete this admin request. Please try again.');
+  }
 }
 
 export async function inviteStaff(email: string, displayName: string, reason: string) {

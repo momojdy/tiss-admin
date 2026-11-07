@@ -1258,6 +1258,20 @@
     ]
   },
   {
+    "id": "lbl.buildersLoadFailed",
+    "text": "Could not load custom products. Please try again.",
+    "pages": [
+      "Build Your Own"
+    ]
+  },
+  {
+    "id": "lbl.buildersLoading",
+    "text": "Loading custom products…",
+    "pages": [
+      "Store"
+    ]
+  },
+  {
     "id": "lbl.byoAddedExplanation",
     "text": "Nothing has been ordered yet. Add more, or review your cart when you are ready.",
     "pages": [
@@ -2023,7 +2037,9 @@
     "text": "Could not load stores",
     "pages": [
       "Shared navigation and access states",
-      "Home"
+      "Shared actions and validation",
+      "Home",
+      "Cart"
     ]
   },
   {
@@ -2039,6 +2055,76 @@
     "pages": [
       "Shared navigation and access states",
       "Home"
+    ]
+  },
+  {
+    "id": "lbl.category.bakery",
+    "text": "Bakery & desserts",
+    "pages": [
+      "Shared components"
+    ]
+  },
+  {
+    "id": "lbl.category.beverages",
+    "text": "Beverages",
+    "pages": [
+      "Shared components"
+    ]
+  },
+  {
+    "id": "lbl.category.care",
+    "text": "Personal care",
+    "pages": [
+      "Shared components"
+    ]
+  },
+  {
+    "id": "lbl.category.drugstore",
+    "text": "Drugstore",
+    "pages": [
+      "Shared components"
+    ]
+  },
+  {
+    "id": "lbl.category.fallback",
+    "text": "Category",
+    "pages": [
+      "Shared components"
+    ]
+  },
+  {
+    "id": "lbl.category.groceries",
+    "text": "Groceries",
+    "pages": [
+      "Shared components"
+    ]
+  },
+  {
+    "id": "lbl.category.haitian",
+    "text": "Haitian products",
+    "pages": [
+      "Shared components"
+    ]
+  },
+  {
+    "id": "lbl.category.meat",
+    "text": "Meat & seafood",
+    "pages": [
+      "Shared components"
+    ]
+  },
+  {
+    "id": "lbl.category.produce",
+    "text": "Fresh produce",
+    "pages": [
+      "Shared components"
+    ]
+  },
+  {
+    "id": "lbl.category.restaurants",
+    "text": "Restaurant",
+    "pages": [
+      "Shared components"
     ]
   },
   {
@@ -2241,6 +2327,7 @@
     "id": "lbl.checkoutCartUnavailable",
     "text": "Your cart is unavailable",
     "pages": [
+      "Cart",
       "Checkout"
     ]
   },
@@ -2392,9 +2479,24 @@
     ]
   },
   {
+    "id": "lbl.checkoutPaymentLoading",
+    "text": "Loading payment methods…",
+    "pages": [
+      "Checkout"
+    ]
+  },
+  {
     "id": "lbl.checkoutPaymentMethod",
     "text": "Payment method",
     "pages": [
+      "Checkout"
+    ]
+  },
+  {
+    "id": "lbl.checkoutPaymentUnavailable",
+    "text": "Payment details unavailable. Please try again.",
+    "pages": [
+      "Shared actions and validation",
       "Checkout"
     ]
   },
@@ -7254,7 +7356,9 @@
       "Home",
       "Card verification",
       "Store",
-      "Store reviews"
+      "Store reviews",
+      "Cart",
+      "Checkout"
     ]
   },
   {

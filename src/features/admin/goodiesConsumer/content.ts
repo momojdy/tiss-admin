@@ -105,6 +105,22 @@ export async function clearContent() {
 }
 export const hasContent = () => !!C;
 
+const categoryFallbacks: Record<string, () => string> = {
+  restaurants: () => label('lbl.category.restaurants', 'Restaurant'),
+  produce: () => label('lbl.category.produce', 'Fresh produce'),
+  beverages: () => label('lbl.category.beverages', 'Beverages'),
+  bakery: () => label('lbl.category.bakery', 'Bakery & desserts'),
+  meat: () => label('lbl.category.meat', 'Meat & seafood'),
+  groceries: () => label('lbl.category.groceries', 'Groceries'),
+  haitian: () => label('lbl.category.haitian', 'Haitian products'),
+  care: () => label('lbl.category.care', 'Personal care'),
+  drugstore: () => label('lbl.category.drugstore', 'Drugstore'),
+};
+export function categoryDisplayName(id: string, text: Txt): string {
+  const translated = tx(text);
+  return translated.trim() ? translated : categoryFallbacks[id]?.() || label('lbl.category.fallback', 'Category');
+}
+
 export function categories(): {id: string; name: Txt; emoji: string; art?: string | null}[] {
   if (!C) return CATS.map(c => ({id: c.id, name: c.name, emoji: c.emoji, art: c.art || null, home: c.home}));
   return C.cats.filter((c: any) => c.st === 'on').sort((a: any, b: any) => a.ord - b.ord).map((c: any) => ({id: c.id, name: c.name, emoji: c.emoji, art: c.art ? c.art.data : null, home: c.home}));

@@ -50,3 +50,14 @@ test('permanent bans remain Super Admin only despite arbitrary granted labels',(
   assert.equal(a.hasRight('Ban accounts'),false);
   Object.assign(a.session,{role:'super_admin'});assert.equal(a.hasRight('Ban accounts'),true);
 });
+
+test('admin invocation hides transport, exception and backend response details',async()=>{
+ const filename=path.resolve(__dirname,'../src/features/admin/lib/adminBackend.ts'),source=ts.createSourceFile(filename,fs.readFileSync(filename,'utf8'),99,true);
+ const fn=source.statements.find(n=>ts.isFunctionDeclaration(n)&&n.name?.text==='invoke');
+ const code=ts.transpileModule(fn.getText(source)+'\nmodule.exports=invoke;', {compilerOptions:{target:ts.ScriptTarget.ES2022,module:ts.ModuleKind.CommonJS}}).outputText;
+ for(const response of [{error:{message:'private SQLSTATE 42501'}},{data:{error:'secret upstream response'}},new Error('private connection token')]){
+  const module={exports:{}};vm.runInNewContext(code,{module,supabase:{functions:{invoke:async()=>{if(response instanceof Error)throw response;return response;}}}});
+  await assert.rejects(module.exports('test',{}),{message:'Could not complete this admin request. Please try again.'});
+ }
+ const module={exports:{}};vm.runInNewContext(code,{module,supabase:{functions:{invoke:async()=>({data:{ok:true}})}}});assert.equal((await module.exports('test',{})).ok,true);
+});

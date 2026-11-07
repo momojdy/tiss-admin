@@ -247,7 +247,7 @@ export const clearFilters = () => {S.f = ''; S.sub = ''; emit();};
 export const setConsent = (v: boolean) => {S.alcConsent = v; emit();};
 export function alcAccept() {S.alcAck = 1; const p = S.pend; ui.close(); if (p && p[0] && !p[2]) cartAdd(p[0], p[1]); else if (p && p[2]) p[2]();}
 export async function refreshPaymentOptions() {
-  if (previewOnly) return;
+  if (previewOnly) {S.paymentOptionsStatus='ready';emit();return true;}
   try {
     const {data: sessionData, error: sessionError} = await supabase.auth.getUser();
     if (sessionError || !sessionData.user) return;

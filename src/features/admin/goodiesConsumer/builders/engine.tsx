@@ -47,8 +47,9 @@ export function fromTemplate(type: 'pizza' | 'burger' | 'custom'): Builder {
   }) as Builder;
 }
 
-export const BYO: {cfg: Record<string, Builder[]>; store: Record<string, boolean>; drafts: Record<string, any>} = {cfg: {}, store: {}, drafts: {}};
+export const BYO: {loading:boolean;error:string;cfg: Record<string, Builder[]>; store: Record<string, boolean>; drafts: Record<string, any>} = {loading:false,error:'',cfg: {}, store: {}, drafts: {}};
 export async function loadBuilders() {
+  if (previewOnly) {BYO.loading=false;BYO.error='';emit();return;}
   if (!previewOnly) try {
     const r = JSON.parse((await AsyncStorage.getItem(BKEY)) || 'null');
     if (r && typeof r === 'object') {if (r.cfg && !Array.isArray(r.cfg)) BYO.cfg = r.cfg; if (r.drafts) BYO.drafts = r.drafts; if (r.store) BYO.store = r.store;}

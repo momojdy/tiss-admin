@@ -5,7 +5,7 @@ import { Pressable, ScrollView, Text, View } from 'react-native';
 import { GoodiesApp } from '../../goodiesConsumer/GoodiesApp';
 import { emit, IT, S, STB, useGoodies, setPreviewOnly, setEditLocked } from '../../goodiesConsumer/store';
 import { BYO, bClean, fromTemplate, setBD } from '../../goodiesConsumer/builders/engine';
-import { applyContent, clearContent, setDraftControlled } from '../../goodiesConsumer/content';
+import { applyContent, clearContent, setDraftControlled, label } from '../../goodiesConsumer/content';
 import { resolveForRender } from '../../goodiesConsumer/draft';
 import { EditContext, type BuilderTarget, type GoodiesSelection } from '../../goodiesConsumer/editContext';
 import { PhoneFrame } from './PhoneFrame';
@@ -80,6 +80,9 @@ export function GoodiesConsumerPreview({ editMode = false, contentDraft, assetUr
     STB[storeId]={id:storeId,n:'Preview store',c:'groceries',e:'🛍️',bg:'bg0',r:0,rv:0,km:0,eta:'20–30',fee:0,min:0,it:[itemId],open:true,live:false} as any;
     IT[itemId]={id:itemId,s:storeId,n:'Preview product',p:5.99,e:'🥭',stock:1,oos:0,d:'Isolated preview item',al:'',w:false,restriction:'none'} as any;
     S.accountId=previewUserId;
+    S.paymentOptionsStatus=nextScenario==='loading'?'loading':nextScenario==='error'?'error':'ready';
+    BYO.loading=nextScenario==='loading';
+    BYO.error=nextScenario==='error'?label('lbl.buildersLoadFailed','Could not load custom products. Please try again.'):'';
     S.sh={id:itemId,size:0,drink:0,q:1,off:0,note:''};
     if(route==='grouporder') S.groupOrder=['host','guest','loading','error'].includes(nextScenario)?{groupId:'__cms_preview_group__',code:'PREVIEW-ONLY',host:'Preview customer',members:[],serverBacked:true,storeId,expiresAt:new Date(Date.now()+3600000).toISOString()}:null;
     // A preview-only store lets the admin open each actual customer builder even
