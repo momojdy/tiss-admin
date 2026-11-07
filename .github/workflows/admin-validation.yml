@@ -21,7 +21,7 @@ jobs:
         uses: actions/checkout@v4
         with:
           repository: momojdy/tiss_tiss_beta
-          ref: 7fba2bba8ef91dfef557935f5d410355deabcf60
+          ref: 6fa5c74475205a04fc22d6ab19f0316fd9c2091a
           path: tiss_tiss_beta
           persist-credentials: false
       - uses: actions/setup-node@v4
