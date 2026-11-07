@@ -1,5 +1,5 @@
 import { AppState, type AppStateStatus } from 'react-native';
-import { supabase } from '../lib/supabase';
+import {previewBackend as supabase} from './previewRuntime';
 import { S, STB, emit, save } from './store';
 
 type ServerOrder = {

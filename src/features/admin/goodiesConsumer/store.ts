@@ -1,7 +1,8 @@
+import {label} from './content';
 
 import {useSyncExternalStore} from 'react';
-import AsyncStorage from '@react-native-async-storage/async-storage';
-import {supabase} from '../lib/supabase';
+import {previewStorage as AsyncStorage} from './previewRuntime';
+import {previewBackend as supabase} from './previewRuntime';
 import {providerInfo} from './providers';
 import type {Store, Item, Address, CartLine, Order} from './data/types';
 import {STAGES_DELIVERY, STAGES_PICKUP} from './data/seed';
@@ -49,7 +50,7 @@ const GDEF = () => ({
   serverUnread: 0,
   notifs: [] as any[],
   orders: [] as Order[], cart: {sid: null as string | null, lines: [] as CartLine[]}, fav: [] as string[], favp: [] as string[], cards: [] as any[],
-  wallet: 0, hasWallet: false, pay: 'cash', selectedCardId: '', mode: 'delivery', tip: 0, promo: '', as: 0, gc: [] as any[], cc: 'w', np: {orders: 0, promos: 0}, rev: {} as any, driverRev: {} as any, rec: [] as any[], rv: [] as any[], groupOrder: null as any,
+  paymentOptionsStatus: 'ready', wallet: 0, hasWallet: false, pay: 'cash', selectedCardId: '', mode: 'delivery', tip: 0, promo: '', as: 0, gc: [] as any[], cc: 'w', np: {orders: 0, promos: 0}, rev: {} as any, driverRev: {} as any, rec: [] as any[], rv: [] as any[], groupOrder: null as any,
 });
 export const WP = ['pf', 'addr'], GP = ['notifs', 'orders', 'cart', 'fav', 'favp', 'pay', 'mode', 'tip', 'promo', 'as', 'gc', 'cc', 'np', 'rev', 'driverRev', 'rec', 'rv', 'groupOrder'];
 
@@ -381,7 +382,7 @@ export function filt(list: Store[]) {
   if (f === 'near') l.sort((a, b) => a.km - b.km);
   return l;
 }
-export const FCH: [string, string][] = [['', 'All'], ['offers', 'Offers'], ['free', 'Free delivery'], ['top', 'Rating 4.5+'], ['fast', 'Under 30 min'], ['open', 'Open now'], ['near', 'Nearest']];
+export const FCH = (): [string, string][] => [['', label('lbl.filterAll', 'All')], ['offers', label('lbl.filterOffers', 'Offers')], ['free', label('lbl.filterFree', 'Free delivery')], ['top', label('lbl.filterTop', 'Rating 4.5+')], ['fast', label('lbl.filterFast', 'Under 30 min')], ['open', label('lbl.filterOpen', 'Open now')], ['near', label('lbl.filterNearest', 'Nearest')]];
 
 /* demo only: wipes local data */
 export async function resetDemo() {

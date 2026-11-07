@@ -1,3 +1,4 @@
+import {listAllCmsAssets} from './cmsAssetPagination';
 import { supabase } from './supabase';
 
 export type AccessLevel = 'view' | 'edit' | 'manage';
@@ -34,10 +35,13 @@ export interface CmsContentRecord {
 }
 
 async function invoke<T>(name: string, body: Record<string, unknown>): Promise<T> {
-  const { data, error } = await supabase.functions.invoke(name, { body });
-  if (error) throw new Error(error.message || 'The server operation failed.');
-  if (data?.error) throw new Error(String(data.error));
-  return data as T;
+  try {
+    const { data, error } = await supabase.functions.invoke(name, { body });
+    if (error || data?.error) throw new Error('Admin request failed');
+    return data as T;
+  } catch {
+    throw new Error('Could not complete this admin request. Please try again.');
+  }
 }
 
 export async function inviteStaff(email: string, displayName: string, reason: string) {
@@ -194,10 +198,9 @@ export async function uploadCmsAsset(input: {
 }
 
 export async function listCmsAssets() {
-  const { data, error } = await supabase.rpc('wantiss_admin_list_cms_assets');
-  if (error) throw new Error(error.code === '42501' ? 'You do not have permission to view assets.' : 'Assets are unavailable.');
-  return data || [];
+  return listAllCmsAssets(supabase);
 }
+
 export async function publishCmsVersion(id: string) {
   const { error } = await supabase.rpc('wantiss_admin_publish_cms_version', { p_content_id: id });
   if (error) throw new Error(error.code === '42501' ? 'Publishing requires content.publish manage permission.' : error.message);
@@ -227,10 +230,11 @@ export interface AdminAccountRestriction {
   created_by: string;
   notify_user: boolean;
   status: 'active' | 'lifted';
+  appeal_status?: 'none' | 'open' | 'upheld';
 }
 export async function listAccountRestrictions(): Promise<AdminAccountRestriction[]> {
   const { data, error } = await supabase.from('wantiss_admin_account_restrictions')
-    .select('id,target_user_id,kind,scope,reason,notes,starts_at,ends_at,created_by,notify_user,status')
+    .select('*')
     .eq('status', 'active').order('created_at', { ascending: false });
   if (error) throw new Error('Account restrictions are unavailable.');
   return data || [];
@@ -300,4 +304,11 @@ export async function reviewFinancialAction(id: string, decision: 'approve' | 'r
     p_action_id: id, p_decision: decision, p_reason: reason,
   });
   if (error) throw new Error(error.code === '42501' ? 'You do not have permission to review financial actions.' : error.message);
+}
+
+export async function recordRestrictionAppeal(restrictionId: string, action: 'receive' | 'uphold', reason: string) {
+  const {error} = await supabase.rpc('wantiss_admin_record_restriction_appeal', {
+    p_restriction_id: restrictionId, p_action: action, p_reason: reason.trim(),
+  });
+  if (error) throw new Error(error.code === '42501' ? 'Super Admin account-restriction permission is required.' : error.message);
 }

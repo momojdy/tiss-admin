@@ -1,0 +1,41 @@
+
+> wantiss-admin-rn@0.12.0 test
+> node tests/access.test.cjs && node tests/cms.test.cjs
+
+✔ signed-out and revoked sessions never inherit prototype permissions (172.490348ms)
+✔ CMS and account controls use canonical server keys and required manage level (41.529022ms)
+✔ expired and revoked grants cannot authorize controls (32.668563ms)
+✔ permanent bans remain Super Admin only despite arbitrary granted labels (48.888808ms)
+ℹ tests 4
+ℹ suites 0
+ℹ pass 4
+ℹ fail 0
+ℹ cancelled 0
+ℹ skipped 0
+ℹ todo 0
+ℹ duration_ms 324.089585
+✔ every registered source field is manually editable in all five locales and survives save serialization (159.809596ms)
+✔ opening an existing draft preserves all edited content, translations and protected configuration (8.456078ms)
+✔ every discovered route has a page entry and every referenced label exists in the starter (8.366023ms)
+✔ FAQ, support topics and policy edits preserve all locales through serialization (19.166594ms)
+✔ required dynamic placeholders cannot disappear on save and edits never promote human review (38.916986ms)
+✔ real structured editor controls save edits and honor read-only access (54.869954ms)
+✔ editing legacy string content preserves its English wording (0.172209ms)
+✔ the existing starter draft remains valid without requiring unrelated text changes (26.062601ms)
+✔ CMS wording never replaces internal payment configuration keys (39.723056ms)
+✔ asset listing reaches beyond the legacy 500-row cap and never reports partial results as complete (19.541447ms)
+✔ critical publication requires explicit review and never promotes translation status (22.166964ms)
+✔ all registered fields complete a local edit-save-review-serialization-consumer lookup round trip (34.303205ms)
+✔ store preview preserves the actual consumer hero geometry and asset behavior (65.102545ms)
+✔ every customer route is available in the preview selector, including secure card and group pages (1.671909ms)
+✔ preview backend blocks writes, checkout, publication and provider calls without any network client (19.15042ms)
+✔ preview retains customer group/card visual attributes and records source provenance (175.50591ms)
+✔ explicit field identities resolve duplicate and dynamic wording while ambiguous legacy text opens a chooser (30.227186ms)
+ℹ tests 17
+ℹ suites 0
+ℹ pass 17
+ℹ fail 0
+ℹ cancelled 0
+ℹ skipped 0
+ℹ todo 0
+ℹ duration_ms 738.627556

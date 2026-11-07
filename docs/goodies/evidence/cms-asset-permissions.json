@@ -1,0 +1,13 @@
+{
+  "project": "ycbirmgppwavorwudlrv",
+  "inspection": "Read-only metadata, 2026-11-06",
+  "table": "public.wantiss_cms_assets",
+  "rls_enabled": true,
+  "authenticated_select": true,
+  "anonymous_select": false,
+  "policy": "wantiss_cms_assets_staff_select",
+  "roles": ["authenticated"],
+  "command": "SELECT",
+  "predicate": "wantiss_has_permission('content.assets'::text, 'view'::text)",
+  "limitation": "Metadata verification; not an authenticated hosted role/HTTP test."
+}

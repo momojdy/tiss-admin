@@ -1,3 +1,4 @@
+import {label as cmsText} from "./content";
 /* Goodies customer app entry; navigation stays inside its own stack. */
 import React, {useEffect, useMemo, useRef, useState} from 'react';
 import {View, Text, Pressable, ScrollView, RefreshControl, Animated, PanResponder, BackHandler, Platform, StatusBar, KeyboardAvoidingView, Dimensions} from 'react-native';
@@ -13,13 +14,17 @@ import {Account} from './screens/Account';
 import {Sheets} from './components/Sheets';
 import {ByoScreen, ByoFoot} from './builders/Builder';
 import {loadBuilders, BD} from './builders/engine';
-import {loadContent} from './content';
+import {loadContent, catName} from './content';
 import {PROMO} from './theme';
 import {CATS} from './data/seed';
 import {t as tr} from './i18n';
 
+import {GroupOrderPage} from './screens/GroupOrders';
+import AddCard from './screens/AddCard';
+import {CardAuthentication} from './screens/CardAuthentication';
+
 const TABS = ['home', 'cats', 'orders', 'cart'];
-const NOCB = ['cart', 'checkout', 'confirm', 'track', 'notifs', 'storechat', 'settings', 'payments', 'help', 'contact', 'supdone', 'profile', 'addresses', 'product', 'wantiss', 'ndetail', 'policies', 'policy', 'byo', 'seller', 'sellerEdit'];
+const NOCB = ['grouporder', 'addcard', 'cardauth', 'cart', 'checkout', 'confirm', 'track', 'notifs', 'storechat', 'settings', 'payments', 'help', 'contact', 'supdone', 'profile', 'addresses', 'product', 'wantiss', 'ndetail', 'policies', 'policy', 'byo', 'seller', 'sellerEdit'];
 const FOOTED = ['product', 'checkout'];
 
 export function GoodiesApp({onExit, embedded = true, previewMode = false}: {onExit?: () => void; embedded?: boolean; previewMode?: boolean}) {
@@ -51,7 +56,7 @@ export function GoodiesApp({onExit, embedded = true, previewMode = false}: {onEx
           const st = stage(o);
           if (st !== o.st) {
             o.st = st; ch = true; const Tt = o.pk ? TP : TL;
-            notify(done(o) ? 'Order ' + (o.pk ? 'picked up' : 'delivered') : 'Order update', o.id + ': ' + Tt[st], 'track', o.id, 'o');
+            notify(done(o) ? 'Order ' + (o.pk ? 'picked up' : 'delivered') : cmsText("lbl.orderNotifUpdate", "Order update"), o.id + ': ' + Tt[st], 'track', o.id, 'o');
             if (done(o)) toast('Order ' + o.id + ' ' + (o.pk ? 'picked up' : 'delivered') + ' 🎉');
           }
         }
@@ -92,6 +97,9 @@ export function GoodiesApp({onExit, embedded = true, previewMode = false}: {onEx
 
   let body: any;
   switch (r) {
+    case 'grouporder': body = <GroupOrderPage onBack={handleBack} storeId={c.p} />; break;
+    case 'addcard': body = <AddCard contentLabel={cmsText} onBack={A.back} />; break;
+    case 'cardauth': body = <CardAuthentication clientSecret='__cms_preview__' publishableKey='__cms_preview__' onComplete={() => toast('Payments are disabled in the CMS preview.')} onCancel={A.back} />; break;
     case 'wantiss': body = <WantissEntry />; break;
     case 'home': body = <Home onExit={handleBack} />; break;
     case 'cats': body = <><TopBar title={tr('categories')} /><Cats /></>; break;
@@ -99,7 +107,7 @@ export function GoodiesApp({onExit, embedded = true, previewMode = false}: {onEx
     case 'cart': body = <Cart />; break;
     case 'explore': body = <Explore />; break;
     case 'search': body = <Search />; break;
-    case 'catlist': body = <><TopBar title={c.p === 'all' ? 'All stores' : String(CATS.find((x: any) => x.id === c.p)?.name || '')} /><CatList p={c.p} /></>; break;
+    case 'catlist': body = <><TopBar title={c.p === 'all' ? cmsText('lbl.catAllStores', 'All stores') : catName(c.p)} /><CatList p={c.p} /></>; break;
     case 'store': body = <Store id={c.p} />; break;
     case 'reviews': body = <StoreReviews id={c.p} />; break;
     case 'product': body = <Product />; break;
@@ -138,7 +146,7 @@ export function GoodiesApp({onExit, embedded = true, previewMode = false}: {onEx
     <KeyboardAvoidingView style={{flex: 1, backgroundColor: th.bg}} behavior={Platform.OS === 'ios' ? 'padding' : 'height'} keyboardVerticalOffset={0} {...pan.panHandlers}>
       <StatusBar barStyle={th.dark ? 'light-content' : 'dark-content'} />
       <SafeAreaView style={{flex: 1}} edges={[]}>
-        {r === 'byo' || r === 'storechat' ? <View style={{flex: 1}}>{body}</View> : <ScrollView ref={scroll} keyboardShouldPersistTaps="handled" onScroll={e => {c.sy = e.nativeEvent.contentOffset.y;}} scrollEventThrottle={64} showsVerticalScrollIndicator={false} refreshControl={r === 'flashdeals' ? <RefreshControl refreshing={refreshing} onRefresh={() => {if (refreshing) return; setRefreshing(true); void loadContent().finally(() => setRefreshing(false));}} /> : undefined} contentContainerStyle={{paddingBottom: showTabs ? 170 : footed ? 120 : 110}}>
+        {['byo','storechat','grouporder','addcard','cardauth'].includes(r) ? <View key={key} style={{flex: 1}}>{body}</View> : <ScrollView ref={scroll} keyboardShouldPersistTaps="handled" onScroll={e => {c.sy = e.nativeEvent.contentOffset.y;}} scrollEventThrottle={64} showsVerticalScrollIndicator={false} refreshControl={r === 'flashdeals' ? <RefreshControl refreshing={refreshing} onRefresh={() => {if (refreshing) return; setRefreshing(true); void loadContent().finally(() => setRefreshing(false));}} /> : undefined} contentContainerStyle={{paddingBottom: showTabs ? 170 : footed ? 120 : 110}}>
           {body}
         </ScrollView>}
       </SafeAreaView>
@@ -148,12 +156,12 @@ export function GoodiesApp({onExit, embedded = true, previewMode = false}: {onEx
       {showCb ? (
         <View pointerEvents="box-none" style={{position: 'absolute', left: 12, right: 12, bottom: showTabs ? 92 + ins.bottom : 14 + ins.bottom, height: 68, zIndex: 12}}>
           <Animated.View {...cartBannerPan.panHandlers} style={{position: 'absolute', left: 0, right: 0, bottom: 0, height: 54, borderRadius: 16, backgroundColor: th.br, flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', paddingLeft: 14, paddingRight: 12, shadowColor: th.br, shadowOpacity: 0.45, shadowRadius: 24, shadowOffset: {width: 0, height: 10}, elevation: 12, transform: [{translateX: cartDragX}]}}>
-            <Pressable accessibilityRole="button" accessibilityLabel="Open cart" onPress={() => A.tab('cart')} style={{flex: 1, height: '100%', flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between'}}>
-              <Row style={{gap: 10}}><View style={{minWidth: 26, height: 26, borderRadius: 13, backgroundColor: 'rgba(255,255,255,.25)', alignItems: 'center', justifyContent: 'center', paddingHorizontal: 6}}><T size={13} weight="800" color="#fff">{cnt()}</T></View><T size={14.5} weight="800" color="#fff">Your cart</T></Row>
-              <View style={{backgroundColor: '#fff', height: 38, paddingHorizontal: 13, borderRadius: 12, justifyContent: 'center'}}><T size={13.5} weight="800" color={th.brd}>View cart · {money(totals().total)}</T></View>
+            <Pressable accessibilityRole="button" accessibilityLabel={cmsText("lbl.browseAutoJGDJ0J", "Open cart")} onPress={() => A.tab('cart')} style={{flex: 1, height: '100%', flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between'}}>
+              <Row style={{gap: 10}}><View style={{minWidth: 26, height: 26, borderRadius: 13, backgroundColor: 'rgba(255,255,255,.25)', alignItems: 'center', justifyContent: 'center', paddingHorizontal: 6}}><T size={13} weight="800" color="#fff">{cnt()}</T></View><T size={14.5} weight="800" color="#fff">{cmsText("lbl.browseAutoEJBBC2", "Your cart")}</T></Row>
+              <View style={{backgroundColor: '#fff', height: 38, paddingHorizontal: 13, borderRadius: 12, justifyContent: 'center'}}><T size={13.5} weight="800" color={th.brd}>{cmsText("lbl.page.GoodiesApp.4af0bf2db1", "View cart · ")}{money(totals().total)}</T></View>
             </Pressable>
           </Animated.View>
-          <Pressable accessibilityRole="button" accessibilityLabel="Dismiss cart banner" onPress={() => { cartDragX.setValue(0); setDismissedCartCount(cnt()); }} hitSlop={8} style={{position: 'absolute', top: -2, right: -3, width: 24, height: 24, borderRadius: 12, backgroundColor: '#FFFFFF', borderWidth: 1, borderColor: th.line, alignItems: 'center', justifyContent: 'center', zIndex: 3, shadowColor: '#000', shadowOpacity: 0.12, shadowRadius: 5, shadowOffset: {width: 0, height: 2}, elevation: 5}}>
+          <Pressable accessibilityRole="button" accessibilityLabel={cmsText("lbl.browseAuto1APR0T", "Dismiss cart banner")} onPress={() => { cartDragX.setValue(0); setDismissedCartCount(cnt()); }} hitSlop={8} style={{position: 'absolute', top: -2, right: -3, width: 24, height: 24, borderRadius: 12, backgroundColor: '#FFFFFF', borderWidth: 1, borderColor: th.line, alignItems: 'center', justifyContent: 'center', zIndex: 3, shadowColor: '#000', shadowOpacity: 0.12, shadowRadius: 5, shadowOffset: {width: 0, height: 2}, elevation: 5}}>
             <Icon name="x" size={13} color={th.br} />
           </Pressable>
         </View>
@@ -197,15 +205,15 @@ function WantissEntry() {
   const th = useTheme();
   return (
     <View style={{padding: 16, paddingTop: 60}}>
-      <T size={32} weight="800" style={{fontFamily: Platform.OS === 'ios' ? 'Georgia' : 'serif'}}>Wantiss</T>
-      <T color={th.mut} style={{marginTop: 6, marginBottom: 24}}>Your everyday super-app (demo entry screen)</T>
+      <T size={32} weight="800" style={{fontFamily: Platform.OS === 'ios' ? 'Georgia' : 'serif'}}>{cmsText("lbl.browseAuto1MQHTQ6", "Wantiss")}</T>
+      <T color={th.mut} style={{marginTop: 6, marginBottom: 24}}>{cmsText("lbl.browseAutoXNYVOQ", "Your everyday super-app (demo entry screen)")}</T>
       <Pressable onPress={() => {S.stack = [{r: 'wantiss', u: 1}, {r: 'home', u: 2}]; emit();}} style={{height: 130, borderRadius: 18, overflow: 'hidden'}}>
         <Grad colors={['#FD802E', '#FF9F4D']} style={{flex: 1, padding: 14}}>
-          <T size={22} weight="800" color="#fff">Goodies</T><T size={12} color="#fff" style={{marginTop: 3}}>Food, groceries, drinks and everyday essentials</T>
+          <T size={22} weight="800" color="#fff">{cmsText("lbl.browseAuto11P24TT", "Goodies")}</T><T size={12} color="#fff" style={{marginTop: 3}}>{cmsText("lbl.browseAuto1R48A8", "Food, groceries, drinks and everyday essentials")}</T>
           <Text style={{position: 'absolute', right: 6, bottom: -4, fontSize: 62}}>🛍️</Text>
         </Grad>
       </Pressable>
-      <T size={12.5} color={th.mut} align="center" style={{marginTop: 16}}>This is a stand-in for the Wantiss home. Other services will appear here.</T>
+      <T size={12.5} color={th.mut} align="center" style={{marginTop: 16}}>{cmsText("lbl.browseAuto2NONO1", "This is a stand-in for the Wantiss home. Other services will appear here.")}</T>
     </View>
   );
 }

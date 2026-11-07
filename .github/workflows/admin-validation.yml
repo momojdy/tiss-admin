@@ -4,20 +4,41 @@ on:
   pull_request:
     branches: [main]
   push:
-    branches: [main, audit/shared-backend-foundation]
+    branches: [main, audit/shared-backend-foundation, goodies/production-readiness]
+
+defaults:
+  run:
+    working-directory: tiss-admin
 
 jobs:
   typecheck:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
+        with:
+          path: tiss-admin
+      - name: Checkout paired customer source for CMS parity tests
+        uses: actions/checkout@v4
+        with:
+          repository: momojdy/tiss_tiss_beta
+          ref: 63659a6ff95e92616eb39dd569e9e73f66744143
+          path: tiss_tiss_beta
+          persist-credentials: false
       - uses: actions/setup-node@v4
         with:
           node-version: 22
           cache: npm
+          cache-dependency-path: tiss-admin/package-lock.json
       - run: npm ci
+      - run: npm test
       - run: npm run typecheck
       - name: Bundle Android application
         run: npx expo export --platform android --output-dir dist/android
       - name: Bundle iOS application
         run: npx expo export --platform ios --output-dir dist/ios
+      - name: Upload admin verification bundles
+        uses: actions/upload-artifact@v4
+        with:
+          name: goodies-admin-native-js-${{ github.sha }}
+          path: tiss-admin/dist
+          if-no-files-found: error

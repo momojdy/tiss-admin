@@ -1,0 +1,21 @@
+
+> wantiss-admin-rn@0.12.0 test
+> node tests/access.test.cjs
+
+✔ signed-out and revoked sessions never inherit prototype permissions (116.04114ms)
+✔ CMS and account controls use canonical server keys and required manage level (31.224755ms)
+✔ expired and revoked grants cannot authorize controls (37.927009ms)
+✔ permanent bans remain Super Admin only despite arbitrary granted labels (45.464037ms)
+ℹ tests 4
+ℹ suites 0
+ℹ pass 4
+ℹ fail 0
+ℹ cancelled 0
+ℹ skipped 0
+ℹ todo 0
+ℹ duration_ms 292.644346
+npm notice
+npm notice New major version of npm available! 11.9.0 -> 12.2.2
+npm notice Changelog: https://github.com/npm/cli/releases/tag/v12.2.2
+npm notice To update run: npm install -g npm@12.2.2
+npm notice

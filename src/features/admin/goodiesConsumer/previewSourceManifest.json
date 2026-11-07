@@ -1,0 +1,50 @@
+{
+  "scope": "Source mirroring and native/provider adapter boundaries; not hosted verification",
+  "copies": [
+    {
+      "target": "screens/GroupOrders.tsx",
+      "origins": [
+        {
+          "file": "src/features/Goodies/components/Sheets.tsx",
+          "sha256": "9b7748b415a73f85867cbab31d9b5d0229f42973ce046b5aa184d10911cdf134"
+        }
+      ]
+    },
+    {
+      "target": "screens/CardAuthentication.tsx",
+      "origins": [
+        {
+          "file": "src/features/Goodies/screens/CardAuthentication.tsx",
+          "sha256": "f6d274dfb2fb18da7be98bcd2084611ec96b3d4b5bbf2e23e28b395f49b82262"
+        }
+      ]
+    },
+    {
+      "target": "screens/AddCard.tsx",
+      "origins": [
+        {
+          "file": "src/screens/Wallet/WalletAddNewCardScreen.tsx",
+          "sha256": "818e7ddca412273e34f6f039afc7b91a6fefd6ee83ce22fbeed1007e56ae92af"
+        }
+      ]
+    },
+    {
+      "target": "components/ui.tsx",
+      "origins": [
+        {
+          "file": "src/features/Goodies/components/ui.tsx",
+          "sha256": "798e1474c20f74e1588161a1de15a155086d5378c43f7c40c4ae4fd6b60bd099"
+        }
+      ]
+    },
+    {
+      "target": "components/Overlays.tsx",
+      "origins": [
+        {
+          "file": "src/features/Goodies/components/Overlays.tsx",
+          "sha256": "cee6a7ac09737d8cdf9571ac2e5696469afc4014799020b4f18a2f567deac6af"
+        }
+      ]
+    }
+  ]
+}

@@ -1,26 +1,20 @@
+import pageCatalog from '../../goodiesConsumer/customerPageCatalog.json';
+import {previewUserId,setPreviewScenario,type PreviewScenario} from '../../goodiesConsumer/previewRuntime';
 import React, { useCallback, useEffect, useLayoutEffect, useMemo, useState } from 'react';
 import { Pressable, ScrollView, Text, View } from 'react-native';
 import { GoodiesApp } from '../../goodiesConsumer/GoodiesApp';
 import { emit, IT, S, STB, useGoodies, setPreviewOnly, setEditLocked } from '../../goodiesConsumer/store';
 import { BYO, bClean, fromTemplate, setBD } from '../../goodiesConsumer/builders/engine';
-import { applyContent, clearContent, setDraftControlled } from '../../goodiesConsumer/content';
+import { applyContent, clearContent, setDraftControlled, label } from '../../goodiesConsumer/content';
 import { resolveForRender } from '../../goodiesConsumer/draft';
 import { EditContext, type BuilderTarget, type GoodiesSelection } from '../../goodiesConsumer/editContext';
 import { PhoneFrame } from './PhoneFrame';
+import { LANGS } from '../../goodiesConsumer/i18n';
 
 const orange = '#FD802E';
 const ink = '#1B1B1F';
 const muted = '#74747C';
-const screens = [
-  { key: 'home', label: 'Home' },
-  { key: 'cats', label: 'Categories' },
-  { key: 'orders', label: 'Orders' },
-  { key: 'settings', label: 'Account' },
-  { key: 'cart', label: 'Cart' },
-  { key: 'store', label: 'Store' },
-  { key: 'product', label: 'Product' },
-  { key: 'checkout', label: 'Checkout' },
-] as const;
+const screens = pageCatalog.flatMap(page => page.routes.filter(key => key !== 'byo').map(key => ({key,label:page.name})));
 
 /** Renders a resolved copy of the editor-owned draft and prevents consumer loading from overwriting it. */
 export function GoodiesConsumerPreview({ editMode = false, contentDraft, assetUrls, selectedTarget, onSelectTarget, savedBuilders, builderTarget, onPickBuilder }: {
@@ -48,6 +42,9 @@ export function GoodiesConsumerPreview({ editMode = false, contentDraft, assetUr
   }, [savedBuilders, sampleBuilders]);
   const [builderMenuOpen, setBuilderMenuOpen] = useState(false);
   const [selectedBuilderId, setSelectedBuilderId] = useState('');
+  const [choices,setChoices]=useState<string[]>([]);
+  const [scenario,setScenario]=useState<PreviewScenario>('default');
+  const [zoom, setZoom] = useState(1);
   const selectedBuilder = previewBuilders.find((builder: any) => builder.id === selectedBuilderId) || previewBuilders[0];
   // Keep the preview store in step with edits and drop the old in-progress order so removed items cannot linger.
   useEffect(() => {
@@ -58,29 +55,36 @@ export function GoodiesConsumerPreview({ editMode = false, contentDraft, assetUr
     emit();
   }, [previewBuilders]);
   const resolved = useMemo(() => {
-    if (!contentDraft) return null;
-    try { return resolveForRender(contentDraft, assetUrls); } catch { return null; }
+    if (!contentDraft) return {content:null,error:''};
+    try { return {content:resolveForRender(contentDraft, assetUrls),error:''}; } catch { return {content:null,error:'This draft could not be rendered. Check the content fields and asset references.'}; }
   }, [contentDraft, assetUrls]);
 
   // Runs before the children's effects on first mount, and on every draft change.
   useLayoutEffect(() => {
     try {
-      if (resolved) applyContent(resolved); else void clearContent();
+      if (resolved.content) applyContent(resolved.content); else void clearContent();
     } catch { void clearContent(); }
     emit();
   }, [resolved]);
 
   useEffect(() => {
     setEditLocked(editMode);
-    if (editMode) { S.stack = [{ r: 'home', u: Date.now() }]; emit(); }
+    emit();
     return () => setEditLocked(false);
   }, [editMode]);
 
   useEffect(() => () => { setDraftControlled(false); void clearContent(); }, []);
 
-  const navigate = useCallback((route: string, builderId?: string) => {
-    const itemId = Object.keys(IT)[0] || '';
-    const storeId = Object.keys(STB).find((id) => !id.startsWith('__admin_goodies_')) || 's12';
+  const navigate = useCallback((route: string, builderId?: string, nextScenario:PreviewScenario=scenario) => {
+    const storeId='__admin_goodies_checkout_preview__',itemId='__admin_goodies_checkout_item__';
+    STB[storeId]={id:storeId,n:'Preview store',c:'groceries',e:'🛍️',bg:'bg0',r:0,rv:0,km:0,eta:'20–30',fee:0,min:0,it:[itemId],open:true,live:false} as any;
+    IT[itemId]={id:itemId,s:storeId,n:'Preview product',p:5.99,e:'🥭',stock:1,oos:0,d:'Isolated preview item',al:'',w:false,restriction:'none'} as any;
+    S.accountId=previewUserId;
+    S.paymentOptionsStatus=nextScenario==='loading'?'loading':nextScenario==='error'?'error':'ready';
+    BYO.loading=nextScenario==='loading';
+    BYO.error=nextScenario==='error'?label('lbl.buildersLoadFailed','Could not load custom products. Please try again.'):'';
+    S.sh={id:itemId,size:0,drink:0,q:1,off:0,note:''};
+    if(route==='grouporder') S.groupOrder=['host','guest','loading','error'].includes(nextScenario)?{groupId:'__cms_preview_group__',code:'PREVIEW-ONLY',host:'Preview customer',members:[],serverBacked:true,storeId,expiresAt:new Date(Date.now()+3600000).toISOString()}:null;
     // A preview-only store lets the admin open each actual customer builder even
     // when no live store has published one. Nothing from this fixture is saved.
     const previewStoreId = '__admin_goodies_builder_preview__';
@@ -88,7 +92,25 @@ export function GoodiesConsumerPreview({ editMode = false, contentDraft, assetUr
     BYO.store[previewStoreId] = true;
     BYO.cfg[previewStoreId] = previewBuilders;
     const chosen = previewBuilders.find((builder: any) => builder.id === (builderId || selectedBuilder?.id)) || previewBuilders[0];
-    const param = route === 'store' ? storeId : route === 'byo' ? previewStoreId + '|' + chosen.id : route === 'product' ? itemId : undefined;
+    let param: any = (route === 'store' || route === 'reviews' || route === 'storechat' || route === 'grouporder') ? storeId : route === 'byo' ? previewStoreId + '|' + chosen.id : route === 'product' ? itemId : undefined;
+    if (route === 'catlist') param = 'all';
+    if (route === 'policy') param = 'terms';
+    if (route === 'supdone') param = {ticket:'PREVIEW-ONLY'};
+    if (route === 'ndetail') {
+      param='__admin_goodies_notification_preview__';
+      S.notifs=[{id:param,t:'Sample notification',d:'Preview only. No notification was sent.',r:'promos',p:null,read:false},...S.notifs.filter((notice:any)=>notice.id!==param)] as any;
+    }
+    if (route === 'confirm' || route === 'track') {
+      const fixtureStore = '__admin_goodies_order_preview__';
+      STB[fixtureStore] = {id: fixtureStore, n: 'Sample Goodies store', c: 'groceries', e: '🛍️', bg: 'bg0', r: 0, rv: 0, km: 0, eta: '20–30', fee: 0, min: 0, it: [], open: true, live: false} as any;
+      param = '__admin_goodies_sample_order__';
+      const fixture = {id: param, backendId: param, serverStatus: 'accepted', sid: fixtureStore,
+        sn: 'Sample Goodies store', lines: [{id: '__preview_item__', k: '__preview_item__', n: 'Sample item', e: '🥭', p: 5, q: 1, d: ''}],
+        sub: 5, fee: 0, svc: 0, disc: 0, tip: 0, total: 5, t0: Date.now(), st: 1, rated: 0, cx: 0, pk: false,
+        addr: 'Sample delivery address', ad: {t: 'Sample delivery address', apt: ''}, ph: '2025550100',
+        pay: 'cash', payl: 'Preview only', note: '', sch: 0, promo: '', alc: null};
+      S.orders = [fixture, ...S.orders.filter((order: any) => order.id !== param)] as any;
+    }
     if (route === 'checkout') {
       // A local-only fixture gives the checkout editor a complete journey without
       // loading a real customer's cart, wallet, address or payment methods.
@@ -118,17 +140,26 @@ export function GoodiesConsumerPreview({ editMode = false, contentDraft, assetUr
       ? [{ r: 'home', u: now }]
       : [{ r: 'home', u: now - 1 }, { r: route, p: param, u: now }];
     emit();
-  }, [previewBuilders, selectedBuilder]);
+  }, [previewBuilders, selectedBuilder, scenario]);
 
-  const editValue = useMemo(() => (editMode ? { selected: selectedTarget, select: onSelectTarget, pick: onPickBuilder, picked: builderTarget || null } : null), [editMode, selectedTarget, onSelectTarget, onPickBuilder, builderTarget]);
+  const editValue = useMemo(() => (editMode ? { selected: selectedTarget, select: onSelectTarget, choose:setChoices, pick: onPickBuilder, picked: builderTarget || null } : null), [editMode, selectedTarget, onSelectTarget, onPickBuilder, builderTarget]);
 
   return (
     <View style={{ width: '100%', alignItems: 'center' }}>
       <View style={{ width: '100%', maxWidth: 390, marginBottom: 10, paddingHorizontal: 4 }}>
-        <Text style={{ color: ink, fontSize: 12, fontWeight: '800' }}>{editMode ? 'Edit actual Goodies consumer screen' : 'Actual Goodies consumer screens'}</Text>
+        <Text style={{ color: ink, fontSize: 12, fontWeight: '800' }}>{editMode ? 'Edit Goodies content preview' : 'Goodies content preview'}</Text>
         <Text style={{ color: muted, fontSize: 10, lineHeight: 15, marginTop: 3 }}>
-          {editMode ? 'Use the screen tabs to open a page, then tap editable text in the phone to select its matching field.' : 'Rendered from the consumer app source using the current draft. Placing orders is disabled in this preview.'}
+          {editMode ? 'Use the screen tabs to open a page, then tap editable text in the phone to select its matching field.' : 'Rendered using the current draft and isolated sample data. Placing orders is disabled in this preview.'}
         </Text>
+        <Text style={{ color: muted, fontSize: 10, marginTop: 6 }}>Draft preview · Sample data only · Fixtures apply to group/card pages; no order, card or payment is saved. · Unreviewed translations may appear here; customers receive reviewed translations or English.</Text>
+        <ScrollView horizontal showsHorizontalScrollIndicator={false} contentContainerStyle={{ gap: 6, paddingVertical: 8 }}>
+          {LANGS.map(locale => <Pressable key={locale.code} accessibilityRole="button" accessibilityLabel={'Preview in ' + locale.label} accessibilityState={{selected: S.lang === locale.code}} onPress={() => {S.lang = locale.code; emit();}} style={{padding: 7, borderRadius: 12, backgroundColor: S.lang === locale.code ? orange : '#F1F1F2'}}><Text style={{fontSize: 10, color: S.lang === locale.code ? '#FFFFFF' : ink}}>{locale.label}</Text></Pressable>)}
+          {[0.75, 1, 1.25].map(value => <Pressable key={value} accessibilityRole="button" accessibilityLabel={'Preview zoom ' + Math.round(value * 100) + '%'} accessibilityState={{selected: zoom === value}} onPress={() => setZoom(value)} style={{padding: 7, borderRadius: 12, backgroundColor: zoom === value ? orange : '#F1F1F2'}}><Text style={{fontSize: 10, color: zoom === value ? '#FFFFFF' : ink}}>{Math.round(value * 100)}%</Text></Pressable>)}
+        </ScrollView>
+        <ScrollView horizontal showsHorizontalScrollIndicator={false} contentContainerStyle={{gap:6,paddingVertical:8}}>
+          {(['default','loading','error','host','guest','saving','success'] as PreviewScenario[]).map(value=><Pressable key={value} accessibilityRole="button" accessibilityLabel={'Preview fixture: '+value} accessibilityState={{selected:scenario===value}} onPress={()=>{setPreviewScenario(value);setScenario(value);const current=S.stack[S.stack.length-1];navigate(current.r,undefined,value);}} style={{padding:7,borderRadius:12,backgroundColor:scenario===value?orange:'#F1F1F2'}}><Text style={{fontSize:10,color:scenario===value?'white':ink}}>{value} fixture</Text></Pressable>)}
+        </ScrollView>
+        {choices.length?<View accessibilityLabel="Matching CMS fields" style={{padding:8,borderWidth:1,borderColor:orange}}>{choices.map(id=><Pressable key={id} onPress={()=>{onSelectTarget({kind:'label',id,field:'text'});setChoices([]);}} style={{padding:8}}><Text style={{fontSize:11}}>{id}</Text></Pressable>)}</View>:null}
         <ScrollView horizontal showsHorizontalScrollIndicator={false} contentContainerStyle={{ gap: 6, paddingVertical: 10 }}>
           {screens.map((screen) => {
             const active = S.stack?.[S.stack.length - 1]?.r === screen.key;
@@ -160,11 +191,14 @@ export function GoodiesConsumerPreview({ editMode = false, contentDraft, assetUr
           </View>
         ) : null}
       </View>
-      <PhoneFrame background="#FFFFFF">
+      {resolved.error?<Text accessibilityRole="alert" style={{color:'#B42318',padding:12}}>{resolved.error}</Text>:null}
+      <ScrollView horizontal contentContainerStyle={{flexGrow: 1, justifyContent: 'center'}}>
+      <PhoneFrame background="#FFFFFF" zoom={zoom}>
         <EditContext.Provider value={editValue}>
           <GoodiesApp embedded previewMode />
         </EditContext.Provider>
       </PhoneFrame>
+      </ScrollView>
     </View>
   );
 }

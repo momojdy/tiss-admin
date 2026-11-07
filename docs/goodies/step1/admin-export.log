@@ -1,0 +1,33 @@
+Starting Metro Bundler
+
+iOS Bundled 19876ms index.ts (1180 modules)
+Android Bundled 36905ms index.ts (1188 modules)
+
+› Assets (16):
+node_modules/@expo-google-fonts/manrope/200ExtraLight/Manrope_200ExtraLight.ttf (97KB)
+node_modules/@expo-google-fonts/manrope/300Light/Manrope_300Light.ttf (97KB)
+node_modules/@expo-google-fonts/manrope/400Regular/Manrope_400Regular.ttf (97KB)
+node_modules/@expo-google-fonts/manrope/500Medium/Manrope_500Medium.ttf (97KB)
+node_modules/@expo-google-fonts/manrope/600SemiBold/Manrope_600SemiBold.ttf (97KB)
+node_modules/@expo-google-fonts/manrope/700Bold/Manrope_700Bold.ttf (97KB)
+node_modules/@expo-google-fonts/manrope/800ExtraBold/Manrope_800ExtraBold.ttf (98KB)
+node_modules/@expo-google-fonts/outfit/Outfit_100Thin.ttf (36KB)
+node_modules/@expo-google-fonts/outfit/Outfit_200ExtraLight.ttf (36KB)
+node_modules/@expo-google-fonts/outfit/Outfit_300Light.ttf (36KB)
+node_modules/@expo-google-fonts/outfit/Outfit_400Regular.ttf (36KB)
+node_modules/@expo-google-fonts/outfit/Outfit_500Medium.ttf (36KB)
+node_modules/@expo-google-fonts/outfit/Outfit_600SemiBold.ttf (36KB)
+node_modules/@expo-google-fonts/outfit/Outfit_700Bold.ttf (36KB)
+node_modules/@expo-google-fonts/outfit/Outfit_800ExtraBold.ttf (36KB)
+node_modules/@expo-google-fonts/outfit/Outfit_900Black.ttf (36KB)
+
+› ios bundles (1):
+_expo/static/js/ios/index-ed3908c2f5a610679f41a6f8000ab816.hbc (4.8MB)
+
+› android bundles (1):
+_expo/static/js/android/index-a731bf25569c0e3f7740e948f2a3569a.hbc (4.8MB)
+
+› Files (1):
+metadata.json (2.3KB)
+
+Exported: /tmp/goodies-step1-admin-verified

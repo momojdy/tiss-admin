@@ -1,3 +1,7 @@
+import {goodiesPublicationErrors} from '../../goodiesConsumer/publicationReview';
+import customerPageCatalog from '../../goodiesConsumer/customerPageCatalog.json';
+import {mergeMissingLabels, setLocalizedText, contentTextValues} from '../../goodiesConsumer/contentEditing';
+import {GoodiesPageContentFields} from './GoodiesPageContentFields';
 import { useCallback, useEffect, useMemo, useState } from 'react';
 import { Image, Pressable, TextInput, View } from 'react-native';
 import * as ImagePicker from 'expo-image-picker';
@@ -27,13 +31,16 @@ type Notice = { tone: 'ok' | 'warn' | 'error'; text: string };
 const COLUMNS = 'id,content_key,version,status,payload';
 const ASSET_BUCKET = 'wantiss-cms-assets';
 
-const listKeyFor = (kind: GoodiesSelection['kind']) => (kind === 'mode' ? 'modes' : kind === 'promo' ? 'promos' : kind === 'category' ? 'cats' : 'labels');
-const textKeyFor = (sel: GoodiesSelection) => (sel.kind === 'label' ? 't' : sel.kind === 'category' ? 'name' : sel.field);
-const PAGE_ORDER = ['Home, browse & discovery', 'Store, products & reviews', 'Cart, deals & coupons', 'Checkout, delivery & payment', 'Orders, actions & validation', 'Build Your Own & ingredients', 'Account, notifications & help', 'Store chat & messages', 'Scheduling & delivery', 'Reviews & ratings', 'Addresses', 'Contact numbers', 'Group orders', 'Courier, cart & wallet sheets', 'Shared sheets & modal actions', 'Order tracking steps', 'Screen reader labels', 'Other Goodies pages & shared messages'];
+const listKeyFor = (kind: GoodiesSelection['kind']) => (kind === 'mode' ? 'modes' : kind === 'promo' ? 'promos' : kind === 'category' ? 'cats' : kind === 'library' ? 'lib' : 'labels');
+const textKeyFor = (sel: GoodiesSelection) => (sel.kind === 'label' ? 't' : sel.kind === 'category' || sel.kind === 'library' ? 'name' : sel.field);
+const PAGE_ORDER = ['Home, browse & discovery', 'Store, products & reviews', 'Cart, deals & coupons', 'Checkout, delivery & payment', 'Orders, actions & validation', 'Build Your Own & ingredients', 'Account, notifications & help', 'Notification templates', 'Store chat & messages', 'Scheduling & delivery', 'Reviews & ratings', 'Addresses', 'Contact numbers', 'Group orders', 'Courier, cart & wallet sheets', 'Shared sheets & modal actions', 'Order tracking steps', 'Screen reader labels', 'Other Goodies pages & shared messages'];
 
 const labelPage = (id: string) => {
+  const sourcePage = customerPageCatalog.find(page => page.fields.includes(id));
+  if (sourcePage) return sourcePage.name;
   const key = id.replace(/^lbl\./, '').toLowerCase();
   const groups: Array<[RegExp, string]> = [
+    [/^notification\./, 'Notification templates'],
     [/^a11y/, 'Screen reader labels'],
     [/^stage/, 'Order tracking steps'],
     [/^(chat|message|conversation|storechat|storemessage|contact)/, 'Store chat & messages'],
@@ -58,9 +65,9 @@ const labelPage = (id: string) => {
 
 const HOME_LABEL_IDS = ['lbl.search', 'lbl.coupons', 'lbl.coupons2', 'lbl.flash', 'lbl.again', 'lbl.recent', 'lbl.popular', 'lbl.produce', 'lbl.haitian', 'lbl.trending'];
 
-const readText = (value: any, language = 'en'): string => (typeof value === 'string' ? value : String(value?.[language]?.v ?? ''));
+const readText = (value: any, language = 'en'): string => (typeof value === 'string' ? (language === 'en' ? value : '') : String(value?.[language]?.v ?? ''));
 const fieldName: Record<string, string> = { title: 'Title', sub: 'Subtitle', btn: 'Button text', text: 'Text', art: 'Emoji and image' };
-const kindName: Record<string, string> = { mode: 'Service tile', promo: 'Promotion', category: 'Category', label: 'Text' };
+const kindName: Record<string, string> = { mode: 'Service tile', promo: 'Promotion', category: 'Category', label: 'Text', library: 'Ingredient artwork' };
 
 /** Owns the Goodies draft lifecycle; stores asset keys and keeps signed URLs in memory only. */
 export function GoodiesEditor({ canEdit, canPublish }: { canEdit: boolean; canPublish: boolean }) {
@@ -78,6 +85,7 @@ export function GoodiesEditor({ canEdit, canPublish }: { canEdit: boolean; canPu
   const [notice, setNotice] = useState<Notice | null>(null);
   const [confirmPublish, setConfirmPublish] = useState(false);
   const [assets, setAssets] = useState<any[]>([]);
+  const [assetSearch, setAssetSearch] = useState('');
   const [assetUrls, setAssetUrls] = useState<Record<string, string>>({});
   const [assetNote, setAssetNote] = useState('');
   const [pendingAssets, setPendingAssets] = useState<Record<string, string>>({});
@@ -109,16 +117,14 @@ export function GoodiesEditor({ canEdit, canPublish }: { canEdit: boolean; canPu
       } else {
         const errors = validateGoodiesDraft(latest.payload);
         if (errors.length) throw new Error('Version ' + latest.version + ' (' + latest.status + ') is not valid Goodies content. ' + errors[0]);
-        const opened = clone(latest.payload);
+        const opened = mergeMissingLabels(clone(latest.payload), buildStarterDraft());
         /* Newly added text fields appear in the editor with their default wording; saving keeps them. */
-        const known = new Set((opened.labels || []).map((entry: any) => entry.id));
-        opened.labels = [...(opened.labels || []), ...buildStarterDraft().labels.filter((entry: any) => !known.has(entry.id))];
         setDraft(opened); setRow(latest); setBaseline(stable(sanitizeForSave(latest.payload))); setSource(latest.status === 'published' ? 'published' : 'draft'); setSelection(null);
       }
       setLoadState('ready');
     } catch (e) {
       // Never replace existing content on a failure: the previous draft stays as it was.
-      setLoadError(e instanceof Error ? e.message : 'Goodies content could not be loaded.');
+      setLoadError('Goodies content could not be loaded.');
       setLoadState('error');
     }
   }, []);
@@ -135,15 +141,17 @@ export function GoodiesEditor({ canEdit, canPublish }: { canEdit: boolean; canPu
       setAssets(Array.from(byKey.values()));
       const paths = Array.from(byKey.values()).map((a) => a.storage_path);
       if (!paths.length) { setAssetUrls({}); setAssetNote(''); return; }
-      const { data, error } = await supabase.storage.from(ASSET_BUCKET).createSignedUrls(paths, 3600);
-      if (error) throw new Error('Draft images cannot be previewed: ' + error.message);
       const urlByPath = new Map<string, string>();
-      (data || []).forEach((d: any) => { if (d?.path && d?.signedUrl) urlByPath.set(d.path, d.signedUrl); });
+      for (let index=0; index<paths.length; index+=100) {
+        const {data,error}=await supabase.storage.from(ASSET_BUCKET).createSignedUrls(paths.slice(index,index+100),3600);
+        if(error) throw new Error('Draft images cannot be previewed. Please try again.');
+        (data || []).forEach((entry:any)=>{if(entry?.path&&entry?.signedUrl)urlByPath.set(entry.path,entry.signedUrl);});
+      }
       const next: Record<string, string> = {};
       byKey.forEach((a, key) => { const url = urlByPath.get(a.storage_path); if (url) next[key] = url; });
       setAssetUrls(next); setAssetNote('');
     } catch (e) {
-      setAssetNote(e instanceof Error ? e.message : 'Assets are unavailable.');
+      setAssetNote('Assets are unavailable.');
     }
   }, []);
 
@@ -172,16 +180,16 @@ export function GoodiesEditor({ canEdit, canPublish }: { canEdit: boolean; canPu
   const setLabelText = (id: string, value: string) => edit((next) => {
     const target = (next.labels || []).find((entry: any) => entry.id === id);
     if (!target) return;
-    const holder = target.t && typeof target.t === 'object' ? target.t : {};
-    holder[editLanguage] = { v: value, s: value.trim() ? 'draft' : 'missing' };
-    target.t = holder;
+    target.t = setLocalizedText(target.t, editLanguage, value);
   });
   const pageGroups = useMemo(() => {
-    const grouped = new Map<string, any[]>();
+    const grouped = new Map<string, any[]>(customerPageCatalog.map(page => [page.name, []]));
     (draft?.labels || []).filter((entry: any) => !HOME_LABEL_IDS.includes(String(entry.id))).forEach((entry: any) => {
-      const page = labelPage(String(entry.id || ''));
-      if (!grouped.has(page)) grouped.set(page, []);
-      grouped.get(page)!.push(entry);
+      const pages = customerPageCatalog.filter(page => page.fields.includes(String(entry.id))).map(page=>page.name);
+      (pages.length ? pages : [labelPage(String(entry.id || ''))]).forEach(page=>{
+        if (!grouped.has(page)) grouped.set(page, []);
+        grouped.get(page)!.push(entry);
+      });
     });
     const rank = (name: string) => { const i = PAGE_ORDER.indexOf(name); return i < 0 ? 99 : i; };
     return Array.from(grouped.entries()).sort(([a], [b]) => rank(a) - rank(b) || a.localeCompare(b));
@@ -213,10 +221,7 @@ export function GoodiesEditor({ canEdit, canPublish }: { canEdit: boolean; canPu
     const target = findItem(next, selection);
     if (!target) return;
     const key = textKeyFor(selection);
-    const current = target[key];
-    const holder = current && typeof current === 'object' ? current : {};
-    holder[editLanguage] = { v: value, s: value.trim() ? 'draft' : 'missing' };
-    target[key] = holder;
+    target[key] = setLocalizedText(target[key], editLanguage, value);
   });
   const setSelectedTranslationReviewed = (reviewed: boolean) => edit((next) => {
     if (!selection) return;
@@ -239,9 +244,9 @@ export function GoodiesEditor({ canEdit, canPublish }: { canEdit: boolean; canPu
     target.t=holder;
   });
   const localeCoverage = useMemo(() => {
-    const entries=draft?.labels||[];
-    return {total:entries.length,filled:entries.filter((x:any)=>String(x.t?.[editLanguage]?.v||'').trim()).length,reviewed:entries.filter((x:any)=>x.t?.[editLanguage]?.s==='reviewed').length};
-  },[draft?.labels,editLanguage]);
+    const entries=contentTextValues(draft);
+    return {total:entries.length,filled:entries.filter((x:any)=>readText(x,editLanguage).trim()).length,reviewed:entries.filter((x:any)=>x?.[editLanguage]?.s==='reviewed').length};
+  },[draft,editLanguage]);
   const setEmoji = (value: string) => edit((next) => { const target = selection && findItem(next, selection); if (target) target.emoji = value; });
   const setImage = (image: any) => edit((next) => { const target = selection && findItem(next, selection); if (target) target[imageKey] = image; });
   const setMeta = (kind: GoodiesSelection['kind'], id: string, key: string, value: string) => edit((next) => {
@@ -251,11 +256,11 @@ export function GoodiesEditor({ canEdit, canPublish }: { canEdit: boolean; canPu
   const metaInput = (kind: GoodiesSelection['kind'], entry: any, key: string, label: string) => (
     <View style={{ width: key === 'ord' ? 104 : undefined, maxWidth: key === 'ord' ? 104 : undefined, flex: key === 'ord' ? 0 : 1, flexShrink: 1, minWidth: 0, marginTop: 6 }}>
       <Txt size={9.5} mut>{label}</Txt>
-      <TextInput value={String(entry[key] ?? '')} onChangeText={(value) => setMeta(kind, entry.id, key, value)} editable={canEdit && !busy && !assetBusy} keyboardType={key === 'ord' ? 'number-pad' : 'default'} maxLength={key === 'ord' ? 4 : undefined} style={[fieldStyle, key === 'ord' ? { width: '100%', minWidth: 0, textAlign: 'center', paddingHorizontal: 6 } : null]} />
+      <TextInput value={String(entry[key] ?? '')} onChangeText={(value) => setMeta(kind, entry.id, key, value)} editable={editMode && !busy && !assetBusy} keyboardType={key === 'ord' ? 'number-pad' : 'default'} maxLength={key === 'ord' ? 4 : undefined} style={[fieldStyle, key === 'ord' ? { width: '100%', minWidth: 0, textAlign: 'center', paddingHorizontal: 6 } : null]} />
     </View>
   );
   const toggleLive = (kind: GoodiesSelection['kind'], entry: any, key: string, active: string, inactive: string) => (
-    <OutlineBtn onPress={() => setMeta(kind, entry.id, key, entry[key] === active ? inactive : active)} disabled={!canEdit || !!busy || !!assetBusy}>
+    <OutlineBtn onPress={() => setMeta(kind, entry.id, key, entry[key] === active ? inactive : active)} disabled={!editMode || !!busy || !!assetBusy}>
       {entry[key] === active ? 'Hide' : 'Show'}
     </OutlineBtn>
   );
@@ -286,14 +291,14 @@ export function GoodiesEditor({ canEdit, canPublish }: { canEdit: boolean; canPu
       }
       if (!byteSize) throw new Error('The selected image size could not be read.');
       setAssetBusy(source);
-      const key = 'wantiss.goodies.home.' + selection.kind + '.' + selection.id + '.' + createAssetUploadId();
-      const id = await uploadCmsAsset({ key, uri, fileName, contentType, byteSize, altText: { en: 'Goodies Home ' + selection.kind + ' image' }, status: 'draft' });
+      const key = (selection.kind === 'library' ? 'wantiss.goodies.lib.' : 'wantiss.goodies.home.') + selection.kind + '.' + selection.id + '.' + createAssetUploadId();
+      const id = await uploadCmsAsset({ key, uri, fileName, contentType, byteSize, altText: { en: 'Goodies ' + selection.kind + ' image' }, status: 'draft' });
       setPendingAssets((current) => ({ ...current, [key]: id }));
       setImage({ assetKey: key });
       await loadAssets();
-      setAssetNote('Image uploaded as a private draft. Publish the image before publishing the Home content.');
+      setAssetNote('Image uploaded as a private draft. Publish the image before publishing the Goodies content.');
     } catch (e) {
-      setAssetNote(e instanceof Error ? e.message : 'The image could not be uploaded.');
+      setAssetNote('The image could not be uploaded.');
     } finally { setAssetBusy(''); }
   };
 
@@ -305,8 +310,8 @@ export function GoodiesEditor({ canEdit, canPublish }: { canEdit: boolean; canPu
       await publishCmsAsset(id);
       setPendingAssets((current) => { const next = { ...current }; delete next[key]; return next; });
       await loadAssets();
-      setAssetNote('Image published. Save the Home draft, then publish the Home content.');
-    } catch (e) { setAssetNote(e instanceof Error ? e.message : 'The image could not be published.'); }
+      setAssetNote('Image published. Save the Goodies draft, then publish the Goodies content.');
+    } catch (e) { setAssetNote('The image could not be published.'); }
     finally { setAssetBusy(''); }
   };
 
@@ -328,7 +333,7 @@ export function GoodiesEditor({ canEdit, canPublish }: { canEdit: boolean; canPu
 
   const save = async () => {
     if (!draft || !clean || !canEdit || busy) return;
-    const errors = validateGoodiesDraft(clean);
+    const errors = validateGoodiesDraft(clean, true);
     if (errors.length) { setNotice({ tone: 'error', text: 'Not saved. ' + errors[0] }); return; }
     setBusy('save'); setNotice(null); setConfirmPublish(false);
     try {
@@ -346,12 +351,14 @@ export function GoodiesEditor({ canEdit, canPublish }: { canEdit: boolean; canPu
         setNotice({ tone: 'warn', text: 'Saved as version ' + saved.version + ' but the stored content differs from what was sent. Press Reload and review.' });
       }
     } catch (e) {
-      setNotice({ tone: 'error', text: 'Not saved. ' + (e instanceof Error ? e.message : 'The draft could not be saved.') });
+      setNotice({ tone: 'error', text: 'Not saved. ' + ('The draft could not be saved.') });
     } finally { setBusy(''); }
   };
 
   const publish = async () => {
     if (!canPublish || !row || row.status !== 'draft' || dirty || busy || !draft) return;
+    const reviewErrors = goodiesPublicationErrors(draft);
+    if(reviewErrors.length){setNotice({tone:'error',text:reviewErrors[0]});return;}
     setBusy('publish'); setNotice(null);
     try {
       const keys = referencedAssetKeys(draft);
@@ -371,7 +378,7 @@ export function GoodiesEditor({ canEdit, canPublish }: { canEdit: boolean; canPu
         ? { tone: 'ok', text: 'Published version ' + row.version + ' and confirmed on the public endpoint.' }
         : { tone: 'warn', text: 'Version ' + row.version + ' was published. The public endpoint caches for up to a minute, so press Reload shortly to confirm.' });
     } catch (e) {
-      setNotice({ tone: 'error', text: 'Not published. ' + (e instanceof Error ? e.message : 'Publishing failed.') });
+      setNotice({ tone: 'error', text: 'Not published. ' + ('Publishing failed.') });
     } finally { setBusy(''); setConfirmPublish(false); }
   };
 
@@ -396,12 +403,12 @@ export function GoodiesEditor({ canEdit, canPublish }: { canEdit: boolean; canPu
   const promoColorPicker = (entry: any) => {
     const previewColor = promoColors.find((option) => option.id === entry.color)?.colors[0] || '#7B3FE4';
     return (
-      <CollapsibleColorField label="Promotion card color" value={previewColor} disabled={!canEdit || !!busy || !!assetBusy}>
+      <CollapsibleColorField label="Promotion card color" value={previewColor} disabled={!editMode || !!busy || !!assetBusy}>
         <View style={{ gap: 8 }}>
           <View style={{ flexDirection: 'row', flexWrap: 'wrap', gap: 7 }}>
             {promoColors.map((option) => <Pressable key={option.id} accessibilityRole="button" accessibilityLabel={'Set ' + option.label + ' promotion color'} onPress={() => setPromoColor(entry, option.id)} style={{ flexDirection: 'row', alignItems: 'center', gap: 6, paddingVertical: 6, paddingHorizontal: 9, borderRadius: 18, borderWidth: entry.color === option.id ? 2 : 1, borderColor: entry.color === option.id ? c.ink : c.bd, backgroundColor: c.card }}><View style={{ width: 28, height: 18, borderRadius: 6, backgroundColor: option.colors[0], borderWidth: 1, borderColor: option.colors[1] }} /><Txt size={10} weight={entry.color === option.id ? 600 : 400}>{option.label}</Txt>{entry.color === option.id ? <Txt size={10}>✓</Txt> : null}</Pressable>)}
           </View>
-          <PromoColorPicker value={String(entry.color || 'plum')} onChange={(color) => setPromoColor(entry, color)} disabled={!canEdit || !!busy || !!assetBusy} />
+          <PromoColorPicker value={String(entry.color || 'plum')} onChange={(color) => setPromoColor(entry, color)} disabled={!editMode || !!busy || !!assetBusy} />
         </View>
       </CollapsibleColorField>
     );
@@ -470,22 +477,22 @@ export function GoodiesEditor({ canEdit, canPublish }: { canEdit: boolean; canPu
           <View style={{ flexDirection: 'row', flexWrap: 'wrap', gap: 6, marginBottom: 10 }}>
             {(['en','fr','ht','es','zh-Hans'] as const).map((lang) => <OutlineBtn key={lang} primary={editLanguage===lang} onPress={()=>setEditLanguage(lang)}>{({en:'English',fr:'Français',ht:'Kreyòl',es:'Español','zh-Hans':'中文'} as any)[lang]}</OutlineBtn>)}
           </View>
-          <Txt size={9.5} mut style={{marginBottom:8}}>{localeCoverage.filled}/{localeCoverage.total} labels translated · {localeCoverage.reviewed} marked reviewed in this language</Txt>
+          <Txt size={9.5} mut style={{marginBottom:8}}>{localeCoverage.filled}/{localeCoverage.total} text fields translated · {localeCoverage.reviewed} marked reviewed in this language</Txt>
           <View style={{ borderWidth: 2, borderStyle: 'dashed', borderColor: '#FD802E', borderRadius: 12, padding: 10 }}>
           {!item ? (
             <View>
-              {selection.kind === 'label' ? <View style={{ marginTop: 8 }}><OutlineBtn primary onPress={createLabel}>Create editable text</OutlineBtn></View> : null}
+              {selection.kind === 'label' ? <View style={{ marginTop: 8 }}><OutlineBtn disabled={!editMode} primary onPress={createLabel}>Create editable text</OutlineBtn></View> : null}
             </View>
           ) : selection.field !== 'art' ? (
             <View>
               <Txt size={9.5} mut>{fieldName[selection.field]}</Txt>
-              <TextInput value={readText(item[textKeyFor(selection)], editLanguage)} onChangeText={setText} style={fieldStyle} placeholder={fieldName[selection.field]} />
-              <View style={{marginTop:7,alignSelf:'flex-start'}}><OutlineBtn onPress={()=>setSelectedTranslationReviewed(item[textKeyFor(selection)]?.[editLanguage]?.s!=='reviewed')} disabled={!canEdit || !readText(item[textKeyFor(selection)],editLanguage).trim()}>{item[textKeyFor(selection)]?.[editLanguage]?.s==='reviewed'?'Marked reviewed':'Mark this translation reviewed'}</OutlineBtn></View>
+              <TextInput editable={editMode && !busy && !assetBusy} value={readText(item[textKeyFor(selection)], editLanguage)} onChangeText={setText} style={fieldStyle} placeholder={fieldName[selection.field]} />
+              <View style={{marginTop:7,alignSelf:'flex-start'}}><OutlineBtn onPress={()=>setSelectedTranslationReviewed(item[textKeyFor(selection)]?.[editLanguage]?.s!=='reviewed')} disabled={!editMode || !readText(item[textKeyFor(selection)],editLanguage).trim()}>{item[textKeyFor(selection)]?.[editLanguage]?.s==='reviewed'?'Marked reviewed':'Mark this translation reviewed'}</OutlineBtn></View>
             </View>
           ) : (
             <View>
               <Txt size={9.5} mut>Emoji</Txt>
-              <TextInput value={String(item.emoji || '')} onChangeText={setEmoji} style={fieldStyle} placeholder="Emoji" />
+              <TextInput editable={editMode && !busy && !assetBusy} value={String(item.emoji || '')} onChangeText={setEmoji} style={fieldStyle} placeholder="Emoji" />
               <Txt size={9.5} mut>Image</Txt>
               <View style={{ flexDirection: 'row', alignItems: 'center', gap: 12, flexWrap: 'wrap', marginTop: 8 }}>
                 {thumbnailFor(item, selection.kind) ? <Image source={{ uri: thumbnailFor(item, selection.kind) }} resizeMode="contain" style={{ width: 100, height: 64, borderRadius: 8, backgroundColor: '#FFFFFF' }} /> : <View style={{ width: 100, height: 64, borderRadius: 8, backgroundColor: c.inset, alignItems: 'center', justifyContent: 'center' }}><Txt size={10} mut>{item.emoji || 'No image'}</Txt></View>}
@@ -503,19 +510,21 @@ export function GoodiesEditor({ canEdit, canPublish }: { canEdit: boolean; canPu
               <View style={{ marginTop: 10 }}>
                 <Txt size={10.5} weight={500}>Choose an existing CMS image</Txt>
                 <Txt size={9.5} mut style={{ marginTop: 2, marginBottom: 5 }}>Select an image to use it for this item. The preview updates immediately.</Txt>
-                {assets.slice(0, 20).map((asset) => {
+                <TextInput value={assetSearch} onChangeText={setAssetSearch} placeholder="Search all CMS images by asset key" style={fieldStyle} />
+                {assets.filter(asset => !assetSearch.trim() || asset.asset_key.toLowerCase().includes(assetSearch.trim().toLowerCase())).slice(0, 100).map((asset) => {
                   const active = currentImage?.assetKey === asset.asset_key || currentImage?.asset_key === asset.asset_key;
                   return (
                     <Pressable key={asset.id} onPress={() => pickAsset(asset)} accessibilityRole="button" accessibilityLabel={'Select image ' + asset.asset_key} style={{ flexDirection: 'row', alignItems: 'center', gap: 12, flexWrap: 'wrap', paddingVertical: 8, paddingHorizontal: 7, marginBottom: 5, borderWidth: active ? 2 : 1, borderColor: active ? c.ink : c.bd, borderRadius: 10, backgroundColor: active ? c.inset : c.card }}>
                       {assetUrls[asset.asset_key] ? <Image source={{ uri: assetUrls[asset.asset_key] }} resizeMode="contain" style={{ width: 100, height: 64, borderRadius: 8, backgroundColor: '#FFFFFF' }} /> : <View style={{ width: 100, height: 64, borderRadius: 8, backgroundColor: c.inset, alignItems: 'center', justifyContent: 'center' }}><Txt size={10} mut>No preview</Txt></View>}
                       <View style={{ flex: 1, minWidth: 150 }}>
                         <Txt size={10.5} weight={500}>{asset.asset_key}</Txt>
-                        <Txt size={9.5} mut>{asset.status === 'published' ? 'Published image' : 'Draft image · publish before publishing Home content'}</Txt>
+                        <Txt size={9.5} mut>{asset.status === 'published' ? 'Published image' : 'Draft image · publish before publishing Goodies content'}</Txt>
                         {active ? <Txt size={9.5} weight={500}>Currently selected ✓</Txt> : <Txt size={9.5} mut>Tap to select</Txt>}
                       </View>
                     </Pressable>
                   );
                 })}
+                {assets.length > 100 ? <Txt size={9.5} mut>Showing up to 100 matches. Search by asset key to find any image.</Txt> : null}
                 {!assets.length ? <Txt size={10} mut>No image assets found yet. Choose an image above or upload it in Content Studio.</Txt> : null}
               </View>
               <Txt size={9.5} mut style={{ marginTop: 8 }}>Or use an external https link (not managed by the CMS)</Txt>
@@ -614,7 +623,7 @@ export function GoodiesEditor({ canEdit, canPublish }: { canEdit: boolean; canPu
             ))}
             {!draft.labels?.length ? <Txt size={10} mut style={{ marginTop: 6 }}>No Home text fields are configured.</Txt> : null}
           </Section>
-          <Section title="Other pages · Text">
+          <Section title="Pages · Text">
             <View style={{ flexDirection: 'row', flexWrap: 'wrap', gap: 6, marginBottom: 10 }}>
             {(['en','fr','ht','es','zh-Hans'] as const).map((lang) => <OutlineBtn key={lang} primary={editLanguage===lang} onPress={()=>setEditLanguage(lang)}>{({en:'English',fr:'Français',ht:'Kreyòl',es:'Español','zh-Hans':'中文'} as any)[lang]}</OutlineBtn>)}
           </View>
@@ -627,11 +636,29 @@ export function GoodiesEditor({ canEdit, canPublish }: { canEdit: boolean; canPu
             {activeEntries.map((entry: any) => (
               <View key={entry.id} style={{ marginTop: 8, paddingTop: 6, borderTopWidth: 1, borderTopColor: c.bd }}>
                 <Txt size={10.5} mut>{entry.label || entry.id}</Txt>
-                <TextInput value={readText(entry.t, editLanguage)} onChangeText={(value) => setLabelText(entry.id, value)} editable={canEdit && !busy} multiline={readText(entry.t,editLanguage).length > 60} style={[fieldStyle, readText(entry.t,editLanguage).length > 60 ? { minHeight: 64, textAlignVertical: 'top' } : null]} placeholder={'Text customers see in ' + editLanguage.toUpperCase()} />
-                <View style={{marginTop:6,alignSelf:'flex-start'}}><OutlineBtn onPress={()=>setLabelTranslationReviewed(entry.id,entry.t?.[editLanguage]?.s!=='reviewed')} disabled={!canEdit || !String(entry.t?.[editLanguage]?.v||'').trim()}>{entry.t?.[editLanguage]?.s==='reviewed'?'Reviewed':'Mark reviewed'}</OutlineBtn></View>
+                <Txt size={9} mut>{entry.id}</Txt>
+                <TextInput value={readText(entry.t, editLanguage)} onChangeText={(value) => setLabelText(entry.id, value)} editable={editMode && !busy} multiline={readText(entry.t,editLanguage).length > 60} style={[fieldStyle, readText(entry.t,editLanguage).length > 60 ? { minHeight: 64, textAlignVertical: 'top' } : null]} placeholder={'Text customers see in ' + editLanguage.toUpperCase()} />
+                <View style={{marginTop:6,alignSelf:'flex-start'}}><OutlineBtn onPress={()=>setLabelTranslationReviewed(entry.id,entry.t?.[editLanguage]?.s!=='reviewed')} disabled={!editMode || !String(entry.t?.[editLanguage]?.v||'').trim()}>{entry.t?.[editLanguage]?.s==='reviewed'?'Reviewed':'Mark reviewed'}</OutlineBtn></View>
               </View>
             ))}
           </Section>
+          <Section title="Assets · Existing ingredient artwork">
+            <Txt size={10} mut>Replace the artwork used by configured builders. Keep artwork IDs stable so saved configurations retain their references.</Txt>
+            {(draft.lib || []).map((entry: any) => <View key={entry.id} style={{marginTop:8,paddingTop:8,borderTopWidth:1,borderTopColor:c.bd}}>
+              <Txt size={10.5}>{readText(entry.name) || entry.id}</Txt>
+              <View style={{flexDirection:'row',flexWrap:'wrap',gap:6,marginTop:5}}>
+                <OutlineBtn onPress={()=>select({kind:'library',id:entry.id,field:'text'})}>Edit name</OutlineBtn>
+                <OutlineBtn onPress={()=>select({kind:'library',id:entry.id,field:'art'})}>Edit image</OutlineBtn>
+                {toggleLive('library',{...entry,st:entry.st==='off'?'off':'on'},'st','on','off')}
+              </View>
+              <View style={{flexDirection:'row',flexWrap:'wrap',gap:8}}>{[['rk','Layer order'],['w','Layer width'],['k','Layer overlap']].map(([key,title])=><View key={key} style={{minWidth:100,flex:1}}>
+                <Txt size={9.5} mut>{title}</Txt>
+                <TextInput style={fieldStyle} value={String(entry[key] ?? '')} editable={editMode&&!busy} keyboardType="numeric" onChangeText={value=>edit(next=>{const target=next.lib.find((row:any)=>row.id===entry.id);const number=Number(value);if(target)target[key]=value.trim()&&Number.isFinite(number)?number:null;})}/>
+              </View>)}</View>
+            </View>)}
+            {!draft.lib?.length?<Txt size={10} mut>No shared ingredient artwork is configured. Builder-specific images remain in the existing builder editor.</Txt>:null}
+          </Section>
+          <GoodiesPageContentFields draft={draft} locale={editLanguage} disabled={!editMode || !!busy} edit={edit} />
           <GoodiesIngredientRequests canEdit={canEdit} />
         </>
       ) : null}
