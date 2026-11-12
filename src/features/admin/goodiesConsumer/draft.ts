@@ -1,5 +1,5 @@
 /* Goodies draft validation and safe asset handling; confirm the v5 schema against the original Admin export. */
-import {CATS} from './data/seed';
+import {CATS} from './draftCategories';
 import {DEFAULT_PROMOS} from './data/defaultPromos';
 import {clone} from '../lib/clone';
 import {t as tr} from './i18n';

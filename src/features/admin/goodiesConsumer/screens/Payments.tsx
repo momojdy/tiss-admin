@@ -18,7 +18,7 @@ type LoadState = 'loading' | 'ready' | 'error' | 'signedout';
 /* Same shape as refreshPaymentOptions() in actions.ts, which checkout reads (id, b, l4, expiryMonth, expiryYear, isDefault). */
 const normalizeCard = (c: any) => ({
   id: String(c.id),
-  b: String(c.brand || 'Card'),
+  b: String(c.brand || label('lbl.paymentCardFallback', 'Card')),
   l4: String(c.last4 || ''),
   expiryMonth: c.expiry_month,
   expiryYear: c.expiry_year,
@@ -31,7 +31,7 @@ function Skeleton({h, w}: {h: number; w?: number | string}) {
   return <View style={{height: h, width: (w ?? '100%') as any, borderRadius: 14, backgroundColor: th.soft, marginBottom: 12}} />;
 }
 
-export function LivePayments() {
+export function LivePayments({onOpenWallet}: {onOpenWallet?:()=>void}={}) {
   const th = useTheme();
   const [state, setState] = useState<LoadState>('loading');
   const [problem, setProblem] = useState('');
@@ -61,7 +61,7 @@ export function LivePayments() {
       ]);
       if (wallet.error) throw wallet.error;
       if (methods.error) throw methods.error;
-      if (!mounted.current) return;
+      if (!mounted.current || S.accountId !== auth.user.id) return;
       S.hasWallet = !!wallet.data?.id;
       S.wallet = Number(wallet.data?.balance || 0);
       S.cards = (methods.data || []).map(normalizeCard);
@@ -96,12 +96,12 @@ export function LivePayments() {
     if (ok && mounted.current) await load();
   };
   const makeDefault = (id: string) => {
-    void act(id, () => supabase.rpc('set_default_payment_method', {p_payment_method_id: id}), 'Default card updated', 'Could not change your default card.');
+    void act(id, () => supabase.rpc('set_default_payment_method', {p_payment_method_id: id}), label("lbl.page.screens.Payments.0d5c557a94", "Default card updated"), label("lbl.page.screens.Payments.5519facea3", "Could not change your default card."));
   };
   const removeCard = (id: string) => {
     if (busyRef.current) return;
     if (confirmId !== id) {setConfirmId(id); return;}
-    void act(id, () => supabase.rpc('delete_payment_method', {p_payment_method_id: id}), 'Card removed', 'Could not remove this card.');
+    void act(id, () => supabase.rpc('delete_payment_method', {p_payment_method_id: id}), label("lbl.page.screens.Payments.0e75e7b8ad", "Card removed"), label("lbl.page.screens.Payments.901ecf3e48", "Could not remove this card."));
   };
   const makeWallet = async () => {
     if (creating) return;
@@ -149,7 +149,7 @@ export function LivePayments() {
         <View style={{marginBottom: 12}}>
           {/* Same green wallet card as the Wallet feature home; it loads its own balance and stays live. */}
           <View style={{marginHorizontal: -16, marginTop: -13}}><WalletBalance contentLabel={label} /></View>
-          <Pressable accessibilityRole="button" accessibilityLabel={label('lbl.paymentTopup', 'Top up')} hitSlop={10} onPress={() => toast(label('lbl.paymentTopupUnavailable', 'Wallet top-up is not available yet.'))} style={{alignSelf: 'flex-start', marginTop: 10, flexDirection: 'row', alignItems: 'center', gap: 6}}>
+          <Pressable accessibilityRole="button" accessibilityLabel={label('lbl.paymentTopup', 'Top up')} hitSlop={10} onPress={() => onOpenWallet ? onOpenWallet() : toast(label('lbl.paymentOpenWallet','Open Wantiss Wallet from the main menu to add funds.'))} style={{alignSelf: 'flex-start', marginTop: 10, flexDirection: 'row', alignItems: 'center', gap: 6}}>
             <Icon name="plus" size={16} color={th.br} /><T cmsKey={'lbl.paymentTopup'} size={13.5} weight="600" color={th.br}>{label('lbl.paymentTopup', 'Top up')}</T>
           </Pressable>
         </View>
@@ -168,7 +168,7 @@ export function LivePayments() {
             <Icon name="card" size={22} color={th.ink} />
             <View style={{flex: 1}}>
               <T weight="600">{c.b} •••• {c.l4}</T>
-              <T cmsKeys={["lbl.cms.832feb1f5f0c","lbl.cms.b4fe1f1f9202"]} size={12.5} color={th.mut}>{expLabel(c) ? label("lbl.cms.832feb1f5f0c", "Expires ") + expLabel(c) : label("lbl.cms.b4fe1f1f9202", "Saved card")}</T>
+              <T cmsKeys={['lbl.paymentExpires',"lbl.cms.b4fe1f1f9202"]} size={12.5} color={th.mut}>{expLabel(c) ? label('lbl.paymentExpires', 'Expires {expiry}').replace('{expiry}', expLabel(c)) : label("lbl.cms.b4fe1f1f9202", "Saved card")}</T>
             </View>
             {c.isDefault ? <Badge cmsKey={'lbl.paymentDefaultCard'} green label={label('lbl.paymentDefaultCard', 'Default')} /> : null}
             <Pressable accessibilityRole="button" accessibilityLabel={label('lbl.paymentRemoveCard', 'Remove card')} hitSlop={12} disabled={!!busyId} onPress={() => removeCard(c.id)}><Icon name="trash" size={18} color={th.red} /></Pressable>

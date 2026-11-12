@@ -17,12 +17,15 @@ export function CardAuthentication({clientSecret, publishableKey, onComplete, on
   const [busy, setBusy] = useState(false);
   const [problem, setProblem] = useState('');
   const verifying=label('lbl.cardVerifying','Securely verifying your card…');
+  const [retry, setRetry] = useState(0);
+  const networkFailed = () => {setBusy(false);setProblem(label('lbl.cardNetworkFailed', 'Card verification could not load. Check your connection and try again.'));};
   const html = useMemo(() => {
     const safeVerifying=verifying.replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]!));
     const secret = JSON.stringify(clientSecret);
     const key = JSON.stringify(publishableKey);
-      return `<!doctype html><html><head><meta name="viewport" content="width=device-width,initial-scale=1"></head><body style="font-family:Arial,sans-serif;color:#1A2517;padding:18px;text-align:center"><p>${safeVerifying}</p><script src="https://js.stripe.com/v3/"></script><script>
+      return `<!doctype html><html><head><meta name="viewport" content="width=device-width,initial-scale=1"></head><body style="font-family:Arial,sans-serif;color:#1A2517;padding:18px;text-align:center"><p>${safeVerifying}</p><script src="https://js.stripe.com/v3/" onerror="window.ReactNativeWebView&&window.ReactNativeWebView.postMessage(JSON.stringify({error:'Card form unavailable'}))"></script><script>
       const send=x=>window.ReactNativeWebView&&window.ReactNativeWebView.postMessage(JSON.stringify(x));
+      window.addEventListener('error',()=>send({error:'Card form unavailable'}));
       const stripe=Stripe(${key});
       stripe.handleCardAction(${secret}).then(({paymentIntent,error})=>{
         if(error){send({error:error.message||'Card verification failed'});return;}
@@ -46,11 +49,11 @@ export function CardAuthentication({clientSecret, publishableKey, onComplete, on
         <Text cmsKey={"lbl.cms.d8fc219cd4f7"} style={{color: th.mut, fontSize: 13, lineHeight: 19, marginTop: 6}}>{label("lbl.cms.d8fc219cd4f7", "Complete the secure verification from your bank. Your card is only captured after verification succeeds.")}</Text>
       </Card>
       <View style={{height: 330, overflow: 'hidden', borderRadius: 14, backgroundColor: '#fff'}}>
-        <WebView source={{html, baseUrl: 'https://wantiss.app'}} originWhitelist={['*']} javaScriptEnabled domStorageEnabled onMessage={onMessage} onLoadStart={() => setBusy(true)} onLoadEnd={() => setBusy(false)} />
+        <WebView key={retry} onError={networkFailed} onHttpError={networkFailed} source={{html, baseUrl: 'https://wantiss.app'}} originWhitelist={['*']} javaScriptEnabled domStorageEnabled onMessage={onMessage} onLoadStart={() => setBusy(true)} onLoadEnd={() => setBusy(false)} />
       </View>
       {busy ? <View style={{flexDirection: 'row', alignItems: 'center', gap: 8}}><ActivityIndicator color={th.br} /><Text cmsKey={"lbl.cms.6db1d18c8e5d"} style={{color: th.mut, fontSize: 12}}>{label("lbl.cms.6db1d18c8e5d", "Waiting for secure card verification…")}</Text></View> : null}
-      {problem ? <Text style={{color: th.red, fontSize: 13}}>{problem}</Text> : null}
-      <Cta cmsKey={"lbl.cms.e9f88c775f6c"} ghost label={label("lbl.cms.e9f88c775f6c", "Cancel verification")} onPress={onCancel} disabled={busy} />
+      {problem ? <><Text style={{color: th.red, fontSize: 13}}>{problem}</Text><Cta cmsKey={'lbl.retry'} ghost label={label('lbl.retry', 'Try again')} onPress={() => {setProblem('');setRetry(v => v + 1);}} /></> : null}
+      <Cta cmsKey={"lbl.cms.e9f88c775f6c"} ghost label={label("lbl.cms.e9f88c775f6c", "Cancel verification")} onPress={onCancel} />
     </View>
   </View>;
 }

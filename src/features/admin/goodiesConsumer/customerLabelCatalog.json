@@ -21,6 +21,13 @@
     ]
   },
   {
+    "id": "lbl.a11yOpenStore",
+    "text": "Open {store}",
+    "pages": [
+      "Search"
+    ]
+  },
+  {
     "id": "lbl.a11yRateDriver",
     "text": "Rate driver {n} stars",
     "pages": [
@@ -49,6 +56,13 @@
     ]
   },
   {
+    "id": "lbl.a11yRemoveStoreFavorite",
+    "text": "Remove {store}",
+    "pages": [
+      "Search"
+    ]
+  },
+  {
     "id": "lbl.a11ySaveFavorite",
     "text": "Save {name} to favorites",
     "pages": [
@@ -60,6 +74,13 @@
     "text": "Save to favorites",
     "pages": [
       "Shared components"
+    ]
+  },
+  {
+    "id": "lbl.a11ySaveStoreFavorite",
+    "text": "Save {store}",
+    "pages": [
+      "Search"
     ]
   },
   {
@@ -140,6 +161,14 @@
     ]
   },
   {
+    "id": "lbl.accountCustomerFallback",
+    "text": "Customer",
+    "pages": [
+      "Store conversation",
+      "Contact support"
+    ]
+  },
+  {
     "id": "lbl.accountDarkModeHint",
     "text": "Goodies only. Other Wantiss features keep their theme.",
     "pages": [
@@ -158,27 +187,6 @@
     "text": "Delivery instructions",
     "pages": [
       "Addresses"
-    ]
-  },
-  {
-    "id": "lbl.accountDemoHeading",
-    "text": "Demo",
-    "pages": [
-      "Settings"
-    ]
-  },
-  {
-    "id": "lbl.accountDemoResetDone",
-    "text": "Demo data reset",
-    "pages": [
-      "Settings"
-    ]
-  },
-  {
-    "id": "lbl.accountDemoTicketSent",
-    "text": "Ticket {ticket} (demo). Your support request is not connected to a live support inbox yet.",
-    "pages": [
-      "Account subpages"
     ]
   },
   {
@@ -207,13 +215,6 @@
     "text": "Help and support",
     "pages": [
       "Profile"
-    ]
-  },
-  {
-    "id": "lbl.accountImportContent",
-    "text": "Import Admin content",
-    "pages": [
-      "Settings"
     ]
   },
   {
@@ -280,6 +281,20 @@
     ]
   },
   {
+    "id": "lbl.accountOrderCountMany",
+    "text": "{count} orders",
+    "pages": [
+      "Profile"
+    ]
+  },
+  {
+    "id": "lbl.accountOrderCountOne",
+    "text": "{count} order",
+    "pages": [
+      "Profile"
+    ]
+  },
+  {
     "id": "lbl.accountPageNotFound",
     "text": "Page not found",
     "pages": [
@@ -287,31 +302,17 @@
     ]
   },
   {
-    "id": "lbl.accountPasteAdminExport",
-    "text": "Paste the export from Wantiss Admin",
-    "pages": [
-      "Settings"
-    ]
-  },
-  {
-    "id": "lbl.accountResetDemo",
-    "text": "Reset Goodies demo data",
-    "pages": [
-      "Settings"
-    ]
-  },
-  {
-    "id": "lbl.accountResetDemoHint",
-    "text": "Clears orders, cart and checkout numbers",
-    "pages": [
-      "Settings"
-    ]
-  },
-  {
     "id": "lbl.accountSaveAddress",
     "text": "Save address",
     "pages": [
       "Addresses"
+    ]
+  },
+  {
+    "id": "lbl.accountSavedCount",
+    "text": "{count} saved",
+    "pages": [
+      "Settings"
     ]
   },
   {
@@ -352,6 +353,13 @@
   {
     "id": "lbl.accountSupportSentTitle",
     "text": "Message sent",
+    "pages": [
+      "Account subpages"
+    ]
+  },
+  {
+    "id": "lbl.accountSupportTicketSent",
+    "text": "Your support request {ticket} has been sent. Keep this reference if you contact us again.",
     "pages": [
       "Account subpages"
     ]
@@ -899,6 +907,13 @@
     ]
   },
   {
+    "id": "lbl.addressSelectedFallback",
+    "text": "your selected address",
+    "pages": [
+      "Shared actions and validation"
+    ]
+  },
+  {
     "id": "lbl.again",
     "text": "Order again",
     "pages": [
@@ -927,38 +942,10 @@
     ]
   },
   {
-    "id": "lbl.browseAuto11P24TT",
-    "text": "Goodies",
-    "pages": [
-      "Wantiss entry"
-    ]
-  },
-  {
     "id": "lbl.browseAuto1APR0T",
     "text": "Dismiss cart banner",
     "pages": [
       "Shared navigation and access states"
-    ]
-  },
-  {
-    "id": "lbl.browseAuto1MQHTQ6",
-    "text": "Wantiss",
-    "pages": [
-      "Wantiss entry"
-    ]
-  },
-  {
-    "id": "lbl.browseAuto1R48A8",
-    "text": "Food, groceries, drinks and everyday essentials",
-    "pages": [
-      "Wantiss entry"
-    ]
-  },
-  {
-    "id": "lbl.browseAuto2NONO1",
-    "text": "This is a stand-in for the Wantiss home. Other services will appear here.",
-    "pages": [
-      "Wantiss entry"
     ]
   },
   {
@@ -980,13 +967,6 @@
     "text": "Open cart",
     "pages": [
       "Shared navigation and access states"
-    ]
-  },
-  {
-    "id": "lbl.browseAutoXNYVOQ",
-    "text": "Your everyday super-app (demo entry screen)",
-    "pages": [
-      "Wantiss entry"
     ]
   },
   {
@@ -1209,6 +1189,20 @@
     ]
   },
   {
+    "id": "lbl.buildersLoadFailed",
+    "text": "Could not load custom products. Please try again.",
+    "pages": [
+      "Build Your Own"
+    ]
+  },
+  {
+    "id": "lbl.buildersLoading",
+    "text": "Loading custom products…",
+    "pages": [
+      "Store"
+    ]
+  },
+  {
     "id": "lbl.byoAddedExplanation",
     "text": "Nothing has been ordered yet. Add more, or review your cart when you are ready.",
     "pages": [
@@ -1238,7 +1232,7 @@
   },
   {
     "id": "lbl.byoAuto3ROGT8",
-    "text": "Preview drawing. Photo layers appear once uploaded in Admin.",
+    "text": "Product illustration. Appearance may vary.",
     "pages": [
       "Build Your Own"
     ]
@@ -1699,6 +1693,13 @@
     ]
   },
   {
+    "id": "lbl.cardNetworkFailed",
+    "text": "Card verification could not load. Check your connection and try again.",
+    "pages": [
+      "Card verification"
+    ]
+  },
+  {
     "id": "lbl.cardNewStore",
     "text": "New store",
     "pages": [
@@ -1878,7 +1879,7 @@
   },
   {
     "id": "lbl.cartPromoPlaceholder",
-    "text": "Try GOODIES10",
+    "text": "Enter promo code",
     "pages": [
       "Cart"
     ]
@@ -1929,7 +1930,8 @@
     "id": "lbl.cartStoreOrder",
     "text": "Your order from this store",
     "pages": [
-      "Cart"
+      "Cart",
+      "Checkout"
     ]
   },
   {
@@ -1958,7 +1960,103 @@
     "text": "All stores",
     "pages": [
       "Shared navigation and access states",
+      "Shared components",
       "Categories"
+    ]
+  },
+  {
+    "id": "lbl.catalogFailed",
+    "text": "Could not load stores",
+    "pages": [
+      "Shared navigation and access states",
+      "Shared actions and validation",
+      "Home",
+      "Cart"
+    ]
+  },
+  {
+    "id": "lbl.catalogLoading",
+    "text": "Loading stores…",
+    "pages": [
+      "Home"
+    ]
+  },
+  {
+    "id": "lbl.catalogRetryHint",
+    "text": "Check your connection and try again.",
+    "pages": [
+      "Shared navigation and access states",
+      "Home"
+    ]
+  },
+  {
+    "id": "lbl.category.bakery",
+    "text": "Bakery & desserts",
+    "pages": [
+      "Shared components"
+    ]
+  },
+  {
+    "id": "lbl.category.beverages",
+    "text": "Beverages",
+    "pages": [
+      "Shared components"
+    ]
+  },
+  {
+    "id": "lbl.category.care",
+    "text": "Personal care",
+    "pages": [
+      "Shared components"
+    ]
+  },
+  {
+    "id": "lbl.category.drugstore",
+    "text": "Drugstore",
+    "pages": [
+      "Shared components"
+    ]
+  },
+  {
+    "id": "lbl.category.fallback",
+    "text": "Category",
+    "pages": [
+      "Shared components"
+    ]
+  },
+  {
+    "id": "lbl.category.groceries",
+    "text": "Groceries",
+    "pages": [
+      "Shared components"
+    ]
+  },
+  {
+    "id": "lbl.category.haitian",
+    "text": "Haitian products",
+    "pages": [
+      "Shared components"
+    ]
+  },
+  {
+    "id": "lbl.category.meat",
+    "text": "Meat & seafood",
+    "pages": [
+      "Shared components"
+    ]
+  },
+  {
+    "id": "lbl.category.produce",
+    "text": "Fresh produce",
+    "pages": [
+      "Shared components"
+    ]
+  },
+  {
+    "id": "lbl.category.restaurants",
+    "text": "Restaurant",
+    "pages": [
+      "Shared components"
     ]
   },
   {
@@ -2140,6 +2238,7 @@
     "id": "lbl.checkoutCartUnavailable",
     "text": "Your cart is unavailable",
     "pages": [
+      "Cart",
       "Checkout"
     ]
   },
@@ -2153,6 +2252,13 @@
   {
     "id": "lbl.checkoutCashCondition",
     "text": "Only when this store and an available courier accept cash on delivery",
+    "pages": [
+      "Checkout"
+    ]
+  },
+  {
+    "id": "lbl.checkoutCashNotice",
+    "text": "Pay in cash when you receive your order.",
     "pages": [
       "Checkout"
     ]
@@ -2285,9 +2391,24 @@
     ]
   },
   {
+    "id": "lbl.checkoutPaymentLoading",
+    "text": "Loading payment methods…",
+    "pages": [
+      "Checkout"
+    ]
+  },
+  {
     "id": "lbl.checkoutPaymentMethod",
     "text": "Payment method",
     "pages": [
+      "Checkout"
+    ]
+  },
+  {
+    "id": "lbl.checkoutPaymentUnavailable",
+    "text": "Payment details unavailable. Please try again.",
+    "pages": [
+      "Shared actions and validation",
       "Checkout"
     ]
   },
@@ -2321,6 +2442,13 @@
     ]
   },
   {
+    "id": "lbl.checkoutRequestFailed",
+    "text": "Could not confirm the order. Check your order history before trying again.",
+    "pages": [
+      "Shared actions and validation"
+    ]
+  },
+  {
     "id": "lbl.checkoutReview",
     "text": "Review",
     "pages": [
@@ -2335,15 +2463,15 @@
     ]
   },
   {
-    "id": "lbl.checkoutSavedCardCount",
-    "text": "{count} saved card",
+    "id": "lbl.checkoutSavedCardCountMany",
+    "text": "{count} saved cards",
     "pages": [
       "Checkout"
     ]
   },
   {
-    "id": "lbl.checkoutSavedCardsCount",
-    "text": "{count} saved cards",
+    "id": "lbl.checkoutSavedCardCountOne",
+    "text": "{count} saved card",
     "pages": [
       "Checkout"
     ]
@@ -2360,6 +2488,13 @@
     "text": "Note for the store",
     "pages": [
       "Checkout"
+    ]
+  },
+  {
+    "id": "lbl.checkoutSubmitting",
+    "text": "Placing order…",
+    "pages": [
+      "Shop · shared"
     ]
   },
   {
@@ -2426,20 +2561,6 @@
     ]
   },
   {
-    "id": "lbl.cms.014bc9ccf696",
-    "text": "stores · one delivery",
-    "pages": [
-      "Checkout"
-    ]
-  },
-  {
-    "id": "lbl.cms.015a04ab6e9c",
-    "text": "The courier GPS signal is temporarily stale. Waiting for a fresh location update.",
-    "pages": [
-      "Shop · shared"
-    ]
-  },
-  {
     "id": "lbl.cms.0175f1d4a19a",
     "text": "Your Wantiss Wallet is not set up yet. Create your wallet to add and use saved cards.",
     "pages": [
@@ -2454,20 +2575,6 @@
     ]
   },
   {
-    "id": "lbl.cms.046f168e2991",
-    "text": "left",
-    "pages": [
-      "Help Pay walkthrough"
-    ]
-  },
-  {
-    "id": "lbl.cms.05521fd984d2",
-    "text": "% funded",
-    "pages": [
-      "Help Pay walkthrough"
-    ]
-  },
-  {
     "id": "lbl.cms.06e2931ac98c",
     "text": "• Minimum age here: ",
     "pages": [
@@ -2479,20 +2586,6 @@
     "text": "ID check failed. ",
     "pages": [
       "Order tracking"
-    ]
-  },
-  {
-    "id": "lbl.cms.091a111ce415",
-    "text": "Preview another friend's contribution",
-    "pages": [
-      "Help Pay walkthrough"
-    ]
-  },
-  {
-    "id": "lbl.cms.099a7872e3cb",
-    "text": "Customer funding overview",
-    "pages": [
-      "Help Pay walkthrough"
     ]
   },
   {
@@ -2528,13 +2621,6 @@
     "text": "No friends to invite yet.",
     "pages": [
       "Group orders"
-    ]
-  },
-  {
-    "id": "lbl.cms.0c815902b6b8",
-    "text": "The real version uses your Wantiss friend list. These are placeholders.",
-    "pages": [
-      "Help Pay walkthrough"
     ]
   },
   {
@@ -2658,13 +2744,6 @@
     ]
   },
   {
-    "id": "lbl.cms.19192368f257",
-    "text": "% of the original bill. Wallet only.",
-    "pages": [
-      "Help Pay walkthrough"
-    ]
-  },
-  {
     "id": "lbl.cms.19a9e614842b",
     "text": "Decline",
     "pages": [
@@ -2683,13 +2762,6 @@
     "text": " stores, so adding from ",
     "pages": [
       "Sheets · newcart"
-    ]
-  },
-  {
-    "id": "lbl.cms.1b446a360546",
-    "text": "Friends see the aggregate progress and their own payments, never the other contributors' identities or amounts.",
-    "pages": [
-      "Help Pay walkthrough"
     ]
   },
   {
@@ -2749,13 +2821,6 @@
     ]
   },
   {
-    "id": "lbl.cms.1ffcbca434d7",
-    "text": "remaining · expires in ",
-    "pages": [
-      "Help Pay walkthrough"
-    ]
-  },
-  {
     "id": "lbl.cms.203961ea028d",
     "text": "Address deleted.",
     "pages": [
@@ -2791,13 +2856,6 @@
     ]
   },
   {
-    "id": "lbl.cms.22d1e84f1755",
-    "text": "Open ",
-    "pages": [
-      "Search"
-    ]
-  },
-  {
     "id": "lbl.cms.234ba50b0bb2",
     "text": "Instructions",
     "pages": [
@@ -2812,31 +2870,10 @@
     ]
   },
   {
-    "id": "lbl.cms.248fefd7effd",
-    "text": "You request 100% of the bill from someone else. One person pays the full amount using an eligible payment method.",
-    "pages": [
-      "Help Pay walkthrough"
-    ]
-  },
-  {
-    "id": "lbl.cms.24a1b0418c6e",
-    "text": "You pay 60% first. Friends can contribute any percentage of the remaining 40%, until it is fully covered. One friend can pay the whole 40%.",
-    "pages": [
-      "Help Pay walkthrough"
-    ]
-  },
-  {
     "id": "lbl.cms.24b1ece4f51b",
     "text": "WANTISS",
     "pages": [
       "Checkout"
-    ]
-  },
-  {
-    "id": "lbl.cms.24f236576f00",
-    "text": "Help Pay · Walkthrough",
-    "pages": [
-      "Help Pay walkthrough"
     ]
   },
   {
@@ -2851,13 +2888,6 @@
     "text": "SAVED CARD",
     "pages": [
       "Checkout"
-    ]
-  },
-  {
-    "id": "lbl.cms.27e784aa0425",
-    "text": " orders",
-    "pages": [
-      "Profile"
     ]
   },
   {
@@ -2886,13 +2916,6 @@
     "text": "Total · ",
     "pages": [
       "Order tracking"
-    ]
-  },
-  {
-    "id": "lbl.cms.2aeeb41bb682",
-    "text": "Step ",
-    "pages": [
-      "Help Pay walkthrough"
     ]
   },
   {
@@ -2974,20 +2997,6 @@
     ]
   },
   {
-    "id": "lbl.cms.3037855e4da5",
-    "text": "In the real checkout, the request is only shared after the required upfront payment is verified.",
-    "pages": [
-      "Help Pay walkthrough"
-    ]
-  },
-  {
-    "id": "lbl.cms.315075ecf41e",
-    "text": "Create or join a server-backed group order first.",
-    "pages": [
-      "Group orders"
-    ]
-  },
-  {
     "id": "lbl.cms.31fdc2bc7366",
     "text": "Start a new cart",
     "pages": [
@@ -3041,13 +3050,6 @@
     "text": "Delivery fee",
     "pages": [
       "Checkout"
-    ]
-  },
-  {
-    "id": "lbl.cms.38a73aeee517",
-    "text": "Choose a percentage of the remaining Help Pay amount.",
-    "pages": [
-      "Help Pay walkthrough"
     ]
   },
   {
@@ -3156,13 +3158,6 @@
     ]
   },
   {
-    "id": "lbl.cms.40b928d70f8f",
-    "text": "The built-in sample content is currently used.",
-    "pages": [
-      "Preview import"
-    ]
-  },
-  {
     "id": "lbl.cms.40babc6bdeb6",
     "text": "min",
     "pages": [
@@ -3175,20 +3170,6 @@
     "text": ". Scheduled orders are available. The earliest time is set by this shop.",
     "pages": [
       "Cart"
-    ]
-  },
-  {
-    "id": "lbl.cms.41f4298910ce",
-    "text": "of ",
-    "pages": [
-      "Help Pay walkthrough"
-    ]
-  },
-  {
-    "id": "lbl.cms.421be83107c0",
-    "text": "Message preview · ",
-    "pages": [
-      "Help Pay walkthrough"
     ]
   },
   {
@@ -3207,7 +3188,7 @@
   },
   {
     "id": "lbl.cms.42b822c31c92",
-    "text": "Help Pay / Share Bill · Preview",
+    "text": "Help Pay / Share Bill",
     "pages": [
       "Checkout"
     ]
@@ -3224,13 +3205,6 @@
     "text": "minimum.",
     "pages": [
       "Cart"
-    ]
-  },
-  {
-    "id": "lbl.cms.439ba7bca2f9",
-    "text": "Selected",
-    "pages": [
-      "Help Pay walkthrough"
     ]
   },
   {
@@ -3346,13 +3320,6 @@
     ]
   },
   {
-    "id": "lbl.cms.4d841f662ff0",
-    "text": "Continue to friend selection",
-    "pages": [
-      "Help Pay walkthrough"
-    ]
-  },
-  {
     "id": "lbl.cms.4e0609617fa9",
     "text": "Tip",
     "pages": [
@@ -3396,31 +3363,10 @@
     ]
   },
   {
-    "id": "lbl.cms.51de0d274565",
-    "text": "Paste the content exported from Wantiss Admin. It replaces promo cards, categories, labels, fees, age rules, texts and artwork in this demo. ",
-    "pages": [
-      "Preview import"
-    ]
-  },
-  {
     "id": "lbl.cms.51f14b4a403f",
     "text": "is ",
     "pages": [
       "Checkout"
-    ]
-  },
-  {
-    "id": "lbl.cms.51f5915af4ef",
-    "text": "How the 60/40 split works",
-    "pages": [
-      "Help Pay walkthrough"
-    ]
-  },
-  {
-    "id": "lbl.cms.51fd3576107d",
-    "text": "Choose friends · preview contacts",
-    "pages": [
-      "Help Pay walkthrough"
     ]
   },
   {
@@ -3449,13 +3395,6 @@
     "text": "Only the group host can check out.",
     "pages": [
       "Group orders"
-    ]
-  },
-  {
-    "id": "lbl.cms.54627b4c469e",
-    "text": "What happens next?",
-    "pages": [
-      "Help Pay walkthrough"
     ]
   },
   {
@@ -3491,20 +3430,6 @@
     "text": "left",
     "pages": [
       "Shared components"
-    ]
-  },
-  {
-    "id": "lbl.cms.5736a9bb3c88",
-    "text": "Previous step",
-    "pages": [
-      "Help Pay walkthrough"
-    ]
-  },
-  {
-    "id": "lbl.cms.5742239db66e",
-    "text": "Selected ",
-    "pages": [
-      "Help Pay walkthrough"
     ]
   },
   {
@@ -3565,13 +3490,6 @@
     ]
   },
   {
-    "id": "lbl.cms.5bc7d6f08522",
-    "text": " saved",
-    "pages": [
-      "Settings"
-    ]
-  },
-  {
     "id": "lbl.cms.5bebcc4de709",
     "text": "Loading friends…",
     "pages": [
@@ -3600,13 +3518,6 @@
     ]
   },
   {
-    "id": "lbl.cms.5f964c1d13e4",
-    "text": "Still needed",
-    "pages": [
-      "Help Pay walkthrough"
-    ]
-  },
-  {
     "id": "lbl.cms.60f2f9167a32",
     "text": "Min. ",
     "pages": [
@@ -3618,13 +3529,6 @@
     "text": "Could not update the Goodies delivery address.",
     "pages": [
       "Shared actions and validation"
-    ]
-  },
-  {
-    "id": "lbl.cms.6472bf2c1c5e",
-    "text": ". In the live flow, eligible Wallet and card payment options are offered.",
-    "pages": [
-      "Help Pay walkthrough"
     ]
   },
   {
@@ -3653,20 +3557,6 @@
     "text": "Selected: ",
     "pages": [
       "Scheduling"
-    ]
-  },
-  {
-    "id": "lbl.cms.666ec91f4a22",
-    "text": "This request requires one person to pay the entire ",
-    "pages": [
-      "Help Pay walkthrough"
-    ]
-  },
-  {
-    "id": "lbl.cms.66d0ec6d4d70",
-    "text": "Select",
-    "pages": [
-      "Help Pay walkthrough"
     ]
   },
   {
@@ -3754,13 +3644,6 @@
     ]
   },
   {
-    "id": "lbl.cms.6e746ee8b4fe",
-    "text": "Goodies · ",
-    "pages": [
-      "Help Pay walkthrough"
-    ]
-  },
-  {
     "id": "lbl.cms.6e9eb3a9a0bb",
     "text": "Review and validate the combined cart first.",
     "pages": [
@@ -3772,13 +3655,6 @@
     "text": " km",
     "pages": [
       "Store"
-    ]
-  },
-  {
-    "id": "lbl.cms.70ab53df00d6",
-    "text": "Once the server confirms all funds, checkout details and store availability must be revalidated. Only then can the real Goodies order be placed. If the request expires or fails, payments must be reversed.",
-    "pages": [
-      "Help Pay walkthrough"
     ]
   },
   {
@@ -3859,24 +3735,10 @@
     ]
   },
   {
-    "id": "lbl.cms.77261425ec6c",
-    "text": "Friends can cover",
-    "pages": [
-      "Help Pay walkthrough"
-    ]
-  },
-  {
     "id": "lbl.cms.77f13132a763",
     "text": "Goodies access permanently restricted",
     "pages": [
       "Shared navigation and access states"
-    ]
-  },
-  {
-    "id": "lbl.cms.78242f2aebe6",
-    "text": "Interactive preview · Nothing is charged, shared or ordered.",
-    "pages": [
-      "Help Pay walkthrough"
     ]
   },
   {
@@ -3908,13 +3770,6 @@
     ]
   },
   {
-    "id": "lbl.cms.7b6022533f4d",
-    "text": "Forwarding shares the same request and remaining balance. It never resets the 30-minute timer.",
-    "pages": [
-      "Help Pay walkthrough"
-    ]
-  },
-  {
     "id": "lbl.cms.7bb9755afe95",
     "text": "No saved addresses found. Add a delivery address to your profile first.",
     "pages": [
@@ -3926,13 +3781,6 @@
     "text": " m from your address",
     "pages": [
       "Checkout"
-    ]
-  },
-  {
-    "id": "lbl.cms.7c6ce6c610f1",
-    "text": "Could not update delivery",
-    "pages": [
-      "Courier"
     ]
   },
   {
@@ -3999,24 +3847,10 @@
     ]
   },
   {
-    "id": "lbl.cms.832feb1f5f0c",
-    "text": "Expires ",
-    "pages": [
-      "Payment methods"
-    ]
-  },
-  {
     "id": "lbl.cms.843cf2cc36fc",
     "text": "Hide friends",
     "pages": [
       "Group orders"
-    ]
-  },
-  {
-    "id": "lbl.cms.84439715c11a",
-    "text": "Contributors cannot see this list or the number of people who paid.",
-    "pages": [
-      "Help Pay walkthrough"
     ]
   },
   {
@@ -4165,13 +3999,6 @@
     "text": "ON",
     "pages": [
       "Courier"
-    ]
-  },
-  {
-    "id": "lbl.cms.8ff661770946",
-    "text": "Fully funded · preview",
-    "pages": [
-      "Help Pay walkthrough"
     ]
   },
   {
@@ -4406,13 +4233,6 @@
     ]
   },
   {
-    "id": "lbl.cms.a5199d9cdd76",
-    "text": "Courier accepted. Waiting for the first GPS location.",
-    "pages": [
-      "Shop · shared"
-    ]
-  },
-  {
     "id": "lbl.cms.a55440a13be7",
     "text": "Go back",
     "pages": [
@@ -4483,13 +4303,6 @@
     ]
   },
   {
-    "id": "lbl.cms.aa7b44ff793b",
-    "text": "Your order from this store",
-    "pages": [
-      "Checkout"
-    ]
-  },
-  {
     "id": "lbl.cms.acf78f33a391",
     "text": "Today",
     "pages": [
@@ -4516,13 +4329,6 @@
     "text": "Main default",
     "pages": [
       "Addresses"
-    ]
-  },
-  {
-    "id": "lbl.cms.af5b6180fcea",
-    "text": "Customer's upfront share",
-    "pages": [
-      "Help Pay walkthrough"
     ]
   },
   {
@@ -4566,13 +4372,6 @@
     "pages": [
       "Checkout",
       "Order tracking"
-    ]
-  },
-  {
-    "id": "lbl.cms.b472632d5ebe",
-    "text": "reviews",
-    "pages": [
-      "Store reviews"
     ]
   },
   {
@@ -4654,13 +4453,6 @@
     ]
   },
   {
-    "id": "lbl.cms.be8b08bcf8db",
-    "text": "Preview friend's message",
-    "pages": [
-      "Help Pay walkthrough"
-    ]
-  },
-  {
     "id": "lbl.cms.bf089c2685f9",
     "text": "stores",
     "pages": [
@@ -4672,13 +4464,6 @@
     "text": "Address saved to your Wantiss account.",
     "pages": [
       "Addresses"
-    ]
-  },
-  {
-    "id": "lbl.cms.bf6e025c5d90",
-    "text": "Open Wallet",
-    "pages": [
-      "Checkout"
     ]
   },
   {
@@ -4725,13 +4510,6 @@
     ]
   },
   {
-    "id": "lbl.cms.c36ec498735d",
-    "text": "How much would you like to pay?",
-    "pages": [
-      "Help Pay walkthrough"
-    ]
-  },
-  {
     "id": "lbl.cms.c36ed3e83c8c",
     "text": ", selected ",
     "pages": [
@@ -4743,20 +4521,6 @@
     "text": "Wantiss Wallet payments debit your available balance.",
     "pages": [
       "Checkout"
-    ]
-  },
-  {
-    "id": "lbl.cms.c460d20229b9",
-    "text": "How full payment works",
-    "pages": [
-      "Help Pay walkthrough"
-    ]
-  },
-  {
-    "id": "lbl.cms.c73acc89640b",
-    "text": "Admin content is currently loaded.",
-    "pages": [
-      "Preview import"
     ]
   },
   {
@@ -4781,13 +4545,6 @@
     ]
   },
   {
-    "id": "lbl.cms.ca05018be110",
-    "text": "Equivalent to ",
-    "pages": [
-      "Help Pay walkthrough"
-    ]
-  },
-  {
     "id": "lbl.cms.ca48b79aba54",
     "text": "Goodies store",
     "pages": [
@@ -4799,13 +4556,6 @@
     "text": "Close menu",
     "pages": [
       "Shared components"
-    ]
-  },
-  {
-    "id": "lbl.cms.cb52931e4fa7",
-    "text": "Help pay a Goodies order",
-    "pages": [
-      "Help Pay walkthrough"
     ]
   },
   {
@@ -4915,7 +4665,7 @@
   },
   {
     "id": "lbl.cms.d0b078223c9e",
-    "text": "Explore the flow without sending a request or charging anyone",
+    "text": "Create a verified payment request and share it with friends",
     "pages": [
       "Checkout"
     ]
@@ -4988,13 +4738,6 @@
     "text": "Complete the secure verification from your bank. Your card is only captured after verification succeeds.",
     "pages": [
       "Card verification"
-    ]
-  },
-  {
-    "id": "lbl.cms.da77f6ee2ece",
-    "text": "Simulate paying {value0}",
-    "pages": [
-      "Help Pay walkthrough"
     ]
   },
   {
@@ -5082,13 +4825,6 @@
     ]
   },
   {
-    "id": "lbl.cms.e0f192b8b2cb",
-    "text": "Contributions · customer view only",
-    "pages": [
-      "Help Pay walkthrough"
-    ]
-  },
-  {
     "id": "lbl.cms.e12b8e635219",
     "text": "Group order ended.",
     "pages": [
@@ -5159,24 +4895,10 @@
     ]
   },
   {
-    "id": "lbl.cms.e5d115728d05",
-    "text": "Restart walkthrough",
-    "pages": [
-      "Help Pay walkthrough"
-    ]
-  },
-  {
     "id": "lbl.cms.e6097512cd01",
     "text": "checked by the courier",
     "pages": [
       "Order tracking"
-    ]
-  },
-  {
-    "id": "lbl.cms.e8f8942d465d",
-    "text": "Could not respond",
-    "pages": [
-      "Courier"
     ]
   },
   {
@@ -5219,13 +4941,6 @@
     "text": " km from your address",
     "pages": [
       "Checkout"
-    ]
-  },
-  {
-    "id": "lbl.cms.ec1cc0c94ace",
-    "text": "Goodies bill",
-    "pages": [
-      "Help Pay walkthrough"
     ]
   },
   {
@@ -5278,24 +4993,10 @@
     ]
   },
   {
-    "id": "lbl.cms.f387bbae5293",
-    "text": " min",
-    "pages": [
-      "Store"
-    ]
-  },
-  {
     "id": "lbl.cms.f409318cbe6e",
     "text": "Distance unavailable",
     "pages": [
       "Checkout"
-    ]
-  },
-  {
-    "id": "lbl.cms.f4a87149377d",
-    "text": "Full bill payment",
-    "pages": [
-      "Help Pay walkthrough"
     ]
   },
   {
@@ -5461,6 +5162,20 @@
     ]
   },
   {
+    "id": "lbl.contactRemoveFailed",
+    "text": "Could not remove this number. Please retry.",
+    "pages": [
+      "Contact numbers sheet"
+    ]
+  },
+  {
+    "id": "lbl.contactSaveFailed",
+    "text": "Could not save this number. Please retry.",
+    "pages": [
+      "Contact number form"
+    ]
+  },
+  {
     "id": "lbl.contactSend",
     "text": "Send message",
     "pages": [
@@ -5503,6 +5218,20 @@
     ]
   },
   {
+    "id": "lbl.contentLoadFailed",
+    "text": "Goodies content is temporarily unavailable",
+    "pages": [
+      "Home"
+    ]
+  },
+  {
+    "id": "lbl.contentRetryHint",
+    "text": "Check your connection and try again.",
+    "pages": [
+      "Home"
+    ]
+  },
+  {
     "id": "lbl.coupons",
     "text": "Coupons and offers",
     "pages": [
@@ -5541,6 +5270,7 @@
     "id": "lbl.filterAll",
     "text": "All",
     "pages": [
+      "Category / store results",
       "Shared state messages"
     ]
   },
@@ -5642,6 +5372,13 @@
     ]
   },
   {
+    "id": "lbl.groupYou",
+    "text": "You",
+    "pages": [
+      "Group orders"
+    ]
+  },
+  {
     "id": "lbl.haitian",
     "text": "Haitian specialties",
     "pages": [
@@ -5663,73 +5400,235 @@
     ]
   },
   {
-    "id": "lbl.helpPay.friendA",
-    "text": "Friend A",
+    "id": "lbl.helpPayCancelError",
+    "text": "Could not confirm cancellation. Check the request status and retry.",
     "pages": [
-      "Help Pay walkthrough"
+      "Shared Bill requests"
     ]
   },
   {
-    "id": "lbl.helpPay.friendB",
-    "text": "Friend B",
+    "id": "lbl.helpPayCancelTitle",
+    "text": "Cancel request and refund everyone",
     "pages": [
-      "Help Pay walkthrough"
+      "Shared Bill requests"
     ]
   },
   {
-    "id": "lbl.helpPay.friendC",
-    "text": "Friend C",
+    "id": "lbl.helpPayConfirmed",
+    "text": "Payment confirmed · Order placed",
     "pages": [
-      "Help Pay walkthrough"
+      "Shared Bill requests"
     ]
   },
   {
-    "id": "lbl.helpPay.fullPay",
-    "text": "Help me fully pay",
+    "id": "lbl.helpPayContributorsTitle",
+    "text": "Who helped pay",
     "pages": [
-      "Help Pay walkthrough"
+      "Shared Bill requests"
     ]
   },
   {
-    "id": "lbl.helpPay.shareBill",
-    "text": "Share bill · 60/40",
+    "id": "lbl.helpPayExpiresExplainer",
+    "text": "The request expires after 30 minutes. If it is not funded, every Wallet contribution is automatically refunded. The order is only created once the entire bill is paid.",
     "pages": [
-      "Help Pay walkthrough"
+      "Shared Bill requests"
     ]
   },
   {
-    "id": "lbl.helpPay.step.complete",
-    "text": "Order is fully funded",
+    "id": "lbl.helpPayExplainer",
+    "text": "Create a secure Wallet request for your Goodies checkout. Friends can pay by scanning your QR code or opening your Wantiss message.",
     "pages": [
-      "HelpPayPreview · shared"
+      "Shared Bill requests"
     ]
   },
   {
-    "id": "lbl.helpPay.step.invite",
-    "text": "Send to friends",
+    "id": "lbl.helpPayFriendsCanCover",
+    "text": "Friends can cover",
     "pages": [
-      "HelpPayPreview · shared"
+      "Shared Bill requests"
     ]
   },
   {
-    "id": "lbl.helpPay.step.pay",
-    "text": "Friend chooses an amount",
+    "id": "lbl.helpPayFriendsContributed",
+    "text": "Friends contributed",
     "pages": [
-      "HelpPayPreview · shared"
+      "Shared Bill requests"
     ]
   },
   {
-    "id": "lbl.helpPay.step.progress",
-    "text": "Track contributions",
+    "id": "lbl.helpPayGoodiesPrefix",
+    "text": "Goodies · ",
     "pages": [
-      "HelpPayPreview · shared"
+      "Shared Bill requests"
     ]
   },
   {
-    "id": "lbl.helpPay.step.setup",
-    "text": "Choose how to split",
+    "id": "lbl.helpPayGoodiesTotal",
+    "text": "Goodies total",
     "pages": [
-      "HelpPayPreview · shared"
+      "Shared Bill requests"
+    ]
+  },
+  {
+    "id": "lbl.helpPayLeftSuffix",
+    "text": " left",
+    "pages": [
+      "Shared Bill requests"
+    ]
+  },
+  {
+    "id": "lbl.helpPayLoadError",
+    "text": "Could not load this payment request. Please retry.",
+    "pages": [
+      "Shared Bill requests",
+      "Shared Bill contribution"
+    ]
+  },
+  {
+    "id": "lbl.helpPayNoFriends",
+    "text": "No accepted friends yet. Add friends in Wantiss Messages, or share the payment link above.",
+    "pages": [
+      "Shared Bill requests"
+    ]
+  },
+  {
+    "id": "lbl.helpPayOrderLoadError",
+    "text": "Your order is funded. Open Orders to reload its details.",
+    "pages": [
+      "Shared Bill requests"
+    ]
+  },
+  {
+    "id": "lbl.helpPayOrderSent",
+    "text": "The store has received your funded Goodies order.",
+    "pages": [
+      "Shared Bill requests"
+    ]
+  },
+  {
+    "id": "lbl.helpPayPaymentUnconfirmed",
+    "text": "Payment not confirmed. Check Wallet activity before trying again.",
+    "pages": [
+      "Shared Bill contribution"
+    ]
+  },
+  {
+    "id": "lbl.helpPayPayTogether",
+    "text": "Pay together.",
+    "pages": [
+      "Shared Bill requests"
+    ]
+  },
+  {
+    "id": "lbl.helpPayPercentFundedSuffix",
+    "text": "% funded",
+    "pages": [
+      "Shared Bill requests"
+    ]
+  },
+  {
+    "id": "lbl.helpPayRefunded",
+    "text": "This request could not be finalized. Your Wallet has been refunded.",
+    "pages": [
+      "Shared Bill contribution"
+    ]
+  },
+  {
+    "id": "lbl.helpPayRemainingSuffix",
+    "text": " remaining",
+    "pages": [
+      "Shared Bill requests"
+    ]
+  },
+  {
+    "id": "lbl.helpPayRetry",
+    "text": "Retry",
+    "pages": [
+      "Shared Bill requests"
+    ]
+  },
+  {
+    "id": "lbl.helpPayReturnCheckout",
+    "text": "Return to checkout",
+    "pages": [
+      "Shared Bill requests"
+    ]
+  },
+  {
+    "id": "lbl.helpPayScanInstructions",
+    "text": "Scan using the Wantiss Wallet scanner",
+    "pages": [
+      "Shared Bill requests"
+    ]
+  },
+  {
+    "id": "lbl.helpPayScanTitle",
+    "text": "Scan to help pay",
+    "pages": [
+      "Shared Bill requests"
+    ]
+  },
+  {
+    "id": "lbl.helpPayShareError",
+    "text": "Could not share this request. Please retry.",
+    "pages": [
+      "Shared Bill requests"
+    ]
+  },
+  {
+    "id": "lbl.helpPayShareInMessages",
+    "text": "Share in Wantiss Messages",
+    "pages": [
+      "Shared Bill requests"
+    ]
+  },
+  {
+    "id": "lbl.helpPayShareLink",
+    "text": "Share payment link",
+    "pages": [
+      "Shared Bill requests"
+    ]
+  },
+  {
+    "id": "lbl.helpPayTitle",
+    "text": "Help Pay · Goodies",
+    "pages": [
+      "Shared Bill requests"
+    ]
+  },
+  {
+    "id": "lbl.helpPayUnavailable",
+    "text": "Shared payments are not available yet.",
+    "pages": [
+      "Shared Bill requests"
+    ]
+  },
+  {
+    "id": "lbl.helpPayUpfrontShare",
+    "text": "Your upfront share",
+    "pages": [
+      "Shared Bill requests"
+    ]
+  },
+  {
+    "id": "lbl.helpPayViewOrders",
+    "text": "View Goodies orders",
+    "pages": [
+      "Shared Bill requests"
+    ]
+  },
+  {
+    "id": "lbl.helpPayYouPayNow",
+    "text": "You pay now",
+    "pages": [
+      "Shared Bill requests"
+    ]
+  },
+  {
+    "id": "lbl.helpPayYourGoodiesBill",
+    "text": "Your Goodies bill",
+    "pages": [
+      "Shared Bill requests"
     ]
   },
   {
@@ -6022,6 +5921,13 @@
     ]
   },
   {
+    "id": "lbl.languageSyncFailed",
+    "text": "Language changed on this device, but your account preference could not be saved. Please retry in Wantiss Settings.",
+    "pages": [
+      "Shared state messages"
+    ]
+  },
+  {
     "id": "lbl.legalPolicyTitle",
     "text": "Policy",
     "pages": [
@@ -6061,6 +5967,15 @@
     "text": "This policy is not available yet",
     "pages": [
       "Account subpages"
+    ]
+  },
+  {
+    "id": "lbl.loadMore",
+    "text": "Load more",
+    "pages": [
+      "Store",
+      "Store reviews",
+      "Order history"
     ]
   },
   {
@@ -6155,6 +6070,482 @@
     ]
   },
   {
+    "id": "lbl.notification.cardVerificationExpired.body",
+    "text": "{details}",
+    "pages": [
+      "Notification templates"
+    ]
+  },
+  {
+    "id": "lbl.notification.cardVerificationExpired.title",
+    "text": "Goodies card verification expired",
+    "pages": [
+      "Notification templates"
+    ]
+  },
+  {
+    "id": "lbl.notification.courierAccepted.body",
+    "text": "{details}",
+    "pages": [
+      "Notification templates"
+    ]
+  },
+  {
+    "id": "lbl.notification.courierAccepted.title",
+    "text": "Courier accepted your order",
+    "pages": [
+      "Notification templates"
+    ]
+  },
+  {
+    "id": "lbl.notification.courierDeclined.body",
+    "text": "{details}",
+    "pages": [
+      "Notification templates"
+    ]
+  },
+  {
+    "id": "lbl.notification.courierDeclined.title",
+    "text": "Courier declined the offer",
+    "pages": [
+      "Notification templates"
+    ]
+  },
+  {
+    "id": "lbl.notification.courierExpired.body",
+    "text": "{details}",
+    "pages": [
+      "Notification templates"
+    ]
+  },
+  {
+    "id": "lbl.notification.courierExpired.title",
+    "text": "Courier offer expired",
+    "pages": [
+      "Notification templates"
+    ]
+  },
+  {
+    "id": "lbl.notification.courierOffered.body",
+    "text": "{details}",
+    "pages": [
+      "Notification templates"
+    ]
+  },
+  {
+    "id": "lbl.notification.courierOffered.title",
+    "text": "Courier offer sent",
+    "pages": [
+      "Notification templates"
+    ]
+  },
+  {
+    "id": "lbl.notification.deliveryReported.body",
+    "text": "{details}",
+    "pages": [
+      "Notification templates"
+    ]
+  },
+  {
+    "id": "lbl.notification.deliveryReported.title",
+    "text": "Delivery reported",
+    "pages": [
+      "Notification templates"
+    ]
+  },
+  {
+    "id": "lbl.notification.disputeResolution.body",
+    "text": "{details}",
+    "pages": [
+      "Notification templates"
+    ]
+  },
+  {
+    "id": "lbl.notification.disputeResolution.title",
+    "text": "Your report was reviewed",
+    "pages": [
+      "Notification templates"
+    ]
+  },
+  {
+    "id": "lbl.notification.goodies_admin_product_submission.body",
+    "text": "{details}",
+    "pages": [
+      "Notification templates"
+    ]
+  },
+  {
+    "id": "lbl.notification.goodies_admin_product_submission.title",
+    "text": "Goodies product awaiting review",
+    "pages": [
+      "Notification templates"
+    ]
+  },
+  {
+    "id": "lbl.notification.goodies_vendor_product_review.body",
+    "text": "{details}",
+    "pages": [
+      "Notification templates"
+    ]
+  },
+  {
+    "id": "lbl.notification.goodies_vendor_product_review.title",
+    "text": "Goodies product review",
+    "pages": [
+      "Notification templates"
+    ]
+  },
+  {
+    "id": "lbl.notification.goodies_vendor_settlement_cash_remittance_received.body",
+    "text": "Courier cash remittance was confirmed. Open payouts to review your balance.",
+    "pages": [
+      "Notification templates"
+    ]
+  },
+  {
+    "id": "lbl.notification.goodies_vendor_settlement_cash_remittance_received.title",
+    "text": "Goodies settlement update",
+    "pages": [
+      "Notification templates"
+    ]
+  },
+  {
+    "id": "lbl.notification.goodies_vendor_settlement_commission_due_soon.body",
+    "text": "Your weekly Goodies commission settlement is due within 24 hours.",
+    "pages": [
+      "Notification templates"
+    ]
+  },
+  {
+    "id": "lbl.notification.goodies_vendor_settlement_commission_due_soon.title",
+    "text": "Goodies settlement update",
+    "pages": [
+      "Notification templates"
+    ]
+  },
+  {
+    "id": "lbl.notification.goodies_vendor_settlement_commission_due.body",
+    "text": "Your weekly Goodies commission settlement is due. Open payouts to review the amount.",
+    "pages": [
+      "Notification templates"
+    ]
+  },
+  {
+    "id": "lbl.notification.goodies_vendor_settlement_commission_due.title",
+    "text": "Goodies settlement update",
+    "pages": [
+      "Notification templates"
+    ]
+  },
+  {
+    "id": "lbl.notification.goodies_vendor_settlement_commission_paid.body",
+    "text": "Your Goodies cash-order commission payment is completed.",
+    "pages": [
+      "Notification templates"
+    ]
+  },
+  {
+    "id": "lbl.notification.goodies_vendor_settlement_commission_paid.title",
+    "text": "Goodies settlement update",
+    "pages": [
+      "Notification templates"
+    ]
+  },
+  {
+    "id": "lbl.notification.goodies_vendor_settlement_destination_rejected.body",
+    "text": "Your Goodies settlement details were updated. Open payouts to review them.",
+    "pages": [
+      "Notification templates"
+    ]
+  },
+  {
+    "id": "lbl.notification.goodies_vendor_settlement_destination_rejected.title",
+    "text": "Goodies settlement update",
+    "pages": [
+      "Notification templates"
+    ]
+  },
+  {
+    "id": "lbl.notification.goodies_vendor_settlement_destination_verified.body",
+    "text": "Your Goodies settlement details were updated. Open payouts to review them.",
+    "pages": [
+      "Notification templates"
+    ]
+  },
+  {
+    "id": "lbl.notification.goodies_vendor_settlement_destination_verified.title",
+    "text": "Goodies settlement update",
+    "pages": [
+      "Notification templates"
+    ]
+  },
+  {
+    "id": "lbl.notification.goodies_vendor_settlement_payout_completed.body",
+    "text": "Your Goodies payout is completed.",
+    "pages": [
+      "Notification templates"
+    ]
+  },
+  {
+    "id": "lbl.notification.goodies_vendor_settlement_payout_completed.title",
+    "text": "Goodies settlement update",
+    "pages": [
+      "Notification templates"
+    ]
+  },
+  {
+    "id": "lbl.notification.goodies_vendor_settlement_payout_failed.body",
+    "text": "Your Goodies payout could not be completed. Open payouts to review it.",
+    "pages": [
+      "Notification templates"
+    ]
+  },
+  {
+    "id": "lbl.notification.goodies_vendor_settlement_payout_failed.title",
+    "text": "Goodies settlement update",
+    "pages": [
+      "Notification templates"
+    ]
+  },
+  {
+    "id": "lbl.notification.goodies_vendor_settlement_payout_processing.body",
+    "text": "Your Goodies settlement details were updated. Open payouts to review them.",
+    "pages": [
+      "Notification templates"
+    ]
+  },
+  {
+    "id": "lbl.notification.goodies_vendor_settlement_payout_processing.title",
+    "text": "Goodies settlement update",
+    "pages": [
+      "Notification templates"
+    ]
+  },
+  {
+    "id": "lbl.notification.goodies_vendor_settlement_payout_requested.body",
+    "text": "Your Goodies payout request was recorded. Open payouts to check its status.",
+    "pages": [
+      "Notification templates"
+    ]
+  },
+  {
+    "id": "lbl.notification.goodies_vendor_settlement_payout_requested.title",
+    "text": "Goodies settlement update",
+    "pages": [
+      "Notification templates"
+    ]
+  },
+  {
+    "id": "lbl.notification.newVendorOrder.body",
+    "text": "{details}",
+    "pages": [
+      "Notification templates"
+    ]
+  },
+  {
+    "id": "lbl.notification.newVendorOrder.title",
+    "text": "New Goodies order",
+    "pages": [
+      "Notification templates"
+    ]
+  },
+  {
+    "id": "lbl.notification.orderAccepted.body",
+    "text": "{details}",
+    "pages": [
+      "Notification templates"
+    ]
+  },
+  {
+    "id": "lbl.notification.orderAccepted.title",
+    "text": "Goodies order accepted",
+    "pages": [
+      "Notification templates"
+    ]
+  },
+  {
+    "id": "lbl.notification.orderCancelled.body",
+    "text": "{details}",
+    "pages": [
+      "Notification templates"
+    ]
+  },
+  {
+    "id": "lbl.notification.orderCancelled.title",
+    "text": "Goodies order cancelled",
+    "pages": [
+      "Notification templates"
+    ]
+  },
+  {
+    "id": "lbl.notification.orderCompleted.body",
+    "text": "{details}",
+    "pages": [
+      "Notification templates"
+    ]
+  },
+  {
+    "id": "lbl.notification.orderCompleted.title",
+    "text": "Goodies order completed",
+    "pages": [
+      "Notification templates"
+    ]
+  },
+  {
+    "id": "lbl.notification.orderDeclined.body",
+    "text": "{details}",
+    "pages": [
+      "Notification templates"
+    ]
+  },
+  {
+    "id": "lbl.notification.orderDeclined.title",
+    "text": "Store declined your Goodies order",
+    "pages": [
+      "Notification templates"
+    ]
+  },
+  {
+    "id": "lbl.notification.orderExpired.body",
+    "text": "{details}",
+    "pages": [
+      "Notification templates"
+    ]
+  },
+  {
+    "id": "lbl.notification.orderExpired.title",
+    "text": "Goodies order expired",
+    "pages": [
+      "Notification templates"
+    ]
+  },
+  {
+    "id": "lbl.notification.orderPlaced.body",
+    "text": "{details}",
+    "pages": [
+      "Notification templates"
+    ]
+  },
+  {
+    "id": "lbl.notification.orderPlaced.title",
+    "text": "Goodies order placed",
+    "pages": [
+      "Notification templates"
+    ]
+  },
+  {
+    "id": "lbl.notification.orderPreparing.body",
+    "text": "{details}",
+    "pages": [
+      "Notification templates"
+    ]
+  },
+  {
+    "id": "lbl.notification.orderPreparing.title",
+    "text": "Store is preparing your Goodies order",
+    "pages": [
+      "Notification templates"
+    ]
+  },
+  {
+    "id": "lbl.notification.orderReady.body",
+    "text": "{details}",
+    "pages": [
+      "Notification templates"
+    ]
+  },
+  {
+    "id": "lbl.notification.orderReady.title",
+    "text": "Goodies order is ready",
+    "pages": [
+      "Notification templates"
+    ]
+  },
+  {
+    "id": "lbl.notification.orderScheduled.body",
+    "text": "{details}",
+    "pages": [
+      "Notification templates"
+    ]
+  },
+  {
+    "id": "lbl.notification.orderScheduled.title",
+    "text": "Goodies order scheduled",
+    "pages": [
+      "Notification templates"
+    ]
+  },
+  {
+    "id": "lbl.notification.ownDriverOnWay.body",
+    "text": "{details}",
+    "pages": [
+      "Notification templates"
+    ]
+  },
+  {
+    "id": "lbl.notification.ownDriverOnWay.title",
+    "text": "Your order is on its way",
+    "pages": [
+      "Notification templates"
+    ]
+  },
+  {
+    "id": "lbl.notification.paymentFailed.body",
+    "text": "{details}",
+    "pages": [
+      "Notification templates"
+    ]
+  },
+  {
+    "id": "lbl.notification.paymentFailed.title",
+    "text": "Goodies payment failed",
+    "pages": [
+      "Notification templates"
+    ]
+  },
+  {
+    "id": "lbl.notification.receiptConfirmation.body",
+    "text": "{details}",
+    "pages": [
+      "Notification templates"
+    ]
+  },
+  {
+    "id": "lbl.notification.receiptConfirmation.title",
+    "text": "Did you receive your order?",
+    "pages": [
+      "Notification templates"
+    ]
+  },
+  {
+    "id": "lbl.notification.restaurantCancelled.body",
+    "text": "{details}",
+    "pages": [
+      "Notification templates"
+    ]
+  },
+  {
+    "id": "lbl.notification.restaurantCancelled.title",
+    "text": "Restaurant cancelled your Goodies order",
+    "pages": [
+      "Notification templates"
+    ]
+  },
+  {
+    "id": "lbl.notification.scheduledOrderDue.body",
+    "text": "{details}",
+    "pages": [
+      "Notification templates"
+    ]
+  },
+  {
+    "id": "lbl.notification.scheduledOrderDue.title",
+    "text": "Scheduled Goodies order is due",
+    "pages": [
+      "Notification templates"
+    ]
+  },
+  {
     "id": "lbl.notifsEmpty",
     "text": "You’re all caught up",
     "pages": [
@@ -6227,6 +6618,13 @@
     ]
   },
   {
+    "id": "lbl.orderCourierAwaitingGps",
+    "text": "Courier accepted. Waiting for the first GPS location.",
+    "pages": [
+      "Shop · shared"
+    ]
+  },
+  {
     "id": "lbl.orderCourierLive",
     "text": "Courier GPS location is updating live.",
     "pages": [
@@ -6259,6 +6657,20 @@
     "text": "Your courier has picked up the order",
     "pages": [
       "Order tracking"
+    ]
+  },
+  {
+    "id": "lbl.orderCourierRefreshFailed",
+    "text": "Courier tracking is temporarily unavailable. Retrying automatically.",
+    "pages": [
+      "Shop · shared"
+    ]
+  },
+  {
+    "id": "lbl.orderCourierStale",
+    "text": "The courier GPS signal is temporarily stale. Waiting for a fresh location update.",
+    "pages": [
+      "Shop · shared"
     ]
   },
   {
@@ -6445,6 +6857,13 @@
     ]
   },
   {
+    "id": "lbl.orderProofUnavailable",
+    "text": "Delivery photo unavailable. Please try again later.",
+    "pages": [
+      "Order tracking"
+    ]
+  },
+  {
     "id": "lbl.orderRate",
     "text": "Rate your order",
     "pages": [
@@ -6472,6 +6891,13 @@
     "text": "Ready for pickup",
     "pages": [
       "Order tracking"
+    ]
+  },
+  {
+    "id": "lbl.orderRoadRouteUnavailable",
+    "text": "Road route unavailable. The map shows known locations only.",
+    "pages": [
+      "Shop · shared"
     ]
   },
   {
@@ -6510,6 +6936,20 @@
     ]
   },
   {
+    "id": "lbl.ordersLoading",
+    "text": "Loading orders…",
+    "pages": [
+      "Order history"
+    ]
+  },
+  {
+    "id": "lbl.ordersLoadingMore",
+    "text": "Loading orders…",
+    "pages": [
+      "Order history"
+    ]
+  },
+  {
     "id": "lbl.ordersNoActive",
     "text": "No active orders",
     "pages": [
@@ -6526,6 +6966,13 @@
   {
     "id": "lbl.ordersPast",
     "text": "Past",
+    "pages": [
+      "Order history"
+    ]
+  },
+  {
+    "id": "lbl.ordersRefreshFailed",
+    "text": "Could not refresh orders. Pull down to try again.",
     "pages": [
       "Order history"
     ]
@@ -6629,6 +7076,504 @@
     ]
   },
   {
+    "id": "lbl.page.actions.0316618817",
+    "text": "ID check failed",
+    "pages": [
+      "Shared actions and validation"
+    ]
+  },
+  {
+    "id": "lbl.page.actions.0e483440c6",
+    "text": "Choose Wantiss Wallet or cash to order from several stores.",
+    "pages": [
+      "Shared actions and validation"
+    ]
+  },
+  {
+    "id": "lbl.page.actions.0e7f1cefe2",
+    "text": ". Tap to track it.",
+    "pages": [
+      "Shared actions and validation"
+    ]
+  },
+  {
+    "id": "lbl.page.actions.0e98e7865b",
+    "text": "One of the stores is no longer taking orders.",
+    "pages": [
+      "Shared actions and validation"
+    ]
+  },
+  {
+    "id": "lbl.page.actions.25b66787be",
+    "text": "). Check the delivery address and try again.",
+    "pages": [
+      "Shared actions and validation"
+    ]
+  },
+  {
+    "id": "lbl.page.actions.353a2b3bb1",
+    "text": " The total was refunded to your wallet.",
+    "pages": [
+      "Shared actions and validation"
+    ]
+  },
+  {
+    "id": "lbl.page.actions.56d63db38f",
+    "text": "The ID check failed, so the order was not handed over. You were not charged.",
+    "pages": [
+      "Shared actions and validation"
+    ]
+  },
+  {
+    "id": "lbl.page.actions.66a268bc9d",
+    "text": "Sign in to create a Wantiss wallet.",
+    "pages": [
+      "Shared actions and validation"
+    ]
+  },
+  {
+    "id": "lbl.page.actions.672fe60e14",
+    "text": ": cash on delivery is not currently available. Choose Wantiss Wallet or try again later.",
+    "pages": [
+      "Shared actions and validation"
+    ]
+  },
+  {
+    "id": "lbl.page.actions.737e259f91",
+    "text": "You can order from up to ",
+    "pages": [
+      "Shared actions and validation"
+    ]
+  },
+  {
+    "id": "lbl.page.actions.756aec8c65",
+    "text": "Wallet creation was not confirmed by the server. Please retry.",
+    "pages": [
+      "Shared actions and validation"
+    ]
+  },
+  {
+    "id": "lbl.page.actions.78645fb5f6",
+    "text": " stores at once.",
+    "pages": [
+      "Shared actions and validation"
+    ]
+  },
+  {
+    "id": "lbl.page.actions.7d44819659",
+    "text": "The card payment could not be cancelled yet.",
+    "pages": [
+      "Shared actions and validation"
+    ]
+  },
+  {
+    "id": "lbl.page.actions.9983301c3b",
+    "text": "Demo order sent to ",
+    "pages": [
+      "Shared actions and validation"
+    ]
+  },
+  {
+    "id": "lbl.page.actions.ad7e8cd3a2",
+    "text": "Card payment could not be completed.",
+    "pages": [
+      "Shared actions and validation"
+    ]
+  },
+  {
+    "id": "lbl.page.actions.c010aa83cd",
+    "text": "Your order was cancelled.",
+    "pages": [
+      "Shared actions and validation"
+    ]
+  },
+  {
+    "id": "lbl.page.actions.cf161ce31c",
+    "text": "A store",
+    "pages": [
+      "Shared actions and validation"
+    ]
+  },
+  {
+    "id": "lbl.page.actions.cfb06d9224",
+    "text": "Wantiss number",
+    "pages": [
+      "Shared actions and validation"
+    ]
+  },
+  {
+    "id": "lbl.page.actions.d1c9a01d57",
+    "text": "Wallet",
+    "pages": [
+      "Shared actions and validation"
+    ]
+  },
+  {
+    "id": "lbl.page.actions.d2c68bb213",
+    "text": "Ordering from several stores needs a live connection.",
+    "pages": [
+      "Shared actions and validation"
+    ]
+  },
+  {
+    "id": "lbl.page.actions.e13f05dc32",
+    "text": " was refunded to your Wantiss wallet. The delivery fee is not refunded.",
+    "pages": [
+      "Shared actions and validation"
+    ]
+  },
+  {
+    "id": "lbl.page.actions.e2da108f63",
+    "text": "Cash",
+    "pages": [
+      "Shared actions and validation"
+    ]
+  },
+  {
+    "id": "lbl.page.actions.e7cb25f2ef",
+    "text": "Card •••• ",
+    "pages": [
+      "Shared actions and validation"
+    ]
+  },
+  {
+    "id": "lbl.page.components.cards.04b9a4b3d2",
+    "text": "Distance unavailable",
+    "pages": [
+      "Shared components"
+    ]
+  },
+  {
+    "id": "lbl.page.components.cards.2e75737a6b",
+    "text": " min",
+    "pages": [
+      "Shared components"
+    ]
+  },
+  {
+    "id": "lbl.page.components.Overlays.d2252166e4",
+    "text": "Close confirmation",
+    "pages": [
+      "Shared components"
+    ]
+  },
+  {
+    "id": "lbl.page.components.Sheets.59297174fd",
+    "text": "Create or join a group order first.",
+    "pages": [
+      "Group orders"
+    ]
+  },
+  {
+    "id": "lbl.page.components.Sheets.66f53417d3",
+    "text": "Just now",
+    "pages": [
+      "Review sheet"
+    ]
+  },
+  {
+    "id": "lbl.page.components.Sheets.a54b07b29c",
+    "text": "Join my Wantiss Goodies group order.\n\nOpen this invite in Wantiss: ",
+    "pages": [
+      "Group orders"
+    ]
+  },
+  {
+    "id": "lbl.page.components.Sheets.a686a8f76f",
+    "text": "Could not create the group invitation.",
+    "pages": [
+      "Group orders"
+    ]
+  },
+  {
+    "id": "lbl.page.components.Sheets.c4af5f55a9",
+    "text": "\n\nOr enter invite code: ",
+    "pages": [
+      "Group orders"
+    ]
+  },
+  {
+    "id": "lbl.page.components.Sheets.e947050714",
+    "text": "Could not join this group order.",
+    "pages": [
+      "Group orders"
+    ]
+  },
+  {
+    "id": "lbl.page.GoodiesCourierScreen.01753bced3",
+    "text": "Waiting for a fresh GPS location.",
+    "pages": [
+      "Courier"
+    ]
+  },
+  {
+    "id": "lbl.page.GoodiesCourierScreen.22a7f353b4",
+    "text": "Allow location access to track your active delivery.",
+    "pages": [
+      "Courier"
+    ]
+  },
+  {
+    "id": "lbl.page.GoodiesCourierScreen.5800646f2b",
+    "text": "Background permission was not granted. Live GPS works only while Wantiss is open.",
+    "pages": [
+      "Courier"
+    ]
+  },
+  {
+    "id": "lbl.page.GoodiesCourierScreen.5adac531a4",
+    "text": "Your live location is shared with the customer for this delivery.",
+    "pages": [
+      "Courier"
+    ]
+  },
+  {
+    "id": "lbl.page.GoodiesCourierScreen.5f0c80ecc7",
+    "text": "Could not refresh deliveries",
+    "pages": [
+      "Courier"
+    ]
+  },
+  {
+    "id": "lbl.page.GoodiesCourierScreen.66000cc67d",
+    "text": "Could not refresh delivery status",
+    "pages": [
+      "Courier"
+    ]
+  },
+  {
+    "id": "lbl.page.GoodiesCourierScreen.762dfff7c0",
+    "text": "Background GPS active · location sharing continues when you switch apps or lock your phone",
+    "pages": [
+      "Courier"
+    ]
+  },
+  {
+    "id": "lbl.page.GoodiesCourierScreen.82058ce156",
+    "text": "Background GPS is unavailable in this app build. Live GPS will continue while Wantiss is open.",
+    "pages": [
+      "Courier"
+    ]
+  },
+  {
+    "id": "lbl.page.GoodiesCourierScreen.9716bbbf48",
+    "text": "The response may have been saved. Refresh before retrying.",
+    "pages": [
+      "Courier"
+    ]
+  },
+  {
+    "id": "lbl.page.GoodiesCourierScreen.9ea62e5a2d",
+    "text": "Location sharing is off",
+    "pages": [
+      "Courier"
+    ]
+  },
+  {
+    "id": "lbl.page.GoodiesCourierScreen.c5dd75349b",
+    "text": "Location sharing stops when no delivery is active",
+    "pages": [
+      "Courier"
+    ]
+  },
+  {
+    "id": "lbl.page.GoodiesCourierScreen.c8c91e20b0",
+    "text": "Delivery address unavailable",
+    "pages": [
+      "Courier"
+    ]
+  },
+  {
+    "id": "lbl.page.GoodiesCourierScreen.ccaf4d36ba",
+    "text": "The update may have been saved. Refresh before retrying.",
+    "pages": [
+      "Courier"
+    ]
+  },
+  {
+    "id": "lbl.page.GoodiesCourierScreen.dc28ca1956",
+    "text": "Wantiss delivery tracking is active",
+    "pages": [
+      "Courier"
+    ]
+  },
+  {
+    "id": "lbl.page.GoodiesCourierScreen.e769b32cb8",
+    "text": "Foreground GPS only in Expo Go. A Wantiss development build is required for background tracking.",
+    "pages": [
+      "Courier"
+    ]
+  },
+  {
+    "id": "lbl.page.GoodiesCourierScreen.f37119df43",
+    "text": "Could not refresh delivery response",
+    "pages": [
+      "Courier"
+    ]
+  },
+  {
+    "id": "lbl.page.screens.Account.1a09f5e12f",
+    "text": "Support ticket ",
+    "pages": [
+      "Contact support"
+    ]
+  },
+  {
+    "id": "lbl.page.screens.Account.289cf25261",
+    "text": " · Order ",
+    "pages": [
+      "Contact support"
+    ]
+  },
+  {
+    "id": "lbl.page.screens.Account.2e1d18330b",
+    "text": "Please sign in again.",
+    "pages": [
+      "Addresses"
+    ]
+  },
+  {
+    "id": "lbl.page.screens.Account.49dca65f36",
+    "text": "United States",
+    "pages": [
+      "Addresses"
+    ]
+  },
+  {
+    "id": "lbl.page.screens.Account.71a14bea90",
+    "text": "Order problem",
+    "pages": [
+      "Contact support"
+    ]
+  },
+  {
+    "id": "lbl.page.screens.Account.81e884cb2e",
+    "text": "Dominican Republic",
+    "pages": [
+      "Addresses"
+    ]
+  },
+  {
+    "id": "lbl.page.screens.Account.f97e9da0e3",
+    "text": "Other",
+    "pages": [
+      "Addresses",
+      "Contact support"
+    ]
+  },
+  {
+    "id": "lbl.page.screens.Browse.1280456fb9",
+    "text": " to favorites",
+    "pages": [
+      "Search"
+    ]
+  },
+  {
+    "id": "lbl.page.screens.Browse.a9d3b30ba1",
+    "text": " from favorites",
+    "pages": [
+      "Search"
+    ]
+  },
+  {
+    "id": "lbl.page.screens.Payments.0d5c557a94",
+    "text": "Default card updated",
+    "pages": [
+      "Payment methods"
+    ]
+  },
+  {
+    "id": "lbl.page.screens.Payments.0e75e7b8ad",
+    "text": "Card removed",
+    "pages": [
+      "Payment methods"
+    ]
+  },
+  {
+    "id": "lbl.page.screens.Payments.5519facea3",
+    "text": "Could not change your default card.",
+    "pages": [
+      "Payment methods"
+    ]
+  },
+  {
+    "id": "lbl.page.screens.Payments.901ecf3e48",
+    "text": "Could not remove this card.",
+    "pages": [
+      "Payment methods"
+    ]
+  },
+  {
+    "id": "lbl.page.screens.Shop.9b6c227411",
+    "text": "Thanks for confirming.",
+    "pages": [
+      "Order tracking"
+    ]
+  },
+  {
+    "id": "lbl.page.screens.Shop.a03800365a",
+    "text": " reviews",
+    "pages": [
+      "Store reviews"
+    ]
+  },
+  {
+    "id": "lbl.page.screens.Shop.bfeb229338",
+    "text": "Your report was sent.",
+    "pages": [
+      "Order tracking"
+    ]
+  },
+  {
+    "id": "lbl.page.screens.Shop.c5a9016622",
+    "text": " stores · one delivery",
+    "pages": [
+      "Checkout"
+    ]
+  },
+  {
+    "id": "lbl.page.store.21bd4a6572",
+    "text": "All stores",
+    "pages": [
+      "Shared state messages"
+    ]
+  },
+  {
+    "id": "lbl.page.store.4f45fc13d6",
+    "text": "No longer taking orders",
+    "pages": [
+      "Shared state messages"
+    ]
+  },
+  {
+    "id": "lbl.page.store.6b987654a4",
+    "text": "PM",
+    "pages": [
+      "Shared state messages"
+    ]
+  },
+  {
+    "id": "lbl.page.store.c8f48a6864",
+    "text": "AM",
+    "pages": [
+      "Shared state messages"
+    ]
+  },
+  {
+    "id": "lbl.page.store.d8aea5db73",
+    "text": "This cart item is not linked to a live catalogue product.",
+    "pages": [
+      "Shared state messages"
+    ]
+  },
+  {
+    "id": "lbl.page.store.fb54363a03",
+    "text": "Reset demo data",
+    "pages": [
+      "Shared state messages"
+    ]
+  },
+  {
     "id": "lbl.paymentAddCard",
     "text": "+ Add a card",
     "pages": [
@@ -6650,8 +7595,22 @@
     ]
   },
   {
+    "id": "lbl.paymentCardFallback",
+    "text": "Card",
+    "pages": [
+      "Payments · shared"
+    ]
+  },
+  {
     "id": "lbl.paymentDefaultCard",
     "text": "Default",
+    "pages": [
+      "Payment methods"
+    ]
+  },
+  {
+    "id": "lbl.paymentExpires",
+    "text": "Expires {expiry}",
     "pages": [
       "Payment methods"
     ]
@@ -6673,6 +7632,13 @@
   {
     "id": "lbl.paymentNoWallet",
     "text": "No Wantiss wallet found",
+    "pages": [
+      "Payment methods"
+    ]
+  },
+  {
+    "id": "lbl.paymentOpenWallet",
+    "text": "Open Wantiss Wallet from the main menu to add funds.",
     "pages": [
       "Payment methods"
     ]
@@ -6741,17 +7707,17 @@
     ]
   },
   {
-    "id": "lbl.paymentTopupUnavailable",
-    "text": "Wallet top-up is not available yet.",
-    "pages": [
-      "Payment methods"
-    ]
-  },
-  {
     "id": "lbl.popular",
     "text": "Popular vendors",
     "pages": [
       "Home"
+    ]
+  },
+  {
+    "id": "lbl.preferenceSaveFailed",
+    "text": "Could not save notification preferences. Please try again.",
+    "pages": [
+      "Shared actions and validation"
     ]
   },
   {
@@ -6923,6 +7889,13 @@
     ]
   },
   {
+    "id": "lbl.productUnavailable",
+    "text": "This product is unavailable.",
+    "pages": [
+      "Shared navigation and access states"
+    ]
+  },
+  {
     "id": "lbl.profileOrderHistory",
     "text": "Order history",
     "pages": [
@@ -6949,6 +7922,27 @@
     "text": "Profile",
     "pages": [
       "Profile"
+    ]
+  },
+  {
+    "id": "lbl.promoBrowseOffers",
+    "text": "Browse offers",
+    "pages": [
+      "Sheets · promo"
+    ]
+  },
+  {
+    "id": "lbl.promoDetailsUnavailable",
+    "text": "Offer details are unavailable",
+    "pages": [
+      "Sheets · promo"
+    ]
+  },
+  {
+    "id": "lbl.promoDetailsUnavailableBody",
+    "text": "Browse the current offers for up-to-date details.",
+    "pages": [
+      "Sheets · promo"
     ]
   },
   {
@@ -6987,10 +7981,84 @@
     ]
   },
   {
+    "id": "lbl.ratingsUnavailable",
+    "text": "Ratings unavailable",
+    "pages": [
+      "Shared components",
+      "Store",
+      "Store reviews",
+      "Product"
+    ]
+  },
+  {
     "id": "lbl.recent",
     "text": "Recently viewed",
     "pages": [
       "Home"
+    ]
+  },
+  {
+    "id": "lbl.retry",
+    "text": "Try again",
+    "pages": [
+      "Shared navigation and access states",
+      "Home",
+      "Card verification",
+      "Store",
+      "Store reviews",
+      "Cart",
+      "Checkout"
+    ]
+  },
+  {
+    "id": "lbl.reviewCustomer",
+    "text": "Customer",
+    "pages": [
+      "Shared components"
+    ]
+  },
+  {
+    "id": "lbl.reviewSaveFailed",
+    "text": "Could not submit your review. Please try again.",
+    "pages": [
+      "Review sheet"
+    ]
+  },
+  {
+    "id": "lbl.reviewSaving",
+    "text": "Submitting…",
+    "pages": [
+      "Review sheet"
+    ]
+  },
+  {
+    "id": "lbl.reviewsFailed",
+    "text": "Could not load reviews",
+    "pages": [
+      "Store",
+      "Store reviews"
+    ]
+  },
+  {
+    "id": "lbl.reviewsLoading",
+    "text": "Loading reviews…",
+    "pages": [
+      "Store",
+      "Store reviews"
+    ]
+  },
+  {
+    "id": "lbl.reviewTooLong",
+    "text": "Keep your review under 1,000 characters.",
+    "pages": [
+      "Review sheet"
+    ]
+  },
+  {
+    "id": "lbl.reviewYou",
+    "text": "You",
+    "pages": [
+      "Shared components"
     ]
   },
   {
@@ -7130,6 +8198,1065 @@
     ]
   },
   {
+    "id": "lbl.settlement.account",
+    "text": "Account number",
+    "pages": [
+      "Vendor settlement"
+    ]
+  },
+  {
+    "id": "lbl.settlement.all",
+    "text": "All",
+    "pages": [
+      "Vendor settlement"
+    ]
+  },
+  {
+    "id": "lbl.settlement.amount",
+    "text": "Amount (USD)",
+    "pages": [
+      "Vendor settlement"
+    ]
+  },
+  {
+    "id": "lbl.settlement.available",
+    "text": "GOODIES AVAILABLE",
+    "pages": [
+      "Vendor settlement"
+    ]
+  },
+  {
+    "id": "lbl.settlement.bank",
+    "text": "Bank transfer",
+    "pages": [
+      "Vendor settlement"
+    ]
+  },
+  {
+    "id": "lbl.settlement.bankName",
+    "text": "Bank name",
+    "pages": [
+      "Vendor settlement"
+    ]
+  },
+  {
+    "id": "lbl.settlement.bankTiming",
+    "text": "7–14 business days",
+    "pages": [
+      "Vendor settlement"
+    ]
+  },
+  {
+    "id": "lbl.settlement.cashCommission",
+    "text": "Cash-order commission",
+    "pages": [
+      "Vendor settlement"
+    ]
+  },
+  {
+    "id": "lbl.settlement.cashEnabled",
+    "text": "Cash on delivery enabled for your store.",
+    "pages": [
+      "Vendor orders"
+    ]
+  },
+  {
+    "id": "lbl.settlement.cashLimit",
+    "text": "Settle Goodies cash-order commission to accept more cash orders.",
+    "pages": [
+      "Vendor settlement"
+    ]
+  },
+  {
+    "id": "lbl.settlement.cashSales",
+    "text": "Cash sales awaiting settlement",
+    "pages": [
+      "Vendor settlement"
+    ]
+  },
+  {
+    "id": "lbl.settlement.cashUnavailable",
+    "text": "Cash ordering is temporarily unavailable. Please try again later.",
+    "pages": [
+      "Vendor settlement"
+    ]
+  },
+  {
+    "id": "lbl.settlement.checkHistory",
+    "text": "Check payout history before changing an unresolved request.",
+    "pages": [
+      "Vendor settlement"
+    ]
+  },
+  {
+    "id": "lbl.settlement.confirm",
+    "text": "Confirm payout",
+    "pages": [
+      "Vendor settlement"
+    ]
+  },
+  {
+    "id": "lbl.settlement.countryHT",
+    "text": "Haiti",
+    "pages": [
+      "Vendor settlement"
+    ]
+  },
+  {
+    "id": "lbl.settlement.countryPH",
+    "text": "Philippines",
+    "pages": [
+      "Vendor settlement"
+    ]
+  },
+  {
+    "id": "lbl.settlement.countryUS",
+    "text": "United States",
+    "pages": [
+      "Vendor settlement"
+    ]
+  },
+  {
+    "id": "lbl.settlement.createWallet",
+    "text": "Create Wantiss Wallet",
+    "pages": [
+      "Vendor settlement"
+    ]
+  },
+  {
+    "id": "lbl.settlement.destinationReview",
+    "text": "External payout details require verification before use.",
+    "pages": [
+      "Vendor settlement"
+    ]
+  },
+  {
+    "id": "lbl.settlement.digitalTiming",
+    "text": "2 days",
+    "pages": [
+      "Vendor settlement"
+    ]
+  },
+  {
+    "id": "lbl.settlement.dispatchFailed",
+    "text": "Could not check delivery options.",
+    "pages": [
+      "Vendor orders"
+    ]
+  },
+  {
+    "id": "lbl.settlement.dispatchLoading",
+    "text": "Checking delivery options…",
+    "pages": [
+      "Vendor orders"
+    ]
+  },
+  {
+    "id": "lbl.settlement.due",
+    "text": "Settle by",
+    "pages": [
+      "Vendor settlement"
+    ]
+  },
+  {
+    "id": "lbl.settlement.entryCommissionPaid",
+    "text": "Commission paid",
+    "pages": [
+      "Vendor settlement"
+    ]
+  },
+  {
+    "id": "lbl.settlement.entryFee",
+    "text": "Commission owed",
+    "pages": [
+      "Vendor settlement"
+    ]
+  },
+  {
+    "id": "lbl.settlement.entryOther",
+    "text": "Settlement",
+    "pages": [
+      "Vendor settlement"
+    ]
+  },
+  {
+    "id": "lbl.settlement.entryPayout",
+    "text": "Payout",
+    "pages": [
+      "Vendor settlement"
+    ]
+  },
+  {
+    "id": "lbl.settlement.entryRefund",
+    "text": "Refund",
+    "pages": [
+      "Vendor settlement"
+    ]
+  },
+  {
+    "id": "lbl.settlement.entrySale",
+    "text": "Sale",
+    "pages": [
+      "Vendor settlement"
+    ]
+  },
+  {
+    "id": "lbl.settlement.failed",
+    "text": "Could not complete this request. Check your history and try again.",
+    "pages": [
+      "Vendor settlement"
+    ]
+  },
+  {
+    "id": "lbl.settlement.fees",
+    "text": "Fees",
+    "pages": [
+      "Vendor settlement"
+    ]
+  },
+  {
+    "id": "lbl.settlement.history",
+    "text": "Payout history",
+    "pages": [
+      "Vendor settlement"
+    ]
+  },
+  {
+    "id": "lbl.settlement.historyFailed",
+    "text": "Could not load settlement history.",
+    "pages": [
+      "Vendor settlement"
+    ]
+  },
+  {
+    "id": "lbl.settlement.hold",
+    "text": "Earnings become available 24 hours after confirmed delivery. Disputed amounts remain held.",
+    "pages": [
+      "Vendor settlement"
+    ]
+  },
+  {
+    "id": "lbl.settlement.holder",
+    "text": "Account holder",
+    "pages": [
+      "Vendor settlement"
+    ]
+  },
+  {
+    "id": "lbl.settlement.instant",
+    "text": "Instant once earnings are available",
+    "pages": [
+      "Vendor settlement"
+    ]
+  },
+  {
+    "id": "lbl.settlement.ledger",
+    "text": "Ledger",
+    "pages": [
+      "Vendor settlement"
+    ]
+  },
+  {
+    "id": "lbl.settlement.loading",
+    "text": "Loading…",
+    "pages": [
+      "Vendor settlement"
+    ]
+  },
+  {
+    "id": "lbl.settlement.methods",
+    "text": "Manage payout methods",
+    "pages": [
+      "Vendor settlement"
+    ]
+  },
+  {
+    "id": "lbl.settlement.methodUnavailable",
+    "text": "Currently unavailable",
+    "pages": [
+      "Vendor settlement"
+    ]
+  },
+  {
+    "id": "lbl.settlement.next",
+    "text": "Next page",
+    "pages": [
+      "Vendor settlement"
+    ]
+  },
+  {
+    "id": "lbl.settlement.noHistory",
+    "text": "No settlement transactions yet",
+    "pages": [
+      "Vendor settlement"
+    ]
+  },
+  {
+    "id": "lbl.settlement.openWallet",
+    "text": "Open Wantiss Wallet",
+    "pages": [
+      "Vendor settlement"
+    ]
+  },
+  {
+    "id": "lbl.settlement.optionsFailed",
+    "text": "Payout methods are unavailable.",
+    "pages": [
+      "Vendor settlement"
+    ]
+  },
+  {
+    "id": "lbl.settlement.owed",
+    "text": "Commission and platform fees owed",
+    "pages": [
+      "Vendor settlement"
+    ]
+  },
+  {
+    "id": "lbl.settlement.ownerRequired",
+    "text": "Only a business owner can request payouts or manage payout details.",
+    "pages": [
+      "Vendor settlement"
+    ]
+  },
+  {
+    "id": "lbl.settlement.paused",
+    "text": "New cash orders are paused until settlement. Accepted orders continue.",
+    "pages": [
+      "Vendor settlement"
+    ]
+  },
+  {
+    "id": "lbl.settlement.payCommission",
+    "text": "Pay commission with Wantiss Wallet",
+    "pages": [
+      "Vendor settlement"
+    ]
+  },
+  {
+    "id": "lbl.settlement.payouts",
+    "text": "Payouts",
+    "pages": [
+      "Vendor settlement"
+    ]
+  },
+  {
+    "id": "lbl.settlement.pending",
+    "text": "Pending",
+    "pages": [
+      "Vendor settlement"
+    ]
+  },
+  {
+    "id": "lbl.settlement.phone",
+    "text": "Wallet phone number",
+    "pages": [
+      "Vendor settlement"
+    ]
+  },
+  {
+    "id": "lbl.settlement.previous",
+    "text": "Previous page",
+    "pages": [
+      "Vendor settlement"
+    ]
+  },
+  {
+    "id": "lbl.settlement.quoteExpired",
+    "text": "Refresh payout methods to get a current exchange quote.",
+    "pages": [
+      "Vendor settlement"
+    ]
+  },
+  {
+    "id": "lbl.settlement.receive",
+    "text": "You receive",
+    "pages": [
+      "Vendor settlement"
+    ]
+  },
+  {
+    "id": "lbl.settlement.recovery",
+    "text": "Balance requiring review",
+    "pages": [
+      "Vendor settlement"
+    ]
+  },
+  {
+    "id": "lbl.settlement.refunds",
+    "text": "Refunds",
+    "pages": [
+      "Vendor settlement"
+    ]
+  },
+  {
+    "id": "lbl.settlement.request",
+    "text": "Request payout",
+    "pages": [
+      "Vendor settlement"
+    ]
+  },
+  {
+    "id": "lbl.settlement.requested",
+    "text": "Payout requested. Check history for its status.",
+    "pages": [
+      "Vendor settlement"
+    ]
+  },
+  {
+    "id": "lbl.settlement.reviewPending",
+    "text": "Payout details submitted for verification.",
+    "pages": [
+      "Vendor settlement"
+    ]
+  },
+  {
+    "id": "lbl.settlement.routing",
+    "text": "Routing / SWIFT code",
+    "pages": [
+      "Vendor settlement"
+    ]
+  },
+  {
+    "id": "lbl.settlement.sales",
+    "text": "Sales",
+    "pages": [
+      "Vendor settlement"
+    ]
+  },
+  {
+    "id": "lbl.settlement.save",
+    "text": "Submit for verification",
+    "pages": [
+      "Vendor settlement"
+    ]
+  },
+  {
+    "id": "lbl.settlement.saveFailed",
+    "text": "Could not save payout details. Check the fields and try again.",
+    "pages": [
+      "Vendor settlement"
+    ]
+  },
+  {
+    "id": "lbl.settlement.statusCompleted",
+    "text": "Completed",
+    "pages": [
+      "Vendor settlement"
+    ]
+  },
+  {
+    "id": "lbl.settlement.statusFailed",
+    "text": "Failed",
+    "pages": [
+      "Vendor settlement"
+    ]
+  },
+  {
+    "id": "lbl.settlement.statusHeld",
+    "text": "On hold",
+    "pages": [
+      "Vendor settlement"
+    ]
+  },
+  {
+    "id": "lbl.settlement.statusProcessing",
+    "text": "Processing",
+    "pages": [
+      "Vendor settlement"
+    ]
+  },
+  {
+    "id": "lbl.settlement.statusRecorded",
+    "text": "Recorded",
+    "pages": [
+      "Vendor settlement"
+    ]
+  },
+  {
+    "id": "lbl.settlement.statusRejected",
+    "text": "Rejected",
+    "pages": [
+      "Vendor settlement"
+    ]
+  },
+  {
+    "id": "lbl.settlement.statusRequested",
+    "text": "Requested",
+    "pages": [
+      "Vendor settlement"
+    ]
+  },
+  {
+    "id": "lbl.settlement.statusReversed",
+    "text": "Reversed",
+    "pages": [
+      "Vendor settlement"
+    ]
+  },
+  {
+    "id": "lbl.settlement.statusReview",
+    "text": "Under review",
+    "pages": [
+      "Vendor settlement"
+    ]
+  },
+  {
+    "id": "lbl.settlement.statusVerified",
+    "text": "Verified",
+    "pages": [
+      "Vendor settlement"
+    ]
+  },
+  {
+    "id": "lbl.settlement.summaryFailed",
+    "text": "Goodies settlement details are unavailable.",
+    "pages": [
+      "Vendor settlement"
+    ]
+  },
+  {
+    "id": "lbl.settlement.unavailable",
+    "text": "Unavailable",
+    "pages": [
+      "Vendor settlement"
+    ]
+  },
+  {
+    "id": "lbl.settlement.wallet",
+    "text": "Wantiss Wallet",
+    "pages": [
+      "Vendor settlement"
+    ]
+  },
+  {
+    "id": "lbl.settlement.walletAutomatic",
+    "text": "Wantiss Wallet is available without an external payout account.",
+    "pages": [
+      "Vendor settlement"
+    ]
+  },
+  {
+    "id": "lbl.settlement.walletFunds",
+    "text": "Add funds to your Wantiss Wallet before paying commission.",
+    "pages": [
+      "Vendor settlement"
+    ]
+  },
+  {
+    "id": "lbl.settlement.walletSent",
+    "text": "Sent to your Wantiss Wallet",
+    "pages": [
+      "Vendor settlement"
+    ]
+  },
+  {
+    "id": "lbl.sharedPay.02cea13ccec6",
+    "text": "Payments are debited exactly once and automatically refunded if the order cannot be fulfilled.",
+    "pages": [
+      "Shared Bill contribution"
+    ]
+  },
+  {
+    "id": "lbl.sharedPay.04cd2b8aaa12",
+    "text": "Order fully funded",
+    "pages": [
+      "Shared Bill contribution"
+    ]
+  },
+  {
+    "id": "lbl.sharedPay.0ea70b1eccd8",
+    "text": "The Help Pay card was sent to ",
+    "pages": [
+      "Shared Bill requests"
+    ]
+  },
+  {
+    "id": "lbl.sharedPay.0ff5e16d4eb0",
+    "text": "Request expired",
+    "pages": [
+      "Shared Bill requests",
+      "Shared Bill contribution"
+    ]
+  },
+  {
+    "id": "lbl.sharedPay.12076fe48d8c",
+    "text": "Delivery quote failed (HTTP ",
+    "pages": [
+      "Shared actions and validation"
+    ]
+  },
+  {
+    "id": "lbl.sharedPay.17fd54ffc83e",
+    "text": "Create full-payment request",
+    "pages": [
+      "Shared Bill requests"
+    ]
+  },
+  {
+    "id": "lbl.sharedPay.19ca27bcb4cf",
+    "text": "Invalid Wantiss payment link",
+    "pages": [
+      "Shared Bill contribution"
+    ]
+  },
+  {
+    "id": "lbl.sharedPay.1d5556f0ae86",
+    "text": "Your contribution was reserved. The order will be placed when fully funded.",
+    "pages": [
+      "Shared Bill contribution"
+    ]
+  },
+  {
+    "id": "lbl.sharedPay.1da621181d3d",
+    "text": " placed",
+    "pages": [
+      "Shared actions and validation"
+    ]
+  },
+  {
+    "id": "lbl.sharedPay.20a7aa907eeb",
+    "text": "Or exact amount (USD)",
+    "pages": [
+      "Shared Bill contribution"
+    ]
+  },
+  {
+    "id": "lbl.sharedPay.23e39291d613",
+    "text": "Saving…",
+    "pages": [
+      "Contact number form"
+    ]
+  },
+  {
+    "id": "lbl.sharedPay.28b5ba9e934d",
+    "text": "No new payments can be accepted. Any expired or cancelled contributions are returned to their original Wallets.",
+    "pages": [
+      "Shared Bill contribution"
+    ]
+  },
+  {
+    "id": "lbl.sharedPay.2e7ab90ac60c",
+    "text": "Wallet balance",
+    "pages": [
+      "Shared Bill contribution"
+    ]
+  },
+  {
+    "id": "lbl.sharedPay.3259de868228",
+    "text": "Keep request",
+    "pages": [
+      "Shared Bill requests"
+    ]
+  },
+  {
+    "id": "lbl.sharedPay.343e6dc6593a",
+    "text": "One friend pays the full remaining bill through Wantiss Wallet.",
+    "pages": [
+      "Shared Bill requests"
+    ]
+  },
+  {
+    "id": "lbl.sharedPay.368953429e33",
+    "text": "Share bill · 60/40",
+    "pages": [
+      "Shared Bill requests"
+    ]
+  },
+  {
+    "id": "lbl.sharedPay.38e31e9e9664",
+    "text": "Full bill",
+    "pages": [
+      "Shared Bill requests"
+    ]
+  },
+  {
+    "id": "lbl.sharedPay.3908875a8ecd",
+    "text": "Create a Wantiss Wallet before paying this request.",
+    "pages": [
+      "Shared Bill contribution"
+    ]
+  },
+  {
+    "id": "lbl.sharedPay.416f4bdc7db9",
+    "text": "Not accepting payments",
+    "pages": [
+      "Shared Bill contribution"
+    ]
+  },
+  {
+    "id": "lbl.sharedPay.443643141b0d",
+    "text": "Preparing secure request…",
+    "pages": [
+      "Shared Bill requests"
+    ]
+  },
+  {
+    "id": "lbl.sharedPay.460ed0499c69",
+    "text": "Confirm Help Pay contribution",
+    "pages": [
+      "Shared Bill contribution"
+    ]
+  },
+  {
+    "id": "lbl.sharedPay.4bf46f85b397",
+    "text": "Goodies bill",
+    "pages": [
+      "Shared Bill contribution"
+    ]
+  },
+  {
+    "id": "lbl.sharedPay.4e60343ccd34",
+    "text": "Help Pay · Goodies",
+    "pages": [
+      "Shared Bill contribution"
+    ]
+  },
+  {
+    "id": "lbl.sharedPay.5235c824c0e8",
+    "text": ". They can tap it in Messages to pay.",
+    "pages": [
+      "Shared Bill requests"
+    ]
+  },
+  {
+    "id": "lbl.sharedPay.595478e89b6c",
+    "text": "Insufficient Wallet balance",
+    "pages": [
+      "Shared Bill contribution"
+    ]
+  },
+  {
+    "id": "lbl.sharedPay.5a4a4293580d",
+    "text": "You will pay",
+    "pages": [
+      "Shared Bill contribution"
+    ]
+  },
+  {
+    "id": "lbl.sharedPay.60c6b463eb3c",
+    "text": "Choose an amount between $0.01 and",
+    "pages": [
+      "Shared Bill contribution"
+    ]
+  },
+  {
+    "id": "lbl.sharedPay.620e8c691a5e",
+    "text": "Sent in Wantiss",
+    "pages": [
+      "Shared Bill requests"
+    ]
+  },
+  {
+    "id": "lbl.sharedPay.709e29ca60c0",
+    "text": "Custom percentage",
+    "pages": [
+      "Shared Bill contribution"
+    ]
+  },
+  {
+    "id": "lbl.sharedPay.7108183f1888",
+    "text": "Request cancelled",
+    "pages": [
+      "Shared Bill requests",
+      "Shared Bill contribution"
+    ]
+  },
+  {
+    "id": "lbl.sharedPay.761d0751f5d4",
+    "text": "Pay ",
+    "pages": [
+      "Shared Bill contribution"
+    ]
+  },
+  {
+    "id": "lbl.sharedPay.76900f1bfd16",
+    "text": "Back",
+    "pages": [
+      "Shared Bill contribution"
+    ]
+  },
+  {
+    "id": "lbl.sharedPay.7a919abc163d",
+    "text": "YOUR CONTRIBUTION",
+    "pages": [
+      "Shared Bill contribution"
+    ]
+  },
+  {
+    "id": "lbl.sharedPay.81659570b4ae",
+    "text": "Wallet not available",
+    "pages": [
+      "Shared Bill contribution"
+    ]
+  },
+  {
+    "id": "lbl.sharedPay.88295663710d",
+    "text": "Could not share",
+    "pages": [
+      "Shared Bill requests"
+    ]
+  },
+  {
+    "id": "lbl.sharedPay.884d5bff79c1",
+    "text": "GD",
+    "pages": [
+      "Shared actions and validation"
+    ]
+  },
+  {
+    "id": "lbl.sharedPay.901b78876685",
+    "text": "This is your own request. Share your QR or message card with friends; you cannot pay yourself.",
+    "pages": [
+      "Shared Bill contribution"
+    ]
+  },
+  {
+    "id": "lbl.sharedPay.92432ea870cc",
+    "text": "Already funded",
+    "pages": [
+      "Shared Bill contribution"
+    ]
+  },
+  {
+    "id": "lbl.sharedPay.93ac77559da0",
+    "text": "Cancel Help Pay?",
+    "pages": [
+      "Shared Bill requests"
+    ]
+  },
+  {
+    "id": "lbl.sharedPay.942087cc2d41",
+    "text": "Retry",
+    "pages": [
+      "Shared Bill contribution"
+    ]
+  },
+  {
+    "id": "lbl.sharedPay.9cd2ba51b7a1",
+    "text": "Help Pay is ready",
+    "pages": [
+      "Shared Bill requests"
+    ]
+  },
+  {
+    "id": "lbl.sharedPay.9ddec70577a7",
+    "text": " from your Wantiss Wallet for this Goodies order? This payment is reserved until the order is fully funded or refunded.",
+    "pages": [
+      "Shared Bill contribution"
+    ]
+  },
+  {
+    "id": "lbl.sharedPay.a0e63d7c7125",
+    "text": "Not now",
+    "pages": [
+      "Shared Bill contribution"
+    ]
+  },
+  {
+    "id": "lbl.sharedPay.a106da9432de",
+    "text": "Choose a percentage of the remaining bill",
+    "pages": [
+      "Shared Bill contribution"
+    ]
+  },
+  {
+    "id": "lbl.sharedPay.ad68dbabf62f",
+    "text": "Custom contribution amount",
+    "pages": [
+      "Shared Bill contribution"
+    ]
+  },
+  {
+    "id": "lbl.sharedPay.adb5f4392989",
+    "text": "Your contribution completed the order.",
+    "pages": [
+      "Shared Bill contribution"
+    ]
+  },
+  {
+    "id": "lbl.sharedPay.aeca45af88a6",
+    "text": "Help pay a Goodies bill",
+    "pages": [
+      "Shared Bill contribution"
+    ]
+  },
+  {
+    "id": "lbl.sharedPay.b60de3ca37f2",
+    "text": "Still needed",
+    "pages": [
+      "Shared Bill contribution"
+    ]
+  },
+  {
+    "id": "lbl.sharedPay.b8ed5279e897",
+    "text": "Sending…",
+    "pages": [
+      "Shared Bill requests"
+    ]
+  },
+  {
+    "id": "lbl.sharedPay.b9378c00f9db",
+    "text": "Confirming…",
+    "pages": [
+      "Shared Bill contribution"
+    ]
+  },
+  {
+    "id": "lbl.sharedPay.b97f77e01cbd",
+    "text": "Unable to cancel",
+    "pages": [
+      "Shared Bill requests"
+    ]
+  },
+  {
+    "id": "lbl.sharedPay.c6935a2cf1c3",
+    "text": "Help me fully pay",
+    "pages": [
+      "Shared Bill requests"
+    ]
+  },
+  {
+    "id": "lbl.sharedPay.cd46246db8c2",
+    "text": " cancelled",
+    "pages": [
+      "Shared actions and validation"
+    ]
+  },
+  {
+    "id": "lbl.sharedPay.cf8698e6a85f",
+    "text": "Your Wallet contributions:",
+    "pages": [
+      "Shared Bill contribution"
+    ]
+  },
+  {
+    "id": "lbl.sharedPay.d08a8574e8ca",
+    "text": "BILL SUMMARY",
+    "pages": [
+      "Shared Bill contribution"
+    ]
+  },
+  {
+    "id": "lbl.sharedPay.d337d826db7e",
+    "text": "Order ",
+    "pages": [
+      "Shared actions and validation"
+    ]
+  },
+  {
+    "id": "lbl.sharedPay.d353a99eb455",
+    "text": "Cancelled",
+    "pages": [
+      "Shared Bill requests"
+    ]
+  },
+  {
+    "id": "lbl.sharedPay.d59713c10908",
+    "text": "All contributions have been returned to the Wallets that paid.",
+    "pages": [
+      "Shared Bill requests"
+    ]
+  },
+  {
+    "id": "lbl.sharedPay.d5dc6f809720",
+    "text": "Payment not confirmed",
+    "pages": [
+      "Shared Bill contribution"
+    ]
+  },
+  {
+    "id": "lbl.sharedPay.d7cbce64a0d2",
+    "text": "Add money to your Wantiss Wallet before contributing.",
+    "pages": [
+      "Shared Bill contribution"
+    ]
+  },
+  {
+    "id": "lbl.sharedPay.d82f324531d1",
+    "text": "Order funded",
+    "pages": [
+      "Shared Bill requests"
+    ]
+  },
+  {
+    "id": "lbl.sharedPay.dc142ba53499",
+    "text": "Payment refunded",
+    "pages": [
+      "Shared Bill contribution"
+    ]
+  },
+  {
+    "id": "lbl.sharedPay.ddf9b59c7bf4",
+    "text": "Custom percentage (%)",
+    "pages": [
+      "Shared Bill contribution"
+    ]
+  },
+  {
+    "id": "lbl.sharedPay.de9967524f05",
+    "text": "Expires in",
+    "pages": [
+      "Shared Bill contribution"
+    ]
+  },
+  {
+    "id": "lbl.sharedPay.e0f309639ee2",
+    "text": "All reserved Wallet contributions, including your upfront share, will be refunded.",
+    "pages": [
+      "Shared Bill requests"
+    ]
+  },
+  {
+    "id": "lbl.sharedPay.e21a6332ee26",
+    "text": "A secure Wantiss request. Your payment goes directly toward the original customer's order.",
+    "pages": [
+      "Shared Bill contribution"
+    ]
+  },
+  {
+    "id": "lbl.sharedPay.e7f3ef2a0caf",
+    "text": "Your 60% is reserved from your Wantiss Wallet before sharing. Friends choose any amount or percentage of the remaining 40%.",
+    "pages": [
+      "Shared Bill requests"
+    ]
+  },
+  {
+    "id": "lbl.sharedPay.ee77216dac18",
+    "text": "Wallet required",
+    "pages": [
+      "Shared Bill contribution"
+    ]
+  },
+  {
+    "id": "lbl.sharedPay.f6f4688ff23d",
+    "text": "Send",
+    "pages": [
+      "Shared Bill requests"
+    ]
+  },
+  {
+    "id": "lbl.sharedPay.f95fe35ec83a",
+    "text": "Cancel and refund",
+    "pages": [
+      "Shared Bill requests"
+    ]
+  },
+  {
+    "id": "lbl.sharedPay.fbb4c1079b3d",
+    "text": "This request requires one person to cover the entire unpaid bill.",
+    "pages": [
+      "Shared Bill contribution"
+    ]
+  },
+  {
+    "id": "lbl.sharedPay.fd720ee2314f",
+    "text": "Help Pay requests must contain items from one store.",
+    "pages": [
+      "Shared actions and validation"
+    ]
+  },
+  {
     "id": "lbl.sheetAcceptingOrders",
     "text": "Accepting orders",
     "pages": [
@@ -7144,17 +9271,17 @@
     ]
   },
   {
+    "id": "lbl.sheetAddressFallback",
+    "text": "this address",
+    "pages": [
+      "Sheets · remove-address"
+    ]
+  },
+  {
     "id": "lbl.sheetAddressScope",
     "text": "Choosing an address here only changes Goodies. Your Wantiss default stays the same.",
     "pages": [
       "Sheets · addr"
-    ]
-  },
-  {
-    "id": "lbl.sheetAdminContentLoaded",
-    "text": "Admin content loaded",
-    "pages": [
-      "Preview import"
     ]
   },
   {
@@ -7193,24 +9320,10 @@
     ]
   },
   {
-    "id": "lbl.sheetAuto1DJ0R80",
-    "text": "Import Admin content",
-    "pages": [
-      "Preview import"
-    ]
-  },
-  {
     "id": "lbl.sheetAuto1DTRBEO",
     "text": "This clears your current choices. Items already in your cart are not affected.",
     "pages": [
       "Sheets · byoreset"
-    ]
-  },
-  {
-    "id": "lbl.sheetAuto1EXCTAI",
-    "text": "Import",
-    "pages": [
-      "Preview import"
     ]
   },
   {
@@ -7239,13 +9352,6 @@
     "text": "Back",
     "pages": [
       "Contact number form"
-    ]
-  },
-  {
-    "id": "lbl.sheetAuto1U4P0PS",
-    "text": "Go back to sample content",
-    "pages": [
-      "Preview import"
     ]
   },
   {
@@ -7281,13 +9387,6 @@
     "text": "• The courier checks your ID at the door. At a pickup, the shop checks it.",
     "pages": [
       "Sheets · alcrules"
-    ]
-  },
-  {
-    "id": "lbl.sheetAutoAED84A",
-    "text": "Paste JSON here",
-    "pages": [
-      "Preview import"
     ]
   },
   {
@@ -7532,13 +9631,6 @@
     ]
   },
   {
-    "id": "lbl.sheetDemoMoney",
-    "text": "Demo: no real money moves.",
-    "pages": [
-      "Sheets · topup"
-    ]
-  },
-  {
     "id": "lbl.sheetDiscard",
     "text": "Discard",
     "pages": [
@@ -7638,13 +9730,6 @@
     ]
   },
   {
-    "id": "lbl.sheetInvalidJson",
-    "text": "That is not valid JSON",
-    "pages": [
-      "Preview import"
-    ]
-  },
-  {
     "id": "lbl.sheetInviteCode",
     "text": "GROUP INVITE CODE",
     "pages": [
@@ -7656,6 +9741,13 @@
     "text": "Invite people",
     "pages": [
       "Group orders"
+    ]
+  },
+  {
+    "id": "lbl.sheetItemFallback",
+    "text": "this item",
+    "pages": [
+      "Sheets · remove-item"
     ]
   },
   {
@@ -7736,6 +9828,13 @@
     "text": "This store does not accept scheduled orders.",
     "pages": [
       "Scheduling"
+    ]
+  },
+  {
+    "id": "lbl.sheetNumberFallback",
+    "text": "this number",
+    "pages": [
+      "Sheets · remove-number"
     ]
   },
   {
@@ -7886,13 +9985,6 @@
     ]
   },
   {
-    "id": "lbl.sheetSampleContent",
-    "text": "Using sample content",
-    "pages": [
-      "Preview import"
-    ]
-  },
-  {
     "id": "lbl.sheetScheduledAvailable",
     "text": "Available while closed",
     "pages": [
@@ -7974,20 +10066,6 @@
     "text": "Subtotal",
     "pages": [
       "Group orders"
-    ]
-  },
-  {
-    "id": "lbl.sheetTopup",
-    "text": "Top up wallet",
-    "pages": [
-      "Sheets · topup"
-    ]
-  },
-  {
-    "id": "lbl.sheetWalletToppedUp",
-    "text": "Wallet topped up to {amount}",
-    "pages": [
-      "Sheets · topup"
     ]
   },
   {
@@ -8192,6 +10270,13 @@
     "text": "Picked up",
     "pages": [
       "Order tracking"
+    ]
+  },
+  {
+    "id": "lbl.startupFailed",
+    "text": "Goodies could not load",
+    "pages": [
+      "Shared navigation and access states"
     ]
   },
   {
@@ -8410,7 +10495,9 @@
     "id": "lbl.storeNotFound",
     "text": "Store not found",
     "pages": [
-      "Store reviews"
+      "Store reviews",
+      "Order tracking",
+      "Order history"
     ]
   },
   {
@@ -8500,14 +10587,6 @@
     ]
   },
   {
-    "id": "lbl.storeSampleReview",
-    "text": "sample review",
-    "pages": [
-      "Store",
-      "Store reviews"
-    ]
-  },
-  {
     "id": "lbl.storeSave",
     "text": "Save store",
     "pages": [
@@ -8563,6 +10642,21 @@
     "pages": [
       "Home",
       "Search"
+    ]
+  },
+  {
+    "id": "lbl.unitKilometers",
+    "text": " km",
+    "pages": [
+      "Shared components"
+    ]
+  },
+  {
+    "id": "lbl.unitMinutes",
+    "text": " min",
+    "pages": [
+      "Sheets · sinfo",
+      "Store"
     ]
   },
   {

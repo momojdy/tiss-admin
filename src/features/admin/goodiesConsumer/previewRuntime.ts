@@ -63,3 +63,5 @@ export const previewFriendlyError=(error:unknown,fallback:string)=>error?fallbac
 export const previewFunctionError=async(_error:unknown,fallback:string)=>fallback;
 
 export const previewPublishedContent=async(_locale?:string):Promise<{content:{content_key:string;payload:any}[];assets:{asset_key:string;url:string}[]}>=>({content:[],assets:[]});
+
+export const previewDeliveryProof=async(_reference:string)=>'';

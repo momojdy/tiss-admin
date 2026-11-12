@@ -112,7 +112,7 @@ function BurgerFallback({b}: {b: Builder}) {
   L.forEach(it => {const a = artOfBurger(it), h = H[a] || 10; cur -= h; const y = cur;
     if (a === 'patty') o += `<rect x="14" y="${y}" width="222" height="${h}" rx="14" fill="${it.col}"/><path d="M30 ${y + 10}h40M100 ${y + 18}h50M170 ${y + 9}h40" stroke="#000" stroke-opacity=".18" stroke-width="3" stroke-linecap="round"/>`;
     else if (a === 'cheese') o += `<path d="M10 ${y}H240V${y + 5}L205 ${y + 5}L195 ${y + h + 3}L184 ${y + 5}H66L55 ${y + h + 3}L45 ${y + 5}H10Z" fill="${it.col}"/>`;
-    else if (a === 'lettuce') {let d = `M10 ${y + h}V${y + 5}`; for (let i = 0; i < 14; i++) d += 'q8.5 -9 17 0'; o += `<path d="${d}V${y + h}Z" fill="#5FAE3C"/><path d="M14 ${y + h - 3}H236" stroke="#8ED45F" stroke-width="2" opacity=".6"/>`;}
+    else if (a === 'lettuce') {let d = `M10 ${y + h}V${y + 5}`; for (let i = 0; i < 14; i++) d += "q8.5 -9 17 0"; o += `<path d="${d}V${y + h}Z" fill="#5FAE3C"/><path d="M14 ${y + h - 3}H236" stroke="#8ED45F" stroke-width="2" opacity=".6"/>`;}
     else if (a === 'tomato') o += `<rect x="18" y="${y}" width="214" height="${h}" rx="6" fill="#D8412E"/><path d="M40 ${y + 4}h30M120 ${y + 4}h40M190 ${y + 4}h24" stroke="#F58B7A" stroke-width="3" stroke-linecap="round"/>`;
     else if (a === 'onion') o += `<rect x="22" y="${y}" width="206" height="${h}" rx="4" fill="#C98AD0"/><path d="M30 ${y + h / 2}H220" stroke="#F2DCF4" stroke-width="2"/>`;
     else if (a === 'pickle') o += `<rect x="20" y="${y}" width="210" height="${h}" rx="4" fill="#6C9B3A"/><path d="M36 ${y + 4}h6M90 ${y + 5}h6M150 ${y + 4}h6M200 ${y + 5}h6" stroke="#B8DB86" stroke-width="2.5" stroke-linecap="round"/>`;
@@ -123,7 +123,7 @@ function BurgerFallback({b}: {b: Builder}) {
   const topY = cur - 38; o += `<path d="M16 ${cur}Q16 ${topY} 125 ${topY}Q234 ${topY} 234 ${cur}Z" fill="${bc}"/><path d="M40 ${cur - 12}Q60 ${topY + 8} 100 ${topY + 6}" stroke="#fff" stroke-opacity=".28" stroke-width="5" fill="none" stroke-linecap="round"/>`;
   [[80, cur - 22], [120, cur - 28], [160, cur - 24], [100, cur - 12], [150, cur - 14], [190, cur - 14]].forEach(p => {o += `<ellipse cx="${p[0]}" cy="${p[1]}" rx="4" ry="2.2" fill="#FFF3D6" opacity=".8" transform="rotate(-20 ${p[0]} ${p[1]})"/>`;});
   const vb = `0 ${topY - 6} 250 ${tot - topY + 8}`, hgt = Math.min(210, 190 * (tot - topY + 8) / 250);
-  return <View style={{alignItems: 'center'}}><SvgXml width={190} height={hgt} xml={`<svg xmlns="http://www.w3.org/2000/svg" viewBox="${vb}">${o}</svg>`} /><T cmsKey={"lbl.byoAuto3ROGT8"} size={10.5} color="rgba(255,255,255,.6)" style={{marginTop: 6}}>{label("lbl.byoAuto3ROGT8", "Preview drawing. Photo layers appear once uploaded in Admin.")}</T></View>;
+  return <View style={{alignItems: 'center'}}><SvgXml width={190} height={hgt} xml={`<svg xmlns="http://www.w3.org/2000/svg" viewBox="${vb}">${o}</svg>`} /><T cmsKey={"lbl.byoAuto3ROGT8"} size={10.5} color="rgba(255,255,255,.6)" style={{marginTop: 6}}>{label("lbl.byoAuto3ROGT8", "Product illustration. Appearance may vary.")}</T></View>;
 }
 
 /* ---------- pizza ---------- */
@@ -185,7 +185,7 @@ function TileIcon({it, type}: {it: BItem; type: string}) {
   return <View style={{width: 26, height: 26, borderRadius: 13, backgroundColor: it.col, borderWidth: 2, borderColor: 'rgba(0,0,0,.12)'}} />;
 }
 function OptTile({b, g, it}: {b: Builder; g: any; it: BItem}) {
-  const th = useTheme(), us = units(g, BD), q = us.filter(x => x === it.id).length, on = q > 0, free = it.free || it.price === 0, lab = !it.avail ? label('lbl.byoUnavailableOption', label('lbl.byoUnavailableOption', 'Unavailable')) : free ? label('lbl.byoFree', 'Free') : g.kind === 'many' && us.length < g.inc ? label('lbl.byoFree', 'Free') : '+' + money(it.price);
+  const th = useTheme(), us = units(g, BD), q = us.filter(x => x === it.id).length, on = q > 0, free = it.free || it.price === 0, lab = !it.avail ? label('lbl.byoUnavailableOption', 'Unavailable') : free ? label('lbl.byoFree', 'Free') : g.kind === 'many' && us.length < g.inc ? label('lbl.byoFree', 'Free') : '+' + money(it.price);
   return (
     <View style={{width: 96, opacity: it.avail ? 1 : 0.45}}>
       <Pressable accessibilityRole="button" accessibilityLabel={it.name + ', ' + lab + (on ? label("lbl.cms.c36ed3e83c8c", ", selected ") + q : '')} accessibilityState={{selected: on, disabled: !it.avail}} disabled={!it.avail} onPress={() => bzAdd(g.id, it.id)} style={{alignItems: 'center', gap: 4, paddingTop: 10, paddingBottom: 8, paddingHorizontal: 4, borderRadius: 16, borderWidth: 2, borderColor: on ? th.br : th.line, backgroundColor: on ? th.brt : th.card, minHeight: 100}}>

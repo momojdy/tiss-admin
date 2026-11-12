@@ -53,10 +53,10 @@ export function Dish({i, off = 0, left, grid}: {i: Item; off?: number; left?: nu
   );
 }
 const storeDistanceLabel = (s: Store) => {
-  if (!s.live) return s.km.toFixed(1) + ' km';
-  if (!s.distanceReady) return !addr()?.t?.trim() ? label('lbl.storeAddAddressForDistance', 'Add address to see distance') : s.distanceError ? 'Distance unavailable' : '';
+  if (!s.live) return s.km.toFixed(1) + label('lbl.unitKilometers', ' km');
+  if (!s.distanceReady) return !addr()?.t?.trim() ? label('lbl.storeAddAddressForDistance', 'Add address to see distance') : s.distanceError ? label("lbl.page.components.cards.04b9a4b3d2", "Distance unavailable") : '';
   const meters = Math.round(s.km * 1000);
-  return meters < 1000 ? meters + ' m' : (meters / 1000).toFixed(1) + ' km';
+  return meters < 1000 ? meters + ' m' : (meters / 1000).toFixed(1) + label('lbl.unitKilometers', ' km');
 };
 
 export function VCard({s}: {s: Store}) {
@@ -73,7 +73,7 @@ export function VCard({s}: {s: Store}) {
         <T size={13.5} weight="600" lines={1}>{s.n}</T>
         <T size={11.5} color={th.mut} lines={1}>{s.k}{storeDistanceLabel(s) ? ' · ' + storeDistanceLabel(s) : ''}</T>
         <View style={{flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', marginTop: 8}}>
-          {s.live && s.rv === 0 ? <T cmsKey={'lbl.cardNewStore'} size={11.5} color={th.mut}>{label('lbl.cardNewStore', 'New store')}</T> : <Stars n={s.r.toFixed(1)} />}<T cmsKey={"lbl.cms.cf6143006f14"} size={11.5} color={th.mut}>{s.eta} {label("lbl.cms.cf6143006f14", "min")}</T>
+          {(s.ratingsAvailable===false || (s.live && s.rv===0)) ? <T cmsKeys={['lbl.ratingsUnavailable','lbl.cardNewStore']} size={11.5} color={th.mut}>{s.ratingsAvailable===false ? label('lbl.ratingsUnavailable', 'Ratings unavailable') : label('lbl.cardNewStore', 'New store')}</T> : <Stars n={s.r.toFixed(1)} />}<T cmsKey={"lbl.page.components.cards.2e75737a6b"} size={11.5} color={th.mut}>{s.eta} {label("lbl.page.components.cards.2e75737a6b", " min")}</T>
         </View>
       </Pressable>
     </View>
@@ -107,7 +107,7 @@ export function StoreCard({s, showProducts = false}: {s: Store; showProducts?: b
       <Pressable onPress={() => go('store', s.id)} style={{paddingTop: 10, paddingHorizontal: 2}}>
         <View style={{flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', gap: 8}}>
           <T size={16.5} weight="600" style={{flexShrink: 1}}>{s.n}</T>
-          {s.live && s.rv === 0 ? <T cmsKey={'lbl.storeNoReviewsYet'} size={12} color={th.mut}>{label('lbl.storeNoReviewsYet', 'No reviews yet')}</T> : <View style={{flexDirection: 'row', alignItems: 'center', gap: 3}}><Icon name="star" size={13} color="#FFB400" fill /><T size={13} weight="600">{s.r.toFixed(1)} </T><T size={13} color={th.mut}>({s.rv})</T></View>}
+          {(s.ratingsAvailable===false || (s.live && s.rv===0)) ? <T cmsKeys={['lbl.ratingsUnavailable','lbl.storeNoReviewsYet']} size={12} color={th.mut}>{s.ratingsAvailable===false ? label('lbl.ratingsUnavailable', 'Ratings unavailable') : label('lbl.storeNoReviewsYet', 'No reviews yet')}</T> : <View style={{flexDirection: 'row', alignItems: 'center', gap: 3}}><Icon name="star" size={13} color="#FFB400" fill /><T size={13} weight="600">{s.r.toFixed(1)} </T><T size={13} color={th.mut}>({s.rv})</T></View>}
         </View>
         <T size={13} color={th.mut} style={{marginTop: 3}}>{s.k}{storeDistanceLabel(s) ? ' · ' + storeDistanceLabel(s) : ''}</T>
         {byoTag(s.id)}

@@ -1,3 +1,4 @@
+import {recoverShoppingSnapshots} from './cacheRecovery';
 /* Goodies state, persistence, pricing and cart logic. */
 import {useSyncExternalStore} from 'react';
 import {previewStorage as AsyncStorage} from './previewRuntime';
@@ -7,6 +8,8 @@ import {label} from './content';
 import type {Store, Item, Address, CartLine, Order} from './data/types';
 import {STAGES_DELIVERY, STAGES_PICKUP} from './data/seed';
 import {friendlyError} from './friendlyError';
+import {ownedCache, cacheEnvelope} from './accountCache';
+import {wantissLocale, WANTISS_LANGUAGES} from './previewLocales';
 export let previewOnly = false;
 export const setPreviewOnly=(value:boolean)=>{previewOnly=value;};
 export let editLocked=false;
@@ -32,7 +35,7 @@ export const money = (n: number) => {
   try {return new Intl.NumberFormat(LOC[S.lang] || 'en-US', {style: 'currency', currency: 'USD', currencyDisplay: 'narrowSymbol'}).format(n);} catch (e) {return '$' + n.toFixed(2);}
 };
 export const fmtTime = (d: Date) => {
-  try {return new Intl.DateTimeFormat(LOC[S.lang] || 'en-US', {hour: 'numeric', minute: '2-digit'}).format(d);} catch (e) {let h = d.getHours(); const m = String(d.getMinutes()).padStart(2, '0'); return (h % 12 || 12) + ':' + m + ' ' + (h >= 12 ? 'PM' : 'AM');}
+  try {return new Intl.DateTimeFormat(LOC[S.lang] || 'en-US', {hour: 'numeric', minute: '2-digit'}).format(d);} catch (e) {let h = d.getHours(); const m = String(d.getMinutes()).padStart(2, '0'); return (h % 12 || 12) + ':' + m + ' ' + (h >= 12 ? label("lbl.page.store.6b987654a4", "PM") : label("lbl.page.store.c8f48a6864", "AM"));}
 };
 export const fmtDay = (d: Date) => {
   try {return new Intl.DateTimeFormat(LOC[S.lang] || 'en-US', {month: 'short', day: 'numeric'}).format(d);} catch (e) {return ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'][d.getMonth()] + ' ' + d.getDate();}
@@ -40,7 +43,7 @@ export const fmtDay = (d: Date) => {
 export const fmtStoreDay = (_sid: string, timestamp: number) => new Intl.DateTimeFormat(LOC[S.lang] || 'en-US', {timeZone: Intl.DateTimeFormat().resolvedOptions().timeZone, month: 'short', day: 'numeric'}).format(new Date(timestamp));
 export const fmtStoreTime = (_sid: string, timestamp: number) => new Intl.DateTimeFormat(LOC[S.lang] || 'en-US', {timeZone: Intl.DateTimeFormat().resolvedOptions().timeZone, hour: 'numeric', minute: '2-digit', timeZoneName: 'short'}).format(new Date(timestamp));
 export const dp = (i: Item, off: number) => Math.round(i.p * (100 - off)) / 100;
-export const cname = (id: string, cats: {id: string; name: any}[]) => (cats.find(c => c.id === id) as any)?.name || 'All stores';
+export const cname = (id: string, cats: {id: string; name: any}[]) => (cats.find(c => c.id === id) as any)?.name || label("lbl.page.store.21bd4a6572", "All stores");
 const zoneOf = (t: string) => {let x = 0; for (let i = 0; i < t.length; i++) x = (x * 31 + t.charCodeAt(i)) % 97; return Math.round((x % 5) * 9) / 10;};
 export const phoneOK = (s: string) => {s = String(s || '').trim(); const d = s.replace(/\D/g, ''); return /^[+\d][\d\s().-]*$/.test(s) && d.length >= 8 && d.length <= 15;};
 
@@ -51,16 +54,27 @@ const WDEF = () => ({
 });
 const GDEF = () => ({
   firstOrderEligible: null as boolean | null,
-  serverUnread: 0, checkoutAttempt: null as any,
+  ordersError: '', ordersLoading: true, ordersPaging: false, ordersHasMore: false, ordersPageBoundary: '', ordersCursor: null as {createdAt:string;id:string}|null,
+  serverUnread: 0, checkoutAttempt: null as any, helpPayRequestId: null as string|null, helpPayRequestUserId: null as string|null,
   goodiesAccess: {status: 'active', reason: '', endsAt: null as string | null},
   notifs: [] as any[],
   orders: [] as Order[], cart: {sid: null as string | null, lines: [] as CartLine[]}, fav: [] as string[], favp: [] as string[], cards: [] as any[],
-  wallet: 0, hasWallet: false, pay: 'wallet', selectedCardId: '', mode: 'delivery', tip: 0, promo: '', as: 0, gc: [] as any[], cc: 'w', np: {orders: 0, promos: 0}, rev: {} as any, driverRev: {} as any, rec: [] as any[], rv: [] as any[], groupOrder: null as any,
+  paymentOptionsStatus: 'idle', wallet: 0, hasWallet: false, pay: 'wallet', selectedCardId: '', mode: 'delivery', tip: 0, promo: '', as: 0, gc: [] as any[], cc: 'w', np: {orders: 0, promos: 0}, rev: {} as any, driverRev: {} as any, rec: [] as any[], rv: [] as any[], groupOrder: null as any,
 });
-export const WP = ['pf', 'addr'], GP = ['notifs', 'orders', 'cart', 'fav', 'favp', 'pay', 'mode', 'tip', 'promo', 'as', 'gc', 'cc', 'np', 'rev', 'driverRev', 'rec', 'rv', 'groupOrder'];
+export const WP = ['pf', 'addr'], GP = ['notifs', 'orders', 'cart', 'fav', 'favp', 'pay', 'mode', 'tip', 'promo', 'as', 'gc', 'cc', 'np', 'rev', 'driverRev', 'rec', 'rv', 'groupOrder', 'helpPayRequestId', 'helpPayRequestUserId'];
 
 export interface Route {r: string; p?: any; u: number; sy?: number}
 export const S: any = Object.assign(WDEF(), GDEF());
+S.accountId = null;
+export function switchGoodiesAccount(userId: string | null) {
+  if (S.accountId === userId) return;
+  Object.assign(S, WDEF(), GDEF(), {accountId: userId, cardPending: null, pendingGroupInviteCode: '',
+    cs: 0, sch: 0, note: '', sh: null, pend: null, ro: null, busy: 0, currentLocation: null,
+    pin: '', alcConsent: false, alcAck: 0});
+  S.stack = [{r: 'home', u: Date.now()}];
+  ui.close?.();
+  emit();
+}
 let uid = 0;
 S.stack = [{r: 'home', u: ++uid}] as Route[];
 Object.assign(S, {f: '', sub: '', ot: 'active', ft: 'stores', sh: null, pend: null, bump: 0, cs: 0, time: 'ASAP', sch: 0, note: '', pin: '', busy: 0, ss: {}, srt: 'rel', sr: {q: '', sort: 'rel', f: {}}, theme: 'light', lang: 'en', ready: false});
@@ -147,14 +161,15 @@ function liveStore(r: any, items: Item[]): Store {
 
 function placeholderStore(sid: string, _name: string): Store {
   return {
-    id: sid, n: 'Store', c: '', e: '🛍️', bg: bgOf(sid), r: 0, rv: 0, km: 0, km0: 0, eta: '0–0', eta0: '0–0', fee: 0, min: 0, pr: '', k: '', it: [],
-    open: 0, h: '', nx: 'No longer taking orders', far: false, acceptScheduledOrders: false,
+    id: sid, n: _name || 'Store', c: '', e: '🛍️', bg: bgOf(sid), r: 0, rv: 0, km: 0, km0: 0, eta: '0–0', eta0: '0–0', fee: 0, min: 0, pr: '', k: '', it: [],
+    open: 0, h: '', nx: label("lbl.page.store.4f45fc13d6", "No longer taking orders"), far: false, acceptScheduledOrders: false,
   };
 }
 
 let liveTimer: any = null;
 export async function refreshLiveSchedules() {
   if(previewOnly)return;
+  S.catalogLoading = true;emit();
   try {
     const {data: rows, error} = await supabase.from('goodies_store_schedules')
       .select('business_id,store_id,description,phone,email,website,address,city,country,store_latitude,store_longitude,delivery_modes,logo_url,thumbnail_url,store_name,hours,accept_scheduled_orders,scheduled_order_start_time,scheduled_order_timezone,category,kind,min_order,delivery_fee,delivery_pricing_mode,delivery_max_distance_km,accept_cash_on_delivery,eta_min,eta_max,promo,names,cover_url')
@@ -174,24 +189,12 @@ export async function refreshLiveSchedules() {
         if ((pr.data || []).length < 1000) break;
       }
     }
+    let ratingsAvailable = true;
     const ratingByBiz: Record<string, {sum: number; count: number}> = {};
-    if (prods.length) {
-      const productBusiness = new Map(prods.map(p => [String(p.id), String(p.business_id)]));
-      try {
-        for (let from = 0; ; from += 1000) {
-          const rr = await supabase.from('reviews').select('product_id,rating')
-            .in('product_id', prods.map(p => p.id)).gte('rating', 1).lte('rating', 5)
-            .range(from, from + 999);
-          if (rr.error) break;
-          for (const review of rr.data || []) {
-            const businessId = productBusiness.get(String(review.product_id));
-            if (!businessId) continue;
-            const acc = ratingByBiz[businessId] || (ratingByBiz[businessId] = {sum: 0, count: 0});
-            acc.sum += Number(review.rating); acc.count += 1;
-          }
-          if ((rr.data || []).length < 1000) break;
-        }
-      } catch (e) {}
+    if (stores.length) {
+      const {data: ratings, error: ratingError} = await supabase.rpc('goodies_store_review_summaries', {p_business_ids: stores.map(r => r.business_id)});
+      ratingsAvailable = !ratingError;
+      if (!ratingError) for (const row of ratings || []) ratingByBiz[row.business_id] = {sum: Number(row.rating) * Number(row.review_count), count: Number(row.review_count)};
     }
     Object.keys(IT).forEach(k => delete IT[k]); Object.keys(STB).forEach(k => delete STB[k]); ST.length = 0;
     const byBiz: Record<string, Item[]> = {};
@@ -206,7 +209,7 @@ export async function refreshLiveSchedules() {
       const current = IT[line.id];
       if (current?.photo) line.photo = current.photo;
     });
-    stores.forEach(r => {const s = liveStore(r, byBiz[r.business_id] || []); const rating = ratingByBiz[String(r.business_id)]; if (rating?.count) { s.r = Math.round((rating.sum / rating.count) * 10) / 10; s.rv = rating.count; } STB[s.id] = s; ST.push(s);});
+    stores.forEach(r => {const s = liveStore(r, byBiz[r.business_id] || []);s.ratingsAvailable=ratingsAvailable; const rating = ratingByBiz[String(r.business_id)]; if (rating?.count) { s.r = Math.round((rating.sum / rating.count) * 10) / 10; s.rv = rating.count; } STB[s.id] = s; ST.push(s);});
     (S.orders || []).forEach((o: any) => {if (o && o.sid && !STB[o.sid]) STB[o.sid] = placeholderStore(o.sid, o.sn); if (o && Array.isArray(o.lines)) o.lines = o.lines.map((line: any) => ({...line, photo: line.photo || IT[String(line.id || '')]?.photo || null}));});
     if (S.cart && S.cart.sid && !STB[S.cart.sid]) STB[S.cart.sid] = placeholderStore(S.cart.sid, '');
     S.catalogError = '';
@@ -214,6 +217,7 @@ export async function refreshLiveSchedules() {
   } catch (e: any) {
     S.catalogError = friendlyError(e, label("lbl.cms.ce62eda09faa", "Could not load stores"));
   }
+  S.catalogLoading = false;emit();
   if (!liveTimer) {
     liveTimer = setInterval(() => {
       let ch = false;
@@ -230,12 +234,14 @@ export async function refreshLiveSchedules() {
 
 /* ---------- persistence ---------- */
 export async function refreshGoodiesAccess() {
+  const accountId = S.accountId;
   if (providerInfo.demo) {
     S.goodiesAccess = {status: 'active', reason: '', endsAt: null};
     emit();
     return S.goodiesAccess;
   }
   const {data, error} = await supabase.rpc('get_my_goodies_access_status');
+  if (S.accountId !== accountId) return S.goodiesAccess;
   if (error) {
     S.goodiesAccess = {status: 'unknown', reason: '', endsAt: null};
     emit();
@@ -251,10 +257,52 @@ export async function refreshGoodiesAccess() {
   return S.goodiesAccess;
 }
 
+export async function refreshGoodiesContactNumbers() {
+  const accountId=S.accountId;
+  if (providerInfo.demo) return S.gc;
+  const {data:{user}} = await supabase.auth.getUser();
+  if (!user||S.accountId!==accountId) return S.gc;
+  const {data,error} = await supabase.from('goodies_contact_numbers').select('id,phone_number,label').eq('user_id',user.id).order('created_at',{ascending:true});
+  if(S.accountId!==accountId)return S.gc;
+  if (error) throw error;
+  const previousPhone = S.gc.find((entry:any)=>entry.id===S.cc)?.ph;
+  S.gc = (data||[]).map((entry:any)=>({id:entry.id,ph:entry.phone_number,l:entry.label}));
+  S.cc = S.gc.find((entry:any)=>entry.ph===previousPhone)?.id || (S.cc==='w'?'w':S.gc[0]?.id||'w');
+  emit();
+  return S.gc;
+}
+export async function persistGoodiesContactNumber(phone:string,name:string,id?:string) {
+  const accountId=S.accountId;
+  const {data:{user}} = await supabase.auth.getUser();
+  if(S.accountId!==accountId)return;
+  if (!user) throw new Error('Sign in to save this number.');
+  const payload = {user_id:user.id,phone_number:phone,label:name};
+  const {data,error} = id
+    ? await supabase.from('goodies_contact_numbers').update(payload).eq('id',id).eq('user_id',user.id).select('id').single()
+    : await supabase.from('goodies_contact_numbers').insert(payload).select('id').single();
+  if(S.accountId!==accountId)return;
+  if(error) throw error;
+  await refreshGoodiesContactNumbers();
+  if(S.accountId!==accountId)return;
+  S.cc = data.id; await save();emit();
+}
+export async function removeGoodiesContactNumber(id:string) {
+  const accountId=S.accountId;
+  const {data:{user}}=await supabase.auth.getUser();
+  if(S.accountId!==accountId)return;
+  if(!user) throw new Error('Sign in to remove this number.');
+  const {error}=await supabase.from('goodies_contact_numbers').delete().eq('id',id).eq('user_id',user.id);
+  if(S.accountId!==accountId)return;
+  if(error) throw error;
+  if(S.cc===id) S.cc='w';
+  await refreshGoodiesContactNumbers();await save();
+}
 export async function refreshUserAddresses() {
   if (providerInfo.demo) return S.addr;
   const {data: auth, error: authError} = await supabase.auth.getUser();
-  if (authError || !auth.user) return S.addr;
+  if (authError) throw authError;
+  if (!auth.user) {S.addr = []; S.as = 0; emit(); return S.addr;}
+  const addressUserId = auth.user.id;
   const baseColumns = 'id,recipient_name,phone_number,country,department,city,street_address,apartment,delivery_notes,is_default,created_at';
   const read = (columns: string) => supabase.from('user_addresses').select(columns)
     .eq('user_id', auth.user.id).order('is_default', {ascending: false}).order('created_at', {ascending: true});
@@ -268,11 +316,12 @@ export async function refreshUserAddresses() {
     t: [row.street_address, row.city, row.department, row.country].filter(Boolean).join(', '),
     apt: String(row.apartment || ''), inst: String(row.delivery_notes || ''),
     def: row.is_default ? 1 : 0, goodiesDefault: String(row.id) === metadataAddressId ? 1 : 0,
-    z: 0, cc: row.country === 'Dominican Republic' ? 'DO' : row.country === 'United States' ? 'US' : row.country === 'Haiti' ? 'HT' : 'XX',
+    z: 0, cc: row.country === 'Dominican Republic' ? "DO" : row.country === 'United States' ? "US" : row.country === 'Haiti' ? "HT" : "XX",
     city: String(row.city || ''), department: String(row.department || ''), country: String(row.country || ''),
     phone: String(row.phone_number || ''), createdAt: row.created_at,
     latitude: row.latitude == null ? null : Number(row.latitude), longitude: row.longitude == null ? null : Number(row.longitude),
   }));
+  if (S.accountId !== addressUserId) return S.addr;
   S.addr = rows;
   const selected = rows.find((row: any) => row.id === metadataAddressId) || rows.find((row: any) => row.def) || rows[0];
   S.as = selected?.id ?? 0;
@@ -285,24 +334,33 @@ export async function refreshUserAddresses() {
 
 export async function load() {
   if(previewOnly)return;
+  const {data: cachedSession} = await supabase.auth.getSession();
+  switchGoodiesAccount(cachedSession.session?.user.id || null);
+  const ownerId = S.accountId;
+  let accountLanguageLoaded = false;
   const merge = async (key: string, D: any) => {
     try {
-      const raw = JSON.parse((await AsyncStorage.getItem(key)) || 'null');
+      const raw = ownedCache(JSON.parse((await AsyncStorage.getItem(key)) || 'null'), ownerId);
+      if (S.accountId !== ownerId) return;
       if (raw && typeof raw === 'object') for (const k in D) if (raw[k] !== undefined && typeof raw[k] === typeof D[k] && Array.isArray(raw[k]) === Array.isArray(D[k])) S[k] = raw[k];
     } catch (e) {}
   };
   await merge(WKEY, WDEF()); await merge(KEY, GDEF());
   try {
     const attempt = JSON.parse((await AsyncStorage.getItem('goodies-checkout-attempt-v1')) || 'null');
-    if (attempt && typeof attempt.key === 'string' && typeof attempt.fingerprint === 'string') S.checkoutAttempt = attempt;
+    if (S.accountId === ownerId && attempt?.ownerId === ownerId && typeof attempt.key === 'string' && typeof attempt.fingerprint === 'string') S.checkoutAttempt = attempt;
   } catch (e) {}
   S.wallet = 0; S.hasWallet = false; S.cards = []; S.selectedCardId = '';
   try {
     const {data: auth} = await supabase.auth.getUser();
     if (auth.user) {
+      if (S.helpPayRequestUserId !== auth.user.id) S.helpPayRequestId = null;
       const {data: profile} = await supabase.from('profiles').select('full_name,email,phone_number,avatar_url').eq('id', auth.user.id).maybeSingle();
-      if (profile) S.pf = {n: profile.full_name || '', e: profile.email || auth.user.email || '', ph: profile.phone_number || '', av: profile.avatar_url || ''};
+      if (profile && S.accountId === auth.user.id) S.pf = {n: profile.full_name || '', e: profile.email || auth.user.email || '', ph: profile.phone_number || '', av: profile.avatar_url || ''};
+      const {data: settings,error: settingsError} = await supabase.from('user_settings').select('language').eq('user_id',auth.user.id).maybeSingle();
+      if (!settingsError && S.accountId === auth.user.id) {S.lang=wantissLocale(settings?.language);accountLanguageLoaded=true;}
       await refreshUserAddresses();
+      await refreshGoodiesContactNumbers().catch(()=>undefined);
     }
   } catch (e) {}
   if (!providerInfo.demo) {
@@ -315,11 +373,11 @@ export async function load() {
           supabase.from('wallets').select('balance').eq('user_id', userId).maybeSingle(),
           supabase.rpc('get_my_payment_methods'),
         ]);
-        if (!walletResult.error) {
+        if (!walletResult.error && S.accountId === userId) {
           S.hasWallet = !!walletResult.data;
           S.wallet = Number(walletResult.data?.balance ?? 0);
         }
-        if (!methodsResult.error && Array.isArray(methodsResult.data)) {
+        if (!methodsResult.error && S.accountId === userId && Array.isArray(methodsResult.data)) {
           S.cards = methodsResult.data.map((pm: any) => ({
             id: String(pm.id), b: String(pm.brand || 'Card'), l4: String(pm.last4 || ''),
             expiryMonth: pm.expiry_month, expiryYear: pm.expiry_year, isDefault: !!pm.is_default,
@@ -331,21 +389,11 @@ export async function load() {
     }
   }
   try {const t = await AsyncStorage.getItem('goodies-theme'); if (t === 'light' || t === 'dark') S.theme = t;} catch (e) {}
-  try {const l = await AsyncStorage.getItem('goodies-lang'); if (l) S.lang = l;} catch (e) {}
-  /* The catalog must be loaded before the cart, favorites and orders are checked against it. */
+  try {const l = await AsyncStorage.getItem('goodies-lang'); if (l && !accountLanguageLoaded) S.lang = wantissLocale(l);} catch (e) {}
+  /* Refresh availability without using a transient catalog outage to delete owned snapshots. */
   await refreshLiveSchedules();
-  /* sanitise exactly like v24 */
-  const c = S.cart;
-  if (!c || !Array.isArray(c.lines)) S.cart = {sid: null, lines: []};
-  S.cart.lines = S.cart.lines.filter((l: any) => l && ((l.byo && l.byo.bid && l.byo.sel && l.byo.lines) || IT[l.id]) && l.q > 0);
-  if (!S.cart.lines.length) S.cart.sid = null;
-  else if (!cartStoreIds().includes(String(S.cart.sid))) S.cart.sid = cartStoreIds()[0] || null;
-  if (S.checkoutAttempt && !S.cart.lines.length && !S.checkoutAttempt.completed) {
-    S.checkoutAttempt = {...S.checkoutAttempt, completed: true};
-    try {await AsyncStorage.setItem('goodies-checkout-attempt-v1', JSON.stringify(S.checkoutAttempt));} catch (e) {}
-  }
-  S.orders = S.orders.filter((o: any) => o && STB[o.sid] && Array.isArray(o.lines));
-  S.fav = S.fav.filter((x: string) => STB[x]); S.favp = S.favp.filter((x: string) => IT[x]);
+  if (S.accountId !== ownerId) return;
+  recoverShoppingSnapshots(S, IT, STB, placeholderStore);
   S.addr = S.addr.filter((a: any) => a && a.t); if (!S.addr.length && providerInfo.demo) S.addr = WDEF().addr;
   S.addr.forEach((a: any) => {if (typeof a.z !== 'number') a.z = zoneOf(a.t); if (!a.cc) a.cc = 'HT';});
   if (S.addr.length && !S.addr.some((a: Address) => a.def) && providerInfo.demo) S.addr[0].def = 1;
@@ -360,8 +408,8 @@ export function save(): Promise<void> {
     const w: any = {}, g: any = {};
     WP.forEach(k => (w[k] = S[k])); GP.forEach(k => (g[k] = S[k]));
     return Promise.all([
-      AsyncStorage.setItem(WKEY, JSON.stringify(w)),
-      AsyncStorage.setItem(KEY, JSON.stringify(g)),
+      AsyncStorage.setItem(WKEY, JSON.stringify(cacheEnvelope(S.accountId, w))),
+      AsyncStorage.setItem(KEY, JSON.stringify(cacheEnvelope(S.accountId, g))),
     ]).then(() => undefined).catch(() => undefined);
   } catch (e) {
     return Promise.resolve();
@@ -374,6 +422,7 @@ export async function getGoodiesCheckoutAttempt(fingerprint: string): Promise<{k
     return {key: current.key, fingerprint: current.fingerprint};
   }
   const attempt = {
+    ownerId: S.accountId,
     key: 'goodies-checkout-' + Date.now() + '-' + Math.random().toString(36).slice(2),
     fingerprint,
     completed: false,
@@ -389,7 +438,14 @@ export async function completeGoodiesCheckoutAttempt(orderId: string): Promise<v
   try {await AsyncStorage.setItem('goodies-checkout-attempt-v1', JSON.stringify(S.checkoutAttempt));} catch (e) {}
 }
 export const setTheme = (t: 'light' | 'dark') => {S.theme = t; AsyncStorage.setItem('goodies-theme', t); emit();};
-export const setLang = (l: string) => {S.lang = l; AsyncStorage.setItem('goodies-lang', l); emit();};
+export const setLang = async (l: string) => {
+  const locale=wantissLocale(l), owner=S.accountId;
+  S.lang=locale;emit();await AsyncStorage.setItem('goodies-lang',locale);
+  if (!owner) return;
+  const language=WANTISS_LANGUAGES.find(entry=>entry.code===locale)!.label;
+  const {error}=await supabase.from('user_settings').upsert({user_id:owner,language,updated_at:new Date().toISOString()},{onConflict:'user_id'});
+  if(error && S.accountId===owner)toast(label('lbl.languageSyncFailed','Language changed on this device, but your account preference could not be saved. Please retry in Wantiss Settings.'));
+};
 
 /* ---------- derived ---------- */
 export const defAddr = (): Address => S.addr.filter((a: Address) => a.def)[0] || S.addr[0];
@@ -443,7 +499,7 @@ export async function refreshStoreDistances(storeIds: string[], address: Address
       const row: any = byId.get(store.id);
       const meters = row?.distance_m == null ? NaN : Number(row.distance_m);
       if (!Number.isFinite(meters) || meters < 0) {
-        store.distanceError = row?.error || 'Distance is unavailable for this address.';
+        store.distanceError = row?.error || label("lbl.cms.5abb6f216652", "Distance is unavailable for this address.");
         distances[store.id] = null;
         return;
       }
@@ -508,7 +564,7 @@ export function pChk(code: string, sub: number, sid: string | null) {
   return {p} as any;
 }
 /** The store a cart line belongs to. Older saved lines fall back to the product's store. */
-export const lineStore = (l: CartLine): string => l.s || IT[l.id]?.s || S.cart.sid || '';
+export const lineStore = (l: CartLine): string => l.s || l.byo?.sid || IT[l.id]?.s || S.cart.sid || '';
 /** Stores in the cart, in the order they were added. */
 export const cartStoreIds = (): string[] => {
   const ids = S.cart.lines.map(lineStore).filter((id: string): id is string => typeof id === 'string' && id.length > 0);
@@ -573,7 +629,7 @@ export function navBack(): 'exit' | void {
 /* ---------- cart ops ---------- */
 export async function syncGroupOrderCartLine(groupId: string, line: CartLine) {
   const productId = IT[line.id] ? line.id : '';
-  if (!productId) return {error: new Error('This cart item is not linked to a live catalogue product.')};
+  if (!productId) return {error: new Error(label("lbl.page.store.d8aea5db73", "This cart item is not linked to a live catalogue product."))};
   return supabase.rpc('goodies_group_order_upsert_item', {
     p_group_id: groupId,
     p_product_id: productId,
@@ -685,7 +741,7 @@ export const FCH:[string,string][] = [
 /* demo only: wipes local data */
 export async function resetDemo() {
   const {assertDemoOnly} = require('./providers');
-  assertDemoOnly('Reset demo data');
+  assertDemoOnly(label("lbl.page.store.fb54363a03", "Reset demo data"));
   await AsyncStorage.multiRemove([KEY, WKEY, 'goodies-checkout-attempt-v1']);
   Object.assign(S, WDEF(), GDEF());
   S.stack = [{r: 'home', u: ++uid}];

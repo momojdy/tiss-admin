@@ -1,17 +1,18 @@
 /* Shared published content provider. Draft content is never read by customer or vendor clients. */
 import {previewPublishedContent as fetchPublishedWantissContent} from './previewRuntime';
 import {previewStorage as AsyncStorage} from './previewRuntime';
-import {tx} from './i18n';
 import {setInterfaceContent} from './i18n/interfaceContent';
+import {tx} from './i18n';
 import {contentHooks} from './store';
 import type {Txt} from './data/types';
 
 export interface Asset {u: string; w: number; h: number; ver: number}
 export const ASSETS: Record<string, Asset> = {};
 export const LAYOUT: Record<string, {rk: number | null; w: number | null; k: number | null; off?: boolean}> = {};
+export let contentStatus:'idle'|'loading'|'ready'|'error'='idle';
 let draftControlled=false;
 export const setDraftControlled=(value:boolean)=>{draftControlled=value;};
-export let C: any = null; /* raw Admin export, or null = use seed */
+export let C: any = null;
 const subs = new Set<() => void>();
 const CONTENT_CACHE_KEY = 'goodies-published-content-v5';
 let hydration: Promise<void> | null = null;
@@ -30,7 +31,7 @@ export const stripeColor = (): string => (C && typeof C.stripe === 'string' && /
 
 export function applyContent(json: any) {
   if (!json || json.v !== 5) throw new Error('This is not a Wantiss Admin Goodies export (version 5).');
-  C = json;
+  C = json;contentStatus='ready';
   setInterfaceContent(json.labels || []);
   Object.keys(ASSETS).forEach(k => delete ASSETS[k]); Object.keys(LAYOUT).forEach(k => delete LAYOUT[k]);
   (json.lib || []).forEach((a: any) => {
@@ -42,6 +43,7 @@ export function applyContent(json: any) {
 export function loadContent(): Promise<void> {
   if(draftControlled)return Promise.resolve();
   if (contentLoad) return contentLoad;
+  contentStatus='loading';subs.forEach(f=>f());
   const request = (async () => {
     await hydrateContent();
     try {
@@ -69,26 +71,44 @@ export function loadContent(): Promise<void> {
         applyContent(payload);
         try { await AsyncStorage.setItem(CONTENT_CACHE_KEY, JSON.stringify(payload)); } catch { /* Disk cache is an optimization; live content remains usable. */ }
       }
+      if (!payload || payload.v!==5) throw new Error('Published Goodies content unavailable');
+      contentStatus='ready';
       // A missing/temporarily unavailable published record must not erase the last
       // successfully loaded customer content and its image URLs.
     } catch {
-      // Keep the last known published content visible during transient network errors.
-    }
+      contentStatus='error';
+    } finally {subs.forEach(f=>f());}
   })();
   const tracked = request.finally(() => { if (contentLoad === tracked) contentLoad = null; });
   contentLoad = tracked;
   return tracked;
 }
-export async function importContent(text: string) { const j = JSON.parse(text); applyContent(j); try { await AsyncStorage.setItem(CONTENT_CACHE_KEY, JSON.stringify(j)); } catch { /* Optional persistence. */ } }
-export async function clearContent() { C = null; setInterfaceContent([]); hydration = null; try { await AsyncStorage.removeItem(CONTENT_CACHE_KEY); } catch { /* Ignore cache cleanup errors. */ } Object.keys(ASSETS).forEach(k => delete ASSETS[k]); Object.keys(LAYOUT).forEach(k => delete LAYOUT[k]); subs.forEach(f => f()); }
+
+export async function clearContent() { C = null;contentStatus='idle'; setInterfaceContent(); hydration = null; try { await AsyncStorage.removeItem(CONTENT_CACHE_KEY); } catch { /* Ignore cache cleanup errors. */ } Object.keys(ASSETS).forEach(k => delete ASSETS[k]); Object.keys(LAYOUT).forEach(k => delete LAYOUT[k]); subs.forEach(f => f()); }
 export const hasContent = () => !!C;
 
 /* ---------- accessors ---------- */
+const categoryFallbacks: Record<string, () => string> = {
+  restaurants: () => label('lbl.category.restaurants', 'Restaurant'),
+  produce: () => label('lbl.category.produce', 'Fresh produce'),
+  beverages: () => label('lbl.category.beverages', 'Beverages'),
+  bakery: () => label('lbl.category.bakery', 'Bakery & desserts'),
+  meat: () => label('lbl.category.meat', 'Meat & seafood'),
+  groceries: () => label('lbl.category.groceries', 'Groceries'),
+  haitian: () => label('lbl.category.haitian', 'Haitian products'),
+  care: () => label('lbl.category.care', 'Personal care'),
+  drugstore: () => label('lbl.category.drugstore', 'Drugstore'),
+};
+export function categoryDisplayName(id: string, text: Txt): string {
+  const translated = tx(text);
+  return translated.trim() ? translated : categoryFallbacks[id]?.() || label('lbl.category.fallback', 'Category');
+}
+
 export function categories(): {id: string; name: Txt; emoji: string; art?: string | null}[] {
   if (!C) return [];
-  return C.cats.filter((c: any) => c.st === 'on').sort((a: any, b: any) => a.ord - b.ord).map((c: any) => ({id: c.id, name: c.name, emoji: c.emoji, art: c.art ? c.art.data : null, home: c.home}));
+  return C.cats.filter((c: any) => c.st === 'on').sort((a: any, b: any) => a.ord - b.ord).map((c: any) => ({id: c.id, name: categoryDisplayName(c.id, c.name), emoji: c.emoji, art: c.art ? c.art.data : null, home: c.home}));
 }
-export const catName = (id: string) => {const c = categories().find(x => x.id === id); return c ? tx(c.name) : id === 'all' ? 'All stores' : id;};
+export const catName = (id: string) => {const c = categories().find(x => x.id === id); return c ? tx(c.name) : id === 'all' ? label('lbl.catAllStores', 'All stores') : id;};
 export const label = (id: string, fallback: string) => {const l = C && C.labels && C.labels.find((x: any) => x.id === id); const s = l ? tx(l.t) : ''; return s || fallback;};
 const live = (r: any) => {const n = new Date().toISOString().slice(0, 10); return r.st === 'Live' && (!r.from || r.from <= n) && (!r.to || r.to >= n);};
 export type PromoCard = {id: string; emoji: string; image?: string | null; color: string; title: string; sub: string; btn: string; target: string; newOnly: boolean};
@@ -116,7 +136,7 @@ export function minAge(cc: string | null | undefined): number {
 export const rgText = (id: string, fallback: string, age: number) => {const t = C && C.rg && C.rg.texts.find((x: any) => x.id === id); return (t ? tx(t.t) || fallback : fallback).replace(/\{age\}/g, String(age));};
 export const rulesLive = () => !!(C && C.rg && C.rg.live);
 export const stageLabels = (pickup: boolean, fallback: string[]) => fallback.map((text, i) => label('lbl.stage' + (pickup ? 'P' : 'D') + i, text));
-export const faq = (_fallback: [string, string][]): [string, string][] => (C && Array.isArray(C.faq) ? C.faq.map((f: any) => [tx(f.q), tx(f.a)] as [string, string]) : []);
+export const faq = (_fallback: [string, string][]): [string, string][] => (C && Array.isArray(C.faq) ? C.faq.filter((f: any) => !/^\s*answer coming soon[.!]?\s*$/i.test(typeof f.a==='string'?f.a:f.a?.en?.v||'')).map((f: any) => [tx(f.q), tx(f.a)] as [string, string]).filter(([q,a]:[string,string])=>q.trim()&&a.trim()) : []);
 export const supportTopics = (_fallback: string[]) => (C && Array.isArray(C.topics) ? C.topics.map((t: any) => tx(t.t)) : []);
 export function legalDoc(id: string): string | null {const d = C && C.legal && C.legal.find((x: any) => x.id === id && x.st === 'Live'); const s = d ? tx(d.t) : ''; return s || null;}
 export function modes(): {id?: string;emoji: string; image?: string | null; title: string; sub: string; cat: string}[] | null {

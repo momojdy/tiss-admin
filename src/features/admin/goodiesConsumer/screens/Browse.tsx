@@ -1,13 +1,14 @@
 import {Sel,BSel,AddChip,useAssetSelectionContext} from '../editContext';
 import {EditableNativeText as Text} from '../EditableNativeText';
+import {CUSTOMER_NOTIFICATION_FILTER} from '../notifications';
 import React, {useEffect, useRef, useState} from 'react';
 import {useSafeAreaInsets} from 'react-native-safe-area-context';
 import {View, Text as UnusedNativeText, Pressable, ScrollView, TextInput, useWindowDimensions, RefreshControl, Image} from 'react-native';
 import {Icon} from '../components/Icon';
 import {T, Mut, Grad, Circ, Bar, Sh, Rail, Chip, Chips, Cta, Card, Row, Badge, Ttl, Empty, Tile, bgIdx, useTheme, heartBtn} from '../components/ui';
 import {Dish, VCard, StoreCard, ItemRow} from '../components/cards';
-import {S, ST, STB, IT, DEALS, PR, money, addr, cnt, unread, first, filt, FCH, emit, save, toast, ui, refreshStoreDistances} from '../store';
-import {categories, catName, label, promoCards, deals, dealEnd, coupons, modes, stripeColor, loadContent, onContent, hasContent} from '../content';
+import {S, ST, STB, IT, DEALS, PR, money, addr, cnt, unread, first, filt, FCH, emit, save, toast, ui, refreshLiveSchedules, refreshStoreDistances} from '../store';
+import {categories, catName, label, promoCards, deals, dealEnd, coupons, modes, stripeColor, loadContent, onContent, hasContent, contentStatus} from '../content';
 import {go, tab, back, browse, setFilter, setSub, clearFilters, usePromo as applyPromo, openNotif, readAll, heart} from '../actions';
 import {byoNames} from '../builders/engine';
 import {fetchGoodiesOrderForNotification} from '../serverSync';
@@ -140,6 +141,9 @@ export function Home({onExit}: {onExit?: () => void}) {
         </Pressable>
       </View>
       </View>
+      {S.catalogLoading ? <View style={{paddingHorizontal:16,paddingVertical:12}}><View style={{height:72,borderRadius:14,backgroundColor:th.soft}} /><T cmsKey={'lbl.catalogLoading'} color={th.mut}>{label('lbl.catalogLoading', 'Loading stores…')}</T></View> : null}
+      {contentStatus==='error'?<Empty title={label('lbl.contentLoadFailed','Goodies content is temporarily unavailable')} text={label('lbl.contentRetryHint','Check your connection and try again.')} button={label('lbl.retry','Try again')} onPress={()=>void loadContent()} />:null}
+      {S.catalogError ? <Empty title={label('lbl.catalogFailed', 'Could not load stores')} text={label('lbl.catalogRetryHint', 'Check your connection and try again.')} button={label('lbl.retry', 'Try again')} onPress={() => void refreshLiveSchedules()} /> : null}
       <Pressable onPress={() => go('search')} style={{marginTop: 14, marginHorizontal: 16, height: 48, borderRadius: 24, backgroundColor: th.soft, flexDirection: 'row', alignItems: 'center', gap: 10, paddingHorizontal: 16}}>
         <Icon name="search" size={18} color={th.mut} /><T cmsKey={'lbl.search'} size={14.5} color={th.mut}>{label('lbl.search', tr('searchPh'))}</T>
       </Pressable>
@@ -281,9 +285,9 @@ export function CatList({p}: {p: string}) {
   return (
     <View>
       <View style={{paddingHorizontal: 16}}>
-        <View style={{marginBottom: 12}}><Mode grad small={false} title={p === 'all' ? label('lbl.catEverythingNear', 'Everything near you') : cname(p)} sub={(l.length === 1 ? label('lbl.catStoreOne', '{n} store') : label('lbl.catStoreMany', '{n} stores')).replace('{n}', String(l.length)) + ' · ' + label('lbl.catProducts', '{n} products').replace('{n}', String(its.length))} emoji={c ? c.emoji : '🏪'} onPress={() => {}} /></View>
+        <View style={{marginBottom: 12}}><Mode grad small={false} title={p === 'all' ? label('lbl.catEverythingNear', 'Everything near you') : cname(p)} sub={(l.length === 1 ? label('lbl.catStoreOne', '{n} store') : label('lbl.catStoreMany', '{n} stores')).replace('{n}', String(l.length)) + ' · ' + label('lbl.catProducts', '{n} products').replace('{n}', String(its.length))} emoji={c ? c.emoji : '🏪'} onPress={() => go('search')} /></View>
       </View>
-      {p !== 'all' && kinds.length > 1 ? (<><T cmsKey={'lbl.browseSubcategories'} size={12.5} weight="600" color={th.mut} style={{paddingHorizontal: 16, paddingBottom: 6}}>{label('lbl.browseSubcategories', 'SUBCATEGORIES')}</T><Chips list={[['', 'All'], ...kinds.map(k => [k, k] as [string, string])]} on={S.sub} onPick={setSub} /></>) : null}
+      {p !== 'all' && kinds.length > 1 ? (<><T cmsKey={'lbl.browseSubcategories'} size={12.5} weight="600" color={th.mut} style={{paddingHorizontal: 16, paddingBottom: 6}}>{label('lbl.browseSubcategories', 'SUBCATEGORIES')}</T><Chips list={[['', label('lbl.filterAll', 'All')], ...kinds.map(k => [k, k] as [string, string])]} on={S.sub} onPick={setSub} /></>) : null}
       <Chips list={FCH} on={S.f} onPick={setFilter} />
       {l.length ? (<>
         {l.length > 1 ? (<><Sh cmsKey={'lbl.browseFeaturedVendors'} title={label('lbl.browseFeaturedVendors', 'Featured vendors')} /><Rail>{l.slice().sort((a, b) => b.r - a.r).slice(0, 4).map(s => <VCard key={s.id} s={s} />)}</Rail></>) : null}
@@ -343,8 +347,8 @@ export function Search() {
                 <Tile e={s.e} bg={s.bg} />
                 <View style={{flex: 1, minWidth: 0}}><View style={{flexDirection: 'row', gap: 6, alignItems: 'center', flexWrap: 'wrap'}}><T weight="600">{s.n}</T>{!s.open ? <Badge cmsKey={"lbl.interface.closed"} red label={tr('closed')} /> : null}</View><T cmsKeys={["lbl.cms.29ce74d8129d",'lbl.cardNewStore']} size={13} color={th.mut}>{s.k} · {s.eta} {label("lbl.cms.29ce74d8129d", "min · ")}{s.rv > 0 ? '★ ' + s.r.toFixed(1) : label('lbl.cardNewStore', 'New store')}</T></View>
               </Pressable>
-              {heartBtn(s.id, S.fav.indexOf(s.id) > -1, () => heart(s.id), S.fav.indexOf(s.id) > -1 ? 'Remove ' + s.n + ' from favorites' : 'Save ' + s.n + ' to favorites')}
-              <Pressable accessibilityRole="link" accessibilityLabel={label("lbl.cms.22d1e84f1755", "Open ") + s.n} onPress={() => {if (q) rec(r.q.trim()); go('store', s.id);}}><Icon name="chevR" size={16} color={th.ink} /></Pressable>
+              {heartBtn(s.id, S.fav.indexOf(s.id) > -1, () => heart(s.id), S.fav.indexOf(s.id) > -1 ? label('lbl.a11yRemoveStoreFavorite', 'Remove {store}').replace('{store}', s.n) + label("lbl.page.screens.Browse.a9d3b30ba1", " from favorites") : label('lbl.a11ySaveStoreFavorite', 'Save {store}').replace('{store}', s.n) + label("lbl.page.screens.Browse.1280456fb9", " to favorites"))}
+              <Pressable accessibilityRole="link" accessibilityLabel={label('lbl.a11yOpenStore', 'Open {store}').replace('{store}', s.n)} onPress={() => {if (q) rec(r.q.trim()); go('store', s.id);}}><Icon name="chevR" size={16} color={th.ink} /></Pressable>
             </View>))}</>) : null}
           {is.length ? (<><Ttl>{label("lbl.browseAuto100SEII", "Products")}</Ttl>{is.map(i => <ItemRow key={i.id} i={i} />)}</>) : null}
         </View>
@@ -423,7 +427,7 @@ export function Notifs() {
     serverUserId.current = auth.user.id;
     const {data, error} = await supabase.from('notifications')
       .select('id,title,body,read,metadata,created_at,notification_type,feature_name,destination')
-      .eq('user_id', auth.user.id).ilike('feature_name', 'goodies').or('notification_type.is.null,notification_type.not.like.goodies_ingredient_%')
+      .eq('user_id', auth.user.id).ilike('feature_name', 'goodies').or(CUSTOMER_NOTIFICATION_FILTER)
       .order('created_at', {ascending: false}).limit(50);
     if (!serverMounted.current || requestId !== serverLoadId.current || serverUserId.current !== auth.user.id) return;
     if (error) { setServerError(friendlyError(error, label("lbl.cms.ce2855382c78", "Something went wrong. Please try again."))); return; }
@@ -474,7 +478,7 @@ export function Notifs() {
     const {data: auth} = await supabase.auth.getUser();
     if (auth.user) {
       const {error} = await supabase.from('notifications').update({read: true})
-        .eq('user_id', auth.user.id).ilike('feature_name', 'goodies').or('notification_type.is.null,notification_type.not.like.goodies_ingredient_%').eq('read', false);
+        .eq('user_id', auth.user.id).ilike('feature_name', 'goodies').or(CUSTOMER_NOTIFICATION_FILTER).eq('read', false);
       if (error) setServerError(friendlyError(error, label("lbl.cms.ce2855382c78", "Something went wrong. Please try again.")));
       else await loadServer();
     }

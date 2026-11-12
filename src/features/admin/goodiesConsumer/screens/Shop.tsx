@@ -1,4 +1,9 @@
 import {EditableNativeText as Text} from '../EditableNativeText';
+import {GOODIES_SHARED_PAYMENTS_RELEASED} from '../helpPayApi';
+import {loadOlderGoodiesOrders} from '../serverSync';
+import {useStoreReviews} from '../reviews';
+import {coordinate, courierLocation, routeSegments, trackingRegion} from '../deliveryTracking';
+import {previewDeliveryProof as resolveGoodiesDeliveryProof} from '../previewRuntime';
 import React, {useState, useEffect} from 'react';
 import {previewClipboard as Clipboard} from '../previewNative';
 import {MaterialCommunityIcons} from '@expo/vector-icons';
@@ -11,8 +16,7 @@ import {go, tab, back, browse, heart, favp, setSize, toggleDrink, productQty, pr
 import {CHOOSE_SIZE_CATS, setConsent, createWallet, idResult} from '../actions';
 import {rgText, stageLabels, fees, faq as faqList, label} from '../content';
 import {providerInfo} from '../providers';
-import {byoRows, byoOn, lineBad, bzEdit, bzRemove} from '../builders/engine';
-import {SEED_REVIEWS} from '../data/seed';
+import {BYO, loadBuilders, byoRows, byoOn, lineBad, bzEdit, bzRemove} from '../builders/engine';
 import {ScheduleInline} from '../components/Sheets';
 import {t as tr} from '../i18n';
 import {previewBackend as supabase} from '../previewRuntime';
@@ -70,6 +74,7 @@ export function Store({id}: {id: string}) {
     finally{setShareSending(null);}
   };
   const th = useTheme(), s = STB[id], address = addr(), t = S.ss[id + 't'] || 'all', q = (S.ss[id] || '').toLowerCase();
+  const reviewState = useStoreReviews(id);
   useEffect(() => {
     let active = true;
     void refreshLiveSchedules().then(() => {
@@ -81,7 +86,7 @@ export function Store({id}: {id: string}) {
   const l = s.it.filter((i, n) => (!q || i.n.toLowerCase().indexOf(q) > -1) && (t === 'all' || (t === 'pop' && n < 2) || (t === 'deal' && DEALS.some(d => d[0] === i.id))));
   const rows = t === 'all' || t === 'custom' ? byoRows(id, q) : null;
   const items = t === 'custom' ? [] : l;
-  const reviews = s.live ? [] : SEED_REVIEWS.concat(S.rev[id] || []);
+  const reviews = reviewState.rows;
   const tabs: [string, string][] = [['all', label('lbl.storeAll', 'All')], ['pop', label('lbl.storePopular', 'Popular')], ['deal', label('lbl.storeDeals', 'Deals')], ...(byoOn(id) ? [['custom', label('lbl.storeCustom', 'Custom products')] as [string, string]] : [])];
   return (
     <View>
@@ -99,7 +104,7 @@ export function Store({id}: {id: string}) {
         <T cmsKeys={["lbl.cms.ffbce6e6a57c","lbl.cms.6f24af4842a9","lbl.cms.a2cc2b9fa21d","lbl.cms.0a7b93a19c11",'lbl.sheetKmAway',"lbl.cms.a85c2c949931"]} size={13} color={th.mut} style={{marginTop: 3}}>{s.k}{s.live && s.distanceReady ? ' · ' + (Math.round(s.km * 1000) < 1000 ? Math.round(s.km * 1000) + label("lbl.cms.ffbce6e6a57c", " m") : s.km.toFixed(1) + label("lbl.cms.6f24af4842a9", " km")) + (S.currentLocation && S.currentLocation.addressText === address?.t ? label("lbl.cms.a2cc2b9fa21d", " from your location") : label("lbl.cms.0a7b93a19c11", " from your address")) : !s.live ? ' · ' + label('lbl.sheetKmAway', '{km} km away').replace('{km}', s.km.toFixed(1)) : s.live && s.distanceError ? label("lbl.cms.a85c2c949931", " · Distance unavailable") : ''}</T>
         {!s.open ? <Card style={{backgroundColor: th.brt, borderColor: th.br, marginTop: 12}}><T cmsKey={'lbl.storeClosed'} weight="600">{label('lbl.storeClosed', 'Closed right now')}</T><T cmsKeys={["lbl.cms.9a05153daef9","lbl.cms.f1cd4727c8c8"]} size={13} color={th.mut}>{s.acceptScheduledOrders ? s.nx + label("lbl.cms.9a05153daef9", ". Scheduled orders are available for future opening-time slots.") : s.nx + label("lbl.cms.f1cd4727c8c8", ". Ordering is paused until then.")}</T></Card> : null}
         <View style={{flexDirection: 'row', flexWrap: 'wrap', gap: 8, marginTop: 12, marginBottom: 4}}>
-          <Pressable accessibilityRole="button" accessibilityLabel={label('lbl.storeReadReviews', 'Read store reviews')} onPress={() => go('reviews', id)}><Badge cmsKey={'lbl.storeNewNoReviews'} green label={s.live && s.rv === 0 ? label('lbl.storeNewNoReviews', 'New · No reviews yet') : '★ ' + s.r.toFixed(1) + ' (' + s.rv + ')'} /></Pressable><Badge cmsKey={"lbl.cms.f387bbae5293"} label={s.eta + label("lbl.cms.f387bbae5293", " min")} /><Badge label={s.fee === 0 ? tr('freeDelivery') : money(s.fee) + ' ' + tr('delivery')} /><Badge cmsKey={"lbl.cms.60f2f9167a32"} label={label("lbl.cms.60f2f9167a32", "Min. ") + money(s.min)} /><Badge cmsKey={"lbl.shopAuto18E4IBZ"} label={label("lbl.shopAuto18E4IBZ", "Delivery + pickup")} />{s.pr ? <Badge label={s.pr} /> : null}
+          <Pressable accessibilityRole="button" accessibilityLabel={label('lbl.storeReadReviews', 'Read store reviews')} onPress={() => go('reviews', id)}><Badge green label={s.ratingsAvailable===false ? label('lbl.ratingsUnavailable', 'Ratings unavailable') : s.live && s.rv === 0 ? label('lbl.storeNewNoReviews', 'New · No reviews yet') : '★ ' + s.r.toFixed(1) + ' (' + s.rv + ')'} /></Pressable><Badge cmsKey={'lbl.unitMinutes'} label={s.eta + label('lbl.unitMinutes', ' min')} /><Badge label={s.fee === 0 ? tr('freeDelivery') : money(s.fee) + ' ' + tr('delivery')} /><Badge cmsKey={"lbl.cms.60f2f9167a32"} label={label("lbl.cms.60f2f9167a32", "Min. ") + money(s.min)} /><Badge cmsKey={"lbl.shopAuto18E4IBZ"} label={label("lbl.shopAuto18E4IBZ", "Delivery + pickup")} />{s.pr ? <Badge label={s.pr} /> : null}
         </View>
         <View style={{flexDirection: 'row', alignItems: 'center', gap: 14, marginTop: 10}}>
           <Cta cmsKey={'lbl.storeInfo'} small ghost label={label('lbl.storeInfo', 'Store info')} onPress={() => require('../store').ui.sheet({kind: 'sinfo', id})} />
@@ -110,16 +115,21 @@ export function Store({id}: {id: string}) {
       </View>
       <View style={{marginTop: 8}}><Chips list={tabs} on={t} onPick={k => {S.ss[id + 't'] = k; emit();}} /></View>
       <View style={{paddingHorizontal: 16, marginTop: 4}}>
-        {rows || items.length ? (<>{rows}{items.map(i => <ItemRow key={i.id} i={i} />)}</>) : <Empty emoji="🔎" title={label('lbl.storeNoItems', 'No items found')} text={label('lbl.storeTryAnother', 'Try another word.')} />}
+        {s.live && BYO.loading ? <T cmsKey={'lbl.buildersLoading'} color={th.mut}>{label('lbl.buildersLoading', 'Loading custom products…')}</T> : null}
+        {s.live && BYO.error ? <Card><T color={th.red}>{BYO.error}</T><Cta cmsKey={'lbl.retry'} small ghost label={label('lbl.retry', 'Try again')} onPress={() => void loadBuilders()} /></Card> : null}
+        {rows || items.length ? (<>{rows}{items.map(i => <ItemRow key={i.id} i={i} />)}</>) : !BYO.loading && !BYO.error ? <Empty emoji="🔎" title={label('lbl.storeNoItems', 'No items found')} text={label('lbl.storeTryAnother', 'Try another word.')} /> : null}
         <T cmsKey={'lbl.storeReviews'} size={19} weight="600" style={{marginTop: 24, marginBottom: 8}}>{label('lbl.storeReviews', 'Reviews')}</T>
         {reviews.map((v: any, k: number) => (
           <Card key={k} style={{marginBottom: 8}}>
             <Row sp><Row style={{gap: 6}}><T weight="600">{v.n}</T>{v.you ? <Badge cmsKey={'lbl.storeYourReview'} label={label('lbl.storeYourReview', 'Your review')} /> : null}</Row><Row style={{gap: 3}}><Icon name="star" size={13} color="#FFB400" fill /><T size={13} weight="600">{v.r}</T></Row></Row>
             <T cmsKey={'lbl.storeNoComment'} size={13.5} color={th.mut} style={{marginTop: 4}}>{v.t || label('lbl.storeNoComment', 'No comment')}</T>
-            <T cmsKey={'lbl.storeSampleReview'} size={11.5} color={th.mut} style={{marginTop: 4}}>{v.d}{v.you ? '' : ' · ' + label('lbl.storeSampleReview', 'sample review')}</T>
+            <T size={11.5} color={th.mut} style={{marginTop: 4}}>{v.d}</T>
           </Card>
         ))}
-        {!reviews.length ? <Empty emoji="⭐" title={label('lbl.storeNoReviews', 'No reviews yet')} text={s.live && s.rv > 0 ? label('lbl.storeRatingsOnly', 'Ratings are available, but written review details are not available here yet.') : label('lbl.storeBeFirstReview', 'Be the first customer to review this store.')} /> : null}
+        {reviewState.loading ? <T cmsKey={'lbl.reviewsLoading'} color={th.mut}>{label('lbl.reviewsLoading', 'Loading reviews…')}</T> : null}
+        {reviewState.error ? <Empty title={label('lbl.reviewsFailed', 'Could not load reviews')} button={label('lbl.retry', 'Try again')} onPress={reviewState.reload} /> : null}
+        {reviewState.hasMore ? <Cta cmsKey={'lbl.loadMore'} ghost disabled={reviewState.loading} label={label('lbl.loadMore', 'Load more')} onPress={reviewState.more} /> : null}
+        {!reviews.length && !reviewState.loading && !reviewState.error ? <Empty emoji="⭐" title={label('lbl.storeNoReviews', 'No reviews yet')} text={s.live && s.rv > 0 ? label('lbl.storeRatingsOnly', 'Ratings are available, but written review details are not available here yet.') : label('lbl.storeBeFirstReview', 'Be the first customer to review this store.')} /> : null}
       </View>
     </View>
   );
@@ -127,8 +137,9 @@ export function Store({id}: {id: string}) {
 
 export function StoreReviews({id}: {id: string}) {
   const th = useTheme(), s = STB[id];
+  const reviewState = useStoreReviews(id);
   if (!s) return <View><Bar cmsKey={'lbl.storeReviewsTitle'} title={label('lbl.storeReviewsTitle', 'Store reviews')} onBack={back} /><Empty emoji="⭐" title={label('lbl.storeNotFound', 'Store not found')} button={label('lbl.storeBackToStores', 'Back to stores')} onPress={browse} /></View>;
-  const reviews = s.live ? [] : SEED_REVIEWS.concat(S.rev[id] || []);
+  const reviews = reviewState.rows;
   return (
     <View>
       <Bar cmsKey={'lbl.storeReviews'} title={label('lbl.storeReviews', 'Reviews')} onBack={back} />
@@ -137,14 +148,17 @@ export function StoreReviews({id}: {id: string}) {
           <Row style={{alignItems: 'center', gap: 12}}>
             <View style={{width: 54, height: 54, borderRadius: 16, backgroundColor: th.soft, alignItems: 'center', justifyContent: 'center'}}><Text style={{fontSize: 30}}>{s.e}</Text></View>
             <View style={{flex: 1}}><T size={18} weight="600">{s.n}</T><T cmsKey={'lbl.storeCustomerReviews'} size={13} color={th.mut}>{label('lbl.storeCustomerReviews', 'Customer reviews')}</T></View>
-            <View style={{alignItems: 'flex-end'}}>{s.rv > 0 ? <><T size={22} weight="600">★ {s.r.toFixed(1)}</T><T cmsKey={"lbl.cms.b472632d5ebe"} size={11.5} color={th.mut}>{s.rv} {label("lbl.cms.b472632d5ebe", "reviews")}</T></> : <T cmsKey={'lbl.storeNoReviewsYet'} size={12} color={th.mut}>{label('lbl.storeNoReviewsYet', 'No reviews yet')}</T>}</View>
+            <View style={{alignItems: 'flex-end'}}>{s.ratingsAvailable===false ? <T cmsKey={'lbl.ratingsUnavailable'} size={12} color={th.mut}>{label('lbl.ratingsUnavailable', 'Ratings unavailable')}</T> : s.rv > 0 ? <><T size={22} weight="600">★ {s.r.toFixed(1)}</T><T cmsKey={"lbl.page.screens.Shop.a03800365a"} size={11.5} color={th.mut}>{s.rv} {label("lbl.page.screens.Shop.a03800365a", " reviews")}</T></> : <T cmsKey={'lbl.storeNoReviewsYet'} size={12} color={th.mut}>{label('lbl.storeNoReviewsYet', 'No reviews yet')}</T>}</View>
           </Row>
         </Card>
+        {reviewState.loading ? <T cmsKey={'lbl.reviewsLoading'} color={th.mut}>{label('lbl.reviewsLoading', 'Loading reviews…')}</T> : null}
+        {reviewState.error ? <Empty title={label('lbl.reviewsFailed', 'Could not load reviews')} button={label('lbl.retry', 'Try again')} onPress={reviewState.reload} /> : null}
         {reviews.length ? reviews.map((v: any, k: number) => <Card key={k} style={{marginBottom: 10}}>
           <Row sp><Row style={{gap: 6}}><T weight="600">{v.n}</T>{v.you ? <Badge cmsKey={'lbl.storeYourReview'} label={label('lbl.storeYourReview', 'Your review')} /> : null}</Row><Row style={{gap: 4}}><Icon name="star" size={13} color="#FFB400" fill /><T size={13} weight="600">{v.r}</T></Row></Row>
           <T cmsKey={'lbl.storeNoComment'} size={13.5} style={{marginTop: 6}}>{v.t || label('lbl.storeNoComment', 'No comment')}</T>
-          <T cmsKey={'lbl.storeSampleReview'} size={11.5} color={th.mut} style={{marginTop: 5}}>{v.d}{v.you ? '' : ' · ' + label('lbl.storeSampleReview', 'sample review')}</T>
-        </Card>) : <Empty emoji="⭐" title={label('lbl.storeNoReviews', 'No reviews yet')} text={s.live && s.rv > 0 ? label('lbl.storeRatingsOnly', 'Ratings are available, but written review details are not available here yet.') : label('lbl.storeBeFirstReview', 'Be the first customer to review this store.')} />}
+          <T size={11.5} color={th.mut} style={{marginTop: 5}}>{v.d}</T>
+        </Card>) : !reviewState.loading && !reviewState.error ? <Empty emoji="⭐" title={label('lbl.storeNoReviews', 'No reviews yet')} text={s.live && s.rv > 0 ? label('lbl.storeRatingsOnly', 'Ratings are available, but written review details are not available here yet.') : label('lbl.storeBeFirstReview', 'Be the first customer to review this store.')} /> : null}
+        {reviewState.hasMore ? <Cta cmsKey={'lbl.loadMore'} ghost disabled={reviewState.loading} label={label('lbl.loadMore', 'Load more')} onPress={reviewState.more} /> : null}
         <Cta cmsKey={'lbl.storeBack'} ghost label={label('lbl.storeBack', 'Back to store')} onPress={() => go('store', id)} />
       </View>
     </View>
@@ -173,7 +187,7 @@ export function Product() {
       </> : <Grad idx={bgIdx(s.bg)} style={{width, height:210}} />}
       <View style={{paddingHorizontal: 16}}>
         <T size={23} weight="600" style={{marginTop: 10}}>{i.n}</T>
-        <Pressable onPress={() => go('store', s.id)}><T cmsKey={"lbl.cms.2d44412e115d"} size={13.5} weight="600" color={th.br}>{s.n}{s.rv > 0 ? ' · ★ ' + s.r.toFixed(1) : label("lbl.cms.2d44412e115d", " · New store")}</T></Pressable>
+        <Pressable onPress={() => go('store', s.id)}><T cmsKeys={['lbl.ratingsUnavailable',"lbl.cms.2d44412e115d"]} size={13.5} weight="600" color={th.br}>{s.n}{s.ratingsAvailable===false ? ' · '+label('lbl.ratingsUnavailable', 'Ratings unavailable') : s.rv > 0 ? ' · ★ ' + s.r.toFixed(1) : label("lbl.cms.2d44412e115d", " · New store")}</T></Pressable>
         <View style={{flexDirection: 'row', alignItems: 'center', gap: 8, marginTop: 8}}>
           <T size={24} weight="600" color={th.br}>{money(base)}</T>
           {h.off ? <><T size={15} color={th.mut} style={{textDecorationLine: 'line-through'}}>{money(i.p)}</T><Badge label={'-' + h.off + '%'} /></> : null}
@@ -218,14 +232,17 @@ const Sum = ({rows, total}: {rows: [string, string, 'g'?][]; total?: [string, st
 export function Cart() {
   const th = useTheme(), c = S.cart, [code, setCode] = useState(S.pin || ''), [scheduleOpen, setScheduleOpen] = useState(false);
   if (!c.lines.length) return <View><Bar cmsKey={'lbl.cartTitle'} title={label('lbl.cartTitle', 'Your cart')} onBack={back} right={<Pressable accessibilityRole="button" accessibilityLabel={label('lbl.cartGroupOrder', 'Start a group order')} onPress={() => require('../store').ui.sheet({kind:'group-order'})} hitSlop={10} style={{padding: 4, alignItems: 'center', justifyContent: 'center'}}><Icon name="user-plus" size={23} color={th.br} /></Pressable>} /><View style={{alignItems:'center',paddingHorizontal:28,paddingTop:76,paddingBottom:34}}><Icon name="bag" size={38} color={th.mut}/><T cmsKey={'lbl.cartEmptyTitle'} size={21} weight="600" style={{marginTop:18,textAlign:'center'}}>{label('lbl.cartEmptyTitle', 'Your cart is empty')}</T><T cmsKey={'lbl.cartEmptyText'} size={13} color={th.mut} align="center" style={{marginTop:7,marginBottom:22}}>{label('lbl.cartEmptyText', 'Explore nearby stores and discover products around your chosen address.')}</T><View style={{width:'100%'}}><Cta cmsKey={'lbl.cartBrowse'} label={label('lbl.cartBrowse', 'Browse stores')} onPress={() => go('explore')} /></View></View></View>;
-  const t = totals(), st = t.st!, stops: string[] = (t as any).stops || [], multi = stops.length > 1, badLine = c.lines.some((l: any) => l.byo && lineBad(l)), short = (multi ? stops.some((id: string) => storeSub(id) < (STB[id]?.min || 0)) : t.sub < st.min) || badLine;
+  const t = totals(), st = t.st, stops: string[] = (t as any).stops || [], multi = stops.length > 1, badLine = c.lines.some((l: any) => l.byo && lineBad(l));
+  if (!st) return <View><Bar cmsKey={'lbl.cartTitle'} title={label('lbl.cartTitle', 'Your cart')} onBack={back} right={<Circ icon="trash" label={label('lbl.cartClearAction', 'Clear cart')} onPress={clearAsk} />} /><Empty title={label('lbl.checkoutCartUnavailable', 'Your cart is unavailable')} button={label('lbl.retry', 'Try again')} onPress={() => void refreshLiveSchedules()} /></View>;
+  const short = (multi ? stops.some((id: string) => storeSub(id) < (STB[id]?.min || 0)) : t.sub < st.min) || badLine;
   return (
     <View>
       <Bar cmsKey={'lbl.cartTitle'} title={label('lbl.cartTitle', 'Your cart')} onBack={back} right={<Circ icon="trash" label={label('lbl.cartClearAction', 'Clear cart')} onPress={clearAsk} />} />
       <View style={{paddingHorizontal: 16}}>
+        {S.catalogError ? <Card><T cmsKey={'lbl.catalogFailed'} color={th.red}>{label('lbl.catalogFailed', 'Could not load stores')}</T><Cta cmsKey={'lbl.retry'} small ghost label={label('lbl.retry', 'Try again')} onPress={() => void refreshLiveSchedules()} /></Card> : null}
         {!multi && st.cover ? <Image source={{uri: st.cover}} style={{width: '100%', height: 112, borderRadius: 14, marginBottom: 10}} resizeMode="cover" /> : null}
         {multi ? null : <Row style={{marginBottom: 8}}><Tile e={st.e} bg={st.bg} size={44} photo={st.thumbnail || st.logo} /><View style={{flex: 1}}><T weight="600">{st.n}</T><T cmsKeys={['lbl.cartStoreOrder',"lbl.cms.40babc6bdeb6"]} size={13} color={th.mut}>{label('lbl.cartStoreOrder', 'Your order from this store')} · {st.eta} {label("lbl.cms.40babc6bdeb6", "min")}</T></View></Row>}
-                {!multi && !st.open ? <Card style={{backgroundColor: th.brt, borderColor: th.br}}><T cmsKey={"lbl.cms.4ac2c8430ce8"} weight="600">{st.n} {label("lbl.cms.4ac2c8430ce8", "is closed")}</T><T cmsKeys={["lbl.cms.41b312a60379","lbl.cms.6548a2ae6f3e"]} size={13} color={th.mut}>{st.acceptScheduledOrders ? st.nx + label("lbl.cms.41b312a60379", ". Scheduled orders are available. The earliest time is set by this shop.") : st.nx + label("lbl.cms.6548a2ae6f3e", ". This store does not currently accept scheduled orders.")}</T></Card> : null}
+                {!multi && !S.catalogError && !st.open ? <Card style={{backgroundColor: th.brt, borderColor: th.br}}><T cmsKey={"lbl.cms.4ac2c8430ce8"} weight="600">{st.n} {label("lbl.cms.4ac2c8430ce8", "is closed")}</T><T cmsKeys={["lbl.cms.41b312a60379","lbl.cms.6548a2ae6f3e"]} size={13} color={th.mut}>{st.acceptScheduledOrders ? st.nx + label("lbl.cms.41b312a60379", ". Scheduled orders are available. The earliest time is set by this shop.") : st.nx + label("lbl.cms.6548a2ae6f3e", ". This store does not currently accept scheduled orders.")}</T></Card> : null}
         <View style={{marginTop:14,marginBottom:8,paddingVertical:10,borderBottomWidth:0.5,borderBottomColor:th.line}}>
           <Row sp>
             <View style={{flex:1}}>
@@ -270,7 +287,7 @@ export function Cart() {
         {S.promo ? (
           <Card style={{padding: 12}}><Row sp><View style={{flex: 1}}><Row style={{gap: 6}}><T weight="600">{S.promo}</T>{t.pok ? <Badge cmsKey={'lbl.cartApplied'} green label={label('lbl.cartApplied', 'Applied')} /> : <Badge cmsKey={'lbl.cartInvalid'} red label={label('lbl.cartInvalid', 'Not valid')} />}</Row>{t.perr ? <T size={12.5} color={th.mut} style={{marginTop: 4}}>{t.perr}</T> : null}</View><Pressable onPress={promoClear}><T cmsKey={'lbl.cartRemove'} weight="600" color={th.red}>{label('lbl.cartRemove', 'Remove')}</T></Pressable></Row></Card>
         ) : (<>
-          <Row><View style={{flex: 1}}><Input cmsPlaceholderKey={'lbl.cartPromoPlaceholder'} value={code} onChange={v => setCode(v.toUpperCase())} placeholder={label('lbl.cartPromoPlaceholder', 'Try GOODIES10')} /></View><View style={{width: 90}}><Cta cmsKey={'lbl.cartApply'} label={label('lbl.cartApply', 'Apply')} onPress={() => promoApply(code)} /></View></Row>
+          <Row><View style={{flex: 1}}><Input cmsPlaceholderKey={'lbl.cartPromoPlaceholder'} value={code} onChange={v => setCode(v.toUpperCase())} placeholder={label('lbl.cartPromoPlaceholder', 'Enter promo code')} /></View><View style={{width: 90}}><Cta cmsKey={'lbl.cartApply'} label={label('lbl.cartApply', 'Apply')} onPress={() => promoApply(code)} /></View></Row>
           <Pressable onPress={() => go('promos')}><T cmsKey={'lbl.cartAvailableCoupons'} size={13} weight="600" color={th.br} style={{marginTop: 8}}>{label('lbl.cartAvailableCoupons', 'See available coupons')}</T></Pressable>
         </>)}
         <View style={{marginTop: 16}}><Sum rows={[[label('lbl.cartSubtotal', 'Subtotal'), money(t.sub)], [label('lbl.cartDeliveryFee', 'Delivery fee'), isPk() ? label("lbl.cms.c036c1628698","Pickup") : t.free ? (first() ? label("lbl.cms.a323e7a83705","Free (first order)") : label("lbl.cms.b9a67ad4232a","Free")) : money(t.fee), t.free ? 'g' : undefined as any], [label('lbl.cartServiceFee', 'Service fee'), money(t.svc)], ...(t.disc ? [[label('lbl.cartDiscount', 'Discount'), '-' + money(t.disc), 'g'] as any] : []), ...(t.tip ? [[label('lbl.cartCourierTip', 'Courier tip'), money(t.tip)] as any] : [])]} total={[label('lbl.cartTotal', 'Total'), money(t.total)]} /></View>
@@ -312,7 +329,9 @@ export function Checkout() {
     }
     return () => { active = false; };
   }, [st?.id, pk, multi, stops.join(',')]);
-  const PAYON: any = fees().pay, allPays: [string, string, string, string][] = [['wallet', label('lbl.checkoutWallet', 'Wantiss Wallet'), S.hasWallet ? label('lbl.checkoutWalletBalance','Balance {amount}').replace('{amount}',money(S.wallet)) : label('lbl.checkoutWalletMissing','Wallet not created'), 'wallet'], ['moncash', label('lbl.checkoutMoncash', 'MonCash'), label('lbl.checkoutUnavailablePayment','Not available for live Goodies orders'), 'phone'], ['card', label('lbl.checkoutCard', 'Credit / debit card'), S.cards.length ? (S.cards.length===1?label('lbl.checkoutSavedCardCount','{count} saved card'):label('lbl.checkoutSavedCardsCount','{count} saved cards')).replace('{count}',String(S.cards.length)) : label('lbl.checkoutAddCard','Add a card'), 'card'], ['cash', label('lbl.checkoutCash', 'Cash on') + ' ' + label('lbl.checkoutDelivery', 'delivery'), label('lbl.checkoutCashCondition','Only when this store and an available courier accept cash on delivery'), 'bag']], pays = allPays.filter(p => PAYON[({wallet: 'Wallet', moncash: 'MonCash', card: 'Card', cash: 'Cash'} as any)[p[0]]] && !(multi && p[0] === 'card') && (providerInfo.demo ? p[0] !== 'moncash' : p[0] !== 'moncash' && (p[0] !== 'cash' || cashEligible)));
+  const paymentReady = S.paymentOptionsStatus === 'ready';
+  const paymentStatusText = S.paymentOptionsStatus === 'error' ? label('lbl.checkoutPaymentUnavailable', 'Payment details unavailable. Please try again.') : label('lbl.checkoutPaymentLoading', 'Loading payment methods…');
+  const PAYON: any = fees().pay, allPays: [string, string, string, string][] = [['wallet', label('lbl.checkoutWallet', 'Wantiss Wallet'), !paymentReady ? paymentStatusText : S.hasWallet ? label('lbl.checkoutWalletBalance', 'Balance {amount}').replace('{amount}', money(S.wallet)) : label('lbl.checkoutWalletMissing', "Wallet not created"), 'wallet'], ['moncash', label('lbl.checkoutMoncash', 'MonCash'), label('lbl.checkoutUnavailablePayment', "Not available for live Goodies orders"), 'phone'], ['card', label('lbl.checkoutCard', 'Credit / debit card'), !paymentReady ? paymentStatusText : S.cards.length ? (S.cards.length === 1 ? label('lbl.checkoutSavedCardCountOne', '{count} saved card') : label('lbl.checkoutSavedCardCountMany', '{count} saved cards')).replace('{count}', String(S.cards.length)) : label('lbl.checkoutAddCard', "Add a card"), 'card'], ['cash', label('lbl.checkoutCash', 'Cash on') + ' ' + label('lbl.checkoutDelivery', 'delivery'), label('lbl.checkoutCashCondition', "Only when this store and an available courier accept cash on delivery"), 'bag']], pays = allPays.filter(p => PAYON[({wallet: 'Wallet', moncash: 'MonCash', card: 'Card', cash: 'Cash'} as any)[p[0]]] && !(multi && p[0] === 'card') && (providerInfo.demo ? p[0] !== 'moncash' : p[0] !== 'moncash' && (p[0] !== 'cash' || cashEligible)));
   const availablePayKey = pays.map(p => p[0]).join('|');
   useEffect(() => { if (pays.length && !pays.some(p => p[0] === S.pay)) setPay(pays[0][0]); }, [availablePayKey, S.pay]);
   const ct = ctOf() || {ph: S.pf?.ph || '', l: label('lbl.sheetDefaultNumber', 'Default Wantiss number'), w: 1};
@@ -326,7 +345,7 @@ export function Checkout() {
       {pk ? <><T weight="600">{st.n}</T><T cmsKeys={["lbl.cms.7c642a8ed0bc","lbl.cms.ebaf18552056","lbl.cms.f409318cbe6e",'lbl.checkoutKmFromYou','lbl.checkoutOpenHours']} size={13} color={th.mut}>{st.live ? (st.distanceReady ? (Math.round(st.km * 1000) < 1000 ? Math.round(st.km * 1000) + label("lbl.cms.7c642a8ed0bc", " m from your address") : st.km.toFixed(1) + label("lbl.cms.ebaf18552056", " km from your address")) : st.distanceError ? label("lbl.cms.f409318cbe6e", "Distance unavailable") : null) : label('lbl.checkoutKmFromYou', '{km} km from you').replace('{km}', st.km.toFixed(1))}{st.h ? ' · ' + label('lbl.checkoutOpenHours', 'open {hours}').replace('{hours}', st.h) : ''}</T></> : a ? <><T cmsKey={"lbl.cms.5f5052920c34"} weight="600">{a.l || label("lbl.cms.5f5052920c34", "Delivery address")}</T><T size={13} color={th.mut}>{a.t}{a.apt ? ', ' + a.apt : ''}</T>{a.inst ? <T cmsKey={'lbl.checkoutNote'} size={12.5} color={th.mut}>{label('lbl.checkoutNote', 'Note: {note}').replace('{note}', a.inst)}</T> : null}</> : <><T cmsKey={"lbl.cms.6795bcf3e74a"} weight="600">{label("lbl.cms.6795bcf3e74a", "Choose a delivery address")}</T><T cmsKey={"lbl.cms.2c1905767c95"} size={13} color={th.mut}>{label("lbl.cms.2c1905767c95", "Select a saved address to continue.")}</T></>}
     </View>{pk ? null : <Pressable onPress={() => go('addresses')}><T cmsKeys={['lbl.checkoutChange',"lbl.cms.1586f89c0499"]} size={13} weight="600" color={th.br} >{a ? label('lbl.checkoutChange', 'Change') : label("lbl.cms.1586f89c0499", "Add address")}</T></Pressable>}</Row></Card>
     {st.far && !st.live ? <Card style={{backgroundColor: th.brt, borderColor: th.br, marginTop: 12}}><T cmsKey={'lbl.checkoutPickupOnly'} weight="600">{label('lbl.checkoutPickupOnly', 'Pickup only')}</T><T cmsKeys={["lbl.cms.51f14b4a403f","lbl.cms.cea0549897a2"]} size={13} color={th.mut}>{st.n} {label("lbl.cms.51f14b4a403f", "is ")}{st.km.toFixed(1)} {label("lbl.cms.cea0549897a2", "km from this address, beyond delivery range. Pick another address to get delivery.")}</T></Card> : null}
-    {hasAlcohol() && !S.hasWallet ? <Card style={{backgroundColor: th.brt, borderColor: th.br, marginTop: 12}}><T cmsKey={'lbl.checkoutCreateWallet'} weight="600">{label('lbl.checkoutCreateWallet', 'Create a Wantiss wallet')}</T><T size={13} color={th.mut} style={{marginVertical: 4}}>{rgText('rg.wallet', 'Create a Wantiss wallet so any refund has somewhere to go. You can withdraw from it later.', alcAge(S.cart.sid).age)}</T><Cta cmsKey={'lbl.checkoutCreateWallet'} small label={label('lbl.checkoutCreateWallet', 'Create wallet')} onPress={createWallet} /></Card> : null}
+    {paymentReady && hasAlcohol() && !S.hasWallet ? <Card style={{backgroundColor: th.brt, borderColor: th.br, marginTop: 12}}><T cmsKey={'lbl.checkoutCreateWallet'} weight="600">{label('lbl.checkoutCreateWallet', 'Create a Wantiss wallet')}</T><T size={13} color={th.mut} style={{marginVertical: 4}}>{rgText('rg.wallet', 'Create a Wantiss wallet so any refund has somewhere to go. You can withdraw from it later.', alcAge(S.cart.sid).age)}</T><Cta cmsKey={'lbl.checkoutCreateWallet'} small label={label('lbl.checkoutCreateWallet', 'Create wallet')} onPress={createWallet} /></Card> : null}
     <Ttl>{label('lbl.checkoutContactNumber', 'Contact number')}</Ttl>
     <Card><Row><IcBox icon="phone" /><View style={{flex: 1}}><T weight="600">{ct.ph}</T><View style={{marginTop: 3, flexDirection: 'row', gap: 6, flexWrap: 'wrap'}}>{ct.w ? <Badge cmsKey={'lbl.checkoutDefaultPhone'} green label={label('lbl.checkoutDefaultPhone', 'Default Wantiss number')} /> : <><Badge cmsKey={"lbl.shopAuto1TZ3XVT"} label={label("lbl.shopAuto1TZ3XVT", "Goodies checkout number")} /><T size={12.5} color={th.mut}>{ct.l}</T></>}</View></View><Pressable onPress={() => require('../store').ui.sheet({kind: 'contacts'})}><T cmsKey={"lbl.shopAuto1YYH3EC"} size={13} weight="600" color={th.br}>{label("lbl.shopAuto1YYH3EC", "Change")}</T></Pressable></Row></Card>
   </>);
@@ -352,16 +371,17 @@ export function Checkout() {
     <Input cmsPlaceholderKey={'lbl.checkoutOptional'} label={pk ? label('lbl.checkoutStoreNote', 'Note for the store') : label('lbl.checkoutDeliveryInstructions', 'Delivery instructions')} value={S.note} onChange={v => {S.note = v; emit();}} placeholder={label('lbl.checkoutOptional', 'Optional')} multiline />
   </>);
   if (S.cs === 2) body = (<>
+    {!paymentReady ? <Card><T color={S.paymentOptionsStatus === 'error' ? th.red : th.mut}>{paymentStatusText}</T>{S.paymentOptionsStatus === 'error' ? <Cta cmsKey={'lbl.retry'} small ghost label={label('lbl.retry', 'Try again')} onPress={() => void refreshPaymentOptions()} /> : null}</Card> : null}
     <T cmsKey={'lbl.checkoutPaymentMethod'} size={15} weight="600" style={{marginBottom: 8}}>{label('lbl.checkoutPaymentMethod', 'Payment method')}</T>
-    {pays.map(p => <Radio key={p[0]} on={S.pay === p[0]} onPress={() => setPay(p[0])}><Row><Icon name={p[3]} size={20} color={th.ink} /><View style={{flex: 1}}><T size={14.5} weight="600">{p[1]}</T><T size={12.5} color={th.mut}>{p[2]}</T></View></Row></Radio>)}
-    {!providerInfo.demo && !S.hasWallet ? <Card style={{borderColor: th.br}}><T cmsKey={'lbl.checkoutWalletNotFound'} weight="600">{label('lbl.checkoutWalletNotFound', 'Wantiss wallet not found')}</T><T cmsKey={'lbl.checkoutWalletHint'} size={12.5} color={th.mut} style={{marginVertical: 6}}>{label('lbl.checkoutWalletHint', 'Create a wallet to pay for Goodies orders with your balance.')}</T><Cta cmsKey={"lbl.shopAutoFLJ2MD"} label={label("lbl.shopAutoFLJ2MD", "Create wallet")} onPress={createWallet} /></Card> : null}
-    {!providerInfo.demo && S.pay === 'wallet' && (!S.hasWallet || S.wallet < t.total) ? <View style={{paddingVertical:10}}>
+    {pays.map(p => <Radio key={p[0]} on={S.pay === p[0]} onPress={() => {if (p[0] !== 'card' || paymentReady) setPay(p[0]);}}><Row><Icon name={p[3]} size={20} color={th.ink} /><View style={{flex: 1}}><T size={14.5} weight="600">{p[1]}</T><T size={12.5} color={th.mut}>{p[2]}</T></View></Row></Radio>)}
+    {paymentReady && !providerInfo.demo && !S.hasWallet ? <Card style={{borderColor: th.br}}><T cmsKey={'lbl.checkoutWalletNotFound'} weight="600">{label('lbl.checkoutWalletNotFound', 'Wantiss wallet not found')}</T><T cmsKey={'lbl.checkoutWalletHint'} size={12.5} color={th.mut} style={{marginVertical: 6}}>{label('lbl.checkoutWalletHint', 'Create a wallet to pay for Goodies orders with your balance.')}</T><Cta cmsKey={"lbl.shopAutoFLJ2MD"} label={label("lbl.shopAutoFLJ2MD", "Create wallet")} onPress={createWallet} /></Card> : null}
+    {paymentReady && !providerInfo.demo && S.pay === 'wallet' && (!S.hasWallet || S.wallet < t.total) ? <View style={{paddingVertical:10}}>
       <T cmsKeys={['lbl.checkoutWalletNotFound','lbl.checkoutInsufficient']} size={14} weight="600" color={th.red}>{!S.hasWallet ? label('lbl.checkoutWalletNotFound', 'Wantiss wallet not found') : label('lbl.checkoutInsufficient', 'Insufficient wallet balance')}</T>
       <T cmsKeys={["lbl.cms.cbbfe5f88c2e","lbl.cms.181c95d39d9a","lbl.cms.b11cd484018f","lbl.cms.e0b12ec3af49"]} size={12.5} color={th.mut} style={{marginTop:4}}>{!S.hasWallet ? label("lbl.cms.cbbfe5f88c2e", "Create a Wantiss wallet or choose another payment method.") : label("lbl.cms.181c95d39d9a", "Balance: ") + money(S.wallet) + label("lbl.cms.b11cd484018f", " · Add at least ") + money(Math.max(0, t.total - S.wallet)) + label("lbl.cms.e0b12ec3af49", " to continue.")}</T>
       <Pressable onPress={() => go('payments')} style={{alignSelf:'flex-start',paddingVertical:7}}><T cmsKey={'lbl.checkoutOpenWallet'} size={13} weight="600" color={th.br}>{label('lbl.checkoutOpenWallet', 'Open Wallet')}</T></Pressable>
     </View> : null}
-    <Pressable accessibilityRole="button" onPress={() => go('help-pay-preview')} style={{paddingVertical: 13, marginTop: 8}}><T cmsKey={"lbl.cms.42b822c31c92"} size={14} weight="600" color={th.br}>{label("lbl.cms.42b822c31c92", "Help Pay / Share Bill · Preview")}</T><T cmsKey={"lbl.cms.d0b078223c9e"} size={12} color={th.mut}>{label("lbl.cms.d0b078223c9e", "Explore the flow without sending a request or charging anyone")}</T></Pressable>
-    {S.pay === 'card' ? <Card style={{marginTop: 10, padding: 12}}>
+    {GOODIES_SHARED_PAYMENTS_RELEASED?<Pressable accessibilityRole="button" onPress={() => go('help-pay')} style={{paddingVertical: 13, marginTop: 8}}><T cmsKey={"lbl.cms.42b822c31c92"} size={14} weight="600" color={th.br}>{label("lbl.cms.42b822c31c92", "Help Pay / Share Bill")}</T><T cmsKey={"lbl.cms.d0b078223c9e"} size={12} color={th.mut}>{label("lbl.cms.d0b078223c9e", "Create a verified payment request and share it with friends")}</T></Pressable>:null}
+    {paymentReady && S.pay === 'card' ? <Card style={{marginTop: 10, padding: 12}}>
       <T cmsKey={'lbl.checkoutSavedCard'} weight="600" style={{marginBottom: 10}}>{label('lbl.checkoutSavedCard', 'Choose a saved card')}</T>
       {S.cards.length ? S.cards.map((card: any) => <Pressable key={card.id} accessibilityRole="radio" accessibilityState={{checked:S.selectedCardId === card.id}} onPress={() => setCard(card.id)} style={{marginBottom:10,borderRadius:16,borderWidth:S.selectedCardId === card.id ? 2 : 1,borderColor:S.selectedCardId === card.id ? '#8FAF84' : th.line,overflow:'hidden'}}>
         <View style={{backgroundColor:'#1A2517',padding:14,minHeight:104,justifyContent:'space-between'}}>
@@ -383,14 +403,15 @@ export function Checkout() {
         <Cta cmsKeys={['lbl.checkoutAddCard',"lbl.cms.7f28264e6c5c"]} label={S.hasWallet ? label('lbl.checkoutAddCard', 'Add a card') : label("lbl.cms.7f28264e6c5c", "Create wallet")} onPress={() => go('payments')} />
       </View>}
     </Card> : null}
-    {!providerInfo.demo ? <T cmsKeys={["lbl.cms.3b2939c58c05","lbl.cms.c3f6f449738e"]} size={12} color={th.mut}>{S.pay === 'card' ? label("lbl.cms.3b2939c58c05", "Your payment is processed securely.") : label("lbl.cms.c3f6f449738e", "Wantiss Wallet payments debit your available balance.")}</T> : <T cmsKey={"lbl.shopAuto12HC9JV"} size={12} color={th.mut}>{label("lbl.shopAuto12HC9JV", "Demo only. No real payment is taken.")}</T>}
+    {!providerInfo.demo ? <T cmsKeys={['lbl.checkoutCashNotice',"lbl.cms.3b2939c58c05","lbl.cms.c3f6f449738e"]} size={12} color={th.mut}>{S.pay==='cash'?label('lbl.checkoutCashNotice','Pay in cash when you receive your order.'):S.pay === 'card' ? label("lbl.cms.3b2939c58c05", "Your payment is processed securely.") : label("lbl.cms.c3f6f449738e", "Wantiss Wallet payments debit your available balance.")}</T> : <T cmsKey={"lbl.shopAuto12HC9JV"} size={12} color={th.mut}>{label("lbl.shopAuto12HC9JV", "Demo only. No real payment is taken.")}</T>}
   </>);
   if (S.cs === 3) body = (<>
-    <Card>{!multi && st.cover ? <Image source={{uri:st.cover}} style={{width:"100%",height:100,borderRadius:12,marginBottom:10}} resizeMode="cover" /> : null}{multi ? <T cmsKey={"lbl.cms.014bc9ccf696"} weight="600">{stops.length} {label("lbl.cms.014bc9ccf696", "stores · one delivery")}</T> : <Row style={{gap:10, alignItems:"center"}}><Tile e={st.e} bg={st.bg} size={46} photo={st.thumbnail || st.logo} /><View style={{flex:1}}><T weight="600">{st.n}</T><T cmsKey={"lbl.cms.aa7b44ff793b"} size={12} color={th.mut}>{label("lbl.cms.aa7b44ff793b", "Your order from this store")}</T></View></Row>}{S.cart.lines.map((l: any, li: number) => <React.Fragment key={l.k}>{multi && (li === 0 || lineStore(l) !== lineStore(S.cart.lines[li - 1])) ? <T size={12.5} weight="600" color={th.mut} style={{marginTop: 14}}>{STB[lineStore(l)]?.n}</T> : null}<Row sp style={{marginTop: 10, alignItems: "center"}}><Row style={{flex:1, gap:9, alignItems:"center"}}><Tile e={l.e} bg="bg0" size={42} photo={l.photo} /><View style={{flex:1}}><T size={14}>{l.q}× {l.n}</T>{l.d ? <T size={12} color={th.mut}>{l.d}</T> : null}</View></Row><T size={14}>{money(l.p * l.q)}</T></Row></React.Fragment>)}</Card>
-    {S.pay === 'wallet' && !providerInfo.demo && (!S.hasWallet || S.wallet < t.total) ? <View style={{paddingVertical:10}}>
+    {!paymentReady ? <Card><T color={S.paymentOptionsStatus === 'error' ? th.red : th.mut}>{paymentStatusText}</T>{S.paymentOptionsStatus === 'error' ? <Cta cmsKey={'lbl.retry'} small ghost label={label('lbl.retry', 'Try again')} onPress={() => void refreshPaymentOptions()} /> : null}</Card> : null}
+    <Card>{!multi && st.cover ? <Image source={{uri:st.cover}} style={{width:"100%",height:100,borderRadius:12,marginBottom:10}} resizeMode="cover" /> : null}{multi ? <T cmsKey={"lbl.page.screens.Shop.c5a9016622"} weight="600">{stops.length} {label("lbl.page.screens.Shop.c5a9016622", " stores · one delivery")}</T> : <Row style={{gap:10, alignItems:"center"}}><Tile e={st.e} bg={st.bg} size={46} photo={st.thumbnail || st.logo} /><View style={{flex:1}}><T weight="600">{st.n}</T><T cmsKey={'lbl.cartStoreOrder'} size={12} color={th.mut}>{label('lbl.cartStoreOrder', "Your order from this store")}</T></View></Row>}{S.cart.lines.map((l: any, li: number) => <React.Fragment key={l.k}>{multi && (li === 0 || lineStore(l) !== lineStore(S.cart.lines[li - 1])) ? <T size={12.5} weight="600" color={th.mut} style={{marginTop: 14}}>{STB[lineStore(l)]?.n}</T> : null}<Row sp style={{marginTop: 10, alignItems: "center"}}><Row style={{flex:1, gap:9, alignItems:"center"}}><Tile e={l.e} bg="bg0" size={42} photo={l.photo} /><View style={{flex:1}}><T size={14}>{l.q}× {l.n}</T>{l.d ? <T size={12} color={th.mut}>{l.d}</T> : null}</View></Row><T size={14}>{money(l.p * l.q)}</T></Row></React.Fragment>)}</Card>
+    {paymentReady && S.pay === 'wallet' && !providerInfo.demo && (!S.hasWallet || S.wallet < t.total) ? <View style={{paddingVertical:10}}>
       <T cmsKeys={["lbl.cms.dcdea3f94cd3","lbl.cms.1b69bdd92811"]} size={14} weight="600" color={th.red}>{!S.hasWallet ? label("lbl.cms.dcdea3f94cd3", "Wantiss Wallet is not available.") : label("lbl.cms.1b69bdd92811", "Insufficient Wantiss Wallet balance.")}</T>
       <T cmsKeys={["lbl.cms.a878cc26f08f","lbl.cms.ffb62b872edd","lbl.cms.d2f0b5c9f696","lbl.cms.e1ce1d9b44e5"]} size={12.5} color={th.mut} style={{marginTop:3}}>{!S.hasWallet ? label("lbl.cms.a878cc26f08f", "Create a wallet or choose another payment method.") : label("lbl.cms.ffb62b872edd", "Your balance is ") + money(S.wallet) + label("lbl.cms.d2f0b5c9f696", ". Add ") + money(Math.max(0,t.total-S.wallet)) + label("lbl.cms.e1ce1d9b44e5", " or choose another payment method.")}</T>
-      <Pressable onPress={() => go('payments')} style={{alignSelf:'flex-start',paddingVertical:6}}><T cmsKey={"lbl.cms.bf6e025c5d90"} size={13} weight="600" color={th.br}>{label("lbl.cms.bf6e025c5d90", "Open Wallet")}</T></Pressable>
+      <Pressable onPress={() => go('payments')} style={{alignSelf:'flex-start',paddingVertical:6}}><T cmsKey={'lbl.checkoutOpenWallet'} size={13} weight="600" color={th.br}>{label('lbl.checkoutOpenWallet', "Open Wallet")}</T></Pressable>
     </View> : null}
     <Sum rows={[[pk ? label("lbl.cms.c036c1628698","Pickup") : label("lbl.cms.4f41d93f89c6","Delivery to"), pk ? st.n : a.t], [label("lbl.cms.b7e3f7d2bbc4","When"), S.sch ? fmtStoreDay(st.id,S.sch) + ', ' + fmtStoreTime(st.id,S.sch) : label("lbl.cms.2d27b416d70d","ASAP")], [label("lbl.cms.b38dad2419ef","Contact"), ct.ph], [label("lbl.cms.f2c657366cc0","Payment"), S.pay === 'card' ? label("lbl.cms.9d0a083bbac9","Card •••• ") + ((S.cards.find((card: any) => card.id === S.selectedCardId) || S.cards[0])?.l4 || '') : ({wallet: label("lbl.cms.8895dfda4351","Wallet"), moncash: label("lbl.cms.0cad80a25b4b","MonCash"), cash: label("lbl.cms.ffb25a7171b4","Cash")} as any)[S.pay]], ...(S.note ? [[label("lbl.cms.5a9d0e767b9b","Note"), S.note] as any] : [])]} />
     {hasAlcohol() ? <Card style={{borderColor: th.br}}><T cmsKey={'lbl.checkoutAlcoholConfirm'} weight="600">{label('lbl.checkoutAlcoholConfirm', 'Alcohol order. Please confirm.')}</T><T size={13} color={th.mut} style={{marginVertical: 6}}>{rgText('rg.refund', 'If the ID check fails, the alcohol returns to the store and you are refunded to your Wantiss wallet minus the delivery fee.', alcAge(S.cart.sid).age)}</T><Pressable onPress={() => setConsent(!S.alcConsent)} accessibilityRole="checkbox" accessibilityState={{checked: !!S.alcConsent}} style={{flexDirection: 'row', gap: 10, alignItems: 'center', marginTop: 4}}><View style={{width: 22, height: 22, borderRadius: 6, borderWidth: 2, borderColor: th.br, backgroundColor: S.alcConsent ? th.br : 'transparent', alignItems: 'center', justifyContent: 'center'}}>{S.alcConsent ? <Icon name="check" size={14} color="#fff" /> : null}</View><T size={13.5} style={{flex: 1}}>{rgText('rg.consent', 'I am {age} or older and will show valid government photo ID on delivery or pickup.', alcAge(S.cart.sid).age)}</T></Pressable></Card> : null}
@@ -406,7 +427,7 @@ export function Checkout() {
     </View>
   );
 }
-export const CheckoutFoot = () => {const insufficientWallet = S.cs === 3 && !providerInfo.demo && S.pay === 'wallet' && (!S.hasWallet || S.wallet < totals().total); return <Cta cmsKeys={['lbl.checkoutPlaceOrder','lbl.checkoutContinue']} label={S.cs === 3 ? label('lbl.checkoutPlaceOrder', 'Place order') + ' · ' + money(totals().total) : label('lbl.checkoutContinue', 'Continue')} disabled={(S.cs === 3 && hasAlcohol() && !S.alcConsent) || insufficientWallet} onPress={S.cs === 3 ? placeOrder : checkoutNext} />;};
+export const CheckoutFoot = () => {const insufficientWallet = S.cs === 3 && !providerInfo.demo && S.pay === 'wallet' && (!S.hasWallet || S.wallet < totals().total); return <Cta cmsKeys={['lbl.checkoutSubmitting','lbl.checkoutPlaceOrder','lbl.checkoutContinue']} label={S.busy ? label('lbl.checkoutSubmitting', 'Placing order…') : S.cs === 3 ? label('lbl.checkoutPlaceOrder', 'Place order') + ' · ' + money(totals().total) : label('lbl.checkoutContinue', 'Continue')} disabled={!!S.busy || (S.cs === 3 && hasAlcohol() && !S.alcConsent) || insufficientWallet} onPress={S.cs === 3 ? () => {void placeOrder();} : checkoutNext} />;};
 
 export function Confirm({id}: {id: string}) {
   const th = useTheme(), o = S.orders.filter((x: any) => x.id === id)[0];
@@ -429,45 +450,60 @@ function DeliveryRouteMap({orderId, origin, destination, route}: {orderId: strin
   const [courier, setCourier] = useState<any>(null);
   const [assignmentStatus, setAssignmentStatus] = useState('');
   const [locationStale, setLocationStale] = useState(false);
+  const [trackingError, setTrackingError] = useState(false);
   useEffect(() => {
     let active = true;
+    let request = 0;
+    setCourier(null); setAssignmentStatus(''); setLocationStale(false);
     const load = async () => {
-      const {data, error} = await supabase.from('goodies_delivery_assignments')
-        .select('latitude,longitude,status,location_updated_at')
-        .eq('order_id', orderId).maybeSingle();
-      if (active && !error && data) {
-        setAssignmentStatus(String(data.status || ''));
-        const fresh=!!data.location_updated_at && Date.now()-new Date(data.location_updated_at).getTime()<=120000;
-        setLocationStale(!!data.location_updated_at&&!fresh);
-        if (fresh && Number.isFinite(Number(data.latitude)) && Number.isFinite(Number(data.longitude)) && data.latitude != null && data.longitude != null) {
-          setCourier({latitude: Number(data.latitude), longitude: Number(data.longitude), updatedAt: data.location_updated_at});
-        } else setCourier(null);
+      const current = ++request;
+      try {
+        const {data, error} = await supabase.from('goodies_delivery_assignments')
+          .select('latitude,longitude,status,location_updated_at')
+          .eq('order_id', orderId).maybeSingle();
+        if (!active || current !== request) return;
+        if (error) throw error;
+        const location = courierLocation(data);
+        setAssignmentStatus(String(data?.status || ''));
+        setLocationStale(!!data?.location_updated_at && !location && ['accepted', 'picked_up'].includes(data.status));
+        setCourier(location);
+        setTrackingError(false);
+      } catch {
+        if (!active || current !== request) return;
+        setCourier(null); setTrackingError(true);
       }
     };
     void load();
+    // Recheck freshness even when no realtime event arrives (for example, if GPS stops).
+    const freshnessTimer = setInterval(() => {
+      // Expire locally even if the network request never settles while offline.
+      setCourier((previous: any) => previous && courierLocation({...previous, status: 'accepted', location_updated_at: previous.updatedAt}));
+      void load();
+    }, 30000);
     const channel = supabase.channel('goodies-courier-map-' + orderId)
       .on('postgres_changes', {event: '*', schema: 'public', table: 'goodies_delivery_assignments', filter: 'order_id=eq.' + orderId}, () => { void load(); })
       .subscribe();
-    return () => { active = false; void supabase.removeChannel(channel); };
+    return () => { active = false; clearInterval(freshnessTimer); void supabase.removeChannel(channel); };
   }, [orderId]);
-  const valid = (p: any) => p && p.latitude != null && p.longitude != null && Number.isFinite(Number(p.latitude)) && Number.isFinite(Number(p.longitude));
-  const routeCoords = Array.isArray(route?.coordinates) ? (route.type === 'MultiLineString' ? route.coordinates.flat(1) : route.coordinates).map((p:any)=>({latitude:Number(p[1]),longitude:Number(p[0])})).filter((p:any)=>Number.isFinite(p.latitude)&&Number.isFinite(p.longitude)) : [];
-  const points = [origin, destination, courier].filter(valid);
-  const center = points.length ? {latitude: points.reduce((n,p)=>n+Number(p.latitude),0)/points.length, longitude: points.reduce((n,p)=>n+Number(p.longitude),0)/points.length} : null;
+  const valid = (point: any) => !!coordinate(point);
+  const segments = routeSegments(route);
+  const region = trackingRegion([origin, destination, courier, ...segments.flat()]);
   return <Card style={{padding: 12}}>
     <T cmsKey={'lbl.orderLiveTracking'} size={15} weight="600">{label('lbl.orderLiveTracking', 'Live delivery route')}</T>
-    {center ? <MapView style={{height: 250, borderRadius: 14, marginTop: 10}} region={{...center,latitudeDelta:0.04,longitudeDelta:0.04}} showsCompass>
+    {region ? <MapView style={{height: 250, borderRadius: 14, marginTop: 10}} region={region} showsCompass>
       {valid(origin) ? <Marker coordinate={origin} title={label('lbl.orderStoreOrigin','Store')} pinColor="#2E8B57" /> : null}
       {valid(destination) ? <Marker coordinate={destination} title={label('lbl.orderDeliveryDestination','Delivery address')} pinColor="#D97706" /> : null}
       {valid(courier) ? <Marker coordinate={courier} title={label('lbl.orderCourierLocation','Courier')} description={courier.updatedAt ? label('lbl.orderCourierUpdated','Updated {time}').replace('{time}',new Date(courier.updatedAt).toLocaleTimeString()) : ''} /> : null}
-      {routeCoords.length > 1 ? <Polyline coordinates={routeCoords} strokeWidth={4} strokeColor={th.br} /> : valid(origin) && valid(destination) ? <Polyline coordinates={[origin,destination]} strokeWidth={3} strokeColor={th.br} lineDashPattern={[5,5]} /> : null}
+      {segments.map((points, index) => <Polyline key={index} coordinates={points} strokeWidth={4} strokeColor={th.br} />)}
     </MapView> : <Empty title={label('lbl.orderMapPreparing','Preparing delivery map')} text={label('lbl.orderMapPreparingHint','The map appears when the delivery address has been geocoded.')} />}
-    <T cmsKeys={['lbl.orderCourierLive',"lbl.cms.015a04ab6e9c",'lbl.orderCourierOffer',"lbl.cms.a5199d9cdd76",'lbl.orderCourierPending']} size={12} color={th.mut} style={{marginTop:8}}>{valid(courier) ? label('lbl.orderCourierLive','Courier GPS location is updating live.') : locationStale ? label("lbl.cms.015a04ab6e9c", "The courier GPS signal is temporarily stale. Waiting for a fresh location update.") : assignmentStatus === 'offered' ? label('lbl.orderCourierOffer','Waiting for the courier to accept the delivery.') : assignmentStatus === 'accepted' || assignmentStatus === 'picked_up' ? label("lbl.cms.a5199d9cdd76", "Courier accepted. Waiting for the first GPS location.") : label('lbl.orderCourierPending','Waiting for courier assignment. The map will update when a courier starts sharing GPS.')}</T>
+    {!segments.length && region ? <T cmsKey={'lbl.orderRoadRouteUnavailable'} size={12} color={th.mut} style={{marginTop:8}}>{label('lbl.orderRoadRouteUnavailable', 'Road route unavailable. The map shows known locations only.')}</T> : null}
+    <T cmsKeys={['lbl.orderCourierRefreshFailed','lbl.orderCourierLive','lbl.orderCourierStale','lbl.orderCourierOffer','lbl.orderCourierAwaitingGps','lbl.orderCourierPending']} size={12} color={th.mut} style={{marginTop:8}}>{trackingError ? label('lbl.orderCourierRefreshFailed', 'Courier tracking is temporarily unavailable. Retrying automatically.') : valid(courier) ? label('lbl.orderCourierLive','Courier GPS location is updating live.') : locationStale ? label('lbl.orderCourierStale', 'The courier GPS signal is temporarily stale. Waiting for a fresh location update.') : assignmentStatus === 'offered' ? label('lbl.orderCourierOffer','Waiting for the courier to accept the delivery.') : assignmentStatus === 'accepted' || assignmentStatus === 'picked_up' ? label('lbl.orderCourierAwaitingGps', 'Courier accepted. Waiting for the first GPS location.') : label('lbl.orderCourierPending','Waiting for courier assignment. The map will update when a courier starts sharing GPS.')}</T>
   </Card>;
 }
 
-function PickupLocationMap() {
-  return <Card style={{padding: 12}}><T cmsKey={'lbl.orderPickupLocation'} size={15} weight="600">{label('lbl.orderPickupLocation', 'Pickup location')}</T><Empty title={label('lbl.orderPickupUnavailable', 'Live location unavailable')} text={label("lbl.shopAuto1WOHU9O", "Pickup coordinates have not been provided by the store.")} /></Card>;
+function PickupLocationMap({origin}: {origin: unknown}) {
+  const point = coordinate(origin);
+  return <Card style={{padding: 12}}><T cmsKey={'lbl.orderPickupLocation'} size={15} weight="600">{label('lbl.orderPickupLocation', 'Pickup location')}</T>{point ? <MapView style={{height: 200, marginTop: 8, borderRadius: 12}} initialRegion={{...point, latitudeDelta: 0.01, longitudeDelta: 0.01}}><Marker coordinate={point} title={label('lbl.orderPickupLocation', 'Pickup location')} /></MapView> : <Empty title={label('lbl.orderPickupUnavailable', 'Live location unavailable')} text={label("lbl.shopAuto1WOHU9O", "Pickup coordinates have not been provided by the store.")} />}</Card>;
 }
 
 export function Track({id}: {id: string}) {
@@ -477,9 +513,11 @@ export function Track({id}: {id: string}) {
   const [reportText, setReportText] = useState('');
   const receiptCall = async (fn: 'goodies_customer_confirm_received' | 'goodies_customer_dispute_delivery', args: any, okMessage: string) => {
     setReceiptBusy(true);
-    const {error} = await supabase.rpc(fn, args);
-    setReceiptBusy(false);
-    if (error) {console.warn('Receipt action failed', error.message); toast(/24-hour|already|reported/i.test(error.message) ? error.message : label("lbl.cms.d87606c1f3c5", "Could not send this. Please try again.")); return;}
+    let error: any;
+    try {({error} = await supabase.rpc(fn, args));}
+    catch {error = {message: 'Request unavailable'};}
+    finally {setReceiptBusy(false);}
+    if (error) {console.warn('Receipt action failed'); toast(label("lbl.cms.d87606c1f3c5", "Could not send this. Please try again.")); return;}
     toast(okMessage); setReportOpen(false); setReportText('');
     if (fn === 'goodies_customer_confirm_received') {o.serverStatus = 'completed'; o.st = require('../store').stage(o);} else o.deliveryDispute = 'open';
     save(); emit();
@@ -501,7 +539,12 @@ export function Track({id}: {id: string}) {
       o.deliveryRoute = data.delivery_route || null;
       o.courierId = data.courier_id || null;
       o.selfDelivery = !!data.self_delivery; o.selfDriverName = data.self_driver_name || ''; o.selfDriverPhone = data.self_driver_phone || '';
-      o.proofUrl = data.delivery_proof_url || ''; o.vendorDeliveredAt = data.vendor_delivered_at || null; o.receiptDeadlineAt = data.receipt_deadline_at || null; o.deliveryDispute = data.delivery_dispute_status || null;
+      try {
+        o.proofUrl = await resolveGoodiesDeliveryProof(data.delivery_proof_url || '');
+        o.proofError = '';
+      } catch {o.proofUrl = ''; o.proofError = label('lbl.orderProofUnavailable', 'Delivery photo unavailable. Please try again later.');}
+      if (!active) return;
+      o.vendorDeliveredAt = data.vendor_delivered_at || null; o.receiptDeadlineAt = data.receipt_deadline_at || null; o.deliveryDispute = data.delivery_dispute_status || null;
       if (data.payment_method === 'card' && ['declined','expired','cancelled'].includes(String(data.status)) && ['paid','refund_pending'].includes(data.payment_status) && !o.refundRequested) {
         o.refundRequested = true;
         const refund = await supabase.functions.invoke('refund-goodies-card-order', { body: { order_id: o.backendId } });
@@ -520,7 +563,7 @@ export function Track({id}: {id: string}) {
     return () => { active = false; void supabase.removeChannel(channel); };
   }, [o?.backendId]);
   if (!o) return <View><Bar cmsKey={"lbl.shopAuto15CA8YK"} title={label("lbl.shopAuto15CA8YK", "Order")} onBack={back} /><Empty emoji="📦" title={label('lbl.orderNotFound', 'Order not found')} button={label('lbl.orderGoHome', 'Go home')} onPress={browse} /></View>;
-  const s = STB[o.sid], T_: string[] = stageLabels(!!o.pk, o.pk ? TP : TL), dn = done(o);
+  const s = STB[o.sid] || {n: o.sn || label('lbl.storeNotFound', 'Store not found'), e: '🏪', bg: 0}, T_: string[] = stageLabels(!!o.pk, o.pk ? TP : TL), dn = done(o);
   const serverStatus = String(o.serverStatus || '').toLowerCase();
   const eta = o.declined ? label('lbl.orderStoreDeclined', 'Store declined the order') : o.expired ? label('lbl.orderExpired', 'Response window expired') : o.cx ? label('lbl.orderCancelled', 'Cancelled') : dn ? (o.pk ? label('lbl.orderPickedUp', 'Picked up') : label('lbl.orderDelivered', 'Delivered')) : o.backendId ? (serverStatus === 'scheduled' && o.sch && Date.now() < o.sch ? label('lbl.orderScheduledFor', 'Scheduled for {time}').replace('{time}', fmtTime(new Date(o.sch))) : serverStatus === 'scheduled' || serverStatus === 'placed' ? label('lbl.orderWaitingStore', 'Waiting for store to accept') : serverStatus === 'accepted' ? label('lbl.orderAccepted', 'Order accepted by store') : serverStatus === 'preparing' ? label('lbl.orderPreparing', 'Store is preparing your order') : serverStatus === 'ready' ? (o.pk ? label('lbl.orderReadyPickup', 'Ready for pickup') : label('lbl.orderReadyCourier', 'Ready for courier pickup')) : serverStatus === 'courier_assigned' ? label('lbl.orderCourierAssigned', 'A courier has been assigned') : serverStatus === 'picked_up' ? label('lbl.orderCourierPickedUp', 'Your courier has picked up the order') : label('lbl.orderUpdated', 'Order update')) : o.sch && Date.now() < o.sch ? label('lbl.orderScheduledFor', 'Scheduled for {time}').replace('{time}', fmtTime(new Date(o.sch))) : label('lbl.orderUpdated', 'Order update');
   return (
@@ -534,12 +577,13 @@ export function Track({id}: {id: string}) {
             <T cmsKey={"lbl.cms.159703b671cc"} size={13} color={th.mut}>{label("lbl.cms.159703b671cc", "Delivered by the store · ")}{o.selfDriverName}{o.selfDriverPhone ? ' · ' + o.selfDriverPhone : ''}</T>
             {o.vendorDeliveredAt ? <View style={{marginTop: 10}}>
               {o.proofUrl ? <Image source={{uri: o.proofUrl}} style={{width: '100%', height: 190, borderRadius: 14, backgroundColor: th.soft}} resizeMode="cover" /> : null}
+              {o.proofError ? <T size={12} color={th.mut}>{o.proofError}</T> : null}
               {o.deliveryDispute === 'open' ? <T cmsKey={"lbl.cms.8acc0d99b9d7"} size={13.5} weight="600" style={{marginTop: 10}}>{label("lbl.cms.8acc0d99b9d7", "Your report was sent. Our team is reviewing it.")}</T> : <>
                 <T cmsKeys={["lbl.cms.86aa98d055a3","lbl.cms.227331420344"]} size={13.5} style={{marginTop: 10}}>{label("lbl.cms.86aa98d055a3", "The store says this order was delivered. Please confirm, or report a problem before ")}{o.receiptDeadlineAt ? new Date(o.receiptDeadlineAt).toLocaleString() : label("lbl.cms.227331420344", "the deadline")}.</T>
-                <View style={{marginTop: 10}}><Cta cmsKeys={["lbl.cms.4531925b5cf1","lbl.cms.b17be51367a9"]} label={receiptBusy ? label("lbl.cms.4531925b5cf1", "Please wait…") : label("lbl.cms.b17be51367a9", "I received my order")} disabled={receiptBusy} onPress={() => void receiptCall('goodies_customer_confirm_received', {p_order_id: o.backendId}, 'Thanks for confirming.')} /></View>
+                <View style={{marginTop: 10}}><Cta cmsKeys={["lbl.cms.4531925b5cf1","lbl.cms.b17be51367a9"]} label={receiptBusy ? label("lbl.cms.4531925b5cf1", "Please wait…") : label("lbl.cms.b17be51367a9", "I received my order")} disabled={receiptBusy} onPress={() => void receiptCall('goodies_customer_confirm_received', {p_order_id: o.backendId}, label("lbl.page.screens.Shop.9b6c227411", "Thanks for confirming."))} /></View>
                 {reportOpen ? <View style={{marginTop: 10}}>
                   <Input cmsPlaceholderKey={"lbl.cms.7b49bfc70d42"} value={reportText} onChange={setReportText} placeholder={label("lbl.cms.7b49bfc70d42", "What went wrong?")} />
-                  <View style={{marginTop: 10}}><Cta cmsKey={"lbl.cms.c814afa2abd9"} ghost label={label("lbl.cms.c814afa2abd9", "Send report")} disabled={receiptBusy || reportText.trim().length < 3} onPress={() => void receiptCall('goodies_customer_dispute_delivery', {p_order_id: o.backendId, p_reason: reportText}, 'Your report was sent.')} /></View>
+                  <View style={{marginTop: 10}}><Cta cmsKey={"lbl.cms.c814afa2abd9"} ghost label={label("lbl.cms.c814afa2abd9", "Send report")} disabled={receiptBusy || reportText.trim().length < 3} onPress={() => void receiptCall('goodies_customer_dispute_delivery', {p_order_id: o.backendId, p_reason: reportText}, label("lbl.page.screens.Shop.bfeb229338", "Your report was sent."))} /></View>
                 </View> : <Pressable onPress={() => setReportOpen(true)} style={{marginTop: 12, alignItems: 'center'}}><T cmsKey={"lbl.cms.1ef1997e7f65"} size={13.5} weight="600" color={th.red}>{label("lbl.cms.1ef1997e7f65", "I have a problem with this order")}</T></Pressable>}
               </>}
             </View> : <T cmsKey={"lbl.cms.74d8ca9709e9"} size={13} color={th.mut} style={{marginTop: 6}}>{label("lbl.cms.74d8ca9709e9", "Your order is on its way.")}</T>}
@@ -550,7 +594,7 @@ export function Track({id}: {id: string}) {
           </>)}
           <T cmsKey={'lbl.orderStatusHeading'} size={11.5} color={th.mut}>{label('lbl.orderStatusHeading', 'Order status is provided by the live order service.')}</T>
         </Card>
-        {o.pk && o.st >= 3 && !o.cx ? <PickupLocationMap /> : null}
+        {o.pk && o.st >= 3 && !o.cx ? <PickupLocationMap origin={{latitude: o.storeLatitude, longitude: o.storeLongitude}} /> : null}
         {!o.pk && o.st >= 4 && !dn && o.backendId ? <DeliveryRouteMap orderId={o.backendId} origin={{latitude:o.storeLatitude,longitude:o.storeLongitude}} destination={{latitude:o.deliveryLatitude,longitude:o.deliveryLongitude}} route={o.deliveryRoute} /> : null}
         {o.alc ? <Card style={{borderColor: o.alc.status === 'failed' ? th.red : th.br}}><Row><Text style={{fontSize: 26}}>🪪</Text><View style={{flex: 1}}><T cmsKeys={["lbl.cms.5a0595a94ee9","lbl.cms.b76c533d659a","lbl.cms.e6097512cd01"]} weight="600">{label("lbl.cms.5a0595a94ee9", "ID check · ")}{o.alc.age}+ ({o.alc.who === 'shop' ? label("lbl.cms.b76c533d659a", "checked by the shop") : label("lbl.cms.e6097512cd01", "checked by the courier")})</T><T cmsKeys={["lbl.cms.d78ba6e23dc0","lbl.cms.3dc4a54dd622","lbl.cms.dab075b135b8","lbl.cms.08bec5419d29","lbl.cms.6c1b35aaee08"]} size={13} color={th.mut}>{o.alc.status === 'pending' ? label("lbl.cms.d78ba6e23dc0", "Have your valid government photo ID ready. The order is completed only after it is checked.") : o.alc.status === 'passed' ? label("lbl.cms.3dc4a54dd622", "ID checked.") : (o.pay === 'cash' ? label("lbl.cms.dab075b135b8", "ID check failed. You were not charged.") : label("lbl.cms.08bec5419d29", "ID check failed. ") + money(o.refund || 0) + label("lbl.cms.6c1b35aaee08", " was refunded to your Wantiss wallet. The delivery fee is not refunded."))}</T></View></Row>{providerInfo.demo && o.alc.status === 'pending' && o.st >= (o.pk ? 3 : 5) ? <View style={{flexDirection: 'row', gap: 8, marginTop: 10}}><Cta cmsKey={"lbl.shopAuto1RR9Q6U"} small ghost label={label("lbl.shopAuto1RR9Q6U", "Demo: ID valid")} onPress={() => idResult(o.id, true)} /><Cta cmsKey={"lbl.shopAuto2L0NX5"} small ghost label={label("lbl.shopAuto2L0NX5", "Demo: ID failed")} onPress={() => idResult(o.id, false)} /></View> : null}</Card> : null}
         {dn && !o.cx && (!o.rated || (!o.pk && !o.driverRated)) ? <Card><Row sp style={{alignItems:'center'}}><View style={{flex:1}}><T cmsKey={'lbl.orderRate'} weight="600">{label('lbl.orderRate', 'Rate your order')}</T><T cmsKey={'lbl.orderFeedback'} size={12} color={th.mut}>{label('lbl.orderFeedback', 'Order and delivery feedback')}</T></View><View style={{flexDirection:'row',gap:3}}>{[1,2,3,4,5].map(k=><Pressable key={k} accessibilityRole="button" accessibilityLabel={label('lbl.a11yRateOrder', 'Rate order {n} stars').replace('{n}', String(k))} onPress={()=>{S.rt=k;require('../store').ui.sheet({kind:'review',id:o.id,initialStars:k});}}><Icon name="star" size={23} color={o.rated>=k?'#FFB400':th.line} fill /></Pressable>)}</View></Row>{o.rated ? <T cmsKey={'lbl.orderYourRating'} size={12} color={th.mut} style={{marginTop:5}}>{label('lbl.orderYourRating', 'Your rating: {n} ★').replace('{n}', String(o.rated))}</T> : null}{!o.pk ? <><View style={{height:1,backgroundColor:th.line,marginVertical:10}}/><Row sp style={{alignItems:'center'}}><View style={{flex:1}}><T cmsKey={'lbl.orderRateDriver'} weight="600">{label('lbl.orderRateDriver', 'Rate your driver')}</T><T cmsKey={'lbl.orderDeliveryExperience'} size={12} color={th.mut}>{label('lbl.orderDeliveryExperience', 'Delivery experience')}</T></View>{o.driverRated ? <T weight="600">{o.driverRated} ★</T> : <View style={{flexDirection:'row',gap:3}}>{[1,2,3,4,5].map(k=><Pressable key={k} accessibilityRole="button" accessibilityLabel={label('lbl.a11yRateDriver', 'Rate driver {n} stars').replace('{n}', String(k))} onPress={()=>{S.rt=k;require('../store').ui.sheet({kind:'driver-review',id:o.id,initialStars:k});}}><Icon name="star" size={23} color="#FFB400" fill /></Pressable>)}</View>}</Row></> : null}</Card> : null}
@@ -618,8 +662,10 @@ export function Orders() {
       <View style={{paddingHorizontal: 16}}>
         <Seg list={[['active', label('lbl.ordersActive', 'Active')], ['past', label('lbl.ordersPast', 'Past')]]} on={S.ot} onPick={setOrdersTab} />
         <View style={{height: 14}} />
+        {S.ordersLoading && !S.orders.length ? <Card><View style={{height:64,borderRadius:12,backgroundColor:th.soft}} /><T cmsKey={'lbl.ordersLoading'} color={th.mut}>{label('lbl.ordersLoading', 'Loading orders…')}</T></Card> : null}
+        {S.ordersError ? <T cmsKey={'lbl.ordersRefreshFailed'} color={th.red}>{label('lbl.ordersRefreshFailed', 'Could not refresh orders. Pull down to try again.')}</T> : null}
         {a.length ? a.map((o: any) => {
-          const s = STB[o.sid], d = new Date(o.t0);
+          const s = STB[o.sid] || {e: '🏪', bg: 0, n: o.sn || label('lbl.storeNotFound', 'Store not found')}, d = new Date(o.t0);
           return (
             <Card key={o.id}>
               <Pressable onPress={() => go('track', o.id)} style={{flexDirection: 'row', alignItems: 'center', gap: 12}}>
@@ -630,7 +676,8 @@ export function Orders() {
               <Row style={{marginTop: 12}}><Cta cmsKey={'lbl.ordersReorder'} small ghost label={label('lbl.ordersReorder', 'Reorder')} onPress={() => reorder(o.id)} /><Cta cmsKeys={['lbl.ordersDetails','lbl.ordersTrack']} small label={done(o) ? label('lbl.ordersDetails', 'Details') : label('lbl.ordersTrack', 'Track')} onPress={() => go('track', o.id)} /></Row>
             </Card>
           );
-        }) : <Empty emoji={S.ot === 'active' ? '🍽️' : '🧾'} title={S.ot === 'active' ? label('lbl.ordersNoActive', 'No active orders') : label('lbl.ordersNoPast', 'No past orders yet')} text={label('lbl.ordersEmptyText', 'Your orders will show up here.')} button={label('lbl.ordersBrowse', 'Browse stores')} onPress={() => go('explore')} />}
+        }) : S.ordersError || S.ordersLoading ? null : <Empty emoji={S.ot === 'active' ? '🍽️' : '🧾'} title={S.ot === 'active' ? label('lbl.ordersNoActive', 'No active orders') : label('lbl.ordersNoPast', 'No past orders yet')} text={label('lbl.ordersEmptyText', 'Your orders will show up here.')} button={label('lbl.ordersBrowse', 'Browse stores')} onPress={() => go('explore')} />}
+        {S.ordersHasMore ? <Cta cmsKeys={['lbl.ordersLoadingMore','lbl.loadMore']} ghost disabled={S.ordersPaging} label={S.ordersPaging ? label('lbl.ordersLoadingMore', 'Loading orders…') : label('lbl.loadMore', 'Load more')} onPress={() => void loadOlderGoodiesOrders()} /> : null}
       </View>
     </View>
   );
@@ -655,7 +702,7 @@ export function Help() {
     <View>
       <Bar cmsKey={'lbl.helpTitle'} title={label('lbl.helpTitle', 'Help center')} onBack={back} />
       <View style={{paddingHorizontal: 16}}>
-        {faqList(FAQ).map((x, k) => (
+        {faqList([]).map((x, k) => (
           <Pressable key={k} onPress={() => setOpen(open === k ? -1 : k)} style={{borderBottomWidth: 1, borderBottomColor: th.line, paddingVertical: 14, paddingHorizontal: 4}}>
             <T size={14.5} weight="600">{x[0]}</T>
             {open === k ? <T size={13.5} color={th.mut} style={{marginTop: 8, lineHeight: 20}}>{x[1]}</T> : null}

@@ -9,7 +9,6 @@ import {S, defAddr, money, emit, save, toast, ui, push, reset, STB, refreshUserA
 import {back, go, tab, togglePref} from '../actions';
 import {setTheme} from '../store';
 import {t as tr} from '../i18n';
-import {providerInfo} from '../providers';
 import {Home} from './Browse';
 import {LivePayments} from './Payments';
 import {previewBackend as supabase} from '../previewRuntime';
@@ -50,12 +49,12 @@ function Settings() {
       <Row sp style={{paddingVertical: 8, paddingHorizontal: 4}}><T cmsKey={'lbl.settingsOffers'}>{label('lbl.settingsOffers', 'Offers and deals')}</T><Switch on={!!S.np.promos} label={label('lbl.settingsOffers', 'Offers and deals')} onPress={() => togglePref('promos')} /></Row>
       <Ttl>{label('lbl.settingsAccount', 'Account')}</Ttl>
       <LRow icon="pin" title={label('lbl.settingsAddresses', 'Saved addresses')} sub={address?.t ? label('lbl.settingsAddressDefault', '{address} · Wantiss default').replace('{address}', address.t) : label('lbl.settingsAddAddressHint', 'Add a delivery address')} onPress={() => go('addresses')} />
-      <LRow icon="heart" title={label('lbl.settingsFavorites', 'Favorites')} sub={S.fav.length + S.favp.length + label("lbl.cms.5bc7d6f08522", " saved")} onPress={() => go('favs')} />
+      <LRow icon="heart" title={label('lbl.settingsFavorites', 'Favorites')} sub={label('lbl.accountSavedCount', '{count} saved').replace('{count}', String(S.fav.length + S.favp.length))} onPress={() => go('favs')} />
       <LRow icon="tag" title={label('lbl.settingsCoupons', 'Coupons and offers')} onPress={() => go('promos')} />
 
       <LRow icon="moon" title={label('lbl.settingsDarkMode', 'Dark mode')} sub={label('lbl.accountDarkModeHint', 'Goodies only. Other Wantiss features keep their theme.')} onPress={() => setTheme(d ? 'light' : 'dark')} right={<Switch on={d} label={label('lbl.settingsDarkMode', 'Dark mode')} onPress={() => setTheme(d ? 'light' : 'dark')} />} />
       <LRow icon="help" title={label('lbl.settingsHelp', 'Help center')} sub={label('lbl.accountFaqSupportHint', 'FAQs and support')} onPress={() => go('help')} />
-      {providerInfo.demo ? (<><Ttl>{label('lbl.accountDemoHeading', 'Demo')}</Ttl><LRow icon="tag" title={label('lbl.accountImportContent', 'Import Admin content')} sub={label('lbl.accountPasteAdminExport', 'Paste the export from Wantiss Admin')} onPress={() => ui.sheet({kind: 'import'})} /><LRow icon="user" title={label('lbl.accountResetDemo', 'Reset Goodies demo data')} sub={label('lbl.accountResetDemoHint', 'Clears orders, cart and checkout numbers')} onPress={() => {require('../store').resetDemo(); toast(label('lbl.accountDemoResetDone', 'Demo data reset'));}} /></>) : null}
+
     </View>
   </View>);
 }
@@ -67,7 +66,7 @@ function Profile() {
     <View style={{paddingHorizontal: 16}}>
       <Card style={{alignItems: 'center'}}><Avatar z={76} /><T size={17} weight="600" style={{marginTop: 10}}>{p.n}</T><T size={13.5} color={th.mut} align="center" style={{lineHeight: 22}}>{p.e}{'\n'}{p.ph}</T><View style={{marginTop: 8}}><Badge cmsKey={'lbl.profileShared'} label={label('lbl.profileShared', 'Shared Wantiss account')} /></View></Card>
       <LRow icon="pin" title={label('lbl.settingsAddresses', 'Saved addresses')} onPress={() => go('addresses')} />
-      <LRow icon="bag" title={label('lbl.profileOrderHistory', 'Order history')} sub={S.orders.length + label("lbl.cms.27e784aa0425", " orders")} onPress={() => tab('orders')} />
+      <LRow icon="bag" title={label('lbl.profileOrderHistory', 'Order history')} sub={(S.orders.length === 1 ? label('lbl.accountOrderCountOne', '{count} order') : label('lbl.accountOrderCountMany', '{count} orders')).replace('{count}', String(S.orders.length))} onPress={() => tab('orders')} />
       <LRow icon="heart" title={label('lbl.settingsFavorites', 'Favorites')} onPress={() => go('favs')} />
       <LRow icon="bell" title={label('lbl.accountNotificationPreferences', 'Notification preferences')} onPress={() => go('settings')} />
       <LRow icon="help" title={label('lbl.accountHelpSupport', 'Help and support')} onPress={() => go('help')} />
@@ -98,14 +97,14 @@ function Addresses() {
   };
   useEffect(() => { void refreshUserAddresses().catch((e: any) => toast(friendlyError(e, label("lbl.cms.dfee89702c16", "Could not load saved addresses.")))); }, []);
   const rows = S.addr || [];
-  const countryName = (cc: string, fallback?: string) => ({HT:'Haiti',DO:'Dominican Republic',US:'United States'} as any)[cc] || (fallback && fallback !== 'Other' ? fallback : 'Other');
+  const countryName = (cc: string, fallback?: string) => ({HT:'Haiti',DO:label("lbl.page.screens.Account.81e884cb2e", "Dominican Republic"),US:label("lbl.page.screens.Account.49dca65f36", "United States")} as any)[cc] || (fallback && fallback !== 'Other' ? fallback : label("lbl.page.screens.Account.f97e9da0e3", "Other"));
   const selectForGoodies = async (a: any) => {
     if (busy) return;
     setBusy(true);
     try {
       const {data: auth, error: authError} = await supabase.auth.getUser();
       if (authError) throw authError;
-      if (!auth.user) throw new Error('Please sign in again.');
+      if (!auth.user) throw new Error(label("lbl.page.screens.Account.2e1d18330b", "Please sign in again."));
       const {error} = await supabase.auth.updateUser({data: {goodies_default_address_id: String(a.id)}});
       if (error) throw error;
       S.as = a.id;
@@ -123,7 +122,7 @@ function Addresses() {
     try {
       const {data: auth, error: authError} = await supabase.auth.getUser();
       if (authError) throw authError;
-      if (!auth.user) throw new Error('Please sign in again.');
+      if (!auth.user) throw new Error(label("lbl.page.screens.Account.2e1d18330b", "Please sign in again."));
       const payload = {
         recipient_name: String(edit.l || 'Home').trim().slice(0, 80) || 'Home',
         phone_number: String(edit.phone || S.pf.ph || '').trim(),
@@ -227,7 +226,7 @@ function StoreChat({id}: {id: string}) {
         setUserId(user.id); userIdRef.current = user.id;
         const {data: cid, error: conversationError} = await supabase.rpc('goodies_start_store_conversation', {
           p_store_id: id,
-          p_customer_name: S.pf.n || 'Customer',
+          p_customer_name: S.pf.n || label('lbl.accountCustomerFallback', 'Customer'),
         });
         if (conversationError) throw conversationError;
         if (!cid) throw new Error(label('lbl.chatErrOpen', 'Could not open this store conversation.'));
@@ -282,7 +281,7 @@ function StoreChat({id}: {id: string}) {
 
 function Contact({p}: {p: any}) {
   const th = useTheme(), storeId = p && p.storeContact ? String(p.storeId || '') : '', store = storeId ? STB[storeId] : null;
-  const [topic, setTopic] = useState(p && p.o ? 'Order problem' : store ? 'Other' : 'Other');
+  const [topic, setTopic] = useState(p && p.o ? label("lbl.page.screens.Account.71a14bea90", "Order problem") : store ? label("lbl.page.screens.Account.f97e9da0e3", "Other") : label("lbl.page.screens.Account.f97e9da0e3", "Other"));
   const [oid, setOid] = useState(p && p.oid ? p.oid : '');
   const [msg, setMsg] = useState('');
   const [sending, setSending] = useState(false);
@@ -300,13 +299,13 @@ function Contact({p}: {p: any}) {
         if (!auth.user) throw new Error(label('lbl.contactErrSignInStore', 'Sign in to contact this store. Your message has not been sent.'));
         const {data: createdConversation, error: conversationError} = await supabase.rpc('goodies_start_store_conversation', {
           p_store_id: storeId,
-          p_customer_name: S.pf.n || 'Customer',
+          p_customer_name: S.pf.n || label('lbl.accountCustomerFallback', 'Customer'),
         });
         if (conversationError) throw conversationError;
         if (!createdConversation) throw new Error(label('lbl.contactErrNoVendor', 'We could not find the vendor account linked to this store. Your message has not been sent.'));
         conversationId = String(createdConversation);
         ticket = 'GS-' + conversationId.replace(/-/g, '').slice(0, 8).toUpperCase();
-        const ticketBody = 'Support ticket ' + ticket + ' · ' + topic + (oid ? ' · Order ' + oid : '') + '\n\n' + body;
+        const ticketBody = label("lbl.page.screens.Account.1a09f5e12f", "Support ticket ") + ticket + ' · ' + topic + (oid ? label("lbl.page.screens.Account.289cf25261", " · Order ") + oid : '') + '\n\n' + body;
         const {error: messageError} = await supabase.rpc('goodies_send_store_message', {p_conversation_id: conversationId, p_body: ticketBody});
         if (messageError) throw messageError;
       } else {
@@ -347,16 +346,16 @@ function Contact({p}: {p: any}) {
   </View>);
 }
 
-export function Account({r, p}: {r: string; p: any}): any {
+export function Account({r, p,onOpenWallet}: {r: string; p: any;onOpenWallet?:()=>void}): any {
   const th = useTheme();
   switch (r) {
     case 'settings': return <Settings />;
     case 'profile': return <Profile />;
     case 'addresses': return <Addresses />;
-    case 'payments': return <LivePayments />;
+    case 'payments': return <LivePayments onOpenWallet={onOpenWallet} />;
     case 'contact': return <Contact p={p} />;
     case 'storechat': return <StoreChat id={String(p || '')} />;
-    case 'supdone': { const result = p && typeof p === 'object' ? p : {ticket: p}; const store = result.storeId ? STB[result.storeId] : null; return <View style={{padding: 16, paddingTop: 50, alignItems: 'center'}}><Text style={{fontSize: 64}}>💬</Text><T cmsKey={'lbl.accountSupportSentTitle'} size={22} weight="600" style={{marginTop: 10}}>{label('lbl.accountSupportSentTitle', 'Message sent')}</T><T cmsKeys={['lbl.accountStoreTicketSent','lbl.accountDemoTicketSent']} color={th.mut} align="center" style={{marginVertical: 8, marginBottom: 20}}>{store ? label('lbl.accountStoreTicketSent', 'Ticket {ticket} was sent to {store}. You can return to this conversation to see the store reply.').replace('{ticket}', String(result.ticket)).replace('{store}', store.n) : label('lbl.accountDemoTicketSent', 'Ticket {ticket} (demo). Your support request is not connected to a live support inbox yet.').replace('{ticket}', String(result.ticket))}</T><View style={{alignSelf: 'stretch'}}>{store ? <><Cta cmsKey={'lbl.accountOpenStoreConversation'} label={label('lbl.accountOpenStoreConversation', 'Open store conversation')} onPress={() => go('storechat', result.storeId)} /><View style={{height: 10}} /></> : null}<Cta cmsKey={'lbl.accountBackGoodies'} ghost label={label('lbl.accountBackGoodies', 'Back to Goodies')} onPress={() => tab('home')} /></View></View>; }
+    case 'supdone': { const result = p && typeof p === 'object' ? p : {ticket: p}; const store = result.storeId ? STB[result.storeId] : null; return <View style={{padding: 16, paddingTop: 50, alignItems: 'center'}}><Text style={{fontSize: 64}}>💬</Text><T cmsKey={'lbl.accountSupportSentTitle'} size={22} weight="600" style={{marginTop: 10}}>{label('lbl.accountSupportSentTitle', 'Message sent')}</T><T cmsKeys={['lbl.accountStoreTicketSent','lbl.accountSupportTicketSent']} color={th.mut} align="center" style={{marginVertical: 8, marginBottom: 20}}>{store ? label('lbl.accountStoreTicketSent', 'Ticket {ticket} was sent to {store}. You can return to this conversation to see the store reply.').replace('{ticket}', String(result.ticket)).replace('{store}', store.n) : label('lbl.accountSupportTicketSent', 'Your support request {ticket} has been sent. Keep this reference if you contact us again.').replace('{ticket}', String(result.ticket))}</T><View style={{alignSelf: 'stretch'}}>{store ? <><Cta cmsKey={'lbl.accountOpenStoreConversation'} label={label('lbl.accountOpenStoreConversation', 'Open store conversation')} onPress={() => go('storechat', result.storeId)} /><View style={{height: 10}} /></> : null}<Cta cmsKey={'lbl.accountBackGoodies'} ghost label={label('lbl.accountBackGoodies', 'Back to Goodies')} onPress={() => tab('home')} /></View></View>; }
     case 'policies': return <View><Bar cmsKey={'lbl.profilePolicies'} title={label('lbl.profilePolicies', 'Terms and policies')} onBack={back} /><View style={{paddingHorizontal: 16}}>{Object.keys(POL).map(k => <LRow key={k} icon="help" title={label(POL_LABELS[k][0], POL[k][0])} onPress={() => go('policy', k)} />)}</View></View>;
     case 'policy': { const policy = POL[p]; const publishedText = policy ? legalDoc(policy[1]) : null; return policy ? <View><Bar cmsKey={POL_LABELS[p][0]} title={label(POL_LABELS[p][0], policy[0])} onBack={back} /><View style={{paddingHorizontal: 16}}>{publishedText ? <Card><T size={14.5} style={{lineHeight: 23}}>{publishedText}</T></Card> : <Card><T cmsKey={'lbl.legalUnavailableTitle'} weight="600">{label('lbl.legalUnavailableTitle', 'This policy is not available yet')}</T><T cmsKey={'lbl.legalUnavailableBody'} size={13} color={th.mut} style={{lineHeight: 21, marginTop: 6}}>{label('lbl.legalUnavailableBody', 'An approved, published version of this policy is not currently available. Please check back later or contact support if you need help.')}</T></Card>}</View></View> : <View><Bar cmsKey={'lbl.legalPolicyTitle'} title={label('lbl.legalPolicyTitle', 'Policy')} onBack={back} /><Empty emoji="📄" title={label('lbl.accountPageNotFound', 'Page not found')} button={label('lbl.accountBack', 'Back')} onPress={() => tab('home')} /></View>; }
     case 'ndetail': { const n = S.notifs.filter((x: any) => x.id == p)[0]; return n ? <View><Bar cmsKey={'lbl.accountNotificationTitle'} title={label('lbl.accountNotificationTitle', 'Notification')} onBack={back} /><View style={{paddingHorizontal: 16}}><Card><T size={17} weight="600">{n.t}</T><T color={th.mut} style={{marginTop: 8, lineHeight: 21}}>{n.d}</T></Card><Cta cmsKeys={['lbl.accountViewOrder','lbl.accountSeeDetails']} label={n.r === 'track' ? label('lbl.accountViewOrder', 'View order') : label('lbl.accountSeeDetails', 'See details')} onPress={() => (n.r === 'track' ? go('track', n.p) : n.r === 'promos' ? go('promos') : go('catlist', n.p || 'all'))} /></View></View> : <View><Bar cmsKey={'lbl.accountNotificationTitle'} title={label('lbl.accountNotificationTitle', 'Notification')} onBack={back} /><Empty emoji="🔔" title={label('lbl.accountNotificationNotFound', 'Notification not found')} button={label('lbl.accountBackGoodies', 'Back to Goodies')} onPress={() => tab('home')} /></View>; }

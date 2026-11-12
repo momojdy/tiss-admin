@@ -1,5 +1,5 @@
 import {Modal} from '../previewNative';
-import {label} from '../content';
+import {label} from "../content";
 import React, {useEffect, useState} from 'react';
 import {View, Pressable, KeyboardAvoidingView, Platform, Keyboard, Animated} from 'react-native';
 
@@ -47,7 +47,7 @@ type ConfirmDialogProps = {
   accessibilityLabel?: string;
 };
 
-export function ConfirmDialog({visible, onClose, children, accessibilityLabel = 'Close confirmation'}: ConfirmDialogProps) {
+export function ConfirmDialog({visible, onClose, children, accessibilityLabel = label("lbl.page.components.Overlays.d2252166e4", "Close confirmation")}: ConfirmDialogProps) {
   const [scale] = useState(() => new Animated.Value(0.96));
   useEffect(() => {
     if (visible) Animated.spring(scale, {toValue: 1, useNativeDriver: true, speed: 22, bounciness: 4}).start();

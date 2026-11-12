@@ -8,7 +8,7 @@ export interface Item {
   restriction?: 'none' | 'otc' | 'alcohol'; photo?: string | null; photos?: string[];
 }
 export interface Store {
-  id: string; businessId?: string; n: string; c: string; e: string; bg: string; r: number; rv: number; km: number; eta: string; fee: number; min: number;
+  id: string; businessId?: string; n: string; c: string; e: string; bg: string; r: number; rv: number; ratingsAvailable?: boolean; km: number; eta: string; fee: number; min: number;
   pr: string; k: string; it: Item[]; km0: number; eta0: string; open: number; h: string; nx: string; far?: boolean; live?: boolean;
   logo?: string | null; cover?: string | null; thumbnail?: string | null; acceptScheduledOrders?: boolean; scheduledOrderStartTime?: string; scheduledOrderTimezone?: string; scheduleHours?: Record<string, {open: string; close: string; closed: boolean}>; businessName?: string; businessDescription?: string; businessPhone?: string; businessEmail?: string; businessWebsite?: string; businessAddress?: string; businessCity?: string; businessCountry?: string; businessDeliveryModes?: string[]; businessLogoUrl?: string; acceptCashOnDelivery?: boolean; deliveryPricingMode?: 'fixed' | 'distance'; maxDeliveryDistanceKm?: number | null; distanceReady?: boolean; distanceAddressKey?: string; distanceError?: string; storeLatitude?: number | null; storeLongitude?: number | null;
 }
