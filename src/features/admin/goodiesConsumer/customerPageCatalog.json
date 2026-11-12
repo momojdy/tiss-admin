@@ -185,7 +185,7 @@
       "lbl.cms.9957e5f281b7",
       "lbl.cms.8e4755e555e1",
       "lbl.cms.fa36fe77f660",
-      "lbl.cms.123b3ed119bc",
+      "lbl.groupCreateFirst",
       "lbl.cms.540c5531f480",
       "lbl.cms.6e9eb3a9a0bb",
       "lbl.cms.d2905bdbca8c",
@@ -266,7 +266,7 @@
       "lbl.cms.91e196e0db97",
       "lbl.sheetDone",
       "lbl.sheetEndGroup",
-      "lbl.cms.3d7a9de0260e",
+      "lbl.groupInviteUnavailable",
       "lbl.cms.5c58c7dec596",
       "lbl.cms.e12b8e635219",
       "lbl.cms.c90943bbdf87",
@@ -2037,6 +2037,19 @@
       "lbl.sharedPay.b9378c00f9db",
       "lbl.sharedPay.02cea13ccec6",
       "lbl.sharedPay.cf8698e6a85f"
+    ]
+  },
+  {
+    "name": "Shared account addresses",
+    "collections": [],
+    "routes": [],
+    "fields": [
+      "lbl.retry",
+      "lbl.sharedAddressLoadFailed",
+      "lbl.sharedAddressSignIn",
+      "lbl.sharedAddressNumbersTitle",
+      "lbl.sharedAddressNumbersHint",
+      "lbl.sharedAddressContactFallback"
     ]
   },
   {

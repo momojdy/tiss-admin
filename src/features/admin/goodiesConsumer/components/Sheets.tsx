@@ -422,7 +422,7 @@ function GroupOrderSheet({close, showTitle = true, showDone = true, storeId = ''
   const groupCheckoutLock=useRef(false);
   const checkoutGroupOrder = async () => {
     if(groupCheckoutLock.current)return;
-    if(!group.serverBacked||!group.groupId){toast(label("lbl.cms.123b3ed119bc", "Create a server-backed group order first."));return;}
+    if(!group.serverBacked||!group.groupId){toast(label('lbl.groupCreateFirst','Create or join a group order first.'));return;}
     if(!groupMembers.some((member:any)=>member.user_id===currentUserId&&member.role==='host')){toast(label("lbl.cms.540c5531f480", "Only the group host can check out."));return;}
     if(!checkoutPreview){toast(label("lbl.cms.6e9eb3a9a0bb", "Review and validate the combined cart first."));return;}
     if(!checkoutEstimate || checkoutEstimate.group_id!==group.groupId || checkoutEstimate.order_type!==groupCheckoutType){toast(label("lbl.cms.d2905bdbca8c", "Review the current group-order total before placing the order."));return;}
@@ -637,7 +637,7 @@ function GroupOrderSheet({close, showTitle = true, showDone = true, storeId = ''
     </View> : null}
     {showDone ? <><View style={{height:12}} /><Cta cmsKey={'lbl.sheetDone'} label={label('lbl.sheetDone', 'Done')} onPress={close} /><View style={{height:8}} /></> : null}
     {group.serverBacked && group.groupId ? <Cta cmsKey={'lbl.sheetEndGroup'} ghost label={label('lbl.sheetEndGroup', 'End group order')} onPress={async () => {
-      if (!group.serverBacked || !group.groupId) {toast(label("lbl.cms.3d7a9de0260e", "This group invitation is not server-backed."));return;}
+      if (!group.serverBacked || !group.groupId) {toast(label('lbl.groupInviteUnavailable','This group invitation is unavailable. Create or join a group order again.'));return;}
       setGroupBusy(true);
       const {data,error}=await supabase.rpc('goodies_group_order_end',{p_group_id:group.groupId});
       setGroupBusy(false);

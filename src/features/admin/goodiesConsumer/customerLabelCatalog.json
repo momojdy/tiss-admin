@@ -2680,13 +2680,6 @@
     ]
   },
   {
-    "id": "lbl.cms.123b3ed119bc",
-    "text": "Create a server-backed group order first.",
-    "pages": [
-      "Group orders"
-    ]
-  },
-  {
     "id": "lbl.cms.157ca315044a",
     "text": "Discount",
     "pages": [
@@ -3097,13 +3090,6 @@
   {
     "id": "lbl.cms.3cb5b5afda95",
     "text": "Sending…",
-    "pages": [
-      "Group orders"
-    ]
-  },
-  {
-    "id": "lbl.cms.3d7a9de0260e",
-    "text": "This group invitation is not server-backed.",
     "pages": [
       "Group orders"
     ]
@@ -5369,6 +5355,20 @@
     "text": "Limited-time offers",
     "pages": [
       "Flash deals"
+    ]
+  },
+  {
+    "id": "lbl.groupCreateFirst",
+    "text": "Create or join a group order first.",
+    "pages": [
+      "Group orders"
+    ]
+  },
+  {
+    "id": "lbl.groupInviteUnavailable",
+    "text": "This group invitation is unavailable. Create or join a group order again.",
+    "pages": [
+      "Group orders"
     ]
   },
   {
@@ -8035,7 +8035,8 @@
       "Store",
       "Store reviews",
       "Cart",
-      "Checkout"
+      "Checkout",
+      "Shared account addresses"
     ]
   },
   {
@@ -8776,6 +8777,41 @@
     "text": "Sent to your Wantiss Wallet",
     "pages": [
       "Vendor settlement"
+    ]
+  },
+  {
+    "id": "lbl.sharedAddressContactFallback",
+    "text": "Checkout contact",
+    "pages": [
+      "Shared account addresses"
+    ]
+  },
+  {
+    "id": "lbl.sharedAddressLoadFailed",
+    "text": "Could not load your saved addresses and Goodies contact numbers. Please retry.",
+    "pages": [
+      "Shared account addresses"
+    ]
+  },
+  {
+    "id": "lbl.sharedAddressNumbersHint",
+    "text": "Use these numbers at Goodies checkout.",
+    "pages": [
+      "Shared account addresses"
+    ]
+  },
+  {
+    "id": "lbl.sharedAddressNumbersTitle",
+    "text": "Goodies contact numbers",
+    "pages": [
+      "Shared account addresses"
+    ]
+  },
+  {
+    "id": "lbl.sharedAddressSignIn",
+    "text": "Sign in to view your saved addresses.",
+    "pages": [
+      "Shared account addresses"
     ]
   },
   {
