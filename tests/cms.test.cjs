@@ -194,3 +194,9 @@ test('four approved languages can publish while unfinished Creole keeps its valu
   for(const locale of ['fr','es','zh-Hans']){const changed=JSON.parse(before);changed.labels[0].t[locale].s='draft';assert.ok(goodiesPublicationErrors(changed).some(e=>e.includes('('+locale+')')));}
  }
 });
+
+test('every mirrored preview dependency is declared for a clean admin install',()=>{
+ const pkg=require('../package.json'),declared=new Set([...Object.keys(pkg.dependencies||{}),...Object.keys(pkg.devDependencies||{})]);
+ function visitDirectory(dir){for(const entry of fs.readdirSync(dir,{withFileTypes:true})){const file=path.join(dir,entry.name);if(entry.isDirectory())visitDirectory(file);else if(/\.tsx?$/.test(file)){const ast=ts.createSourceFile(file,fs.readFileSync(file,'utf8'),99,true);for(const node of ast.statements)if(ts.isImportDeclaration(node)){const id=node.moduleSpecifier.text;if(!id.startsWith('.')){const name=id.startsWith('@')?id.split('/').slice(0,2).join('/'):id.split('/')[0];assert.ok(declared.has(name),'Declare '+name+' imported by '+path.relative(root,file));}}}}}
+ visitDirectory(root);
+});

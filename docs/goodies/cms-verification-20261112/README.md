@@ -17,7 +17,7 @@ The customer base includes the concurrent Android navigation-bar fix (`a5be9734`
 
 ## Verification
 
-**PASS:** 7 consumer and 18 admin node:test cases; 34 isolated browser route renders; 11 browser interactions covering identity selection, draft reload, locale, zoom, structured FAQ/support/policy rendering and blocked financial/publication transports. Synthetic fixture text is isolated in the editor. All registered fields are exercised in all five locales through edit/serialization/lookup tests; this is technical coverage, not human translation approval.
+**PASS:** 7 consumer and 19 admin node:test cases; 34 isolated browser route renders; 11 browser interactions covering identity selection, draft reload, locale, zoom, structured FAQ/support/policy rendering and blocked financial/publication transports. Synthetic fixture text is isolated in the editor. All registered fields are exercised in all five locales through edit/serialization/lookup tests; this is technical coverage, not human translation approval.
 
 **PASS:** source register check, no direct JSX text/label bypass in scanned Goodies screens/components, literal label registration, internal-state comparison guard, customer/shared lint with zero errors, admin Android/iOS Expo exports. These exports are unsigned JavaScript/Hermes bundles, not signed device builds.
 
@@ -40,7 +40,7 @@ npm run test:goodies-cms
 npm run typecheck
 ```
 
-`npm run sync:goodies-cms` in the customer repo regenerates the catalog and current-source preview in the sibling admin checkout. It never publishes. Admin tests explicitly skip the two paired-source parity checks if the customer checkout is absent; both ran and passed for this report. Each repository's existing validation workflow now runs its CMS regression checks.
+`npm run sync:goodies-cms` in the customer repo regenerates the catalog and current-source preview in the sibling admin checkout. It never publishes. Admin tests explicitly skip the two paired-source parity checks if the customer checkout is absent; both ran and passed for this report. Each repository's existing validation workflow now runs its CMS regression checks. A clean GitHub install exposed an undeclared QR-code dependency for the mirrored group-order preview; it was added along with a regression test that checks all preview imports against declared packages.
 
 Evidence JSON/logs accompany this report. Browser harness files are preserved as `.txt` outside application compilation; they used local Chromium/Playwright and esbuild with font/gradient/safe-area/icon adapters, and blocked external network requests. They verify local preview behavior rather than native visual fidelity or hosted publication.
 

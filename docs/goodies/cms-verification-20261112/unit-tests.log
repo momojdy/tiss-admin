@@ -2,32 +2,33 @@
 > wantiss-admin-rn@0.12.0 test:goodies-cms
 > node tests/cms.test.cjs
 
-✔ every registered source field is manually editable in all five locales and survives save serialization (123.15449ms)
-✔ opening an existing draft preserves all edited content, translations and protected configuration (8.51217ms)
-✔ every discovered route has a page entry and every referenced label exists in the starter (30.300704ms)
-✔ FAQ, support topics and policy edits preserve all locales through serialization (14.292024ms)
-✔ required dynamic placeholders cannot disappear on save and edits never promote human review (22.068176ms)
-✔ real structured editor controls save edits and honor read-only access (78.016446ms)
-✔ editing legacy string content preserves its English wording (0.255996ms)
-✔ the existing starter draft remains valid without requiring unrelated text changes (20.073211ms)
-✔ CMS wording never replaces internal payment configuration keys (43.814ms)
-✔ asset listing reaches beyond the legacy 500-row cap and never reports partial results as complete (31.040028ms)
-✔ critical publication requires explicit review and never promotes translation status (15.762539ms)
-✔ all registered fields complete a local edit-save-review-serialization-consumer lookup round trip (46.548493ms)
-✔ store preview preserves the actual consumer hero geometry and asset behavior (61.009693ms)
-✔ every customer route is available in the preview selector, including secure card and group pages (0.682327ms)
-✔ preview backend blocks writes, checkout, publication and provider calls without any network client (12.577642ms)
-✔ preview retains customer group/card visual attributes and records source provenance (116.551822ms)
-✔ explicit field identities resolve duplicate and dynamic wording while explicit multiple identities open a chooser (41.310015ms)
-✔ four approved languages can publish while unfinished Creole keeps its value/status and uses reviewed English (12.106733ms)
-ℹ tests 18
+✔ every registered source field is manually editable in all five locales and survives save serialization (140.555003ms)
+✔ opening an existing draft preserves all edited content, translations and protected configuration (6.635303ms)
+✔ every discovered route has a page entry and every referenced label exists in the starter (7.699396ms)
+✔ FAQ, support topics and policy edits preserve all locales through serialization (13.035773ms)
+✔ required dynamic placeholders cannot disappear on save and edits never promote human review (34.383383ms)
+✔ real structured editor controls save edits and honor read-only access (45.837073ms)
+✔ editing legacy string content preserves its English wording (0.237898ms)
+✔ the existing starter draft remains valid without requiring unrelated text changes (17.394227ms)
+✔ CMS wording never replaces internal payment configuration keys (47.106625ms)
+✔ asset listing reaches beyond the legacy 500-row cap and never reports partial results as complete (17.986989ms)
+✔ critical publication requires explicit review and never promotes translation status (14.565998ms)
+✔ all registered fields complete a local edit-save-review-serialization-consumer lookup round trip (37.747865ms)
+✔ store preview preserves the actual consumer hero geometry and asset behavior (46.182743ms)
+✔ every customer route is available in the preview selector, including secure card and group pages (1.311916ms)
+✔ preview backend blocks writes, checkout, publication and provider calls without any network client (25.021824ms)
+✔ preview retains customer group/card visual attributes and records source provenance (96.117208ms)
+✔ explicit field identities resolve duplicate and dynamic wording while explicit multiple identities open a chooser (16.597132ms)
+✔ four approved languages can publish while unfinished Creole keeps its value/status and uses reviewed English (15.732233ms)
+✔ every mirrored preview dependency is declared for a clean admin install (214.705423ms)
+ℹ tests 19
 ℹ suites 0
-ℹ pass 18
+ℹ pass 19
 ℹ fail 0
 ℹ cancelled 0
 ℹ skipped 0
 ℹ todo 0
-ℹ duration_ms 687.237374
+ℹ duration_ms 806.858227
 npm notice
 npm notice New major version of npm available! 11.9.0 -> 12.2.2
 npm notice Changelog: https://github.com/npm/cli/releases/tag/v12.2.2

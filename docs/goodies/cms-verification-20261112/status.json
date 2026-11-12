@@ -16,7 +16,7 @@
     },
     {
       "status": "PASS",
-      "check": "7 consumer and 18 admin regression tests; 34 browser route renders; 11 browser interaction checks"
+      "check": "7 consumer and 19 admin regression tests; 34 browser route renders; 11 browser interaction checks"
     },
     {
       "status": "PASS",
