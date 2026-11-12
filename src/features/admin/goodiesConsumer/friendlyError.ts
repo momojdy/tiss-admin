@@ -11,7 +11,7 @@ export function friendlyError(error: any, fallback: string): string {
   }
 
   // Translate the one known actionable server condition into app-owned copy.
-  if (/insufficient(?:\s+funds?|\s+balance)?/i.test(raw)) {
+  if (/\binsufficient\s+(?:(?:wantiss\s+)?wallet\s+)?(?:funds?|balance)\b/i.test(raw)) {
     return label('lbl.actionWalletInsufficient', "Insufficient Wantiss wallet balance. Add funds or choose another payment method.");
   }
 
