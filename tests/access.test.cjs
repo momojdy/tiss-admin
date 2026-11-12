@@ -61,3 +61,19 @@ test('admin invocation hides transport, exception and backend response details',
  }
  const module={exports:{}};vm.runInNewContext(code,{module,supabase:{functions:{invoke:async()=>({data:{ok:true}})}}});assert.equal((await module.exports('test',{})).ok,true);
 });
+
+function accessAction(name,overrides={}){
+ const file=path.resolve(__dirname,'../src/features/admin/overlays/PeopleDrawers.tsx'),ast=ts.createSourceFile(file,fs.readFileSync(file,'utf8'),99,true);let declaration,action;
+ for(const node of ast.statements)if(ts.isFunctionDeclaration(node)&&node.name?.text==='EditAccessSheet')declaration=node;
+ function visit(node){if(ts.isVariableDeclaration(node)&&node.name.getText(ast)===name)action=node.initializer;ts.forEachChild(node,visit);}visit(declaration);assert.ok(action);
+ const messages=[],module={exports:{}};
+ const context={staff:{userId:'synthetic-staff'},why:'Synthetic grant reason',until:'',permission:'Operations',level:'edit',permissionKey:()=> 'operations',setBusy(){},setError:value=>messages.push(value),setGrants(){},setWhy(){},setUntil(){},onSaved(){},refresh:async()=>{},listPermissionGrants:async()=>{throw new Error('private database permission token');},grantStaffPermissionBackend:async()=>{throw new Error('private database permission token');},revokeStaffPermissionBackend:async()=>{throw new Error('private database permission token');},...overrides,module,exports:module.exports};
+ vm.runInNewContext(ts.transpileModule('module.exports='+action.getText(ast),{compilerOptions:{module:ts.ModuleKind.CommonJS,target:ts.ScriptTarget.ES2022}}).outputText,context);
+ return{run:module.exports,messages};
+}
+test('staff access actions never render backend or transport exception details',async()=>{
+ for(const [name,expected]of [['refresh','Could not load grants.'],['save','Could not grant access.'],['revoke','Could not revoke access.']]){const h=accessAction(name);await h.run('synthetic-grant');assert.equal(h.messages.at(-1),expected);}
+});
+test('invalid expiration dates are rejected before a staff permission write',async()=>{
+ for(const until of ['not-a-date','2026-02-30','2026-13-01']){let writes=0;const h=accessAction('save',{until,grantStaffPermissionBackend:async()=>{writes++;}});await h.run();assert.equal(writes,0);assert.equal(h.messages.at(-1),'Enter a valid expiration date (YYYY-MM-DD).');}
+});

@@ -127,25 +127,31 @@ function EditAccessSheet({ name, onClose, onSaved }: { name: string; onClose: ()
   const refresh = async () => {
     if (!staff?.userId) return;
     try { setGrants(await listPermissionGrants(staff.userId)); }
-    catch (e) { setError(e instanceof Error ? e.message : 'Could not load grants.'); }
+    catch (e) { setError('Could not load grants.'); }
   };
   useEffect(() => { void refresh(); }, [staff?.userId]);
 
   const save = async () => {
     if (!staff?.userId) return setError('This staff record is not linked to Supabase Auth.');
     if (why.trim().length < 3) return setError('Enter a reason for this grant.');
+    let expiresAt:string|null=null;
+    if(until.trim()){
+      const date=new Date(until.trim()+'T23:59:59');
+      if(!/^\d{4}-\d{2}-\d{2}$/.test(until.trim())||!Number.isFinite(date.getTime())||date.getFullYear()!==Number(until.slice(0,4))||date.getMonth()+1!==Number(until.slice(5,7))||date.getDate()!==Number(until.slice(8,10)))return setError('Enter a valid expiration date (YYYY-MM-DD).');
+      expiresAt=date.toISOString();
+    }
     setBusy(true); setError('');
     try {
       await grantStaffPermissionBackend({
         userId: staff.userId, permissionKey: permissionKey(permission),
         level: level as 'view' | 'edit' | 'manage', reason: why.trim(),
-        expiresAt: until.trim() ? new Date(until + 'T23:59:59').toISOString() : null,
+        expiresAt,
       });
       setWhy(''); setUntil('');
       await refresh();
       onSaved();
     } catch (e) {
-      setError(e instanceof Error ? e.message : 'Could not grant access.');
+      setError('Could not grant access.');
     } finally { setBusy(false); }
   };
 
@@ -155,7 +161,7 @@ function EditAccessSheet({ name, onClose, onSaved }: { name: string; onClose: ()
       await revokeStaffPermissionBackend(grantId, 'Revoked by Super Admin from staff access editor');
       await refresh();
       onSaved();
-    } catch (e) { setError(e instanceof Error ? e.message : 'Could not revoke access.'); }
+    } catch (e) { setError('Could not revoke access.'); }
     finally { setBusy(false); }
   };
 
