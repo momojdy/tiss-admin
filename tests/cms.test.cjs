@@ -194,4 +194,3 @@ test('four approved languages can publish while unfinished Creole keeps its valu
   for(const locale of ['fr','es','zh-Hans']){const changed=JSON.parse(before);changed.labels[0].t[locale].s='draft';assert.ok(goodiesPublicationErrors(changed).some(e=>e.includes('('+locale+')')));}
  }
 });
-
