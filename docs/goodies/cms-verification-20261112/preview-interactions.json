@@ -1,0 +1,17 @@
+{
+  "scope": "Local isolated CMS preview; no hosted publication",
+  "status": "PASS",
+  "results": [
+    "Explicit label selection",
+    "Draft change rerenders consumer without publish",
+    "Selected editor locale renders draft translation",
+    "Category selection preserves structured content editor",
+    "Promotion selection preserves structured content editor",
+    "Mode selection preserves structured content editor",
+    "Zoom selector",
+    "Structured FAQ draft renders question and answer",
+    "Structured support topics render from draft",
+    "Structured policy draft renders without publication",
+    "No permitted order/payment/publication transports"
+  ]
+}

@@ -1,0 +1,48 @@
+Starting Metro Bundler
+
+Android Bundled 28302ms index.ts (1778 modules)
+
+› Assets (35):
+../../tiss_tiss_beta/node_modules/@expo/vector-icons/build/vendor/react-native-vector-icons/Fonts/AntDesign.ttf (130KB)
+../../tiss_tiss_beta/node_modules/@expo/vector-icons/build/vendor/react-native-vector-icons/Fonts/Entypo.ttf (66KB)
+../../tiss_tiss_beta/node_modules/@expo/vector-icons/build/vendor/react-native-vector-icons/Fonts/EvilIcons.ttf (13KB)
+../../tiss_tiss_beta/node_modules/@expo/vector-icons/build/vendor/react-native-vector-icons/Fonts/Feather.ttf (56KB)
+../../tiss_tiss_beta/node_modules/@expo/vector-icons/build/vendor/react-native-vector-icons/Fonts/FontAwesome.ttf (166KB)
+../../tiss_tiss_beta/node_modules/@expo/vector-icons/build/vendor/react-native-vector-icons/Fonts/FontAwesome5_Brands.ttf (134KB)
+../../tiss_tiss_beta/node_modules/@expo/vector-icons/build/vendor/react-native-vector-icons/Fonts/FontAwesome5_Regular.ttf (34KB)
+../../tiss_tiss_beta/node_modules/@expo/vector-icons/build/vendor/react-native-vector-icons/Fonts/FontAwesome5_Solid.ttf (203KB)
+../../tiss_tiss_beta/node_modules/@expo/vector-icons/build/vendor/react-native-vector-icons/Fonts/FontAwesome6_Brands.ttf (209KB)
+../../tiss_tiss_beta/node_modules/@expo/vector-icons/build/vendor/react-native-vector-icons/Fonts/FontAwesome6_Regular.ttf (68KB)
+../../tiss_tiss_beta/node_modules/@expo/vector-icons/build/vendor/react-native-vector-icons/Fonts/FontAwesome6_Solid.ttf (424KB)
+../../tiss_tiss_beta/node_modules/@expo/vector-icons/build/vendor/react-native-vector-icons/Fonts/Fontisto.ttf (314KB)
+../../tiss_tiss_beta/node_modules/@expo/vector-icons/build/vendor/react-native-vector-icons/Fonts/Foundation.ttf (57KB)
+../../tiss_tiss_beta/node_modules/@expo/vector-icons/build/vendor/react-native-vector-icons/Fonts/Ionicons.ttf (390KB)
+../../tiss_tiss_beta/node_modules/@expo/vector-icons/build/vendor/react-native-vector-icons/Fonts/MaterialCommunityIcons.ttf (1.3MB)
+../../tiss_tiss_beta/node_modules/@expo/vector-icons/build/vendor/react-native-vector-icons/Fonts/MaterialIcons.ttf (357KB)
+../../tiss_tiss_beta/node_modules/@expo/vector-icons/build/vendor/react-native-vector-icons/Fonts/Octicons.ttf (69KB)
+../../tiss_tiss_beta/node_modules/@expo/vector-icons/build/vendor/react-native-vector-icons/Fonts/SimpleLineIcons.ttf (54KB)
+../../tiss_tiss_beta/node_modules/@expo/vector-icons/build/vendor/react-native-vector-icons/Fonts/Zocial.ttf (26KB)
+../../tiss-admin/node_modules/@expo-google-fonts/manrope/200ExtraLight/Manrope_200ExtraLight.ttf (97KB)
+../../tiss-admin/node_modules/@expo-google-fonts/manrope/300Light/Manrope_300Light.ttf (97KB)
+../../tiss-admin/node_modules/@expo-google-fonts/manrope/400Regular/Manrope_400Regular.ttf (97KB)
+../../tiss-admin/node_modules/@expo-google-fonts/manrope/500Medium/Manrope_500Medium.ttf (97KB)
+../../tiss-admin/node_modules/@expo-google-fonts/manrope/600SemiBold/Manrope_600SemiBold.ttf (97KB)
+../../tiss-admin/node_modules/@expo-google-fonts/manrope/700Bold/Manrope_700Bold.ttf (97KB)
+../../tiss-admin/node_modules/@expo-google-fonts/manrope/800ExtraBold/Manrope_800ExtraBold.ttf (98KB)
+../../tiss-admin/node_modules/@expo-google-fonts/outfit/Outfit_100Thin.ttf (36KB)
+../../tiss-admin/node_modules/@expo-google-fonts/outfit/Outfit_200ExtraLight.ttf (36KB)
+../../tiss-admin/node_modules/@expo-google-fonts/outfit/Outfit_300Light.ttf (36KB)
+../../tiss-admin/node_modules/@expo-google-fonts/outfit/Outfit_400Regular.ttf (36KB)
+../../tiss-admin/node_modules/@expo-google-fonts/outfit/Outfit_500Medium.ttf (36KB)
+../../tiss-admin/node_modules/@expo-google-fonts/outfit/Outfit_600SemiBold.ttf (36KB)
+../../tiss-admin/node_modules/@expo-google-fonts/outfit/Outfit_700Bold.ttf (36KB)
+../../tiss-admin/node_modules/@expo-google-fonts/outfit/Outfit_800ExtraBold.ttf (36KB)
+../../tiss-admin/node_modules/@expo-google-fonts/outfit/Outfit_900Black.ttf (36KB)
+
+› android bundles (1):
+_expo/static/js/android/index-83b6b9e5f44aac9871469e0aa740b2bb.hbc (6MB)
+
+› Files (1):
+metadata.json (2.4KB)
+
+Exported: /tmp/goodies-cms-admin-android

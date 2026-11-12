@@ -1,0 +1,209 @@
+{
+  "scope": "Local React Native web draft preview; fonts/gradient/safe area/icons adapted; network blocked; no hosted publishing/native-device validation",
+  "results": [
+    {
+      "route": "wantiss",
+      "status": "PASS",
+      "actualRoute": "wantiss",
+      "text": "yment is saved. · Unreviewed translations may appear here; customers receive reviewed translations or English.\nEnglish\nFrançais\nKreyòl ayisyen\nEspañol\n简体中文\n75%\n100%\n125%\ndefault fixture\nloading fixture\nerror fixture\nhost fixture\nguest fixture\nsaving fixture\nsuccess fixture\nWantiss entry\nHome\nCategories\nOrder history\nCart\nGroup orders\nExplore\nSearch\nCategory / store results\nStore\nStore reviews\nProduct\nCheckout\nHelp Pay walkthrough\nAdd card\nCard verification\nOrder confirmation\nOrder tracking\nNotifications\nPromotions\nFlash deals\nFavorites\nHelp / FAQs\nSettings\nProfile\nAddresses\nPayment methods\nContact support\nStore conversation\nSupport confirmation\nPolicies\nPolicy document\nNotification detail\nBuild Your Own ▾\nWantiss\nYour everyday super-app (demo entry screen)\nGoodies\nFood, groceries, drinks and everyday essentials\n🛍️\nThis is a stand-in for the Wantiss home. Other services will appear here."
+    },
+    {
+      "route": "home",
+      "status": "PASS",
+      "actualRoute": "home",
+      "text": "confirmation\nPolicies\nPolicy document\nNotification detail\nBuild Your Own ▾\nDeliver to\nChoose your location\nCraving something? Search here\nFood\ndelivery\nHot and fresh to you\n🍛\nGroceries\n🛒\nDrugstore\n💊\n🍽️\nRestaurant\n🥭\nFresh produce\n🥤\nBeverages\n🥐\nBakery & desserts\n🥩\nMeat & seafood\n🛒\nGroceries\n🇭🇹\nHaitian products\n🧴\nPersonal care\n💊\nDrugstore\nEarn double points this weekend\nPay with Wallet on any order.\nStart earning\n🎁\n20% off fresh produce\nStraight from local farms and markets.\nShop now\n🥬\nCoupons and offers\nCodes you can use at checkout\n⚡ Flash deals\nSee all\nPopular vendors\nSee all\n🛍️\nPreview store\n· 0.0 km\n0.0\n20–30 min\n🥭 Fresh produce\nSee all\n🇭🇹 Haitian specialties\nSee all\nRestaurants near you\nSee all\nAll\nOffers\nFree delivery\nRating 4.5+\nUnder 30 min\nOpen now\nNearest\n🛍️\n20–30 min\nPreview store\n0.0 \n(0)\n · 0.0 km\nFree delivery · Min. order $0.00\nHome\nCategories\nOrders\nCart"
+    },
+    {
+      "route": "cats",
+      "status": "PASS",
+      "actualRoute": "cats",
+      "text": "· Unreviewed translations may appear here; customers receive reviewed translations or English.\nEnglish\nFrançais\nKreyòl ayisyen\nEspañol\n简体中文\n75%\n100%\n125%\ndefault fixture\nloading fixture\nerror fixture\nhost fixture\nguest fixture\nsaving fixture\nsuccess fixture\nWantiss entry\nHome\nCategories\nOrder history\nCart\nGroup orders\nExplore\nSearch\nCategory / store results\nStore\nStore reviews\nProduct\nCheckout\nHelp Pay walkthrough\nAdd card\nCard verification\nOrder confirmation\nOrder tracking\nNotifications\nPromotions\nFlash deals\nFavorites\nHelp / FAQs\nSettings\nProfile\nAddresses\nPayment methods\nContact support\nStore conversation\nSupport confirmation\nPolicies\nPolicy document\nNotification detail\nBuild Your Own ▾\nCategories\n🍽️\nRestaurant\n🥭\nFresh produce\n🥤\nBeverages\n🥐\nBakery & desserts\n🥩\nMeat & seafood\n🛒\nGroceries\n🇭🇹\nHaitian products\n🧴\nPersonal care\n💊\nDrugstore\n🏪\nAll stores\nHome\nCategories\nOrders\nCart"
+    },
+    {
+      "route": "orders",
+      "status": "PASS",
+      "actualRoute": "orders",
+      "text": "data only · Fixtures apply to group/card pages; no order, card or payment is saved. · Unreviewed translations may appear here; customers receive reviewed translations or English.\nEnglish\nFrançais\nKreyòl ayisyen\nEspañol\n简体中文\n75%\n100%\n125%\ndefault fixture\nloading fixture\nerror fixture\nhost fixture\nguest fixture\nsaving fixture\nsuccess fixture\nWantiss entry\nHome\nCategories\nOrder history\nCart\nGroup orders\nExplore\nSearch\nCategory / store results\nStore\nStore reviews\nProduct\nCheckout\nHelp Pay walkthrough\nAdd card\nCard verification\nOrder confirmation\nOrder tracking\nNotifications\nPromotions\nFlash deals\nFavorites\nHelp / FAQs\nSettings\nProfile\nAddresses\nPayment methods\nContact support\nStore conversation\nSupport confirmation\nPolicies\nPolicy document\nNotification detail\nBuild Your Own ▾\nYour orders\nActive\nPast\n🍽️\nNo active orders\nYour orders will show up here.\nBrowse stores\nHome\nCategories\nOrders\nCart"
+    },
+    {
+      "route": "cart",
+      "status": "PASS",
+      "actualRoute": "cart",
+      "text": "; no order, card or payment is saved. · Unreviewed translations may appear here; customers receive reviewed translations or English.\nEnglish\nFrançais\nKreyòl ayisyen\nEspañol\n简体中文\n75%\n100%\n125%\ndefault fixture\nloading fixture\nerror fixture\nhost fixture\nguest fixture\nsaving fixture\nsuccess fixture\nWantiss entry\nHome\nCategories\nOrder history\nCart\nGroup orders\nExplore\nSearch\nCategory / store results\nStore\nStore reviews\nProduct\nCheckout\nHelp Pay walkthrough\nAdd card\nCard verification\nOrder confirmation\nOrder tracking\nNotifications\nPromotions\nFlash deals\nFavorites\nHelp / FAQs\nSettings\nProfile\nAddresses\nPayment methods\nContact support\nStore conversation\nSupport confirmation\nPolicies\nPolicy document\nNotification detail\nBuild Your Own ▾\nYour cart\nYour cart is empty\nExplore nearby stores, check what's open, and discover products around your chosen address.\nStart browsing\nHome\nCategories\nOrders\nCart"
+    },
+    {
+      "route": "grouporder",
+      "status": "PASS",
+      "actualRoute": "grouporder",
+      "text": "customers receive reviewed translations or English.\nEnglish\nFrançais\nKreyòl ayisyen\nEspañol\n简体中文\n75%\n100%\n125%\ndefault fixture\nloading fixture\nerror fixture\nhost fixture\nguest fixture\nsaving fixture\nsuccess fixture\nWantiss entry\nHome\nCategories\nOrder history\nCart\nGroup orders\nExplore\nSearch\nCategory / store results\nStore\nStore reviews\nProduct\nCheckout\nHelp Pay walkthrough\nAdd card\nCard verification\nOrder confirmation\nOrder tracking\nNotifications\nPromotions\nFlash deals\nFavorites\nHelp / FAQs\nSettings\nProfile\nAddresses\nPayment methods\nContact support\nStore conversation\nSupport confirmation\nPolicies\nPolicy document\nNotification detail\nBuild Your Own ▾\nGroup order\nJoin a group order\nEnter the invite code, or scan the QR code your friend shared.\nJoin group order\nor start your own\nStart a group order\nYou pay for the whole order. Friends add their items from their own phones.\nCreate group invite"
+    },
+    {
+      "route": "explore",
+      "status": "PASS",
+      "actualRoute": "explore",
+      "text": "ntiss entry\nHome\nCategories\nOrder history\nCart\nGroup orders\nExplore\nSearch\nCategory / store results\nStore\nStore reviews\nProduct\nCheckout\nHelp Pay walkthrough\nAdd card\nCard verification\nOrder confirmation\nOrder tracking\nNotifications\nPromotions\nFlash deals\nFavorites\nHelp / FAQs\nSettings\nProfile\nAddresses\nPayment methods\nContact support\nStore conversation\nSupport confirmation\nPolicies\nPolicy document\nNotification detail\nBuild Your Own ▾\nExplore nearby\nBROWSING NEAR\nChoose your location\nChange address\nDiscover your options\nClosest\nOpen now\nAll available\nCategories\nAll categories\n🍽️ Restaurant\n🥭 Fresh produce\n🥤 Beverages\n🥐 Bakery & desserts\n🥩 Meat & seafood\n🛒 Groceries\n🇭🇹 Haitian products\n🧴 Personal care\n💊 Drugstore\nAll available stores\n1 stores\n🛍️\n20–30 min\nPreview store\n0.0 \n(0)\n · 0.0 km\nFree delivery · Min. order $0.00\nProducts to explore\n🥭\nPreview product\nPreview store\n$5.99"
+    },
+    {
+      "route": "search",
+      "status": "PASS",
+      "actualRoute": "search",
+      "text": "ol\n简体中文\n75%\n100%\n125%\ndefault fixture\nloading fixture\nerror fixture\nhost fixture\nguest fixture\nsaving fixture\nsuccess fixture\nWantiss entry\nHome\nCategories\nOrder history\nCart\nGroup orders\nExplore\nSearch\nCategory / store results\nStore\nStore reviews\nProduct\nCheckout\nHelp Pay walkthrough\nAdd card\nCard verification\nOrder confirmation\nOrder tracking\nNotifications\nPromotions\nFlash deals\nFavorites\nHelp / FAQs\nSettings\nProfile\nAddresses\nPayment methods\nContact support\nStore conversation\nSupport confirmation\nPolicies\nPolicy document\nNotification detail\nBuild Your Own ▾\nOpen now\nRating 4.5+\nUnder 30 min\nFree delivery\nOn sale\nUnder $5\nUnder $10\nRelevance\nPopularity\nPrice: low to high\nPrice: high to low\nHighest rating\nFastest delivery\nTrending right now\n🍽️ Restaurant\n🥭 Fresh produce\n🥤 Beverages\n🥐 Bakery & desserts\n🥩 Meat & seafood\n🛒 Groceries\n🇭🇹 Haitian products\n🧴 Personal care\n💊 Drugstore"
+    },
+    {
+      "route": "catlist",
+      "status": "PASS",
+      "actualRoute": "catlist",
+      "text": "ed translations or English.\nEnglish\nFrançais\nKreyòl ayisyen\nEspañol\n简体中文\n75%\n100%\n125%\ndefault fixture\nloading fixture\nerror fixture\nhost fixture\nguest fixture\nsaving fixture\nsuccess fixture\nWantiss entry\nHome\nCategories\nOrder history\nCart\nGroup orders\nExplore\nSearch\nCategory / store results\nStore\nStore reviews\nProduct\nCheckout\nHelp Pay walkthrough\nAdd card\nCard verification\nOrder confirmation\nOrder tracking\nNotifications\nPromotions\nFlash deals\nFavorites\nHelp / FAQs\nSettings\nProfile\nAddresses\nPayment methods\nContact support\nStore conversation\nSupport confirmation\nPolicies\nPolicy document\nNotification detail\nBuild Your Own ▾\nAll stores\nEverything near you\n1 store · 1 products\n🏪\nAll\nOffers\nFree delivery\nRating 4.5+\nUnder 30 min\nOpen now\nNearest\nAll stores\n🛍️\n20–30 min\nPreview store\n0.0 \n(0)\n · 0.0 km\nFree delivery · Min. order $0.00\nPopular products\n🥭\nPreview product\nPreview store\n$5.99"
+    },
+    {
+      "route": "store",
+      "status": "PASS",
+      "actualRoute": "store",
+      "text": "ixture\nguest fixture\nsaving fixture\nsuccess fixture\nWantiss entry\nHome\nCategories\nOrder history\nCart\nGroup orders\nExplore\nSearch\nCategory / store results\nStore\nStore reviews\nProduct\nCheckout\nHelp Pay walkthrough\nAdd card\nCard verification\nOrder confirmation\nOrder tracking\nNotifications\nPromotions\nFlash deals\nFavorites\nHelp / FAQs\nSettings\nProfile\nAddresses\nPayment methods\nContact support\nStore conversation\nSupport confirmation\nPolicies\nPolicy document\nNotification detail\nBuild Your Own ▾\n🛍️\n◌\nPreview store\n · 0.0 km away\n★ 0.0 (0)\n20–30 min\nFree delivery\nMin. $0.00\nDelivery + pickup\nStore info\nMessage store\nAll\nPopular\nDeals\n🥭\nPreview product\nPreview store\n$5.99\nReviews\nMarie J.\n5\nFresh and fast, will order again.\n2 days ago · sample review\nJean R.\n4\nGood portions, delivery a bit slow.\n1 week ago · sample review\nSophia L.\n5\nFriendly service and great prices.\n2 weeks ago · sample review"
+    },
+    {
+      "route": "reviews",
+      "status": "PASS",
+      "actualRoute": "reviews",
+      "text": "ish.\nEnglish\nFrançais\nKreyòl ayisyen\nEspañol\n简体中文\n75%\n100%\n125%\ndefault fixture\nloading fixture\nerror fixture\nhost fixture\nguest fixture\nsaving fixture\nsuccess fixture\nWantiss entry\nHome\nCategories\nOrder history\nCart\nGroup orders\nExplore\nSearch\nCategory / store results\nStore\nStore reviews\nProduct\nCheckout\nHelp Pay walkthrough\nAdd card\nCard verification\nOrder confirmation\nOrder tracking\nNotifications\nPromotions\nFlash deals\nFavorites\nHelp / FAQs\nSettings\nProfile\nAddresses\nPayment methods\nContact support\nStore conversation\nSupport confirmation\nPolicies\nPolicy document\nNotification detail\nBuild Your Own ▾\nReviews\n🛍️\nPreview store\nCustomer reviews\nNo reviews yet\nMarie J.\n5\nFresh and fast, will order again.\n2 days ago · sample review\nJean R.\n4\nGood portions, delivery a bit slow.\n1 week ago · sample review\nSophia L.\n5\nFriendly service and great prices.\n2 weeks ago · sample review\nBack to store"
+    },
+    {
+      "route": "product",
+      "status": "PASS",
+      "actualRoute": "product",
+      "text": "d pages; no order, card or payment is saved. · Unreviewed translations may appear here; customers receive reviewed translations or English.\nEnglish\nFrançais\nKreyòl ayisyen\nEspañol\n简体中文\n75%\n100%\n125%\ndefault fixture\nloading fixture\nerror fixture\nhost fixture\nguest fixture\nsaving fixture\nsuccess fixture\nWantiss entry\nHome\nCategories\nOrder history\nCart\nGroup orders\nExplore\nSearch\nCategory / store results\nStore\nStore reviews\nProduct\nCheckout\nHelp Pay walkthrough\nAdd card\nCard verification\nOrder confirmation\nOrder tracking\nNotifications\nPromotions\nFlash deals\nFavorites\nHelp / FAQs\nSettings\nProfile\nAddresses\nPayment methods\nContact support\nStore conversation\nSupport confirmation\nPolicies\nPolicy document\nNotification detail\nBuild Your Own ▾\nPreview store\nPreview product\nPreview store · New store\n$5.99\nIsolated preview item\nOnly 1 left\nSpecial instructions\nYou may also like\n1\nAdd to cart · $5.99"
+    },
+    {
+      "route": "checkout",
+      "status": "PASS",
+      "actualRoute": "checkout",
+      "text": "r payment is saved. · Unreviewed translations may appear here; customers receive reviewed translations or English.\nEnglish\nFrançais\nKreyòl ayisyen\nEspañol\n简体中文\n75%\n100%\n125%\ndefault fixture\nloading fixture\nerror fixture\nhost fixture\nguest fixture\nsaving fixture\nsuccess fixture\nWantiss entry\nHome\nCategories\nOrder history\nCart\nGroup orders\nExplore\nSearch\nCategory / store results\nStore\nStore reviews\nProduct\nCheckout\nHelp Pay walkthrough\nAdd card\nCard verification\nOrder confirmation\nOrder tracking\nNotifications\nPromotions\nFlash deals\nFavorites\nHelp / FAQs\nSettings\nProfile\nAddresses\nPayment methods\nContact support\nStore conversation\nSupport confirmation\nPolicies\nPolicy document\nNotification detail\nBuild Your Own ▾\nCheckout\nDelivery\nTime\nPayment method\nReview\nDelivery\nPickup\nDeliver to\nDemo delivery address\n123 Demo Street\nChange\nContact number\n2025550100\nDefault Wantiss number\nChange\nContinue"
+    },
+    {
+      "route": "help-pay-preview",
+      "status": "PASS",
+      "actualRoute": "help-pay-preview",
+      "text": "ws\nProduct\nCheckout\nHelp Pay walkthrough\nAdd card\nCard verification\nOrder confirmation\nOrder tracking\nNotifications\nPromotions\nFlash deals\nFavorites\nHelp / FAQs\nSettings\nProfile\nAddresses\nPayment methods\nContact support\nStore conversation\nSupport confirmation\nPolicies\nPolicy document\nNotification detail\nBuild Your Own ▾\nHelp Pay · Walkthrough\nInteractive preview · Nothing is charged, shared or ordered.\nShare bill · 60/40\nHelp me fully pay\nStep 1 of 5\nGoodies · 30:00 left\nChoose how to split\nGoodies bill\n$0.00\nCustomer's upfront share\n$0.00\nFriends can cover\n$0.00\nStill needed\n$0.00\nHow the 60/40 split works\nYou pay 60% first. Friends can contribute any percentage of the remaining 40%, until it is fully covered. One friend can pay the whole 40%.\nIn the real checkout, the request is only shared after the required upfront payment is verified.\nContinue to friend selection\nRestart walkthrough"
+    },
+    {
+      "route": "addcard",
+      "status": "PASS",
+      "actualRoute": "addcard",
+      "text": "ed. · Unreviewed translations may appear here; customers receive reviewed translations or English.\nEnglish\nFrançais\nKreyòl ayisyen\nEspañol\n简体中文\n75%\n100%\n125%\ndefault fixture\nloading fixture\nerror fixture\nhost fixture\nguest fixture\nsaving fixture\nsuccess fixture\nWantiss entry\nHome\nCategories\nOrder history\nCart\nGroup orders\nExplore\nSearch\nCategory / store results\nStore\nStore reviews\nProduct\nCheckout\nHelp Pay walkthrough\nAdd card\nCard verification\nOrder confirmation\nOrder tracking\nNotifications\nPromotions\nFlash deals\nFavorites\nHelp / FAQs\nSettings\nProfile\nAddresses\nPayment methods\nContact support\nStore conversation\nSupport confirmation\nPolicies\nPolicy document\nNotification detail\nBuild Your Own ▾\nAdd New Card\nCard holder\nFULL NAME\nExpires\nMM/YY\nAuthorized signature\nCVV\nCard Number\nExpiry Date\nCVV\nName on Card\nWe accept\nVISA\nAMEX\nDiscover\nSave Card\nSaving Card…\nThis only takes a moment.\nDone"
+    },
+    {
+      "route": "cardauth",
+      "status": "PASS",
+      "actualRoute": "cardauth",
+      "text": "eviewed translations or English.\nEnglish\nFrançais\nKreyòl ayisyen\nEspañol\n简体中文\n75%\n100%\n125%\ndefault fixture\nloading fixture\nerror fixture\nhost fixture\nguest fixture\nsaving fixture\nsuccess fixture\nWantiss entry\nHome\nCategories\nOrder history\nCart\nGroup orders\nExplore\nSearch\nCategory / store results\nStore\nStore reviews\nProduct\nCheckout\nHelp Pay walkthrough\nAdd card\nCard verification\nOrder confirmation\nOrder tracking\nNotifications\nPromotions\nFlash deals\nFavorites\nHelp / FAQs\nSettings\nProfile\nAddresses\nPayment methods\nContact support\nStore conversation\nSupport confirmation\nPolicies\nPolicy document\nNotification detail\nBuild Your Own ▾\nVerify card\nYour bank may ask you to approve this payment\nComplete the secure verification from your bank. Your card is only captured after verification succeeds.\nSecurely verifying your card…\nBank verification is disabled in this CMS preview.\nCancel verification"
+    },
+    {
+      "route": "confirm",
+      "status": "PASS",
+      "actualRoute": "confirm",
+      "text": "pply to group/card pages; no order, card or payment is saved. · Unreviewed translations may appear here; customers receive reviewed translations or English.\nEnglish\nFrançais\nKreyòl ayisyen\nEspañol\n简体中文\n75%\n100%\n125%\ndefault fixture\nloading fixture\nerror fixture\nhost fixture\nguest fixture\nsaving fixture\nsuccess fixture\nWantiss entry\nHome\nCategories\nOrder history\nCart\nGroup orders\nExplore\nSearch\nCategory / store results\nStore\nStore reviews\nProduct\nCheckout\nHelp Pay walkthrough\nAdd card\nCard verification\nOrder confirmation\nOrder tracking\nNotifications\nPromotions\nFlash deals\nFavorites\nHelp / FAQs\nSettings\nProfile\nAddresses\nPayment methods\nContact support\nStore conversation\nSupport confirmation\nPolicies\nPolicy document\nNotification detail\nBuild Your Own ▾\n✅\nOrder placed\nOrder __admin_goodies_sample_order__ with Sample Goodies store.\n1× Sample item\n$5.00\nTotal\n$5.00\nTrack order\nBack to Goodies"
+    },
+    {
+      "route": "track",
+      "status": "PASS",
+      "actualRoute": "track",
+      "text": "xture\nsuccess fixture\nWantiss entry\nHome\nCategories\nOrder history\nCart\nGroup orders\nExplore\nSearch\nCategory / store results\nStore\nStore reviews\nProduct\nCheckout\nHelp Pay walkthrough\nAdd card\nCard verification\nOrder confirmation\nOrder tracking\nNotifications\nPromotions\nFlash deals\nFavorites\nHelp / FAQs\nSettings\nProfile\nAddresses\nPayment methods\nContact support\nStore conversation\nSupport confirmation\nPolicies\nPolicy document\nNotification detail\nBuild Your Own ▾\nOrder __admin_goodies_sample_order__\n🛍️\nSample Goodies store\nTo Sample delivery address\nOrder accepted by store\nOrder placed\nVendor confirmed\nPreparing order\nReady for courier pickup\nCourier assigned\nOn the way\nDelivered\nOrder status is provided by the live order service.\nItems\n🥭\n1× Sample item\n$5.00\nFees\n$0.00\nContact\n2025550100\nTotal · Preview only\n$5.00\nCancel order\nOrder again\nMessage store\nGet help with this order\nGo to Orders"
+    },
+    {
+      "route": "notifs",
+      "status": "PASS",
+      "actualRoute": "notifs",
+      "text": "tching field.\nDraft preview · Sample data only · Fixtures apply to group/card pages; no order, card or payment is saved. · Unreviewed translations may appear here; customers receive reviewed translations or English.\nEnglish\nFrançais\nKreyòl ayisyen\nEspañol\n简体中文\n75%\n100%\n125%\ndefault fixture\nloading fixture\nerror fixture\nhost fixture\nguest fixture\nsaving fixture\nsuccess fixture\nWantiss entry\nHome\nCategories\nOrder history\nCart\nGroup orders\nExplore\nSearch\nCategory / store results\nStore\nStore reviews\nProduct\nCheckout\nHelp Pay walkthrough\nAdd card\nCard verification\nOrder confirmation\nOrder tracking\nNotifications\nPromotions\nFlash deals\nFavorites\nHelp / FAQs\nSettings\nProfile\nAddresses\nPayment methods\nContact support\nStore conversation\nSupport confirmation\nPolicies\nPolicy document\nNotification detail\nBuild Your Own ▾\nNotifications\n🔔\nYou’re all caught up\nOrder updates and offers will appear here."
+    },
+    {
+      "route": "promos",
+      "status": "PASS",
+      "actualRoute": "promos",
+      "text": "itable text in the phone to select its matching field.\nDraft preview · Sample data only · Fixtures apply to group/card pages; no order, card or payment is saved. · Unreviewed translations may appear here; customers receive reviewed translations or English.\nEnglish\nFrançais\nKreyòl ayisyen\nEspañol\n简体中文\n75%\n100%\n125%\ndefault fixture\nloading fixture\nerror fixture\nhost fixture\nguest fixture\nsaving fixture\nsuccess fixture\nWantiss entry\nHome\nCategories\nOrder history\nCart\nGroup orders\nExplore\nSearch\nCategory / store results\nStore\nStore reviews\nProduct\nCheckout\nHelp Pay walkthrough\nAdd card\nCard verification\nOrder confirmation\nOrder tracking\nNotifications\nPromotions\nFlash deals\nFavorites\nHelp / FAQs\nSettings\nProfile\nAddresses\nPayment methods\nContact support\nStore conversation\nSupport confirmation\nPolicies\nPolicy document\nNotification detail\nBuild Your Own ▾\nCoupons and offers\nNo coupons or offers"
+    },
+    {
+      "route": "flashdeals",
+      "status": "PASS",
+      "actualRoute": "flashdeals",
+      "text": "ft preview · Sample data only · Fixtures apply to group/card pages; no order, card or payment is saved. · Unreviewed translations may appear here; customers receive reviewed translations or English.\nEnglish\nFrançais\nKreyòl ayisyen\nEspañol\n简体中文\n75%\n100%\n125%\ndefault fixture\nloading fixture\nerror fixture\nhost fixture\nguest fixture\nsaving fixture\nsuccess fixture\nWantiss entry\nHome\nCategories\nOrder history\nCart\nGroup orders\nExplore\nSearch\nCategory / store results\nStore\nStore reviews\nProduct\nCheckout\nHelp Pay walkthrough\nAdd card\nCard verification\nOrder confirmation\nOrder tracking\nNotifications\nPromotions\nFlash deals\nFavorites\nHelp / FAQs\nSettings\nProfile\nAddresses\nPayment methods\nContact support\nStore conversation\nSupport confirmation\nPolicies\nPolicy document\nNotification detail\nBuild Your Own ▾\nFlash deals\nLimited-time offers\nNo flash deals available\nCheck back soon for limited-time offers."
+    },
+    {
+      "route": "favs",
+      "status": "PASS",
+      "actualRoute": "favs",
+      "text": "ample data only · Fixtures apply to group/card pages; no order, card or payment is saved. · Unreviewed translations may appear here; customers receive reviewed translations or English.\nEnglish\nFrançais\nKreyòl ayisyen\nEspañol\n简体中文\n75%\n100%\n125%\ndefault fixture\nloading fixture\nerror fixture\nhost fixture\nguest fixture\nsaving fixture\nsuccess fixture\nWantiss entry\nHome\nCategories\nOrder history\nCart\nGroup orders\nExplore\nSearch\nCategory / store results\nStore\nStore reviews\nProduct\nCheckout\nHelp Pay walkthrough\nAdd card\nCard verification\nOrder confirmation\nOrder tracking\nNotifications\nPromotions\nFlash deals\nFavorites\nHelp / FAQs\nSettings\nProfile\nAddresses\nPayment methods\nContact support\nStore conversation\nSupport confirmation\nPolicies\nPolicy document\nNotification detail\nBuild Your Own ▾\nYour favorites\nStores (0)\nItems (0)\nNothing saved yet\nSave stores and products to find them here.\nBrowse stores"
+    },
+    {
+      "route": "byo",
+      "status": "PASS",
+      "actualRoute": "byo",
+      "text": "ication\nOrder confirmation\nOrder tracking\nNotifications\nPromotions\nFlash deals\nFavorites\nHelp / FAQs\nSettings\nProfile\nAddresses\nPayment methods\nContact support\nStore conversation\nSupport confirmation\nPolicies\nPolicy document\nNotification detail\nBuild Your Own ▾\nBuild Your Pizza\nBuild Your Own preview\nSize\nChoose 1 · Required\nSmall\nBase price\nMedium\n+$3.00\nLarge\n+$6.00\nCrust\nChoose 1 · Required\nClassic\nFree\nThin\nFree\nStuffed crust\n+$2.50\nSauce\nChoose 1 · Required\nTomato\nFree\nBBQ\n+$0.50\nWhite garlic\n+$0.50\nCheese  0/3\nChoose 1 to 3 · Required\nMozzarella\nFree\nCheddar\nFree\nParmesan\nFree\nMeat  0/5\nUp to 5 · Optional\nPepperoni\nFree\nSausage\nFree\nBacon\nFree\nVegetables  0/8\nUp to 8 · Optional\nMushroom\nFree\nOlives\nFree\nPeppers\nFree\nRed onion\nFree\nTomato\nFree\nBasil\nFree\nAnything else we should know?\n0/200\nYour order\nBuild Your Pizza — Small\n$8.00\nItem price\n$8.00\nChoose crust\n1\nAdd to Order · $8.00"
+    },
+    {
+      "route": "help",
+      "status": "PASS",
+      "actualRoute": "help",
+      "text": "ect its matching field.\nDraft preview · Sample data only · Fixtures apply to group/card pages; no order, card or payment is saved. · Unreviewed translations may appear here; customers receive reviewed translations or English.\nEnglish\nFrançais\nKreyòl ayisyen\nEspañol\n简体中文\n75%\n100%\n125%\ndefault fixture\nloading fixture\nerror fixture\nhost fixture\nguest fixture\nsaving fixture\nsuccess fixture\nWantiss entry\nHome\nCategories\nOrder history\nCart\nGroup orders\nExplore\nSearch\nCategory / store results\nStore\nStore reviews\nProduct\nCheckout\nHelp Pay walkthrough\nAdd card\nCard verification\nOrder confirmation\nOrder tracking\nNotifications\nPromotions\nFlash deals\nFavorites\nHelp / FAQs\nSettings\nProfile\nAddresses\nPayment methods\nContact support\nStore conversation\nSupport confirmation\nPolicies\nPolicy document\nNotification detail\nBuild Your Own ▾\nHelp center\nContact support\nReport an order problem\nTerms and policies"
+    },
+    {
+      "route": "settings",
+      "status": "PASS",
+      "actualRoute": "settings",
+      "text": "appear here; customers receive reviewed translations or English.\nEnglish\nFrançais\nKreyòl ayisyen\nEspañol\n简体中文\n75%\n100%\n125%\ndefault fixture\nloading fixture\nerror fixture\nhost fixture\nguest fixture\nsaving fixture\nsuccess fixture\nWantiss entry\nHome\nCategories\nOrder history\nCart\nGroup orders\nExplore\nSearch\nCategory / store results\nStore\nStore reviews\nProduct\nCheckout\nHelp Pay walkthrough\nAdd card\nCard verification\nOrder confirmation\nOrder tracking\nNotifications\nPromotions\nFlash deals\nFavorites\nHelp / FAQs\nSettings\nProfile\nAddresses\nPayment methods\nContact support\nStore conversation\nSupport confirmation\nPolicies\nPolicy document\nNotification detail\nBuild Your Own ▾\nSettings\nNotifications\nOrder updates\nOffers and deals\nAccount\nSaved addresses\nAdd a delivery address\nFavorites\n0 saved\nCoupons and offers\nDark mode\nGoodies only. Other Wantiss features keep their theme.\nHelp center\nFAQs and support"
+    },
+    {
+      "route": "profile",
+      "status": "PASS",
+      "actualRoute": "profile",
+      "text": "y to group/card pages; no order, card or payment is saved. · Unreviewed translations may appear here; customers receive reviewed translations or English.\nEnglish\nFrançais\nKreyòl ayisyen\nEspañol\n简体中文\n75%\n100%\n125%\ndefault fixture\nloading fixture\nerror fixture\nhost fixture\nguest fixture\nsaving fixture\nsuccess fixture\nWantiss entry\nHome\nCategories\nOrder history\nCart\nGroup orders\nExplore\nSearch\nCategory / store results\nStore\nStore reviews\nProduct\nCheckout\nHelp Pay walkthrough\nAdd card\nCard verification\nOrder confirmation\nOrder tracking\nNotifications\nPromotions\nFlash deals\nFavorites\nHelp / FAQs\nSettings\nProfile\nAddresses\nPayment methods\nContact support\nStore conversation\nSupport confirmation\nPolicies\nPolicy document\nNotification detail\nBuild Your Own ▾\nProfile\n\n\nShared Wantiss account\nSaved addresses\nOrder history\n0 orders\nFavorites\nNotification preferences\nHelp and support\nTerms and policies"
+    },
+    {
+      "route": "addresses",
+      "status": "PASS",
+      "actualRoute": "addresses",
+      "text": "o select its matching field.\nDraft preview · Sample data only · Fixtures apply to group/card pages; no order, card or payment is saved. · Unreviewed translations may appear here; customers receive reviewed translations or English.\nEnglish\nFrançais\nKreyòl ayisyen\nEspañol\n简体中文\n75%\n100%\n125%\ndefault fixture\nloading fixture\nerror fixture\nhost fixture\nguest fixture\nsaving fixture\nsuccess fixture\nWantiss entry\nHome\nCategories\nOrder history\nCart\nGroup orders\nExplore\nSearch\nCategory / store results\nStore\nStore reviews\nProduct\nCheckout\nHelp Pay walkthrough\nAdd card\nCard verification\nOrder confirmation\nOrder tracking\nNotifications\nPromotions\nFlash deals\nFavorites\nHelp / FAQs\nSettings\nProfile\nAddresses\nPayment methods\nContact support\nStore conversation\nSupport confirmation\nPolicies\nPolicy document\nNotification detail\nBuild Your Own ▾\nSaved addresses\n+ Add new address\nCould not load saved addresses."
+    },
+    {
+      "route": "payments",
+      "status": "PASS",
+      "actualRoute": "payments",
+      "text": "ew · Sample data only · Fixtures apply to group/card pages; no order, card or payment is saved. · Unreviewed translations may appear here; customers receive reviewed translations or English.\nEnglish\nFrançais\nKreyòl ayisyen\nEspañol\n简体中文\n75%\n100%\n125%\ndefault fixture\nloading fixture\nerror fixture\nhost fixture\nguest fixture\nsaving fixture\nsuccess fixture\nWantiss entry\nHome\nCategories\nOrder history\nCart\nGroup orders\nExplore\nSearch\nCategory / store results\nStore\nStore reviews\nProduct\nCheckout\nHelp Pay walkthrough\nAdd card\nCard verification\nOrder confirmation\nOrder tracking\nNotifications\nPromotions\nFlash deals\nFavorites\nHelp / FAQs\nSettings\nProfile\nAddresses\nPayment methods\nContact support\nStore conversation\nSupport confirmation\nPolicies\nPolicy document\nNotification detail\nBuild Your Own ▾\nWallet and payments\nWe couldn’t load your payment details\nCould not load your wallet and cards.\nTry again"
+    },
+    {
+      "route": "contact",
+      "status": "PASS",
+      "actualRoute": "contact",
+      "text": "e data only · Fixtures apply to group/card pages; no order, card or payment is saved. · Unreviewed translations may appear here; customers receive reviewed translations or English.\nEnglish\nFrançais\nKreyòl ayisyen\nEspañol\n简体中文\n75%\n100%\n125%\ndefault fixture\nloading fixture\nerror fixture\nhost fixture\nguest fixture\nsaving fixture\nsuccess fixture\nWantiss entry\nHome\nCategories\nOrder history\nCart\nGroup orders\nExplore\nSearch\nCategory / store results\nStore\nStore reviews\nProduct\nCheckout\nHelp Pay walkthrough\nAdd card\nCard verification\nOrder confirmation\nOrder tracking\nNotifications\nPromotions\nFlash deals\nFavorites\nHelp / FAQs\nSettings\nProfile\nAddresses\nPayment methods\nContact support\nStore conversation\nSupport confirmation\nPolicies\nPolicy document\nNotification detail\nBuild Your Own ▾\nContact support\nTopic\nOrder (optional)\nNone\nMessage\nSend message\nSupport messages are tracked with a ticket number."
+    },
+    {
+      "route": "storechat",
+      "status": "PASS",
+      "actualRoute": "storechat",
+      "text": " reviewed translations or English.\nEnglish\nFrançais\nKreyòl ayisyen\nEspañol\n简体中文\n75%\n100%\n125%\ndefault fixture\nloading fixture\nerror fixture\nhost fixture\nguest fixture\nsaving fixture\nsuccess fixture\nWantiss entry\nHome\nCategories\nOrder history\nCart\nGroup orders\nExplore\nSearch\nCategory / store results\nStore\nStore reviews\nProduct\nCheckout\nHelp Pay walkthrough\nAdd card\nCard verification\nOrder confirmation\nOrder tracking\nNotifications\nPromotions\nFlash deals\nFavorites\nHelp / FAQs\nSettings\nProfile\nAddresses\nPayment methods\nContact support\nStore conversation\nSupport confirmation\nPolicies\nPolicy document\nNotification detail\nBuild Your Own ▾\nPreview store\n🛍️\nPreview store\nMessage store\nGoodies\nCould not open this store conversation.\nTry again\n✉️\nContact the store\nSend your message below. Your messages are delivered to the store; the chat conversation will activate here when the store replies.\nSend"
+    },
+    {
+      "route": "supdone",
+      "status": "PASS",
+      "actualRoute": "supdone",
+      "text": " · Fixtures apply to group/card pages; no order, card or payment is saved. · Unreviewed translations may appear here; customers receive reviewed translations or English.\nEnglish\nFrançais\nKreyòl ayisyen\nEspañol\n简体中文\n75%\n100%\n125%\ndefault fixture\nloading fixture\nerror fixture\nhost fixture\nguest fixture\nsaving fixture\nsuccess fixture\nWantiss entry\nHome\nCategories\nOrder history\nCart\nGroup orders\nExplore\nSearch\nCategory / store results\nStore\nStore reviews\nProduct\nCheckout\nHelp Pay walkthrough\nAdd card\nCard verification\nOrder confirmation\nOrder tracking\nNotifications\nPromotions\nFlash deals\nFavorites\nHelp / FAQs\nSettings\nProfile\nAddresses\nPayment methods\nContact support\nStore conversation\nSupport confirmation\nPolicies\nPolicy document\nNotification detail\nBuild Your Own ▾\n💬\nMessage sent\nTicket PREVIEW-ONLY (demo). Your support request is not connected to a live support inbox yet.\nBack to Goodies"
+    },
+    {
+      "route": "policies",
+      "status": "PASS",
+      "actualRoute": "policies",
+      "text": " matching field.\nDraft preview · Sample data only · Fixtures apply to group/card pages; no order, card or payment is saved. · Unreviewed translations may appear here; customers receive reviewed translations or English.\nEnglish\nFrançais\nKreyòl ayisyen\nEspañol\n简体中文\n75%\n100%\n125%\ndefault fixture\nloading fixture\nerror fixture\nhost fixture\nguest fixture\nsaving fixture\nsuccess fixture\nWantiss entry\nHome\nCategories\nOrder history\nCart\nGroup orders\nExplore\nSearch\nCategory / store results\nStore\nStore reviews\nProduct\nCheckout\nHelp Pay walkthrough\nAdd card\nCard verification\nOrder confirmation\nOrder tracking\nNotifications\nPromotions\nFlash deals\nFavorites\nHelp / FAQs\nSettings\nProfile\nAddresses\nPayment methods\nContact support\nStore conversation\nSupport confirmation\nPolicies\nPolicy document\nNotification detail\nBuild Your Own ▾\nTerms and policies\nTerms of use\nPrivacy policy\nRefund and cancellation policy"
+    },
+    {
+      "route": "policy",
+      "status": "PASS",
+      "actualRoute": "policy",
+      "text": "or payment is saved. · Unreviewed translations may appear here; customers receive reviewed translations or English.\nEnglish\nFrançais\nKreyòl ayisyen\nEspañol\n简体中文\n75%\n100%\n125%\ndefault fixture\nloading fixture\nerror fixture\nhost fixture\nguest fixture\nsaving fixture\nsuccess fixture\nWantiss entry\nHome\nCategories\nOrder history\nCart\nGroup orders\nExplore\nSearch\nCategory / store results\nStore\nStore reviews\nProduct\nCheckout\nHelp Pay walkthrough\nAdd card\nCard verification\nOrder confirmation\nOrder tracking\nNotifications\nPromotions\nFlash deals\nFavorites\nHelp / FAQs\nSettings\nProfile\nAddresses\nPayment methods\nContact support\nStore conversation\nSupport confirmation\nPolicies\nPolicy document\nNotification detail\nBuild Your Own ▾\nTerms of use\nThis policy is not available yet\nAn approved, published version of this policy is not currently available. Please check back later or contact support if you need help."
+    },
+    {
+      "route": "ndetail",
+      "status": "PASS",
+      "actualRoute": "ndetail",
+      "text": "ng field.\nDraft preview · Sample data only · Fixtures apply to group/card pages; no order, card or payment is saved. · Unreviewed translations may appear here; customers receive reviewed translations or English.\nEnglish\nFrançais\nKreyòl ayisyen\nEspañol\n简体中文\n75%\n100%\n125%\ndefault fixture\nloading fixture\nerror fixture\nhost fixture\nguest fixture\nsaving fixture\nsuccess fixture\nWantiss entry\nHome\nCategories\nOrder history\nCart\nGroup orders\nExplore\nSearch\nCategory / store results\nStore\nStore reviews\nProduct\nCheckout\nHelp Pay walkthrough\nAdd card\nCard verification\nOrder confirmation\nOrder tracking\nNotifications\nPromotions\nFlash deals\nFavorites\nHelp / FAQs\nSettings\nProfile\nAddresses\nPayment methods\nContact support\nStore conversation\nSupport confirmation\nPolicies\nPolicy document\nNotification detail\nBuild Your Own ▾\nNotification\nSample notification\nPreview only. No notification was sent.\nSee details"
+    }
+  ]
+}

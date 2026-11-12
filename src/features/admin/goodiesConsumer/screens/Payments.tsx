@@ -1,12 +1,17 @@
+import {EditableNativeText as Text} from '../EditableNativeText';
 /* Wantiss Wallet and saved cards for Goodies (live data).
    The shell (GoodiesApp) already scrolls every route except byo and storechat, so this screen must not add its own ScrollView. */
 import React, {useCallback, useEffect, useRef, useState} from 'react';
-import {View, Pressable, Text} from 'react-native';
+import {View, Pressable, Text as UnusedNativeText} from 'react-native';
 import {Icon} from '../components/Icon';
+import WalletBalance from './WalletBalance';
 import {T, Bar, Cta, Card, Row, Badge, Ttl, useTheme} from '../components/ui';
-import {S, money, emit, save, toast, previewOnly} from '../store';
+import {S, money, emit, save, toast} from '../store';
 import {back, createWallet} from '../actions';
-import {supabase} from '../../lib/supabase';
+import {push} from '../store';
+import {label} from '../content';
+import {previewBackend as supabase} from '../previewRuntime';
+import {friendlyError} from '../friendlyError';
 
 type LoadState = 'loading' | 'ready' | 'error' | 'signedout';
 
@@ -43,12 +48,6 @@ export function LivePayments() {
   }, []);
 
   const load = useCallback(async () => {
-    if (previewOnly) {
-      S.hasWallet = true; S.wallet = 0;
-      S.cards = [{id: 'preview-demo-card', b: 'Demo card', l4: '4242', expiryMonth: 12, expiryYear: 2030, isDefault: true}];
-      S.selectedCardId = 'preview-demo-card';
-      setState('ready'); loaded.current = true; return;
-    }
     if (!loaded.current) setState('loading');
     try {
       const {data: auth, error: authError} = await supabase.auth.getUser();
@@ -71,7 +70,7 @@ export function LivePayments() {
       loaded.current = true; setProblem(''); setState('ready');
     } catch (e: any) {
       if (!mounted.current) return;
-      const msg = e?.message || 'Could not load your wallet and cards.';
+      const msg = friendlyError(e, label("lbl.cms.cd891775350a", "Could not load your wallet and cards."));
       if (loaded.current) {toast(msg); return;} /* keep showing the last good data */
       setProblem(msg); setState('error');
     }
@@ -81,16 +80,15 @@ export function LivePayments() {
 
   /* Both card RPCs return a boolean. false means nothing changed, with no error. */
   const act = async (id: string, call: () => PromiseLike<{data: any; error: any}>, okMsg: string, failMsg: string) => {
-    if (previewOnly) { toast('Payment-method changes are disabled in the admin preview.'); return; }
     if (busyRef.current) return;
     busyRef.current = true; setBusyId(id); setConfirmId('');
     let ok = false;
     try {
       const {data, error} = await call();
-      if (error || data === false) toast(error?.message || failMsg);
+      if (error || data === false) toast(friendlyError(error, failMsg));
       else {toast(okMsg); ok = true;}
     } catch (e: any) {
-      toast(e?.message || failMsg);
+      toast(friendlyError(e, failMsg));
     } finally {
       busyRef.current = false;
       if (mounted.current) setBusyId('');
@@ -106,7 +104,6 @@ export function LivePayments() {
     void act(id, () => supabase.rpc('delete_payment_method', {p_payment_method_id: id}), 'Card removed', 'Could not remove this card.');
   };
   const makeWallet = async () => {
-    if (previewOnly) { toast('Wallet changes are disabled in the admin preview.'); return; }
     if (creating) return;
     setCreating(true);
     try {await createWallet();} finally {if (mounted.current) setCreating(false);}
@@ -115,7 +112,7 @@ export function LivePayments() {
 
   if (state === 'loading') {
     return (<View>
-      <Bar title="Wallet and payments" onBack={back} />
+      <Bar cmsKey={'lbl.paymentsTitle'} title={label('lbl.paymentsTitle', 'Wallet and payments')} onBack={back} />
       <View style={{paddingHorizontal: 16}}>
         <Skeleton h={120} /><Skeleton h={20} w={110} /><Skeleton h={64} /><Skeleton h={64} />
       </View>
@@ -123,75 +120,75 @@ export function LivePayments() {
   }
   if (state === 'signedout') {
     return (<View>
-      <Bar title="Wallet and payments" onBack={back} />
+      <Bar cmsKey={'lbl.paymentsTitle'} title={label('lbl.paymentsTitle', 'Wallet and payments')} onBack={back} />
       <View style={{padding: 16, paddingTop: 40, alignItems: 'center'}}>
         <Text style={{fontSize: 52}}>🔒</Text>
-        <T size={18} weight="800" style={{marginTop: 8}}>Sign in to see your wallet</T>
-        <T size={13.5} color={th.mut} align="center" style={{marginVertical: 8, marginBottom: 18}}>Your Wantiss wallet and saved cards are tied to your account.</T>
-        <View style={{alignSelf: 'stretch'}}><Cta ghost label="Back" onPress={back} /></View>
+        <T cmsKey={'lbl.paymentsSignIn'} size={18} weight="600" style={{marginTop: 8}}>{label('lbl.paymentsSignIn', 'Sign in to see your wallet')}</T>
+        <T cmsKey={'lbl.paymentsSignedOut'} size={13.5} color={th.mut} align="center" style={{marginVertical: 8, marginBottom: 18}}>{label('lbl.paymentsSignedOut', 'Your Wantiss wallet and saved cards are tied to your account.')}</T>
+        <View style={{alignSelf: 'stretch'}}><Cta cmsKey={'lbl.paymentBack'} ghost label={label('lbl.paymentBack', 'Back')} onPress={back} /></View>
       </View>
     </View>);
   }
   if (state === 'error') {
     return (<View>
-      <Bar title="Wallet and payments" onBack={back} />
+      <Bar cmsKey={'lbl.paymentsTitle'} title={label('lbl.paymentsTitle', 'Wallet and payments')} onBack={back} />
       <View style={{paddingHorizontal: 16}}>
         <Card style={{borderColor: th.red}}>
-          <T weight="800">We couldn’t load your payment details</T>
+          <T cmsKey={'lbl.paymentLoadError'} weight="600">{label('lbl.paymentLoadError', 'We couldn’t load your payment details')}</T>
           <T size={13} color={th.red} style={{marginTop: 4}}>{problem}</T>
-          <View style={{marginTop: 12}}><Cta small label="Try again" onPress={() => {void load();}} /></View>
+          <View style={{marginTop: 12}}><Cta cmsKey={'lbl.paymentRetry'} small label={label('lbl.paymentRetry', 'Try again')} onPress={() => {void load();}} /></View>
         </Card>
       </View>
     </View>);
   }
 
   return (<View>
-    <Bar title="Wallet and payments" onBack={back} />
+    <Bar cmsKey={'lbl.paymentsTitle'} title={label('lbl.paymentsTitle', 'Wallet and payments')} onBack={back} />
     <View style={{paddingHorizontal: 16}}>
-      {previewOnly ? <Card style={{borderColor: th.br, marginBottom: 12}}><T weight="800">Demo preview only</T><T size={12.5} color={th.mut} style={{marginTop: 4}}>Sample wallet and card details for editing checkout screens. No real balance, saved card, charge or payment request is used.</T></Card> : null}
       {S.hasWallet ? (
-        <View style={{borderRadius: 18, padding: 14, backgroundColor: th.br, marginBottom: 12}}>
-          <T size={13} color="#fff" style={{opacity: 0.9}}>{previewOnly ? 'Demo Wantiss Wallet' : 'Wantiss Wallet'}</T>
-          <T size={34} weight="800" color="#fff" style={{marginTop: 4, marginBottom: 14}}>{money(S.wallet)}</T>
-          <Pressable accessibilityRole="button" onPress={() => toast(previewOnly ? 'Demo preview only. No funds can be added.' : 'Wallet top-up is not available yet.')} style={{height: 44, borderRadius: 16, backgroundColor: '#fff', alignItems: 'center', justifyContent: 'center'}}><T size={15} weight="800" color={th.brd}>Top up (coming soon)</T></Pressable>
+        <View style={{marginBottom: 12}}>
+          {/* Same green wallet card as the Wallet feature home; it loads its own balance and stays live. */}
+          <View style={{marginHorizontal: -16, marginTop: -13}}><WalletBalance contentLabel={label} /></View>
+          <Pressable accessibilityRole="button" accessibilityLabel={label('lbl.paymentTopup', 'Top up')} hitSlop={10} onPress={() => toast(label('lbl.paymentTopupUnavailable', 'Wallet top-up is not available yet.'))} style={{alignSelf: 'flex-start', marginTop: 10, flexDirection: 'row', alignItems: 'center', gap: 6}}>
+            <Icon name="plus" size={16} color={th.br} /><T cmsKey={'lbl.paymentTopup'} size={13.5} weight="600" color={th.br}>{label('lbl.paymentTopup', 'Top up')}</T>
+          </Pressable>
         </View>
       ) : (
         <Card>
-          <Row style={{gap: 10}}><Text style={{fontSize: 30}}>👛</Text><View style={{flex: 1}}><T weight="800">No Wantiss wallet found</T></View></Row>
-          <T size={13} color={th.mut} style={{marginVertical: 6, lineHeight: 19}}>You haven’t created a wallet, or it was deleted. Create one to pay with it and to receive refunds. Your balance starts at {money(0)}.</T>
-          <Cta small label={creating ? 'Creating…' : 'Create wallet'} disabled={creating} onPress={() => {void makeWallet();}} />
+          <Row style={{gap: 10}}><Text style={{fontSize: 30}}>👛</Text><View style={{flex: 1}}><T cmsKey={'lbl.paymentNoWallet'} weight="600">{label('lbl.paymentNoWallet', 'No Wantiss wallet found')}</T></View></Row>
+          <T cmsKey={"lbl.cms.f8cd04d16d2c"} size={13} color={th.mut} style={{marginVertical: 6, lineHeight: 19}}>{label("lbl.cms.f8cd04d16d2c", "You haven’t created a wallet, or it was deleted. Create one to pay with it and to receive refunds. Your balance starts at ")}{money(0)}.</T>
+          <Cta cmsKeys={["lbl.cms.7ac9ab914a13","lbl.cms.f94093c65ad4"]} small label={creating ? label("lbl.cms.7ac9ab914a13", "Creating…") : label("lbl.cms.f94093c65ad4", "Create wallet")} disabled={creating} onPress={() => {void makeWallet();}} />
         </Card>
       )}
 
-      <Ttl>Saved cards</Ttl>
+      <Ttl>{label('lbl.paymentsCards', 'Saved cards')}</Ttl>
       {S.cards.length ? S.cards.map((c: any) => (
         <Card key={c.id}>
           <Row style={{gap: 10}}>
             <Icon name="card" size={22} color={th.ink} />
             <View style={{flex: 1}}>
-              <T weight="700">{c.b} •••• {c.l4}</T>
-              <T size={12.5} color={th.mut}>{expLabel(c) ? 'Expires ' + expLabel(c) : 'Saved card'}</T>
+              <T weight="600">{c.b} •••• {c.l4}</T>
+              <T cmsKeys={["lbl.cms.832feb1f5f0c","lbl.cms.b4fe1f1f9202"]} size={12.5} color={th.mut}>{expLabel(c) ? label("lbl.cms.832feb1f5f0c", "Expires ") + expLabel(c) : label("lbl.cms.b4fe1f1f9202", "Saved card")}</T>
             </View>
-            {c.isDefault ? <Badge green label="Default" /> : null}
-            <Pressable accessibilityRole="button" accessibilityLabel="Remove card" hitSlop={12} disabled={!!busyId} onPress={() => removeCard(c.id)}><Icon name="trash" size={18} color={th.red} /></Pressable>
+            {c.isDefault ? <Badge cmsKey={'lbl.paymentDefaultCard'} green label={label('lbl.paymentDefaultCard', 'Default')} /> : null}
+            <Pressable accessibilityRole="button" accessibilityLabel={label('lbl.paymentRemoveCard', 'Remove card')} hitSlop={12} disabled={!!busyId} onPress={() => removeCard(c.id)}><Icon name="trash" size={18} color={th.red} /></Pressable>
           </Row>
           {(!c.isDefault || confirmId === c.id) ? (
             <Row style={{marginTop: 10, gap: 16}}>
-              {!c.isDefault ? <Pressable accessibilityRole="button" disabled={!!busyId} onPress={() => makeDefault(c.id)}><T size={13.5} weight="700" color={th.br}>{busyId === c.id ? 'Updating…' : 'Set as default'}</T></Pressable> : null}
-              {confirmId === c.id ? <Pressable accessibilityRole="button" disabled={!!busyId} onPress={() => removeCard(c.id)}><T size={13.5} weight="700" color={th.red}>Tap again to remove</T></Pressable> : null}
-              {confirmId === c.id ? <Pressable accessibilityRole="button" onPress={() => setConfirmId('')}><T size={13.5} weight="700" color={th.mut}>Cancel</T></Pressable> : null}
+              {!c.isDefault ? <Pressable accessibilityRole="button" disabled={!!busyId} onPress={() => makeDefault(c.id)}><T cmsKeys={["lbl.cms.ce5c2af83377","lbl.cms.eeb9fe67ea00"]} size={13.5} weight="600" color={th.br}>{busyId === c.id ? label("lbl.cms.ce5c2af83377", "Updating…") : label("lbl.cms.eeb9fe67ea00", "Set as default")}</T></Pressable> : null}
+              {confirmId === c.id ? <Pressable accessibilityRole="button" disabled={!!busyId} onPress={() => removeCard(c.id)}><T cmsKey={'lbl.paymentTapAgainRemove'} size={13.5} weight="600" color={th.red}>{label('lbl.paymentTapAgainRemove', 'Tap again to remove')}</T></Pressable> : null}
+              {confirmId === c.id ? <Pressable accessibilityRole="button" onPress={() => setConfirmId('')}><T cmsKey={'lbl.paymentCancel'} size={13.5} weight="600" color={th.mut}>{label('lbl.paymentCancel', 'Cancel')}</T></Pressable> : null}
             </Row>
           ) : null}
         </Card>
       )) : (
         <Card style={{alignItems: 'center', paddingVertical: 22}}>
           <Text style={{fontSize: 40}}>💳</Text>
-          <T weight="800" style={{marginTop: 6}}>No saved cards yet</T>
-          <T size={13} color={th.mut} align="center" style={{marginTop: 4, lineHeight: 19}}>Saved cards will appear here and can be used at checkout.</T>
+          <T cmsKey={'lbl.paymentNoCards'} weight="600" style={{marginTop: 6}}>{label('lbl.paymentNoCards', 'No saved cards yet')}</T>
+          <T cmsKey={'lbl.paymentSavedCardsHint'} size={13} color={th.mut} align="center" style={{marginTop: 4, lineHeight: 19}}>{label('lbl.paymentSavedCardsHint', 'Saved cards will appear here and can be used at checkout.')}</T>
         </Card>
       )}
-      <Cta ghost label={previewOnly ? 'Demo card · no real card attached' : '+ Add a card'} disabled={previewOnly} onPress={() => toast('Adding cards is not available yet.')} />
-      <T size={12} color={th.mut} style={{marginTop: 10}}>Only the brand, last 4 digits and expiry are shown.</T>
+      <Cta cmsKey={'lbl.paymentAddCard'} ghost label={label('lbl.paymentAddCard', '+ Add a card')} onPress={() => push('addcard')} />
     </View>
   </View>);
 }

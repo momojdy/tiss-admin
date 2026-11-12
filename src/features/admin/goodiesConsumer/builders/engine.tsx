@@ -1,21 +1,27 @@
-/** Goodies builder engine: validation, pricing, draft state and actions. */
+import {previewOnly} from '../store';
+/* Build Your Own engine. Port of the v24 builder logic (bClean, bBreak, bCheck, bLine, lineBad, drafts, actions).
+   Differences from v24, all deliberate:
+   - ingredients reference Admin library asset IDs (`assetId`) instead of v24's name-matching (`phKey`);
+   - builders are configured in the Vendor Dashboard, so the seller screens are gone from this file;
+   - an ingredient can also carry a per-item limit (`max`), chosen by the vendor.
+   Builder config is stored under 'goodies-byo-v4', the same key the Vendor Dashboard writes in demo mode. */
 import React from 'react';
 import {View, Pressable} from 'react-native';
-import AsyncStorage from '@react-native-async-storage/async-storage';
-import {supabase} from '../../lib/supabase';
-import {fetchPublishedWantissContent} from '../../lib/wantissCms';
-import {previewOnly, S, STB, ui, toast, emit, save, push, navBack, cur, hooks, money} from '../store';
+import {previewStorage as AsyncStorage} from '../previewRuntime';
+import {previewBackend as supabase} from '../previewRuntime';
+import {previewPublishedContent as fetchPublishedWantissContent} from '../previewRuntime';
+import {label} from '../content';
+import {S, STB, ui, toast, emit, save, push, navBack, cur, hooks, money} from '../store';
 import {TEMPLATES} from './templates';
 import {T, useTheme, Tile} from '../components/ui';
 
-// Keep this key stable: it restores existing local builder configurations across app launches.
-const BKEY = 'goodies-byo-v4';
+export const BKEY = 'goodies-byo-v4';
 const r2 = (n: number) => Math.round(n * 100) / 100;
 const cl = <X,>(o: X): X => JSON.parse(JSON.stringify(o));
 const rid = () => Math.random().toString(36).slice(2, 10);
 
 export type BItem = {id: string; name: string; price: number; free: boolean; avail: boolean; assetId: string | null; col: string; max?: number; img?: {assetKey?: string; data?: string}};
-type BGroup = {id: string; name: string; kind: 'one' | 'many'; req: boolean; min: number; max: number; inc: number; me: number; items: BItem[]};
+export type BGroup = {id: string; name: string; kind: 'one' | 'many'; req: boolean; min: number; max: number; inc: number; me: number; items: BItem[]};
 export type Builder = {id: string; type: 'pizza' | 'burger' | 'custom'; name: string; desc: string; emoji: string; enabled: boolean; available: boolean; base: number; notes: boolean; stageBgColor?: string; sizes: {id: string; name: string; add: number; avail: boolean}[]; groups: BGroup[]};
 
 export function bClean(b: any): Builder | null {
@@ -48,7 +54,8 @@ export function fromTemplate(type: 'pizza' | 'burger' | 'custom'): Builder {
 
 export const BYO: {cfg: Record<string, Builder[]>; store: Record<string, boolean>; drafts: Record<string, any>} = {cfg: {}, store: {}, drafts: {}};
 export async function loadBuilders() {
-  if (!previewOnly) try {
+  if(previewOnly)return;
+  try {
     const r = JSON.parse((await AsyncStorage.getItem(BKEY)) || 'null');
     if (r && typeof r === 'object') {if (r.cfg && !Array.isArray(r.cfg)) BYO.cfg = r.cfg; if (r.drafts) BYO.drafts = r.drafts; if (r.store) BYO.store = r.store;}
   } catch (e) {}
@@ -66,7 +73,7 @@ export async function loadBuilders() {
         const rows = (data || []).filter((row: any) => row.business_id === store.businessId);
         BYO.cfg[store.id] = rows.map((row: any) => bClean(row.config)).filter((b: Builder | null): b is Builder => !!b && b.enabled && b.available);
       }
-      // Ingredient pictures the admin uploaded are published assets; attach their links.
+      // Ingredient pictures uploaded by Wantiss are published assets; attach their links.
       try {
         const remote = await fetchPublishedWantissContent('en');
         const urlByKey = new Map(remote.assets.map((a: any) => [a.asset_key, a.url]));
@@ -82,16 +89,17 @@ export async function loadBuilders() {
   }
   bsave(); emit();
 }
-const bsave = () => {if (previewOnly) return; try {AsyncStorage.setItem(BKEY, JSON.stringify(BYO));} catch (e) {}};
-const bFor = (sid: string) => BYO.cfg[sid] || [];
+export const bsave = () => {try {AsyncStorage.setItem(BKEY, JSON.stringify(BYO));} catch (e) {}};
+export const bFor = (sid: string) => BYO.cfg[sid] || [];
 export const bGet = (sid: string, id: string) => bFor(sid).filter(b => b.id === id)[0];
 export const units = (g: BGroup, d: any): string[] => {const a = d.sel && d.sel[g.id]; return Array.isArray(a) ? a : [];};
 export const itemOf = (g: BGroup, id: string) => g.items.filter(i => i.id === id)[0];
-const byoList = (sid: string) => (BYO.store[sid] === false ? [] : bFor(sid).filter(b => b.enabled));
+export const byoList = (sid: string) => (BYO.store[sid] === false ? [] : bFor(sid).filter(b => b.enabled));
 export const byoOn = (sid: string) => byoList(sid).length > 0;
 export const byoNames = (sid: string) => byoList(sid).map(b => b.name + ' build your own custom').join(' ');
-const limitOf = (g: BGroup, it: BItem) => Math.min(g.me, it.max || g.me);
+export const limitOf = (g: BGroup, it: BItem) => Math.min(g.me, it.max || g.me);
 
+/* ---------- pricing + validation (single source for preview, review and cart) ---------- */
 export function bBreak(b: Builder, d: any) {
   let tot = b.base; const sz = b.sizes.filter(s => s.id === d.size)[0], lines: any[] = []; if (sz) tot += sz.add;
   b.groups.forEach(g => {
@@ -108,31 +116,32 @@ export function bBreak(b: Builder, d: any) {
 }
 export function bCheck(b: Builder, d: any) {
   const errs: string[] = [], conf: string[] = [], s = STB[d.sid];
-  if (!s || BYO.store[d.sid] === false || !b.enabled || !b.available) errs.push('This builder is currently unavailable'); else if (!s.open) errs.push(s.n + ' is closed right now');
-  if (b.sizes.length) {const sz = b.sizes.filter(x => x.id === d.size)[0]; if (!sz) errs.push('Choose a size'); else if (!sz.avail) conf.push(sz.name + ' is no longer available. Choose another size');}
+  if (!s || BYO.store[d.sid] === false || !b.enabled || !b.available) errs.push(label('lbl.byoErrUnavailable', 'This builder is currently unavailable')); else if (!s.open) errs.push(label('lbl.byoErrStoreClosed', '{store} is closed right now').replace('{store}', s.n));
+  if (b.sizes.length) {const sz = b.sizes.filter(x => x.id === d.size)[0]; if (!sz) errs.push(label('lbl.byoErrChooseSize', 'Choose a size')); else if (!sz.avail) conf.push(label('lbl.byoErrSizeGone', '{size} is no longer available. Choose another size').replace('{size}', sz.name));}
   b.groups.forEach(g => {
     const us = units(g, d), mn = g.req || g.min > 0 ? Math.max(1, g.min) : 0; let live = 0; const c: any = {};
-    us.forEach(id => {const it = itemOf(g, id); c[id] = (c[id] || 0) + 1; if (!it) conf.push('An item you chose in ' + g.name + ' was removed by the store'); else if (!it.avail) conf.push(it.name + ' is unavailable'); else live++;});
-    if (live < mn) errs.push(mn === 1 ? 'Choose ' + g.name.toLowerCase() : 'Choose at least ' + mn + ' in ' + g.name);
-    if (us.length > g.max) errs.push('Too many in ' + g.name + ' (max ' + g.max + ')');
-    Object.keys(c).forEach(id => {const it = itemOf(g, id); const lim = it ? limitOf(g, it) : g.me; if (c[id] > lim) errs.push('At most ' + lim + ' of ' + (it ? it.name : 'the same item') + ' in ' + g.name);});
+    us.forEach(id => {const it = itemOf(g, id); c[id] = (c[id] || 0) + 1; if (!it) conf.push(label('lbl.byoErrItemRemoved', 'An item you chose in {group} was removed by the store').replace('{group}', g.name)); else if (!it.avail) conf.push(label('lbl.byoIngredientUnavailable', '{item} is unavailable').replace('{item}', it.name)); else live++;});
+    if (live < mn) errs.push(mn === 1 ? label('lbl.byoErrChooseOne', 'Choose {group}').replace('{group}', g.name.toLowerCase()) : label('lbl.byoErrChooseAtLeast', 'Choose at least {min} in {group}').replace('{min}', String(mn)).replace('{group}', g.name));
+    if (us.length > g.max) errs.push(label('lbl.byoErrTooMany', 'Too many in {group} (max {max})').replace('{group}', g.name).replace('{max}', String(g.max)));
+    Object.keys(c).forEach(id => {const it = itemOf(g, id); const lim = it ? limitOf(g, it) : g.me; if (c[id] > lim) errs.push(label('lbl.byoErrAtMost', 'At most {limit} of {item} in {group}').replace('{limit}', String(lim)).replace('{item}', it ? it.name : label('lbl.byoErrSameItem', 'the same item')).replace('{group}', g.name));});
   });
   return {errs, conf, ok: !errs.length && !conf.length};
 }
-const bFlat = (br: any) => br.lines.map((L: any) => L.items.map((i: any) => (i.qty > 1 ? i.qty + '× ' : '') + i.name).join(', ')).join(' · ');
+export const bFlat = (br: any) => br.lines.map((L: any) => L.items.map((i: any) => (i.qty > 1 ? i.qty + '× ' : '') + i.name).join(', ')).join(' · ');
 const hs = (s: string) => {let h = 2166136261; for (let i = 0; i < s.length; i++) h = Math.imul(h ^ s.charCodeAt(i), 16777619); return h >>> 0;};
 export function bLine(b: Builder, d: any, q: number) {
   const br = bBreak(b, d), note = b.notes ? String(d.note || '').trim().slice(0, 200) : '', sel = cl(d.sel);
   return {k: 'byo|' + b.id + '|' + hs(JSON.stringify([d.size, sel, note, br.total])), id: 'byo:' + b.id, n: b.name + (br.size ? ' — ' + br.size.name : ''), e: b.emoji, p: br.total, q, d: bFlat(br), nt: note, byo: {sid: d.sid, bid: b.id, type: b.type, size: d.size, sel, lines: br.lines}};
 }
 export function lineBad(l: any): string {
-  if (!l.byo) return ''; const b = bGet(l.byo.sid, l.byo.bid); if (!b) return 'is no longer offered';
+  if (!l.byo) return ''; const b = bGet(l.byo.sid, l.byo.bid); if (!b) return label('lbl.byoLineRemoved','is no longer offered');
   const d = {sid: l.byo.sid, size: l.byo.size, sel: l.byo.sel}, ck = bCheck(b, d);
-  if (!ck.ok) return 'needs changes: ' + (ck.errs[0] || ck.conf[0]);
-  if (bBreak(b, d).total !== l.p) return 'has a new price. Open Edit to review it'; return '';
+  if (!ck.ok) return label('lbl.byoLineNeedsChanges','needs changes: ') + (ck.errs[0] || ck.conf[0]);
+  if (bBreak(b, d).total !== l.p) return label('lbl.byoLinePriceChanged','has a new price. Open Edit to review it'); return '';
 }
 hooks.bGet = bGet; hooks.bCheck = bCheck; hooks.bLine = bLine; (hooks as any).lineBad = lineBad;
 
+/* ---------- drafts ---------- */
 export let BD: any = null;
 export const setBD = (d: any) => {BD = d;};
 const dirtyOf = (d: any) => Object.keys(d.sel).some(k => d.sel[k].length) || !!d.note || d.q > 1;
@@ -151,7 +160,7 @@ export function bzDirty() {
   if (BD.edit) return JSON.stringify([BD.size, BD.sel, BD.note, BD.q]) !== BD.orig;
   return dirtyOf(BD);
 }
-function bDraftSave() {
+export function bDraftSave() {
   if (!BD || BD.edit || BD.added) return;
   if (bzDirty()) BYO.drafts[BD.bid] = {sid: BD.sid, size: BD.size, sel: BD.sel, note: BD.note, q: BD.q}; else delete BYO.drafts[BD.bid];
   bsave();
@@ -159,22 +168,23 @@ function bDraftSave() {
 const hist = () => {BD.hist.push(JSON.stringify([BD.size, BD.sel])); if (BD.hist.length > 40) BD.hist.shift();};
 const upd = () => {bDraftSave(); emit();};
 
-function byoOpen(sid: string, bid: string) {
+/* ---------- actions ---------- */
+export function byoOpen(sid: string, bid: string) {
   const b = bGet(sid, bid);
-  if (!b || !b.enabled || !b.available || BYO.store[sid] === false) {toast('This builder is not available right now'); return;}
-  if (!STB[sid].open) {toast(STB[sid].n + ' is closed right now'); return;}
+  if (!b || !b.enabled || !b.available || BYO.store[sid] === false) {toast(label('lbl.byoNotAvailableNow', 'This builder is not available right now')); return;}
+  if (!STB[sid].open) {toast(label('lbl.byoStoreClosedNow', '{store} is closed right now').replace('{store}', STB[sid].n)); return;}
   BD = bDraft(b, sid); push('byo', sid + '|' + b.id);
 }
 export function bzAdd(gid: string, iid: string) {
   const b = bGet(BD.sid, BD.bid), g = b && b.groups.filter(x => x.id === gid)[0], it = g && itemOf(g, iid);
   if (!it || !g || BD.added) return;
-  if (!it.avail) {toast(it.name + ' is unavailable'); return;}
+  if (!it.avail) {toast(label('lbl.byoIngredientUnavailable', '{item} is unavailable').replace('{item}', it.name)); return;}
   const us = units(g, BD).slice();
   if (g.kind === 'one') {if (us[0] === it.id) return; hist(); BD.sel[g.id] = [it.id];}
   else {
     const q = us.filter(x => x === it.id).length;
-    if (us.length >= g.max) {toast('You can choose up to ' + g.max + ' in ' + g.name); return;}
-    if (q >= limitOf(g, it)) {toast('At most ' + limitOf(g, it) + ' of ' + it.name); return;}
+    if (us.length >= g.max) {toast(label('lbl.byoMaxGroupChoices', 'You can choose up to {max} in {group}').replace('{max}', String(g.max)).replace('{group}', g.name)); return;}
+    if (q >= limitOf(g, it)) {toast(label('lbl.byoMaxSameIngredient', 'At most {max} of {item}').replace('{max}', String(limitOf(g, it))).replace('{item}', it.name)); return;}
     hist(); us.push(it.id); BD.sel[g.id] = us;
   }
   const a = (it.assetId || '').replace('burger.', '');
@@ -204,24 +214,24 @@ export function bzShop() {
 export function bzEdit(k: string) {
   const l = S.cart.lines.filter((x: any) => x.k === k)[0]; if (!l || !l.byo) return;
   const b = bGet(l.byo.sid, l.byo.bid);
-  if (!b || !b.enabled || BYO.store[l.byo.sid] === false) {toast('This item can no longer be customized. You can remove it from your cart.'); return;}
+  if (!b || !b.enabled || BYO.store[l.byo.sid] === false) {toast(label('lbl.byoNoLongerCustomizable', 'This item can no longer be customized. You can remove it from your cart.')); return;}
   BD = {sid: l.byo.sid, bid: b.id, size: l.byo.size, sel: cl(l.byo.sel), note: l.nt || '', q: l.q, hist: [], added: null, busy: 0, leave: 0, edit: l.k, snap: l.p, resumed: 0, exploded: true, assembling: 0, seasoningPulse: 0};
   BD.orig = JSON.stringify([BD.size, BD.sel, BD.note, BD.q]); push('byo', l.byo.sid + '|' + b.id);
 }
 export function bzRemove(k: string) {
   const c = S.cart, i = c.lines.findIndex((x: any) => x.k === k); if (i < 0) return;
-  c.lines.splice(i, 1); if (!c.lines.length) {c.sid = null; S.promo = '';} toast('Removed from your cart'); save(); emit();
+  c.lines.splice(i, 1); if (!c.lines.length) {c.sid = null; S.promo = '';} toast(label('lbl.byoRemovedFromCart', 'Removed from your cart')); save(); emit();
 }
 function bzCommit(b: Builder, ln: any) {
   const c = S.cart; c.sid = BD.sid;
   if (BD.edit) {
     const i = c.lines.findIndex((x: any) => x.k === BD.edit);
-    if (i < 0) {toast('That item is no longer in your cart'); BD = null; navBack(); return;}
+    if (i < 0) {toast(label('lbl.byoItemMissingCart', 'That item is no longer in your cart')); BD = null; navBack(); return;}
     c.lines.splice(i, 1); const ex = c.lines.filter((x: any) => x.k === ln.k)[0]; if (ex) ex.q += ln.q; else c.lines.splice(i, 0, ln);
-    BD = null; toast('Item updated'); save(); navBack(); return;
+    BD = null; toast(label('lbl.byoItemUpdated', 'Item updated')); save(); navBack(); return;
   }
   const ex2 = c.lines.filter((x: any) => x.k === ln.k)[0]; if (ex2) ex2.q += ln.q; else c.lines.push(ln);
-  delete BYO.drafts[b.id]; bsave(); BD.added = {n: ln.n, q: ln.q, p: ln.p}; BD.busy = 0; S.bump = 1; toast('Added to your order!'); save(); emit();
+  delete BYO.drafts[b.id]; bsave(); BD.added = {n: ln.n, q: ln.q, p: ln.p}; BD.busy = 0; S.bump = 1; toast(label('lbl.byoAddedSuccess', 'Added to your order!')); save(); emit();
 }
 function animateCommit(b: Builder, ln: any) {
   if (!BD || BD.added) return;
@@ -230,7 +240,6 @@ function animateCommit(b: Builder, ln: any) {
   setTimeout(() => {if (BD && BD.busy && !BD.added) {BD.assembling = 0; bzCommit(b, ln);}}, 1050);
 }
 export function bzAddOrder() {
-  if (previewOnly) {toast('This is a preview. Orders cannot be placed here.'); return;}
   const b = BD && bGet(BD.sid, BD.bid); if (!b || BD.added || BD.busy) return;
   const ck = bCheck(b, BD); if (!ck.ok) {toast(ck.errs[0] || ck.conf[0]); return;}
   BD.busy = 1; const ln = bLine(b, BD, BD.q), c = S.cart;
@@ -246,22 +255,23 @@ hooks.byoGuard = () => {
 };
 hooks.byoClear = () => {if (BD) {bDraftSave();} BD = null;};
 
-function TagText({text}: {text: string}) {const th = useTheme(); return <T size={13} weight="700" color={th.brd} style={{marginTop: 3}}>{text}</T>;}
+/* ---------- store page pieces ---------- */
+function TagText({text}: {text: string}) {const th = useTheme(); return <T size={13} weight="600" color={th.brd} style={{marginTop: 3}}>{text}</T>;}
 export function byoTag(sid: string): React.ReactNode {
   const l = byoList(sid); if (!l.length) return null;
-  return <TagText text={'Build your own ' + l.map(b => b.emoji).join(' ')} />;
+  return <TagText text={label('lbl.storeCustom', 'Custom products') + ' ' + l.map(b => b.emoji).join(' ')} />;
 }
 function ByoRow({b, s}: {b: Builder; s: any}) {
   const th = useTheme(), ok = b.available && s.open;
   let mn = b.sizes.filter(z => z.avail).reduce((a, z) => Math.min(a, z.add), 1e9); if (mn === 1e9) mn = 0;
   return (
-    <Pressable disabled={!ok} onPress={() => byoOpen(s.id, b.id)} style={{flexDirection: 'row', alignItems: 'center', gap: 12, paddingVertical: 12, borderBottomWidth: 1, borderBottomColor: th.line, opacity: ok ? 1 : 0.55}}>
+    <Pressable disabled={!ok} onPress={() => byoOpen(s.id, b.id)} style={{flexDirection: 'row', alignItems: 'center', gap: 12, paddingVertical: 12, borderBottomWidth: 0.5, borderBottomColor: th.line, opacity: ok ? 1 : 0.55}}>
       <Tile e={b.emoji} bg="bg3" />
       <View style={{flex: 1}}>
-        <View style={{flexDirection: 'row', alignItems: 'center', gap: 6, flexWrap: 'wrap'}}><T weight="700">{b.name}</T><View style={{backgroundColor: th.brt, borderRadius: 9, paddingHorizontal: 8, paddingVertical: 2}}><T size={11} weight="800" color={th.brd}>Build your own</T></View></View>
-        <T size={12.5} color={th.mut}>{ok ? (b.desc || 'Customize it your way') + ' · from ' + money(b.base + mn) : 'Currently unavailable'}</T>
+        <View style={{flexDirection: 'row', alignItems: 'center', gap: 6, flexWrap: 'wrap'}}><T weight="600">{b.name}</T><View style={{backgroundColor: th.brt, borderRadius: 9, paddingHorizontal: 8, paddingVertical: 2}}><T size={11} weight="600" color={th.brd}>{label('lbl.storeCustom', 'Customizable')}</T></View></View>
+        <T size={12.5} color={th.mut}>{ok ? label('lbl.byoFromPrice', '{desc} · from {price}').replace('{desc}', b.desc || label('lbl.byoDefaultDesc', 'Customize it your way')).replace('{price}', money(b.base + mn)) : label('lbl.byoCardUnavailable', 'Currently unavailable')}</T>
       </View>
-      {ok ? <View style={{backgroundColor: th.br, borderRadius: 14, paddingHorizontal: 14, paddingVertical: 8}}><T size={13} weight="800" color="#fff">{BYO.drafts[b.id] ? 'Resume' : 'Build'}</T></View> : null}
+      {ok ? <View style={{backgroundColor: th.br, borderRadius: 14, paddingHorizontal: 14, paddingVertical: 8}}><T size={13} weight="600" color="#fff">{BYO.drafts[b.id] ? label('lbl.byoResume', 'Resume') : label('lbl.byoBuild', 'Build')}</T></View> : null}
     </Pressable>
   );
 }

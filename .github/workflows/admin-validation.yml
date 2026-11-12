@@ -16,6 +16,8 @@ jobs:
           node-version: 22
           cache: npm
       - run: npm ci
+      - name: Goodies CMS regression tests
+        run: npm run test:goodies-cms
       - run: npm run typecheck
       - name: Bundle Android application
         run: npx expo export --platform android --output-dir dist/android

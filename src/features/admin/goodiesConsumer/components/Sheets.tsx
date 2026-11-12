@@ -1,15 +1,21 @@
-import React, {useState} from 'react';
-import {View, Text, Pressable, ScrollView, Share} from 'react-native';
-import {T, Cta, Row, Card, Badge, Input, Radio, SheetBox, useTheme} from './ui';
+import {Modal,previewShare as Share} from '../previewNative';
+import {EditableNativeText as Text} from '../EditableNativeText';
+import React, {useEffect, useMemo, useState} from 'react';
+import {View, Text as UnusedNativeText, Pressable, Modal as UnusedNativeModal, ScrollView, KeyboardAvoidingView, Share as UnusedNativeShare, Image, Platform, TextInput, useWindowDimensions, PanResponder} from 'react-native';
+import {PreviewDateTimePicker as DateTimePicker} from '../previewNative';
+import {T, Cta, Row, Card, Badge, Input, Radio, Seg, SheetBox, Bar, useTheme} from './ui';
 import {Icon} from './Icon';
-import {S, STB, money, emit, save, toast, ui, addr, defAddr, done, phoneOK, fmtDay, fmtTime, alcAge} from '../store';
+import {CameraView, useCameraPermissions} from '../previewNative';
+import QRCode from 'react-native-qrcode-svg';
+import {S, STB, money, emit, save, toast, ui, addr, defAddr, done, phoneOK, fmtDay, fmtTime, alcAge, syncGroupOrderCartLine, removeGroupOrderCartLine, refreshUserAddresses, clearActiveGroup, validateActiveGroup} from '../store';
 import * as A from '../actions';
+import {previewBackend as supabase} from '../previewRuntime';
 import {PROMO_DETAIL} from '../data/promoText';
 import {bzLeave, bzDiscard, bzReset2} from '../builders/engine';
-import {rgText, importContent, clearContent, hasContent} from '../content';
-import {TextInput, useWindowDimensions} from 'react-native';
+import {rgText, importContent, clearContent, hasContent, label} from '../content';
 import {useSafeAreaInsets} from 'react-native-safe-area-context';
 import {BottomSheet, ConfirmDialog} from './Overlays';
+import {friendlyError} from '../friendlyError';
 
 export function Sheets({sheet, close}: {sheet: any; close: () => void}) {
   const th = useTheme(), insets = useSafeAreaInsets(), {height: windowHeight} = useWindowDimensions();
@@ -17,38 +23,38 @@ export function Sheets({sheet, close}: {sheet: any; close: () => void}) {
   const k = sheet.kind;
   const stars = (n: number, on: (v: number) => void) => <View style={{flexDirection: 'row', justifyContent: 'center', gap: 6, marginVertical: 10}}>{[1, 2, 3, 4, 5].map(v => <Pressable key={v} onPress={() => on(v)}><Icon name="star" size={32} color={n >= v ? '#FFB400' : th.line} fill /></Pressable>)}</View>;
   let content: any = null;
-  if (k === 'newcart') content = (<><T size={20} weight="800">Start a new cart?</T><T color={th.mut} style={{marginVertical: 8, marginBottom: 18}}>Your cart has items from {sheet.from}. Orders are placed with one store at a time, so adding from {sheet.to} replaces them.</T><Cta label="Replace and add" onPress={A.newCart} /><View style={{height: 10}} /><Cta ghost label="Keep current cart" onPress={close} /></>);
-  if (k === 'byoleave') content = (<><T size={20} weight="800">{sheet.edit ? 'Discard your changes?' : 'Leave this builder?'}</T><T color={th.mut} style={{marginVertical: 8, marginBottom: 18}}>{sheet.edit ? 'The item in your cart stays as it was.' : 'Your choices can be saved as a draft so you can pick up where you left off.'}</T>{sheet.edit ? null : <><Cta label="Save draft and leave" onPress={bzLeave} /><View style={{height: 10}} /></>}<Pressable onPress={bzDiscard} style={{height: 52, borderRadius: 16, backgroundColor: th.red, alignItems: 'center', justifyContent: 'center'}}><T size={15.5} weight="800" color="#fff">Discard</T></Pressable><View style={{height: 10}} /><Cta ghost label="Keep editing" onPress={close} /></>);
-  if (k === 'byoreset') content = (<><T size={20} weight="800">Start over?</T><T color={th.mut} style={{marginVertical: 8, marginBottom: 18}}>This clears your current choices. Items already in your cart are not affected.</T><Cta label="Start over" onPress={bzReset2} /><View style={{height: 10}} /><Cta ghost label="Keep editing" onPress={close} /></>);
-  if (k === 'alcrules') { const a = alcAge(sheet.sid || (S.pend && S.pend[0] ? S.pend[0].s : null)); content = (<><View style={{alignItems: 'center', marginBottom: 6}}><Text style={{fontSize: 44}}>🪪</Text></View><T size={20} weight="800">Alcohol rules</T><T color={th.mut} style={{marginTop: 8, lineHeight: 21}}>{rgText('rg.rules', 'Alcohol is sold only to customers aged {age} or older. Minors may not buy alcohol. Valid government photo ID is required at delivery or pickup. If the ID check fails, you are refunded to your Wantiss wallet minus the delivery fee.', a.age)}</T><Card style={{marginTop: 12}}><T size={13.5}>• Minimum age here: <T weight="800">{a.age}</T></T><T size={13.5}>• The courier checks your ID at the door. At a pickup, the shop checks it.</T><T size={13.5}>• If it fails, you get a refund to your Wantiss wallet minus the delivery fee.</T></Card><View style={{height: 6}} /><Cta label="I understand" onPress={A.alcAccept} /><View style={{height: 10}} /><Cta ghost label="Cancel" onPress={close} /></>); }
-  if (k === 'group-order') content = <GroupOrderSheet close={close} />;
+  if (k === 'newcart') content = (<><T cmsKey={'lbl.sheetStartCart'} size={20} weight="600">{label('lbl.sheetStartCart', 'Start a new cart?')}</T><T cmsKeys={["lbl.cms.adf8a6e98991","lbl.cms.5a754caad741","lbl.cms.936aefb39183","lbl.cms.516f8e8c1f07","lbl.cms.1a5decb44df8","lbl.cms.3402664551ea","lbl.cms.dd7415008f6b"]} color={th.mut} style={{marginVertical: 8, marginBottom: 18}}>{sheet.canMerge ? label("lbl.cms.adf8a6e98991", "Your cart has items from ") + sheet.from + label("lbl.cms.5a754caad741", ". Add ") + sheet.to + label("lbl.cms.936aefb39183", " to the same order, or start a new cart.") : sheet.stops >= sheet.max ? label("lbl.cms.adf8a6e98991", "Your cart has items from ") + sheet.from + label("lbl.cms.516f8e8c1f07", ". One order can include up to ") + sheet.max + label("lbl.cms.1a5decb44df8", " stores, so adding from ") + sheet.to + label("lbl.cms.3402664551ea", " replaces them.") : label("lbl.cms.adf8a6e98991", "Your cart has items from ") + sheet.from + label("lbl.cms.dd7415008f6b", ". Adding from ") + sheet.to + label("lbl.cms.3402664551ea", " replaces them.")}</T>{sheet.canMerge ? <><Cta cmsKey={"lbl.cms.ec46b728216f"} label={label("lbl.cms.ec46b728216f", "Add to this order")} onPress={A.addStop} /><View style={{height: 10}} /></> : null}<Cta cmsKeys={["lbl.cms.31fdc2bc7366",'lbl.sheetReplace']} ghost={!!sheet.canMerge} label={sheet.canMerge ? label("lbl.cms.31fdc2bc7366", "Start a new cart") : label('lbl.sheetReplace', 'Replace and add')} onPress={A.newCart} /><View style={{height: 10}} /><Cta cmsKey={'lbl.sheetKeepCart'} ghost label={label('lbl.sheetKeepCart', 'Keep current cart')} onPress={close} /></>);
+  if (k === 'byoleave') content = (<><T cmsKeys={['lbl.sheetDiscardTitle','lbl.sheetLeaveTitle']} size={20} weight="600">{sheet.edit ? label('lbl.sheetDiscardTitle', 'Discard your changes?') : label('lbl.sheetLeaveTitle', 'Leave this builder?')}</T><T cmsKeys={['lbl.sheetDiscardText','lbl.sheetLeaveText']} color={th.mut} style={{marginVertical: 8, marginBottom: 18}}>{sheet.edit ? label('lbl.sheetDiscardText', 'The item in your cart stays as it was.') : label('lbl.sheetLeaveText', 'Your choices can be saved as a draft so you can pick up where you left off.')}</T>{sheet.edit ? null : <><Cta cmsKey={'lbl.sheetBuilderSave'} label={label('lbl.sheetBuilderSave', 'Save draft and leave')} onPress={bzLeave} /><View style={{height: 10}} /></>}<Pressable onPress={bzDiscard} style={{height: 52, borderRadius: 16, backgroundColor: th.red, alignItems: 'center', justifyContent: 'center'}}><T cmsKey={'lbl.sheetDiscard'} size={15.5} weight="600" color="#fff">{label('lbl.sheetDiscard', 'Discard')}</T></Pressable><View style={{height: 10}} /><Cta cmsKey={'lbl.sheetKeepEditing'} ghost label={label('lbl.sheetKeepEditing', 'Keep editing')} onPress={close} /></>);
+  if (k === 'byoreset') content = (<><T cmsKey={'lbl.sheetStartOver'} size={20} weight="600">{label('lbl.sheetStartOver', 'Start over?')}</T><T cmsKey={"lbl.sheetAuto1DTRBEO"} color={th.mut} style={{marginVertical: 8, marginBottom: 18}}>{label("lbl.sheetAuto1DTRBEO", "This clears your current choices. Items already in your cart are not affected.")}</T><Cta cmsKey={"lbl.sheetAutoT5109D"} label={label("lbl.sheetAutoT5109D", "Start over")} onPress={bzReset2} /><View style={{height: 10}} /><Cta cmsKey={'lbl.sheetKeepEditing'} ghost label={label('lbl.sheetKeepEditing', 'Keep editing')} onPress={close} /></>);
+  if (k === 'alcrules') { const a = alcAge(sheet.sid || (S.pend && S.pend[0] ? S.pend[0].s : null)); content = (<><View style={{alignItems: 'center', marginBottom: 6}}><Text style={{fontSize: 44}}>🪪</Text></View><T cmsKey={'lbl.sheetAlcoholRules'} size={20} weight="600">{label('lbl.sheetAlcoholRules', 'Alcohol rules')}</T><T color={th.mut} style={{marginTop: 8, lineHeight: 21}}>{rgText('rg.rules', 'Alcohol is sold only to customers aged {age} or older. Minors may not buy alcohol. Valid government photo ID is required at delivery or pickup. If the ID check fails, you are refunded to your Wantiss wallet minus the delivery fee.', a.age)}</T><Card style={{marginTop: 12}}><T cmsKey={"lbl.cms.06e2931ac98c"} size={13.5}>{label("lbl.cms.06e2931ac98c", "• Minimum age here: ")}<T weight="600">{a.age}</T></T><T cmsKey={"lbl.sheetAuto9O43A9"} size={13.5}>{label("lbl.sheetAuto9O43A9", "• The courier checks your ID at the door. At a pickup, the shop checks it.")}</T><T cmsKey={"lbl.sheetAuto1JBCM1P"} size={13.5}>{label("lbl.sheetAuto1JBCM1P", "• If it fails, you get a refund to your Wantiss wallet minus the delivery fee.")}</T></Card><View style={{height: 6}} /><Cta cmsKey={'lbl.sheetAlcoholAccept'} label={label('lbl.sheetAlcoholAccept', 'I understand')} onPress={A.alcAccept} /><View style={{height: 10}} /><Cta cmsKey={"lbl.sheetAutoWFRFF9"} ghost label={label("lbl.sheetAutoWFRFF9", "Cancel")} onPress={close} /></>); }
   if (k === 'schedule') content = <ScheduleSheet close={close} />;
   if (k === 'import') content = <ImportSheet close={close} />;
   if (k === 'contacts') content = <ContactsSheet close={close} />;
-  if (k === 'ctform') content = <CtForm key={sheet.id || 'new'} id={sheet.id} />;
-  if (k === 'topup') content = (<><T size={20} weight="800">Top up wallet</T><T color={th.mut} style={{marginTop: 6, marginBottom: 14}}>Demo: no real money moves.</T><View style={{flexDirection: 'row', flexWrap: 'wrap', gap: 8}}>{[10, 20, 50, 100].map(v => <Pressable key={v} onPress={() => {S.wallet += v; close(); toast('Wallet topped up to ' + money(S.wallet)); save(); emit();}} style={{paddingVertical: 10, paddingHorizontal: 16, borderRadius: 18, backgroundColor: th.soft}}><T size={14} weight="700">+{money(v)}</T></Pressable>)}</View></>);
-  if (k === 'replace') content = (<><T size={20} weight="800">Replace your cart?</T><T color={th.mut} style={{marginVertical: 8, marginBottom: 18}}>Your cart has items from {sheet.from}.</T><Cta label="Replace and reorder" onPress={A.runReorder} /><View style={{height: 10}} /><Cta ghost label="Keep current cart" onPress={close} /></>);
+  if (k === 'ctform') content = <CtForm key={sheet.id || 'new'} id={sheet.id} bottomInset={insets.bottom} />;
+  if (k === 'topup') content = (<><T cmsKey={'lbl.sheetTopup'} size={20} weight="600">{label('lbl.sheetTopup', 'Top up wallet')}</T><T cmsKey={'lbl.sheetDemoMoney'} color={th.mut} style={{marginTop: 6, marginBottom: 14}}>{label('lbl.sheetDemoMoney', 'Demo: no real money moves.')}</T><View style={{flexDirection: 'row', flexWrap: 'wrap', gap: 8}}>{[10, 20, 50, 100].map(v => <Pressable key={v} onPress={() => {S.wallet += v; close(); toast(label('lbl.sheetWalletToppedUp', 'Wallet topped up to {amount}').replace('{amount}', money(S.wallet))); save(); emit();}} style={{paddingVertical: 10, paddingHorizontal: 16, borderRadius: 18, backgroundColor: th.soft}}><T size={14} weight="600">+{money(v)}</T></Pressable>)}</View></>);
+  if (k === 'replace') content = (<><T cmsKey={'lbl.sheetReplaceCart'} size={20} weight="600">{label('lbl.sheetReplaceCart', 'Replace your cart?')}</T><T cmsKey={"lbl.cms.adf8a6e98991"} color={th.mut} style={{marginVertical: 8, marginBottom: 18}}>{label("lbl.cms.adf8a6e98991", "Your cart has items from ")}{sheet.from}.</T><Cta cmsKey={'lbl.sheetReorder'} label={label('lbl.sheetReorder', 'Replace and reorder')} onPress={A.runReorder} /><View style={{height: 10}} /><Cta cmsKey={'lbl.sheetKeepCart'} ghost label={label('lbl.sheetKeepCart', 'Keep current cart')} onPress={close} /></>);
   if (k === 'remove-number') content = (<>
-    <T size={20} weight="800">Remove this contact number?</T>
-    <T color={th.mut} style={{marginVertical: 8, marginBottom: 18}}>Remove {String(sheet.numberLabel || 'this number')} from your Goodies checkout contacts?</T>
-    <Cta label="Remove number" onPress={() => { void sheet.onConfirm?.(); }} />
+    <T cmsKey={'lbl.sheetRemoveNumberTitle'} size={20} weight="600">{label('lbl.sheetRemoveNumberTitle', 'Remove this contact number?')}</T>
+    <T cmsKey={'lbl.sheetRemoveNumberBody'} color={th.mut} style={{marginVertical: 8, marginBottom: 18}}>{label('lbl.sheetRemoveNumberBody', 'Remove {number} from your Goodies checkout contacts?').replace('{number}', String(sheet.numberLabel || 'this number'))}</T>
+    <Cta cmsKey={'lbl.sheetRemoveNumberConfirm'} label={label('lbl.sheetRemoveNumberConfirm', 'Remove number')} onPress={() => { void sheet.onConfirm?.(); }} />
     <View style={{height: 10}} />
-    <Cta ghost label="Keep number" onPress={close} />
+    <Cta cmsKey={'lbl.sheetKeepNumber'} ghost label={label('lbl.sheetKeepNumber', 'Keep number')} onPress={close} />
   </>);
-  if (k === 'remove-item') content = (<>
-    <T size={20} weight="800">Remove this item?</T>
-    <T color={th.mut} style={{marginVertical: 8, marginBottom: 18}}>Remove {String(sheet.itemName || 'this item')} from your cart?</T>
-    <Cta label="Remove item" onPress={() => { A.qty(String(sheet.lineKey), -1); close(); }} />
+  if (k === 'remove-address') content = (<>
+    <T cmsKey={'lbl.sheetDeleteAddressTitle'} size={20} weight="600">{label('lbl.sheetDeleteAddressTitle', 'Delete this address?')}</T>
+    <T cmsKey={'lbl.sheetDeleteAddressBody'} color={th.mut} style={{marginVertical: 8, marginBottom: 18}}>{label('lbl.sheetDeleteAddressBody', 'Remove {address} from your saved addresses?').replace('{address}', String(sheet.addressLabel || 'this address'))}</T>
+    <Cta cmsKey={'lbl.sheetDeleteAddressConfirm'} label={label('lbl.sheetDeleteAddressConfirm', 'Delete address')} onPress={() => { void sheet.onConfirm?.(); }} />
     <View style={{height: 10}} />
-    <Cta ghost label="Keep item" onPress={close} />
+    <Cta cmsKey={'lbl.sheetKeepAddress'} ghost label={label('lbl.sheetKeepAddress', 'Keep address')} onPress={close} />
   </>);
-  if (k === 'clear') content = (<><T size={20} weight="800">Clear your cart?</T><T color={th.mut} style={{marginVertical: 8, marginBottom: 18}}>All items will be removed.</T><Pressable onPress={A.clearCart} style={{height: 52, borderRadius: 16, backgroundColor: th.red, alignItems: 'center', justifyContent: 'center'}}><T size={15.5} weight="800" color="#fff">Clear cart</T></Pressable><View style={{height: 10}} /><Cta ghost label="Cancel" onPress={close} /></>);
-  if (k === 'cancel') content = (<><T size={20} weight="800">Cancel this order?</T><T color={th.mut} style={{marginVertical: 8, marginBottom: 18}}>You can cancel until the store finishes preparing it.</T><Pressable onPress={() => A.cancelOrder(sheet.id)} style={{height: 52, borderRadius: 16, backgroundColor: th.red, alignItems: 'center', justifyContent: 'center'}}><T size={15.5} weight="800" color="#fff">Yes, cancel order</T></Pressable><View style={{height: 10}} /><Cta ghost label="Keep order" onPress={close} /></>);
+  if (k === 'remove-item') content = (<><T cmsKey={'lbl.sheetRemoveItemTitle'} size={20} weight="600">{label('lbl.sheetRemoveItemTitle', 'Remove this item?')}</T><T cmsKey={'lbl.sheetRemoveItemBody'} color={th.mut} style={{marginVertical: 8, marginBottom: 18}}>{label('lbl.sheetRemoveItemBody', 'Remove {item} from your cart?').replace('{item}', String(sheet.itemName || 'this item'))}</T><Cta cmsKey={'lbl.sheetRemoveItemConfirm'} label={label('lbl.sheetRemoveItemConfirm', 'Remove item')} onPress={() => { A.qty(String(sheet.lineKey), -1); close(); }} /><View style={{height: 10}} /><Cta cmsKey={'lbl.sheetKeepItem'} ghost label={label('lbl.sheetKeepItem', 'Keep item')} onPress={close} /></>);
+  if (k === 'clear') content = (<><T cmsKey={'lbl.sheetClearCart'} size={20} weight="600">{label('lbl.sheetClearCart', 'Clear your cart?')}</T><T cmsKey={"lbl.sheetAuto1K2QIKR"} color={th.mut} style={{marginVertical: 8, marginBottom: 18}}>{label("lbl.sheetAuto1K2QIKR", "All items will be removed.")}</T><Pressable onPress={A.clearCart} style={{height: 52, borderRadius: 16, backgroundColor: th.red, alignItems: 'center', justifyContent: 'center'}}><T cmsKey={'lbl.sheetClearCartAction'} size={15.5} weight="600" color="#fff">{label('lbl.sheetClearCartAction', 'Clear cart')}</T></Pressable><View style={{height: 10}} /><Cta cmsKey={"lbl.sheetAutoWFRFF9"} ghost label={label("lbl.sheetAutoWFRFF9", "Cancel")} onPress={close} /></>);
+  if (k === 'cancel') content = (<><T cmsKey={'lbl.sheetCancelOrder'} size={20} weight="600">{label('lbl.sheetCancelOrder', 'Cancel this order?')}</T><T cmsKey={"lbl.sheetAutoFMXIAY"} color={th.mut} style={{marginVertical: 8, marginBottom: 18}}>{label("lbl.sheetAutoFMXIAY", "You can cancel until the store finishes preparing it.")}</T><Pressable onPress={() => A.cancelOrder(sheet.id)} style={{height: 52, borderRadius: 16, backgroundColor: th.red, alignItems: 'center', justifyContent: 'center'}}><T cmsKey={'lbl.sheetCancelConfirm'} size={15.5} weight="600" color="#fff">{label('lbl.sheetCancelConfirm', 'Yes, cancel order')}</T></Pressable><View style={{height: 10}} /><Cta cmsKey={"lbl.sheetAuto81YEJ2"} ghost label={label("lbl.sheetAuto81YEJ2", "Keep order")} onPress={close} /></>);
   if (k === 'promo') {
     const d = PROMO_DETAIL[sheet.p as 'free' | 'points' | 'produce'], custom = sheet.custom || {};
     content = (<>
       <View style={{height: 150, borderRadius: 20, alignItems: 'center', justifyContent: 'center', backgroundColor: d.bg, marginBottom: 12}}><Text style={{fontSize: 78}}>{custom.emoji || d.e}</Text></View>
-      <T size={21} weight="800">{custom.title || d.t}</T>
+      <T size={21} weight="600">{custom.title || d.t}</T>
       <T color={th.mut} style={{marginVertical: 8, marginBottom: 18, lineHeight: 21}}>{custom.sub || d.d}</T>
       <Cta label={custom.btn || d.b} onPress={() => {
         const target = String(custom.target || '');
@@ -62,231 +68,604 @@ export function Sheets({sheet, close}: {sheet: any; close: () => void}) {
   }
   if (k === 'sinfo') {
     const s = STB[sheet.id];
-    const row = (a: string, b: string) => <View key={a} style={{flexDirection: 'row', alignItems: 'flex-start', gap: 12, paddingVertical: 11, borderBottomWidth: 1, borderBottomColor: th.line}}><T color={th.mut} style={{width: '38%'}}>{a}</T><T color={th.ink} weight="700" style={{flex: 1, textAlign: 'right'}}>{b}</T></View>;
+    const row = (a: string, b: string) => <View key={a} style={{flexDirection: 'row', alignItems: 'flex-start', gap: 12, paddingVertical: 11, borderBottomWidth: 0.5, borderBottomColor: th.line}}><T color={th.mut} style={{width: '38%'}}>{a}</T><T color={th.ink} weight="600" style={{flex: 1, textAlign: 'right'}}>{b}</T></View>;
     content = (<>
-      <T size={23} weight="800">{s.businessName || s.n}</T>
+      <T size={23} weight="600">{s.businessName || s.n}</T>
       <T color={th.mut} style={{marginTop: 6, marginBottom: 14, lineHeight: 21}}>{s.businessDescription || s.k}</T>
       <Card style={{padding: 16}}>
         <Row style={{gap: 10, alignItems: 'center', marginBottom: 10}}>
-          <Pressable accessibilityRole="button" accessibilityLabel="Read store reviews" onPress={() => {close(); A.go('reviews', sheet.id);}} style={{flex: 1}}><T size={13} color={th.br}>CUSTOMER REVIEWS</T><T size={18} weight="800">{s.rv > 0 ? '★ ' + s.r.toFixed(1) + ' (' + s.rv + ' reviews)' : 'No reviews yet'}</T></Pressable>
-          <Badge label={s.open ? 'Open now' : 'Closed now'} />
+          <Pressable accessibilityRole="button" accessibilityLabel={label("lbl.sheetAutoC0Z21F", "Read store reviews")} onPress={() => {close(); A.go('reviews', sheet.id);}} style={{flex: 1}}><T cmsKey={'lbl.storeCustomerReviews'} size={13} color={th.br}>{label('lbl.storeCustomerReviews', 'Customer reviews').toUpperCase()}</T><T cmsKeys={['lbl.sheetRatingSummary','lbl.storeNoReviewsYet']} size={18} weight="600">{s.rv > 0 ? label('lbl.sheetRatingSummary', '★ {rating} ({n} reviews)').replace('{rating}', s.r.toFixed(1)).replace('{n}', String(s.rv)) : label('lbl.storeNoReviewsYet', 'No reviews yet')}</T></Pressable>
+          <Badge label={s.open ? label('lbl.sheetOpenNow', 'Open now') : label('lbl.sheetClosedNow', 'Closed now')} />
         </Row>
-        {row('Opening hours', s.h)}
-        {row('Current status', s.open ? 'Accepting orders' : s.nx || 'Currently closed')}
-        {s.businessAddress ? row('Address', [s.businessAddress, s.businessCity, s.businessCountry].filter(Boolean).join(', ')) : null}
-        {s.businessPhone ? row('Phone', s.businessPhone) : null}
-        {s.businessEmail ? row('Email', s.businessEmail) : null}
-        {s.businessWebsite ? row('Website', s.businessWebsite) : null}
-        {s.businessDeliveryModes?.length ? row('Available services', s.businessDeliveryModes.join(' and ')) : null}
-        {row('Delivery fee', s.fee === 0 ? 'Free delivery' : money(s.fee))}
-        {row('Minimum order', money(s.min))}
-        {row('Distance', s.live ? 'Unavailable until store location is provided' : s.km.toFixed(1) + ' km away')}
-        {row('Estimated delivery', s.eta + ' min')}
-        {row('Order methods', 'Delivery and pickup')}
-        {row('Scheduled orders', s.acceptScheduledOrders ? 'Available while closed' : 'Only while open')}
-        {s.acceptScheduledOrders ? row('Minimum advance time', Math.max(0, Number(s.scheduledOrderStartMinutes ?? 60)) + ' minutes after opening') : null}
+        {row(label('lbl.storeOpeningHours', 'Opening hours'), s.h)}
+        {row(label('lbl.storeCurrentStatus', 'Current status'), s.open ? label('lbl.sheetAcceptingOrders', 'Accepting orders') : s.nx || label('lbl.storeCurrentlyClosed', 'Currently closed'))}
+        {s.businessAddress ? row(label('lbl.storeAddress', 'Address'), [s.businessAddress, s.businessCity, s.businessCountry].filter(Boolean).join(', ')) : null}
+        {s.businessPhone ? row(label('lbl.storePhone', 'Phone'), s.businessPhone) : null}
+        {s.businessEmail ? row(label('lbl.storeEmail', 'Email'), s.businessEmail) : null}
+        {s.businessWebsite ? row(label('lbl.storeWebsite', 'Website'), s.businessWebsite) : null}
+        {s.businessDeliveryModes?.length ? row(label('lbl.storeServices', 'Available services'), s.businessDeliveryModes.join(' and ')) : null}
+        {row(label('lbl.storeDeliveryFee', 'Delivery fee'), s.fee === 0 ? label('lbl.filterFree', 'Free delivery') : money(s.fee))}
+        {row(label('lbl.storeMinimumOrder', 'Minimum order'), money(s.min))}
+        {s.live ? (s.distanceReady ? row(label('lbl.storeDistance', 'Distance'), label('lbl.storeDistanceFromAddress', '{km} km from your address').replace('{km}', s.km.toFixed(1))) : !addr()?.t?.trim() ? row(label('lbl.storeDistance', 'Distance'), label('lbl.storeAddAddressForDistance', 'Add address to see distance')) : null) : row(label('lbl.storeDistance', 'Distance'), label('lbl.sheetKmAway', '{km} km away').replace('{km}', s.km.toFixed(1)))}
+        {row(label('lbl.storeEstimatedDelivery', 'Estimated delivery'), s.eta + ' min')}
+        {row(label('lbl.storeOrderMethods', 'Order methods'), label('lbl.sheetDeliveryAndPickup', 'Delivery and pickup'))}
+        {row(label('lbl.storeScheduledOrders', 'Scheduled orders'), s.acceptScheduledOrders ? label('lbl.sheetScheduledAvailable', 'Available while closed') : label('lbl.sheetScheduledOnlyOpen', 'Only while open'))}
+        {s.acceptScheduledOrders ? row(label('lbl.storeAdvanceTime', 'Earliest order time'), String(s.scheduledOrderStartTime || '10:00').slice(0,5)) : null}
       </Card>
     </>);
   }
-  if (k === 'msg') content = (<><T size={20} weight="800" style={{marginBottom: 14}}>Message courier</T><View style={{flexDirection: 'row', flexWrap: 'wrap', gap: 8}}>{['I am at the gate', 'Please call me', 'Leave it at the door', 'Running 5 min late'].map(x => <Pressable key={x} onPress={() => {close(); toast('Sent: ' + x);}} style={{paddingVertical: 9, paddingHorizontal: 14, borderRadius: 18, backgroundColor: th.soft}}><T size={13.5} weight="700">{x}</T></Pressable>)}</View></>);
+  if (k === 'msg') content = (<><T cmsKey={'lbl.sheetCourierTitle'} size={20} weight="600" style={{marginBottom: 14}}>{label('lbl.sheetCourierTitle', 'Message courier')}</T><View style={{flexDirection: 'row', flexWrap: 'wrap', gap: 8}}>{[{id: 'lbl.sheetCourierAtGate', text: label('lbl.sheetCourierAtGate', 'I am at the gate')}, {id: 'lbl.sheetCourierCall', text: label('lbl.sheetCourierCall', 'Please call me')}, {id: 'lbl.sheetCourierDoor', text: label('lbl.sheetCourierDoor', 'Leave it at the door')}, {id: 'lbl.sheetCourierLate', text: label('lbl.sheetCourierLate', 'Running 5 min late')}].map(x => <Pressable key={x.id} onPress={() => {close(); toast(label('lbl.sheetCourierSent', 'Sent: {message}').replace('{message}', x.text));}} style={{paddingVertical: 9, paddingHorizontal: 14, borderRadius: 18, backgroundColor: th.soft}}><T size={13.5} weight="600">{x.text}</T></Pressable>)}</View></>);
   if (k === 'review' || k === 'driver-review') content = <ReviewSheet key={String(sheet.id) + ':' + k} id={sheet.id} stars={stars} driver={k === 'driver-review'} initialStars={sheet.initialStars} />;
-  if (k === 'addr') content = (<><T size={20} weight="800" style={{marginBottom: 4}}>Deliver to</T><T size={12.5} color={th.mut} style={{marginBottom: 12}}>Choosing an address here only changes Goodies. Your Wantiss default stays the same.</T>{S.addr.map((a: any) => <Radio key={a.id} on={a.id === S.as} onPress={() => A.selectAddr(a.id)}><Row style={{gap: 6}}><T weight="700">{a.l}</T>{a.def ? <Badge green label="Wantiss default" /> : null}</Row><T size={12.5} color={th.mut}>{a.t}</T></Radio>)}<Cta ghost label="Manage addresses" onPress={() => {close(); A.go('addresses');}} /></>);
+  if (k === 'addr') content = (<><T cmsKey={'lbl.sheetDeliverToTitle'} size={20} weight="600" style={{marginBottom: 4}}>{label('lbl.sheetDeliverToTitle', 'Deliver to')}</T><T cmsKey={'lbl.sheetAddressScope'} size={12.5} color={th.mut} style={{marginBottom: 12}}>{label('lbl.sheetAddressScope', 'Choosing an address here only changes Goodies. Your Wantiss default stays the same.')}</T>{S.addr.map((a: any) => <Radio key={a.id} on={a.id === S.as} onPress={() => A.selectAddr(a.id)}><Row style={{gap: 6}}><T weight="600">{a.l}</T>{a.def ? <Badge cmsKey={"lbl.sheetAutoCKTN2B"} green label={label("lbl.sheetAutoCKTN2B", "Wantiss default")} /> : null}{a.goodiesDefault ? <View style={{backgroundColor: '#FD802E', borderRadius: 8, paddingHorizontal: 8, paddingVertical: 3}}><T cmsKey={"lbl.cms.7f7b502a8d5a"} size={10} weight="600" color="#fff">{label("lbl.cms.7f7b502a8d5a", "GOODIES")}</T></View> : null}</Row><T size={12.5} color={th.mut}>{a.t}</T></Radio>)}<Cta cmsKey={"lbl.sheetAuto16NJT2W"} ghost label={label("lbl.sheetAuto16NJT2W", "Manage addresses")} onPress={() => {close(); A.go('addresses');}} /></>);
 
+  if (k === 'group-order') return <GroupOrderModal close={close} storeId={String(sheet.storeId || '')} />;
   const isRatingSheet = k === 'review' || k === 'driver-review';
-  const isCenteredSheet = ['remove-item','remove-number','clear','cancel','newcart','replace','byoleave','byoreset','alcrules'].includes(k);
+  const isCenteredSheet = ['remove-item','remove-address','remove-number','clear','cancel','newcart','replace','byoleave','byoreset','alcrules'].includes(k);
   const sheetBody = (
-    <View style={{width:'100%', height: isRatingSheet ? Math.min(430, windowHeight * 0.68) : k==='schedule' ? Math.max(0, windowHeight - insets.top) : undefined, maxHeight: k==='schedule' ? Math.max(0, windowHeight - insets.top) : isRatingSheet ? windowHeight * 0.68 : k==='promo'&&sheet.custom ? '68%' : k==='sinfo'||k==='promo' ? '92%' : isCenteredSheet?'60%':'90%', flexShrink:1, minHeight:0, marginBottom:0}}>
-      <SheetBox centered={isCenteredSheet || k === 'contacts' || k === 'ctform'} large={isRatingSheet || k === 'sinfo' || k === 'schedule' || (k === 'promo' && !sheet.custom)} compact={k === 'promo' && !!sheet.custom} onClose={close}>{k === 'ctform' ? content : <ScrollView style={{flex:1,minHeight:0}} contentContainerStyle={{paddingBottom:Math.max(16,insets.bottom),flexGrow:1}} nestedScrollEnabled keyboardShouldPersistTaps="handled" keyboardDismissMode="interactive" showsVerticalScrollIndicator={false}>{content}</ScrollView>}</SheetBox>
+    <View style={{width:'100%', height: k==='promo' ? 370 : isRatingSheet ? Math.min(430, windowHeight * 0.68) : k==='schedule' ? Math.min(560, windowHeight * 0.72) : k==='ctform' || k==='contacts' ? Math.min(600, windowHeight * 0.84) : undefined, maxHeight: k==='schedule' ? Math.min(560, windowHeight * 0.72) : k==='ctform' || k==='contacts' ? '94%' : isRatingSheet ? windowHeight * 0.68 : k==='promo' ? 370 : k==='sinfo' ? '92%' : isCenteredSheet?'90%':'90%', flexShrink:1, minHeight: isCenteredSheet ? 360 : k==='ctform' || k==='contacts' ? 400 : 0, marginBottom:0}}>
+      <SheetBox centered={isCenteredSheet || k === 'contacts' || k === 'ctform'} large={isRatingSheet || k === 'sinfo' || k === 'schedule' || k === 'ctform' || k === 'contacts' } compact={false} onClose={close}>{k === 'ctform' ? content : <ScrollView style={k === 'promo' ? {flexGrow:0,flexShrink:1} : {flex:1,minHeight:0}} contentContainerStyle={k === 'promo' ? {paddingBottom:0} : {paddingBottom:Math.max(16,insets.bottom),flexGrow:1}} nestedScrollEnabled keyboardShouldPersistTaps="handled" keyboardDismissMode="interactive" showsVerticalScrollIndicator={false}>{content}</ScrollView>}</SheetBox>
     </View>
   );
   if (isCenteredSheet) {
-    return <ConfirmDialog visible onClose={close} accessibilityLabel="Close dialog">{sheetBody}</ConfirmDialog>;
+    return <ConfirmDialog visible onClose={close} accessibilityLabel={label("lbl.sheetAutoKDBKGE", "Close dialog")}>{sheetBody}</ConfirmDialog>;
   }
-  return <BottomSheet visible onClose={close} keyboardAware={k === 'contacts' || k === 'ctform'} maxHeight={k==='schedule' ? Math.max(0, windowHeight - insets.top) : k==='sinfo'||k==='promo' ? '92%' : isRatingSheet ? windowHeight * 0.68 : '90%'}>{sheetBody}</BottomSheet>;
+  return <BottomSheet visible onClose={close} keyboardAware={k === 'contacts' || k === 'ctform'} maxHeight={k==='schedule' ? Math.max(0, windowHeight - insets.top) : k==='ctform' || k==='contacts' ? '94%' : k==='promo' ? 370 : k==='sinfo' ? '92%' : isRatingSheet ? windowHeight * 0.68 : '90%'}>{sheetBody}</BottomSheet>;
 }
 
-function ScheduleSheet({close}: {close: () => void}) {
+function ScheduleSheet({close, inline = false}: {close: () => void; inline?: boolean}) {
   const th = useTheme(), store: any = STB[S.cart.sid];
+  const customerZone = Intl.DateTimeFormat().resolvedOptions().timeZone || 'Etc/GMT';
+  const storeZone = store?.scheduledOrderTimezone || customerZone;
   const dayNames = ['Sunday','Monday','Tuesday','Wednesday','Thursday','Friday','Saturday'];
-  const now = new Date();
-  const roundedNow = new Date(now); roundedNow.setMinutes(Math.ceil(now.getMinutes()/5)*5,0,0);
-  if (roundedNow.getTime() <= now.getTime()) roundedNow.setMinutes(roundedNow.getMinutes()+5);
-  const initialSchedule = S.sch && S.sch > Date.now() ? new Date(S.sch) : roundedNow;
-  const [dayOffset,setDayOffset] = useState(() => {
-    if (!S.sch || S.sch <= Date.now()) return 0;
-    const today = new Date(); today.setHours(0,0,0,0);
-    const chosen = new Date(S.sch); chosen.setHours(0,0,0,0);
-    return Math.max(0,Math.min(6,Math.round((chosen.getTime()-today.getTime())/86400000)));
-  });
-  const [deliveryMode,setDeliveryMode] = useState(S.mode === 'pickup' ? 'pickup' : 'delivery');
-  const [customHour,setCustomHour] = useState(String(initialSchedule.getHours()).padStart(2,'0'));
-  const [customMinute,setCustomMinute] = useState(String(initialSchedule.getMinutes()).padStart(2,'0'));
-  const [customMode,setCustomMode] = useState(!!(S.sch && S.sch > Date.now()));
-  const [selectedTs,setSelectedTs] = useState<number>(() => S.sch && S.sch > Date.now() ? S.sch : 0);
-  const selectedDate = new Date(now);
-  selectedDate.setDate(now.getDate()+dayOffset); selectedDate.setHours(0,0,0,0);
-  const schedule = store?.scheduleHours || {};
-  const hours = schedule[dayNames[selectedDate.getDay()]];
-  const opening = hours && !hours.closed && hours.open ? String(hours.open) : '';
-  const closing = hours && !hours.closed && hours.close ? String(hours.close) : '';
-  const lead = Math.max(0,Number(store?.scheduledOrderStartMinutes ?? 60));
-  let earliest = new Date(selectedDate);
-  if(dayOffset===0) earliest = new Date();
-  if(store && !store.open) {
-    if(opening) {
-      const [oh,om]=opening.split(':').map(Number);
-      const opens=new Date(selectedDate);opens.setHours(oh,om||0,0,0);
-      earliest=new Date(Math.max(earliest.getTime(),opens.getTime()+lead*60000));
-    } else earliest=new Date(Math.max(earliest.getTime(),Date.now())+lead*60000);
-  }
-  const noSchedule = !store?.scheduleHours || !Object.keys(store.scheduleHours).length;
-  const hasHours = !!(hours && !hours.closed && opening && closing);
-  let startMinute=0, endMinute=24*60;
-  if(hasHours) {
-    const [oh,om]=opening.split(':').map(Number),[ch,cm]=closing.split(':').map(Number);
-    startMinute=oh*60+(om||0); endMinute=ch*60+(cm||0);
-  } else { startMinute=8*60; endMinute=22*60; }
-  const candidates:number[]=[];
-  if(hasHours || noSchedule) {
-    for(let mins=startMinute;mins<endMinute;mins+=30) {
-      const d=new Date(selectedDate);d.setHours(Math.floor(mins/60),mins%60,0,0);
-      if(d.getTime()<=Date.now() || d.getTime()<earliest.getTime()) continue;
-      candidates.push(d.getTime());
-    }
-  }
-  const customDate = new Date(selectedDate);
-  const validCustomDigits = /^\d{1,2}$/.test(customHour) && /^\d{1,2}$/.test(customMinute) && Number(customHour)>=0 && Number(customHour)<=23 && Number(customMinute)>=0 && Number(customMinute)<=59;
-  if (validCustomDigits) customDate.setHours(Number(customHour),Number(customMinute),0,0);
-  const customMinutes = customDate.getHours()*60+customDate.getMinutes();
-  const customInHours = hasHours ? customMinutes>=startMinute && customMinutes<endMinute : noSchedule && customMinutes>=8*60 && customMinutes<22*60;
-  const customValid = validCustomDigits && customDate.getTime()>Date.now() && customDate.getTime()>=earliest.getTime() && customInHours;
-  const selected = customMode ? (customValid ? customDate.getTime() : 0) : candidates.find(ts=>ts===selectedTs);
-  const choose = () => {
-    if(!store){toast('Choose a store before scheduling.');return;}
-    if(!store.open&&!store.acceptScheduledOrders){toast('This store does not accept scheduled orders while closed.');return;}
-    if(!selected){
-      if(customMode && !customInHours) toast('Choose a time within the store opening hours.');
-      else if(customMode && customDate.getTime()<earliest.getTime()) toast('This store’s earliest available time is '+fmtTime(earliest)+'.');
-      else toast('Choose a valid future time or select an available time.');
-      return;
-    }
-    A.setSch(selected); A.setMode(deliveryMode);
-    toast('Scheduled for '+fmtDay(new Date(selected))+', '+fmtTime(new Date(selected)));
+  const storeParts = (instant: Date) => {
+    const parts = new Intl.DateTimeFormat('en-US',{timeZone:storeZone,year:'numeric',month:'2-digit',day:'2-digit',weekday:'long',hour:'2-digit',minute:'2-digit',hourCycle:'h23'}).formatToParts(instant);
+    const get = (key:string) => parts.find(part=>part.type===key)?.value || '';
+    return {year:Number(get('year')),month:Number(get('month')),day:Number(get('day')),weekday:get('weekday'),hour:Number(get('hour')),minute:Number(get('minute'))};
+  };
+  const customerNow = new Date();
+  const minimumOrderTime = String(store?.scheduledOrderStartTime || '10:00').slice(0,5);
+  const [minimumHour,minimumMinute] = minimumOrderTime.split(':').map(Number);
+  const isAvailableInstant = (instant:Date) => {
+    const p=storeParts(instant), hours=store?.scheduleHours?.[p.weekday] || null;
+    if (hours && hours.closed) return false;
+    let openMinute=8*60, closeMinute=22*60;
+    if (hours && hours.open && hours.close) {
+      const [oh,om]=String(hours.open).slice(0,5).split(':').map(Number);
+      const [ch,cm]=String(hours.close).slice(0,5).split(':').map(Number);
+      openMinute=oh*60+(om||0); closeMinute=ch*60+(cm||0);
+    } else if (store?.scheduleHours && Object.keys(store.scheduleHours).length && !hours) return false;
+    const minute=p.hour*60+p.minute, minimum=(minimumHour||0)*60+(minimumMinute||0);
+    return minute>=Math.max(openMinute,minimum) && minute<closeMinute;
+  };
+  const customerDayStart = (offset:number) => {const d=new Date(customerNow);d.setHours(0,0,0,0);d.setDate(d.getDate()+offset);return d;};
+  const slotsForDay = (offset:number) => {
+    const start=customerDayStart(offset), end=new Date(start);end.setDate(end.getDate()+1);
+    // Keep a five-minute safety margin so the database cannot reject a slot selected at the edge of "now".
+    let cursor=Math.max(start.getTime(),Math.ceil((Date.now()+15*60_000)/300000)*300000);
+    const slots:Date[]=[];
+    for(;cursor<end.getTime();cursor+=300000){const candidate=new Date(cursor);if(isAvailableInstant(candidate))slots.push(candidate);}
+    return slots;
+  };
+  const initialScheduled = S.sch && S.sch>Date.now() ? new Date(S.sch) : null;
+  const initialOffset = initialScheduled ? Math.max(0,Math.min(6,Math.round((new Date(initialScheduled.getFullYear(),initialScheduled.getMonth(),initialScheduled.getDate()).getTime()-new Date(customerNow.getFullYear(),customerNow.getMonth(),customerNow.getDate()).getTime())/86400000))) : 0;
+  const initialSlots=slotsForDay(initialOffset);
+  const initialChoice=initialScheduled && isAvailableInstant(initialScheduled) ? initialScheduled : initialSlots[0] || new Date(customerNow);
+  const [dayOffset,setDayOffset]=useState(initialOffset);
+  const [deliveryMode,setDeliveryMode]=useState(S.mode==='pickup'?'pickup':'delivery');
+  const [customHour,setCustomHour]=useState(String(initialChoice.getHours()).padStart(2,'0'));
+  const [customMinute,setCustomMinute]=useState(String(initialChoice.getMinutes()).padStart(2,'0'));
+  const selectedDate=customerDayStart(dayOffset);
+  const availableSlots=slotsForDay(dayOffset);
+  const earliestInstant=availableSlots[0] || null;
+  const earliestWall=earliestInstant ? new Date(earliestInstant) : selectedDate;
+  const rawHour=Number(customHour),rawMinute=Number(customMinute);
+  const validDigits=/^\d{1,2}$/.test(customHour)&&/^\d{1,2}$/.test(customMinute)&&rawHour>=0&&rawHour<=23&&rawMinute>=0&&rawMinute<=59;
+  const customDate=new Date(selectedDate);if(validDigits)customDate.setHours(rawHour,rawMinute,0,0);
+  const customInstant=validDigits?new Date(customDate):new Date(0);
+  const customValid=validDigits&&isAvailableInstant(customInstant)&&customInstant.getTime()>Date.now()+15*60_000;
+  const selected=customValid?customInstant.getTime():0;
+  const noFutureSlot=!availableSlots.length;
+  /* Closed store with nothing chosen yet: pre-select the earliest valid slot so checkout can continue without an extra Apply step. */
+  useEffect(()=>{if(inline&&store&&!store.open&&store.acceptScheduledOrders&&!S.sch&&earliestInstant)A.setSch(earliestInstant.getTime());},[inline,store?.id,store?.open,earliestInstant?.getTime()]);
+  const reason=noFutureSlot?label('lbl.sheetClosedDayReason','This store has no remaining scheduled times on that day. Choose another day.') : !customValid?label('lbl.sheetClampEarliest','Choose the minimum available time or a later available time.'):'';
+  const formatCustomer=(ts:number,options:Intl.DateTimeFormatOptions)=>new Intl.DateTimeFormat(undefined,{...options,timeZone:customerZone}).format(new Date(ts));
+  const choose=()=>{
+    if(!store){toast(label('lbl.sheetChooseStore','Choose a store before scheduling.'));return;}
+    if(!store.acceptScheduledOrders){toast(label('lbl.sheetNoScheduleClosed','This store does not accept scheduled orders.'));return;}
+    if(!selected){toast(reason||label('lbl.sheetChooseDay','Choose an available day.'));return;}
+    A.setSch(selected);A.setMode(deliveryMode);
+    toast(label('lbl.sheetScheduledFor','Scheduled for {day}, {time}').replace('{day}',formatCustomer(selected,{weekday:'short',month:'short',day:'numeric'})).replace('{time}',formatCustomer(selected,{hour:'numeric',minute:'2-digit',timeZoneName:'short'})));
     close();
   };
-  return <>
-    <T size={21} weight="800">Schedule your order</T>
-    <T size={12.5} color={th.mut} style={{marginTop:4,marginBottom:12}}>Choose delivery or pick-up, a date, and an available time.</T>
+  return <View style={inline?{paddingTop:12,paddingBottom:12,borderTopWidth:0.5,borderTopColor:th.line,marginTop:10}:undefined}>
+    {inline?null:<T cmsKey={'lbl.sheetScheduleTitle'} size={21} weight='600'>{label('lbl.sheetScheduleTitle','Schedule your order')}</T>}
     <SegSchedule value={deliveryMode} onChange={setDeliveryMode}/>
-    <T size={14} weight="800" style={{marginTop:12,marginBottom:8}}>Choose a day</T>
+    <T cmsKey={'lbl.sheetChooseDay'} size={14} weight='600' style={{marginTop:12,marginBottom:8}}>{label('lbl.sheetChooseDay','Choose a day')}</T>
     <ScrollView horizontal showsHorizontalScrollIndicator={false} contentContainerStyle={{gap:8,paddingBottom:8}}>
-      {Array.from({length:7},(_,i)=>{const d=new Date();d.setDate(d.getDate()+i);const active=dayOffset===i;return <Pressable key={i} onPress={()=>{setDayOffset(i);setSelectedTs(0);setCustomMode(false);}} style={{minWidth:74,paddingVertical:10,paddingHorizontal:10,borderRadius:14,backgroundColor:active?th.br:th.soft,alignItems:'center',borderWidth:1,borderColor:active?th.br:th.line}}>
-        <T size={11.5} weight="700" color={active?'#fff':th.mut}>{i===0?'Today':i===1?'Tomorrow':dayNames[d.getDay()].slice(0,3)}</T><T size={15} weight="800" color={active?'#fff':th.ink}>{d.getDate()}</T><T size={10.5} color={active?'#fff':th.mut}>{d.toLocaleDateString(undefined,{month:'short'})}</T>
+      {Array.from({length:7},(_,i)=>{const d=customerDayStart(i),active=dayOffset===i;return <Pressable key={i} onPress={()=>{setDayOffset(i);const first=slotsForDay(i)[0];if(first){setCustomHour(String(first.getHours()).padStart(2,'0'));setCustomMinute(String(first.getMinutes()).padStart(2,'0'));}}} style={{minWidth:74,paddingVertical:10,paddingHorizontal:10,borderRadius:14,backgroundColor:active?th.br:th.soft,alignItems:'center',borderWidth:0.5,borderColor:active?th.br:th.line}}>
+        <T cmsKeys={["lbl.cms.acf78f33a391","lbl.cms.8548c22a9780"]} size={11.5} weight='600' color={active?'#fff':th.mut}>{i===0?label("lbl.cms.acf78f33a391", "Today"):i===1?label("lbl.cms.8548c22a9780", "Tomorrow"):d.toLocaleDateString(S.lang,{weekday:'short'})}</T><T size={15} weight='600' color={active?'#fff':th.ink}>{d.getDate()}</T><T size={10.5} color={active?'#fff':th.mut}>{d.toLocaleDateString(S.lang,{month:'short'})}</T>
       </Pressable>;})}
     </ScrollView>
-    {store&&!store.open?<Card style={{marginTop:4,marginBottom:8,backgroundColor:th.brt,borderColor:th.br}}><T size={12.5} weight="700">Scheduled-order minimum</T><T size={12} color={th.mut}>{store.acceptScheduledOrders ? (opening ? 'Opening '+opening+' · '+lead+' minutes advance time. Only times after the minimum are selectable.' : 'Minimum advance time: '+lead+' minutes.') : 'This store is not accepting scheduled orders while closed.'}</T></Card>:null}
-    <T size={14} weight="800" style={{marginTop:8,marginBottom:8}}>Available times</T>
-    {candidates.length ? <ScrollView style={{maxHeight:230}} nestedScrollEnabled showsVerticalScrollIndicator={false} contentContainerStyle={{gap:7,paddingBottom:8}}>
-      {candidates.map(ts=><Pressable key={ts} onPress={()=>{setSelectedTs(ts);setCustomHour(String(new Date(ts).getHours()).padStart(2,'0'));setCustomMinute(String(new Date(ts).getMinutes()).padStart(2,'0'));setCustomMode(false);}} style={{minHeight:45,paddingHorizontal:14,paddingVertical:10,borderRadius:13,borderWidth:1,borderColor:selectedTs===ts?th.br:th.line,backgroundColor:selectedTs===ts?th.brt:th.card,flexDirection:'row',alignItems:'center',justifyContent:'space-between'}}>
-        <T size={14} weight={selectedTs===ts?'800':'600'} color={selectedTs===ts?th.br:th.ink}>{fmtTime(new Date(ts))}</T>
-        {selectedTs===ts?<Icon name="check" color={th.br}/>:<T size={12} color={th.mut}>Select</T>}
-      </Pressable>)}
-    </ScrollView>:<Card><T size={13} color={th.mut}>{store&&!store.open&&!store.acceptScheduledOrders?'This store does not accept scheduled orders while closed.':'No preset times are available on this date. You can still enter an exact time below if the store’s hours allow it.'}</T></Card>}
-    <T size={13} weight="800" style={{marginTop:8,marginBottom:6}}>Or enter an exact time</T>
-    <Row style={{gap:10,alignItems:'flex-end'}}>
-      <View style={{flex:1}}><Input label="Hour (00–23)" value={customHour} onChange={v=>{setCustomHour(v.replace(/\D/g,'').slice(0,2));setCustomMode(true);setSelectedTs(0);}} placeholder="14" keyboard="number-pad" /></View>
-      <T size={20} weight="800" style={{paddingBottom:12}}>:</T>
-      <View style={{flex:1}}><Input label="Minute (00–59)" value={customMinute} onChange={v=>{setCustomMinute(v.replace(/\D/g,'').slice(0,2));setCustomMode(true);setSelectedTs(0);}} placeholder="30" keyboard="number-pad" /></View>
-    </Row>
-    <View style={{flexDirection:'row',flexWrap:'wrap',gap:7,marginTop:8}}>
-      {[0,5,10,15,20,25,30,35,40,45,50,55].map(m=><Pressable key={m} onPress={()=>{setCustomMinute(String(m).padStart(2,'0'));setCustomMode(true);setSelectedTs(0);}} style={{paddingHorizontal:10,paddingVertical:7,borderRadius:16,backgroundColor:Number(customMinute)===m&&customMode?th.brt:th.soft,borderWidth:Number(customMinute)===m&&customMode?1:0,borderColor:th.br}}><T size={11.5} weight="700">{String(m).padStart(2,'0')}</T></Pressable>)}
-    </View>
-    {selected ? <T size={12.5} color={th.br} style={{marginTop:8}}>Selected: {fmtDay(new Date(selected))}, {fmtTime(new Date(selected))}</T>:null}
-    <View style={{height:12}}/><Cta label="Apply" disabled={!selected} onPress={choose}/>
-  </>;
+    {store?.acceptScheduledOrders?<T cmsKey={'lbl.sheetScheduledMinimum'} size={12} color={th.mut} style={{marginTop:8,marginBottom:4}}>{label('lbl.sheetScheduledMinimum','Earliest available time')}: {earliestInstant?formatCustomer(earliestInstant.getTime(),{hour:'numeric',minute:'2-digit',timeZoneName:'short'}):'—'} · {customerZone}</T>:null}
+    <T cmsKey={'lbl.sheetExactTime'} size={13} weight='600' style={{marginTop:12,marginBottom:6}}>{label('lbl.sheetExactTime','Choose a time')}</T>
+    {inline?<DateTimePicker value={customValid?customDate:earliestWall} mode='time' display={Platform.OS==='ios'?'spinner':'clock'} minuteInterval={5} onChange={(_,date)=>{if(date){setCustomHour(String(date.getHours()).padStart(2,'0'));setCustomMinute(String(date.getMinutes()).padStart(2,'0'));}}}/>:<ScrollView style={{maxHeight:156,marginTop:6}} nestedScrollEnabled showsVerticalScrollIndicator={false} contentContainerStyle={{flexDirection:'row',flexWrap:'wrap',gap:8,paddingBottom:4}}>
+      {availableSlots.filter((_,i)=>i%3===0 || availableSlots.length<24).map(slot=>{const key=String(slot.getHours()).padStart(2,'0')+':'+String(slot.getMinutes()).padStart(2,'0'),active=customHour===String(slot.getHours()).padStart(2,'0')&&customMinute===String(slot.getMinutes()).padStart(2,'0');return <Pressable key={slot.getTime()} onPress={()=>{setCustomHour(String(slot.getHours()).padStart(2,'0'));setCustomMinute(String(slot.getMinutes()).padStart(2,'0'));}} style={{width:'23%',minHeight:38,borderRadius:10,alignItems:'center',justifyContent:'center',backgroundColor:active?th.br:th.soft,borderWidth:active?0.5:0,borderColor:th.br}}><T size={12.5} weight='600' color={active?'#fff':th.ink}>{key}</T></Pressable>;})}
+    </ScrollView>}
+    {reason?<T size={12.5} color={th.red} style={{marginTop:6}}>{reason}</T>:null}
+    {selected?<T cmsKey={"lbl.cms.6646922f6eaf"} size={12.5} color={th.br} style={{marginTop:8}}>{label("lbl.cms.6646922f6eaf", "Selected: ")}{formatCustomer(selected,{weekday:'short',month:'short',day:'numeric'})}, {formatCustomer(selected,{hour:'numeric',minute:'2-digit',timeZoneName:'short'})}</T>:null}
+    <View style={{height:12}}/><Cta cmsKey={'lbl.sheetApply'} label={label('lbl.sheetApply','Apply')} disabled={!selected} onPress={choose}/>
+  </View>;
 }
+export function ScheduleInline({close}: {close: () => void}) { return <ScheduleSheet close={close} inline />; }
+
 function SegSchedule({value,onChange}:{value:string;onChange:(v:string)=>void}) {
   const th=useTheme();
   return <View style={{flexDirection:'row',gap:8}}>
-    {(['delivery','pickup'] as const).map(v=><Pressable key={v} onPress={()=>onChange(v)} style={{flex:1,paddingVertical:11,borderRadius:13,alignItems:'center',backgroundColor:value===v?th.brt:th.soft,borderWidth:value===v?1:0,borderColor:th.br}}><T weight="800" color={value===v?th.br:th.ink}>{v==='delivery'?'Delivery':'Pick-up'}</T></Pressable>)}
+    {(['delivery','pickup'] as const).map(v=><Pressable key={v} onPress={()=>onChange(v)} style={{flex:1,paddingVertical:11,borderRadius:13,alignItems:'center',backgroundColor:value===v?th.brt:th.soft,borderWidth:value===v?1:0,borderColor:th.br}}><T cmsKeys={["lbl.cms.481e4a34263a","lbl.cms.cc823e1a0b52"]} weight="600" color={value===v?th.br:th.ink}>{v==='delivery'?label("lbl.cms.481e4a34263a", "Delivery"):label("lbl.cms.cc823e1a0b52", "Pick-up")}</T></Pressable>)}
   </View>;
 }
 
-function GroupOrderSheet({close}: {close: () => void}) {
+/** The single group-order surface: empty cart, filled cart, store page and invite links all open this. It closes only from the handle, the X or Done. */
+export function GroupOrderModal({close, storeId = ''}: {close: () => void; storeId?: string}) {
+  const th = useTheme(), insets = useSafeAreaInsets(), {height: windowHeight} = useWindowDimensions();
+  const height = Math.round(Math.min(windowHeight - insets.top - 8, windowHeight * 0.94));
+  const handlePan = useMemo(() => PanResponder.create({
+    onStartShouldSetPanResponder: () => false,
+    onMoveShouldSetPanResponder: (_: any, g: any) => g.dy > 8 && Math.abs(g.dy) > Math.abs(g.dx),
+    onPanResponderRelease: (_: any, g: any) => { if (g.dy > 65 || g.vy > 1.1) close(); },
+  }), [close]);
+  return <BottomSheet visible onClose={close} dismissOnBackdrop={false} keyboardAware maxHeight={height}>
+    <View style={{height, backgroundColor: th.card, borderTopLeftRadius: 26, borderTopRightRadius: 26, overflow: 'hidden'}}>
+      <Pressable {...handlePan.panHandlers} accessibilityRole="button" accessibilityLabel={label("lbl.cms.262630160acf", "Close group order")} onPress={close} hitSlop={{top: 8, bottom: 14, left: 80, right: 80}} style={{alignItems: 'center', paddingTop: 10, paddingBottom: 6}}>
+        <View style={{width: 44, height: 5, borderRadius: 3, backgroundColor: th.line}} />
+      </Pressable>
+      <View style={{flexDirection: 'row', alignItems: 'center', paddingHorizontal: 22, paddingTop: 8, paddingBottom: 14}}>
+        <T cmsKey={'lbl.sheetGroupTitle'} size={22} weight="800" style={{flex: 1}}>{label('lbl.sheetGroupTitle', 'Group order')}</T>
+        <Pressable accessibilityRole="button" accessibilityLabel={label("lbl.cms.4895f0308d1a", "Close")} onPress={close} hitSlop={12} style={{width: 36, height: 36, borderRadius: 18, backgroundColor: th.soft, alignItems: 'center', justifyContent: 'center'}}><Icon name="x" size={18} color={th.ink} /></Pressable>
+      </View>
+      <ScrollView style={{flex: 1}} contentContainerStyle={{paddingHorizontal: 22, paddingTop: 4, paddingBottom: insets.bottom + 28}} keyboardShouldPersistTaps="handled" showsVerticalScrollIndicator={false}>
+        <GroupOrderSheet close={close} showTitle={false} showDone storeId={storeId} />
+      </ScrollView>
+    </View>
+  </BottomSheet>;
+}
+
+function GroupOrderSheet({close, showTitle = true, showDone = true, storeId = ''}: {close: () => void; showTitle?: boolean; showDone?: boolean; storeId?: string}) {
   const th = useTheme();
-  const [name, setName] = useState('');
+  const incomingInviteCode = String((S as any).pendingGroupInviteCode || '');
+  delete (S as any).pendingGroupInviteCode;
+  const [inviteCode, setInviteCode] = useState(incomingInviteCode);
+  const [groupBusy, setGroupBusy] = useState(false);
+  const [sharedItems, setSharedItems] = useState<any[]>([]);
+  const [groupMembers, setGroupMembers] = useState<any[]>([]);
+  const [membershipError, setMembershipError] = useState('');
+  const [checkoutPreview, setCheckoutPreview] = useState<any>(null);
+  const [checkoutEstimate, setCheckoutEstimate] = useState<any>(null);
+  const [previewBusy, setPreviewBusy] = useState(false);
+  const [groupCheckoutBusy, setGroupCheckoutBusy] = useState(false);
+  const [groupCheckoutType, setGroupCheckoutType] = useState<'pickup'|'delivery'>('pickup');
+  const [groupAddressId, setGroupAddressId] = useState<string|number>(()=>addr()?.id ?? '');
+  const [groupDeliveryQuote, setGroupDeliveryQuote] = useState<any>(null);
+  const [groupQuoteBusy, setGroupQuoteBusy] = useState(false);
+  useEffect(() => {
+    if(groupCheckoutType!=='delivery') return;
+    let active=true;
+    void refreshUserAddresses().then((addresses:any[])=>{
+      if(!active||!addresses?.length) return;
+      setGroupAddressId((current:any)=>addresses.some((item:any)=>String(item.id)===String(current))?current:addresses.find((item:any)=>item.def)?.id??addresses[0].id);
+    }).catch((error:any)=>{if(active)toast(friendlyError(error, label("lbl.cms.0f3e6a48b781", "Could not load saved delivery addresses.")));});
+    return ()=>{active=false;};
+  },[groupCheckoutType]);
+  const [currentUserId, setCurrentUserId] = useState('');
+  const [scannerOpen, setScannerOpen] = useState(false);
+  const [cameraPermission, requestCameraPermission] = useCameraPermissions();
   const [group, setGroup] = useState(() => {
-    if (S.groupOrder) return S.groupOrder;
-    const next = {code: 'GD' + Math.random().toString(36).slice(2, 7).toUpperCase(), host: S.pf.n || 'You', members: []};
+    if (incomingInviteCode) return {code: '', host: S.pf.n || 'You', members: [], serverBacked: false};
+    const saved = S.groupOrder;
+    if (saved && typeof saved.code === 'string' && Array.isArray(saved.members)) return saved;
+    const next = {code: '', host: S.pf.n || 'You', members: [], serverBacked: false};
     S.groupOrder = next; save(); return next;
   });
   const saveGroup = (next: any) => { setGroup(next); S.groupOrder = next; save(); emit(); };
-  const groupSubtotal = S.cart.lines.reduce((sum: number, line: any) => sum + Number(line.p || 0) * Number(line.q || 0), 0);
-  const invite = async () => {
+  /* Opening the sheet re-checks a saved group; an ended or expired one is dropped instead of lingering. */
+  useEffect(() => {
+    if (!group.serverBacked) return;
+    let alive = true;
+    void validateActiveGroup().then(ok => {if (alive && !ok) setGroup({code: '', host: S.pf.n || 'You', members: [], serverBacked: false});});
+    return () => {alive = false;};
+  }, []);
+  const createServerGroup = async () => {
+    const targetStoreId = storeId || S.cart.sid || group.storeId || '';
+    if (!targetStoreId) {toast(label("lbl.cms.9ad0840772c3", "Open a store first to create its group invitation."));return;}
+    if (S.cart.lines.length && S.cart.sid !== targetStoreId) {toast(label("lbl.cms.a6b2201002c6", "Your current cart belongs to another store. Clear it before creating this group."));return;}
+    setGroupBusy(true);
     try {
-      await Share.share({message: 'Wantiss Goodies group-order invitation. Code: ' + group.code + '. Store: ' + (S.cart.sid && STB[S.cart.sid] ? STB[S.cart.sid].n : 'Choose a store together') + '. This is a demo invitation; please send your item choices to the host so they can add them to the shared cart.'});
-    } catch (_) { toast('Invite code: ' + group.code); }
+      const {data,error}=await supabase.rpc('goodies_group_order_create',{p_store_id:targetStoreId});
+      const row=Array.isArray(data)?data[0]:data;
+      if(error||!row?.invite_code) throw error || new Error('Could not create the group invitation.');
+      saveGroup({...group,code:row.invite_code,groupId:row.group_id,storeId:targetStoreId,expiresAt:row.expires_at,serverBacked:true});
+      const synced=await Promise.all((S.cart.sid === targetStoreId ? S.cart.lines : []).map((line:any)=>syncGroupOrderCartLine(row.group_id,line)));
+      const failed=synced.find((result:any)=>result.error);
+      if(failed)toast(friendlyError(failed.error, label("lbl.cms.184f5c8af282", "Group created, but one or more cart items could not be shared.")));
+      toast(label("lbl.cms.9e385df54370", "A new group invitation is ready."));
+    } catch(error:any) {
+      toast(friendlyError(error, label("lbl.cms.a9d496a784b4", "Could not create the group invitation. Please try again.")));
+    } finally {
+      setGroupBusy(false);
+    }
+  };
+  const joinServerGroup = async () => {
+    const code=inviteCode.trim().toUpperCase();
+    if(!code){toast(label("lbl.cms.949b8e0d1bea", "Enter a group invite code."));return;}
+    setGroupBusy(true);
+    try {
+      const {data,error}=await supabase.rpc('goodies_group_order_join',{p_invite_code:code});
+      const row=Array.isArray(data)?data[0]:data;
+      if(error||!row?.group_id) throw error || new Error('Could not join this group order.');
+      saveGroup({code:row.invite_code,groupId:row.group_id,storeId:row.store_id,expiresAt:row.expires_at,host:S.pf.n||'You',members:group.members||[],serverBacked:true});
+      toast(label("lbl.cms.9d2f3e3ff6a8", "You joined the group order."));
+    } catch(error:any) {
+      toast(friendlyError(error, label("lbl.cms.b7c7f9985055", "Could not join this group order. Check the invite code and try again.")));
+    } finally {
+      setGroupBusy(false);
+    }
+  };
+  useEffect(() => {
+    let active=true;
+    void supabase.auth.getUser().then(({data})=>{if(active)setCurrentUserId(data.user?.id||'');});
+    if (!group.serverBacked || !group.groupId) {setSharedItems([]);setGroupMembers([]);setMembershipError('');return ()=>{active=false;};}
+    const loadItems=async () => {
+      const {data,error}=await supabase.from('goodies_group_order_items')
+        .select('id,user_id,line_key,quantity,options,note,product:goodies_products(name,price,photo_url,emoji)')
+        .eq('group_id',group.groupId).order('created_at',{ascending:true});
+      if(active){if(error)toast(friendlyError(error, label("lbl.cms.725f5d75b162", "Could not refresh the shared cart.")));else {setSharedItems(data||[]);setCheckoutPreview(null);setCheckoutEstimate(null);}}
+    };
+    const loadMembers=async () => {
+      const {data,error}=await supabase.rpc('goodies_group_order_list_members',{p_group_id:group.groupId});
+      if(active){setMembershipError(friendlyError(error, ''));if(!error)setGroupMembers(data||[]);}
+    };
+    const refreshGroupStatus=async () => {
+      const {data,error}=await supabase.rpc('goodies_group_order_get_status',{p_group_id:group.groupId});
+      if(!active||error)return;
+      const statusRow=Array.isArray(data)?data[0]:data;
+      if(!statusRow||statusRow.status!=='open'||new Date(statusRow.expires_at).getTime()<=Date.now()){
+        S.groupOrder=null; save(); emit(); setGroup({code:'',host:S.pf.n||'You',members:[],serverBacked:false});
+        setSharedItems([]);setGroupMembers([]);setCheckoutPreview(null);
+        toast(statusRow?.status==='cancelled'?label("lbl.cms.7c7eb6fad354", "The group host ended this group order."):label("lbl.cms.984dfaf4f0b3", "This group order has closed or expired."));
+      }
+    };
+    void loadItems(); void loadMembers(); void refreshGroupStatus();
+    const channel=supabase.channel('goodies-group-live-'+group.groupId)
+      .on('postgres_changes',{event:'*',schema:'public',table:'goodies_group_order_items',filter:'group_id=eq.'+group.groupId},()=>{void loadItems();})
+      .on('postgres_changes',{event:'*',schema:'public',table:'goodies_group_order_members',filter:'group_id=eq.'+group.groupId},()=>{void loadMembers();})
+      .on('postgres_changes',{event:'UPDATE',schema:'public',table:'goodies_group_orders',filter:'id=eq.'+group.groupId},()=>{void refreshGroupStatus();})
+      .subscribe();
+    return ()=>{active=false;void supabase.removeChannel(channel);};
+  },[group.serverBacked,group.groupId]);
+
+  /* Friends picker (host) and invitations from friends (guest). */
+  const [friends, setFriends] = useState<any[]>([]);
+  const [friendsOpen, setFriendsOpen] = useState(false);
+  const [pickedFriends, setPickedFriends] = useState<string[]>([]);
+  const [friendsBusy, setFriendsBusy] = useState(false);
+  const [myInvites, setMyInvites] = useState<any[]>([]);
+  useEffect(() => {
+    if (group.serverBacked) return;
+    let active = true;
+    void supabase.rpc('goodies_group_order_my_invites').then(({data, error}) => {
+      if (active && !error) setMyInvites(Array.isArray(data) ? data : []);
+      else if (error) console.warn('Group invites could not load', error.message);
+    });
+    return () => {active = false;};
+  }, [group.serverBacked]);
+  const openFriends = async () => {
+    if (!group.groupId) return;
+    setFriendsOpen(true); setFriendsBusy(true);
+    const {data, error} = await supabase.rpc('goodies_group_order_list_friends', {p_group_id: group.groupId});
+    setFriendsBusy(false);
+    if (error) {setFriends([]); toast(friendlyError(error, label("lbl.cms.fee6cf252c06", "Could not load your friends. Please try again."))); return;}
+    setFriends(Array.isArray(data) ? data : []); setPickedFriends([]);
+  };
+  const sendFriendInvites = async () => {
+    if (!group.groupId || !pickedFriends.length) return;
+    setFriendsBusy(true);
+    const {data, error} = await supabase.rpc('goodies_group_order_invite_friends', {p_group_id: group.groupId, p_user_ids: pickedFriends});
+    setFriendsBusy(false);
+    if (error) {toast(friendlyError(error, label("lbl.cms.e1b4808b8c09", "Could not send the invitations. Please try again."))); return;}
+    toast(Number(data) > 0 ? label("lbl.cms.9cf703554060", "Invitation sent.") : label("lbl.cms.c8c0ebe1e4a9", "Nothing to send."));
+    setFriendsOpen(false); setPickedFriends([]);
+  };
+  const joinFromInvite = async (code: string) => {
+    setInviteCode(code);
+    setGroupBusy(true);
+    try {
+      const {data, error} = await supabase.rpc('goodies_group_order_join', {p_invite_code: code});
+      const row = Array.isArray(data) ? data[0] : data;
+      if (error || !row?.group_id) throw error || new Error('join failed');
+      saveGroup({code: row.invite_code, groupId: row.group_id, storeId: row.store_id, expiresAt: row.expires_at, host: S.pf.n || 'You', members: [], serverBacked: true});
+      toast(label("lbl.cms.9d2f3e3ff6a8", "You joined the group order."));
+    } catch (error: any) {
+      toast(friendlyError(error, label("lbl.cms.d37983f61070", "Could not join this group order. It may have closed.")));
+    } finally {setGroupBusy(false);}
+  };
+  const declineInvite = async (groupId: string) => {
+    setMyInvites(list => list.filter(i => i.group_id !== groupId));
+    const {error} = await supabase.rpc('goodies_group_order_decline_invite', {p_group_id: groupId});
+    if (error) console.warn('Decline invite failed', error.message);
+  };
+  const invite = async () => {
+    if(!group.serverBacked||!group.code){toast(label("lbl.cms.e0747408b56f", "Create a group invitation first."));return;}
+    const inviteLink='wantiss://goodies/group?code='+encodeURIComponent(group.code);
+    try {await Share.share({message:'Join my Wantiss Goodies group order.\n\nOpen this invite in Wantiss: '+inviteLink+'\n\nOr enter invite code: '+group.code});}
+    catch (_) {toast(label("lbl.cms.2299e372cc22", "Invite code: ")+group.code);}
+  };
+  const calculateGroupDeliveryQuote = async () => {
+    let addresses=S.addr||[];
+    if(!addresses.length) addresses=await refreshUserAddresses();
+    const selected=addresses.find((item:any)=>String(item.id)===String(groupAddressId))||addresses.find((item:any)=>item.id===S.as)||addresses[0];
+    if(!selected?.t){toast(label("lbl.cms.0a46732ca884", "Add or select a complete delivery address first."));return;}
+    setGroupQuoteBusy(true);
+    try {
+      const addressPayload={l:selected.l,t:selected.t,apt:selected.apt||'',inst:selected.inst||'',city:selected.city||'',department:selected.department||'',country:selected.country||''};
+      const quote=await supabase.functions.invoke('goodies-delivery-quote',{body:{store_id:group.storeId||checkoutPreview?.store_id,address:addressPayload}});
+      if(quote.error||!quote.data?.quote_id){setGroupDeliveryQuote(null);toast(friendlyError(quote.data?.error ? {message: quote.data.error} : quote.error, label("lbl.cms.9957e5f281b7", "Could not calculate delivery for this address.")));return;}
+      const quoteState={addressId:String(selected.id),quoteId:String(quote.data.quote_id),fee:Number(quote.data.fee||0),distanceKm:Number(quote.data.distance_km||0),expiresAt:Date.now()+4*60*1000};
+      setGroupDeliveryQuote(quoteState);
+      const estimate=await supabase.rpc('goodies_group_order_checkout_estimate',{p_group_id:group.groupId,p_order_type:'delivery',p_address:{...addressPayload,delivery_quote_id:quoteState.quoteId}});
+      if(estimate.error) {setCheckoutEstimate(null);toast(friendlyError(estimate.error, label("lbl.cms.8e4755e555e1", "Could not calculate the final estimate.")));}
+      else setCheckoutEstimate(estimate.data);
+    } catch(e:any) {
+      setGroupDeliveryQuote(null);toast(friendlyError(e, label("lbl.cms.fa36fe77f660", "Could not calculate delivery.")));
+    } finally {setGroupQuoteBusy(false);}
+  };
+  const checkoutGroupOrder = async () => {
+    if(!group.serverBacked||!group.groupId){toast(label("lbl.cms.123b3ed119bc", "Create a server-backed group order first."));return;}
+    if(!groupMembers.some((member:any)=>member.user_id===currentUserId&&member.role==='host')){toast(label("lbl.cms.540c5531f480", "Only the group host can check out."));return;}
+    if(!checkoutPreview){toast(label("lbl.cms.6e9eb3a9a0bb", "Review and validate the combined cart first."));return;}
+    if(!checkoutEstimate || checkoutEstimate.group_id!==group.groupId || checkoutEstimate.order_type!==groupCheckoutType){toast(label("lbl.cms.d2905bdbca8c", "Review the current group-order total before placing the order."));return;}
+    if(!S.pf.ph||!phoneOK(S.pf.ph)){toast(label("lbl.cms.fdc79fde4a45", "Add a valid contact phone number in your profile before checkout."));return;}
+    setGroupCheckoutBusy(true);
+    try {
+      const walletVerified=await A.refreshPaymentOptions();
+      if(!walletVerified){toast(label("lbl.cms.c21b6431da9c", "Could not verify your live Wantiss Wallet balance. Please retry."));return;}
+      if(!S.hasWallet){toast(label("lbl.cms.fa32c0873181", "Your Wantiss Wallet is not available. Create a wallet before placing this group order."));return;}
+      const estimatedTotal=Number(checkoutEstimate?.estimated_total||0);
+      if(estimatedTotal>0&&S.wallet<estimatedTotal){toast(label("lbl.cms.9da7b95cc86d", "Insufficient Wantiss Wallet balance. Add ")+money(estimatedTotal-S.wallet)+label("lbl.cms.66e750d050b2", " or choose another payment method."));return;}
+      let addressPayload:any=null;
+      if(groupCheckoutType==='delivery'){
+        const selected=(S.addr||[]).find((item:any)=>String(item.id)===String(groupAddressId))||(S.addr||[]).find((item:any)=>item.id===S.as)||(S.addr||[])[0];
+        if(!selected?.t){toast(label("lbl.cms.0a46732ca884", "Add or select a complete delivery address first."));return;}
+        if(!groupDeliveryQuote||groupDeliveryQuote.addressId!==String(selected.id)||groupDeliveryQuote.expiresAt<=Date.now()){
+          toast(label("lbl.cms.ce7c584db7be", "Calculate the delivery fee and review it before placing the order."));return;
+        }
+        addressPayload={l:selected.l,t:selected.t,apt:selected.apt||'',inst:selected.inst||'',city:selected.city||'',department:selected.department||'',country:selected.country||'',delivery_quote_id:groupDeliveryQuote.quoteId};
+      }
+      const {data,error}=await supabase.rpc('goodies_group_order_checkout',{
+        p_idempotency_key:'group-'+group.groupId+'-'+Date.now().toString(36),
+        p_group_id:group.groupId,
+        p_order_type:groupCheckoutType,
+        p_scheduled_for:null,
+        p_address:addressPayload,
+        p_contact_phone:S.pf.ph,
+        p_tip:0,
+        p_notes:null
+      });
+      const order=Array.isArray(data)?data[0]:data;
+      if(error||!order?.id){toast(friendlyError(error, label("lbl.cms.1be63d4ce4d0", "Group order checkout failed.")));return;}
+      toast(label("lbl.cms.29fb7a3efa6b", "Group order placed. Order ")+(order.order_code||order.id)+label("lbl.cms.df836d557f92", ". Paid with Wantiss Wallet."));
+      S.groupOrder=null;save();emit();close();
+    } catch(e:any) {
+      toast(friendlyError(e, label("lbl.cms.8eeb9fd8177f", "Could not complete group order checkout.")));
+    } finally {setGroupCheckoutBusy(false);}
+  };
+  const reviewSharedOrder = async () => {
+    if(!group.serverBacked||!group.groupId){toast(label("lbl.cms.315075ecf41e", "Create or join a server-backed group order first."));return;}
+    setPreviewBusy(true); setCheckoutPreview(null);
+    const {data,error}=await supabase.rpc('goodies_group_order_checkout_preview',{p_group_id:group.groupId});
+    setPreviewBusy(false);
+    if(error){toast(friendlyError(error, label("lbl.cms.7143ec373461", "Could not validate the shared cart.")));return;}
+    setCheckoutPreview(data);
+    if(groupCheckoutType==='pickup'){
+      const estimate=await supabase.rpc('goodies_group_order_checkout_estimate',{p_group_id:group.groupId,p_order_type:'pickup',p_address:{}});
+      if(estimate.error){setCheckoutEstimate(null);toast(friendlyError(estimate.error, label("lbl.cms.a8b8e5886e88", "Could not calculate the payment estimate.")));}
+      else setCheckoutEstimate(estimate.data);
+    }
   };
   return <>
-    <T size={21} weight="800">Group order</T>
-    <T size={13} color={th.mut} style={{marginTop:5, marginBottom:12}}>Start a shared cart, invite friends, and coordinate everyone’s items before checkout.</T>
-    <Card style={{marginBottom:12}}>
-      <Row sp><View style={{flex:1}}><T size={11.5} weight="800" color={th.mut}>GROUP INVITE CODE</T><T size={22} weight="800">{group.code}</T></View><Cta small label="Invite people" onPress={invite} /></Row>
-      <T size={12} color={th.mut} style={{marginTop:7}}>Sharing uses your phone’s share menu. This demo coordinates members locally; it does not create a server-hosted join link.</T>
-    </Card>
-    <Card style={{marginBottom:12}}>
-      <T size={14} weight="800">Shared cart</T>
-      {S.cart.lines.length ? S.cart.lines.map((line:any)=><Row key={line.k} sp style={{marginTop:8,alignItems:'flex-start'}}><View style={{flex:1}}><T size={13} weight="700">{line.q}× {line.n}</T>{line.d ? <T size={11.5} color={th.mut}>{line.d}</T> : null}</View><T size={13} weight="700">{money(line.p*line.q)}</T></Row>) : <T size={12.5} color={th.mut} style={{marginTop:7}}>Add items to the cart from the selected store. The host controls checkout.</T>}
-      <Row sp style={{marginTop:12,paddingTop:10,borderTopWidth:1,borderTopColor:th.line}}><T weight="800">Subtotal</T><T weight="800">{money(S.cart.lines.reduce((sum:number,line:any)=>sum+line.p*line.q,0))}</T></Row>
-      {S.cart.sid && STB[S.cart.sid] ? <T size={12} color={th.mut} style={{marginTop:5}}>Store: {STB[S.cart.sid].n}</T> : null}
-      <View style={{height:10}}/><Cta ghost label="View cart" onPress={()=>{close();A.go('cart');}} />
-    </Card>
-    <T size={15} weight="800" style={{marginBottom:7}}>Group members</T>
-    <Row style={{gap:8, marginBottom:10}}>
-      <View style={{flex:1}}><Input value={name} onChange={setName} placeholder="Enter member name" /></View>
-      <View style={{width:88}}><Cta label="Add" onPress={() => {
-        const n=name.trim(); if(!n) {toast('Enter a member name'); return;}
-        if(group.members.some((m:any)=>m.name.toLowerCase()===n.toLowerCase())) {toast('That member is already in the group'); return;}
-        saveGroup({...group,members:[...group.members,{id:Date.now(),name:n,status:'Invited'}]}); setName('');
-      }} /></View>
-    </Row>
-    <Card>
-      <Row style={{gap:10, alignItems:'center', paddingVertical:4}}>
-        <View style={{width:38,height:38,borderRadius:19,backgroundColor:th.brt,alignItems:'center',justifyContent:'center'}}><Icon name="user" color={th.br} /></View>
-        <View style={{flex:1}}><T weight="800">{group.host || S.pf.n || 'You'} (Host)</T><T size={12} color={th.mut}>Owns the group cart</T></View>
-        <Badge green label="Active" />
+    {showTitle ? <T cmsKey={'lbl.sheetGroupTitle'} size={19} weight="600">{label('lbl.sheetGroupTitle', 'Group order')}</T> : null}
+    {!group.serverBacked ? <View>
+      {myInvites.length ? <View style={{marginBottom:22}}>
+        <T cmsKey={"lbl.cms.48ba64bb290c"} size={16} weight="800">{label("lbl.cms.48ba64bb290c", "Invitations from friends")}</T>
+        {myInvites.map((inv:any)=><Row key={inv.group_id} style={{gap:10,alignItems:'center',marginTop:12,padding:12,borderRadius:14,backgroundColor:th.soft}}>
+          <View style={{flex:1}}><T weight="600">{inv.host_name}</T><T cmsKey={"lbl.cms.374da0d6b308"} size={12} color={th.mut}>{label("lbl.cms.374da0d6b308", "invited you to a group order")}</T></View>
+          <Pressable accessibilityRole="button" onPress={()=>void declineInvite(inv.group_id)} hitSlop={8}><T cmsKey={"lbl.cms.fbab10af6bec"} size={13} color={th.mut}>{label("lbl.cms.fbab10af6bec", "Decline")}</T></Pressable>
+          <Cta cmsKey={"lbl.cms.f889c94501e8"} small label={label("lbl.cms.f889c94501e8", "Join")} onPress={()=>void joinFromInvite(inv.invite_code)} disabled={groupBusy} />
+        </Row>)}
+      </View> : null}
+      <T cmsKey={'lbl.sheetJoinGroup'} size={16} weight="800">{label('lbl.sheetJoinGroup', 'Join a group order')}</T>
+      <T cmsKey={'lbl.sheetJoinGroupHint'} size={13} color={th.mut} style={{marginTop:6,marginBottom:16,lineHeight:19}}>{label('lbl.sheetJoinGroupHint', 'Enter the invite code, or scan the QR code your friend shared.')}</T>
+      <Input cmsPlaceholderKey={"lbl.cms.84b73ab53834"} value={inviteCode} onChange={setInviteCode} placeholder={label("lbl.cms.84b73ab53834", "Enter group invite code")} />
+      <Row style={{gap:12,marginTop:16}}>
+        <Pressable accessibilityRole="button" accessibilityLabel={label("lbl.cms.8f0e0fdf8784", "Scan group invite QR code")} disabled={groupBusy} onPress={async()=>{
+          if(!cameraPermission?.granted){const result=await requestCameraPermission();if(!result.granted){toast(label("lbl.cms.0f8d0013465b", "Camera permission is needed to scan a group QR code."));return;}}
+          setScannerOpen(true);
+        }} style={{width:52,height:48,borderRadius:14,alignItems:'center',justifyContent:'center',backgroundColor:th.soft,opacity:groupBusy?0.45:1}}>
+          <Icon name="scan" size={22} color={th.ink}/>
+        </Pressable>
+        <View style={{flex:1}}><Cta cmsKeys={["lbl.cms.0d7c6ad747ae","lbl.cms.4d1a2e311885"]} label={groupBusy?label("lbl.cms.0d7c6ad747ae", "Joining…"):label("lbl.cms.4d1a2e311885", "Join group order")} onPress={()=>void joinServerGroup()} disabled={groupBusy} /></View>
       </Row>
-      {group.members.map((m:any)=><View key={m.id} style={{flexDirection:'row',alignItems:'center',gap:10,paddingVertical:10,borderTopWidth:1,borderTopColor:th.line}}>
-        <View style={{width:38,height:38,borderRadius:19,backgroundColor:th.soft,alignItems:'center',justifyContent:'center'}}><Icon name="user" color={th.mut} /></View>
-        <View style={{flex:1}}><T weight="700">{m.name}</T><T size={12} color={th.mut}>Waiting to add items</T></View>
-        <Badge label={m.status || 'Invited'} />
-        <Pressable accessibilityRole="button" accessibilityLabel={'Remove '+m.name} onPress={()=>saveGroup({...group,members:group.members.filter((x:any)=>x.id!==m.id)})}><Icon name="x" size={18} color={th.red}/></Pressable>
-      </View>)}
-      {!group.members.length ? <T size={13} color={th.mut} style={{paddingVertical:10}}>No members yet. Invite friends or add their names to plan the group.</T> : null}
-    </Card>
+      <View style={{flexDirection:'row',alignItems:'center',gap:12,marginTop:30,marginBottom:26}}>
+        <View style={{flex:1,height:1,backgroundColor:th.line}} /><T cmsKey={'lbl.sheetGroupOr'} size={12} color={th.mut}>{label('lbl.sheetGroupOr', 'or start your own')}</T><View style={{flex:1,height:1,backgroundColor:th.line}} />
+      </View>
+      <T cmsKey={'lbl.sheetStartGroupTitle'} size={16} weight="800">{label('lbl.sheetStartGroupTitle', 'Start a group order')}</T>
+      <T cmsKey={'lbl.sheetStartGroupHint'} size={13} color={th.mut} style={{marginTop:6,marginBottom:16,lineHeight:19}}>{label('lbl.sheetStartGroupHint', 'You pay for the whole order. Friends add their items from their own phones.')}</T>
+      <Cta cmsKeys={["lbl.cms.f61a88208368","lbl.cms.430e970103b4"]} label={groupBusy?label("lbl.cms.f61a88208368", "Please wait…"):label("lbl.cms.430e970103b4", "Create group invite")} onPress={()=>void createServerGroup()} disabled={groupBusy} />
+    {S.cart.lines.length > 0 && !group.serverBacked ? <View>
+      <T cmsKey={'lbl.sheetSharedCart'} size={14} weight="600" style={{marginTop:24}}>{label('lbl.sheetSharedCart', 'Items in this group')}</T>
+      {S.cart.lines.length ? S.cart.lines.map((line:any)=><Row key={line.k} sp style={{marginTop:8,alignItems:'flex-start'}}><View style={{flex:1}}><T size={13} weight="600">{line.q}× {line.n}</T>{line.d ? <T size={11.5} color={th.mut}>{line.d}</T> : null}</View><T size={13} weight="600">{money(line.p*line.q)}</T></Row>) : null}
+      <Row sp style={{marginTop:12,paddingTop:10,borderTopWidth: 0.5,borderTopColor:th.line}}><T cmsKey={'lbl.sheetSubtotal'} weight="600">{label('lbl.sheetSubtotal', 'Subtotal')}</T><T weight="600">{money(S.cart.lines.reduce((sum:number,line:any)=>sum+line.p*line.q,0))}</T></Row>
+
+
+    </View> : null}
+    </View> : null}
+    {group.serverBacked ? <View>
+      <Row sp><View style={{flex:1}}><T cmsKey={'lbl.sheetInviteCode'} size={11.5} weight="600" color={th.mut}>{label('lbl.sheetInviteCode', 'GROUP INVITE CODE')}</T><T size={24} weight="800" style={{marginTop:4}}>{group.code}</T></View><Cta cmsKey={'lbl.sheetInvitePeople'} small label={label('lbl.sheetInvitePeople', 'Invite people')} onPress={invite} /></Row>
+      {group.code ? <View style={{alignItems:'center',paddingVertical:20,marginTop:18,marginBottom:8,borderRadius:18,backgroundColor:th.soft}}>
+        <QRCode value={'wantiss://goodies/group?code='+encodeURIComponent(group.code)} size={168} backgroundColor="#FFFFFF" color="#111111"/>
+        <T cmsKey={"lbl.cms.93357aaf2861"} size={12.5} weight="600" style={{marginTop:12}}>{label("lbl.cms.93357aaf2861", "Scan to join this group")}</T>
+        <T cmsKey={"lbl.cms.2299e372cc22"} size={12} color={th.mut} style={{marginTop:4}}>{label("lbl.cms.2299e372cc22", "Invite code: ")}{group.code}</T>
+      </View> : null}
+      <View style={{height:14}}/>
+      <Cta cmsKey={"lbl.cms.90a979b54f01"} small ghost label={label("lbl.cms.90a979b54f01", "Share invite code")} onPress={()=>void invite()} />
+      {groupMembers.some((member:any)=>member.user_id===currentUserId) ? <View style={{marginTop:12}}>
+        <Cta cmsKeys={["lbl.cms.843cf2cc36fc","lbl.cms.6bb993f5d3e9"]} small ghost label={friendsOpen?label("lbl.cms.843cf2cc36fc", "Hide friends"):label("lbl.cms.6bb993f5d3e9", "Invite friends")} onPress={()=>{if(friendsOpen)setFriendsOpen(false);else void openFriends();}} />
+        {friendsOpen ? <View style={{marginTop:10}}>
+          {friendsBusy&&!friends.length ? <T cmsKey={"lbl.cms.5bebcc4de709"} size={13} color={th.mut}>{label("lbl.cms.5bebcc4de709", "Loading friends…")}</T> : null}
+          {!friendsBusy&&!friends.length ? <T cmsKey={"lbl.cms.0ba8a61c181a"} size={13} color={th.mut}>{label("lbl.cms.0ba8a61c181a", "No friends to invite yet.")}</T> : null}
+          {friends.map((f:any)=>{
+            const uid=String(f.user_id), blocked=!!f.already_member || !!f.already_invited, picked=pickedFriends.includes(uid);
+            return <Pressable key={uid} disabled={blocked} accessibilityRole="checkbox" accessibilityState={{checked:picked,disabled:blocked}} onPress={()=>setPickedFriends(list=>picked?list.filter(x=>x!==uid):[...list,uid])} style={{flexDirection:'row',alignItems:'center',gap:12,paddingVertical:9,opacity:blocked?0.5:1}}>
+              <View style={{width:38,height:38,borderRadius:19,backgroundColor:th.soft,alignItems:'center',justifyContent:'center',overflow:'hidden'}}>{f.avatar_url?<Image source={{uri:f.avatar_url}} style={{width:38,height:38}} />:<Icon name="user" color={th.mut}/>}</View>
+              <View style={{flex:1}}><T weight="600">{f.display_name}</T>{f.already_member?<T cmsKey={"lbl.cms.ce694de2c6e7"} size={12} color={th.mut}>{label("lbl.cms.ce694de2c6e7", "Joined")}</T>:f.already_invited?<T cmsKey={"lbl.cms.409175174430"} size={12} color={th.mut}>{label("lbl.cms.409175174430", "Invited")}</T>:f.invite_status==='declined'?<T cmsKey={"lbl.cms.c123cfeda157"} size={12} color={th.mut}>{label("lbl.cms.c123cfeda157", "Declined")}</T>:null}</View>
+              <View style={{width:22,height:22,borderRadius:7,borderWidth:1.5,borderColor:picked?th.br:th.line,backgroundColor:picked?th.br:'transparent',alignItems:'center',justifyContent:'center'}}>{picked?<Icon name="check" size={14} color="#FFF"/>:null}</View>
+            </Pressable>;
+          })}
+          {friends.length ? <View style={{marginTop:10}}><Cta cmsKeys={["lbl.cms.3cb5b5afda95","lbl.cms.9a867e4ff86a"]} label={friendsBusy?label("lbl.cms.3cb5b5afda95", "Sending…"):label("lbl.cms.9a867e4ff86a", "Send invitation")+(pickedFriends.length?' ('+pickedFriends.length+')':'')} onPress={()=>void sendFriendInvites()} disabled={friendsBusy||!pickedFriends.length} /></View> : null}
+        </View> : null}
+      </View> : null}
+      <View style={{height:24}}/>
+    </View> : null}
+    {group.serverBacked ? <>
+    <T cmsKey={'lbl.sheetGroupMembers'} size={15} weight="600" style={{marginBottom:7}}>{label('lbl.sheetGroupMembers', 'Group members')}</T>
+    <View>
+      {membershipError ? <T cmsKey={"lbl.cms.91ec9baa31db"} size={12} color={th.red}>{label("lbl.cms.91ec9baa31db", "Could not load group members. Try again.")}</T> : null}
+      {groupMembers.map((member:any)=>{
+        const uid=String(member.user_id||'');
+        const isYou=uid===currentUserId;
+        return <Row key={uid} style={{gap:10,alignItems:'center',paddingVertical:9}}>
+          <View style={{width:38,height:38,borderRadius:19,backgroundColor:th.soft,alignItems:'center',justifyContent:'center'}}><Icon name="user" color={th.mut}/></View>
+          <View style={{flex:1}}><T cmsKey={"lbl.cms.72a4f8f6ae2b"} weight="600">{isYou?label("lbl.cms.72a4f8f6ae2b", "You"):member.display_name}</T><T cmsKeys={["lbl.cms.e1d2a0acc58b","lbl.cms.a643f4c6e0ad"]} size={12} color={th.mut}>{member.is_host?label("lbl.cms.e1d2a0acc58b", "Host"):label("lbl.cms.a643f4c6e0ad", "Joined group order")}</T></View>
+          {isYou?<Badge cmsKey={"lbl.cms.72a4f8f6ae2b"} green label={label("lbl.cms.72a4f8f6ae2b", "You")}/>:null}
+        </Row>;
+      })}
+
+    </View>
     <View style={{height:12}}/>
-    <T size={15} weight="800" style={{marginBottom:7}}>Shared cart</T>
-    <Card>
-      {S.cart.lines.length ? S.cart.lines.map((line:any)=><Row key={line.k} sp style={{paddingVertical:7,alignItems:'flex-start'}}><View style={{flex:1}}><T weight="700">{line.q}× {line.n}</T>{line.d ? <T size={11.5} color={th.mut}>{line.d}</T> : null}</View><T weight="700">{money(line.p*line.q)}</T></Row>) : <T size={12.5} color={th.mut}>The host cart is empty. Add items from a store to start the group order.</T>}
-      <View style={{borderTopWidth:1,borderTopColor:th.line,marginTop:5,paddingTop:10}}><Row sp><T weight="800">Items subtotal</T><T weight="800">{money(groupSubtotal)}</T></Row><T size={11.5} color={th.mut} style={{marginTop:4}}>Delivery and service fees are calculated at checkout.</T></View>
-    </Card>
-    <View style={{height:12}} />
-    <Cta label="Done" onPress={close} />
-    <View style={{height:8}} />
-    <Cta ghost label="End group order" onPress={() => {S.groupOrder=null; save(); emit(); close(); toast('Group order ended');}} />
+    <T cmsKey={"lbl.cms.6e3098d0c1da"} size={15} weight="600" style={{marginBottom:7}}>{label("lbl.cms.6e3098d0c1da", "Shared items")}</T>
+    <View>
+      {sharedItems.length ? sharedItems.map((item:any)=>{
+        const product=Array.isArray(item.product)?item.product[0]:item.product;
+        return <Row key={item.id} sp style={{paddingVertical:8,alignItems:'flex-start'}}>
+          <View style={{flex:1}}><T cmsKey={"lbl.cms.3ff260e4c8e9"} weight="600">{item.quantity}× {product?.name || label("lbl.cms.3ff260e4c8e9", "Unavailable product")}</T>{item.note ? <T size={11.5} color={th.mut}>{item.note}</T> : null}</View>
+          <View style={{alignItems:'flex-end',gap:7}}>
+            <T weight="600">{product?.price!=null?money(Number(product.price)*Number(item.quantity)):'—'}</T>
+            {group.serverBacked && String(item.user_id)===currentUserId ? <Pressable accessibilityRole="button" accessibilityLabel={label("lbl.cms.678971e91d3f", "Remove my shared cart item")} onPress={async()=>{
+              const {error}=await removeGroupOrderCartLine(group.groupId,item.line_key);
+              if(error){toast(friendlyError(error, label("lbl.cms.5954ff29d7a5", "Could not remove this shared item.")));return;}
+              const ownLine=S.cart.lines.find((line:any)=>line.k===item.line_key);
+              if(ownLine){S.cart.lines=S.cart.lines.filter((line:any)=>line.k!==item.line_key);if(!S.cart.lines.length)S.cart.sid=null;save();emit();}
+            }}><Icon name="trash-2" size={17} color={th.red}/></Pressable> : null}
+          </View>
+        </Row>;
+      }) : null}
+      <View style={{borderTopWidth: 0.5,borderTopColor:th.line,marginTop:5,paddingTop:10}}>
+        <Row sp><T cmsKey={"lbl.cms.2eb3747e6fda"} weight="600">{label("lbl.cms.2eb3747e6fda", "Items subtotal")}</T><T weight="600">{money(sharedItems.reduce((sum:number,item:any)=>{const product=Array.isArray(item.product)?item.product[0]:item.product;return sum+Number(product?.price||0)*Number(item.quantity||0);},0))}</T></Row>
+       </View>
+      <View style={{height:10}}/>
+      {groupMembers.some((member:any)=>member.user_id===currentUserId&&member.role==='host')
+        ? <Cta cmsKeys={["lbl.cms.c18a37461b0a","lbl.cms.15aa7cafd092"]} label={previewBusy?label("lbl.cms.c18a37461b0a", "Checking shared cart…"):label("lbl.cms.15aa7cafd092", "Review combined cart")} onPress={()=>void reviewSharedOrder()} disabled={previewBusy||!group.serverBacked}/>
+        : null}
+    </View>
+    </> : null}
+    {checkoutPreview ? <View>
+      <T cmsKey={"lbl.cms.f2e22e470687"} size={15} weight="600">{label("lbl.cms.f2e22e470687", "Combined cart")}</T>
+      <T cmsKey={"lbl.cms.4f071bdfe18b"} size={12} color={th.mut} style={{marginTop:4}}>{checkoutPreview.store_name} · {checkoutPreview.item_count} {label("lbl.cms.4f071bdfe18b", "items from everyone")}</T>
+
+      <Row sp style={{borderTopWidth: 0.5,borderTopColor:th.line,paddingTop:10,marginTop:4}}><T cmsKey={"lbl.cms.2eb3747e6fda"} weight="600">{label("lbl.cms.2eb3747e6fda", "Items subtotal")}</T><T weight="600">{money(Number(checkoutPreview.subtotal||0))}</T></Row>
+
+    </View>:null}
+    {checkoutPreview && groupMembers.some((member:any)=>member.user_id===currentUserId&&member.role==='host') ? <View>
+      <T cmsKey={"lbl.cms.365120540556"} size={15} weight="600">{label("lbl.cms.365120540556", "Checkout")}</T>
+
+      <View style={{height:10}}/>
+      <Seg list={[['pickup',label('lbl.checkoutPickup','Pickup')],['delivery',label('lbl.checkoutDelivery','Delivery')]]} on={groupCheckoutType} onPick={value=>{setGroupCheckoutType(value as 'pickup'|'delivery');setGroupDeliveryQuote(null);setCheckoutEstimate(null);if(value==='pickup')void supabase.rpc('goodies_group_order_checkout_estimate',{p_group_id:group.groupId,p_order_type:'pickup',p_address:{}}).then(({data,error}:any)=>{if(error){setCheckoutEstimate(null);toast(friendlyError(error, label("lbl.cms.a8b8e5886e88", "Could not calculate the payment estimate.")));}else setCheckoutEstimate(data);});}} />
+      {groupCheckoutType==='delivery' ? <View style={{marginTop:10}}>
+        <T cmsKey={"lbl.cms.d1be960df332"} size={12} weight="600" style={{marginBottom:6}}>{label("lbl.cms.d1be960df332", "Deliver to")}</T>
+        {S.addr.map((item:any)=><Radio key={String(item.id)} on={String(groupAddressId)===String(item.id)} onPress={()=>{setGroupAddressId(item.id);setGroupDeliveryQuote(null);setCheckoutEstimate(null);}}>
+          <View style={{flex:1}}><T cmsKey={"lbl.cms.85133da20cde"} size={13} weight="600">{item.l}{item.def?label("lbl.cms.85133da20cde", " · Default"):''}</T><T size={11.5} color={th.mut}>{item.t}</T></View>
+        </Radio>)}
+        {!S.addr.length ? <T cmsKey={"lbl.cms.7bb9755afe95"} size={12} color={th.mut}>{label("lbl.cms.7bb9755afe95", "No saved addresses found. Add a delivery address to your profile first.")}</T> : null}
+        <Cta cmsKeys={["lbl.cms.cbc60fe888d9","lbl.cms.92e9fad36618"]} ghost small label={groupQuoteBusy?label("lbl.cms.cbc60fe888d9", "Calculating delivery…"):label("lbl.cms.92e9fad36618", "Calculate delivery fee")} onPress={()=>void calculateGroupDeliveryQuote()} disabled={groupQuoteBusy||!S.addr.length}/>
+        {groupDeliveryQuote&&groupDeliveryQuote.addressId===String(groupAddressId)&&groupDeliveryQuote.expiresAt>Date.now() ? <View style={{marginTop:8,padding:10,borderRadius:10,backgroundColor:th.soft}}>
+          <Row sp><T cmsKey={"lbl.cms.580cf27d049f"} size={12} color={th.mut}>{label("lbl.cms.580cf27d049f", "Delivery fee")}</T><T size={13} weight="600">{money(groupDeliveryQuote.fee)}</T></Row>
+
+
+        </View> : null}
+        <Cta cmsKey={"lbl.cms.80852e133373"} ghost small label={label("lbl.cms.80852e133373", "Manage delivery addresses")} onPress={()=>{close();A.go('addresses');}}/>
+      </View> : null}
+      {checkoutEstimate ? <View style={{marginTop:12,padding:11,borderRadius:11,backgroundColor:th.soft}}>
+        <T cmsKey={"lbl.cms.8299ae70ae45"} size={12} weight="600" style={{marginBottom:7}}>{label("lbl.cms.8299ae70ae45", "Payment estimate")}</T>
+        <Row sp><T cmsKey={"lbl.cms.a55fd7ae1c97"} size={12} color={th.mut}>{label("lbl.cms.a55fd7ae1c97", "Combined cart subtotal")}</T><T size={12} weight="600">{money(Number(checkoutEstimate.subtotal||0))}</T></Row>
+        {groupCheckoutType==='delivery' ? <Row sp style={{marginTop:5}}><T cmsKey={"lbl.cms.580cf27d049f"} size={12} color={th.mut}>{label("lbl.cms.580cf27d049f", "Delivery fee")}</T><T size={12} weight="600">{money(Number(checkoutEstimate.delivery_fee||0))}</T></Row> : null}
+        <Row sp style={{marginTop:5}}><T cmsKey={"lbl.cms.e25611cb9017"} size={12} color={th.mut}>{label("lbl.cms.e25611cb9017", "Service fee")}</T><T size={12} weight="600">{money(Number(checkoutEstimate.service_fee||0))}</T></Row>
+        <View style={{height:1,backgroundColor:th.line,marginVertical:8}}/>
+        <Row sp><T cmsKey={"lbl.cms.58f9d30aae7a"} size={13} weight="600">{label("lbl.cms.58f9d30aae7a", "Estimated total")}</T><T size={15} weight="600">{money(Number(checkoutEstimate.estimated_total||0))}</T></Row>
+
+
+      </View> : null}
+      <Row sp style={{marginTop:10}}><T cmsKey={"lbl.cms.d15afce772c7"} size={12} color={th.mut}>{label("lbl.cms.d15afce772c7", "Host Wallet balance")}</T><T weight="600">{money(Number(S.wallet||0))}</T></Row>
+
+      <View style={{height:9}}/>
+      <Cta cmsKeys={["lbl.cms.5763c91a2cc0","lbl.cms.91e196e0db97"]} label={groupCheckoutBusy?label("lbl.cms.5763c91a2cc0", "Placing group order…"):label("lbl.cms.91e196e0db97", "Place group order · Wallet")} onPress={()=>void checkoutGroupOrder()} disabled={groupCheckoutBusy||(groupCheckoutType==='delivery'&&(!S.addr.length||!groupDeliveryQuote||groupDeliveryQuote.addressId!==String(groupAddressId)||groupDeliveryQuote.expiresAt<=Date.now()))}/>
+    </View> : null}
+    {showDone ? <><View style={{height:12}} /><Cta cmsKey={'lbl.sheetDone'} label={label('lbl.sheetDone', 'Done')} onPress={close} /><View style={{height:8}} /></> : null}
+    {group.serverBacked && group.groupId ? <Cta cmsKey={'lbl.sheetEndGroup'} ghost label={label('lbl.sheetEndGroup', 'End group order')} onPress={async () => {
+      if (!group.serverBacked || !group.groupId) {toast(label("lbl.cms.3d7a9de0260e", "This group invitation is not server-backed."));return;}
+      setGroupBusy(true);
+      const {data,error}=await supabase.rpc('goodies_group_order_end',{p_group_id:group.groupId});
+      setGroupBusy(false);
+      if(error){toast(friendlyError(error, label("lbl.cms.5c58c7dec596", "Could not end this group order.")));return;}
+      clearActiveGroup(); close();
+      toast(label("lbl.cms.e12b8e635219", "Group order ended."));
+    }} /> : null}
+    <Modal visible={scannerOpen} animationType="slide" onRequestClose={()=>setScannerOpen(false)}>
+      <View style={{flex:1,backgroundColor:'#000000'}}>
+        <CameraView style={{flex:1}} facing="back" barcodeScannerSettings={{barcodeTypes:['qr']}} onBarcodeScanned={({data})=>{
+          setScannerOpen(false);
+          const scanned=String(data||'').trim();
+          const linkCode=scanned.match(/[?&]code=([^&]+)/i)?.[1] || scanned.match(/^wantiss:\/\/goodies\/group\/([^/?#]+)/i)?.[1];
+          let code=linkCode ? decodeURIComponent(linkCode) : scanned;
+          code=code.trim().toUpperCase();
+          setInviteCode(code);
+          toast(label("lbl.cms.c90943bbdf87", "QR code scanned. Tap Join group order to continue."));
+        }}/>
+        <View style={{padding:18,backgroundColor:'#111111'}}>
+          <T cmsKey={"lbl.cms.45162ba8dd3a"} color="#FFFFFF" weight="600" align="center">{label("lbl.cms.45162ba8dd3a", "Scan a Wantiss group invite QR code")}</T>
+          <Cta cmsKey={"lbl.cms.b5e1b0b2d344"} label={label("lbl.cms.b5e1b0b2d344", "Close scanner")} onPress={()=>setScannerOpen(false)}/>
+        </View>
+      </View>
+    </Modal>
   </>;
+}
+
+export function GroupOrderPage({onBack, storeId = ''}: {onBack: () => void; storeId?: string}) {
+  const th = useTheme();
+  return <View style={{flex: 1, backgroundColor: th.bg}}>
+    <Bar cmsKey={'lbl.sheetGroupTitle'} title={label('lbl.sheetGroupTitle', 'Group order')} onBack={onBack} />
+    <ScrollView style={{flex: 1}} contentContainerStyle={{paddingHorizontal: 16, paddingTop: 16, paddingBottom: 32}} keyboardShouldPersistTaps="handled"><GroupOrderSheet close={onBack} showTitle={false} showDone={false} storeId={storeId} /></ScrollView>
+  </View>;
 }
 
 function ReviewSheet({id, stars, driver = false, initialStars = 0}: {id: string; stars: any; driver?: boolean; initialStars?: number}) {
   const [n, setN] = useState(initialStars || S.rt || 0), [t, setT] = useState('');
   return (<>
-    <T size={20} weight="800">{driver ? 'Rate your driver' : 'Rate your order'}</T>{stars(n, setN)}
-    <Input value={t} onChange={setT} placeholder="Add a comment (optional)" multiline />
+    <T cmsKeys={['lbl.orderRateDriver','lbl.orderRate']} size={20} weight="600">{driver ? label('lbl.orderRateDriver', 'Rate your driver') : label('lbl.orderRate', 'Rate your order')}</T>{stars(n, setN)}
+    <Input cmsPlaceholderKey={'lbl.sheetReviewComment'} value={t} onChange={setT} placeholder={label('lbl.sheetReviewComment', 'Add a comment (optional)')} multiline />
     <View style={{height: 12}} />
-    <Cta label="Submit review" onPress={() => {
+    <Cta cmsKey={'lbl.sheetSubmitReview'} label={label('lbl.sheetSubmitReview', 'Submit review')} onPress={() => {
       const o = S.orders.filter((x: any) => x.id === id)[0];
-      if (!o) {toast('Order not found'); return;}
-      if (!n) {toast('Pick a star rating'); return;}
+      if (!o) {toast(label('lbl.sheetOrderNotFound', 'Order not found')); return;}
+      if (!n) {toast(label('lbl.sheetPickRating', 'Pick a star rating')); return;}
       if (driver) {
         S.driverRev = S.driverRev || {};
         S.driverRev[id] = {n: S.pf.n, r: n, t: t.trim(), d: 'Just now', orderId: id};
@@ -298,58 +677,63 @@ function ReviewSheet({id, stars, driver = false, initialStars = 0}: {id: string;
         o.rated = n;
         o.orderReview = {r: n, t: t.trim(), d: 'Just now'};
       }
-      S.rt = 0; ui.close(); toast(driver ? 'Thanks for rating your driver!' : 'Thanks for your review!'); save(); emit();
+      S.rt = 0; ui.close(); toast(driver ? label('lbl.sheetDriverReviewThanks', 'Thanks for rating your driver!') : label('lbl.sheetReviewThanks', 'Thanks for your review!')); save(); emit();
     }} />
   </>);
 }
 
 function ContactsSheet({close}: {close: () => void}) {
   const th = useTheme();
-  const rows = [{id: 'w', ph: S.pf.ph, l: 'Default Wantiss number', w: 1}].concat(S.gc.map((c: any) => ({id: c.id, ph: c.ph, l: c.l || 'Goodies number', w: 0})));
+  const rows = [{id: 'w', ph: S.pf.ph, l: label('lbl.sheetDefaultNumber', 'Default Wantiss number'), w: 1}].concat(S.gc.map((c: any) => ({id: c.id, ph: c.ph, l: c.l || label('lbl.sheetGoodiesNumber', 'Goodies number'), w: 0})));
   return (<>
-    <T size={20} weight="800" style={{marginBottom: 4}}>Contact number</T>
-    <T size={12.5} color={th.mut} style={{marginBottom: 12}}>We use this number for this order only. Your Wantiss account number is never changed here.</T>
+    <T cmsKey={'lbl.sheetContactNumber'} size={20} weight="600" style={{marginBottom: 4}}>{label('lbl.sheetContactNumber', 'Contact number')}</T>
+    <T cmsKey={'lbl.sheetContactNumberHint'} size={12.5} color={th.mut} style={{marginBottom: 12}}>{label('lbl.sheetContactNumberHint', 'We use this number for this order only. Your Wantiss account number is never changed here.')}</T>
     {rows.map((r: any) => (
       <View key={r.id} style={{flexDirection: 'row', alignItems: 'center', gap: 8}}>
-        <View style={{flex: 1}}><Radio on={S.cc === r.id} onPress={() => {S.cc = r.id; close(); save(); emit();}}><T weight="700">{r.ph}</T><View style={{marginTop: 3}}>{r.w ? <Badge green label="Default Wantiss number" /> : <T size={12.5} color={th.mut}>Goodies checkout number · {r.l}</T>}</View></Radio></View>
-        {r.w ? null : <><Pressable accessibilityLabel="Edit number" onPress={() => ui.sheet({kind: 'ctform', id: r.id})}><T size={13} weight="700" color={th.br}>Edit</T></Pressable>
-        <Pressable accessibilityLabel="Remove number" onPress={() => {if (S.orders.some((o: any) => !done(o) && o.cid == r.id)) {toast('This number is used by an active order'); return;} ui.sheet({kind: 'remove-number', numberLabel: r.l || r.ph, onConfirm: () => {S.gc = S.gc.filter((c: any) => c.id !== r.id); if (S.cc === r.id) S.cc = 'w'; toast('Number removed'); save(); emit(); ui.sheet({kind: 'contacts'});}});}}><Icon name="trash" size={18} color={th.red} /></Pressable></>}
+        <View style={{flex: 1}}><Radio on={S.cc === r.id} onPress={() => {S.cc = r.id; close(); save(); emit();}}><T weight="600">{r.ph}</T><View style={{marginTop: 3}}>{r.w ? <Badge cmsKey={"lbl.sheetAuto1UP0O00"} green label={label("lbl.sheetAuto1UP0O00", "Default Wantiss number")} /> : <T cmsKey={"lbl.cms.a230877fe597"} size={12.5} color={th.mut}>{label("lbl.cms.a230877fe597", "Goodies checkout number · ")}{r.l}</T>}</View></Radio></View>
+        {r.w ? null : <><Pressable accessibilityLabel={label('lbl.sheetEditNumber', 'Edit number')} onPress={() => ui.sheet({kind: 'ctform', id: r.id})}><T cmsKey={"lbl.sheetAuto1CISXZJ"} size={13} weight="600" color={th.br}>{label("lbl.sheetAuto1CISXZJ", "Edit")}</T></Pressable>
+        <Pressable accessibilityLabel={label('lbl.sheetRemoveNumber', 'Remove number')} onPress={() => {if (S.orders.some((o: any) => !done(o) && o.cid == r.id)) {toast(label('lbl.sheetPhoneInUse', 'This number is used by an active order')); return;} ui.sheet({kind: 'remove-number', numberLabel: r.l || r.ph, onConfirm: () => {S.gc = S.gc.filter((c: any) => c.id !== r.id); if (S.cc === r.id) S.cc = 'w'; toast(label('lbl.sheetNumberRemoved', 'Number removed')); save(); emit(); ui.sheet({kind: 'contacts'});}});}}><Icon name="trash" size={18} color={th.red} /></Pressable></>}
       </View>
     ))}
-    <Cta ghost label="+ Add another number" onPress={() => ui.sheet({kind: 'ctform', id: ''})} />
+    <Cta cmsKey={"lbl.sheetAutoQWFBNT"} ghost label={label("lbl.sheetAutoQWFBNT", "+ Add another number")} onPress={() => ui.sheet({kind: 'ctform', id: ''})} />
   </>);
 }
-function CtForm({id}: {id: any}) {
+function CtForm({id,bottomInset=0}: {id: any; bottomInset?: number}) {
   const th = useTheme(), c = S.gc.filter((x: any) => x.id == id)[0] || {l: '', ph: ''};
   const [l, setL] = useState(c.l || ''), [ph, setPh] = useState(c.ph || '');
   const save_ = () => {
     const p = ph.trim();
-    if (!phoneOK(p)) return toast('Enter a valid phone number (8 to 15 digits)');
+    if (!phoneOK(p)) return toast(label('lbl.sheetPhoneInvalid', 'Enter a valid phone number (8 to 15 digits)'));
     const dg = p.replace(/\D/g, '');
-    if (dg === S.pf.ph.replace(/\D/g, '')) return toast('That is already your Wantiss number');
-    if (S.gc.some((x: any) => x.id != id && String(x.ph).replace(/\D/g, '') === dg)) return toast('You already saved that number');
+    if (dg === S.pf.ph.replace(/\D/g, '')) return toast(label('lbl.sheetSameWantissPhone', 'That is already your Wantiss number'));
+    if (S.gc.some((x: any) => x.id != id && String(x.ph).replace(/\D/g, '') === dg)) return toast(label('lbl.sheetDuplicateNumber', 'You already saved that number'));
     const cc = S.gc.filter((x: any) => x.id == id)[0];
     if (cc) {cc.ph = p; cc.l = l.trim();} else {const n = {id: Date.now(), ph: p, l: l.trim()}; S.gc.push(n); S.cc = n.id;}
-    toast('Number saved for Goodies checkout'); save(); emit(); ui.sheet({kind: 'contacts'});
+    toast(label('lbl.sheetNumberSaved', 'Number saved for Goodies checkout')); save(); emit(); ui.sheet({kind: 'contacts'});
   };
-  return (<>
-    <T size={20} weight="800">{id ? 'Edit' : 'Add'} contact number</T>
-    <T size={12.5} color={th.mut} style={{marginTop: 3}}>Saved for Goodies checkout only. Your Wantiss account number is not changed here. Country-code management will be handled in Wantiss settings.</T>
-    <Input label="Label (optional)" value={l} onChange={setL} placeholder="e.g. Partner, Office" />
-    <Input label="Phone number" value={ph} onChange={setPh} placeholder="Enter phone number" keyboard="phone-pad" />
-    <View style={{height: 14}} /><Cta label="Save number" onPress={save_} /><View style={{height: 10}} /><Cta ghost label="Back" onPress={() => ui.sheet({kind: 'contacts'})} />
-  </>);
+  return <View style={{flex:1,minHeight:0,paddingBottom:Math.max(0,bottomInset-20)}}>
+    <ScrollView keyboardShouldPersistTaps="handled" showsVerticalScrollIndicator={false} contentContainerStyle={{paddingBottom:12}}>
+      <T cmsKeys={['lbl.sheetEditContactNumber','lbl.sheetAddContactNumber']} size={20} weight="600">{id ? label('lbl.sheetEditContactNumber','Edit contact number') : label('lbl.sheetAddContactNumber','Add contact number')}</T>
+      <T cmsKey={"lbl.sheetAutoLZBAF5"} size={12.5} color={th.mut} style={{marginTop:3,marginBottom:10}}>{label("lbl.sheetAutoLZBAF5", "Saved for Goodies checkout only. Your Wantiss account number is not changed here. Country-code management will be handled in Wantiss settings.")}</T>
+      <Input cmsKey={"lbl.sheetAuto5601C6"} cmsPlaceholderKey={"lbl.sheetAutoBBS3LN"} label={label("lbl.sheetAuto5601C6", "Label (optional)")} value={l} onChange={setL} placeholder={label("lbl.sheetAutoBBS3LN", "e.g. Partner, Office")} />
+      <Input cmsKey={"lbl.sheetAutoSTYZV6"} cmsPlaceholderKey={"lbl.sheetAuto1JJXA6W"} label={label("lbl.sheetAutoSTYZV6", "Phone number")} value={ph} onChange={setPh} placeholder={label("lbl.sheetAuto1JJXA6W", "Enter phone number")} keyboard="phone-pad" />
+    </ScrollView>
+    <View style={{paddingTop:8,borderTopWidth: 0.5,borderTopColor:th.line}}>
+      <Cta cmsKey={"lbl.sheetAuto9HY80N"} label={label("lbl.sheetAuto9HY80N", "Save number")} onPress={save_} />
+      <View style={{height:8}}/><Cta cmsKey={"lbl.sheetAuto1LJ92XO"} ghost label={label("lbl.sheetAuto1LJ92XO", "Back")} onPress={() => ui.sheet({kind: 'contacts'})} />
+    </View>
+  </View>;
 }
 
-/* Development helper: paste an Admin export; production loads this content from the backend. */
+/* DEMO: paste the JSON exported from Wantiss Admin (Goodies > Overview > Export content). Production fetches the same shape from the backend. */
 function ImportSheet({close}: {close: () => void}) {
   const th = useTheme(), [txt, setTxt] = useState('');
   return (<>
-    <T size={20} weight="800">Import Admin content</T>
-    <T size={12.5} color={th.mut} style={{marginTop: 6, marginBottom: 10}}>Paste the content exported from Wantiss Admin. It replaces promo cards, categories, labels, fees, age rules, texts and artwork in this demo. {hasContent() ? 'Admin content is currently loaded.' : 'The built-in sample content is currently used.'}</T>
-    <TextInput value={txt} onChangeText={setTxt} multiline placeholder="Paste JSON here" placeholderTextColor={th.mut} style={{minHeight: 120, maxHeight: 220, fontSize: 12, color: th.ink, backgroundColor: th.soft, borderWidth: 1, borderColor: th.line, borderRadius: 12, padding: 10, textAlignVertical: 'top'}} />
+    <T cmsKey={"lbl.sheetAuto1DJ0R80"} size={20} weight="600">{label("lbl.sheetAuto1DJ0R80", "Import Admin content")}</T>
+    <T cmsKeys={["lbl.cms.51de0d274565","lbl.cms.c73acc89640b","lbl.cms.40b928d70f8f"]} size={12.5} color={th.mut} style={{marginTop: 6, marginBottom: 10}}>{label("lbl.cms.51de0d274565", "Paste the content exported from Wantiss Admin. It replaces promo cards, categories, labels, fees, age rules, texts and artwork in this demo. ")}{hasContent() ? label("lbl.cms.c73acc89640b", "Admin content is currently loaded.") : label("lbl.cms.40b928d70f8f", "The built-in sample content is currently used.")}</T>
+    <TextInput value={txt} onChangeText={setTxt} multiline placeholder={label("lbl.sheetAutoAED84A", "Paste JSON here")} placeholderTextColor={th.mut} style={{minHeight: 120, maxHeight: 220, fontSize: 12, color: th.ink, backgroundColor: th.soft, borderWidth: 0.5, borderColor: th.line, borderRadius: 12, padding: 10, textAlignVertical: 'top'}} />
     <View style={{height: 12}} />
-    <Cta label="Import" onPress={async () => {try {await importContent(txt.trim()); close(); toast('Admin content loaded'); emit();} catch (e: any) {toast(String(e && e.message ? e.message : 'That is not valid JSON'));}}} />
-    {hasContent() ? <><View style={{height: 10}} /><Cta ghost label="Go back to sample content" onPress={async () => {await clearContent(); close(); toast('Using sample content'); emit();}} /></> : null}
+    <Cta cmsKey={"lbl.sheetAuto1EXCTAI"} label={label("lbl.sheetAuto1EXCTAI", "Import")} onPress={async () => {try {await importContent(txt.trim()); close(); toast(label('lbl.sheetAdminContentLoaded', 'Admin content loaded')); emit();} catch (e: any) {toast(String(e && e.message ? e.message : label('lbl.sheetInvalidJson', 'That is not valid JSON')));}}} />
+    {hasContent() ? <><View style={{height: 10}} /><Cta cmsKey={"lbl.sheetAuto1U4P0PS"} ghost label={label("lbl.sheetAuto1U4P0PS", "Go back to sample content")} onPress={async () => {await clearContent(); close(); toast(label('lbl.sheetSampleContent', 'Using sample content')); emit();}} /></> : null}
   </>);
 }

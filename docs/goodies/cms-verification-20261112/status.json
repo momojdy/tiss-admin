@@ -1,0 +1,54 @@
+{
+  "scope": "Goodies customer CMS source coverage and isolated admin preview; no deployment or publication",
+  "customerBase": "a5be9734365a73318c6d34d4eec71b1a2c45659e",
+  "adminBase": "e65ff541bef118e6c9e4f82137838a03152d8bed",
+  "fields": 1214,
+  "groups": 64,
+  "routes": 34,
+  "checks": [
+    {
+      "status": "PASS",
+      "check": "All 34 routes represented in generated page catalog and preview selector"
+    },
+    {
+      "status": "PASS",
+      "check": "All registered fields editable in five locales through local serialization/lookup tests"
+    },
+    {
+      "status": "PASS",
+      "check": "7 consumer and 18 admin regression tests; 34 browser route renders; 11 browser interaction checks"
+    },
+    {
+      "status": "PASS",
+      "check": "No direct JSX text/label bypass and no literal CMS lookup used as state comparison"
+    },
+    {
+      "status": "PASS",
+      "check": "Admin Android and iOS Expo exports (unsigned bundles)"
+    },
+    {
+      "status": "PASS",
+      "check": "Repository lint and changed customer/shared files lint: zero errors; existing warnings recorded"
+    },
+    {
+      "status": "FAIL",
+      "check": "Whole customer typecheck: 9 existing Gatherz/Main errors; customer Android bundle: missing Gatherz expo-sensors"
+    },
+    {
+      "status": "FAIL",
+      "check": "Whole admin typecheck: 31 existing shared People/staff state errors"
+    },
+    {
+      "status": "NOT VERIFIED",
+      "check": "Hosted authenticated save \u2192 publish \u2192 real customer reload; no publishing authorized in this task"
+    },
+    {
+      "status": "NOT VERIFIED",
+      "check": "Native provider widgets, physical devices, signed installations and application deployment"
+    },
+    {
+      "status": "NOT VERIFIED",
+      "check": "Legal/FAQ approval and human Haitian Creole review; explicitly deferred"
+    }
+  ]
+}

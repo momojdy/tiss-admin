@@ -7,9 +7,9 @@ export const PHONE_H = 844;
 const BEZEL = 7;
 const MAX_SCALE = 0.82;
 
-export function PhoneFrame({ children, background = '#fff' }: { children: ReactNode; background?: string }) {
+export function PhoneFrame({ children, background = '#fff', zoom = 1 }: { children: ReactNode; background?: string; zoom?: number }) {
   const { width } = useWindowDimensions();
-  const scale = Math.min(MAX_SCALE, Math.max(0.5, (width - 48) / (PHONE_W + BEZEL * 2)));
+  const scale = Math.min(MAX_SCALE, Math.max(0.5, (width - 48) / (PHONE_W + BEZEL * 2))) * Math.max(0.5, Math.min(1.5, zoom));
   return (
     <View style={{ width: PHONE_W * scale + BEZEL * 2, height: PHONE_H * scale + BEZEL * 2, borderRadius: 30, borderWidth: BEZEL, borderColor: '#252529', overflow: 'hidden', backgroundColor: background }}>
       <View pointerEvents="box-none" style={{ position: 'absolute', left: 0, top: 0, width: PHONE_W, height: PHONE_H, transform: [{ translateX: -(PHONE_W * (1 - scale)) / 2 }, { translateY: -(PHONE_H * (1 - scale)) / 2 }, { scale }] }}>

@@ -1,0 +1,347 @@
+{
+  "scope": "Source mirroring and native/provider adapter boundaries; not hosted verification",
+  "copies": [
+    {
+      "target": "GoodiesApp.tsx",
+      "origins": [
+        {
+          "file": "src/features/Goodies/GoodiesApp.tsx",
+          "sha256": "b1d93e1f7a3f5e6cfe55ec6af2bdb0a22c5d6582699af23a619ebf428adf80ab"
+        }
+      ]
+    },
+    {
+      "target": "GoodiesQuickMenu.tsx",
+      "origins": [
+        {
+          "file": "src/features/Goodies/GoodiesQuickMenu.tsx",
+          "sha256": "5f776bd3bffa59c72b5d1d472d66b11f7024f8150d26cd3c437cce571752c18c"
+        }
+      ]
+    },
+    {
+      "target": "actions.ts",
+      "origins": [
+        {
+          "file": "src/features/Goodies/actions.ts",
+          "sha256": "777119620ae477e1c31547cf85b504e0d47b427b5c9aed24569d9f74d16c76bd"
+        }
+      ]
+    },
+    {
+      "target": "builders/Builder.tsx",
+      "origins": [
+        {
+          "file": "src/features/Goodies/builders/Builder.tsx",
+          "sha256": "160ab437910a739dca999d51c91726886e5deca8929ebd1243b2cbf8d7556779"
+        }
+      ]
+    },
+    {
+      "target": "builders/engine.tsx",
+      "origins": [
+        {
+          "file": "src/features/Goodies/builders/engine.tsx",
+          "sha256": "721b65232102cb1c9291e9e0664833fe3ee806799e1c4d52ec3f4270930bfaac"
+        }
+      ]
+    },
+    {
+      "target": "builders/pizzaArt.ts",
+      "origins": [
+        {
+          "file": "src/features/Goodies/builders/pizzaArt.ts",
+          "sha256": "e360aeed5962642e27f21f4adb533b757b25a811f78c60bbe1d3c75ded956af8"
+        }
+      ]
+    },
+    {
+      "target": "builders/templates.ts",
+      "origins": [
+        {
+          "file": "src/features/Goodies/builders/templates.ts",
+          "sha256": "10d1d7d2574098233660e300714d4d0e7bbb7c1688bf2368359accea350cd265"
+        }
+      ]
+    },
+    {
+      "target": "components/Icon.tsx",
+      "origins": [
+        {
+          "file": "src/features/Goodies/components/Icon.tsx",
+          "sha256": "76efc4df504b8651474713ef9d7af3ad6939769bf2ac285292256cf2abe630d5"
+        }
+      ]
+    },
+    {
+      "target": "components/Overlays.tsx",
+      "origins": [
+        {
+          "file": "src/features/Goodies/components/Overlays.tsx",
+          "sha256": "a0bc32f4fa335ccb1b5924bac24ce195375b7aa31d349f74fe7c3c9d330ef8d2"
+        }
+      ]
+    },
+    {
+      "target": "components/Sheets.tsx",
+      "origins": [
+        {
+          "file": "src/features/Goodies/components/Sheets.tsx",
+          "sha256": "82dfa0cecdcfd15ea321cd9fdae88bc703c66f916cac1bf0b656a1f51f1da5cf"
+        }
+      ]
+    },
+    {
+      "target": "components/cards.tsx",
+      "origins": [
+        {
+          "file": "src/features/Goodies/components/cards.tsx",
+          "sha256": "5cf5e7705d228b649d09a7e07099f25a8724e6f6db85d31797c6dbd5a289c92f"
+        }
+      ]
+    },
+    {
+      "target": "components/ui.tsx",
+      "origins": [
+        {
+          "file": "src/features/Goodies/components/ui.tsx",
+          "sha256": "119e2df368220ada6f3b397cb9f56edd2375672ac11018174470e697fa274a3b"
+        }
+      ]
+    },
+    {
+      "target": "content.ts",
+      "origins": [
+        {
+          "file": "src/features/Goodies/content.ts",
+          "sha256": "21384bcba22bf3befea65639327bc0b21734e64d51c7c15b307d7009dd29bd41"
+        }
+      ]
+    },
+    {
+      "target": "data/promoText.ts",
+      "origins": [
+        {
+          "file": "src/features/Goodies/data/promoText.ts",
+          "sha256": "8cdc7ac81fdf7a84f6e2ad8bf7dec5f9f05288903cefdcf5fdf34f55ff23d6a2"
+        }
+      ]
+    },
+    {
+      "target": "data/seed.ts",
+      "origins": [
+        {
+          "file": "src/features/Goodies/data/seed.ts",
+          "sha256": "40c24644b832701384110e0460c07504870e3a499a7dcbb9b476984824ae05ae"
+        }
+      ]
+    },
+    {
+      "target": "data/types.ts",
+      "origins": [
+        {
+          "file": "src/features/Goodies/data/types.ts",
+          "sha256": "2552406b76eded2a6c835fc09f3fe0fbc13e2980e310d45fc608823dd853fbab"
+        }
+      ]
+    },
+    {
+      "target": "friendlyError.ts",
+      "origins": [
+        {
+          "file": "src/features/Goodies/friendlyError.ts",
+          "sha256": "277cba08cdf5276c81edd3587d61d96fdd5e92c61ea8ec89901d9181b1c911a8"
+        }
+      ]
+    },
+    {
+      "target": "helpPayApi.ts",
+      "origins": [
+        {
+          "file": "src/features/Goodies/helpPayApi.ts",
+          "sha256": "9bffe3713832f67c8bbcc95269a478dde339664937b198c48c2ff7651fb4b1c3"
+        }
+      ]
+    },
+    {
+      "target": "i18n/dict.ts",
+      "origins": [
+        {
+          "file": "src/features/Goodies/i18n/dict.ts",
+          "sha256": "3030b8cc5980c6f10b8b50110e563cb05bb34d6cffabc26091445d99ca6fb97a"
+        }
+      ]
+    },
+    {
+      "target": "i18n/index.ts",
+      "origins": [
+        {
+          "file": "src/features/Goodies/i18n/index.ts",
+          "sha256": "ecce3e6cdf4973e5342f1d8c32dd507a58face7d7df2a37134154ad358b35525"
+        }
+      ]
+    },
+    {
+      "target": "i18n/interfaceContent.ts",
+      "origins": [
+        {
+          "file": "src/features/Goodies/i18n/interfaceContent.ts",
+          "sha256": "6cd44a51eaaee35094b67031668782cdf1b4c964683cc9d5ad298c1c6fc73a28"
+        }
+      ]
+    },
+    {
+      "target": "i18n/resolveText.ts",
+      "origins": [
+        {
+          "file": "src/features/Goodies/i18n/resolveText.ts",
+          "sha256": "0de2ce224c7ee01d33eec9f72ce49288a34e007db6e580c5d7fe24812f9562a8"
+        }
+      ]
+    },
+    {
+      "target": "providers/index.ts",
+      "origins": [
+        {
+          "file": "src/features/Goodies/providers/index.ts",
+          "sha256": "32733e0ef40accb80808399810f795cc96caf5bd72375acec36d3263f07bc66d"
+        }
+      ]
+    },
+    {
+      "target": "screens/Account.tsx",
+      "origins": [
+        {
+          "file": "src/features/Goodies/screens/Account.tsx",
+          "sha256": "f8028240877176223bbac7851566308a0f889de9f346348e22e27d375f9eaa45"
+        }
+      ]
+    },
+    {
+      "target": "screens/Browse.tsx",
+      "origins": [
+        {
+          "file": "src/features/Goodies/screens/Browse.tsx",
+          "sha256": "4c9cb1f9b22f0a584cb7dcb0bef6349a2697c0823010e83289f458b3aea6c37b"
+        }
+      ]
+    },
+    {
+      "target": "screens/CardAuthentication.tsx",
+      "origins": [
+        {
+          "file": "src/features/Goodies/screens/CardAuthentication.tsx",
+          "sha256": "19f224a305ab371c23152277ccffedaa78bde084a8435945c912b40b9959ec8d"
+        }
+      ]
+    },
+    {
+      "target": "screens/HelpPayPreview.tsx",
+      "origins": [
+        {
+          "file": "src/features/Goodies/screens/HelpPayPreview.tsx",
+          "sha256": "79008020ca8009f66919c8a5eba075723f4c03d7c791d739129b56a8e11b5dab"
+        }
+      ]
+    },
+    {
+      "target": "screens/Payments.tsx",
+      "origins": [
+        {
+          "file": "src/features/Goodies/screens/Payments.tsx",
+          "sha256": "e4e9d4ede3bcd69764169c6e40b96622af9b3abf0c9c42fc7fef1f195a7ff683"
+        }
+      ]
+    },
+    {
+      "target": "screens/Shop.tsx",
+      "origins": [
+        {
+          "file": "src/features/Goodies/screens/Shop.tsx",
+          "sha256": "67c39c4837a5407526daf4abcb2d7b2b61ade39fb491b1993eaa1e732754b80d"
+        }
+      ]
+    },
+    {
+      "target": "serverSync.ts",
+      "origins": [
+        {
+          "file": "src/features/Goodies/serverSync.ts",
+          "sha256": "a871dc8995a1cd12fb49ef5ad42f0ac2c3da0ee7441457013330f084c577ff94"
+        }
+      ]
+    },
+    {
+      "target": "store.ts",
+      "origins": [
+        {
+          "file": "src/features/Goodies/store.ts",
+          "sha256": "ef84a570aad0a4495e3a78ef6c7a173dadbb3e7b84a50a3ddd200bde2be29036"
+        }
+      ]
+    },
+    {
+      "target": "theme.ts",
+      "origins": [
+        {
+          "file": "src/features/Goodies/theme.ts",
+          "sha256": "ba5f334f32000923d74bbeac26853d2fadff7d1f22c59aa4c9109d569f9a5578"
+        }
+      ]
+    },
+    {
+      "target": "previewMenu.tsx",
+      "origins": [
+        {
+          "file": "src/features/gatherz/GatherzQuickMenu.tsx",
+          "sha256": "a8355e2ed2b826a9e3711d7539991d9326acdc70e2badd626c7b57409bb70eda"
+        }
+      ]
+    },
+    {
+      "target": "screens/WalletBalance.tsx",
+      "origins": [
+        {
+          "file": "src/components/wallet/WalletBalance.tsx",
+          "sha256": "35e37d3e1a607bdc3bbdab8b8e7cd437c81560289f278148de36b9387b1b1c21"
+        }
+      ]
+    },
+    {
+      "target": "screens/CardAuthentication.tsx",
+      "origins": [
+        {
+          "file": "src/features/Goodies/screens/CardAuthentication.tsx",
+          "sha256": "19f224a305ab371c23152277ccffedaa78bde084a8435945c912b40b9959ec8d"
+        }
+      ]
+    },
+    {
+      "target": "screens/AddCard.tsx",
+      "origins": [
+        {
+          "file": "src/screens/Wallet/WalletAddNewCardScreen.tsx",
+          "sha256": "4e8c2348ea7834b9684fcd60b333e751828d8f968f170bc8a21666e3e17e04e4"
+        }
+      ]
+    },
+    {
+      "target": "components/ui.tsx",
+      "origins": [
+        {
+          "file": "src/features/Goodies/components/ui.tsx",
+          "sha256": "119e2df368220ada6f3b397cb9f56edd2375672ac11018174470e697fa274a3b"
+        }
+      ]
+    },
+    {
+      "target": "components/Overlays.tsx",
+      "origins": [
+        {
+          "file": "src/features/Goodies/components/Overlays.tsx",
+          "sha256": "a0bc32f4fa335ccb1b5924bac24ce195375b7aa31d349f74fe7c3c9d330ef8d2"
+        }
+      ]
+    }
+  ]
+}

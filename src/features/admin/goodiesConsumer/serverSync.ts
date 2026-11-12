@@ -1,10 +1,12 @@
 import { AppState, type AppStateStatus } from 'react-native';
-import { supabase } from '../lib/supabase';
-import { S, STB, emit, save } from './store';
+import {previewBackend as supabase} from './previewRuntime';
+import { S, STB, IT, emit, save } from './store';
 
 type ServerOrder = {
   id: string;
   order_code: string;
+  parent_id: string | null;
+  stop_index: number | null;
   store_id: string;
   status: string;
   created_at: string;
@@ -46,10 +48,12 @@ function mapOrder(row: ServerOrder) {
   return {
     id: String(row.order_code || row.id),
     backendId: row.id,
+    parentId: row.parent_id || undefined,
+    stop: row.stop_index == null ? undefined : Number(row.stop_index),
     serverStatus: String(row.status || 'placed').toLowerCase(),
     serverUpdatedAt: row.updated_at,
     sid,
-    lines: items,
+    lines: items.map((item: any) => ({...item, photo: item?.photo || IT[String(item?.id || '')]?.photo || null})),
     sn: STB[sid]?.n || 'Store',
     sub: Number(row.subtotal || 0),
     fee: Number(row.delivery_fee || 0),
@@ -73,6 +77,27 @@ function mapOrder(row: ServerOrder) {
   };
 }
 
+export async function fetchGoodiesOrderForNotification(orderId?: string, orderCode?: string) {
+  const {data: auth, error: authError} = await supabase.auth.getUser();
+  if (authError) throw authError;
+  if (!auth.user) throw new Error('Please sign in again.');
+  let query = supabase.from('goodies_orders')
+    .select('id,order_code,parent_id,stop_index,store_id,status,created_at,scheduled_for,order_type,items,subtotal,delivery_fee,service_fee,discount,tip,total,notes,address,contact_phone,payment_method,payment_status,promo_code,updated_at')
+    .eq('customer_id', auth.user.id);
+  if (orderId && /^[0-9a-f]{8}-[0-9a-f]{4}-[1-8][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i.test(orderId)) query = query.eq('id', orderId);
+  else if (orderCode || orderId) query = query.eq('order_code', orderCode || orderId);
+  else return null;
+  const {data, error} = await query.maybeSingle();
+  if (error) throw error;
+  if (!data) return null;
+  const mapped = mapOrder(data as ServerOrder);
+  const cached = (S.orders || []).find((order: any) => order?.backendId === mapped.backendId);
+  const order = {...cached, ...mapped};
+  S.orders = [order, ...(S.orders || []).filter((item: any) => item?.backendId !== mapped.backendId)];
+  save(); emit();
+  return order.id;
+}
+
 export function startGoodiesSync() {
   let stopped = false;
   let userId: string | null = null;
@@ -94,6 +119,7 @@ export function startGoodiesSync() {
   };
 
   const clearAccountState = () => {
+    S.firstOrderEligible = null;
     S.serverUnread = 0;
     S.wallet = 0;
     S.hasWallet = false;
@@ -121,9 +147,10 @@ export function startGoodiesSync() {
             .select('id', { count: 'exact', head: true })
             .eq('user_id', requestUserId)
             .ilike('feature_name', 'goodies')
+            .or('notification_type.is.null,notification_type.not.like.goodies_ingredient_%')
             .eq('read', false),
           supabase.from('goodies_orders')
-            .select('id,order_code,store_id,status,created_at,scheduled_for,order_type,items,subtotal,delivery_fee,service_fee,discount,tip,total,notes,address,contact_phone,payment_method,payment_status,promo_code,updated_at')
+            .select('id,order_code,parent_id,stop_index,store_id,status,created_at,scheduled_for,order_type,items,subtotal,delivery_fee,service_fee,discount,tip,total,notes,address,contact_phone,payment_method,payment_status,promo_code,updated_at')
             .eq('customer_id', requestUserId)
             .order('created_at', { ascending: false })
             .limit(100),
@@ -147,6 +174,7 @@ export function startGoodiesSync() {
         }
 
         if (!ordersResult.error) {
+          S.firstOrderEligible = (ordersResult.data || []).length === 0;
           const cached = new Map<string, any>(
             (S.orders || []).filter((order: any) => order?.backendId).map((order: any) => [String(order.backendId), order]),
           );

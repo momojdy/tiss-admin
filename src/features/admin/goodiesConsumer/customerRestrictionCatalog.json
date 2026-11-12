@@ -1,0 +1,22 @@
+[
+  {
+    "id": "rg.rules",
+    "text": "Alcohol is sold only to customers aged {age} or older. Minors may not buy alcohol. Valid government photo ID is required at delivery or pickup. If the ID check fails, you are refunded to your Wantiss wallet minus the delivery fee."
+  },
+  {
+    "id": "rg.minors",
+    "text": "Minors may not purchase alcohol."
+  },
+  {
+    "id": "rg.wallet",
+    "text": "Create a Wantiss wallet so any refund has somewhere to go. You can withdraw from it later."
+  },
+  {
+    "id": "rg.refund",
+    "text": "If the ID check fails, the alcohol returns to the store and you are refunded to your Wantiss wallet minus the delivery fee."
+  },
+  {
+    "id": "rg.consent",
+    "text": "I am {age} or older and will show valid government photo ID on delivery or pickup."
+  }
+]

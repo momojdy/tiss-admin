@@ -1,22 +1,18 @@
+import {Sel,BSel,AddChip,useAssetSelectionContext} from '../editContext';
+import {EditableNativeText as Text} from '../EditableNativeText';
 /* Build Your Own screen. Port of v24 vByo, bzStage, bgView, pzView, bzOpts, bzRev, bzFoot, vByoDone. */
 import React, {useEffect, useMemo, useRef} from 'react';
 import {useSafeAreaInsets} from 'react-native-safe-area-context';
-import {View, Text, Pressable, ScrollView, Image, Animated, Easing, TextInput} from 'react-native';
+import {View, Text as UnusedNativeText, Pressable, ScrollView, Image, Animated, Easing, TextInput} from 'react-native';
 import {SvgXml} from 'react-native-svg';
 import {LinearGradient} from 'expo-linear-gradient';
 import {Icon} from '../components/Icon';
 import {T, Circ, Cta, Empty, Stepper, useTheme} from '../components/ui';
-import {S, STB, money, cnt, emit, push} from '../store';
+import {S, STB, money, cnt, emit} from '../store';
 import {back, browse, go, tab} from '../actions';
-import {Sel, BSel, AddChip} from '../editContext';
 import {ASSETS, LAYOUT, label, stripeColor} from '../content';
 import {BD, Builder, BItem, bGet, bDraft, setBD, units, itemOf, bBreak, bCheck, bzDirty, BYO, bzAdd, bzSub, bzSize, bzUndo, bzQty, bzNote, bzResetAsk, bzAddOrder, bzCancel, bzAnother, bzShop} from './engine';
 import {PSZ, bzr, hs, clamp, shade, pizzaBase, defsXml, shreds, iconXml, hasSymbol} from './pizzaArt';
-
-/* CMS text is selectable in the admin phone preview. Selecting it opens the matching text field. */
-function ByoLabel({id, fallback, ...props}: {id: string; fallback: string; [key: string]: any}) {
-  return <Sel sel={{kind: 'label', id, field: 'text'}}><T {...props}>{label(id, fallback)}</T></Sel>;
-}
 
 /* ---------- asset helpers (Admin library ids) ---------- */
 const key = (assetId: string | null) => (assetId || '').replace(/^(burger|pizza)\./, '');
@@ -87,7 +83,7 @@ function BurgerStage({b, fin}: {b: Builder; fin: boolean}) {
       {labels.map((l, k) => (
         <Animated.View key={k} pointerEvents="none" style={{position: 'absolute', top: l.top - 8, [l.side]: 8, width: '30%', maxWidth: 118, opacity: Animated.subtract(1, t) as any, zIndex: 4, flexDirection: l.side === 'left' ? 'row' : 'row-reverse', alignItems: 'center'}}>
           <Text style={{color: '#fff', fontSize: 10, fontWeight: '600', textAlign: l.side === 'left' ? 'left' : 'right', flexShrink: 1}}>{l.name}</Text>
-          <View style={{width: 18, borderTopWidth: 1, borderTopColor: 'rgba(255,255,255,.72)', marginHorizontal: 3}} />
+          <View style={{width: 18, borderTopWidth: 0.5, borderTopColor: 'rgba(255,255,255,.72)', marginHorizontal: 3}} />
         </Animated.View>
       ))}
       {BD?.seasoningPulse && !fin ? <Flakes /> : null}
@@ -127,7 +123,7 @@ function BurgerFallback({b}: {b: Builder}) {
   const topY = cur - 38; o += `<path d="M16 ${cur}Q16 ${topY} 125 ${topY}Q234 ${topY} 234 ${cur}Z" fill="${bc}"/><path d="M40 ${cur - 12}Q60 ${topY + 8} 100 ${topY + 6}" stroke="#fff" stroke-opacity=".28" stroke-width="5" fill="none" stroke-linecap="round"/>`;
   [[80, cur - 22], [120, cur - 28], [160, cur - 24], [100, cur - 12], [150, cur - 14], [190, cur - 14]].forEach(p => {o += `<ellipse cx="${p[0]}" cy="${p[1]}" rx="4" ry="2.2" fill="#FFF3D6" opacity=".8" transform="rotate(-20 ${p[0]} ${p[1]})"/>`;});
   const vb = `0 ${topY - 6} 250 ${tot - topY + 8}`, hgt = Math.min(210, 190 * (tot - topY + 8) / 250);
-  return <View style={{alignItems: 'center'}}><SvgXml width={190} height={hgt} xml={`<svg xmlns="http://www.w3.org/2000/svg" viewBox="${vb}">${o}</svg>`} /><T size={10.5} color="rgba(255,255,255,.6)" style={{marginTop: 6}}>{label("lbl.byoAuto3ROGT8", "Preview drawing. Photo layers appear once uploaded in Admin.")}</T></View>;
+  return <View style={{alignItems: 'center'}}><SvgXml width={190} height={hgt} xml={`<svg xmlns="http://www.w3.org/2000/svg" viewBox="${vb}">${o}</svg>`} /><T cmsKey={"lbl.byoAuto3ROGT8"} size={10.5} color="rgba(255,255,255,.6)" style={{marginTop: 6}}>{label("lbl.byoAuto3ROGT8", "Preview drawing. Photo layers appear once uploaded in Admin.")}</T></View>;
 }
 
 /* ---------- pizza ---------- */
@@ -166,20 +162,16 @@ function CustomPlate({b}: {b: Builder}) {
   return (
     <View style={{alignItems: 'center', paddingHorizontal: 16}}>
       <Text style={{fontSize: 84, lineHeight: 92}}>{b.emoji}</Text>
-      <View style={{flexDirection: 'row', flexWrap: 'wrap', gap: 6, justifyContent: 'center', marginTop: 8}}>{(names.length ? names : [label('lbl.byoPickBelow', 'Pick your options below')]).map((x, i) => <View key={i} style={{backgroundColor: 'rgba(255,255,255,.12)', borderRadius: 14, paddingHorizontal: 10, paddingVertical: 5}}>{names.length ? <T size={12.5} color="#F5F5F5">{x}</T> : <ByoLabel id="lbl.byoPickBelow" fallback="Pick your options below" size={12.5} color="#F5F5F5" />}</View>)}</View>
+      <View style={{flexDirection: 'row', flexWrap: 'wrap', gap: 6, justifyContent: 'center', marginTop: 8}}>{(names.length ? names : [label('lbl.byoPickBelow', 'Pick your options below')]).map((x, i) => <View key={i} style={{backgroundColor: 'rgba(255,255,255,.12)', borderRadius: 14, paddingHorizontal: 10, paddingVertical: 5}}><T size={12.5} color="#F5F5F5">{x}</T></View>)}</View>
     </View>
   );
 }
 export function Stage({b, fin}: {b: Builder; fin?: boolean}) {
   return (
-    <View style={{marginHorizontal: 16, height: 300, flexShrink: 0, position: 'relative'}}>
-      <BSel target={{builderId: b.id, part: 'builder'}} style={{height: 300, width: '100%', flexShrink: 0}}>
-        <LinearGradient colors={[b.stageBgColor || '#2C4A5B', b.stageBgColor || '#2C4A5B']} style={{height: 300, width: '100%', borderRadius: 24, alignItems: 'center', justifyContent: 'center', paddingVertical: b.type === 'burger' ? 8 : 14, overflow: 'visible'}}>
-          {b.type === 'pizza' ? <PizzaStage b={b} /> : b.type === 'burger' ? <BurgerStage b={b} fin={!!fin || !!BD.assembling} /> : <CustomPlate b={b} />}
-        </LinearGradient>
-      </BSel>
-      <Pressable accessibilityLabel={label('lbl.byoUndo', 'Undo last change')} disabled={!BD.hist.length} onPress={bzUndo} style={{position: 'absolute', left: 10, top: 10, width: 40, height: 40, borderRadius: 20, backgroundColor: '#2E4D5F', borderWidth: 1, borderColor: 'rgba(255,255,255,.14)', alignItems: 'center', justifyContent: 'center', zIndex: 20, opacity: BD.hist.length ? 1 : 0.3}}><Icon name="undo" size={20} color="#F5F5F5" /></Pressable>
-    </View>
+    <LinearGradient colors={[b.stageBgColor || '#2C4A5B', b.stageBgColor || '#2C4A5B']} style={{marginHorizontal: 16, borderRadius: 24, height: 300, flexShrink: 0, alignItems: 'center', justifyContent: 'center', paddingVertical: b.type === 'burger' ? 8 : 14, overflow: 'visible'}}>
+      <Pressable accessibilityLabel={label('lbl.byoUndo', 'Undo last change')} disabled={!BD.hist.length} onPress={bzUndo} style={{position: 'absolute', left: 10, top: 10, width: 40, height: 40, borderRadius: 20, backgroundColor: '#2E4D5F', borderWidth: 0.5, borderColor: 'rgba(255,255,255,.14)', alignItems: 'center', justifyContent: 'center', zIndex: 20, opacity: BD.hist.length ? 1 : 0.3}}><Icon name="undo" size={20} color="#F5F5F5" /></Pressable>
+      {b.type === 'pizza' ? <PizzaStage b={b} /> : b.type === 'burger' ? <BurgerStage b={b} fin={!!fin || !!BD.assembling} /> : <CustomPlate b={b} />}
+    </LinearGradient>
   );
 }
 
@@ -196,53 +188,51 @@ function OptTile({b, g, it}: {b: Builder; g: any; it: BItem}) {
   const th = useTheme(), us = units(g, BD), q = us.filter(x => x === it.id).length, on = q > 0, free = it.free || it.price === 0, lab = !it.avail ? label('lbl.byoUnavailableOption', label('lbl.byoUnavailableOption', 'Unavailable')) : free ? label('lbl.byoFree', 'Free') : g.kind === 'many' && us.length < g.inc ? label('lbl.byoFree', 'Free') : '+' + money(it.price);
   return (
     <View style={{width: 96, opacity: it.avail ? 1 : 0.45}}>
-      <Pressable accessibilityRole="button" accessibilityLabel={it.name + ', ' + lab + (on ? ', selected ' + q : '')} accessibilityState={{selected: on, disabled: !it.avail}} disabled={!it.avail} onPress={() => bzAdd(g.id, it.id)} style={{alignItems: 'center', gap: 4, paddingTop: 10, paddingBottom: 8, paddingHorizontal: 4, borderRadius: 16, borderWidth: 2, borderColor: on ? th.br : th.line, backgroundColor: on ? th.brt : th.card, minHeight: 100}}>
+      <Pressable accessibilityRole="button" accessibilityLabel={it.name + ', ' + lab + (on ? label("lbl.cms.c36ed3e83c8c", ", selected ") + q : '')} accessibilityState={{selected: on, disabled: !it.avail}} disabled={!it.avail} onPress={() => bzAdd(g.id, it.id)} style={{alignItems: 'center', gap: 4, paddingTop: 10, paddingBottom: 8, paddingHorizontal: 4, borderRadius: 16, borderWidth: 2, borderColor: on ? th.br : th.line, backgroundColor: on ? th.brt : th.card, minHeight: 100}}>
         <View style={{width: 46, height: 46, borderRadius: 23, backgroundColor: th.soft, alignItems: 'center', justifyContent: 'center'}}><TileIcon it={it} type={b.type} /></View>
-        <T size={12.5} weight="700" align="center" style={{lineHeight: 14}}>{it.name}</T>
+        <T size={12.5} weight="600" align="center" style={{lineHeight: 14}}>{it.name}</T>
         <T size={11.5} color={on ? th.brd : th.mut} weight={on ? '700' : undefined}>{lab}</T>
       </Pressable>
-      {on ? <View style={{position: 'absolute', top: -4, right: -4, minWidth: 22, height: 22, paddingHorizontal: 5, borderRadius: 11, backgroundColor: th.br, alignItems: 'center', justifyContent: 'center', borderWidth: 2, borderColor: th.bg}}><T size={12} weight="800" color="#fff">{q > 1 ? '×' + q : '✓'}</T></View> : null}
-      {on && g.kind === 'many' ? <Pressable accessibilityLabel={label('lbl.byoRemoveOne', 'Remove one {item}').replace('{item}', it.name)} onPress={() => bzSub(g.id, it.id)} style={{position: 'absolute', top: -6, left: -6, width: 30, height: 30, borderRadius: 15, backgroundColor: th.bg, borderWidth: 2, borderColor: th.br, alignItems: 'center', justifyContent: 'center'}}><T size={18} weight="800">−</T></Pressable> : null}
+      {on ? <View style={{position: 'absolute', top: -4, right: -4, minWidth: 22, height: 22, paddingHorizontal: 5, borderRadius: 11, backgroundColor: th.br, alignItems: 'center', justifyContent: 'center', borderWidth: 2, borderColor: th.bg}}><T size={12} weight="600" color="#fff">{q > 1 ? '×' + q : '✓'}</T></View> : null}
+      {on && g.kind === 'many' ? <Pressable accessibilityLabel={label('lbl.byoRemoveOne', 'Remove one {item}').replace('{item}', it.name)} onPress={() => bzSub(g.id, it.id)} style={{position: 'absolute', top: -6, left: -6, width: 30, height: 30, borderRadius: 15, backgroundColor: th.bg, borderWidth: 2, borderColor: th.br, alignItems: 'center', justifyContent: 'center'}}><T size={18} weight="600">−</T></Pressable> : null}
     </View>
   );
 }
-const builderLabelSlug = (value: string) => String(value || '').toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/^-|-$/g, '');
 function Options({b}: {b: Builder}) {
   const th = useTheme();
   return (
     <View>
       {b.sizes.length ? (
         <View style={{marginTop: 18}}>
-          <View style={{flexDirection: 'row', justifyContent: 'space-between', alignItems: 'baseline', marginBottom: 8}}><ByoLabel id="lbl.byoSize" fallback="Size" size={16} weight="800" /><View style={{flexDirection: 'row', alignItems: 'center', gap: 4}}><ByoLabel id="lbl.byoChooseOne" fallback="Choose 1" size={12} color={th.mut} /><T size={12} color={th.mut}> · </T><ByoLabel id="lbl.byoRequired" fallback="Required" size={12} color={th.mut} /></View></View>
+          <View style={{flexDirection: 'row', justifyContent: 'space-between', alignItems: 'baseline', marginBottom: 8}}><T cmsKey={'lbl.byoSize'} size={16} weight="600">{label('lbl.byoSize', 'Size')}</T><T cmsKeys={['lbl.byoChooseOne','lbl.byoRequired']} size={12} color={th.mut}>{label('lbl.byoChooseOne', 'Choose 1') + ' · ' + label('lbl.byoRequired', 'Required')}</T></View>
           <View style={{flexDirection: 'row', gap: 8}}>{b.sizes.map(sz => (
             <Pressable key={sz.id} disabled={!sz.avail} onPress={() => bzSize(sz.id)} accessibilityState={{selected: BD.size === sz.id}} style={{flex: 1, paddingVertical: 10, paddingHorizontal: 4, borderRadius: 14, borderWidth: 2, borderColor: BD.size === sz.id ? th.br : th.line, backgroundColor: BD.size === sz.id ? th.brt : th.card, alignItems: 'center', gap: 2, opacity: sz.avail ? 1 : 0.45}}>
-              <T size={14} weight="800">{sz.name}</T>{sz.avail ? (sz.add ? <T size={11.5} color={th.mut}>{'+' + money(sz.add)}</T> : <ByoLabel id="lbl.byoBasePrice" fallback="Base price" size={11.5} color={th.mut} />) : <ByoLabel id="lbl.byoUnavailableOption" fallback="Unavailable" size={11.5} color={th.mut} />}
+              <T size={14} weight="600">{sz.name}</T><T cmsKeys={['lbl.byoBasePrice','lbl.byoUnavailableOption']} size={11.5} color={th.mut}>{sz.avail ? (sz.add ? '+' + money(sz.add) : label('lbl.byoBasePrice', 'Base price')) : label('lbl.byoUnavailableOption', 'Unavailable')}</T>
             </Pressable>))}</View>
         </View>
       ) : null}
       {b.groups.map(g => {const us = units(g, BD); return (
         <View key={g.id} style={{marginTop: 18}}>
           <View style={{flexDirection: 'row', justifyContent: 'space-between', alignItems: 'baseline', gap: 8, marginBottom: 8}}>
-            <View style={{flexDirection: 'row', alignItems: 'baseline', flexShrink: 1}}><BSel target={{builderId: b.id, part: 'group', groupId: g.id}}><T size={16} weight="800">{label('lbl.byoGroup.' + builderLabelSlug(g.name), g.name)}</T></BSel>{g.kind === 'many' ? <T size={12} color={th.mut} weight="400">{'  ' + us.length + '/' + g.max}</T> : null}</View>
+            <BSel target={{builderId:b.id,part:'group',groupId:g.id}}><T size={16} weight="600" style={{flexShrink: 1}}>{g.name}{g.kind === 'many' ? <T size={12} color={th.mut} weight="400">{'  ' + us.length + '/' + g.max}</T> : null}</T></BSel>
             <T size={12} color={th.mut} align="right">{hint(g)}</T>
           </View>
-          <ScrollView horizontal showsHorizontalScrollIndicator={false} style={{marginHorizontal: -16}} contentContainerStyle={{paddingHorizontal: 16, paddingTop: 10, paddingBottom: 6, gap: 10}}>{g.items.map(it => <BSel key={it.id} target={{builderId: b.id, part: 'ingredient', groupId: g.id, itemId: it.id}}><OptTile b={b} g={g} it={it} /></BSel>)}</ScrollView>
-          <View style={{flexDirection: 'row', flexWrap: 'wrap', gap: 8}}><AddChip target={{builderId: b.id, part: 'addIngredient', groupId: g.id}} label="Add ingredient" /></View>
+          <ScrollView horizontal showsHorizontalScrollIndicator={false} style={{marginHorizontal: -16}} contentContainerStyle={{paddingHorizontal: 16, paddingTop: 10, paddingBottom: 6, gap: 10}}>{g.items.map(it => <BSel key={it.id} target={{builderId:b.id,part:'ingredient',groupId:g.id,itemId:it.id}}><OptTile key={it.id} b={b} g={g} it={it} /></BSel>)}</ScrollView><AddChip target={{builderId:b.id,part:'addIngredient',groupId:g.id}} label="Add ingredient" />
         </View>);})}
     </View>
   );
 }
 function Review({b}: {b: Builder}) {
   const th = useTheme(), br = bBreak(b, BD), ck = bCheck(b, BD);
-  const R = (a: string, c: string, strong?: boolean) => <View style={{flexDirection: 'row', justifyContent: 'space-between', gap: 10, marginVertical: 5, ...(strong ? {borderTopWidth: 1, borderStyle: 'dashed', borderTopColor: th.line, paddingTop: 8, marginTop: 8} : {})}}><T size={strong ? 16 : 13.5} weight={strong ? '800' : undefined} style={{flexShrink: 1}}>{a}</T><T size={strong ? 16 : 13.5} weight={strong ? '800' : undefined} color={strong ? th.ink : th.mut}>{c}</T></View>;
+  const R = (a: string, c: string, strong?: boolean) => <View style={{flexDirection: 'row', justifyContent: 'space-between', gap: 10, marginVertical: 5, ...(strong ? {borderTopWidth: 0.5, borderStyle: 'dashed', borderTopColor: th.line, paddingTop: 8, marginTop: 8} : {})}}><T size={strong ? 16 : 13.5} weight={strong ? '800' : undefined} style={{flexShrink: 1}}>{a}</T><T size={strong ? 16 : 13.5} weight={strong ? '800' : undefined} color={strong ? th.ink : th.mut}>{c}</T></View>;
   return (
-    <View style={{marginTop: 20, borderWidth: 1, borderColor: th.line, borderRadius: 18, padding: 14, backgroundColor: th.card}}>
-      <View style={{flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', marginBottom: 8}}><ByoLabel id="lbl.byoYourOrder" fallback="Your order" size={15} weight="800" />{bzDirty() && !BD.edit ? <Pressable onPress={bzResetAsk}><ByoLabel id="lbl.byoStartOver" fallback="Start over" size={12.5} weight="700" color={th.br} /></Pressable> : null}</View>
+    <View style={{marginTop: 20, borderWidth: 0.5, borderColor: th.line, borderRadius: 18, padding: 14, backgroundColor: th.card}}>
+      <View style={{flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', marginBottom: 8}}><T cmsKey={'lbl.byoYourOrder'} size={15} weight="600">{label('lbl.byoYourOrder', 'Your order')}</T>{bzDirty() && !BD.edit ? <Pressable onPress={bzResetAsk}><T cmsKey={'lbl.byoStartOver'} size={12.5} weight="600" color={th.br}>{label('lbl.byoStartOver', 'Start over')}</T></Pressable> : null}</View>
       {R(b.name + (br.size ? ' — ' + br.size.name : ''), money(b.base + (br.size ? br.size.add : 0)))}
-      {br.lines.map((L: any) => <View key={L.gid}><T size={11.5} weight="800" color={th.mut} style={{marginTop: 8, letterSpacing: 0.4}}>{String(L.gname).toUpperCase()}</T>{L.items.map((i: any) => <View key={i.id}>{R((i.qty > 1 ? i.qty + '× ' : '') + i.name, i.charge > 0 ? '+' + money(i.charge) : i.inc ? label('lbl.byoIncluded', 'Included') : label('lbl.byoFree', 'Free'))}</View>)}</View>)}
+      {br.lines.map((L: any) => <View key={L.gid}><T size={11.5} weight="600" color={th.mut} style={{marginTop: 8, letterSpacing: 0.4}}>{String(L.gname).toUpperCase()}</T>{L.items.map((i: any) => <View key={i.id}>{R((i.qty > 1 ? i.qty + '× ' : '') + i.name, i.charge > 0 ? '+' + money(i.charge) : i.inc ? label('lbl.byoIncluded', 'Included') : label('lbl.byoFree', 'Free'))}</View>)}</View>)}
       {R(label('lbl.byoItemPrice', 'Item price'), money(br.total), true)}
-      {BD.edit && BD.snap != null && br.total !== BD.snap ? <View style={{backgroundColor: th.brt, borderWidth: 1, borderColor: th.br, borderRadius: 12, padding: 10, marginTop: 10}}><T size={13}>{label('lbl.byoPriceChanged', 'Prices changed since you added this item')} (was {money(BD.snap)}, now {money(br.total)}). Saving applies the new price.</T></View> : null}
-      {ck.conf.length ? <View style={{backgroundColor: th.brt, borderWidth: 1, borderColor: th.br, borderRadius: 12, padding: 10, marginTop: 10}}><ByoLabel id="lbl.byoChoicesChanged" fallback="Some choices changed" size={13} weight="800" />{ck.conf.map(x => <T key={x} size={13}>• {x}</T>)}<T size={13}>{label('lbl.byoReplaceChoices', 'Please remove or replace them to continue. We did not change anything for you.')}</T></View> : null}
+      {BD.edit && BD.snap != null && br.total !== BD.snap ? <View style={{backgroundColor: th.brt, borderWidth: 0.5, borderColor: th.br, borderRadius: 12, padding: 10, marginTop: 10}}><T cmsKeys={['lbl.byoPriceChanged',"lbl.cms.40ab82017b3f","lbl.cms.9ede33236e16","lbl.cms.3c846dbb6eab"]} size={13}>{label('lbl.byoPriceChanged', 'Prices changed since you added this item')} {label("lbl.cms.40ab82017b3f", "(was ")}{money(BD.snap)}{label("lbl.cms.9ede33236e16", ", now ")}{money(br.total)}{label("lbl.cms.3c846dbb6eab", "). Saving applies the new price.")}</T></View> : null}
+      {ck.conf.length ? <View style={{backgroundColor: th.brt, borderWidth: 0.5, borderColor: th.br, borderRadius: 12, padding: 10, marginTop: 10}}><T cmsKey={'lbl.byoChoicesChanged'} size={13} weight="600">{label('lbl.byoChoicesChanged', 'Some choices changed')}</T>{ck.conf.map(x => <T key={x} size={13}>• {x}</T>)}<T cmsKey={'lbl.byoReplaceChoices'} size={13}>{label('lbl.byoReplaceChoices', 'Please remove or replace them to continue. We did not change anything for you.')}</T></View> : null}
     </View>
   );
 }
@@ -255,55 +245,31 @@ export function ByoFoot() {
       {why ? <T size={12.5} color={th.red} align="center" style={{marginBottom: 8}}>{why}</T> : null}
       <View style={{flexDirection: 'row', alignItems: 'center', gap: 12}}>
         <Stepper q={BD.q} onMinus={() => bzQty(-1)} onPlus={() => bzQty(1)} />
-        <View style={{flex: 1}}><Sel sel={{kind: 'label', id: BD.edit ? 'lbl.byoSaveChanges' : 'lbl.byoAddOrder', field: 'text'}}><Cta label={(BD.edit ? label('lbl.byoSaveChanges', 'Save changes') : label('lbl.byoAddOrder', 'Add to Order')) + ' · ' + money(tot)} disabled={!ck.ok || !!BD.busy} onPress={bzAddOrder} /></Sel></View>
+        <View style={{flex: 1}}><Cta cmsKeys={['lbl.byoSaveChanges','lbl.byoAddOrder']} label={(BD.edit ? label('lbl.byoSaveChanges', 'Save changes') : label('lbl.byoAddOrder', 'Add to Order')) + ' · ' + money(tot)} disabled={!ck.ok || !!BD.busy} onPress={bzAddOrder} /></View>
       </View>
-      {BD.edit ? <View style={{marginTop: 8}}><Sel sel={{kind: 'label', id: 'lbl.byoCancel', field: 'text'}}><Cta small ghost label={label('lbl.byoCancel', 'Cancel')} onPress={bzCancel} /></Sel></View> : null}
+      {BD.edit ? <View style={{marginTop: 8}}><Cta cmsKey={'lbl.byoCancel'} small ghost label={label('lbl.byoCancel', 'Cancel')} onPress={bzCancel} /></View> : null}
     </View>
   );
 }
 
-function ByoCatalog({sid}: {sid: string}) {
-  const th = useTheme();
-  const builders = (BYO.cfg[sid] || []).filter((item) => item.enabled && item.available);
-  return <View style={{flex: 1}}>
-    <Header title="Build Your Own" sub={STB[sid]?.n || 'Choose what to customize'} onBack={back} />
-    <ScrollView contentContainerStyle={{paddingHorizontal: 16, paddingBottom: 28, gap: 14}} showsVerticalScrollIndicator={false}>
-      <View style={{padding: 16, borderRadius: 18, backgroundColor: th.soft}}><T size={13} color={th.mut}>Choose a creation below. Each one has its own ingredients, selection rules and pricing.</T></View>
-      {builders.map((item) => <View key={item.id} style={{borderWidth: 1, borderColor: th.line, borderRadius: 18, overflow: 'hidden', backgroundColor: th.card}}>
-        <View style={{backgroundColor: '#2C4A5B', padding: 16, flexDirection: 'row', alignItems: 'center', gap: 12}}>
-          <View style={{width: 58, height: 58, borderRadius: 16, backgroundColor: 'rgba(255,255,255,.12)', alignItems: 'center', justifyContent: 'center'}}><Text style={{fontSize: 34}}>{item.emoji || '🍽️'}</Text></View>
-          <View style={{flex: 1}}><T size={17} weight="800" color="#FFFFFF">{item.name}</T><T size={12} color="#E4EAF0">{item.desc || 'Customize it your way'}</T><T size={12} weight="700" color="#FFFFFF" style={{marginTop: 4}}>From {money(item.base)}</T></View>
-        </View>
-        <View style={{padding: 14}}>
-          {item.groups.map((group) => <View key={group.id} style={{marginBottom: 10}}><T size={12} weight="800">{group.name}</T><View style={{flexDirection: 'row', flexWrap: 'wrap', gap: 6, marginTop: 6}}>{group.items.filter((ingredient) => ingredient.avail).slice(0, 8).map((ingredient) => <View key={ingredient.id} style={{paddingHorizontal: 9, paddingVertical: 5, borderRadius: 12, backgroundColor: th.soft, flexDirection: 'row', alignItems: 'center', gap: 5}}><View style={{width: 8, height: 8, borderRadius: 4, backgroundColor: ingredient.col || th.br}} /><T size={11.5}>{ingredient.name}</T>{ingredient.price > 0 ? <T size={10.5} color={th.mut}>+{money(ingredient.price)}</T> : null}</View>)}</View></View>)}
-          <Cta label={'Customize ' + item.name} onPress={() => push('byo', sid + '|' + item.id)} />
-        </View>
-      </View>)}
-      {!builders.length ? <Empty emoji="🍽️" title="No builders available" text="Add a pizza, burger or custom builder in Build Your Own · store configurations." /> : null}
-    </ScrollView>
-  </View>;
-}
-
 export function ByoScreen({p}: {p: string}) {
   const th = useTheme(), a = (p || '').split('|'), sid = a[0], b = bGet(sid, a[1]);
-  if (a[1] === '__catalog__' && STB[sid]) { if (BD) setBD(null); return <ByoCatalog sid={sid} />; }
-  if (!b || !STB[sid]) return <View><Header title={label('lbl.byoTitle', 'Builder')} onBack={back} /><Empty emoji="🍽️" title={label('lbl.byoUnavailableTitle', 'This builder is not available')} text={label('lbl.byoUnavailableText', 'The store may have turned it off.')} button={label('lbl.byoBackGoodies', 'Back to Goodies')} onPress={browse} /></View>;
+  if (!b || !STB[sid]) return <View><Header title={label('lbl.byoTitle', 'Customize your product')} onBack={back} /><Empty emoji="🍽️" title={label('lbl.byoUnavailableTitle', 'This custom product is not available')} text={label('lbl.byoUnavailableText', 'The store may have turned it off.')} button={label('lbl.byoBackGoodies', 'Back to Goodies')} onPress={browse} /></View>;
   if (!BD || BD.bid !== b.id || BD.sid !== sid) setBD(bDraft(b, sid));
   if (BD.added) return <ByoDone b={b} />;
   const s = STB[sid], un = !b.enabled || !b.available || BYO.store[sid] === false || !s.open;
   return (
     <View style={{flex: 1}}>
-      <BSel target={{builderId: b.id, part: 'builder'}}><Header title={b.name} sub={s.n + (BD.edit ? ' · ' + label('lbl.byoEditingItem', 'Editing item') : '')} onBack={back} /></BSel>
+      <BSel target={{builderId:b.id,part:'builder'}}><Header title={b.name} sub={s.n + (BD.edit ? ' · ' + label('lbl.byoEditingItem', 'Editing item') : '')} onBack={back} /></BSel>
       <Stage b={b} />
       <ScrollView style={{flex: 1}} contentContainerStyle={{paddingHorizontal: 16, paddingTop: 15, paddingBottom: 20}} keyboardShouldPersistTaps="handled" showsVerticalScrollIndicator={false}>
-        {un ? <Warn><T weight="800" size={13}>{label('lbl.byoCurrentlyUnavailable', 'Currently unavailable.')} </T><T size={13}>{s.open ? label('lbl.byoStorePaused', 'The store paused this item.') : label('lbl.byoStoreClosed', '{store} is closed.').replace('{store}', s.n)} {label('lbl.byoCannotAdd', 'You can look, but it cannot be added right now.')}</T></Warn> : null}
-        {BD.resumed ? <Warn><T size={13}>{label('lbl.byoResumeDraft', 'Resuming the draft you left earlier.')}</T></Warn> : null}
-        <Options b={b} />
-        <AddChip target={{builderId: b.id, part: 'addGroup'}} label="Add section" />
+        {un ? <Warn><T cmsKey={'lbl.byoCurrentlyUnavailable'} weight="600" size={13}>{label('lbl.byoCurrentlyUnavailable', 'Currently unavailable.')} </T><T cmsKeys={['lbl.byoStorePaused','lbl.byoStoreClosed','lbl.byoCannotAdd']} size={13}>{s.open ? label('lbl.byoStorePaused', 'The store paused this item.') : label('lbl.byoStoreClosed', '{store} is closed.').replace('{store}', s.n)} {label('lbl.byoCannotAdd', 'You can look, but it cannot be added right now.')}</T></Warn> : null}
+        {BD.resumed ? <Warn><T cmsKey={'lbl.byoResumeDraft'} size={13}>{label('lbl.byoResumeDraft', 'Resuming the draft you left earlier.')}</T></Warn> : null}
+        <Options b={b} /><AddChip target={{builderId:b.id,part:'addGroup'}} label="Add section" />
         {b.notes ? (
           <View style={{marginTop: 18}}>
-            <ByoLabel id="lbl.byoNotesPrompt" fallback="Anything else we should know?" size={14} weight="700" style={{marginBottom: 6}} />
-            <Sel sel={{kind: 'label', id: 'lbl.byoNotesPlaceholder', field: 'text'}}><TextInput value={BD.note} onChangeText={bzNote} maxLength={200} multiline placeholder={label('lbl.byoNotesPlaceholder', 'E.g. light sauce, cut into 8 slices…')} placeholderTextColor={th.mut} style={{minHeight: 64, fontSize: 15, color: th.ink, backgroundColor: th.soft, borderWidth: 1, borderColor: th.line, borderRadius: 12, padding: 12, textAlignVertical: 'top'}} /></Sel>
+            <T cmsKey={'lbl.byoNotesPrompt'} size={14} weight="600" style={{marginBottom: 6}}>{label('lbl.byoNotesPrompt', 'Anything else we should know?')}</T>
+            <TextInput value={BD.note} onChangeText={bzNote} maxLength={200} multiline placeholder={label('lbl.byoNotesPlaceholder', 'E.g. light sauce, cut into 8 slices…')} placeholderTextColor={th.mut} style={{minHeight: 64, fontSize: 15, color: th.ink, backgroundColor: th.soft, borderWidth: 0.5, borderColor: th.line, borderRadius: 12, padding: 12, textAlignVertical: 'top'}} />
             <T size={12} color={th.mut} align="right" style={{marginTop: 3}}>{BD.note.length}/200</T>
           </View>
         ) : null}
@@ -312,7 +278,7 @@ export function ByoScreen({p}: {p: string}) {
     </View>
   );
 }
-const Warn = ({children}: any) => {const th = useTheme(); return <View style={{backgroundColor: th.brt, borderWidth: 1, borderColor: th.br, borderRadius: 12, padding: 10, marginBottom: 10}}><Text>{children}</Text></View>;};
+const Warn = ({children}: any) => {const th = useTheme(); return <View style={{backgroundColor: th.brt, borderWidth: 0.5, borderColor: th.br, borderRadius: 12, padding: 10, marginBottom: 10}}><Text>{children}</Text></View>;};
 function Header({title, sub, onBack}: {title: string; sub?: string; onBack: () => void}) {
   const th = useTheme(), ins = useSafeAreaInsets();
   return (
@@ -320,7 +286,7 @@ function Header({title, sub, onBack}: {title: string; sub?: string; onBack: () =
       <View style={{height: 100, justifyContent: 'flex-end', paddingTop: ins.top, paddingHorizontal: 16, paddingBottom: 10}}>
         <View style={{height: 40, flexDirection: 'row', alignItems: 'center', gap: 10}}>
           <Circ icon="chevL" label={label('lbl.byoBack', 'Back')} onPress={onBack} />
-          <View style={{flex: 1, justifyContent: 'center'}}><T size={20} weight="800" style={{lineHeight: 22}}>{title}</T>{sub ? <T size={12} color={th.mut}>{sub}</T> : null}</View>
+          <View style={{flex: 1, justifyContent: 'center'}}><T size={20} weight="600" style={{lineHeight: 22}}>{title}</T>{sub ? <T size={12} color={th.mut}>{sub}</T> : null}</View>
         </View>
       </View>
       <View style={{height: 20, backgroundColor: stripeColor()}} />
@@ -335,10 +301,10 @@ function ByoDone({b}: {b: Builder}) {
       <Header title={label('lbl.byoAddedHeading', 'Added to your order')} onBack={back} />
       <View style={{alignItems: 'center', paddingTop: 30, paddingHorizontal: 20}}>
         {b.type === 'burger' ? <LinearGradient colors={['#2C4A5B', '#233D4C']} style={{alignSelf: 'stretch', borderRadius: 24, paddingVertical: 8, alignItems: 'center'}}><BurgerStage b={b} fin /></LinearGradient> : <Text style={{fontSize: 64}}>✅</Text>}
-        <ByoLabel id="lbl.byoAddedSuccess" fallback="Added to your order!" size={24} weight="800" style={{marginTop: 10}} />
+        <T cmsKey={'lbl.byoAddedSuccess'} size={24} weight="600" style={{marginTop: 10}}>{label('lbl.byoAddedSuccess', 'Added to your order!')}</T>
         <T color={th.mut} style={{marginTop: 4}}>{BD.added.n} · {BD.added.q} × {money(BD.added.p)}</T>
-        <ByoLabel id="lbl.byoAddedExplanation" fallback="Nothing has been ordered yet. Add more, or review your cart when you are ready." size={13} color={th.mut} align="center" style={{marginTop: 6}} />
-        <View style={{alignSelf: 'stretch', marginTop: 20, gap: 10}}><Cta label={label('lbl.byoCustomizeAnother', 'Customize Another')} onPress={bzAnother} /><Cta ghost label={label('lbl.byoContinueShopping', 'Continue Shopping')} onPress={bzShop} /><Cta ghost label={label('lbl.byoViewCart', 'View Cart') + ' (' + cnt() + ')'} onPress={() => go('cart')} /></View>
+        <T cmsKey={'lbl.byoAddedExplanation'} size={13} color={th.mut} align="center" style={{marginTop: 6}}>{label('lbl.byoAddedExplanation', 'Nothing has been ordered yet. Add more, or review your cart when you are ready.')}</T>
+        <View style={{alignSelf: 'stretch', marginTop: 20, gap: 10}}><Cta cmsKey={'lbl.byoCustomizeAnother'} label={label('lbl.byoCustomizeAnother', 'Customize Another')} onPress={bzAnother} /><Cta cmsKey={'lbl.byoContinueShopping'} ghost label={label('lbl.byoContinueShopping', 'Continue Shopping')} onPress={bzShop} /><Cta cmsKey={'lbl.byoViewCart'} ghost label={label('lbl.byoViewCart', 'View Cart') + ' (' + cnt() + ')'} onPress={() => go('cart')} /></View>
       </View>
     </View>
   );

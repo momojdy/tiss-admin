@@ -1,0 +1,8596 @@
+[
+  {
+    "id": "lbl.a11yAddFavorite",
+    "text": "Add {name} to favorites",
+    "pages": [
+      "Shared components"
+    ]
+  },
+  {
+    "id": "lbl.a11yAddToCart",
+    "text": "Add {name} to cart",
+    "pages": [
+      "Shared components"
+    ]
+  },
+  {
+    "id": "lbl.a11yClosePopup",
+    "text": "Close popup",
+    "pages": [
+      "Shared components"
+    ]
+  },
+  {
+    "id": "lbl.a11yRateDriver",
+    "text": "Rate driver {n} stars",
+    "pages": [
+      "Order tracking"
+    ]
+  },
+  {
+    "id": "lbl.a11yRateOrder",
+    "text": "Rate order {n} stars",
+    "pages": [
+      "Order tracking"
+    ]
+  },
+  {
+    "id": "lbl.a11yRemoveFavorite",
+    "text": "Remove {name} from favorites",
+    "pages": [
+      "Shared components"
+    ]
+  },
+  {
+    "id": "lbl.a11yRemoveFavoriteShort",
+    "text": "Remove from favorites",
+    "pages": [
+      "Shared components"
+    ]
+  },
+  {
+    "id": "lbl.a11ySaveFavorite",
+    "text": "Save {name} to favorites",
+    "pages": [
+      "Shared components"
+    ]
+  },
+  {
+    "id": "lbl.a11ySaveFavoriteShort",
+    "text": "Save to favorites",
+    "pages": [
+      "Shared components"
+    ]
+  },
+  {
+    "id": "lbl.accountAddAddress",
+    "text": "+ Add new address",
+    "pages": [
+      "Addresses"
+    ]
+  },
+  {
+    "id": "lbl.accountAddressNote",
+    "text": "Note:",
+    "pages": [
+      "Addresses"
+    ]
+  },
+  {
+    "id": "lbl.accountAddressTypeHome",
+    "text": "Home",
+    "pages": [
+      "Addresses"
+    ]
+  },
+  {
+    "id": "lbl.accountAddressTypeOther",
+    "text": "Other",
+    "pages": [
+      "Addresses"
+    ]
+  },
+  {
+    "id": "lbl.accountAddressTypeWork",
+    "text": "Work",
+    "pages": [
+      "Addresses"
+    ]
+  },
+  {
+    "id": "lbl.accountApartment",
+    "text": "Apartment, building, floor or landmark",
+    "pages": [
+      "Addresses"
+    ]
+  },
+  {
+    "id": "lbl.accountAuto11BPHFG",
+    "text": "Your message will be sent to this store.",
+    "pages": [
+      "Contact support"
+    ]
+  },
+  {
+    "id": "lbl.accountAuto1AABD31",
+    "text": "Goodies",
+    "pages": [
+      "Store conversation"
+    ]
+  },
+  {
+    "id": "lbl.accountBack",
+    "text": "Back",
+    "pages": [
+      "Account subpages"
+    ]
+  },
+  {
+    "id": "lbl.accountBackGoodies",
+    "text": "Back to Goodies",
+    "pages": [
+      "Account subpages"
+    ]
+  },
+  {
+    "id": "lbl.accountCountry",
+    "text": "Country",
+    "pages": [
+      "Addresses"
+    ]
+  },
+  {
+    "id": "lbl.accountDarkModeHint",
+    "text": "Goodies only. Other Wantiss features keep their theme.",
+    "pages": [
+      "Settings"
+    ]
+  },
+  {
+    "id": "lbl.accountDeleteAddress",
+    "text": "Delete",
+    "pages": [
+      "Addresses"
+    ]
+  },
+  {
+    "id": "lbl.accountDeliveryInstructions",
+    "text": "Delivery instructions",
+    "pages": [
+      "Addresses"
+    ]
+  },
+  {
+    "id": "lbl.accountDemoHeading",
+    "text": "Demo",
+    "pages": [
+      "Settings"
+    ]
+  },
+  {
+    "id": "lbl.accountDemoResetDone",
+    "text": "Demo data reset",
+    "pages": [
+      "Settings"
+    ]
+  },
+  {
+    "id": "lbl.accountDemoTicketSent",
+    "text": "Ticket {ticket} (demo). Your support request is not connected to a live support inbox yet.",
+    "pages": [
+      "Account subpages"
+    ]
+  },
+  {
+    "id": "lbl.accountEdit",
+    "text": "Edit",
+    "pages": [
+      "Addresses"
+    ]
+  },
+  {
+    "id": "lbl.accountEditAddress",
+    "text": "Edit address",
+    "pages": [
+      "Addresses"
+    ]
+  },
+  {
+    "id": "lbl.accountFaqSupportHint",
+    "text": "FAQs and support",
+    "pages": [
+      "Settings"
+    ]
+  },
+  {
+    "id": "lbl.accountHelpSupport",
+    "text": "Help and support",
+    "pages": [
+      "Profile"
+    ]
+  },
+  {
+    "id": "lbl.accountImportContent",
+    "text": "Import Admin content",
+    "pages": [
+      "Settings"
+    ]
+  },
+  {
+    "id": "lbl.accountMessage",
+    "text": "Message",
+    "pages": [
+      "Contact support"
+    ]
+  },
+  {
+    "id": "lbl.accountMessageMinLength",
+    "text": "Please write at least 10 characters",
+    "pages": [
+      "Contact support"
+    ]
+  },
+  {
+    "id": "lbl.accountNewAddress",
+    "text": "New address",
+    "pages": [
+      "Addresses"
+    ]
+  },
+  {
+    "id": "lbl.accountNone",
+    "text": "None",
+    "pages": [
+      "Contact support"
+    ]
+  },
+  {
+    "id": "lbl.accountNotificationNotFound",
+    "text": "Notification not found",
+    "pages": [
+      "Account subpages"
+    ]
+  },
+  {
+    "id": "lbl.accountNotificationPreferences",
+    "text": "Notification preferences",
+    "pages": [
+      "Profile"
+    ]
+  },
+  {
+    "id": "lbl.accountNotificationTitle",
+    "text": "Notification",
+    "pages": [
+      "Account subpages"
+    ]
+  },
+  {
+    "id": "lbl.accountOpenStoreConversation",
+    "text": "Open store conversation",
+    "pages": [
+      "Account subpages"
+    ]
+  },
+  {
+    "id": "lbl.accountOptionalOrder",
+    "text": "Order (optional)",
+    "pages": [
+      "Contact support"
+    ]
+  },
+  {
+    "id": "lbl.accountPageNotFound",
+    "text": "Page not found",
+    "pages": [
+      "Account subpages"
+    ]
+  },
+  {
+    "id": "lbl.accountPasteAdminExport",
+    "text": "Paste the export from Wantiss Admin",
+    "pages": [
+      "Settings"
+    ]
+  },
+  {
+    "id": "lbl.accountResetDemo",
+    "text": "Reset Goodies demo data",
+    "pages": [
+      "Settings"
+    ]
+  },
+  {
+    "id": "lbl.accountResetDemoHint",
+    "text": "Clears orders, cart and checkout numbers",
+    "pages": [
+      "Settings"
+    ]
+  },
+  {
+    "id": "lbl.accountSaveAddress",
+    "text": "Save address",
+    "pages": [
+      "Addresses"
+    ]
+  },
+  {
+    "id": "lbl.accountSeeDetails",
+    "text": "See details",
+    "pages": [
+      "Account subpages"
+    ]
+  },
+  {
+    "id": "lbl.accountSendMessageFailed",
+    "text": "Could not send your message. Please try again.",
+    "pages": [
+      "Contact support"
+    ]
+  },
+  {
+    "id": "lbl.accountStoreTicketSent",
+    "text": "Ticket {ticket} was sent to {store}. You can return to this conversation to see the store reply.",
+    "pages": [
+      "Account subpages"
+    ]
+  },
+  {
+    "id": "lbl.accountStreetArea",
+    "text": "Street and area",
+    "pages": [
+      "Addresses"
+    ]
+  },
+  {
+    "id": "lbl.accountSupportMessagePlaceholder",
+    "text": "Tell us what happened (at least 10 characters)",
+    "pages": [
+      "Contact support"
+    ]
+  },
+  {
+    "id": "lbl.accountSupportSentTitle",
+    "text": "Message sent",
+    "pages": [
+      "Account subpages"
+    ]
+  },
+  {
+    "id": "lbl.accountSupportTopic",
+    "text": "Topic",
+    "pages": [
+      "Contact support"
+    ]
+  },
+  {
+    "id": "lbl.accountTermsPolicies",
+    "text": "Terms and policies",
+    "pages": [
+      "Help / FAQs"
+    ]
+  },
+  {
+    "id": "lbl.accountUseForGoodies",
+    "text": "Use for Goodies",
+    "pages": [
+      "Addresses"
+    ]
+  },
+  {
+    "id": "lbl.accountViewOrder",
+    "text": "View order",
+    "pages": [
+      "Account subpages"
+    ]
+  },
+  {
+    "id": "lbl.accountWantissDefault",
+    "text": "Wantiss default",
+    "pages": [
+      "Addresses"
+    ]
+  },
+  {
+    "id": "lbl.actionAddedToCart",
+    "text": "Added {item} to your cart",
+    "pages": [
+      "Shared state messages"
+    ]
+  },
+  {
+    "id": "lbl.actionAddSavedCard",
+    "text": "Add a saved card before checking out.",
+    "pages": [
+      "Shared actions and validation"
+    ]
+  },
+  {
+    "id": "lbl.actionAlcoholUnavailable",
+    "text": "Alcohol orders are not available yet.",
+    "pages": [
+      "Shared actions and validation"
+    ]
+  },
+  {
+    "id": "lbl.actionCannotCancel",
+    "text": "This order can no longer be cancelled",
+    "pages": [
+      "Shared actions and validation"
+    ]
+  },
+  {
+    "id": "lbl.actionCardDeclinedDemo",
+    "text": "Card declined (demo). Your cart is safe. Try another method.",
+    "pages": [
+      "Shared actions and validation"
+    ]
+  },
+  {
+    "id": "lbl.actionCartCleared",
+    "text": "Cart cleared",
+    "pages": [
+      "Shared actions and validation"
+    ]
+  },
+  {
+    "id": "lbl.actionCartEmpty",
+    "text": "Your cart is empty",
+    "pages": [
+      "Shared actions and validation"
+    ]
+  },
+  {
+    "id": "lbl.actionChooseAddress",
+    "text": "Choose a delivery address",
+    "pages": [
+      "Shared actions and validation"
+    ]
+  },
+  {
+    "id": "lbl.actionChoosePayment",
+    "text": "Choose Wantiss Wallet, a saved card, or cash.",
+    "pages": [
+      "Shared actions and validation"
+    ]
+  },
+  {
+    "id": "lbl.actionChooseSize",
+    "text": "Choose a size first",
+    "pages": [
+      "Shared actions and validation"
+    ]
+  },
+  {
+    "id": "lbl.actionConfirmAlcohol",
+    "text": "Please confirm the alcohol rules to continue",
+    "pages": [
+      "Shared actions and validation"
+    ]
+  },
+  {
+    "id": "lbl.actionCreateWalletAlcohol",
+    "text": "Create your Wantiss wallet first. Refunds for alcohol orders go there.",
+    "pages": [
+      "Shared actions and validation"
+    ]
+  },
+  {
+    "id": "lbl.actionDeliveringTo",
+    "text": "Delivering to {address} (Wantiss default unchanged)",
+    "pages": [
+      "Shared actions and validation"
+    ]
+  },
+  {
+    "id": "lbl.actionDemoOrderPlaced",
+    "text": "Demo order placed!",
+    "pages": [
+      "Shared actions and validation"
+    ]
+  },
+  {
+    "id": "lbl.actionFavoriteRemoved",
+    "text": "Removed from favorites",
+    "pages": [
+      "Shared actions and validation"
+    ]
+  },
+  {
+    "id": "lbl.actionFavoriteSaved",
+    "text": "Saved to favorites",
+    "pages": [
+      "Shared actions and validation"
+    ]
+  },
+  {
+    "id": "lbl.actionIdFailed",
+    "text": "ID check failed. Order cancelled",
+    "pages": [
+      "Shared actions and validation"
+    ]
+  },
+  {
+    "id": "lbl.actionIdPassed",
+    "text": "ID checked. Order can be completed",
+    "pages": [
+      "Shared actions and validation"
+    ]
+  },
+  {
+    "id": "lbl.actionLineUnavailable",
+    "text": "{item} {reason}",
+    "pages": [
+      "Shared actions and validation"
+    ]
+  },
+  {
+    "id": "lbl.actionMinimumOrder",
+    "text": "Minimum order is {amount}",
+    "pages": [
+      "Shared actions and validation"
+    ]
+  },
+  {
+    "id": "lbl.actionNothingToReorder",
+    "text": "Nothing to reorder",
+    "pages": [
+      "Shared actions and validation"
+    ]
+  },
+  {
+    "id": "lbl.actionOnlyAvailable",
+    "text": "Only {count} available",
+    "pages": [
+      "Shared actions and validation",
+      "Shared state messages"
+    ]
+  },
+  {
+    "id": "lbl.actionOrderCancelled",
+    "text": "Order cancelled",
+    "pages": [
+      "Shared actions and validation"
+    ]
+  },
+  {
+    "id": "lbl.actionOrderSent",
+    "text": "Order sent to the store",
+    "pages": [
+      "Shared actions and validation"
+    ]
+  },
+  {
+    "id": "lbl.actionOutOfStock",
+    "text": "Sorry, {item} is out of stock",
+    "pages": [
+      "Shared state messages"
+    ]
+  },
+  {
+    "id": "lbl.actionPaymentUnavailable",
+    "text": "This payment method is no longer available. Choose another method.",
+    "pages": [
+      "Shared actions and validation"
+    ]
+  },
+  {
+    "id": "lbl.actionPlaceOrderFailed",
+    "text": "Could not place the order. Please try again.",
+    "pages": [
+      "Shared actions and validation"
+    ]
+  },
+  {
+    "id": "lbl.actionPromoApplied",
+    "text": "{code} applied",
+    "pages": [
+      "Shared actions and validation"
+    ]
+  },
+  {
+    "id": "lbl.actionPromoInvalid",
+    "text": "Your promo code no longer applies. Totals updated",
+    "pages": [
+      "Shared actions and validation"
+    ]
+  },
+  {
+    "id": "lbl.actionPromoSaved",
+    "text": "{code} saved. It applies when you check out",
+    "pages": [
+      "Shared actions and validation"
+    ]
+  },
+  {
+    "id": "lbl.actionQuantityUnavailable",
+    "text": "is no longer available in that quantity",
+    "pages": [
+      "Shared actions and validation"
+    ]
+  },
+  {
+    "id": "lbl.actionRefundPending",
+    "text": "Order cancelled. Your card refund is pending and may need support follow-up.",
+    "pages": [
+      "Shared actions and validation"
+    ]
+  },
+  {
+    "id": "lbl.actionReorderAdded",
+    "text": "Items added to your cart",
+    "pages": [
+      "Shared actions and validation"
+    ]
+  },
+  {
+    "id": "lbl.actionReorderPartial",
+    "text": "Added available items. Unavailable: {items}",
+    "pages": [
+      "Shared actions and validation"
+    ]
+  },
+  {
+    "id": "lbl.actionReorderUnavailable",
+    "text": "Those items are unavailable right now",
+    "pages": [
+      "Shared actions and validation"
+    ]
+  },
+  {
+    "id": "lbl.actionRetryProduct",
+    "text": "Please select the product again and retry.",
+    "pages": [
+      "Shared actions and validation"
+    ]
+  },
+  {
+    "id": "lbl.actionStoreClosedCheckout",
+    "text": "{store} is closed. Choose a future pickup or delivery time if scheduling is available.",
+    "pages": [
+      "Shared actions and validation"
+    ]
+  },
+  {
+    "id": "lbl.actionStoreClosedNext",
+    "text": "{store} is closed. {next}",
+    "pages": [
+      "Shared actions and validation",
+      "Shared state messages"
+    ]
+  },
+  {
+    "id": "lbl.actionStoreClosedSchedule",
+    "text": "This store is closed. Pick a time under \"Schedule\" and tap Apply to continue.",
+    "pages": [
+      "Shared actions and validation"
+    ]
+  },
+  {
+    "id": "lbl.actionTimePassed",
+    "text": "That time has passed. Pick another",
+    "pages": [
+      "Shared actions and validation"
+    ]
+  },
+  {
+    "id": "lbl.actionValidPhone",
+    "text": "Choose a valid contact number",
+    "pages": [
+      "Shared actions and validation"
+    ]
+  },
+  {
+    "id": "lbl.actionWalletCreateFailed",
+    "text": "Could not create your Wantiss wallet. Please try again.",
+    "pages": [
+      "Shared actions and validation"
+    ]
+  },
+  {
+    "id": "lbl.actionWalletInsufficient",
+    "text": "Insufficient Wantiss wallet balance. Add funds or choose a saved card or cash.",
+    "pages": [
+      "Shared actions and validation",
+      "Shared components"
+    ]
+  },
+  {
+    "id": "lbl.actionWalletLow",
+    "text": "Wallet balance is too low. Top up or pick another method.",
+    "pages": [
+      "Shared actions and validation"
+    ]
+  },
+  {
+    "id": "lbl.actionWalletReady",
+    "text": "Wantiss wallet is ready",
+    "pages": [
+      "Shared actions and validation"
+    ]
+  },
+  {
+    "id": "lbl.actionWalletUnavailable",
+    "text": "Your Wantiss wallet is not available. Create a wallet or choose another payment method.",
+    "pages": [
+      "Shared actions and validation"
+    ]
+  },
+  {
+    "id": "lbl.addcard.07f548c871",
+    "text": "CVV",
+    "pages": [
+      "Add card"
+    ]
+  },
+  {
+    "id": "lbl.addcard.1120d5f61a",
+    "text": "Card holder",
+    "pages": [
+      "Add card"
+    ]
+  },
+  {
+    "id": "lbl.addcard.11a6767d56",
+    "text": "Done",
+    "pages": [
+      "Add card"
+    ]
+  },
+  {
+    "id": "lbl.addcard.1b5f68f875",
+    "text": "MM/YY",
+    "pages": [
+      "Add card"
+    ]
+  },
+  {
+    "id": "lbl.addcard.2fe82d1748",
+    "text": "This only takes a moment.",
+    "pages": [
+      "Add card"
+    ]
+  },
+  {
+    "id": "lbl.addcard.39d561254a",
+    "text": "Save Card",
+    "pages": [
+      "Add card"
+    ]
+  },
+  {
+    "id": "lbl.addcard.6085111fd3",
+    "text": "Your card has been saved for future payments.",
+    "pages": [
+      "Add card"
+    ]
+  },
+  {
+    "id": "lbl.addcard.76900f1bfd",
+    "text": "Back",
+    "pages": [
+      "Add card"
+    ]
+  },
+  {
+    "id": "lbl.addcard.8bb79a16ce",
+    "text": "Please complete all fields.",
+    "pages": [
+      "Add card"
+    ]
+  },
+  {
+    "id": "lbl.addcard.a0df07b3b0",
+    "text": "Preparing the secure card form…",
+    "pages": [
+      "Add card"
+    ]
+  },
+  {
+    "id": "lbl.addcard.a2cd15933f",
+    "text": "Card Saved",
+    "pages": [
+      "Add card"
+    ]
+  },
+  {
+    "id": "lbl.addcard.b465f953a8",
+    "text": "Preparing secure card form…",
+    "pages": [
+      "Add card"
+    ]
+  },
+  {
+    "id": "lbl.addcard.bb62f38afd",
+    "text": "Authorized signature",
+    "pages": [
+      "Add card"
+    ]
+  },
+  {
+    "id": "lbl.addcard.c08eb70f1a",
+    "text": "Name on Card",
+    "pages": [
+      "Add card"
+    ]
+  },
+  {
+    "id": "lbl.addcard.cardNumber",
+    "text": "Card Number",
+    "pages": [
+      "Add card"
+    ]
+  },
+  {
+    "id": "lbl.addcard.dbb87a7e89",
+    "text": "Add New Card",
+    "pages": [
+      "Add card"
+    ]
+  },
+  {
+    "id": "lbl.addcard.e6f60d31e2",
+    "text": "Saving Card…",
+    "pages": [
+      "Add card"
+    ]
+  },
+  {
+    "id": "lbl.addcard.expiryDate",
+    "text": "Expiry Date",
+    "pages": [
+      "Add card"
+    ]
+  },
+  {
+    "id": "lbl.addcard.f13a64ba2f",
+    "text": "Full name",
+    "pages": [
+      "Add card"
+    ]
+  },
+  {
+    "id": "lbl.addcard.f520fe9010",
+    "text": "We accept",
+    "pages": [
+      "Add card"
+    ]
+  },
+  {
+    "id": "lbl.addcard.f6725f3af0",
+    "text": "Expires",
+    "pages": [
+      "Add card"
+    ]
+  },
+  {
+    "id": "lbl.addcard.fullName",
+    "text": "FULL NAME",
+    "pages": [
+      "Add card"
+    ]
+  },
+  {
+    "id": "lbl.addcard.networkFailed",
+    "text": "The secure card form could not load. Check your connection and try again.",
+    "pages": [
+      "Add card"
+    ]
+  },
+  {
+    "id": "lbl.addcard.retry",
+    "text": "Try again",
+    "pages": [
+      "Add card"
+    ]
+  },
+  {
+    "id": "lbl.addcard.saveFailed",
+    "text": "Your card could not be saved. Please check the details and try again.",
+    "pages": [
+      "Add card"
+    ]
+  },
+  {
+    "id": "lbl.addcard.securityCode",
+    "text": "CVV",
+    "pages": [
+      "Add card"
+    ]
+  },
+  {
+    "id": "lbl.again",
+    "text": "Order again",
+    "pages": [
+      "Home"
+    ]
+  },
+  {
+    "id": "lbl.browseAllCategories",
+    "text": "All categories",
+    "pages": [
+      "Explore"
+    ]
+  },
+  {
+    "id": "lbl.browseAllStores",
+    "text": "All stores",
+    "pages": [
+      "Category / store results"
+    ]
+  },
+  {
+    "id": "lbl.browseAuto100SEII",
+    "text": "Products",
+    "pages": [
+      "Search"
+    ]
+  },
+  {
+    "id": "lbl.browseAuto11P24TT",
+    "text": "Goodies",
+    "pages": [
+      "Wantiss entry"
+    ]
+  },
+  {
+    "id": "lbl.browseAuto1APR0T",
+    "text": "Dismiss cart banner",
+    "pages": [
+      "Shared navigation and access states"
+    ]
+  },
+  {
+    "id": "lbl.browseAuto1MQHTQ6",
+    "text": "Wantiss",
+    "pages": [
+      "Wantiss entry"
+    ]
+  },
+  {
+    "id": "lbl.browseAuto1R48A8",
+    "text": "Food, groceries, drinks and everyday essentials",
+    "pages": [
+      "Wantiss entry"
+    ]
+  },
+  {
+    "id": "lbl.browseAuto2NONO1",
+    "text": "This is a stand-in for the Wantiss home. Other services will appear here.",
+    "pages": [
+      "Wantiss entry"
+    ]
+  },
+  {
+    "id": "lbl.browseAutoE39JIC",
+    "text": "Clear all",
+    "pages": [
+      "Search"
+    ]
+  },
+  {
+    "id": "lbl.browseAutoEJBBC2",
+    "text": "Your cart",
+    "pages": [
+      "Shared navigation and access states"
+    ]
+  },
+  {
+    "id": "lbl.browseAutoJGDJ0J",
+    "text": "Open cart",
+    "pages": [
+      "Shared navigation and access states"
+    ]
+  },
+  {
+    "id": "lbl.browseAutoXNYVOQ",
+    "text": "Your everyday super-app (demo entry screen)",
+    "pages": [
+      "Wantiss entry"
+    ]
+  },
+  {
+    "id": "lbl.browseCategories",
+    "text": "Categories",
+    "pages": [
+      "Explore",
+      "Search"
+    ]
+  },
+  {
+    "id": "lbl.browseChangeAddress",
+    "text": "Change address",
+    "pages": [
+      "Explore"
+    ]
+  },
+  {
+    "id": "lbl.browseChooseAddress",
+    "text": "Choose browsing address",
+    "pages": [
+      "Explore"
+    ]
+  },
+  {
+    "id": "lbl.browseChooseLocation",
+    "text": "Choose your location",
+    "pages": [
+      "Home",
+      "Explore"
+    ]
+  },
+  {
+    "id": "lbl.browseClearFilterHint",
+    "text": "Clear the filter to see every store.",
+    "pages": [
+      "Category / store results"
+    ]
+  },
+  {
+    "id": "lbl.browseClearFilters",
+    "text": "Clear filters",
+    "pages": [
+      "Category / store results"
+    ]
+  },
+  {
+    "id": "lbl.browseClearSearch",
+    "text": "Clear search",
+    "pages": [
+      "Search"
+    ]
+  },
+  {
+    "id": "lbl.browseCountdown",
+    "text": "Ends in {time}",
+    "pages": [
+      "Browse · shared"
+    ]
+  },
+  {
+    "id": "lbl.browseDiscover",
+    "text": "Discover your options",
+    "pages": [
+      "Explore"
+    ]
+  },
+  {
+    "id": "lbl.browseExploreNearby",
+    "text": "Explore nearby",
+    "pages": [
+      "Explore"
+    ]
+  },
+  {
+    "id": "lbl.browseFeaturedVendors",
+    "text": "Featured vendors",
+    "pages": [
+      "Category / store results"
+    ]
+  },
+  {
+    "id": "lbl.browseNearLabel",
+    "text": "BROWSING NEAR",
+    "pages": [
+      "Explore"
+    ]
+  },
+  {
+    "id": "lbl.browseNoProducts",
+    "text": "No in-stock products match these filters.",
+    "pages": [
+      "Explore"
+    ]
+  },
+  {
+    "id": "lbl.browseNoStores",
+    "text": "No stores match right now",
+    "pages": [
+      "Explore"
+    ]
+  },
+  {
+    "id": "lbl.browseNoStoresHint",
+    "text": "Try another category or show all available options.",
+    "pages": [
+      "Explore"
+    ]
+  },
+  {
+    "id": "lbl.browseNothingMatches",
+    "text": "Nothing matches",
+    "pages": [
+      "Category / store results"
+    ]
+  },
+  {
+    "id": "lbl.browsePopularProducts",
+    "text": "Popular products",
+    "pages": [
+      "Category / store results"
+    ]
+  },
+  {
+    "id": "lbl.browseProductsExplore",
+    "text": "Products to explore",
+    "pages": [
+      "Explore"
+    ]
+  },
+  {
+    "id": "lbl.browseReorder",
+    "text": "Reorder",
+    "pages": [
+      "Home"
+    ]
+  },
+  {
+    "id": "lbl.browseScopeAll",
+    "text": "All available",
+    "pages": [
+      "Explore"
+    ]
+  },
+  {
+    "id": "lbl.browseScopeClosest",
+    "text": "Closest",
+    "pages": [
+      "Explore"
+    ]
+  },
+  {
+    "id": "lbl.browseScopeOpen",
+    "text": "Open now",
+    "pages": [
+      "Explore"
+    ]
+  },
+  {
+    "id": "lbl.browseSearchAccessibility",
+    "text": "Search",
+    "pages": [
+      "Search"
+    ]
+  },
+  {
+    "id": "lbl.browseSearchPlaceholder",
+    "text": "Search food, groceries, drinks",
+    "pages": [
+      "Search"
+    ]
+  },
+  {
+    "id": "lbl.browseShowAll",
+    "text": "Show all available",
+    "pages": [
+      "Explore"
+    ]
+  },
+  {
+    "id": "lbl.browseStores",
+    "text": "Stores",
+    "pages": [
+      "Search"
+    ]
+  },
+  {
+    "id": "lbl.browseSubcategories",
+    "text": "SUBCATEGORIES",
+    "pages": [
+      "Category / store results"
+    ]
+  },
+  {
+    "id": "lbl.browseSuggestions",
+    "text": "Suggestions",
+    "pages": [
+      "Search"
+    ]
+  },
+  {
+    "id": "lbl.browseTitleAll",
+    "text": "All available stores",
+    "pages": [
+      "Explore"
+    ]
+  },
+  {
+    "id": "lbl.browseTitleClosest",
+    "text": "Closest to you",
+    "pages": [
+      "Explore"
+    ]
+  },
+  {
+    "id": "lbl.browseTitleOpen",
+    "text": "Open near you",
+    "pages": [
+      "Explore"
+    ]
+  },
+  {
+    "id": "lbl.byoAddedExplanation",
+    "text": "Nothing has been ordered yet. Add more, or review your cart when you are ready.",
+    "pages": [
+      "Build Your Own"
+    ]
+  },
+  {
+    "id": "lbl.byoAddedHeading",
+    "text": "Added to your order",
+    "pages": [
+      "Build Your Own"
+    ]
+  },
+  {
+    "id": "lbl.byoAddedSuccess",
+    "text": "Added to your order!",
+    "pages": [
+      "Build Your Own"
+    ]
+  },
+  {
+    "id": "lbl.byoAddOrder",
+    "text": "Add to Order",
+    "pages": [
+      "Build Your Own"
+    ]
+  },
+  {
+    "id": "lbl.byoAuto3ROGT8",
+    "text": "Preview drawing. Photo layers appear once uploaded in Admin.",
+    "pages": [
+      "Build Your Own"
+    ]
+  },
+  {
+    "id": "lbl.byoBack",
+    "text": "Back",
+    "pages": [
+      "Build Your Own"
+    ]
+  },
+  {
+    "id": "lbl.byoBackGoodies",
+    "text": "Back to Goodies",
+    "pages": [
+      "Build Your Own"
+    ]
+  },
+  {
+    "id": "lbl.byoBasePrice",
+    "text": "Base price",
+    "pages": [
+      "Build Your Own"
+    ]
+  },
+  {
+    "id": "lbl.byoBuild",
+    "text": "Build",
+    "pages": [
+      "Build Your Own"
+    ]
+  },
+  {
+    "id": "lbl.byoCancel",
+    "text": "Cancel",
+    "pages": [
+      "Build Your Own"
+    ]
+  },
+  {
+    "id": "lbl.byoCannotAdd",
+    "text": "You can look, but it cannot be added right now.",
+    "pages": [
+      "Build Your Own"
+    ]
+  },
+  {
+    "id": "lbl.byoCardUnavailable",
+    "text": "Currently unavailable",
+    "pages": [
+      "Build Your Own"
+    ]
+  },
+  {
+    "id": "lbl.byoChoicesChanged",
+    "text": "Some choices changed",
+    "pages": [
+      "Build Your Own"
+    ]
+  },
+  {
+    "id": "lbl.byoChoose",
+    "text": "Choose",
+    "pages": [
+      "Build Your Own"
+    ]
+  },
+  {
+    "id": "lbl.byoChooseOne",
+    "text": "Choose 1",
+    "pages": [
+      "Build Your Own"
+    ]
+  },
+  {
+    "id": "lbl.byoContinueShopping",
+    "text": "Continue Shopping",
+    "pages": [
+      "Build Your Own"
+    ]
+  },
+  {
+    "id": "lbl.byoCurrentlyUnavailable",
+    "text": "Currently unavailable.",
+    "pages": [
+      "Build Your Own"
+    ]
+  },
+  {
+    "id": "lbl.byoCustomizeAnother",
+    "text": "Customize Another",
+    "pages": [
+      "Build Your Own"
+    ]
+  },
+  {
+    "id": "lbl.byoDefaultDesc",
+    "text": "Customize it your way",
+    "pages": [
+      "Build Your Own"
+    ]
+  },
+  {
+    "id": "lbl.byoEditingItem",
+    "text": "Editing item",
+    "pages": [
+      "Build Your Own"
+    ]
+  },
+  {
+    "id": "lbl.byoErrAtMost",
+    "text": "At most {limit} of {item} in {group}",
+    "pages": [
+      "Build Your Own"
+    ]
+  },
+  {
+    "id": "lbl.byoErrChooseAtLeast",
+    "text": "Choose at least {min} in {group}",
+    "pages": [
+      "Build Your Own"
+    ]
+  },
+  {
+    "id": "lbl.byoErrChooseOne",
+    "text": "Choose {group}",
+    "pages": [
+      "Build Your Own"
+    ]
+  },
+  {
+    "id": "lbl.byoErrChooseSize",
+    "text": "Choose a size",
+    "pages": [
+      "Build Your Own"
+    ]
+  },
+  {
+    "id": "lbl.byoErrItemRemoved",
+    "text": "An item you chose in {group} was removed by the store",
+    "pages": [
+      "Build Your Own"
+    ]
+  },
+  {
+    "id": "lbl.byoErrSameItem",
+    "text": "the same item",
+    "pages": [
+      "Build Your Own"
+    ]
+  },
+  {
+    "id": "lbl.byoErrSizeGone",
+    "text": "{size} is no longer available. Choose another size",
+    "pages": [
+      "Build Your Own"
+    ]
+  },
+  {
+    "id": "lbl.byoErrStoreClosed",
+    "text": "{store} is closed right now",
+    "pages": [
+      "Build Your Own"
+    ]
+  },
+  {
+    "id": "lbl.byoErrTooMany",
+    "text": "Too many in {group} (max {max})",
+    "pages": [
+      "Build Your Own"
+    ]
+  },
+  {
+    "id": "lbl.byoErrUnavailable",
+    "text": "This builder is currently unavailable",
+    "pages": [
+      "Build Your Own"
+    ]
+  },
+  {
+    "id": "lbl.byoFree",
+    "text": "Free",
+    "pages": [
+      "Build Your Own"
+    ]
+  },
+  {
+    "id": "lbl.byoFromPrice",
+    "text": "{desc} · from {price}",
+    "pages": [
+      "Build Your Own"
+    ]
+  },
+  {
+    "id": "lbl.byoIncluded",
+    "text": "Included",
+    "pages": [
+      "Build Your Own"
+    ]
+  },
+  {
+    "id": "lbl.byoIngredientUnavailable",
+    "text": "{item} is unavailable",
+    "pages": [
+      "Build Your Own"
+    ]
+  },
+  {
+    "id": "lbl.byoItemMissingCart",
+    "text": "That item is no longer in your cart",
+    "pages": [
+      "Build Your Own"
+    ]
+  },
+  {
+    "id": "lbl.byoItemPrice",
+    "text": "Item price",
+    "pages": [
+      "Build Your Own"
+    ]
+  },
+  {
+    "id": "lbl.byoItemUpdated",
+    "text": "Item updated",
+    "pages": [
+      "Build Your Own"
+    ]
+  },
+  {
+    "id": "lbl.byoLineNeedsChanges",
+    "text": "needs changes: ",
+    "pages": [
+      "Build Your Own"
+    ]
+  },
+  {
+    "id": "lbl.byoLinePriceChanged",
+    "text": "has a new price. Open Edit to review it",
+    "pages": [
+      "Build Your Own"
+    ]
+  },
+  {
+    "id": "lbl.byoLineRemoved",
+    "text": "is no longer offered",
+    "pages": [
+      "Build Your Own"
+    ]
+  },
+  {
+    "id": "lbl.byoMaxGroupChoices",
+    "text": "You can choose up to {max} in {group}",
+    "pages": [
+      "Build Your Own"
+    ]
+  },
+  {
+    "id": "lbl.byoMaxSameIngredient",
+    "text": "At most {max} of {item}",
+    "pages": [
+      "Build Your Own"
+    ]
+  },
+  {
+    "id": "lbl.byoNoLongerCustomizable",
+    "text": "This item can no longer be customized. You can remove it from your cart.",
+    "pages": [
+      "Build Your Own"
+    ]
+  },
+  {
+    "id": "lbl.byoNotAvailableNow",
+    "text": "This builder is not available right now",
+    "pages": [
+      "Build Your Own"
+    ]
+  },
+  {
+    "id": "lbl.byoNotesPlaceholder",
+    "text": "E.g. light sauce, cut into 8 slices…",
+    "pages": [
+      "Build Your Own"
+    ]
+  },
+  {
+    "id": "lbl.byoNotesPrompt",
+    "text": "Anything else we should know?",
+    "pages": [
+      "Build Your Own"
+    ]
+  },
+  {
+    "id": "lbl.byoOptional",
+    "text": "Optional",
+    "pages": [
+      "Build Your Own"
+    ]
+  },
+  {
+    "id": "lbl.byoPickBelow",
+    "text": "Pick your options below",
+    "pages": [
+      "Build Your Own"
+    ]
+  },
+  {
+    "id": "lbl.byoPriceChanged",
+    "text": "Prices changed since you added this item",
+    "pages": [
+      "Build Your Own"
+    ]
+  },
+  {
+    "id": "lbl.byoRemovedFromCart",
+    "text": "Removed from your cart",
+    "pages": [
+      "Build Your Own"
+    ]
+  },
+  {
+    "id": "lbl.byoRemoveOne",
+    "text": "Remove one {item}",
+    "pages": [
+      "Build Your Own"
+    ]
+  },
+  {
+    "id": "lbl.byoReplaceChoices",
+    "text": "Please remove or replace them to continue. We did not change anything for you.",
+    "pages": [
+      "Build Your Own"
+    ]
+  },
+  {
+    "id": "lbl.byoRequired",
+    "text": "Required",
+    "pages": [
+      "Build Your Own"
+    ]
+  },
+  {
+    "id": "lbl.byoResume",
+    "text": "Resume",
+    "pages": [
+      "Build Your Own"
+    ]
+  },
+  {
+    "id": "lbl.byoResumeDraft",
+    "text": "Resuming the draft you left earlier.",
+    "pages": [
+      "Build Your Own"
+    ]
+  },
+  {
+    "id": "lbl.byoSaveChanges",
+    "text": "Save changes",
+    "pages": [
+      "Build Your Own"
+    ]
+  },
+  {
+    "id": "lbl.byoSize",
+    "text": "Size",
+    "pages": [
+      "Build Your Own"
+    ]
+  },
+  {
+    "id": "lbl.byoStartOver",
+    "text": "Start over",
+    "pages": [
+      "Build Your Own"
+    ]
+  },
+  {
+    "id": "lbl.byoStoreClosed",
+    "text": "{store} is closed.",
+    "pages": [
+      "Build Your Own"
+    ]
+  },
+  {
+    "id": "lbl.byoStoreClosedNow",
+    "text": "{store} is closed right now",
+    "pages": [
+      "Build Your Own"
+    ]
+  },
+  {
+    "id": "lbl.byoStorePaused",
+    "text": "The store paused this item.",
+    "pages": [
+      "Build Your Own"
+    ]
+  },
+  {
+    "id": "lbl.byoTitle",
+    "text": "Customize your product",
+    "pages": [
+      "Build Your Own"
+    ]
+  },
+  {
+    "id": "lbl.byoTo",
+    "text": "to",
+    "pages": [
+      "Build Your Own"
+    ]
+  },
+  {
+    "id": "lbl.byoUnavailableOption",
+    "text": "Unavailable",
+    "pages": [
+      "Build Your Own"
+    ]
+  },
+  {
+    "id": "lbl.byoUnavailableText",
+    "text": "The store may have turned it off.",
+    "pages": [
+      "Build Your Own"
+    ]
+  },
+  {
+    "id": "lbl.byoUnavailableTitle",
+    "text": "This custom product is not available",
+    "pages": [
+      "Build Your Own"
+    ]
+  },
+  {
+    "id": "lbl.byoUndo",
+    "text": "Undo last change",
+    "pages": [
+      "Build Your Own"
+    ]
+  },
+  {
+    "id": "lbl.byoUpTo",
+    "text": "Up to",
+    "pages": [
+      "Build Your Own"
+    ]
+  },
+  {
+    "id": "lbl.byoViewCart",
+    "text": "View Cart",
+    "pages": [
+      "Build Your Own"
+    ]
+  },
+  {
+    "id": "lbl.byoYourOrder",
+    "text": "Your order",
+    "pages": [
+      "Build Your Own"
+    ]
+  },
+  {
+    "id": "lbl.cardNewStore",
+    "text": "New store",
+    "pages": [
+      "Shared components",
+      "Search"
+    ]
+  },
+  {
+    "id": "lbl.cardPickupOnly",
+    "text": "Pickup only at this address",
+    "pages": [
+      "Shared components"
+    ]
+  },
+  {
+    "id": "lbl.cardVerificationFailed",
+    "text": "Your card could not be verified. Please try again or use another card.",
+    "pages": [
+      "Card verification"
+    ]
+  },
+  {
+    "id": "lbl.cardVerifying",
+    "text": "Securely verifying your card…",
+    "pages": [
+      "Card verification"
+    ]
+  },
+  {
+    "id": "lbl.cartAlcoholHeading",
+    "text": "Your order includes alcohol",
+    "pages": [
+      "Cart"
+    ]
+  },
+  {
+    "id": "lbl.cartApplied",
+    "text": "Applied",
+    "pages": [
+      "Promotions",
+      "Cart"
+    ]
+  },
+  {
+    "id": "lbl.cartApply",
+    "text": "Apply",
+    "pages": [
+      "Cart"
+    ]
+  },
+  {
+    "id": "lbl.cartAvailableCoupons",
+    "text": "See available coupons",
+    "pages": [
+      "Cart"
+    ]
+  },
+  {
+    "id": "lbl.cartBrowse",
+    "text": "Browse stores",
+    "pages": [
+      "Cart",
+      "Checkout"
+    ]
+  },
+  {
+    "id": "lbl.cartCheckout",
+    "text": "Checkout",
+    "pages": [
+      "Cart"
+    ]
+  },
+  {
+    "id": "lbl.cartClearAction",
+    "text": "Clear cart",
+    "pages": [
+      "Cart"
+    ]
+  },
+  {
+    "id": "lbl.cartContinueShopping",
+    "text": "Continue shopping",
+    "pages": [
+      "Cart"
+    ]
+  },
+  {
+    "id": "lbl.cartCourierTip",
+    "text": "Courier tip",
+    "pages": [
+      "Cart"
+    ]
+  },
+  {
+    "id": "lbl.cartDeliveryFee",
+    "text": "Delivery fee",
+    "pages": [
+      "Cart"
+    ]
+  },
+  {
+    "id": "lbl.cartDiscount",
+    "text": "Discount",
+    "pages": [
+      "Cart"
+    ]
+  },
+  {
+    "id": "lbl.cartEditItem",
+    "text": "Edit",
+    "pages": [
+      "Cart"
+    ]
+  },
+  {
+    "id": "lbl.cartEmptyText",
+    "text": "Explore nearby stores and discover products around your chosen address.",
+    "pages": [
+      "Cart"
+    ]
+  },
+  {
+    "id": "lbl.cartEmptyTitle",
+    "text": "Your cart is empty",
+    "pages": [
+      "Cart"
+    ]
+  },
+  {
+    "id": "lbl.cartFixItems",
+    "text": "Fix the items marked above to continue.",
+    "pages": [
+      "Cart"
+    ]
+  },
+  {
+    "id": "lbl.cartGroupOrder",
+    "text": "Start a group order",
+    "pages": [
+      "Cart"
+    ]
+  },
+  {
+    "id": "lbl.cartGroupOrderDesc",
+    "text": "Invite friends and coordinate a shared cart",
+    "pages": [
+      "Cart"
+    ]
+  },
+  {
+    "id": "lbl.cartInvalid",
+    "text": "Not valid",
+    "pages": [
+      "Cart"
+    ]
+  },
+  {
+    "id": "lbl.cartMinMore",
+    "text": "Add",
+    "pages": [
+      "Cart"
+    ]
+  },
+  {
+    "id": "lbl.cartPromoInvalid",
+    "text": "That code is not valid",
+    "pages": [
+      "Shared state messages"
+    ]
+  },
+  {
+    "id": "lbl.cartPromoMinimum",
+    "text": "Spend {amount} more to use {code}",
+    "pages": [
+      "Shared state messages"
+    ]
+  },
+  {
+    "id": "lbl.cartPromoPlaceholder",
+    "text": "Try GOODIES10",
+    "pages": [
+      "Cart"
+    ]
+  },
+  {
+    "id": "lbl.cartPromoStoreOnly",
+    "text": "Only valid at {store}",
+    "pages": [
+      "Shared state messages"
+    ]
+  },
+  {
+    "id": "lbl.cartPromoTitle",
+    "text": "Promo code",
+    "pages": [
+      "Cart"
+    ]
+  },
+  {
+    "id": "lbl.cartReachMinimum",
+    "text": "more to reach the",
+    "pages": [
+      "Cart"
+    ]
+  },
+  {
+    "id": "lbl.cartRemove",
+    "text": "Remove",
+    "pages": [
+      "Cart"
+    ]
+  },
+  {
+    "id": "lbl.cartServiceFee",
+    "text": "Service fee",
+    "pages": [
+      "Cart"
+    ]
+  },
+  {
+    "id": "lbl.cartStartGroup",
+    "text": "Start a group order",
+    "pages": [
+      "Cart"
+    ]
+  },
+  {
+    "id": "lbl.cartStoreOrder",
+    "text": "Your order from this store",
+    "pages": [
+      "Cart"
+    ]
+  },
+  {
+    "id": "lbl.cartSubtotal",
+    "text": "Subtotal",
+    "pages": [
+      "Cart"
+    ]
+  },
+  {
+    "id": "lbl.cartTitle",
+    "text": "Your cart",
+    "pages": [
+      "Cart"
+    ]
+  },
+  {
+    "id": "lbl.cartTotal",
+    "text": "Total",
+    "pages": [
+      "Cart"
+    ]
+  },
+  {
+    "id": "lbl.catAllStores",
+    "text": "All stores",
+    "pages": [
+      "Shared navigation and access states",
+      "Categories"
+    ]
+  },
+  {
+    "id": "lbl.catEverythingNear",
+    "text": "Everything near you",
+    "pages": [
+      "Category / store results"
+    ]
+  },
+  {
+    "id": "lbl.catProducts",
+    "text": "{n} products",
+    "pages": [
+      "Category / store results"
+    ]
+  },
+  {
+    "id": "lbl.catStoreMany",
+    "text": "{n} stores",
+    "pages": [
+      "Category / store results"
+    ]
+  },
+  {
+    "id": "lbl.catStoreOne",
+    "text": "{n} store",
+    "pages": [
+      "Category / store results"
+    ]
+  },
+  {
+    "id": "lbl.chatActive",
+    "text": "Chat with the store",
+    "pages": [
+      "Store conversation"
+    ]
+  },
+  {
+    "id": "lbl.chatComposer",
+    "text": "Write a message…",
+    "pages": [
+      "Store conversation"
+    ]
+  },
+  {
+    "id": "lbl.chatContactStore",
+    "text": "Contact the store",
+    "pages": [
+      "Store conversation"
+    ]
+  },
+  {
+    "id": "lbl.chatErrOpen",
+    "text": "Could not open this store conversation.",
+    "pages": [
+      "Store conversation"
+    ]
+  },
+  {
+    "id": "lbl.chatErrRefresh",
+    "text": "Could not refresh messages.",
+    "pages": [
+      "Store conversation"
+    ]
+  },
+  {
+    "id": "lbl.chatErrSend",
+    "text": "Message could not be sent.",
+    "pages": [
+      "Store conversation"
+    ]
+  },
+  {
+    "id": "lbl.chatErrSignIn",
+    "text": "Sign in to message this store. Your conversation will appear here after you sign in.",
+    "pages": [
+      "Store conversation"
+    ]
+  },
+  {
+    "id": "lbl.chatFirstMessageHint",
+    "text": "Send your message below. Your messages are delivered to the store; the chat conversation will activate here when the store replies.",
+    "pages": [
+      "Store conversation"
+    ]
+  },
+  {
+    "id": "lbl.chatMessagesSent",
+    "text": "Messages sent",
+    "pages": [
+      "Store conversation"
+    ]
+  },
+  {
+    "id": "lbl.chatOpening",
+    "text": "Opening conversation…",
+    "pages": [
+      "Store conversation"
+    ]
+  },
+  {
+    "id": "lbl.chatSend",
+    "text": "Send message",
+    "pages": [
+      "Store conversation"
+    ]
+  },
+  {
+    "id": "lbl.chatTitle",
+    "text": "Message store",
+    "pages": [
+      "Store conversation"
+    ]
+  },
+  {
+    "id": "lbl.chatTryAgain",
+    "text": "Try again",
+    "pages": [
+      "Store conversation"
+    ]
+  },
+  {
+    "id": "lbl.chatWaitingStore",
+    "text": "Waiting for the store to reply. The chat opens here as soon as they respond.",
+    "pages": [
+      "Store conversation"
+    ]
+  },
+  {
+    "id": "lbl.checkoutAddAddress",
+    "text": "Add address",
+    "pages": [
+      "Checkout"
+    ]
+  },
+  {
+    "id": "lbl.checkoutAddCard",
+    "text": "Add a card",
+    "pages": [
+      "Checkout"
+    ]
+  },
+  {
+    "id": "lbl.checkoutAddressRequired",
+    "text": "Choose a delivery address",
+    "pages": [
+      "Checkout"
+    ]
+  },
+  {
+    "id": "lbl.checkoutAlcoholConfirm",
+    "text": "Alcohol order. Please confirm.",
+    "pages": [
+      "Checkout"
+    ]
+  },
+  {
+    "id": "lbl.checkoutAsap",
+    "text": "ASAP",
+    "pages": [
+      "Checkout"
+    ]
+  },
+  {
+    "id": "lbl.checkoutAsapMinimum",
+    "text": "Earliest available fulfillment time",
+    "pages": [
+      "Checkout"
+    ]
+  },
+  {
+    "id": "lbl.checkoutCard",
+    "text": "Credit / debit card",
+    "pages": [
+      "Checkout"
+    ]
+  },
+  {
+    "id": "lbl.checkoutCartUnavailable",
+    "text": "Your cart is unavailable",
+    "pages": [
+      "Checkout"
+    ]
+  },
+  {
+    "id": "lbl.checkoutCash",
+    "text": "Cash on",
+    "pages": [
+      "Checkout"
+    ]
+  },
+  {
+    "id": "lbl.checkoutCashCondition",
+    "text": "Only when this store and an available courier accept cash on delivery",
+    "pages": [
+      "Checkout"
+    ]
+  },
+  {
+    "id": "lbl.checkoutChange",
+    "text": "Change",
+    "pages": [
+      "Checkout"
+    ]
+  },
+  {
+    "id": "lbl.checkoutContactNumber",
+    "text": "Contact number",
+    "pages": [
+      "Checkout"
+    ]
+  },
+  {
+    "id": "lbl.checkoutContinue",
+    "text": "Continue",
+    "pages": [
+      "Shop · shared"
+    ]
+  },
+  {
+    "id": "lbl.checkoutCourierTip",
+    "text": "Tip your courier",
+    "pages": [
+      "Checkout"
+    ]
+  },
+  {
+    "id": "lbl.checkoutCreateWallet",
+    "text": "Create a Wantiss wallet",
+    "pages": [
+      "Checkout"
+    ]
+  },
+  {
+    "id": "lbl.checkoutDefaultPhone",
+    "text": "Default Wantiss number",
+    "pages": [
+      "Checkout"
+    ]
+  },
+  {
+    "id": "lbl.checkoutDeliverTo",
+    "text": "Deliver to",
+    "pages": [
+      "Checkout"
+    ]
+  },
+  {
+    "id": "lbl.checkoutDelivery",
+    "text": "Delivery",
+    "pages": [
+      "Group orders",
+      "Checkout"
+    ]
+  },
+  {
+    "id": "lbl.checkoutDeliveryInstructions",
+    "text": "Delivery instructions",
+    "pages": [
+      "Checkout"
+    ]
+  },
+  {
+    "id": "lbl.checkoutInsufficient",
+    "text": "Insufficient wallet balance",
+    "pages": [
+      "Checkout"
+    ]
+  },
+  {
+    "id": "lbl.checkoutKmFromYou",
+    "text": "{km} km from you",
+    "pages": [
+      "Checkout"
+    ]
+  },
+  {
+    "id": "lbl.checkoutMoncash",
+    "text": "MonCash",
+    "pages": [
+      "Checkout"
+    ]
+  },
+  {
+    "id": "lbl.checkoutNoCards",
+    "text": "No saved cards yet",
+    "pages": [
+      "Checkout"
+    ]
+  },
+  {
+    "id": "lbl.checkoutNote",
+    "text": "Note: {note}",
+    "pages": [
+      "Checkout"
+    ]
+  },
+  {
+    "id": "lbl.checkoutNoTip",
+    "text": "No tip",
+    "pages": [
+      "Checkout"
+    ]
+  },
+  {
+    "id": "lbl.checkoutOpenHours",
+    "text": "open {hours}",
+    "pages": [
+      "Checkout"
+    ]
+  },
+  {
+    "id": "lbl.checkoutOpenWallet",
+    "text": "Open Wallet",
+    "pages": [
+      "Checkout"
+    ]
+  },
+  {
+    "id": "lbl.checkoutOptional",
+    "text": "Optional",
+    "pages": [
+      "Checkout"
+    ]
+  },
+  {
+    "id": "lbl.checkoutPaymentMethod",
+    "text": "Payment method",
+    "pages": [
+      "Checkout"
+    ]
+  },
+  {
+    "id": "lbl.checkoutPickup",
+    "text": "Pickup",
+    "pages": [
+      "Group orders",
+      "Checkout"
+    ]
+  },
+  {
+    "id": "lbl.checkoutPickupFrom",
+    "text": "Pickup from",
+    "pages": [
+      "Checkout"
+    ]
+  },
+  {
+    "id": "lbl.checkoutPickupOnly",
+    "text": "Pickup only",
+    "pages": [
+      "Checkout"
+    ]
+  },
+  {
+    "id": "lbl.checkoutPlaceOrder",
+    "text": "Place order",
+    "pages": [
+      "Shop · shared"
+    ]
+  },
+  {
+    "id": "lbl.checkoutReview",
+    "text": "Review",
+    "pages": [
+      "Checkout"
+    ]
+  },
+  {
+    "id": "lbl.checkoutSavedCard",
+    "text": "Choose a saved card",
+    "pages": [
+      "Checkout"
+    ]
+  },
+  {
+    "id": "lbl.checkoutSavedCardCount",
+    "text": "{count} saved card",
+    "pages": [
+      "Checkout"
+    ]
+  },
+  {
+    "id": "lbl.checkoutSavedCardsCount",
+    "text": "{count} saved cards",
+    "pages": [
+      "Checkout"
+    ]
+  },
+  {
+    "id": "lbl.checkoutScheduleOption",
+    "text": "Schedule",
+    "pages": [
+      "Checkout"
+    ]
+  },
+  {
+    "id": "lbl.checkoutStoreNote",
+    "text": "Note for the store",
+    "pages": [
+      "Checkout"
+    ]
+  },
+  {
+    "id": "lbl.checkoutTime",
+    "text": "Time",
+    "pages": [
+      "Checkout"
+    ]
+  },
+  {
+    "id": "lbl.checkoutTitle",
+    "text": "Checkout",
+    "pages": [
+      "Checkout"
+    ]
+  },
+  {
+    "id": "lbl.checkoutUnavailablePayment",
+    "text": "Not available for live Goodies orders",
+    "pages": [
+      "Checkout"
+    ]
+  },
+  {
+    "id": "lbl.checkoutWallet",
+    "text": "Wantiss Wallet",
+    "pages": [
+      "Checkout"
+    ]
+  },
+  {
+    "id": "lbl.checkoutWalletBalance",
+    "text": "Balance {amount}",
+    "pages": [
+      "Checkout"
+    ]
+  },
+  {
+    "id": "lbl.checkoutWalletHint",
+    "text": "Create a wallet to pay for Goodies orders with your balance.",
+    "pages": [
+      "Checkout"
+    ]
+  },
+  {
+    "id": "lbl.checkoutWalletMissing",
+    "text": "Wallet not created",
+    "pages": [
+      "Checkout"
+    ]
+  },
+  {
+    "id": "lbl.checkoutWalletNotFound",
+    "text": "Wantiss wallet not found",
+    "pages": [
+      "Checkout"
+    ]
+  },
+  {
+    "id": "lbl.checkoutWhen",
+    "text": "When do you want it?",
+    "pages": [
+      "Checkout"
+    ]
+  },
+  {
+    "id": "lbl.cms.014bc9ccf696",
+    "text": "stores · one delivery",
+    "pages": [
+      "Checkout"
+    ]
+  },
+  {
+    "id": "lbl.cms.015a04ab6e9c",
+    "text": "The courier GPS signal is temporarily stale. Waiting for a fresh location update.",
+    "pages": [
+      "Shop · shared"
+    ]
+  },
+  {
+    "id": "lbl.cms.0175f1d4a19a",
+    "text": "Your Wantiss Wallet is not set up yet. Create your wallet to add and use saved cards.",
+    "pages": [
+      "Checkout"
+    ]
+  },
+  {
+    "id": "lbl.cms.026a331ef469",
+    "text": "Cancel",
+    "pages": [
+      "Shared components"
+    ]
+  },
+  {
+    "id": "lbl.cms.046f168e2991",
+    "text": "left",
+    "pages": [
+      "Help Pay walkthrough"
+    ]
+  },
+  {
+    "id": "lbl.cms.05521fd984d2",
+    "text": "% funded",
+    "pages": [
+      "Help Pay walkthrough"
+    ]
+  },
+  {
+    "id": "lbl.cms.06e2931ac98c",
+    "text": "• Minimum age here: ",
+    "pages": [
+      "Sheets · alcrules"
+    ]
+  },
+  {
+    "id": "lbl.cms.08bec5419d29",
+    "text": "ID check failed. ",
+    "pages": [
+      "Order tracking"
+    ]
+  },
+  {
+    "id": "lbl.cms.091a111ce415",
+    "text": "Preview another friend's contribution",
+    "pages": [
+      "Help Pay walkthrough"
+    ]
+  },
+  {
+    "id": "lbl.cms.099a7872e3cb",
+    "text": "Customer funding overview",
+    "pages": [
+      "Help Pay walkthrough"
+    ]
+  },
+  {
+    "id": "lbl.cms.09ae3d36c166",
+    "text": "I accept cash on delivery",
+    "pages": [
+      "Courier"
+    ]
+  },
+  {
+    "id": "lbl.cms.0a46732ca884",
+    "text": "Add or select a complete delivery address first.",
+    "pages": [
+      "Group orders"
+    ]
+  },
+  {
+    "id": "lbl.cms.0a7b93a19c11",
+    "text": " from your address",
+    "pages": [
+      "Store"
+    ]
+  },
+  {
+    "id": "lbl.cms.0b1f18ae2490",
+    "text": " Your card refund has been submitted. It may take a few business days to appear.",
+    "pages": [
+      "Order tracking"
+    ]
+  },
+  {
+    "id": "lbl.cms.0ba8a61c181a",
+    "text": "No friends to invite yet.",
+    "pages": [
+      "Group orders"
+    ]
+  },
+  {
+    "id": "lbl.cms.0c815902b6b8",
+    "text": "The real version uses your Wantiss friend list. These are placeholders.",
+    "pages": [
+      "Help Pay walkthrough"
+    ]
+  },
+  {
+    "id": "lbl.cms.0cad80a25b4b",
+    "text": "MonCash",
+    "pages": [
+      "Checkout"
+    ]
+  },
+  {
+    "id": "lbl.cms.0d7c6ad747ae",
+    "text": "Joining…",
+    "pages": [
+      "Group orders"
+    ]
+  },
+  {
+    "id": "lbl.cms.0de16b1a1542",
+    "text": "Availability not updated",
+    "pages": [
+      "Courier"
+    ]
+  },
+  {
+    "id": "lbl.cms.0f3e6a48b781",
+    "text": "Could not load saved delivery addresses.",
+    "pages": [
+      "Group orders"
+    ]
+  },
+  {
+    "id": "lbl.cms.0f8d0013465b",
+    "text": "Camera permission is needed to scan a group QR code.",
+    "pages": [
+      "Group orders"
+    ]
+  },
+  {
+    "id": "lbl.cms.1005cd459f19",
+    "text": "Could not place the order. Please try again.",
+    "pages": [
+      "Shared actions and validation"
+    ]
+  },
+  {
+    "id": "lbl.cms.11195aeabc09",
+    "text": "Verify card",
+    "pages": [
+      "Card verification"
+    ]
+  },
+  {
+    "id": "lbl.cms.11da7c9c425f",
+    "text": "View cart · ",
+    "pages": [
+      "Shared navigation and access states"
+    ]
+  },
+  {
+    "id": "lbl.cms.123b3ed119bc",
+    "text": "Create a server-backed group order first.",
+    "pages": [
+      "Group orders"
+    ]
+  },
+  {
+    "id": "lbl.cms.157ca315044a",
+    "text": "Discount",
+    "pages": [
+      "Checkout",
+      "Order tracking"
+    ]
+  },
+  {
+    "id": "lbl.cms.1586f89c0499",
+    "text": "Add address",
+    "pages": [
+      "Checkout"
+    ]
+  },
+  {
+    "id": "lbl.cms.159703b671cc",
+    "text": "Delivered by the store · ",
+    "pages": [
+      "Order tracking"
+    ]
+  },
+  {
+    "id": "lbl.cms.15aa7cafd092",
+    "text": "Review combined cart",
+    "pages": [
+      "Group orders"
+    ]
+  },
+  {
+    "id": "lbl.cms.163d8660f0f6",
+    "text": "No coupons or offers",
+    "pages": [
+      "Promotions"
+    ]
+  },
+  {
+    "id": "lbl.cms.181c95d39d9a",
+    "text": "Balance: ",
+    "pages": [
+      "Checkout"
+    ]
+  },
+  {
+    "id": "lbl.cms.18296053d4f7",
+    "text": "Use my current location",
+    "pages": [
+      "Addresses"
+    ]
+  },
+  {
+    "id": "lbl.cms.184f5c8af282",
+    "text": "Group created, but one or more cart items could not be shared.",
+    "pages": [
+      "Group orders"
+    ]
+  },
+  {
+    "id": "lbl.cms.19192368f257",
+    "text": "% of the original bill. Wallet only.",
+    "pages": [
+      "Help Pay walkthrough"
+    ]
+  },
+  {
+    "id": "lbl.cms.19a9e614842b",
+    "text": "Decline",
+    "pages": [
+      "Courier"
+    ]
+  },
+  {
+    "id": "lbl.cms.1a0545c55765",
+    "text": "Add a debit or credit card to your Wantiss Wallet to pay here.",
+    "pages": [
+      "Checkout"
+    ]
+  },
+  {
+    "id": "lbl.cms.1a5decb44df8",
+    "text": " stores, so adding from ",
+    "pages": [
+      "Sheets · newcart"
+    ]
+  },
+  {
+    "id": "lbl.cms.1b446a360546",
+    "text": "Friends see the aggregate progress and their own payments, never the other contributors' identities or amounts.",
+    "pages": [
+      "Help Pay walkthrough"
+    ]
+  },
+  {
+    "id": "lbl.cms.1b69bdd92811",
+    "text": "Insufficient Wantiss Wallet balance.",
+    "pages": [
+      "Checkout"
+    ]
+  },
+  {
+    "id": "lbl.cms.1be106e7ef9c",
+    "text": "History",
+    "pages": [
+      "Home"
+    ]
+  },
+  {
+    "id": "lbl.cms.1be63d4ce4d0",
+    "text": "Group order checkout failed.",
+    "pages": [
+      "Group orders"
+    ]
+  },
+  {
+    "id": "lbl.cms.1c37cd1c523e",
+    "text": "Goodies Courier",
+    "pages": [
+      "Courier"
+    ]
+  },
+  {
+    "id": "lbl.cms.1c6579e6b5f5",
+    "text": "Could not delete this address.",
+    "pages": [
+      "Addresses"
+    ]
+  },
+  {
+    "id": "lbl.cms.1e2ac2ca5391",
+    "text": "Customer: ",
+    "pages": [
+      "Courier"
+    ]
+  },
+  {
+    "id": "lbl.cms.1ea8cb359549",
+    "text": "WANTISS · ",
+    "pages": [
+      "Checkout"
+    ]
+  },
+  {
+    "id": "lbl.cms.1ef1997e7f65",
+    "text": "I have a problem with this order",
+    "pages": [
+      "Order tracking"
+    ]
+  },
+  {
+    "id": "lbl.cms.1ffcbca434d7",
+    "text": "remaining · expires in ",
+    "pages": [
+      "Help Pay walkthrough"
+    ]
+  },
+  {
+    "id": "lbl.cms.203961ea028d",
+    "text": "Address deleted.",
+    "pages": [
+      "Addresses"
+    ]
+  },
+  {
+    "id": "lbl.cms.21eb641a53bd",
+    "text": "This store is not available in the Goodies catalog right now.",
+    "pages": [
+      "Store"
+    ]
+  },
+  {
+    "id": "lbl.cms.227331420344",
+    "text": "the deadline",
+    "pages": [
+      "Order tracking"
+    ]
+  },
+  {
+    "id": "lbl.cms.2299e372cc22",
+    "text": "Invite code: ",
+    "pages": [
+      "Group orders"
+    ]
+  },
+  {
+    "id": "lbl.cms.22a3716db5c9",
+    "text": "Your order was sent to ",
+    "pages": [
+      "Shared actions and validation"
+    ]
+  },
+  {
+    "id": "lbl.cms.22d1e84f1755",
+    "text": "Open ",
+    "pages": [
+      "Search"
+    ]
+  },
+  {
+    "id": "lbl.cms.234ba50b0bb2",
+    "text": "Instructions",
+    "pages": [
+      "Order tracking"
+    ]
+  },
+  {
+    "id": "lbl.cms.23eaba046138",
+    "text": "Could not calculate the road distance. Please check the delivery address.",
+    "pages": [
+      "Shared actions and validation"
+    ]
+  },
+  {
+    "id": "lbl.cms.248fefd7effd",
+    "text": "You request 100% of the bill from someone else. One person pays the full amount using an eligible payment method.",
+    "pages": [
+      "Help Pay walkthrough"
+    ]
+  },
+  {
+    "id": "lbl.cms.24a1b0418c6e",
+    "text": "You pay 60% first. Friends can contribute any percentage of the remaining 40%, until it is fully covered. One friend can pay the whole 40%.",
+    "pages": [
+      "Help Pay walkthrough"
+    ]
+  },
+  {
+    "id": "lbl.cms.24b1ece4f51b",
+    "text": "WANTISS",
+    "pages": [
+      "Checkout"
+    ]
+  },
+  {
+    "id": "lbl.cms.24f236576f00",
+    "text": "Help Pay · Walkthrough",
+    "pages": [
+      "Help Pay walkthrough"
+    ]
+  },
+  {
+    "id": "lbl.cms.262630160acf",
+    "text": "Close group order",
+    "pages": [
+      "Group orders"
+    ]
+  },
+  {
+    "id": "lbl.cms.270cfd8932e4",
+    "text": "SAVED CARD",
+    "pages": [
+      "Checkout"
+    ]
+  },
+  {
+    "id": "lbl.cms.27e784aa0425",
+    "text": " orders",
+    "pages": [
+      "Profile"
+    ]
+  },
+  {
+    "id": "lbl.cms.2982d9de568c",
+    "text": "DEFAULT",
+    "pages": [
+      "Checkout"
+    ]
+  },
+  {
+    "id": "lbl.cms.29ce74d8129d",
+    "text": "min · ",
+    "pages": [
+      "Search"
+    ]
+  },
+  {
+    "id": "lbl.cms.29fb7a3efa6b",
+    "text": "Group order placed. Order ",
+    "pages": [
+      "Group orders"
+    ]
+  },
+  {
+    "id": "lbl.cms.2a83279eab59",
+    "text": "Total · ",
+    "pages": [
+      "Order tracking"
+    ]
+  },
+  {
+    "id": "lbl.cms.2aeeb41bb682",
+    "text": "Step ",
+    "pages": [
+      "Help Pay walkthrough"
+    ]
+  },
+  {
+    "id": "lbl.cms.2bb2b73d8ff1",
+    "text": "Friends unavailable",
+    "pages": [
+      "Store"
+    ]
+  },
+  {
+    "id": "lbl.cms.2bc4eea68a5e",
+    "text": "Could not update the Goodies delivery address.",
+    "pages": [
+      "Addresses"
+    ]
+  },
+  {
+    "id": "lbl.cms.2c1905767c95",
+    "text": "Select a saved address to continue.",
+    "pages": [
+      "Checkout"
+    ]
+  },
+  {
+    "id": "lbl.cms.2ca6e6a547c5",
+    "text": "Picked up order",
+    "pages": [
+      "Courier"
+    ]
+  },
+  {
+    "id": "lbl.cms.2cdcc5b2c7ee",
+    "text": "Wantiss default",
+    "pages": [
+      "Addresses"
+    ]
+  },
+  {
+    "id": "lbl.cms.2d27b416d70d",
+    "text": "ASAP",
+    "pages": [
+      "Cart",
+      "Checkout"
+    ]
+  },
+  {
+    "id": "lbl.cms.2d44412e115d",
+    "text": " · New store",
+    "pages": [
+      "Product"
+    ]
+  },
+  {
+    "id": "lbl.cms.2da7d46cf638",
+    "text": "Getting everything ready…",
+    "pages": [
+      "Shared navigation and access states"
+    ]
+  },
+  {
+    "id": "lbl.cms.2e6f98d92bd3",
+    "text": "Could not go offline",
+    "pages": [
+      "Courier"
+    ]
+  },
+  {
+    "id": "lbl.cms.2eb3747e6fda",
+    "text": "Items subtotal",
+    "pages": [
+      "Group orders"
+    ]
+  },
+  {
+    "id": "lbl.cms.2fb4e79b6c80",
+    "text": "Order time",
+    "pages": [
+      "Cart"
+    ]
+  },
+  {
+    "id": "lbl.cms.3037855e4da5",
+    "text": "In the real checkout, the request is only shared after the required upfront payment is verified.",
+    "pages": [
+      "Help Pay walkthrough"
+    ]
+  },
+  {
+    "id": "lbl.cms.315075ecf41e",
+    "text": "Create or join a server-backed group order first.",
+    "pages": [
+      "Group orders"
+    ]
+  },
+  {
+    "id": "lbl.cms.31fdc2bc7366",
+    "text": "Start a new cart",
+    "pages": [
+      "Sheets · newcart"
+    ]
+  },
+  {
+    "id": "lbl.cms.3282b7d2663b",
+    "text": "Your access to Goodies has been permanently restricted.",
+    "pages": [
+      "Shared actions and validation"
+    ]
+  },
+  {
+    "id": "lbl.cms.32c8df865bbe",
+    "text": "Note: ",
+    "pages": [
+      "Cart"
+    ]
+  },
+  {
+    "id": "lbl.cms.3402664551ea",
+    "text": " replaces them.",
+    "pages": [
+      "Sheets · newcart"
+    ]
+  },
+  {
+    "id": "lbl.cms.345fec0110b5",
+    "text": " You were not charged for this order.",
+    "pages": [
+      "Order tracking"
+    ]
+  },
+  {
+    "id": "lbl.cms.365120540556",
+    "text": "Checkout",
+    "pages": [
+      "Group orders"
+    ]
+  },
+  {
+    "id": "lbl.cms.374da0d6b308",
+    "text": "invited you to a group order",
+    "pages": [
+      "Group orders"
+    ]
+  },
+  {
+    "id": "lbl.cms.375ef58f2e7a",
+    "text": "Delivery fee",
+    "pages": [
+      "Checkout"
+    ]
+  },
+  {
+    "id": "lbl.cms.38a73aeee517",
+    "text": "Choose a percentage of the remaining Help Pay amount.",
+    "pages": [
+      "Help Pay walkthrough"
+    ]
+  },
+  {
+    "id": "lbl.cms.392c62d5ae01",
+    "text": "Your Wantiss account, wallet and existing Goodies order history remain available. Contact Wantiss Support if you believe this decision is incorrect.",
+    "pages": [
+      "Shared navigation and access states"
+    ]
+  },
+  {
+    "id": "lbl.cms.3942099232a3",
+    "text": "Cash on delivery",
+    "pages": [
+      "Courier"
+    ]
+  },
+  {
+    "id": "lbl.cms.3ad6a1d313d9",
+    "text": "Favorites",
+    "pages": [
+      "Shared navigation and access states"
+    ]
+  },
+  {
+    "id": "lbl.cms.3b2939c58c05",
+    "text": "Your payment is processed securely.",
+    "pages": [
+      "Checkout"
+    ]
+  },
+  {
+    "id": "lbl.cms.3c2b5e6ec88d",
+    "text": "Store shared in Wantiss Messages",
+    "pages": [
+      "Store"
+    ]
+  },
+  {
+    "id": "lbl.cms.3c846dbb6eab",
+    "text": "). Saving applies the new price.",
+    "pages": [
+      "Build Your Own"
+    ]
+  },
+  {
+    "id": "lbl.cms.3cb5b5afda95",
+    "text": "Sending…",
+    "pages": [
+      "Group orders"
+    ]
+  },
+  {
+    "id": "lbl.cms.3d7a9de0260e",
+    "text": "This group invitation is not server-backed.",
+    "pages": [
+      "Group orders"
+    ]
+  },
+  {
+    "id": "lbl.cms.3dc4a54dd622",
+    "text": "ID checked.",
+    "pages": [
+      "Order tracking"
+    ]
+  },
+  {
+    "id": "lbl.cms.3deeda5e9747",
+    "text": "Store unavailable",
+    "pages": [
+      "Store"
+    ]
+  },
+  {
+    "id": "lbl.cms.3e82f7a82e08",
+    "text": "Accept delivery",
+    "pages": [
+      "Courier"
+    ]
+  },
+  {
+    "id": "lbl.cms.3f3b2e1178c9",
+    "text": "Close share panel",
+    "pages": [
+      "Store"
+    ]
+  },
+  {
+    "id": "lbl.cms.3ff260e4c8e9",
+    "text": "Unavailable product",
+    "pages": [
+      "Group orders"
+    ]
+  },
+  {
+    "id": "lbl.cms.409175174430",
+    "text": "Invited",
+    "pages": [
+      "Group orders"
+    ]
+  },
+  {
+    "id": "lbl.cms.40ab82017b3f",
+    "text": "(was ",
+    "pages": [
+      "Build Your Own"
+    ]
+  },
+  {
+    "id": "lbl.cms.40b928d70f8f",
+    "text": "The built-in sample content is currently used.",
+    "pages": [
+      "Preview import"
+    ]
+  },
+  {
+    "id": "lbl.cms.40babc6bdeb6",
+    "text": "min",
+    "pages": [
+      "Cart",
+      "Checkout"
+    ]
+  },
+  {
+    "id": "lbl.cms.41b312a60379",
+    "text": ". Scheduled orders are available. The earliest time is set by this shop.",
+    "pages": [
+      "Cart"
+    ]
+  },
+  {
+    "id": "lbl.cms.41f4298910ce",
+    "text": "of ",
+    "pages": [
+      "Help Pay walkthrough"
+    ]
+  },
+  {
+    "id": "lbl.cms.421be83107c0",
+    "text": "Message preview · ",
+    "pages": [
+      "Help Pay walkthrough"
+    ]
+  },
+  {
+    "id": "lbl.cms.423ee2331261",
+    "text": "Minimum age ",
+    "pages": [
+      "Product"
+    ]
+  },
+  {
+    "id": "lbl.cms.42ae2727e087",
+    "text": "Address filled from your current location. Check the details before saving.",
+    "pages": [
+      "Addresses"
+    ]
+  },
+  {
+    "id": "lbl.cms.42b822c31c92",
+    "text": "Help Pay / Share Bill · Preview",
+    "pages": [
+      "Checkout"
+    ]
+  },
+  {
+    "id": "lbl.cms.430e970103b4",
+    "text": "Create group invite",
+    "pages": [
+      "Group orders"
+    ]
+  },
+  {
+    "id": "lbl.cms.432ca9a22ed3",
+    "text": "minimum.",
+    "pages": [
+      "Cart"
+    ]
+  },
+  {
+    "id": "lbl.cms.439ba7bca2f9",
+    "text": "Selected",
+    "pages": [
+      "Help Pay walkthrough"
+    ]
+  },
+  {
+    "id": "lbl.cms.445ce73a4a49",
+    "text": "GOODIES",
+    "pages": [
+      "Addresses"
+    ]
+  },
+  {
+    "id": "lbl.cms.4497ac9d2bd1",
+    "text": "Could not get your current location.",
+    "pages": [
+      "Addresses"
+    ]
+  },
+  {
+    "id": "lbl.cms.45162ba8dd3a",
+    "text": "Scan a Wantiss group invite QR code",
+    "pages": [
+      "Group orders"
+    ]
+  },
+  {
+    "id": "lbl.cms.4531925b5cf1",
+    "text": "Please wait…",
+    "pages": [
+      "Order tracking"
+    ]
+  },
+  {
+    "id": "lbl.cms.4670a8753b97",
+    "text": "Availability",
+    "pages": [
+      "Courier"
+    ]
+  },
+  {
+    "id": "lbl.cms.46f72c090911",
+    "text": "Your driver comment: “",
+    "pages": [
+      "Order tracking"
+    ]
+  },
+  {
+    "id": "lbl.cms.481e4a34263a",
+    "text": "Delivery",
+    "pages": [
+      "Scheduling"
+    ]
+  },
+  {
+    "id": "lbl.cms.482e3b899f84",
+    "text": "Choose time",
+    "pages": [
+      "Cart"
+    ]
+  },
+  {
+    "id": "lbl.cms.4895f0308d1a",
+    "text": "Close",
+    "pages": [
+      "Group orders"
+    ]
+  },
+  {
+    "id": "lbl.cms.48ba64bb290c",
+    "text": "Invitations from friends",
+    "pages": [
+      "Group orders"
+    ]
+  },
+  {
+    "id": "lbl.cms.48feb130cb0a",
+    "text": "Copy store link",
+    "pages": [
+      "Store"
+    ]
+  },
+  {
+    "id": "lbl.cms.4a0be576ba7b",
+    "text": " Any applicable refund will be shown in your Wantiss wallet activity.",
+    "pages": [
+      "Order tracking"
+    ]
+  },
+  {
+    "id": "lbl.cms.4ac2c8430ce8",
+    "text": "is closed",
+    "pages": [
+      "Cart"
+    ]
+  },
+  {
+    "id": "lbl.cms.4b8df09e4dfe",
+    "text": "New offers will appear here when a store assigns you.",
+    "pages": [
+      "Courier"
+    ]
+  },
+  {
+    "id": "lbl.cms.4d1a2e311885",
+    "text": "Join group order",
+    "pages": [
+      "Group orders"
+    ]
+  },
+  {
+    "id": "lbl.cms.4d1f059d62c2",
+    "text": "Your card verification did not complete. Please try again or use another card.",
+    "pages": [
+      "Card verification"
+    ]
+  },
+  {
+    "id": "lbl.cms.4d841f662ff0",
+    "text": "Continue to friend selection",
+    "pages": [
+      "Help Pay walkthrough"
+    ]
+  },
+  {
+    "id": "lbl.cms.4e0609617fa9",
+    "text": "Tip",
+    "pages": [
+      "Checkout",
+      "Order tracking"
+    ]
+  },
+  {
+    "id": "lbl.cms.4f071bdfe18b",
+    "text": "items from everyone",
+    "pages": [
+      "Group orders"
+    ]
+  },
+  {
+    "id": "lbl.cms.4f41d93f89c6",
+    "text": "Delivery to",
+    "pages": [
+      "Checkout"
+    ]
+  },
+  {
+    "id": "lbl.cms.50d4cef42e56",
+    "text": "Could not save this address.",
+    "pages": [
+      "Addresses"
+    ]
+  },
+  {
+    "id": "lbl.cms.5152d56536a7",
+    "text": "Could not open this store conversation.",
+    "pages": [
+      "Notifications"
+    ]
+  },
+  {
+    "id": "lbl.cms.516f8e8c1f07",
+    "text": ". One order can include up to ",
+    "pages": [
+      "Sheets · newcart"
+    ]
+  },
+  {
+    "id": "lbl.cms.51de0d274565",
+    "text": "Paste the content exported from Wantiss Admin. It replaces promo cards, categories, labels, fees, age rules, texts and artwork in this demo. ",
+    "pages": [
+      "Preview import"
+    ]
+  },
+  {
+    "id": "lbl.cms.51f14b4a403f",
+    "text": "is ",
+    "pages": [
+      "Checkout"
+    ]
+  },
+  {
+    "id": "lbl.cms.51f5915af4ef",
+    "text": "How the 60/40 split works",
+    "pages": [
+      "Help Pay walkthrough"
+    ]
+  },
+  {
+    "id": "lbl.cms.51fd3576107d",
+    "text": "Choose friends · preview contacts",
+    "pages": [
+      "Help Pay walkthrough"
+    ]
+  },
+  {
+    "id": "lbl.cms.52ae5797df29",
+    "text": "Country name (e.g. Philippines)",
+    "pages": [
+      "Addresses"
+    ]
+  },
+  {
+    "id": "lbl.cms.52bdf65af3cd",
+    "text": "Card payment could not be completed. Your order has not been confirmed.",
+    "pages": [
+      "Shared actions and validation"
+    ]
+  },
+  {
+    "id": "lbl.cms.53af57ba3af5",
+    "text": "Your account can no longer use Goodies.",
+    "pages": [
+      "Shared navigation and access states"
+    ]
+  },
+  {
+    "id": "lbl.cms.540c5531f480",
+    "text": "Only the group host can check out.",
+    "pages": [
+      "Group orders"
+    ]
+  },
+  {
+    "id": "lbl.cms.54627b4c469e",
+    "text": "What happens next?",
+    "pages": [
+      "Help Pay walkthrough"
+    ]
+  },
+  {
+    "id": "lbl.cms.54a7210b0faf",
+    "text": "That scheduled time is too close or has passed. Please choose a later time.",
+    "pages": [
+      "Shared actions and validation"
+    ]
+  },
+  {
+    "id": "lbl.cms.553c2557ccce",
+    "text": "Add ",
+    "pages": [
+      "Cart"
+    ]
+  },
+  {
+    "id": "lbl.cms.55bf5c7385be",
+    "text": ". Valid government photo ID is required at delivery or pickup.",
+    "pages": [
+      "Product"
+    ]
+  },
+  {
+    "id": "lbl.cms.55da95a03134",
+    "text": " Your card refund is being processed. It may take a few business days to appear.",
+    "pages": [
+      "Order tracking"
+    ]
+  },
+  {
+    "id": "lbl.cms.5621f99abe47",
+    "text": "left",
+    "pages": [
+      "Shared components"
+    ]
+  },
+  {
+    "id": "lbl.cms.5736a9bb3c88",
+    "text": "Previous step",
+    "pages": [
+      "Help Pay walkthrough"
+    ]
+  },
+  {
+    "id": "lbl.cms.5742239db66e",
+    "text": "Selected ",
+    "pages": [
+      "Help Pay walkthrough"
+    ]
+  },
+  {
+    "id": "lbl.cms.5763c91a2cc0",
+    "text": "Placing group order…",
+    "pages": [
+      "Group orders"
+    ]
+  },
+  {
+    "id": "lbl.cms.580cf27d049f",
+    "text": "Delivery fee",
+    "pages": [
+      "Group orders"
+    ]
+  },
+  {
+    "id": "lbl.cms.58f9d30aae7a",
+    "text": "Estimated total",
+    "pages": [
+      "Group orders"
+    ]
+  },
+  {
+    "id": "lbl.cms.5954ff29d7a5",
+    "text": "Could not remove this shared item.",
+    "pages": [
+      "Group orders"
+    ]
+  },
+  {
+    "id": "lbl.cms.5a0595a94ee9",
+    "text": "ID check · ",
+    "pages": [
+      "Order tracking"
+    ]
+  },
+  {
+    "id": "lbl.cms.5a754caad741",
+    "text": ". Add ",
+    "pages": [
+      "Sheets · newcart"
+    ]
+  },
+  {
+    "id": "lbl.cms.5a9d0e767b9b",
+    "text": "Note",
+    "pages": [
+      "Checkout",
+      "Order tracking"
+    ]
+  },
+  {
+    "id": "lbl.cms.5abb6f216652",
+    "text": "Distance is unavailable for this address.",
+    "pages": [
+      "Shared state messages"
+    ]
+  },
+  {
+    "id": "lbl.cms.5bc7d6f08522",
+    "text": " saved",
+    "pages": [
+      "Settings"
+    ]
+  },
+  {
+    "id": "lbl.cms.5bebcc4de709",
+    "text": "Loading friends…",
+    "pages": [
+      "Group orders"
+    ]
+  },
+  {
+    "id": "lbl.cms.5c58c7dec596",
+    "text": "Could not end this group order.",
+    "pages": [
+      "Group orders"
+    ]
+  },
+  {
+    "id": "lbl.cms.5ee02dc1f983",
+    "text": "Could not load friends.",
+    "pages": [
+      "Store"
+    ]
+  },
+  {
+    "id": "lbl.cms.5f5052920c34",
+    "text": "Delivery address",
+    "pages": [
+      "Checkout"
+    ]
+  },
+  {
+    "id": "lbl.cms.5f964c1d13e4",
+    "text": "Still needed",
+    "pages": [
+      "Help Pay walkthrough"
+    ]
+  },
+  {
+    "id": "lbl.cms.60f2f9167a32",
+    "text": "Min. ",
+    "pages": [
+      "Store"
+    ]
+  },
+  {
+    "id": "lbl.cms.61e7d6d50f9b",
+    "text": "Could not update the Goodies delivery address.",
+    "pages": [
+      "Shared actions and validation"
+    ]
+  },
+  {
+    "id": "lbl.cms.6472bf2c1c5e",
+    "text": ". In the live flow, eligible Wallet and card payment options are offered.",
+    "pages": [
+      "Help Pay walkthrough"
+    ]
+  },
+  {
+    "id": "lbl.cms.6536f08ae072",
+    "text": "Only ",
+    "pages": [
+      "Shared components"
+    ]
+  },
+  {
+    "id": "lbl.cms.6548a2ae6f3e",
+    "text": ". This store does not currently accept scheduled orders.",
+    "pages": [
+      "Cart"
+    ]
+  },
+  {
+    "id": "lbl.cms.655123d67917",
+    "text": "Switch to ASAP",
+    "pages": [
+      "Cart"
+    ]
+  },
+  {
+    "id": "lbl.cms.6646922f6eaf",
+    "text": "Selected: ",
+    "pages": [
+      "Scheduling"
+    ]
+  },
+  {
+    "id": "lbl.cms.666ec91f4a22",
+    "text": "This request requires one person to pay the entire ",
+    "pages": [
+      "Help Pay walkthrough"
+    ]
+  },
+  {
+    "id": "lbl.cms.66d0ec6d4d70",
+    "text": "Select",
+    "pages": [
+      "Help Pay walkthrough"
+    ]
+  },
+  {
+    "id": "lbl.cms.66e750d050b2",
+    "text": " or choose another payment method.",
+    "pages": [
+      "Group orders"
+    ]
+  },
+  {
+    "id": "lbl.cms.678971e91d3f",
+    "text": "Remove my shared cart item",
+    "pages": [
+      "Group orders"
+    ]
+  },
+  {
+    "id": "lbl.cms.6795bcf3e74a",
+    "text": "Choose a delivery address",
+    "pages": [
+      "Checkout"
+    ]
+  },
+  {
+    "id": "lbl.cms.6905493e11ff",
+    "text": "Could not load this order.",
+    "pages": [
+      "Notifications"
+    ]
+  },
+  {
+    "id": "lbl.cms.6ae0f21e3435",
+    "text": "n/a",
+    "pages": [
+      "Order tracking"
+    ]
+  },
+  {
+    "id": "lbl.cms.6bb993f5d3e9",
+    "text": "Invite friends",
+    "pages": [
+      "Group orders"
+    ]
+  },
+  {
+    "id": "lbl.cms.6bc6c58f3cfb",
+    "text": "Opening store",
+    "pages": [
+      "Shared navigation and access states"
+    ]
+  },
+  {
+    "id": "lbl.cms.6c1b35aaee08",
+    "text": " was refunded to your Wantiss wallet. The delivery fee is not refunded.",
+    "pages": [
+      "Order tracking"
+    ]
+  },
+  {
+    "id": "lbl.cms.6cde4afa422f",
+    "text": "OFF",
+    "pages": [
+      "Courier"
+    ]
+  },
+  {
+    "id": "lbl.cms.6db1d18c8e5d",
+    "text": "Waiting for secure card verification…",
+    "pages": [
+      "Card verification"
+    ]
+  },
+  {
+    "id": "lbl.cms.6ddb87eb71b2",
+    "text": "No active delivery offers",
+    "pages": [
+      "Courier"
+    ]
+  },
+  {
+    "id": "lbl.cms.6e3098d0c1da",
+    "text": "Shared items",
+    "pages": [
+      "Group orders"
+    ]
+  },
+  {
+    "id": "lbl.cms.6e746ee8b4fe",
+    "text": "Goodies · ",
+    "pages": [
+      "Help Pay walkthrough"
+    ]
+  },
+  {
+    "id": "lbl.cms.6e9eb3a9a0bb",
+    "text": "Review and validate the combined cart first.",
+    "pages": [
+      "Group orders"
+    ]
+  },
+  {
+    "id": "lbl.cms.6f24af4842a9",
+    "text": " km",
+    "pages": [
+      "Store"
+    ]
+  },
+  {
+    "id": "lbl.cms.70ab53df00d6",
+    "text": "Once the server confirms all funds, checkout details and store availability must be revalidated. Only then can the real Goodies order be placed. If the request expires or fails, payments must be reversed.",
+    "pages": [
+      "Help Pay walkthrough"
+    ]
+  },
+  {
+    "id": "lbl.cms.713a54f8696b",
+    "text": "This order could not be found.",
+    "pages": [
+      "Notifications"
+    ]
+  },
+  {
+    "id": "lbl.cms.7143ec373461",
+    "text": "Could not validate the shared cart.",
+    "pages": [
+      "Group orders"
+    ]
+  },
+  {
+    "id": "lbl.cms.7169f4af4373",
+    "text": "Sign out",
+    "pages": [
+      "Courier"
+    ]
+  },
+  {
+    "id": "lbl.cms.725f5d75b162",
+    "text": "Could not refresh the shared cart.",
+    "pages": [
+      "Group orders"
+    ]
+  },
+  {
+    "id": "lbl.cms.72a4f8f6ae2b",
+    "text": "You",
+    "pages": [
+      "Group orders"
+    ]
+  },
+  {
+    "id": "lbl.cms.736e82ce9843",
+    "text": "Department / State",
+    "pages": [
+      "Addresses"
+    ]
+  },
+  {
+    "id": "lbl.cms.74d8ca9709e9",
+    "text": "Your order is on its way.",
+    "pages": [
+      "Order tracking"
+    ]
+  },
+  {
+    "id": "lbl.cms.74ebf31a8487",
+    "text": "Prepaid",
+    "pages": [
+      "Courier"
+    ]
+  },
+  {
+    "id": "lbl.cms.7539f83987cf",
+    "text": "Your delivery fee is now ",
+    "pages": [
+      "Shared actions and validation"
+    ]
+  },
+  {
+    "id": "lbl.cms.764a54257195",
+    "text": " left",
+    "pages": [
+      "Product"
+    ]
+  },
+  {
+    "id": "lbl.cms.76eb531be72f",
+    "text": " stores",
+    "pages": [
+      "Shared actions and validation"
+    ]
+  },
+  {
+    "id": "lbl.cms.77261425ec6c",
+    "text": "Friends can cover",
+    "pages": [
+      "Help Pay walkthrough"
+    ]
+  },
+  {
+    "id": "lbl.cms.77f13132a763",
+    "text": "Goodies access permanently restricted",
+    "pages": [
+      "Shared navigation and access states"
+    ]
+  },
+  {
+    "id": "lbl.cms.78242f2aebe6",
+    "text": "Interactive preview · Nothing is charged, shared or ordered.",
+    "pages": [
+      "Help Pay walkthrough"
+    ]
+  },
+  {
+    "id": "lbl.cms.7961892a1ae8",
+    "text": "Delivery assignments and live GPS",
+    "pages": [
+      "Courier"
+    ]
+  },
+  {
+    "id": "lbl.cms.7a946d1d12dc",
+    "text": "Allow location access to fill your address from where you are.",
+    "pages": [
+      "Addresses"
+    ]
+  },
+  {
+    "id": "lbl.cms.7ac9ab914a13",
+    "text": "Creating…",
+    "pages": [
+      "Payment methods"
+    ]
+  },
+  {
+    "id": "lbl.cms.7b49bfc70d42",
+    "text": "What went wrong?",
+    "pages": [
+      "Order tracking"
+    ]
+  },
+  {
+    "id": "lbl.cms.7b6022533f4d",
+    "text": "Forwarding shares the same request and remaining balance. It never resets the 30-minute timer.",
+    "pages": [
+      "Help Pay walkthrough"
+    ]
+  },
+  {
+    "id": "lbl.cms.7bb9755afe95",
+    "text": "No saved addresses found. Add a delivery address to your profile first.",
+    "pages": [
+      "Group orders"
+    ]
+  },
+  {
+    "id": "lbl.cms.7c642a8ed0bc",
+    "text": " m from your address",
+    "pages": [
+      "Checkout"
+    ]
+  },
+  {
+    "id": "lbl.cms.7c6ce6c610f1",
+    "text": "Could not update delivery",
+    "pages": [
+      "Courier"
+    ]
+  },
+  {
+    "id": "lbl.cms.7c7eb6fad354",
+    "text": "The group host ended this group order.",
+    "pages": [
+      "Group orders"
+    ]
+  },
+  {
+    "id": "lbl.cms.7f28264e6c5c",
+    "text": "Create wallet",
+    "pages": [
+      "Checkout"
+    ]
+  },
+  {
+    "id": "lbl.cms.7f7b502a8d5a",
+    "text": "GOODIES",
+    "pages": [
+      "Sheets · addr"
+    ]
+  },
+  {
+    "id": "lbl.cms.80852e133373",
+    "text": "Manage delivery addresses",
+    "pages": [
+      "Group orders"
+    ]
+  },
+  {
+    "id": "lbl.cms.809e99644369",
+    "text": "GPS update failed.",
+    "pages": [
+      "Courier"
+    ]
+  },
+  {
+    "id": "lbl.cms.80f7eb45bdba",
+    "text": "Could not share store",
+    "pages": [
+      "Store"
+    ]
+  },
+  {
+    "id": "lbl.cms.81a56ba9f91d",
+    "text": "We could not turn your location into an address. Please type it in.",
+    "pages": [
+      "Addresses"
+    ]
+  },
+  {
+    "id": "lbl.cms.827cc1f46abc",
+    "text": "Wantiss Wallet could not complete this payment. Your cart is still saved. Please retry or choose another payment method.",
+    "pages": [
+      "Shared actions and validation"
+    ]
+  },
+  {
+    "id": "lbl.cms.8299ae70ae45",
+    "text": "Payment estimate",
+    "pages": [
+      "Group orders"
+    ]
+  },
+  {
+    "id": "lbl.cms.832feb1f5f0c",
+    "text": "Expires ",
+    "pages": [
+      "Payment methods"
+    ]
+  },
+  {
+    "id": "lbl.cms.843cf2cc36fc",
+    "text": "Hide friends",
+    "pages": [
+      "Group orders"
+    ]
+  },
+  {
+    "id": "lbl.cms.84439715c11a",
+    "text": "Contributors cannot see this list or the number of people who paid.",
+    "pages": [
+      "Help Pay walkthrough"
+    ]
+  },
+  {
+    "id": "lbl.cms.846f347b830b",
+    "text": "No phone",
+    "pages": [
+      "Courier"
+    ]
+  },
+  {
+    "id": "lbl.cms.84b73ab53834",
+    "text": "Enter group invite code",
+    "pages": [
+      "Group orders"
+    ]
+  },
+  {
+    "id": "lbl.cms.85133da20cde",
+    "text": " · Default",
+    "pages": [
+      "Group orders"
+    ]
+  },
+  {
+    "id": "lbl.cms.8548c22a9780",
+    "text": "Tomorrow",
+    "pages": [
+      "Scheduling"
+    ]
+  },
+  {
+    "id": "lbl.cms.85a0073d9a54",
+    "text": "Total",
+    "pages": [
+      "Checkout",
+      "Order confirmation"
+    ]
+  },
+  {
+    "id": "lbl.cms.85dae124f037",
+    "text": "Closed",
+    "pages": [
+      "Cart"
+    ]
+  },
+  {
+    "id": "lbl.cms.86aa98d055a3",
+    "text": "The store says this order was delivered. Please confirm, or report a problem before ",
+    "pages": [
+      "Order tracking"
+    ]
+  },
+  {
+    "id": "lbl.cms.870d2ecc0e14",
+    "text": "Your access to Goodies is currently paused.",
+    "pages": [
+      "Shared navigation and access states"
+    ]
+  },
+  {
+    "id": "lbl.cms.87110ca073a0",
+    "text": "Subtotal",
+    "pages": [
+      "Checkout"
+    ]
+  },
+  {
+    "id": "lbl.cms.87e2d9bf2774",
+    "text": "Unable to start background GPS",
+    "pages": [
+      "Courier"
+    ]
+  },
+  {
+    "id": "lbl.cms.8895dfda4351",
+    "text": "Wallet",
+    "pages": [
+      "Checkout"
+    ]
+  },
+  {
+    "id": "lbl.cms.89e524601f0d",
+    "text": "Please try again.",
+    "pages": [
+      "Courier"
+    ]
+  },
+  {
+    "id": "lbl.cms.8acc0d99b9d7",
+    "text": "Your report was sent. Our team is reviewing it.",
+    "pages": [
+      "Order tracking"
+    ]
+  },
+  {
+    "id": "lbl.cms.8b44a234e658",
+    "text": "Unable to verify first-delivery eligibility. Please retry checkout.",
+    "pages": [
+      "Shared actions and validation"
+    ]
+  },
+  {
+    "id": "lbl.cms.8d5e1a5fadd8",
+    "text": "Items",
+    "pages": [
+      "Order tracking"
+    ]
+  },
+  {
+    "id": "lbl.cms.8d6fd57df49b",
+    "text": "Store",
+    "pages": [
+      "Contact support"
+    ]
+  },
+  {
+    "id": "lbl.cms.8e4755e555e1",
+    "text": "Could not calculate the final estimate.",
+    "pages": [
+      "Group orders"
+    ]
+  },
+  {
+    "id": "lbl.cms.8eeb9fd8177f",
+    "text": "Could not complete group order checkout.",
+    "pages": [
+      "Group orders"
+    ]
+  },
+  {
+    "id": "lbl.cms.8f0e0fdf8784",
+    "text": "Scan group invite QR code",
+    "pages": [
+      "Group orders"
+    ]
+  },
+  {
+    "id": "lbl.cms.8f441d23a479",
+    "text": "Goodies access temporarily suspended",
+    "pages": [
+      "Shared navigation and access states"
+    ]
+  },
+  {
+    "id": "lbl.cms.8f4b0527a23c",
+    "text": "ON",
+    "pages": [
+      "Courier"
+    ]
+  },
+  {
+    "id": "lbl.cms.8ff661770946",
+    "text": "Fully funded · preview",
+    "pages": [
+      "Help Pay walkthrough"
+    ]
+  },
+  {
+    "id": "lbl.cms.908e66f0e1a3",
+    "text": "No accepted friends to show yet.",
+    "pages": [
+      "Store"
+    ]
+  },
+  {
+    "id": "lbl.cms.90a979b54f01",
+    "text": "Share invite code",
+    "pages": [
+      "Group orders"
+    ]
+  },
+  {
+    "id": "lbl.cms.91e196e0db97",
+    "text": "Place group order · Wallet",
+    "pages": [
+      "Group orders"
+    ]
+  },
+  {
+    "id": "lbl.cms.91ec9baa31db",
+    "text": "Could not load group members. Try again.",
+    "pages": [
+      "Group orders"
+    ]
+  },
+  {
+    "id": "lbl.cms.923b004405b0",
+    "text": "Go online to receive Goodies delivery offers. GPS sharing starts after you accept and continues in the background while the delivery is active.",
+    "pages": [
+      "Courier"
+    ]
+  },
+  {
+    "id": "lbl.cms.92e9fad36618",
+    "text": "Calculate delivery fee",
+    "pages": [
+      "Group orders"
+    ]
+  },
+  {
+    "id": "lbl.cms.93357aaf2861",
+    "text": "Scan to join this group",
+    "pages": [
+      "Group orders"
+    ]
+  },
+  {
+    "id": "lbl.cms.936aefb39183",
+    "text": " to the same order, or start a new cart.",
+    "pages": [
+      "Sheets · newcart"
+    ]
+  },
+  {
+    "id": "lbl.cms.94924a30e5ac",
+    "text": "Open Goodies quick menu",
+    "pages": [
+      "Shared navigation and access states"
+    ]
+  },
+  {
+    "id": "lbl.cms.949b8e0d1bea",
+    "text": "Enter a group invite code.",
+    "pages": [
+      "Group orders"
+    ]
+  },
+  {
+    "id": "lbl.cms.9694ac7e3bc7",
+    "text": "Complete the active delivery before signing out so customer tracking is not interrupted.",
+    "pages": [
+      "Courier"
+    ]
+  },
+  {
+    "id": "lbl.cms.984a06af7321",
+    "text": "Locating…",
+    "pages": [
+      "Addresses"
+    ]
+  },
+  {
+    "id": "lbl.cms.984dfaf4f0b3",
+    "text": "This group order has closed or expired.",
+    "pages": [
+      "Group orders"
+    ]
+  },
+  {
+    "id": "lbl.cms.9957e5f281b7",
+    "text": "Could not calculate delivery for this address.",
+    "pages": [
+      "Group orders"
+    ]
+  },
+  {
+    "id": "lbl.cms.9a05153daef9",
+    "text": ". Scheduled orders are available for future opening-time slots.",
+    "pages": [
+      "Store"
+    ]
+  },
+  {
+    "id": "lbl.cms.9a867e4ff86a",
+    "text": "Send invitation",
+    "pages": [
+      "Group orders"
+    ]
+  },
+  {
+    "id": "lbl.cms.9ad0840772c3",
+    "text": "Open a store first to create its group invitation.",
+    "pages": [
+      "Group orders"
+    ]
+  },
+  {
+    "id": "lbl.cms.9c6764b3fb4b",
+    "text": "Goodies",
+    "pages": [
+      "Shared navigation and access states"
+    ]
+  },
+  {
+    "id": "lbl.cms.9cf703554060",
+    "text": "Invitation sent.",
+    "pages": [
+      "Group orders"
+    ]
+  },
+  {
+    "id": "lbl.cms.9d0a083bbac9",
+    "text": "Card •••• ",
+    "pages": [
+      "Checkout"
+    ]
+  },
+  {
+    "id": "lbl.cms.9d2f3e3ff6a8",
+    "text": "You joined the group order.",
+    "pages": [
+      "Group orders"
+    ]
+  },
+  {
+    "id": "lbl.cms.9da7b95cc86d",
+    "text": "Insufficient Wantiss Wallet balance. Add ",
+    "pages": [
+      "Group orders"
+    ]
+  },
+  {
+    "id": "lbl.cms.9e385df54370",
+    "text": "A new group invitation is ready.",
+    "pages": [
+      "Group orders"
+    ]
+  },
+  {
+    "id": "lbl.cms.9e67ba6cf31c",
+    "text": "Could not verify your live Wantiss Wallet balance. Please retry before placing the order.",
+    "pages": [
+      "Shared actions and validation"
+    ]
+  },
+  {
+    "id": "lbl.cms.9ed6a2aa1cf9",
+    "text": "My deliveries",
+    "pages": [
+      "Courier"
+    ]
+  },
+  {
+    "id": "lbl.cms.9ede33236e16",
+    "text": ", now ",
+    "pages": [
+      "Build Your Own"
+    ]
+  },
+  {
+    "id": "lbl.cms.a07019e26f56",
+    "text": "Close sheet",
+    "pages": [
+      "Shared components"
+    ]
+  },
+  {
+    "id": "lbl.cms.a230877fe597",
+    "text": "Goodies checkout number · ",
+    "pages": [
+      "Contact numbers sheet"
+    ]
+  },
+  {
+    "id": "lbl.cms.a2327e1b77d0",
+    "text": "Change your main Wantiss default address in Me → Settings → Saved addresses.",
+    "pages": [
+      "Addresses"
+    ]
+  },
+  {
+    "id": "lbl.cms.a256d1f083f5",
+    "text": "Loading Goodies",
+    "pages": [
+      "Shared navigation and access states"
+    ]
+  },
+  {
+    "id": "lbl.cms.a2cc2b9fa21d",
+    "text": " from your location",
+    "pages": [
+      "Store"
+    ]
+  },
+  {
+    "id": "lbl.cms.a323e7a83705",
+    "text": "Free (first order)",
+    "pages": [
+      "Cart"
+    ]
+  },
+  {
+    "id": "lbl.cms.a366719f0771",
+    "text": "Close",
+    "pages": [
+      "Cart"
+    ]
+  },
+  {
+    "id": "lbl.cms.a5199d9cdd76",
+    "text": "Courier accepted. Waiting for the first GPS location.",
+    "pages": [
+      "Shop · shared"
+    ]
+  },
+  {
+    "id": "lbl.cms.a55440a13be7",
+    "text": "Go back",
+    "pages": [
+      "Store"
+    ]
+  },
+  {
+    "id": "lbl.cms.a55fd7ae1c97",
+    "text": "Combined cart subtotal",
+    "pages": [
+      "Group orders"
+    ]
+  },
+  {
+    "id": "lbl.cms.a56cc2117fd5",
+    "text": "Delivery in progress",
+    "pages": [
+      "Courier"
+    ]
+  },
+  {
+    "id": "lbl.cms.a643f4c6e0ad",
+    "text": "Joined group order",
+    "pages": [
+      "Group orders"
+    ]
+  },
+  {
+    "id": "lbl.cms.a6b2201002c6",
+    "text": "Your current cart belongs to another store. Clear it before creating this group.",
+    "pages": [
+      "Group orders"
+    ]
+  },
+  {
+    "id": "lbl.cms.a7b88c6bea1a",
+    "text": "Share store",
+    "pages": [
+      "Store"
+    ]
+  },
+  {
+    "id": "lbl.cms.a85c2c949931",
+    "text": " · Distance unavailable",
+    "pages": [
+      "Store"
+    ]
+  },
+  {
+    "id": "lbl.cms.a878cc26f08f",
+    "text": "Create a wallet or choose another payment method.",
+    "pages": [
+      "Checkout"
+    ]
+  },
+  {
+    "id": "lbl.cms.a8b8e5886e88",
+    "text": "Could not calculate the payment estimate.",
+    "pages": [
+      "Group orders"
+    ]
+  },
+  {
+    "id": "lbl.cms.a9d496a784b4",
+    "text": "Could not create the group invitation. Please try again.",
+    "pages": [
+      "Group orders"
+    ]
+  },
+  {
+    "id": "lbl.cms.aa7b44ff793b",
+    "text": "Your order from this store",
+    "pages": [
+      "Checkout"
+    ]
+  },
+  {
+    "id": "lbl.cms.acf78f33a391",
+    "text": "Today",
+    "pages": [
+      "Scheduling"
+    ]
+  },
+  {
+    "id": "lbl.cms.adf8a6e98991",
+    "text": "Your cart has items from ",
+    "pages": [
+      "Sheets · newcart",
+      "Sheets · replace"
+    ]
+  },
+  {
+    "id": "lbl.cms.af35acfc4f83",
+    "text": "Mark delivered",
+    "pages": [
+      "Courier"
+    ]
+  },
+  {
+    "id": "lbl.cms.af3e5b5bfea5",
+    "text": "Main default",
+    "pages": [
+      "Addresses"
+    ]
+  },
+  {
+    "id": "lbl.cms.af5b6180fcea",
+    "text": "Customer's upfront share",
+    "pages": [
+      "Help Pay walkthrough"
+    ]
+  },
+  {
+    "id": "lbl.cms.b054edffa0ed",
+    "text": "Could not calculate the delivery fee. Please check the delivery address.",
+    "pages": [
+      "Shared actions and validation"
+    ]
+  },
+  {
+    "id": "lbl.cms.b0b30ad199f5",
+    "text": "Saved to your cart. It could not be shared with the group just now.",
+    "pages": [
+      "Shared state messages"
+    ]
+  },
+  {
+    "id": "lbl.cms.b0d33600a790",
+    "text": "Service fee",
+    "pages": [
+      "Checkout"
+    ]
+  },
+  {
+    "id": "lbl.cms.b11cd484018f",
+    "text": " · Add at least ",
+    "pages": [
+      "Checkout"
+    ]
+  },
+  {
+    "id": "lbl.cms.b17be51367a9",
+    "text": "I received my order",
+    "pages": [
+      "Order tracking"
+    ]
+  },
+  {
+    "id": "lbl.cms.b38dad2419ef",
+    "text": "Contact",
+    "pages": [
+      "Checkout",
+      "Order tracking"
+    ]
+  },
+  {
+    "id": "lbl.cms.b472632d5ebe",
+    "text": "reviews",
+    "pages": [
+      "Store reviews"
+    ]
+  },
+  {
+    "id": "lbl.cms.b4fe1f1f9202",
+    "text": "Saved card",
+    "pages": [
+      "Payment methods"
+    ]
+  },
+  {
+    "id": "lbl.cms.b5e1b0b2d344",
+    "text": "Close scanner",
+    "pages": [
+      "Group orders"
+    ]
+  },
+  {
+    "id": "lbl.cms.b66a41c46241",
+    "text": "Your access to Goodies is temporarily suspended.",
+    "pages": [
+      "Shared actions and validation"
+    ]
+  },
+  {
+    "id": "lbl.cms.b76c533d659a",
+    "text": "checked by the shop",
+    "pages": [
+      "Order tracking"
+    ]
+  },
+  {
+    "id": "lbl.cms.b7c7f9985055",
+    "text": "Could not join this group order. Check the invite code and try again.",
+    "pages": [
+      "Group orders"
+    ]
+  },
+  {
+    "id": "lbl.cms.b7e3f7d2bbc4",
+    "text": "When",
+    "pages": [
+      "Checkout"
+    ]
+  },
+  {
+    "id": "lbl.cms.b8671dd2534d",
+    "text": "Enter the street address, city and country.",
+    "pages": [
+      "Addresses"
+    ]
+  },
+  {
+    "id": "lbl.cms.b9a67ad4232a",
+    "text": "Free",
+    "pages": [
+      "Cart",
+      "Checkout"
+    ]
+  },
+  {
+    "id": "lbl.cms.bcfa3aa2ef5b",
+    "text": "Ordering from several stores is available for delivery only.",
+    "pages": [
+      "Shared actions and validation"
+    ]
+  },
+  {
+    "id": "lbl.cms.bd7ffa079895",
+    "text": "Your bank may ask you to approve this payment",
+    "pages": [
+      "Card verification"
+    ]
+  },
+  {
+    "id": "lbl.cms.be7a6005669c",
+    "text": ". Review the updated total and place your order again.",
+    "pages": [
+      "Shared actions and validation"
+    ]
+  },
+  {
+    "id": "lbl.cms.be8b08bcf8db",
+    "text": "Preview friend's message",
+    "pages": [
+      "Help Pay walkthrough"
+    ]
+  },
+  {
+    "id": "lbl.cms.bf089c2685f9",
+    "text": "stores",
+    "pages": [
+      "Explore"
+    ]
+  },
+  {
+    "id": "lbl.cms.bf27147239d8",
+    "text": "Address saved to your Wantiss account.",
+    "pages": [
+      "Addresses"
+    ]
+  },
+  {
+    "id": "lbl.cms.bf6e025c5d90",
+    "text": "Open Wallet",
+    "pages": [
+      "Checkout"
+    ]
+  },
+  {
+    "id": "lbl.cms.c036c1628698",
+    "text": "Pickup",
+    "pages": [
+      "Cart",
+      "Checkout"
+    ]
+  },
+  {
+    "id": "lbl.cms.c097a7fccce6",
+    "text": "Please try again.",
+    "pages": [
+      "Store"
+    ]
+  },
+  {
+    "id": "lbl.cms.c123cfeda157",
+    "text": "Declined",
+    "pages": [
+      "Group orders"
+    ]
+  },
+  {
+    "id": "lbl.cms.c18a37461b0a",
+    "text": "Checking shared cart…",
+    "pages": [
+      "Group orders"
+    ]
+  },
+  {
+    "id": "lbl.cms.c21b6431da9c",
+    "text": "Could not verify your live Wantiss Wallet balance. Please retry.",
+    "pages": [
+      "Group orders"
+    ]
+  },
+  {
+    "id": "lbl.cms.c349a59278cd",
+    "text": "Change time",
+    "pages": [
+      "Cart"
+    ]
+  },
+  {
+    "id": "lbl.cms.c36ec498735d",
+    "text": "How much would you like to pay?",
+    "pages": [
+      "Help Pay walkthrough"
+    ]
+  },
+  {
+    "id": "lbl.cms.c36ed3e83c8c",
+    "text": ", selected ",
+    "pages": [
+      "Build Your Own"
+    ]
+  },
+  {
+    "id": "lbl.cms.c3f6f449738e",
+    "text": "Wantiss Wallet payments debit your available balance.",
+    "pages": [
+      "Checkout"
+    ]
+  },
+  {
+    "id": "lbl.cms.c460d20229b9",
+    "text": "How full payment works",
+    "pages": [
+      "Help Pay walkthrough"
+    ]
+  },
+  {
+    "id": "lbl.cms.c73acc89640b",
+    "text": "Admin content is currently loaded.",
+    "pages": [
+      "Preview import"
+    ]
+  },
+  {
+    "id": "lbl.cms.c814afa2abd9",
+    "text": "Send report",
+    "pages": [
+      "Order tracking"
+    ]
+  },
+  {
+    "id": "lbl.cms.c8c0ebe1e4a9",
+    "text": "Nothing to send.",
+    "pages": [
+      "Group orders"
+    ]
+  },
+  {
+    "id": "lbl.cms.c90943bbdf87",
+    "text": "QR code scanned. Tap Join group order to continue.",
+    "pages": [
+      "Group orders"
+    ]
+  },
+  {
+    "id": "lbl.cms.ca05018be110",
+    "text": "Equivalent to ",
+    "pages": [
+      "Help Pay walkthrough"
+    ]
+  },
+  {
+    "id": "lbl.cms.ca48b79aba54",
+    "text": "Goodies store",
+    "pages": [
+      "Store"
+    ]
+  },
+  {
+    "id": "lbl.cms.ca77e3a6d896",
+    "text": "Close menu",
+    "pages": [
+      "Shared components"
+    ]
+  },
+  {
+    "id": "lbl.cms.cb52931e4fa7",
+    "text": "Help pay a Goodies order",
+    "pages": [
+      "Help Pay walkthrough"
+    ]
+  },
+  {
+    "id": "lbl.cms.cbbfe5f88c2e",
+    "text": "Create a Wantiss wallet or choose another payment method.",
+    "pages": [
+      "Checkout"
+    ]
+  },
+  {
+    "id": "lbl.cms.cbc60fe888d9",
+    "text": "Calculating delivery…",
+    "pages": [
+      "Group orders"
+    ]
+  },
+  {
+    "id": "lbl.cms.cc823e1a0b52",
+    "text": "Pick-up",
+    "pages": [
+      "Scheduling"
+    ]
+  },
+  {
+    "id": "lbl.cms.cd891775350a",
+    "text": "Could not load your wallet and cards.",
+    "pages": [
+      "Payment methods"
+    ]
+  },
+  {
+    "id": "lbl.cms.cdd2f4e6592f",
+    "text": "Access suspension ends ",
+    "pages": [
+      "Shared navigation and access states"
+    ]
+  },
+  {
+    "id": "lbl.cms.ce2855382c78",
+    "text": "Something went wrong. Please try again.",
+    "pages": [
+      "Notifications"
+    ]
+  },
+  {
+    "id": "lbl.cms.ce5c2af83377",
+    "text": "Updating…",
+    "pages": [
+      "Payment methods"
+    ]
+  },
+  {
+    "id": "lbl.cms.ce62eda09faa",
+    "text": "Could not load stores",
+    "pages": [
+      "Shared state messages"
+    ]
+  },
+  {
+    "id": "lbl.cms.ce694de2c6e7",
+    "text": "Joined",
+    "pages": [
+      "Group orders"
+    ]
+  },
+  {
+    "id": "lbl.cms.ce7c584db7be",
+    "text": "Calculate the delivery fee and review it before placing the order.",
+    "pages": [
+      "Group orders"
+    ]
+  },
+  {
+    "id": "lbl.cms.ce9c4301c916",
+    "text": "Could not load deliveries",
+    "pages": [
+      "Courier"
+    ]
+  },
+  {
+    "id": "lbl.cms.cea0549897a2",
+    "text": "km from this address, beyond delivery range. Pick another address to get delivery.",
+    "pages": [
+      "Checkout"
+    ]
+  },
+  {
+    "id": "lbl.cms.cf6143006f14",
+    "text": "min",
+    "pages": [
+      "Shared components"
+    ]
+  },
+  {
+    "id": "lbl.cms.cf72ea618e90",
+    "text": "Saving…",
+    "pages": [
+      "Addresses"
+    ]
+  },
+  {
+    "id": "lbl.cms.cf80b4292197",
+    "text": "Could not securely save this checkout attempt. Please try again.",
+    "pages": [
+      "Shared actions and validation"
+    ]
+  },
+  {
+    "id": "lbl.cms.d0b078223c9e",
+    "text": "Explore the flow without sending a request or charging anyone",
+    "pages": [
+      "Checkout"
+    ]
+  },
+  {
+    "id": "lbl.cms.d15afce772c7",
+    "text": "Host Wallet balance",
+    "pages": [
+      "Group orders"
+    ]
+  },
+  {
+    "id": "lbl.cms.d1be960df332",
+    "text": "Deliver to",
+    "pages": [
+      "Group orders"
+    ]
+  },
+  {
+    "id": "lbl.cms.d2905bdbca8c",
+    "text": "Review the current group-order total before placing the order.",
+    "pages": [
+      "Group orders"
+    ]
+  },
+  {
+    "id": "lbl.cms.d2f0b5c9f696",
+    "text": ". Add ",
+    "pages": [
+      "Checkout"
+    ]
+  },
+  {
+    "id": "lbl.cms.d3055d65ac25",
+    "text": "Go online",
+    "pages": [
+      "Courier"
+    ]
+  },
+  {
+    "id": "lbl.cms.d37983f61070",
+    "text": "Could not join this group order. It may have closed.",
+    "pages": [
+      "Group orders"
+    ]
+  },
+  {
+    "id": "lbl.cms.d78ba6e23dc0",
+    "text": "Have your valid government photo ID ready. The order is completed only after it is checked.",
+    "pages": [
+      "Order tracking"
+    ]
+  },
+  {
+    "id": "lbl.cms.d7f2d0c9c8b8",
+    "text": "more to reach the minimum",
+    "pages": [
+      "Cart"
+    ]
+  },
+  {
+    "id": "lbl.cms.d87606c1f3c5",
+    "text": "Could not send this. Please try again.",
+    "pages": [
+      "Order tracking"
+    ]
+  },
+  {
+    "id": "lbl.cms.d8fc219cd4f7",
+    "text": "Complete the secure verification from your bank. Your card is only captured after verification succeeds.",
+    "pages": [
+      "Card verification"
+    ]
+  },
+  {
+    "id": "lbl.cms.da77f6ee2ece",
+    "text": "Simulate paying {value0}",
+    "pages": [
+      "Help Pay walkthrough"
+    ]
+  },
+  {
+    "id": "lbl.cms.daaf245c613a",
+    "text": "ending in ",
+    "pages": [
+      "Checkout"
+    ]
+  },
+  {
+    "id": "lbl.cms.dab075b135b8",
+    "text": "ID check failed. You were not charged.",
+    "pages": [
+      "Order tracking"
+    ]
+  },
+  {
+    "id": "lbl.cms.dae6f942d4dd",
+    "text": "Your shop/order comment: “",
+    "pages": [
+      "Order tracking"
+    ]
+  },
+  {
+    "id": "lbl.cms.dcdea3f94cd3",
+    "text": "Wantiss Wallet is not available.",
+    "pages": [
+      "Checkout"
+    ]
+  },
+  {
+    "id": "lbl.cms.dd7415008f6b",
+    "text": ". Adding from ",
+    "pages": [
+      "Sheets · newcart"
+    ]
+  },
+  {
+    "id": "lbl.cms.df27a086d299",
+    "text": "Could not read the card verification result.",
+    "pages": [
+      "Card verification"
+    ]
+  },
+  {
+    "id": "lbl.cms.df836d557f92",
+    "text": ". Paid with Wantiss Wallet.",
+    "pages": [
+      "Group orders"
+    ]
+  },
+  {
+    "id": "lbl.cms.dfee89702c16",
+    "text": "Could not load saved addresses.",
+    "pages": [
+      "Addresses"
+    ]
+  },
+  {
+    "id": "lbl.cms.e0747408b56f",
+    "text": "Create a group invitation first.",
+    "pages": [
+      "Group orders"
+    ]
+  },
+  {
+    "id": "lbl.cms.e096428eaf31",
+    "text": "The card payment could not be cancelled yet. Please retry.",
+    "pages": [
+      "Shared actions and validation"
+    ]
+  },
+  {
+    "id": "lbl.cms.e0b12ec3af49",
+    "text": " to continue.",
+    "pages": [
+      "Checkout"
+    ]
+  },
+  {
+    "id": "lbl.cms.e0c1f42dae8c",
+    "text": "You are online · Tap to go offline",
+    "pages": [
+      "Courier"
+    ]
+  },
+  {
+    "id": "lbl.cms.e0f192b8b2cb",
+    "text": "Contributions · customer view only",
+    "pages": [
+      "Help Pay walkthrough"
+    ]
+  },
+  {
+    "id": "lbl.cms.e12b8e635219",
+    "text": "Group order ended.",
+    "pages": [
+      "Group orders"
+    ]
+  },
+  {
+    "id": "lbl.cms.e161497dcb67",
+    "text": "Opening store…",
+    "pages": [
+      "Shared navigation and access states"
+    ]
+  },
+  {
+    "id": "lbl.cms.e1b4808b8c09",
+    "text": "Could not send the invitations. Please try again.",
+    "pages": [
+      "Group orders"
+    ]
+  },
+  {
+    "id": "lbl.cms.e1ce1d9b44e5",
+    "text": " or choose another payment method.",
+    "pages": [
+      "Checkout"
+    ]
+  },
+  {
+    "id": "lbl.cms.e1d2a0acc58b",
+    "text": "Host",
+    "pages": [
+      "Group orders"
+    ]
+  },
+  {
+    "id": "lbl.cms.e2119bae7932",
+    "text": "with ",
+    "pages": [
+      "Order confirmation"
+    ]
+  },
+  {
+    "id": "lbl.cms.e25611cb9017",
+    "text": "Service fee",
+    "pages": [
+      "Group orders"
+    ]
+  },
+  {
+    "id": "lbl.cms.e2cafebf4b38",
+    "text": "Delivery in progress · GPS tracking active",
+    "pages": [
+      "Courier"
+    ]
+  },
+  {
+    "id": "lbl.cms.e3168f3cd560",
+    "text": " for \"",
+    "pages": [
+      "Search"
+    ]
+  },
+  {
+    "id": "lbl.cms.e37b9c50c397",
+    "text": "Your road-based delivery fee is now ",
+    "pages": [
+      "Shared actions and validation"
+    ]
+  },
+  {
+    "id": "lbl.cms.e5d115728d05",
+    "text": "Restart walkthrough",
+    "pages": [
+      "Help Pay walkthrough"
+    ]
+  },
+  {
+    "id": "lbl.cms.e6097512cd01",
+    "text": "checked by the courier",
+    "pages": [
+      "Order tracking"
+    ]
+  },
+  {
+    "id": "lbl.cms.e8f8942d465d",
+    "text": "Could not respond",
+    "pages": [
+      "Courier"
+    ]
+  },
+  {
+    "id": "lbl.cms.e9f88c775f6c",
+    "text": "Cancel verification",
+    "pages": [
+      "Card verification"
+    ]
+  },
+  {
+    "id": "lbl.cms.ea052535e65e",
+    "text": "Saving…",
+    "pages": [
+      "Courier"
+    ]
+  },
+  {
+    "id": "lbl.cms.ea6b7c9309ba",
+    "text": "EXP ",
+    "pages": [
+      "Checkout"
+    ]
+  },
+  {
+    "id": "lbl.cms.eb1f7b6d929c",
+    "text": "Store link copied",
+    "pages": [
+      "Store"
+    ]
+  },
+  {
+    "id": "lbl.cms.eb7b802f12ab",
+    "text": "Search friends",
+    "pages": [
+      "Store"
+    ]
+  },
+  {
+    "id": "lbl.cms.ebaf18552056",
+    "text": " km from your address",
+    "pages": [
+      "Checkout"
+    ]
+  },
+  {
+    "id": "lbl.cms.ec1cc0c94ace",
+    "text": "Goodies bill",
+    "pages": [
+      "Help Pay walkthrough"
+    ]
+  },
+  {
+    "id": "lbl.cms.ec46b728216f",
+    "text": "Add to this order",
+    "pages": [
+      "Sheets · newcart"
+    ]
+  },
+  {
+    "id": "lbl.cms.edaff19cc43c",
+    "text": "Send to a Wantiss friend",
+    "pages": [
+      "Store"
+    ]
+  },
+  {
+    "id": "lbl.cms.eeb9fe67ea00",
+    "text": "Set as default",
+    "pages": [
+      "Payment methods"
+    ]
+  },
+  {
+    "id": "lbl.cms.ef4acf6a72bb",
+    "text": "Fees",
+    "pages": [
+      "Order tracking"
+    ]
+  },
+  {
+    "id": "lbl.cms.f1cd4727c8c8",
+    "text": ". Ordering is paused until then.",
+    "pages": [
+      "Store"
+    ]
+  },
+  {
+    "id": "lbl.cms.f2c657366cc0",
+    "text": "Payment",
+    "pages": [
+      "Checkout"
+    ]
+  },
+  {
+    "id": "lbl.cms.f2e22e470687",
+    "text": "Combined cart",
+    "pages": [
+      "Group orders"
+    ]
+  },
+  {
+    "id": "lbl.cms.f387bbae5293",
+    "text": " min",
+    "pages": [
+      "Store"
+    ]
+  },
+  {
+    "id": "lbl.cms.f409318cbe6e",
+    "text": "Distance unavailable",
+    "pages": [
+      "Checkout"
+    ]
+  },
+  {
+    "id": "lbl.cms.f4a87149377d",
+    "text": "Full bill payment",
+    "pages": [
+      "Help Pay walkthrough"
+    ]
+  },
+  {
+    "id": "lbl.cms.f61a88208368",
+    "text": "Please wait…",
+    "pages": [
+      "Group orders"
+    ]
+  },
+  {
+    "id": "lbl.cms.f7925b4ff6ef",
+    "text": "Order ",
+    "pages": [
+      "Order confirmation",
+      "Order tracking"
+    ]
+  },
+  {
+    "id": "lbl.cms.f889c94501e8",
+    "text": "Join",
+    "pages": [
+      "Group orders"
+    ]
+  },
+  {
+    "id": "lbl.cms.f8cd04d16d2c",
+    "text": "You haven’t created a wallet, or it was deleted. Create one to pay with it and to receive refunds. Your balance starts at ",
+    "pages": [
+      "Payment methods"
+    ]
+  },
+  {
+    "id": "lbl.cms.f94093c65ad4",
+    "text": "Create wallet",
+    "pages": [
+      "Payment methods"
+    ]
+  },
+  {
+    "id": "lbl.cms.fa32c0873181",
+    "text": "Your Wantiss Wallet is not available. Create a wallet before placing this group order.",
+    "pages": [
+      "Group orders"
+    ]
+  },
+  {
+    "id": "lbl.cms.fa36fe77f660",
+    "text": "Could not calculate delivery.",
+    "pages": [
+      "Group orders"
+    ]
+  },
+  {
+    "id": "lbl.cms.fbab10af6bec",
+    "text": "Decline",
+    "pages": [
+      "Group orders"
+    ]
+  },
+  {
+    "id": "lbl.cms.fcae7abd6834",
+    "text": "City",
+    "pages": [
+      "Addresses"
+    ]
+  },
+  {
+    "id": "lbl.cms.fdc79fde4a45",
+    "text": "Add a valid contact phone number in your profile before checkout.",
+    "pages": [
+      "Group orders"
+    ]
+  },
+  {
+    "id": "lbl.cms.fee6cf252c06",
+    "text": "Could not load your friends. Please try again.",
+    "pages": [
+      "Group orders"
+    ]
+  },
+  {
+    "id": "lbl.cms.ff44d9df12d3",
+    "text": "Address updated.",
+    "pages": [
+      "Addresses"
+    ]
+  },
+  {
+    "id": "lbl.cms.ffb25a7171b4",
+    "text": "Cash",
+    "pages": [
+      "Checkout"
+    ]
+  },
+  {
+    "id": "lbl.cms.ffb62b872edd",
+    "text": "Your balance is ",
+    "pages": [
+      "Checkout"
+    ]
+  },
+  {
+    "id": "lbl.cms.ffbce6e6a57c",
+    "text": " m",
+    "pages": [
+      "Store"
+    ]
+  },
+  {
+    "id": "lbl.confirmBackGoodies",
+    "text": "Back to Goodies",
+    "pages": [
+      "Order confirmation"
+    ]
+  },
+  {
+    "id": "lbl.confirmOrderPlaced",
+    "text": "Order placed",
+    "pages": [
+      "Order confirmation"
+    ]
+  },
+  {
+    "id": "lbl.confirmTrackOrder",
+    "text": "Track order",
+    "pages": [
+      "Order confirmation"
+    ]
+  },
+  {
+    "id": "lbl.contactErrNotConfirmed",
+    "text": "Support did not confirm the ticket. Please retry before leaving this screen.",
+    "pages": [
+      "Contact support"
+    ]
+  },
+  {
+    "id": "lbl.contactErrNoVendor",
+    "text": "We could not find the vendor account linked to this store. Your message has not been sent.",
+    "pages": [
+      "Contact support"
+    ]
+  },
+  {
+    "id": "lbl.contactErrServerNotConfirmed",
+    "text": "The server did not confirm your support ticket. Please retry.",
+    "pages": [
+      "Contact support"
+    ]
+  },
+  {
+    "id": "lbl.contactErrSignInStore",
+    "text": "Sign in to contact this store. Your message has not been sent.",
+    "pages": [
+      "Contact support"
+    ]
+  },
+  {
+    "id": "lbl.contactErrSignInSupport",
+    "text": "Sign in to contact support. Your ticket has not been created.",
+    "pages": [
+      "Contact support"
+    ]
+  },
+  {
+    "id": "lbl.contactSend",
+    "text": "Send message",
+    "pages": [
+      "Contact support"
+    ]
+  },
+  {
+    "id": "lbl.contactSending",
+    "text": "Sending…",
+    "pages": [
+      "Contact support"
+    ]
+  },
+  {
+    "id": "lbl.contactStoreNote",
+    "text": "We’ll keep this ticket context with your store conversation. You can continue chatting when the store replies.",
+    "pages": [
+      "Contact support"
+    ]
+  },
+  {
+    "id": "lbl.contactStoreTitle",
+    "text": "Contact store",
+    "pages": [
+      "Contact support"
+    ]
+  },
+  {
+    "id": "lbl.contactSupportNote",
+    "text": "Support messages are tracked with a ticket number.",
+    "pages": [
+      "Contact support"
+    ]
+  },
+  {
+    "id": "lbl.contactSupportTitle",
+    "text": "Contact support",
+    "pages": [
+      "Contact support"
+    ]
+  },
+  {
+    "id": "lbl.coupons",
+    "text": "Coupons and offers",
+    "pages": [
+      "Home"
+    ]
+  },
+  {
+    "id": "lbl.coupons2",
+    "text": "Codes you can use at checkout",
+    "pages": [
+      "Home"
+    ]
+  },
+  {
+    "id": "lbl.favoritesEmpty",
+    "text": "Nothing saved yet",
+    "pages": [
+      "Favorites"
+    ]
+  },
+  {
+    "id": "lbl.favoritesEmptyText",
+    "text": "Save stores and products to find them here.",
+    "pages": [
+      "Favorites"
+    ]
+  },
+  {
+    "id": "lbl.favoritesTitle",
+    "text": "Your favorites",
+    "pages": [
+      "Favorites"
+    ]
+  },
+  {
+    "id": "lbl.filterAll",
+    "text": "All",
+    "pages": [
+      "Shared state messages"
+    ]
+  },
+  {
+    "id": "lbl.filterFast",
+    "text": "Under 30 min",
+    "pages": [
+      "Search",
+      "Shared state messages"
+    ]
+  },
+  {
+    "id": "lbl.filterFree",
+    "text": "Free delivery",
+    "pages": [
+      "Sheets · sinfo",
+      "Search",
+      "Shared state messages"
+    ]
+  },
+  {
+    "id": "lbl.filterNearest",
+    "text": "Nearest",
+    "pages": [
+      "Shared state messages"
+    ]
+  },
+  {
+    "id": "lbl.filterOffers",
+    "text": "Offers",
+    "pages": [
+      "Shared state messages"
+    ]
+  },
+  {
+    "id": "lbl.filterOpen",
+    "text": "Open now",
+    "pages": [
+      "Search",
+      "Shared state messages"
+    ]
+  },
+  {
+    "id": "lbl.filterP10",
+    "text": "Under $10",
+    "pages": [
+      "Search"
+    ]
+  },
+  {
+    "id": "lbl.filterP5",
+    "text": "Under $5",
+    "pages": [
+      "Search"
+    ]
+  },
+  {
+    "id": "lbl.filterSale",
+    "text": "On sale",
+    "pages": [
+      "Search"
+    ]
+  },
+  {
+    "id": "lbl.filterTop",
+    "text": "Rating 4.5+",
+    "pages": [
+      "Search",
+      "Shared state messages"
+    ]
+  },
+  {
+    "id": "lbl.flash",
+    "text": "Flash deals",
+    "pages": [
+      "Home",
+      "Flash deals"
+    ]
+  },
+  {
+    "id": "lbl.flashEmptyBody",
+    "text": "Check back soon for limited-time offers.",
+    "pages": [
+      "Flash deals"
+    ]
+  },
+  {
+    "id": "lbl.flashEmptyTitle",
+    "text": "No flash deals available",
+    "pages": [
+      "Flash deals"
+    ]
+  },
+  {
+    "id": "lbl.flashLimitedTime",
+    "text": "Limited-time offers",
+    "pages": [
+      "Flash deals"
+    ]
+  },
+  {
+    "id": "lbl.haitian",
+    "text": "Haitian specialties",
+    "pages": [
+      "Home"
+    ]
+  },
+  {
+    "id": "lbl.helpContact",
+    "text": "Contact support",
+    "pages": [
+      "Help / FAQs"
+    ]
+  },
+  {
+    "id": "lbl.helpOrders",
+    "text": "Report an order problem",
+    "pages": [
+      "Help / FAQs"
+    ]
+  },
+  {
+    "id": "lbl.helpPay.friendA",
+    "text": "Friend A",
+    "pages": [
+      "Help Pay walkthrough"
+    ]
+  },
+  {
+    "id": "lbl.helpPay.friendB",
+    "text": "Friend B",
+    "pages": [
+      "Help Pay walkthrough"
+    ]
+  },
+  {
+    "id": "lbl.helpPay.friendC",
+    "text": "Friend C",
+    "pages": [
+      "Help Pay walkthrough"
+    ]
+  },
+  {
+    "id": "lbl.helpPay.fullPay",
+    "text": "Help me fully pay",
+    "pages": [
+      "Help Pay walkthrough"
+    ]
+  },
+  {
+    "id": "lbl.helpPay.shareBill",
+    "text": "Share bill · 60/40",
+    "pages": [
+      "Help Pay walkthrough"
+    ]
+  },
+  {
+    "id": "lbl.helpPay.step.complete",
+    "text": "Order is fully funded",
+    "pages": [
+      "HelpPayPreview · shared"
+    ]
+  },
+  {
+    "id": "lbl.helpPay.step.invite",
+    "text": "Send to friends",
+    "pages": [
+      "HelpPayPreview · shared"
+    ]
+  },
+  {
+    "id": "lbl.helpPay.step.pay",
+    "text": "Friend chooses an amount",
+    "pages": [
+      "HelpPayPreview · shared"
+    ]
+  },
+  {
+    "id": "lbl.helpPay.step.progress",
+    "text": "Track contributions",
+    "pages": [
+      "HelpPayPreview · shared"
+    ]
+  },
+  {
+    "id": "lbl.helpPay.step.setup",
+    "text": "Choose how to split",
+    "pages": [
+      "HelpPayPreview · shared"
+    ]
+  },
+  {
+    "id": "lbl.helpTitle",
+    "text": "Help center",
+    "pages": [
+      "Help / FAQs"
+    ]
+  },
+  {
+    "id": "lbl.interface.addToCart",
+    "text": "Add to cart",
+    "pages": [
+      "Shared navigation and interface"
+    ]
+  },
+  {
+    "id": "lbl.interface.back",
+    "text": "Back",
+    "pages": [
+      "Shared components",
+      "Shared navigation and interface",
+      "Home",
+      "Search",
+      "Shop · shared"
+    ]
+  },
+  {
+    "id": "lbl.interface.cart",
+    "text": "Cart",
+    "pages": [
+      "Shared components",
+      "Shared navigation and interface"
+    ]
+  },
+  {
+    "id": "lbl.interface.categories",
+    "text": "Categories",
+    "pages": [
+      "Shared navigation and access states",
+      "Shared components",
+      "Shared navigation and interface"
+    ]
+  },
+  {
+    "id": "lbl.interface.checkout",
+    "text": "Checkout",
+    "pages": [
+      "Shared navigation and interface"
+    ]
+  },
+  {
+    "id": "lbl.interface.closed",
+    "text": "Closed",
+    "pages": [
+      "Shared components",
+      "Shared navigation and interface",
+      "Search"
+    ]
+  },
+  {
+    "id": "lbl.interface.codesCheckout",
+    "text": "Codes you can use at checkout",
+    "pages": [
+      "Shared navigation and interface",
+      "Home"
+    ]
+  },
+  {
+    "id": "lbl.interface.couponsOffers",
+    "text": "Coupons and offers",
+    "pages": [
+      "Shared navigation and interface",
+      "Home"
+    ]
+  },
+  {
+    "id": "lbl.interface.deliverTo",
+    "text": "Deliver to",
+    "pages": [
+      "Shared navigation and interface",
+      "Home"
+    ]
+  },
+  {
+    "id": "lbl.interface.delivery",
+    "text": "delivery",
+    "pages": [
+      "Shared components",
+      "Shared navigation and interface",
+      "Store"
+    ]
+  },
+  {
+    "id": "lbl.interface.drugstore",
+    "text": "Drugstore",
+    "pages": [
+      "Shared navigation and interface",
+      "Home"
+    ]
+  },
+  {
+    "id": "lbl.interface.flashDeals",
+    "text": "Flash deals",
+    "pages": [
+      "Shared navigation and interface",
+      "Home",
+      "Flash deals"
+    ]
+  },
+  {
+    "id": "lbl.interface.foodDelivery",
+    "text": "Food delivery",
+    "pages": [
+      "Shared navigation and interface",
+      "Home"
+    ]
+  },
+  {
+    "id": "lbl.interface.freeDelivery",
+    "text": "Free delivery",
+    "pages": [
+      "Shared components",
+      "Shared navigation and interface",
+      "Store"
+    ]
+  },
+  {
+    "id": "lbl.interface.freshProduce",
+    "text": "Fresh produce",
+    "pages": [
+      "Shared navigation and interface",
+      "Home"
+    ]
+  },
+  {
+    "id": "lbl.interface.groceries",
+    "text": "Groceries",
+    "pages": [
+      "Shared navigation and interface",
+      "Home"
+    ]
+  },
+  {
+    "id": "lbl.interface.haitianSpecialties",
+    "text": "Haitian specialties",
+    "pages": [
+      "Shared navigation and interface",
+      "Home"
+    ]
+  },
+  {
+    "id": "lbl.interface.home",
+    "text": "Home",
+    "pages": [
+      "Shared components",
+      "Shared navigation and interface"
+    ]
+  },
+  {
+    "id": "lbl.interface.hotFresh",
+    "text": "Hot and fresh to you",
+    "pages": [
+      "Shared navigation and interface",
+      "Home"
+    ]
+  },
+  {
+    "id": "lbl.interface.language",
+    "text": "Language",
+    "pages": [
+      "Shared navigation and interface"
+    ]
+  },
+  {
+    "id": "lbl.interface.minOrder",
+    "text": "Min. order",
+    "pages": [
+      "Shared components",
+      "Shared navigation and interface"
+    ]
+  },
+  {
+    "id": "lbl.interface.orderAgain",
+    "text": "Order again",
+    "pages": [
+      "Shared navigation and interface",
+      "Home"
+    ]
+  },
+  {
+    "id": "lbl.interface.orders",
+    "text": "Orders",
+    "pages": [
+      "Shared components",
+      "Shared navigation and interface"
+    ]
+  },
+  {
+    "id": "lbl.interface.placeOrder",
+    "text": "Place order",
+    "pages": [
+      "Shared navigation and interface"
+    ]
+  },
+  {
+    "id": "lbl.interface.popularVendors",
+    "text": "Popular vendors",
+    "pages": [
+      "Shared navigation and interface",
+      "Home"
+    ]
+  },
+  {
+    "id": "lbl.interface.recentlyViewed",
+    "text": "Recently viewed",
+    "pages": [
+      "Shared navigation and interface",
+      "Home"
+    ]
+  },
+  {
+    "id": "lbl.interface.restaurantsNear",
+    "text": "Restaurants near you",
+    "pages": [
+      "Shared navigation and interface",
+      "Home"
+    ]
+  },
+  {
+    "id": "lbl.interface.search",
+    "text": "Search",
+    "pages": [
+      "Shared components",
+      "Shared navigation and interface"
+    ]
+  },
+  {
+    "id": "lbl.interface.searchPh",
+    "text": "Craving something? Search here",
+    "pages": [
+      "Shared navigation and interface",
+      "Home"
+    ]
+  },
+  {
+    "id": "lbl.interface.seeAll",
+    "text": "See all",
+    "pages": [
+      "Shared navigation and interface",
+      "Home"
+    ]
+  },
+  {
+    "id": "lbl.interface.settings",
+    "text": "Settings",
+    "pages": [
+      "Shared navigation and interface",
+      "Settings"
+    ]
+  },
+  {
+    "id": "lbl.interface.soldOut",
+    "text": "Sold out",
+    "pages": [
+      "Shared components",
+      "Shared navigation and interface"
+    ]
+  },
+  {
+    "id": "lbl.interface.trending",
+    "text": "Trending right now",
+    "pages": [
+      "Shared navigation and interface",
+      "Home"
+    ]
+  },
+  {
+    "id": "lbl.interface.viewCart",
+    "text": "View cart",
+    "pages": [
+      "Shared navigation and interface"
+    ]
+  },
+  {
+    "id": "lbl.interface.yourCart",
+    "text": "Your cart",
+    "pages": [
+      "Shared navigation and interface"
+    ]
+  },
+  {
+    "id": "lbl.legalPolicyTitle",
+    "text": "Policy",
+    "pages": [
+      "Account subpages"
+    ]
+  },
+  {
+    "id": "lbl.legalPrivacyTitle",
+    "text": "Privacy policy",
+    "pages": [
+      "Policies"
+    ]
+  },
+  {
+    "id": "lbl.legalRefundTitle",
+    "text": "Refund and cancellation policy",
+    "pages": [
+      "Policies"
+    ]
+  },
+  {
+    "id": "lbl.legalTermsTitle",
+    "text": "Terms of use",
+    "pages": [
+      "Policies"
+    ]
+  },
+  {
+    "id": "lbl.legalUnavailableBody",
+    "text": "An approved, published version of this policy is not currently available. Please check back later or contact support if you need help.",
+    "pages": [
+      "Account subpages"
+    ]
+  },
+  {
+    "id": "lbl.legalUnavailableTitle",
+    "text": "This policy is not available yet",
+    "pages": [
+      "Account subpages"
+    ]
+  },
+  {
+    "id": "lbl.menu.businessspace",
+    "text": "Business Space",
+    "pages": [
+      "Shared components"
+    ]
+  },
+  {
+    "id": "lbl.menu.darkmode",
+    "text": "Dark Mode",
+    "pages": [
+      "Shared components"
+    ]
+  },
+  {
+    "id": "lbl.menu.feedback",
+    "text": "Feedback",
+    "pages": [
+      "Shared components"
+    ]
+  },
+  {
+    "id": "lbl.menu.helpcenter",
+    "text": "Help Center",
+    "pages": [
+      "Shared components"
+    ]
+  },
+  {
+    "id": "lbl.menu.home",
+    "text": "Home",
+    "pages": [
+      "Shared components"
+    ]
+  },
+  {
+    "id": "lbl.menu.messages",
+    "text": "Messages",
+    "pages": [
+      "Shared components"
+    ]
+  },
+  {
+    "id": "lbl.menu.myorders",
+    "text": "My Orders",
+    "pages": [
+      "Shared components"
+    ]
+  },
+  {
+    "id": "lbl.menu.notifications",
+    "text": "Notifications",
+    "pages": [
+      "Shared components"
+    ]
+  },
+  {
+    "id": "lbl.menu.recentactivity",
+    "text": "Recent Activity",
+    "pages": [
+      "Shared components"
+    ]
+  },
+  {
+    "id": "lbl.menu.saved",
+    "text": "Saved",
+    "pages": [
+      "Shared components"
+    ]
+  },
+  {
+    "id": "lbl.menu.wallet",
+    "text": "Wallet",
+    "pages": [
+      "Shared components"
+    ]
+  },
+  {
+    "id": "lbl.messageStore",
+    "text": "Message store",
+    "pages": [
+      "Store"
+    ]
+  },
+  {
+    "id": "lbl.notifDefaultTitle",
+    "text": "Goodies update",
+    "pages": [
+      "Notifications"
+    ]
+  },
+  {
+    "id": "lbl.notifsEmpty",
+    "text": "You’re all caught up",
+    "pages": [
+      "Notifications"
+    ]
+  },
+  {
+    "id": "lbl.notifsEmptyText",
+    "text": "Order updates and offers will appear here.",
+    "pages": [
+      "Notifications"
+    ]
+  },
+  {
+    "id": "lbl.notifsMarkAll",
+    "text": "Mark all as read",
+    "pages": [
+      "Notifications"
+    ]
+  },
+  {
+    "id": "lbl.notifsTitle",
+    "text": "Notifications",
+    "pages": [
+      "Settings",
+      "Notifications"
+    ]
+  },
+  {
+    "id": "lbl.orderAccepted",
+    "text": "Order accepted by store",
+    "pages": [
+      "Order tracking"
+    ]
+  },
+  {
+    "id": "lbl.orderAgain",
+    "text": "Order again",
+    "pages": [
+      "Order tracking"
+    ]
+  },
+  {
+    "id": "lbl.orderCancelAction",
+    "text": "Cancel order",
+    "pages": [
+      "Order tracking"
+    ]
+  },
+  {
+    "id": "lbl.orderCancelled",
+    "text": "Cancelled",
+    "pages": [
+      "Order tracking",
+      "Order history"
+    ]
+  },
+  {
+    "id": "lbl.orderCancelledMessage",
+    "text": "This order was cancelled",
+    "pages": [
+      "Order tracking"
+    ]
+  },
+  {
+    "id": "lbl.orderCourierAssigned",
+    "text": "A courier has been assigned",
+    "pages": [
+      "Order tracking"
+    ]
+  },
+  {
+    "id": "lbl.orderCourierLive",
+    "text": "Courier GPS location is updating live.",
+    "pages": [
+      "Shop · shared"
+    ]
+  },
+  {
+    "id": "lbl.orderCourierLocation",
+    "text": "Courier",
+    "pages": [
+      "Shop · shared"
+    ]
+  },
+  {
+    "id": "lbl.orderCourierOffer",
+    "text": "Waiting for the courier to accept the delivery.",
+    "pages": [
+      "Shop · shared"
+    ]
+  },
+  {
+    "id": "lbl.orderCourierPending",
+    "text": "Waiting for courier assignment. The map will update when a courier starts sharing GPS.",
+    "pages": [
+      "Shop · shared"
+    ]
+  },
+  {
+    "id": "lbl.orderCourierPickedUp",
+    "text": "Your courier has picked up the order",
+    "pages": [
+      "Order tracking"
+    ]
+  },
+  {
+    "id": "lbl.orderCourierUpdated",
+    "text": "Updated {time}",
+    "pages": [
+      "Shop · shared"
+    ]
+  },
+  {
+    "id": "lbl.orderDeclinedFallback",
+    "text": "Please try another store.",
+    "pages": [
+      "Order tracking"
+    ]
+  },
+  {
+    "id": "lbl.orderDeclinedMessage",
+    "text": "The store could not accept your order. {reason}",
+    "pages": [
+      "Order tracking"
+    ]
+  },
+  {
+    "id": "lbl.orderDelivered",
+    "text": "Delivered",
+    "pages": [
+      "Order tracking"
+    ]
+  },
+  {
+    "id": "lbl.orderDeliveryDestination",
+    "text": "Delivery address",
+    "pages": [
+      "Shop · shared"
+    ]
+  },
+  {
+    "id": "lbl.orderDeliveryExperience",
+    "text": "Delivery experience",
+    "pages": [
+      "Order tracking"
+    ]
+  },
+  {
+    "id": "lbl.orderExpired",
+    "text": "Response window expired",
+    "pages": [
+      "Order tracking"
+    ]
+  },
+  {
+    "id": "lbl.orderExpiredMessage",
+    "text": "The store did not respond within 15 minutes. Your order was cancelled.",
+    "pages": [
+      "Order tracking"
+    ]
+  },
+  {
+    "id": "lbl.orderFeedback",
+    "text": "Order and delivery feedback",
+    "pages": [
+      "Order tracking"
+    ]
+  },
+  {
+    "id": "lbl.orderGetHelp",
+    "text": "Get help with this order",
+    "pages": [
+      "Order tracking"
+    ]
+  },
+  {
+    "id": "lbl.orderGoHome",
+    "text": "Go home",
+    "pages": [
+      "Order confirmation",
+      "Order tracking"
+    ]
+  },
+  {
+    "id": "lbl.orderGoToOrders",
+    "text": "Go to Orders",
+    "pages": [
+      "Order tracking"
+    ]
+  },
+  {
+    "id": "lbl.orderLiveTracking",
+    "text": "Live delivery route",
+    "pages": [
+      "Shop · shared"
+    ]
+  },
+  {
+    "id": "lbl.orderLiveUnavailable",
+    "text": "This order is not available from the live Wantiss order service.",
+    "pages": [
+      "Order confirmation"
+    ]
+  },
+  {
+    "id": "lbl.orderMapPreparing",
+    "text": "Preparing delivery map",
+    "pages": [
+      "Shop · shared"
+    ]
+  },
+  {
+    "id": "lbl.orderMapPreparingHint",
+    "text": "The map appears when the delivery address has been geocoded.",
+    "pages": [
+      "Shop · shared"
+    ]
+  },
+  {
+    "id": "lbl.orderMessageStore",
+    "text": "Message store",
+    "pages": [
+      "Order tracking"
+    ]
+  },
+  {
+    "id": "lbl.orderNotFound",
+    "text": "Order not found",
+    "pages": [
+      "Order tracking"
+    ]
+  },
+  {
+    "id": "lbl.orderNotifDelivered",
+    "text": "Order delivered",
+    "pages": [
+      "Shared navigation and access states"
+    ]
+  },
+  {
+    "id": "lbl.orderNotifPickedUp",
+    "text": "Order picked up",
+    "pages": [
+      "Shared navigation and access states"
+    ]
+  },
+  {
+    "id": "lbl.orderNotifUpdate",
+    "text": "Order update",
+    "pages": [
+      "Shared navigation and access states"
+    ]
+  },
+  {
+    "id": "lbl.orderPickedUp",
+    "text": "Picked up",
+    "pages": [
+      "Order tracking"
+    ]
+  },
+  {
+    "id": "lbl.orderPickupLocation",
+    "text": "Pickup location",
+    "pages": [
+      "Shop · shared"
+    ]
+  },
+  {
+    "id": "lbl.orderPickupShort",
+    "text": "Pickup",
+    "pages": [
+      "Order tracking"
+    ]
+  },
+  {
+    "id": "lbl.orderPickupUnavailable",
+    "text": "Live location unavailable",
+    "pages": [
+      "Shop · shared"
+    ]
+  },
+  {
+    "id": "lbl.orderPreparing",
+    "text": "Store is preparing your order",
+    "pages": [
+      "Order tracking"
+    ]
+  },
+  {
+    "id": "lbl.orderRate",
+    "text": "Rate your order",
+    "pages": [
+      "Review sheet",
+      "Order tracking"
+    ]
+  },
+  {
+    "id": "lbl.orderRateDriver",
+    "text": "Rate your driver",
+    "pages": [
+      "Review sheet",
+      "Order tracking"
+    ]
+  },
+  {
+    "id": "lbl.orderReadyCourier",
+    "text": "Ready for courier pickup",
+    "pages": [
+      "Order tracking"
+    ]
+  },
+  {
+    "id": "lbl.orderReadyPickup",
+    "text": "Ready for pickup",
+    "pages": [
+      "Order tracking"
+    ]
+  },
+  {
+    "id": "lbl.ordersActive",
+    "text": "Active",
+    "pages": [
+      "Order history"
+    ]
+  },
+  {
+    "id": "lbl.ordersBrowse",
+    "text": "Browse stores",
+    "pages": [
+      "Order history"
+    ]
+  },
+  {
+    "id": "lbl.orderScheduledFor",
+    "text": "Scheduled for {time}",
+    "pages": [
+      "Order tracking"
+    ]
+  },
+  {
+    "id": "lbl.ordersDetails",
+    "text": "Details",
+    "pages": [
+      "Order history"
+    ]
+  },
+  {
+    "id": "lbl.ordersEmptyText",
+    "text": "Your orders will show up here.",
+    "pages": [
+      "Order history"
+    ]
+  },
+  {
+    "id": "lbl.ordersNoActive",
+    "text": "No active orders",
+    "pages": [
+      "Order history"
+    ]
+  },
+  {
+    "id": "lbl.ordersNoPast",
+    "text": "No past orders yet",
+    "pages": [
+      "Order history"
+    ]
+  },
+  {
+    "id": "lbl.ordersPast",
+    "text": "Past",
+    "pages": [
+      "Order history"
+    ]
+  },
+  {
+    "id": "lbl.ordersReorder",
+    "text": "Reorder",
+    "pages": [
+      "Order history"
+    ]
+  },
+  {
+    "id": "lbl.orderStatusHeading",
+    "text": "Order status is provided by the live order service.",
+    "pages": [
+      "Order tracking"
+    ]
+  },
+  {
+    "id": "lbl.ordersTitle",
+    "text": "Your orders",
+    "pages": [
+      "Order history"
+    ]
+  },
+  {
+    "id": "lbl.orderStoreDeclined",
+    "text": "Store declined the order",
+    "pages": [
+      "Order tracking"
+    ]
+  },
+  {
+    "id": "lbl.orderStoreOrigin",
+    "text": "Store",
+    "pages": [
+      "Shop · shared"
+    ]
+  },
+  {
+    "id": "lbl.ordersTrack",
+    "text": "Track",
+    "pages": [
+      "Order history"
+    ]
+  },
+  {
+    "id": "lbl.orderThanksFeedback",
+    "text": "Thank you for your feedback!",
+    "pages": [
+      "Order tracking"
+    ]
+  },
+  {
+    "id": "lbl.orderToAddress",
+    "text": "To {address}",
+    "pages": [
+      "Order tracking"
+    ]
+  },
+  {
+    "id": "lbl.orderToastDelivered",
+    "text": "Order {id} delivered 🎉",
+    "pages": [
+      "Shared navigation and access states"
+    ]
+  },
+  {
+    "id": "lbl.orderToastPickedUp",
+    "text": "Order {id} picked up 🎉",
+    "pages": [
+      "Shared navigation and access states"
+    ]
+  },
+  {
+    "id": "lbl.orderUnavailable",
+    "text": "Order unavailable",
+    "pages": [
+      "Order confirmation"
+    ]
+  },
+  {
+    "id": "lbl.orderUpdated",
+    "text": "Order update",
+    "pages": [
+      "Order tracking"
+    ]
+  },
+  {
+    "id": "lbl.orderWaitingStore",
+    "text": "Waiting for store to accept",
+    "pages": [
+      "Order tracking"
+    ]
+  },
+  {
+    "id": "lbl.orderYourRating",
+    "text": "Your rating: {n} ★",
+    "pages": [
+      "Order tracking"
+    ]
+  },
+  {
+    "id": "lbl.paymentAddCard",
+    "text": "+ Add a card",
+    "pages": [
+      "Payment methods"
+    ]
+  },
+  {
+    "id": "lbl.paymentBack",
+    "text": "Back",
+    "pages": [
+      "Payment methods"
+    ]
+  },
+  {
+    "id": "lbl.paymentCancel",
+    "text": "Cancel",
+    "pages": [
+      "Payment methods"
+    ]
+  },
+  {
+    "id": "lbl.paymentDefaultCard",
+    "text": "Default",
+    "pages": [
+      "Payment methods"
+    ]
+  },
+  {
+    "id": "lbl.paymentLoadError",
+    "text": "We couldn’t load your payment details",
+    "pages": [
+      "Payment methods"
+    ]
+  },
+  {
+    "id": "lbl.paymentNoCards",
+    "text": "No saved cards yet",
+    "pages": [
+      "Payment methods"
+    ]
+  },
+  {
+    "id": "lbl.paymentNoWallet",
+    "text": "No Wantiss wallet found",
+    "pages": [
+      "Payment methods"
+    ]
+  },
+  {
+    "id": "lbl.paymentRemoveCard",
+    "text": "Remove card",
+    "pages": [
+      "Payment methods"
+    ]
+  },
+  {
+    "id": "lbl.paymentRetry",
+    "text": "Try again",
+    "pages": [
+      "Payment methods"
+    ]
+  },
+  {
+    "id": "lbl.paymentSavedCardsHint",
+    "text": "Saved cards will appear here and can be used at checkout.",
+    "pages": [
+      "Payment methods"
+    ]
+  },
+  {
+    "id": "lbl.paymentsCards",
+    "text": "Saved cards",
+    "pages": [
+      "Payment methods"
+    ]
+  },
+  {
+    "id": "lbl.paymentsSignedOut",
+    "text": "Your Wantiss wallet and saved cards are tied to your account.",
+    "pages": [
+      "Payment methods"
+    ]
+  },
+  {
+    "id": "lbl.paymentsSignIn",
+    "text": "Sign in to see your wallet",
+    "pages": [
+      "Payment methods"
+    ]
+  },
+  {
+    "id": "lbl.paymentsTitle",
+    "text": "Wallet and payments",
+    "pages": [
+      "Payment methods"
+    ]
+  },
+  {
+    "id": "lbl.paymentTapAgainRemove",
+    "text": "Tap again to remove",
+    "pages": [
+      "Payment methods"
+    ]
+  },
+  {
+    "id": "lbl.paymentTopup",
+    "text": "Top up",
+    "pages": [
+      "Payment methods"
+    ]
+  },
+  {
+    "id": "lbl.paymentTopupUnavailable",
+    "text": "Wallet top-up is not available yet.",
+    "pages": [
+      "Payment methods"
+    ]
+  },
+  {
+    "id": "lbl.popular",
+    "text": "Popular vendors",
+    "pages": [
+      "Home"
+    ]
+  },
+  {
+    "id": "lbl.produce",
+    "text": "Fresh produce",
+    "pages": [
+      "Home"
+    ]
+  },
+  {
+    "id": "lbl.productAddDrink",
+    "text": "Add a drink",
+    "pages": [
+      "Product"
+    ]
+  },
+  {
+    "id": "lbl.productAddToCart",
+    "text": "Add to cart",
+    "pages": [
+      "Product"
+    ]
+  },
+  {
+    "id": "lbl.productAlcoholWarning",
+    "text": "Alcohol. Minors may not purchase.",
+    "pages": [
+      "Product"
+    ]
+  },
+  {
+    "id": "lbl.productAllergens",
+    "text": "Allergens",
+    "pages": [
+      "Product"
+    ]
+  },
+  {
+    "id": "lbl.productBackGoodies",
+    "text": "Back to Goodies",
+    "pages": [
+      "Product"
+    ]
+  },
+  {
+    "id": "lbl.productChooseSize",
+    "text": "Choose a size",
+    "pages": [
+      "Product"
+    ]
+  },
+  {
+    "id": "lbl.productEstimatedPrice",
+    "text": "Estimated price. Final amount may vary with the exact weight.",
+    "pages": [
+      "Product"
+    ]
+  },
+  {
+    "id": "lbl.productInStock",
+    "text": "In stock",
+    "pages": [
+      "Product"
+    ]
+  },
+  {
+    "id": "lbl.productInstructions",
+    "text": "Special instructions",
+    "pages": [
+      "Product"
+    ]
+  },
+  {
+    "id": "lbl.productLarge",
+    "text": "Large",
+    "pages": [
+      "Product"
+    ]
+  },
+  {
+    "id": "lbl.productNotFound",
+    "text": "Product not found",
+    "pages": [
+      "Product"
+    ]
+  },
+  {
+    "id": "lbl.productOptional",
+    "text": "Optional",
+    "pages": [
+      "Product"
+    ]
+  },
+  {
+    "id": "lbl.productOtcWarning",
+    "text": "Over-the-counter product. Read the label and use as directed.",
+    "pages": [
+      "Product"
+    ]
+  },
+  {
+    "id": "lbl.productRecommendations",
+    "text": "You may also like",
+    "pages": [
+      "Product"
+    ]
+  },
+  {
+    "id": "lbl.productRegular",
+    "text": "Regular",
+    "pages": [
+      "Product"
+    ]
+  },
+  {
+    "id": "lbl.productRequired",
+    "text": "Required",
+    "pages": [
+      "Product"
+    ]
+  },
+  {
+    "id": "lbl.productSaveItem",
+    "text": "Save item",
+    "pages": [
+      "Product"
+    ]
+  },
+  {
+    "id": "lbl.productScheduleOrder",
+    "text": "Schedule order",
+    "pages": [
+      "Product"
+    ]
+  },
+  {
+    "id": "lbl.productSize",
+    "text": "Size",
+    "pages": [
+      "Product"
+    ]
+  },
+  {
+    "id": "lbl.productStockLow",
+    "text": "Only",
+    "pages": [
+      "Product"
+    ]
+  },
+  {
+    "id": "lbl.productStockOut",
+    "text": "Out of stock",
+    "pages": [
+      "Product"
+    ]
+  },
+  {
+    "id": "lbl.productStoreClosed",
+    "text": "Store is closed",
+    "pages": [
+      "Product"
+    ]
+  },
+  {
+    "id": "lbl.productTitle",
+    "text": "Product",
+    "pages": [
+      "Product"
+    ]
+  },
+  {
+    "id": "lbl.profileOrderHistory",
+    "text": "Order history",
+    "pages": [
+      "Profile"
+    ]
+  },
+  {
+    "id": "lbl.profilePolicies",
+    "text": "Terms and policies",
+    "pages": [
+      "Profile",
+      "Account subpages"
+    ]
+  },
+  {
+    "id": "lbl.profileShared",
+    "text": "Shared Wantiss account",
+    "pages": [
+      "Profile"
+    ]
+  },
+  {
+    "id": "lbl.profileTitle",
+    "text": "Profile",
+    "pages": [
+      "Profile"
+    ]
+  },
+  {
+    "id": "lbl.promosDetails",
+    "text": "Details",
+    "pages": [
+      "Promotions"
+    ]
+  },
+  {
+    "id": "lbl.promosTitle",
+    "text": "Coupons and offers",
+    "pages": [
+      "Promotions"
+    ]
+  },
+  {
+    "id": "lbl.promosUse",
+    "text": "Use this code",
+    "pages": [
+      "Promotions"
+    ]
+  },
+  {
+    "id": "lbl.quantityLess",
+    "text": "Less",
+    "pages": [
+      "Shared components"
+    ]
+  },
+  {
+    "id": "lbl.quantityMore",
+    "text": "More",
+    "pages": [
+      "Shared components"
+    ]
+  },
+  {
+    "id": "lbl.recent",
+    "text": "Recently viewed",
+    "pages": [
+      "Home"
+    ]
+  },
+  {
+    "id": "lbl.search",
+    "text": "Craving something? Search here",
+    "pages": [
+      "Home"
+    ]
+  },
+  {
+    "id": "lbl.searchClear",
+    "text": "Clear recent",
+    "pages": [
+      "Search"
+    ]
+  },
+  {
+    "id": "lbl.searchClearFilters",
+    "text": "Clear filters",
+    "pages": [
+      "Search"
+    ]
+  },
+  {
+    "id": "lbl.searchClearSearch",
+    "text": "Clear search",
+    "pages": [
+      "Search"
+    ]
+  },
+  {
+    "id": "lbl.searchEmpty",
+    "text": "No results found",
+    "pages": [
+      "Search"
+    ]
+  },
+  {
+    "id": "lbl.searchEmptyText",
+    "text": "Try another search or category.",
+    "pages": [
+      "Search"
+    ]
+  },
+  {
+    "id": "lbl.searchRecent",
+    "text": "Recent searches",
+    "pages": [
+      "Search"
+    ]
+  },
+  {
+    "id": "lbl.searchTabItems",
+    "text": "Items ({n})",
+    "pages": [
+      "Favorites"
+    ]
+  },
+  {
+    "id": "lbl.searchTabStores",
+    "text": "Stores ({n})",
+    "pages": [
+      "Favorites"
+    ]
+  },
+  {
+    "id": "lbl.settingsAccount",
+    "text": "Account",
+    "pages": [
+      "Settings"
+    ]
+  },
+  {
+    "id": "lbl.settingsAddAddressHint",
+    "text": "Add a delivery address",
+    "pages": [
+      "Settings"
+    ]
+  },
+  {
+    "id": "lbl.settingsAddressDefault",
+    "text": "{address} · Wantiss default",
+    "pages": [
+      "Settings"
+    ]
+  },
+  {
+    "id": "lbl.settingsAddresses",
+    "text": "Saved addresses",
+    "pages": [
+      "Settings",
+      "Profile",
+      "Addresses"
+    ]
+  },
+  {
+    "id": "lbl.settingsCoupons",
+    "text": "Coupons and offers",
+    "pages": [
+      "Settings"
+    ]
+  },
+  {
+    "id": "lbl.settingsDarkMode",
+    "text": "Dark mode",
+    "pages": [
+      "Settings"
+    ]
+  },
+  {
+    "id": "lbl.settingsFavorites",
+    "text": "Favorites",
+    "pages": [
+      "Settings",
+      "Profile"
+    ]
+  },
+  {
+    "id": "lbl.settingsHelp",
+    "text": "Help center",
+    "pages": [
+      "Settings"
+    ]
+  },
+  {
+    "id": "lbl.settingsOffers",
+    "text": "Offers and deals",
+    "pages": [
+      "Settings"
+    ]
+  },
+  {
+    "id": "lbl.settingsOrderUpdates",
+    "text": "Order updates",
+    "pages": [
+      "Settings"
+    ]
+  },
+  {
+    "id": "lbl.sheetAcceptingOrders",
+    "text": "Accepting orders",
+    "pages": [
+      "Sheets · sinfo"
+    ]
+  },
+  {
+    "id": "lbl.sheetAddContactNumber",
+    "text": "Add contact number",
+    "pages": [
+      "Contact number form"
+    ]
+  },
+  {
+    "id": "lbl.sheetAddressScope",
+    "text": "Choosing an address here only changes Goodies. Your Wantiss default stays the same.",
+    "pages": [
+      "Sheets · addr"
+    ]
+  },
+  {
+    "id": "lbl.sheetAdminContentLoaded",
+    "text": "Admin content loaded",
+    "pages": [
+      "Preview import"
+    ]
+  },
+  {
+    "id": "lbl.sheetAlcoholAccept",
+    "text": "I understand",
+    "pages": [
+      "Sheets · alcrules"
+    ]
+  },
+  {
+    "id": "lbl.sheetAlcoholRules",
+    "text": "Alcohol rules",
+    "pages": [
+      "Sheets · alcrules"
+    ]
+  },
+  {
+    "id": "lbl.sheetApply",
+    "text": "Apply",
+    "pages": [
+      "Scheduling"
+    ]
+  },
+  {
+    "id": "lbl.sheetAuto16NJT2W",
+    "text": "Manage addresses",
+    "pages": [
+      "Sheets · addr"
+    ]
+  },
+  {
+    "id": "lbl.sheetAuto1CISXZJ",
+    "text": "Edit",
+    "pages": [
+      "Contact numbers sheet"
+    ]
+  },
+  {
+    "id": "lbl.sheetAuto1DJ0R80",
+    "text": "Import Admin content",
+    "pages": [
+      "Preview import"
+    ]
+  },
+  {
+    "id": "lbl.sheetAuto1DTRBEO",
+    "text": "This clears your current choices. Items already in your cart are not affected.",
+    "pages": [
+      "Sheets · byoreset"
+    ]
+  },
+  {
+    "id": "lbl.sheetAuto1EXCTAI",
+    "text": "Import",
+    "pages": [
+      "Preview import"
+    ]
+  },
+  {
+    "id": "lbl.sheetAuto1JBCM1P",
+    "text": "• If it fails, you get a refund to your Wantiss wallet minus the delivery fee.",
+    "pages": [
+      "Sheets · alcrules"
+    ]
+  },
+  {
+    "id": "lbl.sheetAuto1JJXA6W",
+    "text": "Enter phone number",
+    "pages": [
+      "Contact number form"
+    ]
+  },
+  {
+    "id": "lbl.sheetAuto1K2QIKR",
+    "text": "All items will be removed.",
+    "pages": [
+      "Sheets · clear"
+    ]
+  },
+  {
+    "id": "lbl.sheetAuto1LJ92XO",
+    "text": "Back",
+    "pages": [
+      "Contact number form"
+    ]
+  },
+  {
+    "id": "lbl.sheetAuto1U4P0PS",
+    "text": "Go back to sample content",
+    "pages": [
+      "Preview import"
+    ]
+  },
+  {
+    "id": "lbl.sheetAuto1UP0O00",
+    "text": "Default Wantiss number",
+    "pages": [
+      "Contact numbers sheet"
+    ]
+  },
+  {
+    "id": "lbl.sheetAuto5601C6",
+    "text": "Label (optional)",
+    "pages": [
+      "Contact number form"
+    ]
+  },
+  {
+    "id": "lbl.sheetAuto81YEJ2",
+    "text": "Keep order",
+    "pages": [
+      "Sheets · cancel"
+    ]
+  },
+  {
+    "id": "lbl.sheetAuto9HY80N",
+    "text": "Save number",
+    "pages": [
+      "Contact number form"
+    ]
+  },
+  {
+    "id": "lbl.sheetAuto9O43A9",
+    "text": "• The courier checks your ID at the door. At a pickup, the shop checks it.",
+    "pages": [
+      "Sheets · alcrules"
+    ]
+  },
+  {
+    "id": "lbl.sheetAutoAED84A",
+    "text": "Paste JSON here",
+    "pages": [
+      "Preview import"
+    ]
+  },
+  {
+    "id": "lbl.sheetAutoBBS3LN",
+    "text": "e.g. Partner, Office",
+    "pages": [
+      "Contact number form"
+    ]
+  },
+  {
+    "id": "lbl.sheetAutoC0Z21F",
+    "text": "Read store reviews",
+    "pages": [
+      "Sheets · sinfo"
+    ]
+  },
+  {
+    "id": "lbl.sheetAutoCKTN2B",
+    "text": "Wantiss default",
+    "pages": [
+      "Sheets · addr"
+    ]
+  },
+  {
+    "id": "lbl.sheetAutoFMXIAY",
+    "text": "You can cancel until the store finishes preparing it.",
+    "pages": [
+      "Sheets · cancel"
+    ]
+  },
+  {
+    "id": "lbl.sheetAutoKDBKGE",
+    "text": "Close dialog",
+    "pages": [
+      "Sheets and bottom sheets"
+    ]
+  },
+  {
+    "id": "lbl.sheetAutoLZBAF5",
+    "text": "Saved for Goodies checkout only. Your Wantiss account number is not changed here. Country-code management will be handled in Wantiss settings.",
+    "pages": [
+      "Contact number form"
+    ]
+  },
+  {
+    "id": "lbl.sheetAutoQWFBNT",
+    "text": "+ Add another number",
+    "pages": [
+      "Contact numbers sheet"
+    ]
+  },
+  {
+    "id": "lbl.sheetAutoSTYZV6",
+    "text": "Phone number",
+    "pages": [
+      "Contact number form"
+    ]
+  },
+  {
+    "id": "lbl.sheetAutoT5109D",
+    "text": "Start over",
+    "pages": [
+      "Sheets · byoreset"
+    ]
+  },
+  {
+    "id": "lbl.sheetAutoWFRFF9",
+    "text": "Cancel",
+    "pages": [
+      "Sheets · alcrules",
+      "Sheets · clear"
+    ]
+  },
+  {
+    "id": "lbl.sheetBuilderSave",
+    "text": "Save draft and leave",
+    "pages": [
+      "Sheets · byoleave"
+    ]
+  },
+  {
+    "id": "lbl.sheetCancelConfirm",
+    "text": "Yes, cancel order",
+    "pages": [
+      "Sheets · cancel"
+    ]
+  },
+  {
+    "id": "lbl.sheetCancelOrder",
+    "text": "Cancel this order?",
+    "pages": [
+      "Sheets · cancel"
+    ]
+  },
+  {
+    "id": "lbl.sheetChooseDay",
+    "text": "Choose an available day.",
+    "pages": [
+      "Scheduling"
+    ]
+  },
+  {
+    "id": "lbl.sheetChooseStore",
+    "text": "Choose a store before scheduling.",
+    "pages": [
+      "Scheduling"
+    ]
+  },
+  {
+    "id": "lbl.sheetClampEarliest",
+    "text": "Choose the minimum available time or a later available time.",
+    "pages": [
+      "Scheduling"
+    ]
+  },
+  {
+    "id": "lbl.sheetClearCart",
+    "text": "Clear your cart?",
+    "pages": [
+      "Sheets · clear"
+    ]
+  },
+  {
+    "id": "lbl.sheetClearCartAction",
+    "text": "Clear cart",
+    "pages": [
+      "Sheets · clear"
+    ]
+  },
+  {
+    "id": "lbl.sheetClosedDayReason",
+    "text": "This store has no remaining scheduled times on that day. Choose another day.",
+    "pages": [
+      "Scheduling"
+    ]
+  },
+  {
+    "id": "lbl.sheetClosedNow",
+    "text": "Closed now",
+    "pages": [
+      "Sheets · sinfo"
+    ]
+  },
+  {
+    "id": "lbl.sheetContactNumber",
+    "text": "Contact number",
+    "pages": [
+      "Contact numbers sheet"
+    ]
+  },
+  {
+    "id": "lbl.sheetContactNumberHint",
+    "text": "We use this number for this order only. Your Wantiss account number is never changed here.",
+    "pages": [
+      "Contact numbers sheet"
+    ]
+  },
+  {
+    "id": "lbl.sheetCourierAtGate",
+    "text": "I am at the gate",
+    "pages": [
+      "Sheets · msg"
+    ]
+  },
+  {
+    "id": "lbl.sheetCourierCall",
+    "text": "Please call me",
+    "pages": [
+      "Sheets · msg"
+    ]
+  },
+  {
+    "id": "lbl.sheetCourierDoor",
+    "text": "Leave it at the door",
+    "pages": [
+      "Sheets · msg"
+    ]
+  },
+  {
+    "id": "lbl.sheetCourierLate",
+    "text": "Running 5 min late",
+    "pages": [
+      "Sheets · msg"
+    ]
+  },
+  {
+    "id": "lbl.sheetCourierSent",
+    "text": "Sent: {message}",
+    "pages": [
+      "Sheets · msg"
+    ]
+  },
+  {
+    "id": "lbl.sheetCourierTitle",
+    "text": "Message courier",
+    "pages": [
+      "Sheets · msg"
+    ]
+  },
+  {
+    "id": "lbl.sheetDefaultNumber",
+    "text": "Default Wantiss number",
+    "pages": [
+      "Contact numbers sheet",
+      "Checkout",
+      "Shared state messages"
+    ]
+  },
+  {
+    "id": "lbl.sheetDeleteAddressBody",
+    "text": "Remove {address} from your saved addresses?",
+    "pages": [
+      "Sheets · remove-address"
+    ]
+  },
+  {
+    "id": "lbl.sheetDeleteAddressConfirm",
+    "text": "Delete address",
+    "pages": [
+      "Sheets · remove-address"
+    ]
+  },
+  {
+    "id": "lbl.sheetDeleteAddressTitle",
+    "text": "Delete this address?",
+    "pages": [
+      "Sheets · remove-address"
+    ]
+  },
+  {
+    "id": "lbl.sheetDeliverToTitle",
+    "text": "Deliver to",
+    "pages": [
+      "Sheets · addr"
+    ]
+  },
+  {
+    "id": "lbl.sheetDeliveryAndPickup",
+    "text": "Delivery and pickup",
+    "pages": [
+      "Sheets · sinfo"
+    ]
+  },
+  {
+    "id": "lbl.sheetDemoMoney",
+    "text": "Demo: no real money moves.",
+    "pages": [
+      "Sheets · topup"
+    ]
+  },
+  {
+    "id": "lbl.sheetDiscard",
+    "text": "Discard",
+    "pages": [
+      "Sheets · byoleave"
+    ]
+  },
+  {
+    "id": "lbl.sheetDiscardText",
+    "text": "The item in your cart stays as it was.",
+    "pages": [
+      "Sheets · byoleave"
+    ]
+  },
+  {
+    "id": "lbl.sheetDiscardTitle",
+    "text": "Discard your changes?",
+    "pages": [
+      "Sheets · byoleave"
+    ]
+  },
+  {
+    "id": "lbl.sheetDone",
+    "text": "Done",
+    "pages": [
+      "Group orders"
+    ]
+  },
+  {
+    "id": "lbl.sheetDriverReviewThanks",
+    "text": "Thanks for rating your driver!",
+    "pages": [
+      "Review sheet"
+    ]
+  },
+  {
+    "id": "lbl.sheetDuplicateNumber",
+    "text": "You already saved that number",
+    "pages": [
+      "Contact number form"
+    ]
+  },
+  {
+    "id": "lbl.sheetEditContactNumber",
+    "text": "Edit contact number",
+    "pages": [
+      "Contact number form"
+    ]
+  },
+  {
+    "id": "lbl.sheetEditNumber",
+    "text": "Edit number",
+    "pages": [
+      "Contact numbers sheet"
+    ]
+  },
+  {
+    "id": "lbl.sheetEndGroup",
+    "text": "End group order",
+    "pages": [
+      "Group orders"
+    ]
+  },
+  {
+    "id": "lbl.sheetExactTime",
+    "text": "Choose a time",
+    "pages": [
+      "Scheduling"
+    ]
+  },
+  {
+    "id": "lbl.sheetGoodiesNumber",
+    "text": "Goodies number",
+    "pages": [
+      "Contact numbers sheet",
+      "Shared state messages"
+    ]
+  },
+  {
+    "id": "lbl.sheetGroupMembers",
+    "text": "Group members",
+    "pages": [
+      "Group orders"
+    ]
+  },
+  {
+    "id": "lbl.sheetGroupOr",
+    "text": "or start your own",
+    "pages": [
+      "Group orders"
+    ]
+  },
+  {
+    "id": "lbl.sheetGroupTitle",
+    "text": "Group order",
+    "pages": [
+      "Group orders"
+    ]
+  },
+  {
+    "id": "lbl.sheetInvalidJson",
+    "text": "That is not valid JSON",
+    "pages": [
+      "Preview import"
+    ]
+  },
+  {
+    "id": "lbl.sheetInviteCode",
+    "text": "GROUP INVITE CODE",
+    "pages": [
+      "Group orders"
+    ]
+  },
+  {
+    "id": "lbl.sheetInvitePeople",
+    "text": "Invite people",
+    "pages": [
+      "Group orders"
+    ]
+  },
+  {
+    "id": "lbl.sheetJoinGroup",
+    "text": "Join a group order",
+    "pages": [
+      "Group orders"
+    ]
+  },
+  {
+    "id": "lbl.sheetJoinGroupHint",
+    "text": "Enter the invite code, or scan the QR code your friend shared.",
+    "pages": [
+      "Group orders"
+    ]
+  },
+  {
+    "id": "lbl.sheetKeepAddress",
+    "text": "Keep address",
+    "pages": [
+      "Sheets · remove-address"
+    ]
+  },
+  {
+    "id": "lbl.sheetKeepCart",
+    "text": "Keep current cart",
+    "pages": [
+      "Sheets · newcart",
+      "Sheets · replace"
+    ]
+  },
+  {
+    "id": "lbl.sheetKeepEditing",
+    "text": "Keep editing",
+    "pages": [
+      "Sheets · byoleave",
+      "Sheets · byoreset"
+    ]
+  },
+  {
+    "id": "lbl.sheetKeepItem",
+    "text": "Keep item",
+    "pages": [
+      "Sheets · remove-item"
+    ]
+  },
+  {
+    "id": "lbl.sheetKeepNumber",
+    "text": "Keep number",
+    "pages": [
+      "Sheets · remove-number"
+    ]
+  },
+  {
+    "id": "lbl.sheetKmAway",
+    "text": "{km} km away",
+    "pages": [
+      "Sheets · sinfo",
+      "Store"
+    ]
+  },
+  {
+    "id": "lbl.sheetLeaveText",
+    "text": "Your choices can be saved as a draft so you can pick up where you left off.",
+    "pages": [
+      "Sheets · byoleave"
+    ]
+  },
+  {
+    "id": "lbl.sheetLeaveTitle",
+    "text": "Leave this builder?",
+    "pages": [
+      "Sheets · byoleave"
+    ]
+  },
+  {
+    "id": "lbl.sheetNoScheduleClosed",
+    "text": "This store does not accept scheduled orders.",
+    "pages": [
+      "Scheduling"
+    ]
+  },
+  {
+    "id": "lbl.sheetNumberRemoved",
+    "text": "Number removed",
+    "pages": [
+      "Contact numbers sheet"
+    ]
+  },
+  {
+    "id": "lbl.sheetNumberSaved",
+    "text": "Number saved for Goodies checkout",
+    "pages": [
+      "Contact number form"
+    ]
+  },
+  {
+    "id": "lbl.sheetOpenNow",
+    "text": "Open now",
+    "pages": [
+      "Sheets · sinfo"
+    ]
+  },
+  {
+    "id": "lbl.sheetOrderNotFound",
+    "text": "Order not found",
+    "pages": [
+      "Review sheet"
+    ]
+  },
+  {
+    "id": "lbl.sheetPhoneInUse",
+    "text": "This number is used by an active order",
+    "pages": [
+      "Contact numbers sheet"
+    ]
+  },
+  {
+    "id": "lbl.sheetPhoneInvalid",
+    "text": "Enter a valid phone number (8 to 15 digits)",
+    "pages": [
+      "Contact number form"
+    ]
+  },
+  {
+    "id": "lbl.sheetPickRating",
+    "text": "Pick a star rating",
+    "pages": [
+      "Review sheet"
+    ]
+  },
+  {
+    "id": "lbl.sheetRatingSummary",
+    "text": "★ {rating} ({n} reviews)",
+    "pages": [
+      "Sheets · sinfo"
+    ]
+  },
+  {
+    "id": "lbl.sheetRemoveItemBody",
+    "text": "Remove {item} from your cart?",
+    "pages": [
+      "Sheets · remove-item"
+    ]
+  },
+  {
+    "id": "lbl.sheetRemoveItemConfirm",
+    "text": "Remove item",
+    "pages": [
+      "Sheets · remove-item"
+    ]
+  },
+  {
+    "id": "lbl.sheetRemoveItemTitle",
+    "text": "Remove this item?",
+    "pages": [
+      "Sheets · remove-item"
+    ]
+  },
+  {
+    "id": "lbl.sheetRemoveNumber",
+    "text": "Remove number",
+    "pages": [
+      "Contact numbers sheet"
+    ]
+  },
+  {
+    "id": "lbl.sheetRemoveNumberBody",
+    "text": "Remove {number} from your Goodies checkout contacts?",
+    "pages": [
+      "Sheets · remove-number"
+    ]
+  },
+  {
+    "id": "lbl.sheetRemoveNumberConfirm",
+    "text": "Remove number",
+    "pages": [
+      "Sheets · remove-number"
+    ]
+  },
+  {
+    "id": "lbl.sheetRemoveNumberTitle",
+    "text": "Remove this contact number?",
+    "pages": [
+      "Sheets · remove-number"
+    ]
+  },
+  {
+    "id": "lbl.sheetReorder",
+    "text": "Replace and reorder",
+    "pages": [
+      "Sheets · replace"
+    ]
+  },
+  {
+    "id": "lbl.sheetReplace",
+    "text": "Replace and add",
+    "pages": [
+      "Sheets · newcart"
+    ]
+  },
+  {
+    "id": "lbl.sheetReplaceCart",
+    "text": "Replace your cart?",
+    "pages": [
+      "Sheets · replace"
+    ]
+  },
+  {
+    "id": "lbl.sheetReviewComment",
+    "text": "Add a comment (optional)",
+    "pages": [
+      "Review sheet"
+    ]
+  },
+  {
+    "id": "lbl.sheetReviewThanks",
+    "text": "Thanks for your review!",
+    "pages": [
+      "Review sheet"
+    ]
+  },
+  {
+    "id": "lbl.sheetSameWantissPhone",
+    "text": "That is already your Wantiss number",
+    "pages": [
+      "Contact number form"
+    ]
+  },
+  {
+    "id": "lbl.sheetSampleContent",
+    "text": "Using sample content",
+    "pages": [
+      "Preview import"
+    ]
+  },
+  {
+    "id": "lbl.sheetScheduledAvailable",
+    "text": "Available while closed",
+    "pages": [
+      "Sheets · sinfo"
+    ]
+  },
+  {
+    "id": "lbl.sheetScheduledFor",
+    "text": "Scheduled for {day}, {time}",
+    "pages": [
+      "Scheduling"
+    ]
+  },
+  {
+    "id": "lbl.sheetScheduledMinimum",
+    "text": "Earliest available time",
+    "pages": [
+      "Scheduling"
+    ]
+  },
+  {
+    "id": "lbl.sheetScheduledOnlyOpen",
+    "text": "Only while open",
+    "pages": [
+      "Sheets · sinfo"
+    ]
+  },
+  {
+    "id": "lbl.sheetScheduleTitle",
+    "text": "Schedule your order",
+    "pages": [
+      "Scheduling"
+    ]
+  },
+  {
+    "id": "lbl.sheetSharedCart",
+    "text": "Items in this group",
+    "pages": [
+      "Group orders"
+    ]
+  },
+  {
+    "id": "lbl.sheetStartCart",
+    "text": "Start a new cart?",
+    "pages": [
+      "Sheets · newcart"
+    ]
+  },
+  {
+    "id": "lbl.sheetStartGroupHint",
+    "text": "You pay for the whole order. Friends add their items from their own phones.",
+    "pages": [
+      "Group orders"
+    ]
+  },
+  {
+    "id": "lbl.sheetStartGroupTitle",
+    "text": "Start a group order",
+    "pages": [
+      "Group orders"
+    ]
+  },
+  {
+    "id": "lbl.sheetStartOver",
+    "text": "Start over?",
+    "pages": [
+      "Sheets · byoreset"
+    ]
+  },
+  {
+    "id": "lbl.sheetSubmitReview",
+    "text": "Submit review",
+    "pages": [
+      "Review sheet"
+    ]
+  },
+  {
+    "id": "lbl.sheetSubtotal",
+    "text": "Subtotal",
+    "pages": [
+      "Group orders"
+    ]
+  },
+  {
+    "id": "lbl.sheetTopup",
+    "text": "Top up wallet",
+    "pages": [
+      "Sheets · topup"
+    ]
+  },
+  {
+    "id": "lbl.sheetWalletToppedUp",
+    "text": "Wallet topped up to {amount}",
+    "pages": [
+      "Sheets · topup"
+    ]
+  },
+  {
+    "id": "lbl.shopAuto12HC9JV",
+    "text": "Demo only. No real payment is taken.",
+    "pages": [
+      "Checkout"
+    ]
+  },
+  {
+    "id": "lbl.shopAuto15CA8YK",
+    "text": "Order",
+    "pages": [
+      "Order confirmation",
+      "Order tracking"
+    ]
+  },
+  {
+    "id": "lbl.shopAuto18E4IBZ",
+    "text": "Delivery + pickup",
+    "pages": [
+      "Store"
+    ]
+  },
+  {
+    "id": "lbl.shopAuto1GWRJAO",
+    "text": "Browse stores",
+    "pages": [
+      "Favorites"
+    ]
+  },
+  {
+    "id": "lbl.shopAuto1RR9Q6U",
+    "text": "Demo: ID valid",
+    "pages": [
+      "Order tracking"
+    ]
+  },
+  {
+    "id": "lbl.shopAuto1TZ3XVT",
+    "text": "Goodies checkout number",
+    "pages": [
+      "Checkout"
+    ]
+  },
+  {
+    "id": "lbl.shopAuto1WOHU9O",
+    "text": "Pickup coordinates have not been provided by the store.",
+    "pages": [
+      "Shop · shared"
+    ]
+  },
+  {
+    "id": "lbl.shopAuto1YYH3EC",
+    "text": "Change",
+    "pages": [
+      "Checkout"
+    ]
+  },
+  {
+    "id": "lbl.shopAuto2L0NX5",
+    "text": "Demo: ID failed",
+    "pages": [
+      "Order tracking"
+    ]
+  },
+  {
+    "id": "lbl.shopAutoFLJ2MD",
+    "text": "Create wallet",
+    "pages": [
+      "Checkout"
+    ]
+  },
+  {
+    "id": "lbl.shopAutoU0R7PW",
+    "text": "Remove",
+    "pages": [
+      "Cart"
+    ]
+  },
+  {
+    "id": "lbl.sortFastest",
+    "text": "Fastest delivery",
+    "pages": [
+      "Search"
+    ]
+  },
+  {
+    "id": "lbl.sortPopularity",
+    "text": "Popularity",
+    "pages": [
+      "Search"
+    ]
+  },
+  {
+    "id": "lbl.sortPriceHigh",
+    "text": "Price: high to low",
+    "pages": [
+      "Search"
+    ]
+  },
+  {
+    "id": "lbl.sortPriceLow",
+    "text": "Price: low to high",
+    "pages": [
+      "Search"
+    ]
+  },
+  {
+    "id": "lbl.sortRating",
+    "text": "Highest rating",
+    "pages": [
+      "Search"
+    ]
+  },
+  {
+    "id": "lbl.sortRelevance",
+    "text": "Relevance",
+    "pages": [
+      "Search"
+    ]
+  },
+  {
+    "id": "lbl.stageD0",
+    "text": "Order placed",
+    "pages": [
+      "Order tracking"
+    ]
+  },
+  {
+    "id": "lbl.stageD1",
+    "text": "Vendor confirmed",
+    "pages": [
+      "Order tracking"
+    ]
+  },
+  {
+    "id": "lbl.stageD2",
+    "text": "Preparing order",
+    "pages": [
+      "Order tracking"
+    ]
+  },
+  {
+    "id": "lbl.stageD3",
+    "text": "Ready for courier pickup",
+    "pages": [
+      "Order tracking"
+    ]
+  },
+  {
+    "id": "lbl.stageD4",
+    "text": "Courier assigned",
+    "pages": [
+      "Order tracking"
+    ]
+  },
+  {
+    "id": "lbl.stageD5",
+    "text": "On the way",
+    "pages": [
+      "Order tracking"
+    ]
+  },
+  {
+    "id": "lbl.stageD6",
+    "text": "Delivered",
+    "pages": [
+      "Order tracking"
+    ]
+  },
+  {
+    "id": "lbl.stageP0",
+    "text": "Order placed",
+    "pages": [
+      "Order tracking"
+    ]
+  },
+  {
+    "id": "lbl.stageP1",
+    "text": "Vendor confirmed",
+    "pages": [
+      "Order tracking"
+    ]
+  },
+  {
+    "id": "lbl.stageP2",
+    "text": "Preparing order",
+    "pages": [
+      "Order tracking"
+    ]
+  },
+  {
+    "id": "lbl.stageP3",
+    "text": "Ready for pickup",
+    "pages": [
+      "Order tracking"
+    ]
+  },
+  {
+    "id": "lbl.stageP4",
+    "text": "Picked up",
+    "pages": [
+      "Order tracking"
+    ]
+  },
+  {
+    "id": "lbl.storeAddAddressForDistance",
+    "text": "Add address to see distance",
+    "pages": [
+      "Sheets · sinfo",
+      "Shared components"
+    ]
+  },
+  {
+    "id": "lbl.storeAddress",
+    "text": "Address",
+    "pages": [
+      "Sheets · sinfo"
+    ]
+  },
+  {
+    "id": "lbl.storeAdvanceTime",
+    "text": "Earliest order time",
+    "pages": [
+      "Sheets · sinfo"
+    ]
+  },
+  {
+    "id": "lbl.storeAll",
+    "text": "All",
+    "pages": [
+      "Store"
+    ]
+  },
+  {
+    "id": "lbl.storeBack",
+    "text": "Back to store",
+    "pages": [
+      "Store reviews"
+    ]
+  },
+  {
+    "id": "lbl.storeBackToStores",
+    "text": "Back to stores",
+    "pages": [
+      "Store reviews"
+    ]
+  },
+  {
+    "id": "lbl.storeBeFirstReview",
+    "text": "Be the first customer to review this store.",
+    "pages": [
+      "Store",
+      "Store reviews"
+    ]
+  },
+  {
+    "id": "lbl.storeClosed",
+    "text": "Closed right now",
+    "pages": [
+      "Store"
+    ]
+  },
+  {
+    "id": "lbl.storeClosedToday",
+    "text": "Closed today",
+    "pages": [
+      "Shared state messages"
+    ]
+  },
+  {
+    "id": "lbl.storeCurrentlyClosed",
+    "text": "Currently closed",
+    "pages": [
+      "Sheets · sinfo",
+      "Shared state messages"
+    ]
+  },
+  {
+    "id": "lbl.storeCurrentStatus",
+    "text": "Current status",
+    "pages": [
+      "Sheets · sinfo"
+    ]
+  },
+  {
+    "id": "lbl.storeCustom",
+    "text": "Custom products",
+    "pages": [
+      "Build Your Own",
+      "Store"
+    ]
+  },
+  {
+    "id": "lbl.storeCustomerReviews",
+    "text": "Customer reviews",
+    "pages": [
+      "Sheets · sinfo",
+      "Store reviews"
+    ]
+  },
+  {
+    "id": "lbl.storeDeals",
+    "text": "Deals",
+    "pages": [
+      "Store"
+    ]
+  },
+  {
+    "id": "lbl.storeDeliveryFee",
+    "text": "Delivery fee",
+    "pages": [
+      "Sheets · sinfo"
+    ]
+  },
+  {
+    "id": "lbl.storeDistance",
+    "text": "Distance",
+    "pages": [
+      "Sheets · sinfo"
+    ]
+  },
+  {
+    "id": "lbl.storeDistanceFromAddress",
+    "text": "{km} km from your address",
+    "pages": [
+      "Sheets · sinfo"
+    ]
+  },
+  {
+    "id": "lbl.storeEmail",
+    "text": "Email",
+    "pages": [
+      "Sheets · sinfo"
+    ]
+  },
+  {
+    "id": "lbl.storeEstimatedDelivery",
+    "text": "Estimated delivery",
+    "pages": [
+      "Sheets · sinfo"
+    ]
+  },
+  {
+    "id": "lbl.storeGroupOrder",
+    "text": "Start a group order",
+    "pages": [
+      "Store"
+    ]
+  },
+  {
+    "id": "lbl.storeHoursNotSet",
+    "text": "Opening hours not set",
+    "pages": [
+      "Shared state messages"
+    ]
+  },
+  {
+    "id": "lbl.storeHoursUnavailable",
+    "text": "Opening hours unavailable",
+    "pages": [
+      "Shared state messages"
+    ]
+  },
+  {
+    "id": "lbl.storeInfo",
+    "text": "Store info",
+    "pages": [
+      "Store"
+    ]
+  },
+  {
+    "id": "lbl.storeMinimumOrder",
+    "text": "Minimum order",
+    "pages": [
+      "Sheets · sinfo"
+    ]
+  },
+  {
+    "id": "lbl.storeNewNoReviews",
+    "text": "New · No reviews yet",
+    "pages": [
+      "Store"
+    ]
+  },
+  {
+    "id": "lbl.storeNoComment",
+    "text": "No comment",
+    "pages": [
+      "Store",
+      "Store reviews"
+    ]
+  },
+  {
+    "id": "lbl.storeNoItems",
+    "text": "No items found",
+    "pages": [
+      "Store"
+    ]
+  },
+  {
+    "id": "lbl.storeNoReviews",
+    "text": "No reviews yet",
+    "pages": [
+      "Store",
+      "Store reviews"
+    ]
+  },
+  {
+    "id": "lbl.storeNoReviewsYet",
+    "text": "No reviews yet",
+    "pages": [
+      "Sheets · sinfo",
+      "Shared components",
+      "Store reviews"
+    ]
+  },
+  {
+    "id": "lbl.storeNotFound",
+    "text": "Store not found",
+    "pages": [
+      "Store reviews"
+    ]
+  },
+  {
+    "id": "lbl.storeOpeningHours",
+    "text": "Opening hours",
+    "pages": [
+      "Sheets · sinfo"
+    ]
+  },
+  {
+    "id": "lbl.storeOpensOnDay",
+    "text": "Opens {time} {day}",
+    "pages": [
+      "Shared state messages"
+    ]
+  },
+  {
+    "id": "lbl.storeOpensToday",
+    "text": "Opens {time} today",
+    "pages": [
+      "Shared state messages"
+    ]
+  },
+  {
+    "id": "lbl.storeOpensTomorrow",
+    "text": "Opens {time} tomorrow",
+    "pages": [
+      "Shared state messages"
+    ]
+  },
+  {
+    "id": "lbl.storeOpenUntil",
+    "text": "Open until {time}",
+    "pages": [
+      "Shared state messages"
+    ]
+  },
+  {
+    "id": "lbl.storeOrderMethods",
+    "text": "Order methods",
+    "pages": [
+      "Sheets · sinfo"
+    ]
+  },
+  {
+    "id": "lbl.storePhone",
+    "text": "Phone",
+    "pages": [
+      "Sheets · sinfo"
+    ]
+  },
+  {
+    "id": "lbl.storePopular",
+    "text": "Popular",
+    "pages": [
+      "Store"
+    ]
+  },
+  {
+    "id": "lbl.storeRatingsOnly",
+    "text": "Ratings are available, but written review details are not available here yet.",
+    "pages": [
+      "Store",
+      "Store reviews"
+    ]
+  },
+  {
+    "id": "lbl.storeReadReviews",
+    "text": "Read store reviews",
+    "pages": [
+      "Store"
+    ]
+  },
+  {
+    "id": "lbl.storeReviews",
+    "text": "Reviews",
+    "pages": [
+      "Store",
+      "Store reviews"
+    ]
+  },
+  {
+    "id": "lbl.storeReviewsTitle",
+    "text": "Store reviews",
+    "pages": [
+      "Store reviews"
+    ]
+  },
+  {
+    "id": "lbl.storeSampleReview",
+    "text": "sample review",
+    "pages": [
+      "Store",
+      "Store reviews"
+    ]
+  },
+  {
+    "id": "lbl.storeSave",
+    "text": "Save store",
+    "pages": [
+      "Store"
+    ]
+  },
+  {
+    "id": "lbl.storeScheduledOrders",
+    "text": "Scheduled orders",
+    "pages": [
+      "Sheets · sinfo"
+    ]
+  },
+  {
+    "id": "lbl.storeSearch",
+    "text": "Search in {store}",
+    "pages": [
+      "Store"
+    ]
+  },
+  {
+    "id": "lbl.storeServices",
+    "text": "Available services",
+    "pages": [
+      "Sheets · sinfo"
+    ]
+  },
+  {
+    "id": "lbl.storeTryAnother",
+    "text": "Try another word.",
+    "pages": [
+      "Store"
+    ]
+  },
+  {
+    "id": "lbl.storeWebsite",
+    "text": "Website",
+    "pages": [
+      "Sheets · sinfo"
+    ]
+  },
+  {
+    "id": "lbl.storeYourReview",
+    "text": "Your review",
+    "pages": [
+      "Store",
+      "Store reviews"
+    ]
+  },
+  {
+    "id": "lbl.trending",
+    "text": "Trending right now",
+    "pages": [
+      "Home",
+      "Search"
+    ]
+  },
+  {
+    "id": "lbl.wallet.loadFailed",
+    "text": "Could not load wallet. Tap to retry.",
+    "pages": [
+      "Payment methods"
+    ]
+  },
+  {
+    "id": "lbl.wallet.missing",
+    "text": "No wallet found for this account.",
+    "pages": [
+      "Payment methods"
+    ]
+  },
+  {
+    "id": "lbl.wallet.signIn",
+    "text": "Sign in to view your wallet.",
+    "pages": [
+      "Payment methods"
+    ]
+  },
+  {
+    "id": "lbl.wallet.title",
+    "text": "Wantiss Crédité",
+    "pages": [
+      "Payment methods"
+    ]
+  }
+]

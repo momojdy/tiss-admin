@@ -1,63 +1,125 @@
+import {EditableNativeText as Text} from '../EditableNativeText';
 import React, {useState, useEffect} from 'react';
-import {View, Text, Pressable, ScrollView, useWindowDimensions, Image} from 'react-native';
+import {previewClipboard as Clipboard} from '../previewNative';
+import {MaterialCommunityIcons} from '@expo/vector-icons';
+import {View, Text as UnusedNativeText, Pressable, ScrollView, useWindowDimensions, Image, TextInput, ActivityIndicator, Alert} from 'react-native';
 import {Icon} from '../components/Icon';
 import {T, Grad, Circ, Bar, Sh, Rail, Chips, Cta, Card, Row, Badge, Ttl, Empty, Tile, Radio, Seg, Stepper, Input, Switch, bgIdx, useTheme} from '../components/ui';
 import {Dish, StoreCard, ItemRow} from '../components/cards';
-import {fmtTime, fmtDay, hasAlcohol, alcAge, S, ST, STB, IT, DEALS, money, dp, addr, cnt, first, totals, isPk, ctOf, qtyIn, done, TL, TP, defAddr, emit, save, toast, refreshLiveSchedules, previewOnly, ui, stage} from '../store';
+import {storeSub, lineStore, fmtTime, fmtDay, fmtStoreTime, fmtStoreDay, hasAlcohol, alcAge, S, ST, STB, IT, DEALS, money, dp, addr, cnt, first, totals, isPk, ctOf, qtyIn, done, TL, TP, defAddr, emit, save, toast, refreshLiveSchedules, refreshStoreDistance} from '../store';
 import {go, tab, back, browse, heart, favp, setSize, toggleDrink, productQty, productAdd, qty, clearAsk, promoApply, promoClear, goCheckout, checkoutNext, setMode, setTip, setSch, setPay, setCard, placeOrder, cancelAsk, reorder, setOrdersTab, refreshPaymentOptions} from '../actions';
 import {CHOOSE_SIZE_CATS, setConsent, createWallet, idResult} from '../actions';
-import {rgText, stageLabels, fees, faq as faqList} from '../content';
+import {rgText, stageLabels, fees, faq as faqList, label} from '../content';
 import {providerInfo} from '../providers';
 import {byoRows, byoOn, lineBad, bzEdit, bzRemove} from '../builders/engine';
 import {SEED_REVIEWS} from '../data/seed';
+import {ScheduleInline} from '../components/Sheets';
 import {t as tr} from '../i18n';
-import {supabase} from '../../lib/supabase';
+import {previewBackend as supabase} from '../previewRuntime';
 import Svg, {Path, Circle} from 'react-native-svg';
+import MapView, {Marker, Polyline} from '../previewNative';
 
 
 const Hero = ({s, onBack, right}: any) => (
-  <Grad idx={bgIdx(s.bg)} style={{height: 180, alignItems: 'center', justifyContent: 'center'}}>
-    {s.cover || s.thumbnail || s.logo ? <Image source={{uri: s.cover || s.thumbnail || s.logo}} style={{width: '100%', height: 180, position: 'absolute'}} resizeMode="cover" /> : <Text style={{fontSize: 90}}>{s.e}</Text>}
+  <View style={{height: 220, overflow: 'hidden', backgroundColor: '#E8EDE5'}}>
+    {s.cover || s.thumbnail || s.logo ? <Image source={{uri: s.cover || s.thumbnail || s.logo}} style={{width: '100%', height: 220, position: 'absolute'}} resizeMode="cover" /> : <Grad idx={bgIdx(s.bg)} style={{height: 220, alignItems: 'center', justifyContent: 'center'}}><Text style={{fontSize: 90}}>{s.e}</Text></Grad>}
     <View style={{position: 'absolute', top: 50, left: 16}}><Circ icon="chevL" label={tr('back')} onPress={onBack} /></View>
     {right ? <View style={{position: 'absolute', top: 50, right: 16}}>{right}</View> : null}
-  </Grad>
+  </View>
 );
 
 export function Store({id}: {id: string}) {
-  useEffect(() => { void refreshLiveSchedules(); }, [id]);
-  const th = useTheme(), s = STB[id], t = S.ss[id + 't'] || 'all', q = (S.ss[id] || '').toLowerCase();
+  const [shareOpen,setShareOpen]=useState(false);
+  const [shareLoading,setShareLoading]=useState(false);
+  const [shareSending,setShareSending]=useState<string|null>(null);
+  const [shareQuery,setShareQuery]=useState('');
+  const [shareFriends,setShareFriends]=useState<Array<{id:string;name:string;avatar:string|null}>>([]);
+  const storeShareUrl='wantiss://goodies/store/'+encodeURIComponent(id);
+  const openStoreShare=async()=>{
+    setShareOpen(true);setShareLoading(true);
+    try{
+      const {data:{user}}=await supabase.auth.getUser();
+      if(!user){setShareFriends([]);return;}
+      const [{data:friendships,error:friendError},{data:profiles,error:profileError}]=await Promise.all([
+        supabase.from('user_friendships').select('requester_id,recipient_id').eq('status','accepted').or('requester_id.eq.'+user.id+',recipient_id.eq.'+user.id),
+        supabase.rpc('wantiss_message_contact_profiles')
+      ]);
+      if(friendError||profileError)throw friendError||profileError;
+      const ids=new Set((friendships||[]).map(f=>f.requester_id===user.id?f.recipient_id:f.requester_id));
+      setShareFriends((profiles||[]).filter((p:any)=>ids.has(p.id)).map((p:any)=>({id:p.id,name:p.full_name||p.wantiss_number||'Wantiss friend',avatar:p.avatar_url||null})));
+    }catch(e){Alert.alert(label("lbl.cms.2bb2b73d8ff1", "Friends unavailable"),e instanceof Error?e.message:label("lbl.cms.5ee02dc1f983", "Could not load friends."));}
+    finally{setShareLoading(false);}
+  };
+  const sendStoreToFriend=async(friendId:string)=>{
+    if(shareSending)return;setShareSending(friendId);
+    try{
+      const {data:{user}}=await supabase.auth.getUser();if(!user)throw new Error('Please sign in.');
+      const {data:existing,error:findError}=await supabase.from('conversations').select('id').eq('feature','friends').contains('participant_ids',[user.id,friendId]).limit(1).maybeSingle();
+      if(findError)throw findError;
+      let conversationId=existing?.id;
+      if(!conversationId){
+        const {data:created,error:createError}=await supabase.from('conversations').insert({participant_ids:[user.id,friendId],customer_id:user.id,feature:'friends',status:'active',title:'Wantiss conversation'}).select('id').single();
+        if(createError)throw createError;conversationId=created.id;
+      }
+      const body='[wantiss-attachment-v1]'+JSON.stringify({kind:'store',name:STB[id]?.n||'Goodies store',reference:storeShareUrl,image:STB[id]?.cover||STB[id]?.thumbnail||STB[id]?.logo||undefined});
+      const {error:sendError}=await supabase.from('messages').insert({conversation_id:conversationId,sender_id:user.id,body});
+      if(sendError)throw sendError;
+      await supabase.from('conversations').update({updated_at:new Date().toISOString()}).eq('id',conversationId);
+      setShareOpen(false);toast(label("lbl.cms.3c2b5e6ec88d", "Store shared in Wantiss Messages"));
+    }catch(e){Alert.alert(label("lbl.cms.80f7eb45bdba", "Could not share store"),e instanceof Error?e.message:label("lbl.cms.c097a7fccce6", "Please try again."));}
+    finally{setShareSending(null);}
+  };
+  const th = useTheme(), s = STB[id], address = addr(), t = S.ss[id + 't'] || 'all', q = (S.ss[id] || '').toLowerCase();
+  useEffect(() => {
+    let active = true;
+    void refreshLiveSchedules().then(() => {
+      if (active && address?.t) return refreshStoreDistance(id, address).catch(() => undefined);
+    });
+    return () => { active = false; };
+  }, [id, address?.t, address?.apt, address?.inst, address?.city, address?.department, address?.country]);
+  if (!s) return <View style={{flex:1,padding:24,alignItems:'center',justifyContent:'center',gap:12}}><Text cmsKey={"lbl.cms.3deeda5e9747"} style={{fontSize:17,fontWeight:'600',color:th.ink}}>{label("lbl.cms.3deeda5e9747", "Store unavailable")}</Text><Text cmsKey={"lbl.cms.21eb641a53bd"} style={{fontSize:13,color:th.mut,textAlign:'center'}}>{label("lbl.cms.21eb641a53bd", "This store is not available in the Goodies catalog right now.")}</Text><Pressable onPress={back} style={{padding:12}}><Text cmsKey={"lbl.cms.a55440a13be7"} style={{color:'#BF008E',fontSize:14}}>{label("lbl.cms.a55440a13be7", "Go back")}</Text></Pressable></View>;
   const l = s.it.filter((i, n) => (!q || i.n.toLowerCase().indexOf(q) > -1) && (t === 'all' || (t === 'pop' && n < 2) || (t === 'deal' && DEALS.some(d => d[0] === i.id))));
   const rows = t === 'all' || t === 'custom' ? byoRows(id, q) : null;
   const items = t === 'custom' ? [] : l;
   const reviews = s.live ? [] : SEED_REVIEWS.concat(S.rev[id] || []);
-  const tabs: [string, string][] = [['all', 'All'], ['pop', 'Popular'], ['deal', 'Deals'], ...(byoOn(id) ? [['custom', 'Build your own'] as [string, string]] : [])];
+  const tabs: [string, string][] = [['all', label('lbl.storeAll', 'All')], ['pop', label('lbl.storePopular', 'Popular')], ['deal', label('lbl.storeDeals', 'Deals')], ...(byoOn(id) ? [['custom', label('lbl.storeCustom', 'Custom products')] as [string, string]] : [])];
   return (
     <View>
-      <Hero s={s} onBack={back} right={<Circ icon="heart" label="Save store" color={S.fav.indexOf(id) > -1 ? '#FD802E' : undefined} fill={S.fav.indexOf(id) > -1} onPress={() => heart(id)} />} />
+      <Hero s={s} onBack={back} right={<View style={{flexDirection:'row',gap:8,alignItems:'center'}}><Pressable accessibilityLabel={label("lbl.cms.a7b88c6bea1a", "Share store")} onPress={()=>void openStoreShare()} style={{width:40,height:40,borderRadius:20,backgroundColor:'#FFFFFF',alignItems:'center',justifyContent:'center'}}><MaterialCommunityIcons name="share-variant-outline" size={22} color="#FD802E"/></Pressable><Circ icon="heart" label={label('lbl.storeSave', 'Save store')} color={S.fav.indexOf(id) > -1 ? '#FD802E' : undefined} fill={S.fav.indexOf(id) > -1} onPress={() => heart(id)} /></View>} />
+      {shareOpen?<View style={{margin:14,padding:14,borderRadius:18,backgroundColor:'#FFF7FB',borderWidth:1,borderColor:'#F0D9E9',gap:12}}>
+        <View style={{flexDirection:'row',alignItems:'center',justifyContent:'space-between'}}><View style={{flex:1}} /><Pressable onPress={()=>setShareOpen(false)} accessibilityLabel={label("lbl.cms.3f3b2e1178c9", "Close share panel")}><MaterialCommunityIcons name="close" size={22} color="#302631"/></Pressable></View>
+        <View style={{flexDirection:'row',alignItems:'center',gap:10}}>{s.cover||s.thumbnail||s.logo?<Image source={{uri:s.cover||s.thumbnail||s.logo||undefined}} style={{width:58,height:58,borderRadius:12}}/>:null}<View style={{flex:1}}><Text style={{color:'#302631',fontWeight:'600'}} numberOfLines={1}>{s.n}</Text><Text cmsKey={"lbl.cms.ca48b79aba54"} style={{color:'#827783',fontSize:12}}>{label("lbl.cms.ca48b79aba54", "Goodies store")}</Text></View></View>
+        <Pressable onPress={async()=>{await Clipboard.setStringAsync(storeShareUrl);toast(label("lbl.cms.eb1f7b6d929c", "Store link copied"));}} style={{padding:12,borderRadius:12,backgroundColor:'#FFFFFF',flexDirection:'row',gap:9,alignItems:'center'}}><MaterialCommunityIcons name="content-copy" size={19} color="#BF008E"/><Text cmsKey={"lbl.cms.48feb130cb0a"} style={{color:'#BF008E',fontWeight:'600'}}>{label("lbl.cms.48feb130cb0a", "Copy store link")}</Text></Pressable>
+        <Text cmsKey={"lbl.cms.edaff19cc43c"} style={{fontSize:14,fontWeight:'600',color:'#302631'}}>{label("lbl.cms.edaff19cc43c", "Send to a Wantiss friend")}</Text>
+        <TextInput value={shareQuery} onChangeText={setShareQuery} placeholder={label("lbl.cms.eb7b802f12ab", "Search friends")} style={{backgroundColor:'#FFFFFF',borderRadius:11,paddingHorizontal:12,paddingVertical:10,color:'#302631'}}/>
+        {shareLoading?<ActivityIndicator color="#BF008E"/>:<ScrollView style={{maxHeight:205}} keyboardShouldPersistTaps="handled">{shareFriends.filter(friend=>friend.name.toLowerCase().includes(shareQuery.trim().toLowerCase())).map(friend=><Pressable key={friend.id} disabled={!!shareSending} onPress={()=>void sendStoreToFriend(friend.id)} style={{paddingVertical:10,flexDirection:'row',alignItems:'center',gap:10}}>{friend.avatar?<Image source={{uri:friend.avatar}} style={{width:38,height:38,borderRadius:19}}/>:<View style={{width:38,height:38,borderRadius:19,backgroundColor:'#EBD7E7',alignItems:'center',justifyContent:'center'}}><MaterialCommunityIcons name="account" size={20} color="#BF008E"/></View>}<Text style={{color:'#302631',flex:1}} numberOfLines={1}>{friend.name}</Text>{shareSending===friend.id?<ActivityIndicator size="small" color="#BF008E"/>:<MaterialCommunityIcons name="send-outline" size={20} color="#BF008E"/>}</Pressable>)}{!shareFriends.length?<Text cmsKey={"lbl.cms.908e66f0e1a3"} style={{color:'#827783',padding:8}}>{label("lbl.cms.908e66f0e1a3", "No accepted friends to show yet.")}</Text>:null}</ScrollView>}
+      </View>:null}
       <View style={{paddingHorizontal: 16}}>
-        <T size={24} weight="800" style={{marginTop: 16}}>{s.n}</T>
-        <T size={13} color={th.mut} style={{marginTop: 3}}>{s.k}{s.live ? ' · Distance unavailable' : ' · ' + s.km.toFixed(1) + ' km away'}</T>
-        {!s.open ? <Card style={{backgroundColor: th.brt, borderColor: th.br, marginTop: 12}}><T weight="700">Closed right now</T><T size={13} color={th.mut}>{s.acceptScheduledOrders ? s.nx + '. Scheduled orders are available for future opening-time slots.' : s.nx + '. Ordering is paused until then.'}</T></Card> : null}
+        <T size={24} weight="600" style={{marginTop: 16}}>{s.n}</T>
+        <T cmsKeys={["lbl.cms.ffbce6e6a57c","lbl.cms.6f24af4842a9","lbl.cms.a2cc2b9fa21d","lbl.cms.0a7b93a19c11",'lbl.sheetKmAway',"lbl.cms.a85c2c949931"]} size={13} color={th.mut} style={{marginTop: 3}}>{s.k}{s.live && s.distanceReady ? ' · ' + (Math.round(s.km * 1000) < 1000 ? Math.round(s.km * 1000) + label("lbl.cms.ffbce6e6a57c", " m") : s.km.toFixed(1) + label("lbl.cms.6f24af4842a9", " km")) + (S.currentLocation && S.currentLocation.addressText === address?.t ? label("lbl.cms.a2cc2b9fa21d", " from your location") : label("lbl.cms.0a7b93a19c11", " from your address")) : !s.live ? ' · ' + label('lbl.sheetKmAway', '{km} km away').replace('{km}', s.km.toFixed(1)) : s.live && s.distanceError ? label("lbl.cms.a85c2c949931", " · Distance unavailable") : ''}</T>
+        {!s.open ? <Card style={{backgroundColor: th.brt, borderColor: th.br, marginTop: 12}}><T cmsKey={'lbl.storeClosed'} weight="600">{label('lbl.storeClosed', 'Closed right now')}</T><T cmsKeys={["lbl.cms.9a05153daef9","lbl.cms.f1cd4727c8c8"]} size={13} color={th.mut}>{s.acceptScheduledOrders ? s.nx + label("lbl.cms.9a05153daef9", ". Scheduled orders are available for future opening-time slots.") : s.nx + label("lbl.cms.f1cd4727c8c8", ". Ordering is paused until then.")}</T></Card> : null}
         <View style={{flexDirection: 'row', flexWrap: 'wrap', gap: 8, marginTop: 12, marginBottom: 4}}>
-          <Pressable accessibilityRole="button" accessibilityLabel="Read store reviews" onPress={() => go('reviews', id)}><Badge green label={s.live && s.rv === 0 ? 'New · No reviews yet' : '★ ' + s.r.toFixed(1) + ' (' + s.rv + ')'} /></Pressable><Badge label={s.eta + ' min'} /><Badge label={s.fee === 0 ? tr('freeDelivery') : money(s.fee) + ' ' + tr('delivery')} /><Badge label={'Min. ' + money(s.min)} /><Badge label="Delivery + pickup" />{s.pr ? <Badge label={s.pr} /> : null}
+          <Pressable accessibilityRole="button" accessibilityLabel={label('lbl.storeReadReviews', 'Read store reviews')} onPress={() => go('reviews', id)}><Badge cmsKey={'lbl.storeNewNoReviews'} green label={s.live && s.rv === 0 ? label('lbl.storeNewNoReviews', 'New · No reviews yet') : '★ ' + s.r.toFixed(1) + ' (' + s.rv + ')'} /></Pressable><Badge cmsKey={"lbl.cms.f387bbae5293"} label={s.eta + label("lbl.cms.f387bbae5293", " min")} /><Badge label={s.fee === 0 ? tr('freeDelivery') : money(s.fee) + ' ' + tr('delivery')} /><Badge cmsKey={"lbl.cms.60f2f9167a32"} label={label("lbl.cms.60f2f9167a32", "Min. ") + money(s.min)} /><Badge cmsKey={"lbl.shopAuto18E4IBZ"} label={label("lbl.shopAuto18E4IBZ", "Delivery + pickup")} />{s.pr ? <Badge label={s.pr} /> : null}
         </View>
-        <View style={{flexDirection: 'row', gap: 8, marginTop: 10}}>
-          <Cta small ghost label="Store info" onPress={() => ui.sheet({kind: 'sinfo', id})} />
-          <Cta small ghost label="Message store" onPress={() => go('contact', {storeContact: true, storeId: id})} />
+        <View style={{flexDirection: 'row', alignItems: 'center', gap: 14, marginTop: 10}}>
+          <Cta cmsKey={'lbl.storeInfo'} small ghost label={label('lbl.storeInfo', 'Store info')} onPress={() => require('../store').ui.sheet({kind: 'sinfo', id})} />
+          <Cta cmsKey={'lbl.messageStore'} small ghost label={label('lbl.messageStore', 'Message store')} onPress={() => go('contact', {storeContact: true, storeId: id})} />
+          <Pressable accessibilityRole="button" accessibilityLabel={label('lbl.storeGroupOrder', 'Start a group order')} onPress={() => require('../store').ui.sheet({kind: 'group-order', storeId: id})} hitSlop={10} style={{padding: 4, alignItems: 'center', justifyContent: 'center'}}><Icon name="user-plus" size={21} color={th.br} /></Pressable>
         </View>
-        <View style={{marginTop: 14}}><Input value={S.ss[id] || ''} onChange={v => {S.ss[id] = v; emit();}} placeholder={'Search in ' + s.n} /></View>
+        <View style={{marginTop: 14}}><Input cmsPlaceholderKey={'lbl.storeSearch'} value={S.ss[id] || ''} onChange={v => {S.ss[id] = v; emit();}} placeholder={label('lbl.storeSearch', 'Search in {store}').replace('{store}',s.n)} /></View>
       </View>
       <View style={{marginTop: 8}}><Chips list={tabs} on={t} onPick={k => {S.ss[id + 't'] = k; emit();}} /></View>
       <View style={{paddingHorizontal: 16, marginTop: 4}}>
-        {rows || items.length ? (<>{rows}{items.map(i => <ItemRow key={i.id} i={i} />)}</>) : <Empty emoji="🔎" title="No items found" text="Try another word." />}
-        <T size={19} weight="800" style={{marginTop: 24, marginBottom: 8}}>Reviews</T>
+        {rows || items.length ? (<>{rows}{items.map(i => <ItemRow key={i.id} i={i} />)}</>) : <Empty emoji="🔎" title={label('lbl.storeNoItems', 'No items found')} text={label('lbl.storeTryAnother', 'Try another word.')} />}
+        <T cmsKey={'lbl.storeReviews'} size={19} weight="600" style={{marginTop: 24, marginBottom: 8}}>{label('lbl.storeReviews', 'Reviews')}</T>
         {reviews.map((v: any, k: number) => (
           <Card key={k} style={{marginBottom: 8}}>
-            <Row sp><Row style={{gap: 6}}><T weight="700">{v.n}</T>{v.you ? <Badge label="Your review" /> : null}</Row><Row style={{gap: 3}}><Icon name="star" size={13} color="#FFB400" fill /><T size={13} weight="700">{v.r}</T></Row></Row>
-            <T size={13.5} color={th.mut} style={{marginTop: 4}}>{v.t || 'No comment'}</T>
-            <T size={11.5} color={th.mut} style={{marginTop: 4}}>{v.d}{v.you ? '' : ' · sample review'}</T>
+            <Row sp><Row style={{gap: 6}}><T weight="600">{v.n}</T>{v.you ? <Badge cmsKey={'lbl.storeYourReview'} label={label('lbl.storeYourReview', 'Your review')} /> : null}</Row><Row style={{gap: 3}}><Icon name="star" size={13} color="#FFB400" fill /><T size={13} weight="600">{v.r}</T></Row></Row>
+            <T cmsKey={'lbl.storeNoComment'} size={13.5} color={th.mut} style={{marginTop: 4}}>{v.t || label('lbl.storeNoComment', 'No comment')}</T>
+            <T cmsKey={'lbl.storeSampleReview'} size={11.5} color={th.mut} style={{marginTop: 4}}>{v.d}{v.you ? '' : ' · ' + label('lbl.storeSampleReview', 'sample review')}</T>
           </Card>
         ))}
+        {!reviews.length ? <Empty emoji="⭐" title={label('lbl.storeNoReviews', 'No reviews yet')} text={s.live && s.rv > 0 ? label('lbl.storeRatingsOnly', 'Ratings are available, but written review details are not available here yet.') : label('lbl.storeBeFirstReview', 'Be the first customer to review this store.')} /> : null}
       </View>
     </View>
   );
@@ -65,25 +127,25 @@ export function Store({id}: {id: string}) {
 
 export function StoreReviews({id}: {id: string}) {
   const th = useTheme(), s = STB[id];
-  if (!s) return <View><Bar title="Store reviews" onBack={back} /><Empty emoji="⭐" title="Store not found" button="Back to stores" onPress={browse} /></View>;
+  if (!s) return <View><Bar cmsKey={'lbl.storeReviewsTitle'} title={label('lbl.storeReviewsTitle', 'Store reviews')} onBack={back} /><Empty emoji="⭐" title={label('lbl.storeNotFound', 'Store not found')} button={label('lbl.storeBackToStores', 'Back to stores')} onPress={browse} /></View>;
   const reviews = s.live ? [] : SEED_REVIEWS.concat(S.rev[id] || []);
   return (
     <View>
-      <Bar title="Reviews" onBack={back} />
+      <Bar cmsKey={'lbl.storeReviews'} title={label('lbl.storeReviews', 'Reviews')} onBack={back} />
       <View style={{paddingHorizontal: 16}}>
         <Card style={{marginBottom: 14}}>
           <Row style={{alignItems: 'center', gap: 12}}>
             <View style={{width: 54, height: 54, borderRadius: 16, backgroundColor: th.soft, alignItems: 'center', justifyContent: 'center'}}><Text style={{fontSize: 30}}>{s.e}</Text></View>
-            <View style={{flex: 1}}><T size={18} weight="800">{s.n}</T><T size={13} color={th.mut}>Customer reviews</T></View>
-            <View style={{alignItems: 'flex-end'}}>{s.rv > 0 ? <><T size={22} weight="800">★ {s.r.toFixed(1)}</T><T size={11.5} color={th.mut}>{s.rv} reviews</T></> : <T size={12} color={th.mut}>No reviews yet</T>}</View>
+            <View style={{flex: 1}}><T size={18} weight="600">{s.n}</T><T cmsKey={'lbl.storeCustomerReviews'} size={13} color={th.mut}>{label('lbl.storeCustomerReviews', 'Customer reviews')}</T></View>
+            <View style={{alignItems: 'flex-end'}}>{s.rv > 0 ? <><T size={22} weight="600">★ {s.r.toFixed(1)}</T><T cmsKey={"lbl.cms.b472632d5ebe"} size={11.5} color={th.mut}>{s.rv} {label("lbl.cms.b472632d5ebe", "reviews")}</T></> : <T cmsKey={'lbl.storeNoReviewsYet'} size={12} color={th.mut}>{label('lbl.storeNoReviewsYet', 'No reviews yet')}</T>}</View>
           </Row>
         </Card>
         {reviews.length ? reviews.map((v: any, k: number) => <Card key={k} style={{marginBottom: 10}}>
-          <Row sp><Row style={{gap: 6}}><T weight="700">{v.n}</T>{v.you ? <Badge label="Your review" /> : null}</Row><Row style={{gap: 4}}><Icon name="star" size={13} color="#FFB400" fill /><T size={13} weight="700">{v.r}</T></Row></Row>
-          <T size={13.5} style={{marginTop: 6}}>{v.t || 'No comment'}</T>
-          <T size={11.5} color={th.mut} style={{marginTop: 5}}>{v.d}{v.you ? '' : ' · sample review'}</T>
-        </Card>) : <Empty emoji="⭐" title="No reviews yet" text="Be the first customer to review this store." />}
-        <Cta ghost label="Back to store" onPress={() => go('store', id)} />
+          <Row sp><Row style={{gap: 6}}><T weight="600">{v.n}</T>{v.you ? <Badge cmsKey={'lbl.storeYourReview'} label={label('lbl.storeYourReview', 'Your review')} /> : null}</Row><Row style={{gap: 4}}><Icon name="star" size={13} color="#FFB400" fill /><T size={13} weight="600">{v.r}</T></Row></Row>
+          <T cmsKey={'lbl.storeNoComment'} size={13.5} style={{marginTop: 6}}>{v.t || label('lbl.storeNoComment', 'No comment')}</T>
+          <T cmsKey={'lbl.storeSampleReview'} size={11.5} color={th.mut} style={{marginTop: 5}}>{v.d}{v.you ? '' : ' · ' + label('lbl.storeSampleReview', 'sample review')}</T>
+        </Card>) : <Empty emoji="⭐" title={label('lbl.storeNoReviews', 'No reviews yet')} text={s.live && s.rv > 0 ? label('lbl.storeRatingsOnly', 'Ratings are available, but written review details are not available here yet.') : label('lbl.storeBeFirstReview', 'Be the first customer to review this store.')} />}
+        <Cta cmsKey={'lbl.storeBack'} ghost label={label('lbl.storeBack', 'Back to store')} onPress={() => go('store', id)} />
       </View>
     </View>
   );
@@ -91,39 +153,45 @@ export function StoreReviews({id}: {id: string}) {
 
 export function Product() {
   const th = useTheme(), {width} = useWindowDimensions(), h = S.sh, i = h && IT[h.id];
-  if (!i) return <View><Bar title="Product" onBack={back} /><Empty emoji="📦" title="Product not found" button="Back to Goodies" onPress={browse} /></View>;
+  const [photoIndex, setPhotoIndex] = useState(0);
+  useEffect(() => { setPhotoIndex(0); }, [h?.id]);
+  if (!i) return <View><Bar cmsKey={'lbl.productTitle'} title={label('lbl.productTitle', 'Product')} onBack={back} /><Empty emoji="📦" title={label('lbl.productNotFound', 'Product not found')} button={label('lbl.productBackGoodies', 'Back to Goodies')} onPress={browse} /></View>;
   const s = STB[i.s], o = CHOOSE_SIZE_CATS.indexOf(s.c) > -1, u = ['restaurants', 'bakery'].indexOf(s.c) > -1;
   const base = h.off ? dp(i, h.off) : i.p, unit = base + (h.size > 0 ? 1.5 : 0) + (h.drink ? 1 : 0);
   const rel = s.it.filter(x => x.id !== i.id).concat(ST.filter(x => x.c === s.c && x.id !== s.id).flatMap(x => x.it)).slice(0, 6);
   const fav = S.favp.indexOf(i.id) > -1;
   return (
     <View>
-      <Bar title={s.n} onBack={back} stripe={false} right={<Circ icon="heart" label="Save item" color={S.favp.indexOf(i.id) > -1 ? '#FD802E' : undefined} fill={S.favp.indexOf(i.id) > -1} onPress={() => favp(i.id)} />} />
-      <ScrollView horizontal pagingEnabled showsHorizontalScrollIndicator={false}>
-        {['bg0', 'bg1', 'bg2'].map((b, n) => <Grad key={b} idx={bgIdx(n ? b : s.bg)} style={{width, height: 210, alignItems: 'center', justifyContent: 'center'}}>{i.photo ? <Image source={{uri: i.photo}} style={{width, height: 210}} /> : <Text style={{fontSize: 96}}>{i.e}</Text>}</Grad>)}
-      </ScrollView>
-      <T size={12} color={th.mut} align="center" style={{marginTop: 6}}>Swipe for more photos</T>
+      <Bar title={s.n} onBack={back} stripe={false} right={<Circ icon="heart" label={label('lbl.productSaveItem', 'Save item')} color={S.favp.indexOf(i.id) > -1 ? '#FD802E' : undefined} fill={S.favp.indexOf(i.id) > -1} onPress={() => favp(i.id)} />} />
+      {((i.photos && i.photos.length ? i.photos : i.photo ? [i.photo] : [])).length ? <>
+        <ScrollView horizontal pagingEnabled showsHorizontalScrollIndicator={false} onMomentumScrollEnd={e => setPhotoIndex(Math.round(e.nativeEvent.contentOffset.x / width))}>
+          {(i.photos && i.photos.length ? i.photos : [i.photo]).filter(Boolean).slice(0,5).map((photo: string, n: number) => <View key={photo + n} style={{width, height:210, backgroundColor:th.soft, alignItems:'center',justifyContent:'center'}}><Image source={{uri:photo}} style={{width,height:210}} resizeMode="contain" /></View>)}
+        </ScrollView>
+        {(i.photos && i.photos.length ? i.photos : [i.photo]).length > 1 ? <View style={{flexDirection:'row',justifyContent:'center',alignItems:'center',gap:6,marginTop:9}}>
+          {(i.photos && i.photos.length ? i.photos : [i.photo]).slice(0,5).map((photo: string | null | undefined,n: number)=><View key={`${photo ?? 'photo'}-${n}`} style={{width:photoIndex===n?16:6,height:6,borderRadius:4,backgroundColor:photoIndex===n?th.br:th.line}} />)}
+        </View> : null}
+      </> : <Grad idx={bgIdx(s.bg)} style={{width, height:210}} />}
       <View style={{paddingHorizontal: 16}}>
-        <T size={23} weight="800" style={{marginTop: 10}}>{i.n}</T>
-        <Pressable onPress={() => go('store', s.id)}><T size={13.5} weight="700" color={th.br}>{s.n}{s.rv > 0 ? ' · ★ ' + s.r.toFixed(1) : ' · New store'}</T></Pressable>
+        <T size={23} weight="600" style={{marginTop: 10}}>{i.n}</T>
+        <Pressable onPress={() => go('store', s.id)}><T cmsKey={"lbl.cms.2d44412e115d"} size={13.5} weight="600" color={th.br}>{s.n}{s.rv > 0 ? ' · ★ ' + s.r.toFixed(1) : label("lbl.cms.2d44412e115d", " · New store")}</T></Pressable>
         <View style={{flexDirection: 'row', alignItems: 'center', gap: 8, marginTop: 8}}>
-          <T size={24} weight="800" color={th.br}>{money(base)}</T>
+          <T size={24} weight="600" color={th.br}>{money(base)}</T>
           {h.off ? <><T size={15} color={th.mut} style={{textDecorationLine: 'line-through'}}>{money(i.p)}</T><Badge label={'-' + h.off + '%'} /></> : null}
         </View>
-        {i.w ? <T size={12.5} color={th.mut} style={{marginTop: 4}}>Estimated price. Final amount may vary with the exact weight.</T> : null}
+        {i.w ? <T cmsKey={'lbl.productEstimatedPrice'} size={12.5} color={th.mut} style={{marginTop: 4}}>{label('lbl.productEstimatedPrice', 'Estimated price. Final amount may vary with the exact weight.')}</T> : null}
         <T size={14.5} style={{marginTop: 12, lineHeight: 21}}>{i.d}</T>
-        {i.al ? <T size={13} color={th.mut} style={{marginTop: 6}}>Allergens: {i.al}</T> : null}
-        {(i as any).restriction === 'alcohol' ? <Card style={{backgroundColor: th.brt, borderColor: th.br, marginTop: 12}}><T weight="800">Alcohol. Minors may not purchase.</T><T size={13} color={th.mut} style={{marginTop: 3}}>{rgText('rg.minors', 'Minors may not purchase alcohol.', alcAge(i.s).age)} Minimum age {alcAge(i.s).age}. Valid government photo ID is required at delivery or pickup.</T></Card> : null}
-        {(i as any).restriction === 'otc' ? <T size={12.5} color={th.mut} style={{marginTop: 8}}>Over-the-counter product. Read the label and use as directed.</T> : null}
-        <T size={13} weight="700" color={i.oos ? th.red : i.stock <= 5 ? th.brd : th.grn} style={{marginTop: 8}}>{i.oos ? 'Out of stock' : i.stock <= 5 ? 'Only ' + i.stock + ' left' : 'In stock'}</T>
+        {i.al ? <T cmsKey={'lbl.productAllergens'} size={13} color={th.mut} style={{marginTop: 6}}>{label('lbl.productAllergens', 'Allergens')}: {i.al}</T> : null}
+        {(i as any).restriction === 'alcohol' ? <Card style={{backgroundColor: th.brt, borderColor: th.br, marginTop: 12}}><T cmsKey={'lbl.productAlcoholWarning'} weight="600">{label('lbl.productAlcoholWarning', 'Alcohol. Minors may not purchase.')}</T><T cmsKeys={["lbl.cms.423ee2331261","lbl.cms.55bf5c7385be"]} size={13} color={th.mut} style={{marginTop: 3}}>{rgText('rg.minors', 'Minors may not purchase alcohol.', alcAge(i.s).age)} {label("lbl.cms.423ee2331261", "Minimum age ")}{alcAge(i.s).age}{label("lbl.cms.55bf5c7385be", ". Valid government photo ID is required at delivery or pickup.")}</T></Card> : null}
+        {(i as any).restriction === 'otc' ? <T cmsKey={'lbl.productOtcWarning'} size={12.5} color={th.mut} style={{marginTop: 8}}>{label('lbl.productOtcWarning', 'Over-the-counter product. Read the label and use as directed.')}</T> : null}
+        <T cmsKeys={['lbl.productStockOut','lbl.productStockLow',"lbl.cms.764a54257195",'lbl.productInStock']} size={13} weight="600" color={i.oos ? th.red : i.stock <= 5 ? th.brd : th.grn} style={{marginTop: 8}}>{i.oos ? label('lbl.productStockOut', 'Out of stock') : i.stock <= 5 ? label('lbl.productStockLow', 'Only') + ' ' + i.stock + label("lbl.cms.764a54257195", " left") : label('lbl.productInStock', 'In stock')}</T>
         {o ? (<>
-          <Row style={{marginTop: 18, marginBottom: 8, gap: 8}}><T size={15} weight="800">Size</T><Badge label="Required" /></Row>
-          <Radio on={h.size === 0} onPress={() => setSize(0)}><T>Regular</T></Radio>
-          <Radio on={h.size === 1} onPress={() => setSize(1)}><Row sp><T>Large</T><T weight="800">+$1.50</T></Row></Radio>
+          <Row style={{marginTop: 18, marginBottom: 8, gap: 8}}><T cmsKey={'lbl.productSize'} size={15} weight="600">{label('lbl.productSize', 'Size')}</T><Badge cmsKey={'lbl.productRequired'} label={label('lbl.productRequired', 'Required')} /></Row>
+          <Radio on={h.size === 0} onPress={() => setSize(0)}><T cmsKey={'lbl.productRegular'}>{label('lbl.productRegular', 'Regular')}</T></Radio>
+          <Radio on={h.size === 1} onPress={() => setSize(1)}><Row sp><T cmsKey={'lbl.productLarge'}>{label('lbl.productLarge', 'Large')}</T><T weight="600">+$1.50</T></Row></Radio>
         </>) : null}
-        {u ? <Radio on={!!h.drink} onPress={toggleDrink}><Row sp><T>Add a drink</T><T weight="800">+$1.00</T></Row></Radio> : null}
-        <Input label="Special instructions" value={h.note || ''} onChange={v => {S.sh.note = v; emit();}} placeholder="Optional" multiline />
-        <T size={18} weight="800" style={{paddingTop: 22, paddingBottom: 10}}>You may also like</T>
+        {u ? <Radio on={!!h.drink} onPress={toggleDrink}><Row sp><T cmsKey={'lbl.productAddDrink'}>{label('lbl.productAddDrink', 'Add a drink')}</T><T weight="600">+$1.00</T></Row></Radio> : null}
+        <Input cmsKey={'lbl.productInstructions'} cmsPlaceholderKey={'lbl.productOptional'} label={label('lbl.productInstructions', 'Special instructions')} value={h.note || ''} onChange={v => {S.sh.note = v; emit();}} placeholder={label('lbl.productOptional', 'Optional')} multiline />
+        <T cmsKey={'lbl.productRecommendations'} size={18} weight="600" style={{paddingTop: 22, paddingBottom: 10}}>{label('lbl.productRecommendations', 'You may also like')}</T>
       </View>
       <Rail>{rel.map(x => <Dish key={x.id} i={x} />)}</Rail>
     </View>
@@ -133,7 +201,7 @@ export function ProductFoot() {
   const th = useTheme(), h = S.sh, i = h && IT[h.id];
   if (!i) return null;
   const s = STB[i.s], o = CHOOSE_SIZE_CATS.indexOf(s.c) > -1, base = h.off ? dp(i, h.off) : i.p, unit = base + (h.size > 0 ? 1.5 : 0) + (h.drink ? 1 : 0);
-  const blocked = i.oos || (!s.open && !s.acceptScheduledOrders) || (o && h.size < 0), lbl = i.oos ? 'Out of stock' : !s.open && !s.acceptScheduledOrders ? 'Store is closed' : !s.open ? 'Schedule order · ' + money(unit * h.q) : o && h.size < 0 ? 'Choose a size' : 'Add to cart · ' + money(unit * h.q);
+  const blocked = i.oos || (!s.open && !s.acceptScheduledOrders) || (o && h.size < 0), lbl = i.oos ? label('lbl.productStockOut', 'Out of stock') : !s.open && !s.acceptScheduledOrders ? label('lbl.productStoreClosed', 'Store is closed') : !s.open ? label('lbl.productScheduleOrder', 'Schedule order') + ' · ' + money(unit * h.q) : o && h.size < 0 ? label('lbl.productChooseSize', 'Choose a size') : label('lbl.productAddToCart', 'Add to cart') + ' · ' + money(unit * h.q);
   return <Row><Stepper q={h.q} onMinus={() => productQty(-1)} onPlus={() => productQty(1)} /><View style={{flex: 1}}><Cta label={lbl} disabled={!!blocked} onPress={productAdd} /></View></Row>;
 }
 
@@ -142,55 +210,72 @@ const Sum = ({rows, total}: {rows: [string, string, 'g'?][]; total?: [string, st
   return (
     <Card>
       {rows.map((r, k) => <View key={k} style={{flexDirection: 'row', justifyContent: 'space-between', marginVertical: 7}}><T size={14} color={r[2] === 'g' ? th.grn : th.mut} weight={r[2] === 'g' ? '700' : undefined}>{r[0]}</T><T size={14} color={r[2] === 'g' ? th.grn : th.mut} weight={r[2] === 'g' ? '700' : undefined} style={{maxWidth: '60%', textAlign: 'right'}}>{r[1]}</T></View>)}
-      {total ? <View style={{flexDirection: 'row', justifyContent: 'space-between', paddingTop: 10, marginTop: 4, borderTopWidth: 1, borderStyle: 'dashed', borderTopColor: th.line}}><T size={17} weight="800">{total[0]}</T><T size={17} weight="800">{total[1]}</T></View> : null}
+      {total ? <View style={{flexDirection: 'row', justifyContent: 'space-between', paddingTop: 10, marginTop: 4, borderTopWidth: 1, borderStyle: 'dashed', borderTopColor: th.line}}><T size={17} weight="600">{total[0]}</T><T size={17} weight="600">{total[1]}</T></View> : null}
     </Card>
   );
 };
 
 export function Cart() {
-  const th = useTheme(), c = S.cart, [code, setCode] = useState(S.pin || '');
-  if (!c.lines.length) return <View><Bar title="Your cart" onBack={back} /><Empty emoji="🛒" title="Your cart is empty" text="Explore nearby stores, check what's open, and discover products around your chosen address." button="Start browsing" onPress={() => go('explore')} /><View style={{paddingHorizontal:16,marginTop:12}}><Cta ghost label="Start a group order" onPress={() => ui.sheet({kind:'group-order'})} /></View></View>;
-  const t = totals(), st = t.st!, badLine = c.lines.some((l: any) => l.byo && lineBad(l)), short = t.sub < st.min || badLine;
+  const th = useTheme(), c = S.cart, [code, setCode] = useState(S.pin || ''), [scheduleOpen, setScheduleOpen] = useState(false);
+  if (!c.lines.length) return <View><Bar cmsKey={'lbl.cartTitle'} title={label('lbl.cartTitle', 'Your cart')} onBack={back} right={<Pressable accessibilityRole="button" accessibilityLabel={label('lbl.cartGroupOrder', 'Start a group order')} onPress={() => require('../store').ui.sheet({kind:'group-order'})} hitSlop={10} style={{padding: 4, alignItems: 'center', justifyContent: 'center'}}><Icon name="user-plus" size={23} color={th.br} /></Pressable>} /><View style={{alignItems:'center',paddingHorizontal:28,paddingTop:76,paddingBottom:34}}><Icon name="bag" size={38} color={th.mut}/><T cmsKey={'lbl.cartEmptyTitle'} size={21} weight="600" style={{marginTop:18,textAlign:'center'}}>{label('lbl.cartEmptyTitle', 'Your cart is empty')}</T><T cmsKey={'lbl.cartEmptyText'} size={13} color={th.mut} align="center" style={{marginTop:7,marginBottom:22}}>{label('lbl.cartEmptyText', 'Explore nearby stores and discover products around your chosen address.')}</T><View style={{width:'100%'}}><Cta cmsKey={'lbl.cartBrowse'} label={label('lbl.cartBrowse', 'Browse stores')} onPress={() => go('explore')} /></View></View></View>;
+  const t = totals(), st = t.st!, stops: string[] = (t as any).stops || [], multi = stops.length > 1, badLine = c.lines.some((l: any) => l.byo && lineBad(l)), short = (multi ? stops.some((id: string) => storeSub(id) < (STB[id]?.min || 0)) : t.sub < st.min) || badLine;
   return (
     <View>
-      <Bar title="Your cart" onBack={back} right={<Circ icon="trash" label="Clear cart" onPress={clearAsk} />} />
+      <Bar cmsKey={'lbl.cartTitle'} title={label('lbl.cartTitle', 'Your cart')} onBack={back} right={<Circ icon="trash" label={label('lbl.cartClearAction', 'Clear cart')} onPress={clearAsk} />} />
       <View style={{paddingHorizontal: 16}}>
-        <Row style={{marginBottom: 8}}><Tile e={st.e} bg={st.bg} size={44} /><View style={{flex: 1}}><T weight="700">{st.n}</T><T size={13} color={th.mut}>Your order from this store · {st.eta} min</T></View></Row>
-        {!st.open ? <Card style={{backgroundColor: th.brt, borderColor: th.br}}><T weight="700">{st.n} is closed</T><T size={13} color={th.mut}>{st.acceptScheduledOrders ? st.nx + '. Scheduled orders are available. The earliest time is set by this shop; choose a future slot at checkout.' : st.nx + '. You can keep these items, but this store does not currently accept scheduled orders.'}</T></Card> : null}
-        {c.lines.map((l: any) => {
-          const bad = l.byo ? lineBad(l) : '';
-          return (
-            <View key={l.k} style={{flexDirection: 'row', gap: 12, alignItems: 'flex-start', paddingVertical: 14, borderBottomWidth: 1, borderBottomColor: th.line}}>
-              <Tile e={l.e} bg="bg0" size={48} />
-              <View style={{flex: 1}}>
-                <T size={14.5} weight="700">{l.n}</T>
-                {l.d ? <T size={12} color={th.mut} style={{lineHeight: 17}}>{l.d}</T> : null}
-                {l.nt ? <T size={12.5} color={th.mut} style={{fontStyle: 'italic', marginTop: 3}}>Note: {l.nt}</T> : null}
-                {bad ? <T size={12.5} weight="700" color={th.red} style={{marginTop: 4}}>{l.n} {bad}</T> : null}
-                <T size={14} weight="800" style={{marginTop: 4}}>{money(l.p * l.q)}</T>
-                {l.byo ? <View style={{flexDirection: 'row', gap: 16, marginTop: 6}}><Pressable onPress={() => bzEdit(l.k)}><T size={13} weight="700" color={th.br}>Edit</T></Pressable><Pressable onPress={() => bzRemove(l.k)}><T size={13} weight="700" color={th.red}>Remove</T></Pressable></View> : null}
-              </View>
-              <Stepper q={l.q} onMinus={() => qty(l.k, -1)} onPlus={() => qty(l.k, 1)} />
+        {!multi && st.cover ? <Image source={{uri: st.cover}} style={{width: '100%', height: 112, borderRadius: 14, marginBottom: 10}} resizeMode="cover" /> : null}
+        {multi ? null : <Row style={{marginBottom: 8}}><Tile e={st.e} bg={st.bg} size={44} photo={st.thumbnail || st.logo} /><View style={{flex: 1}}><T weight="600">{st.n}</T><T cmsKeys={['lbl.cartStoreOrder',"lbl.cms.40babc6bdeb6"]} size={13} color={th.mut}>{label('lbl.cartStoreOrder', 'Your order from this store')} · {st.eta} {label("lbl.cms.40babc6bdeb6", "min")}</T></View></Row>}
+                {!multi && !st.open ? <Card style={{backgroundColor: th.brt, borderColor: th.br}}><T cmsKey={"lbl.cms.4ac2c8430ce8"} weight="600">{st.n} {label("lbl.cms.4ac2c8430ce8", "is closed")}</T><T cmsKeys={["lbl.cms.41b312a60379","lbl.cms.6548a2ae6f3e"]} size={13} color={th.mut}>{st.acceptScheduledOrders ? st.nx + label("lbl.cms.41b312a60379", ". Scheduled orders are available. The earliest time is set by this shop.") : st.nx + label("lbl.cms.6548a2ae6f3e", ". This store does not currently accept scheduled orders.")}</T></Card> : null}
+        <View style={{marginTop:14,marginBottom:8,paddingVertical:10,borderBottomWidth:0.5,borderBottomColor:th.line}}>
+          <Row sp>
+            <View style={{flex:1}}>
+              <T cmsKey={"lbl.cms.2fb4e79b6c80"} weight="600">{label("lbl.cms.2fb4e79b6c80", "Order time")}</T>
+              <T cmsKey={"lbl.cms.2d27b416d70d"} size={13} color={th.mut} style={{marginTop:3}}>{S.sch > Date.now() ? fmtStoreDay(S.cart.sid,S.sch) + ' · ' + fmtStoreTime(S.cart.sid,S.sch) : label("lbl.cms.2d27b416d70d", "ASAP")}</T>
             </View>
+            {st.acceptScheduledOrders ? <Pressable onPress={() => setScheduleOpen(v => !v)}><T cmsKeys={["lbl.cms.a366719f0771","lbl.cms.c349a59278cd","lbl.cms.482e3b899f84"]} size={13.5} weight="600" color={th.br}>{scheduleOpen ? label("lbl.cms.a366719f0771", "Close") : S.sch > Date.now() ? label("lbl.cms.c349a59278cd", "Change time") : label("lbl.cms.482e3b899f84", "Choose time")}</T></Pressable> : <Badge cmsKey={"lbl.cms.2d27b416d70d"} label={label("lbl.cms.2d27b416d70d", "ASAP")} />}
+          </Row>
+          {S.sch > Date.now() ? <Pressable onPress={() => {setSch(0);setScheduleOpen(false);}} style={{alignSelf:'flex-start',marginTop:8}}><T cmsKey={"lbl.cms.655123d67917"} size={12.5} weight="600" color={th.br}>{label("lbl.cms.655123d67917", "Switch to ASAP")}</T></Pressable> : null}
+          {scheduleOpen ? <ScheduleInline close={() => setScheduleOpen(false)} /> : null}
+        </View>
+        {c.lines.map((l: any, index: number) => {
+          const bad = l.byo ? lineBad(l) : '';
+          const lineSid = require('../store').lineStore(l), prevSid = index > 0 ? require('../store').lineStore(c.lines[index - 1]) : '';
+          return (
+            <React.Fragment key={l.k}>
+            {multi && lineSid !== prevSid ? <View style={{marginTop: index ? 18 : 6, paddingBottom: 6}}><Row><Tile e={STB[lineSid]?.e} bg={STB[lineSid]?.bg} size={36} photo={STB[lineSid]?.thumbnail || STB[lineSid]?.logo} /><View style={{flex: 1}}><T weight="600">{STB[lineSid]?.n}</T>{!STB[lineSid]?.open ? <T cmsKey={"lbl.cms.85dae124f037"} size={12} color={th.red}>{label("lbl.cms.85dae124f037", "Closed")}</T> : storeSub(lineSid) < (STB[lineSid]?.min || 0) ? <T cmsKeys={["lbl.cms.553c2557ccce","lbl.cms.d7f2d0c9c8b8"]} size={12} color={th.red}>{label("lbl.cms.553c2557ccce", "Add ")}{money((STB[lineSid]?.min || 0) - storeSub(lineSid))} {label("lbl.cms.d7f2d0c9c8b8", "more to reach the minimum")}</T> : null}</View></Row></View> : null}
+            <View style={{flexDirection: 'row', gap: 12, alignItems: 'flex-start', paddingVertical: 14, borderBottomWidth: 1, borderBottomColor: th.line}}>
+              <Tile e={l.e} bg="bg0" size={48} photo={l.photo} />
+              <View style={{flex: 1}}>
+                <T size={14.5} weight="600">{l.n}</T>
+                {l.d ? <T size={12} color={th.mut} style={{lineHeight: 17}}>{l.d}</T> : null}
+                {l.nt ? <T cmsKey={"lbl.cms.32c8df865bbe"} size={12.5} color={th.mut} style={{fontStyle: 'italic', marginTop: 3}}>{label("lbl.cms.32c8df865bbe", "Note: ")}{l.nt}</T> : null}
+                {bad ? <T size={12.5} weight="600" color={th.red} style={{marginTop: 4}}>{l.n} {bad}</T> : null}
+                <T size={14} weight="600" style={{marginTop: 4}}>{money(l.p * l.q)}</T>
+                {l.byo ? <View style={{flexDirection: 'row', gap: 16, marginTop: 6}}><Pressable onPress={() => bzEdit(l.k)}><T cmsKey={'lbl.cartEditItem'} size={13} weight="600" color={th.br}>{label('lbl.cartEditItem', 'Edit')}</T></Pressable><Pressable onPress={() => bzRemove(l.k)}><T cmsKey={"lbl.shopAutoU0R7PW"} size={13} weight="600" color={th.red}>{label("lbl.shopAutoU0R7PW", "Remove")}</T></Pressable></View> : null}
+              </View>
+              <Stepper q={l.q} onMinus={() => l.q > 1 ? qty(l.k, -1) : require('../store').ui.sheet({kind: 'remove-item', lineKey: l.k, itemName: l.n})} onPlus={() => qty(l.k, 1)} />
+            </View>
+            </React.Fragment>
           );
         })}
-        <Pressable onPress={() => go('store', st.id)} style={{flexDirection: 'row', alignItems: 'center', gap: 12, marginTop: 14, padding: 14, borderWidth: 1.5, borderStyle: 'dashed', borderColor: th.line, borderRadius: 16}}><T weight="700" style={{flex: 1}}>+ Continue shopping</T><Icon name="chevR" size={16} color={th.ink} /></Pressable>
-        <Pressable accessibilityRole="button" accessibilityLabel="Start a group order" onPress={() => ui.sheet({kind:'group-order'})} style={{flexDirection:'row',alignItems:'center',gap:12,marginTop:10,padding:14,borderWidth:1,borderColor:th.br,borderRadius:16,backgroundColor:th.brt}}>
-          <View style={{width:42,height:42,borderRadius:13,backgroundColor:th.card,alignItems:'center',justifyContent:'center'}}><Icon name="user" size={21} color={th.br}/></View>
-          <View style={{flex:1}}><T weight="800">Start a group order</T><T size={12.5} color={th.mut} style={{marginTop:3}}>Invite friends and coordinate a shared cart</T></View>
+        <Pressable onPress={() => go('store', st.id)} style={{flexDirection: 'row', alignItems: 'center', gap: 12, marginTop: 14, padding: 14, borderWidth: 0.5, borderStyle: 'dashed', borderColor: th.line, borderRadius: 16}}><T cmsKey={'lbl.cartContinueShopping'} weight="600" style={{flex: 1}}>{'+ ' + label('lbl.cartContinueShopping', 'Continue shopping')}</T><Icon name="chevR" size={16} color={th.ink} /></Pressable>
+        <Pressable accessibilityRole="button" accessibilityLabel={label('lbl.cartStartGroup', 'Start a group order')} onPress={() => require('../store').ui.sheet({kind:'group-order'})} style={{flexDirection:'row',alignItems:'center',gap:12,marginTop:10,padding:14,borderWidth:1,borderColor:th.br,borderRadius:16,backgroundColor:th.brt}}>
+          <View style={{width:42,height:42,borderRadius:13,backgroundColor:th.card,alignItems:'center',justifyContent:'center'}}><Icon name="user-plus" size={21} color={th.br}/></View>
+          <View style={{flex:1}}><T cmsKey={'lbl.cartGroupOrder'} weight="600">{label('lbl.cartGroupOrder', 'Start a group order')}</T><T cmsKey={'lbl.cartGroupOrderDesc'} size={12.5} color={th.mut} style={{marginTop:3}}>{label('lbl.cartGroupOrderDesc', 'Invite friends and coordinate a shared cart')}</T></View>
           <Icon name="chevR" size={17} color={th.br}/>
         </Pressable>
-        {hasAlcohol() ? <Card style={{backgroundColor: th.brt, borderColor: th.br, marginTop: 14}}><T weight="800">Your order includes alcohol</T><T size={13} color={th.mut} style={{marginTop: 3}}>{rgText('rg.rules', 'Alcohol is sold only to customers aged {age} or older. Minors may not buy alcohol. Valid government photo ID is required at delivery or pickup. If the ID check fails, you are refunded to your Wantiss wallet minus the delivery fee.', alcAge(c.sid).age)}</T></Card> : null}
-        <Ttl>Promo code</Ttl>
+
+        {hasAlcohol() ? <Card style={{backgroundColor: th.brt, borderColor: th.br, marginTop: 14}}><T cmsKey={'lbl.cartAlcoholHeading'} weight="600">{label('lbl.cartAlcoholHeading', 'Your order includes alcohol')}</T><T size={13} color={th.mut} style={{marginTop: 3}}>{rgText('rg.rules', 'Alcohol is sold only to customers aged {age} or older. Minors may not buy alcohol. Valid government photo ID is required at delivery or pickup. If the ID check fails, you are refunded to your Wantiss wallet minus the delivery fee.', alcAge(c.sid).age)}</T></Card> : null}
+        <Ttl>{label('lbl.cartPromoTitle', 'Promo code')}</Ttl>
         {S.promo ? (
-          <Card style={{padding: 12}}><Row sp><View style={{flex: 1}}><Row style={{gap: 6}}><T weight="700">{S.promo}</T>{t.pok ? <Badge green label="Applied" /> : <Badge red label="Not valid" />}</Row>{t.perr ? <T size={12.5} color={th.mut} style={{marginTop: 4}}>{t.perr}</T> : null}</View><Pressable onPress={promoClear}><T weight="700" color={th.red}>Remove</T></Pressable></Row></Card>
+          <Card style={{padding: 12}}><Row sp><View style={{flex: 1}}><Row style={{gap: 6}}><T weight="600">{S.promo}</T>{t.pok ? <Badge cmsKey={'lbl.cartApplied'} green label={label('lbl.cartApplied', 'Applied')} /> : <Badge cmsKey={'lbl.cartInvalid'} red label={label('lbl.cartInvalid', 'Not valid')} />}</Row>{t.perr ? <T size={12.5} color={th.mut} style={{marginTop: 4}}>{t.perr}</T> : null}</View><Pressable onPress={promoClear}><T cmsKey={'lbl.cartRemove'} weight="600" color={th.red}>{label('lbl.cartRemove', 'Remove')}</T></Pressable></Row></Card>
         ) : (<>
-          <Row><View style={{flex: 1}}><Input value={code} onChange={v => setCode(v.toUpperCase())} placeholder="Try GOODIES10" /></View><View style={{width: 90}}><Cta label="Apply" onPress={() => promoApply(code)} /></View></Row>
-          <Pressable onPress={() => go('promos')}><T size={13} weight="700" color={th.br} style={{marginTop: 8}}>See available coupons</T></Pressable>
+          <Row><View style={{flex: 1}}><Input cmsPlaceholderKey={'lbl.cartPromoPlaceholder'} value={code} onChange={v => setCode(v.toUpperCase())} placeholder={label('lbl.cartPromoPlaceholder', 'Try GOODIES10')} /></View><View style={{width: 90}}><Cta cmsKey={'lbl.cartApply'} label={label('lbl.cartApply', 'Apply')} onPress={() => promoApply(code)} /></View></Row>
+          <Pressable onPress={() => go('promos')}><T cmsKey={'lbl.cartAvailableCoupons'} size={13} weight="600" color={th.br} style={{marginTop: 8}}>{label('lbl.cartAvailableCoupons', 'See available coupons')}</T></Pressable>
         </>)}
-        <View style={{marginTop: 16}}><Sum rows={[['Subtotal', money(t.sub)], ['Delivery fee', isPk() ? 'Pickup' : t.free ? (first() ? 'Free (first order)' : 'Free') : money(t.fee), t.free ? 'g' : undefined as any], ['Service fee', money(t.svc)], ...(t.disc ? [['Discount', '-' + money(t.disc), 'g'] as any] : []), ...(t.tip ? [['Courier tip', money(t.tip)] as any] : [])]} total={['Total', money(t.total)]} /></View>
-        {badLine ? <T size={13} color={th.red} align="center" style={{marginBottom: 10}}>Fix the items marked above to continue.</T> : t.sub < st.min ? <T size={13} color={th.mut} align="center" style={{marginBottom: 10}}>Add {money(st.min - t.sub)} more to reach the {money(st.min)} minimum.</T> : null}
-        <Cta label={'Checkout · ' + money(t.total)} disabled={short} onPress={goCheckout} />
+        <View style={{marginTop: 16}}><Sum rows={[[label('lbl.cartSubtotal', 'Subtotal'), money(t.sub)], [label('lbl.cartDeliveryFee', 'Delivery fee'), isPk() ? label("lbl.cms.c036c1628698","Pickup") : t.free ? (first() ? label("lbl.cms.a323e7a83705","Free (first order)") : label("lbl.cms.b9a67ad4232a","Free")) : money(t.fee), t.free ? 'g' : undefined as any], [label('lbl.cartServiceFee', 'Service fee'), money(t.svc)], ...(t.disc ? [[label('lbl.cartDiscount', 'Discount'), '-' + money(t.disc), 'g'] as any] : []), ...(t.tip ? [[label('lbl.cartCourierTip', 'Courier tip'), money(t.tip)] as any] : [])]} total={[label('lbl.cartTotal', 'Total'), money(t.total)]} /></View>
+        {badLine ? <T cmsKey={'lbl.cartFixItems'} size={13} color={th.red} align="center" style={{marginBottom: 10}}>{label('lbl.cartFixItems', 'Fix the items marked above to continue.')}</T> : t.sub < st.min ? <T cmsKeys={['lbl.cartMinMore','lbl.cartReachMinimum',"lbl.cms.432ca9a22ed3"]} size={13} color={th.mut} align="center" style={{marginBottom: 10}}>{label('lbl.cartMinMore', 'Add')} {money(st.min - t.sub)} {label('lbl.cartReachMinimum', 'more to reach the')} {money(st.min)} {label("lbl.cms.432ca9a22ed3", "minimum.")}</T> : null}
+        <Cta cmsKey={'lbl.cartCheckout'} label={label('lbl.cartCheckout', 'Checkout') + ' · ' + money(t.total)} disabled={short} onPress={goCheckout} />
       </View>
     </View>
   );
@@ -199,107 +284,224 @@ export function Cart() {
 const IcBox = ({icon}: {icon: string}) => {const th = useTheme(); return <View style={{width: 40, height: 40, borderRadius: 12, backgroundColor: th.brt, alignItems: 'center', justifyContent: 'center'}}><Icon name={icon} color={th.br} /></View>;};
 
 export function Checkout() {
-  useEffect(() => { if (!previewOnly) { void refreshLiveSchedules(); void refreshPaymentOptions(); } }, []);
-  const th = useTheme(), t = totals(), pk = isPk(), a = addr(), st = t.st!, stp = ['Delivery', 'Time', 'Payment', 'Review'];
-  const PAYON: any = fees().pay, allPays: [string, string, string, string][] = [['wallet', 'Wantiss Wallet', S.hasWallet ? 'Balance ' + money(S.wallet) : 'Wallet not created', 'wallet'], ['moncash', 'MonCash', 'Not available for live Goodies orders', 'phone'], ['card', 'Credit / debit card', S.cards.length ? S.cards.length + ' saved card' + (S.cards.length === 1 ? '' : 's') : 'Add a card in Wallet settings', 'card'], ['cash', 'Cash on ' + (pk ? 'pickup' : 'delivery'), 'Pay when you receive it', 'bag']], pays = allPays.filter(p => previewOnly || (PAYON[({wallet: 'Wallet', moncash: 'MonCash', card: 'Card', cash: 'Cash'} as any)[p[0]]] && (providerInfo.demo || p[0] !== 'moncash')));
-  const ct = ctOf();
+  const th = useTheme(), t = totals(), pk = isPk(), a = addr() || null, st = t.st, stp = [label('lbl.checkoutDelivery', 'Delivery'), label('lbl.checkoutTime', 'Time'), label('lbl.checkoutPaymentMethod', 'Payment method'), label('lbl.checkoutReview', 'Review')];
+  const stops: string[] = (t as any).stops || [], multi = stops.length > 1;
+  const [cashEligible, setCashEligible] = useState(false), [scheduleOpen, setScheduleOpen] = useState(false);
+  useEffect(() => {
+    let active = true;
+    void refreshLiveSchedules().then(() => {
+      if (active && st?.id && st.live && a?.t) return refreshStoreDistance(st.id, a).catch(() => undefined);
+    });
+    void refreshPaymentOptions();
+    return () => { active = false; };
+  }, [st?.id, st?.live, a?.t, a?.apt, a?.inst, a?.city, a?.department, a?.country]);
+  useEffect(() => { if (st?.id && !st.acceptScheduledOrders && S.sch) setSch(0); }, [st?.id, st?.acceptScheduledOrders]);
+  /* A closed store can only be ordered from by scheduling: open the picker so the customer is not left on an empty "Schedule" choice. */
+  useEffect(() => { if (st?.id && !st.open && st.acceptScheduledOrders && !S.sch) setScheduleOpen(true); }, [st?.id, st?.open, st?.acceptScheduledOrders]);
+  useEffect(() => {
+    let active = true;
+    setCashEligible(false);
+    const storeIds = multi ? stops : st?.id ? [st.id] : [];
+    if (!pk && storeIds.length && !providerInfo.demo) {
+      void Promise.all(storeIds.map(async storeId => {
+        const {data, error} = await supabase.rpc('goodies_cash_on_delivery_available', {p_store_id: storeId});
+        return !error && data === true;
+      })).then(results => {
+        if (active) setCashEligible(results.length === storeIds.length && results.every(Boolean));
+      });
+    }
+    return () => { active = false; };
+  }, [st?.id, pk, multi, stops.join(',')]);
+  const PAYON: any = fees().pay, allPays: [string, string, string, string][] = [['wallet', label('lbl.checkoutWallet', 'Wantiss Wallet'), S.hasWallet ? label('lbl.checkoutWalletBalance','Balance {amount}').replace('{amount}',money(S.wallet)) : label('lbl.checkoutWalletMissing','Wallet not created'), 'wallet'], ['moncash', label('lbl.checkoutMoncash', 'MonCash'), label('lbl.checkoutUnavailablePayment','Not available for live Goodies orders'), 'phone'], ['card', label('lbl.checkoutCard', 'Credit / debit card'), S.cards.length ? (S.cards.length===1?label('lbl.checkoutSavedCardCount','{count} saved card'):label('lbl.checkoutSavedCardsCount','{count} saved cards')).replace('{count}',String(S.cards.length)) : label('lbl.checkoutAddCard','Add a card'), 'card'], ['cash', label('lbl.checkoutCash', 'Cash on') + ' ' + label('lbl.checkoutDelivery', 'delivery'), label('lbl.checkoutCashCondition','Only when this store and an available courier accept cash on delivery'), 'bag']], pays = allPays.filter(p => PAYON[({wallet: 'Wallet', moncash: 'MonCash', card: 'Card', cash: 'Cash'} as any)[p[0]]] && !(multi && p[0] === 'card') && (providerInfo.demo ? p[0] !== 'moncash' : p[0] !== 'moncash' && (p[0] !== 'cash' || cashEligible)));
+  const availablePayKey = pays.map(p => p[0]).join('|');
+  useEffect(() => { if (pays.length && !pays.some(p => p[0] === S.pay)) setPay(pays[0][0]); }, [availablePayKey, S.pay]);
+  const ct = ctOf() || {ph: S.pf?.ph || '', l: label('lbl.sheetDefaultNumber', 'Default Wantiss number'), w: 1};
+  if (!st) return <View><Bar cmsKey={'lbl.checkoutTitle'} title={label('lbl.checkoutTitle', 'Checkout')} onBack={back} /><Empty emoji="🛒" title={label('lbl.checkoutCartUnavailable', 'Your cart is unavailable')} button={label('lbl.cartBrowse', 'Start browsing')} onPress={() => go('explore')} /></View>;
+  if (!pk && !a?.t) return <View><Bar cmsKey={'lbl.checkoutTitle'} title={label('lbl.checkoutTitle', 'Checkout')} onBack={back} /><Empty emoji="📍" title={label('lbl.checkoutAddressRequired', 'Choose a delivery address')} button={label('lbl.checkoutAddAddress', 'Add address')} onPress={() => go('addresses')} /></View>;
   let body: any = null;
   if (S.cs === 0) body = (<>
-    <Seg list={[['delivery', 'Delivery'], ['pickup', 'Pickup']]} on={pk ? 'pickup' : 'delivery'} onPick={k => {if (k === 'delivery' && st.far) return; setMode(k);}} />
-    <Ttl>{pk ? 'Pickup from' : 'Deliver to'}</Ttl>
+    <Seg list={[['delivery', label('lbl.checkoutDelivery', 'Delivery')], ['pickup', label('lbl.checkoutPickup', 'Pickup')]]} on={pk ? 'pickup' : 'delivery'} onPick={k => {if (k === 'delivery' && st.far) return; setMode(k);}} />
+    <Ttl>{pk ? label('lbl.checkoutPickupFrom', 'Pickup from') : label('lbl.checkoutDeliverTo', 'Deliver to')}</Ttl>
     <Card><Row><IcBox icon="pin" /><View style={{flex: 1}}>
-      {pk ? <><T weight="700">{st.n}</T><T size={13} color={th.mut}>{st.live ? 'Distance unavailable' : st.km.toFixed(1) + ' km from you'} · open {st.h}</T></> : <><T weight="700">{a.l}</T><T size={13} color={th.mut}>{a.t}{a.apt ? ', ' + a.apt : ''}</T>{a.inst ? <T size={12.5} color={th.mut}>Note: {a.inst}</T> : null}<T size={11.5} color={th.mut} style={{marginTop: 3}}>Only for this order. Your Wantiss default is unchanged.</T></>}
-    </View>{pk ? null : <Pressable onPress={() => go('addresses')}><T size={13} weight="700" color={th.br}>Change</T></Pressable>}</Row></Card>
-    {st.far && !st.live ? <Card style={{backgroundColor: th.brt, borderColor: th.br, marginTop: 12}}><T weight="700">Pickup only</T><T size={13} color={th.mut}>{st.n} is {st.km.toFixed(1)} km from this address, beyond delivery range. Pick another address to get delivery.</T></Card> : null}
-    {hasAlcohol() && !S.hasWallet ? <Card style={{backgroundColor: th.brt, borderColor: th.br, marginTop: 12}}><T weight="800">Create a Wantiss wallet</T><T size={13} color={th.mut} style={{marginVertical: 4}}>{rgText('rg.wallet', 'Create a Wantiss wallet so any refund has somewhere to go. You can withdraw from it later.', alcAge(S.cart.sid).age)}</T><Cta small label="Create wallet" onPress={createWallet} /></Card> : null}
-    <Ttl>Contact number</Ttl>
-    <Card><Row><IcBox icon="phone" /><View style={{flex: 1}}><T weight="700">{ct.ph}</T><View style={{marginTop: 3, flexDirection: 'row', gap: 6, flexWrap: 'wrap'}}>{ct.w ? <Badge green label="Default Wantiss number" /> : <><Badge label="Goodies checkout number" /><T size={12.5} color={th.mut}>{ct.l}</T></>}</View></View><Pressable onPress={() => ui.sheet({kind: 'contacts'})}><T size={13} weight="700" color={th.br}>Change</T></Pressable></Row></Card>
+      {pk ? <><T weight="600">{st.n}</T><T cmsKeys={["lbl.cms.7c642a8ed0bc","lbl.cms.ebaf18552056","lbl.cms.f409318cbe6e",'lbl.checkoutKmFromYou','lbl.checkoutOpenHours']} size={13} color={th.mut}>{st.live ? (st.distanceReady ? (Math.round(st.km * 1000) < 1000 ? Math.round(st.km * 1000) + label("lbl.cms.7c642a8ed0bc", " m from your address") : st.km.toFixed(1) + label("lbl.cms.ebaf18552056", " km from your address")) : st.distanceError ? label("lbl.cms.f409318cbe6e", "Distance unavailable") : null) : label('lbl.checkoutKmFromYou', '{km} km from you').replace('{km}', st.km.toFixed(1))}{st.h ? ' · ' + label('lbl.checkoutOpenHours', 'open {hours}').replace('{hours}', st.h) : ''}</T></> : a ? <><T cmsKey={"lbl.cms.5f5052920c34"} weight="600">{a.l || label("lbl.cms.5f5052920c34", "Delivery address")}</T><T size={13} color={th.mut}>{a.t}{a.apt ? ', ' + a.apt : ''}</T>{a.inst ? <T cmsKey={'lbl.checkoutNote'} size={12.5} color={th.mut}>{label('lbl.checkoutNote', 'Note: {note}').replace('{note}', a.inst)}</T> : null}</> : <><T cmsKey={"lbl.cms.6795bcf3e74a"} weight="600">{label("lbl.cms.6795bcf3e74a", "Choose a delivery address")}</T><T cmsKey={"lbl.cms.2c1905767c95"} size={13} color={th.mut}>{label("lbl.cms.2c1905767c95", "Select a saved address to continue.")}</T></>}
+    </View>{pk ? null : <Pressable onPress={() => go('addresses')}><T cmsKeys={['lbl.checkoutChange',"lbl.cms.1586f89c0499"]} size={13} weight="600" color={th.br} >{a ? label('lbl.checkoutChange', 'Change') : label("lbl.cms.1586f89c0499", "Add address")}</T></Pressable>}</Row></Card>
+    {st.far && !st.live ? <Card style={{backgroundColor: th.brt, borderColor: th.br, marginTop: 12}}><T cmsKey={'lbl.checkoutPickupOnly'} weight="600">{label('lbl.checkoutPickupOnly', 'Pickup only')}</T><T cmsKeys={["lbl.cms.51f14b4a403f","lbl.cms.cea0549897a2"]} size={13} color={th.mut}>{st.n} {label("lbl.cms.51f14b4a403f", "is ")}{st.km.toFixed(1)} {label("lbl.cms.cea0549897a2", "km from this address, beyond delivery range. Pick another address to get delivery.")}</T></Card> : null}
+    {hasAlcohol() && !S.hasWallet ? <Card style={{backgroundColor: th.brt, borderColor: th.br, marginTop: 12}}><T cmsKey={'lbl.checkoutCreateWallet'} weight="600">{label('lbl.checkoutCreateWallet', 'Create a Wantiss wallet')}</T><T size={13} color={th.mut} style={{marginVertical: 4}}>{rgText('rg.wallet', 'Create a Wantiss wallet so any refund has somewhere to go. You can withdraw from it later.', alcAge(S.cart.sid).age)}</T><Cta cmsKey={'lbl.checkoutCreateWallet'} small label={label('lbl.checkoutCreateWallet', 'Create wallet')} onPress={createWallet} /></Card> : null}
+    <Ttl>{label('lbl.checkoutContactNumber', 'Contact number')}</Ttl>
+    <Card><Row><IcBox icon="phone" /><View style={{flex: 1}}><T weight="600">{ct.ph}</T><View style={{marginTop: 3, flexDirection: 'row', gap: 6, flexWrap: 'wrap'}}>{ct.w ? <Badge cmsKey={'lbl.checkoutDefaultPhone'} green label={label('lbl.checkoutDefaultPhone', 'Default Wantiss number')} /> : <><Badge cmsKey={"lbl.shopAuto1TZ3XVT"} label={label("lbl.shopAuto1TZ3XVT", "Goodies checkout number")} /><T size={12.5} color={th.mut}>{ct.l}</T></>}</View></View><Pressable onPress={() => require('../store').ui.sheet({kind: 'contacts'})}><T cmsKey={"lbl.shopAuto1YYH3EC"} size={13} weight="600" color={th.br}>{label("lbl.shopAuto1YYH3EC", "Change")}</T></Pressable></Row></Card>
   </>);
   if (S.cs === 1) body = (<>
-    <T size={15} weight="800" style={{marginBottom: 8}}>When do you want it?</T>
-    {st.open ? <Radio on={!S.sch} onPress={() => setSch(0)}><T weight="700">ASAP</T><T size={12.5} color={th.mut}>{st.eta} min</T></Radio> : <T size={12.5} color={th.mut} style={{marginBottom: 10}}>Choose a future slot. This shop's minimum advance time is already applied; the store receives the order for that selected time.</T>}
-    <Card style={{marginTop:10}}>
-      <Row sp style={{alignItems:'center'}}>
-        <View style={{flex:1}}>
-          <T weight="800">{S.sch ? 'Scheduled order' : 'Choose a date & time'}</T>
-          <T size={12.5} color={th.mut} style={{marginTop:3}}>{S.sch ? fmtDay(new Date(S.sch))+', '+fmtTime(new Date(S.sch)) : (st.open ? 'Choose an exact time, or keep ASAP.' : 'The store’s minimum advance time is applied automatically.')}</T>
-        </View>
-        <View style={{width:142}}><Cta small label={S.sch ? 'Change time' : 'Choose time'} onPress={() => ui.sheet({kind:'schedule'})} /></View>
+    <T cmsKey={'lbl.checkoutWhen'} size={15} weight="600" style={{marginBottom: 8}}>{label('lbl.checkoutWhen', 'When do you want it?')}</T>
+    {st.open ? <Radio on={!S.sch} onPress={() => {setSch(0);setScheduleOpen(false);}}>
+      <Row sp style={{alignItems:'center',flex:1}}>
+        <T cmsKey={'lbl.checkoutAsap'} weight="600">{label('lbl.checkoutAsap', 'ASAP')}</T><T cmsKey={'lbl.checkoutAsapMinimum'} size={12} color={th.mut}>{label('lbl.checkoutAsapMinimum', 'Earliest available fulfillment time')}</T>
+        <T cmsKey={"lbl.cms.40babc6bdeb6"} size={12.5} color={th.mut}>{st.eta} {label("lbl.cms.40babc6bdeb6", "min")}</T>
       </Row>
-      {S.sch ? <Pressable onPress={()=>setSch(0)} style={{alignSelf:'flex-start',paddingTop:9}}><T size={12.5} weight="700" color={th.red}>Clear scheduled time</T></Pressable> : null}
-    </Card>
-    {pk ? null : (<><Ttl>Tip your courier</Ttl><View style={{flexDirection: 'row', flexWrap: 'wrap', gap: 8}}>{fees().tips.map((v: number) => <Pressable key={v} onPress={() => setTip(v)} style={{paddingVertical: 9, paddingHorizontal: 14, borderRadius: 18, backgroundColor: S.tip === v ? th.br : th.soft}}><T size={13.5} weight="700" color={S.tip === v ? '#fff' : th.ink}>{v ? money(v) : 'No tip'}</T></Pressable>)}</View></>)}
-    <Input label={pk ? 'Note for the store' : 'Delivery instructions'} value={S.note} onChange={v => {S.note = v; emit();}} placeholder="Optional" multiline />
+    </Radio> : null}
+    {st.acceptScheduledOrders ? <Radio on={!!S.sch} onPress={() => setScheduleOpen(v => !v)}>
+      <Row sp style={{alignItems:'center',flex:1}}>
+        <View style={{flex:1,minWidth:0}}>
+          <T cmsKey={'lbl.checkoutScheduleOption'} weight="600">{label('lbl.checkoutScheduleOption','Schedule')}</T>
+          {S.sch ? <T size={12.5} color={th.mut} style={{marginTop:3}}>{fmtStoreDay(st.id,S.sch)+' · '+fmtStoreTime(st.id,S.sch)}</T> : null}
+        </View>
+        <Icon name="edit" size={17} color={th.br}/>
+      </Row>
+    </Radio> : null}
+    {scheduleOpen && st.acceptScheduledOrders ? <ScheduleInline close={() => setScheduleOpen(false)} /> : null}
+    {pk ? null : (<><Ttl>{label('lbl.checkoutCourierTip', 'Tip your courier')}</Ttl><View style={{flexDirection: 'row', flexWrap: 'wrap', gap: 8}}>{fees().tips.map((v: number) => <Pressable key={v} onPress={() => setTip(v)} style={{paddingVertical: 9, paddingHorizontal: 14, borderRadius: 18, backgroundColor: S.tip === v ? th.br : th.soft}}><T cmsKey={'lbl.checkoutNoTip'} size={13.5} weight="600" color={S.tip === v ? '#fff' : th.ink}>{v ? money(v) : label('lbl.checkoutNoTip', 'No tip')}</T></Pressable>)}</View></>)}
+    <Input cmsPlaceholderKey={'lbl.checkoutOptional'} label={pk ? label('lbl.checkoutStoreNote', 'Note for the store') : label('lbl.checkoutDeliveryInstructions', 'Delivery instructions')} value={S.note} onChange={v => {S.note = v; emit();}} placeholder={label('lbl.checkoutOptional', 'Optional')} multiline />
   </>);
   if (S.cs === 2) body = (<>
-    <T size={15} weight="800" style={{marginBottom: 8}}>Payment method</T>
-    {pays.map(p => <Radio key={p[0]} on={S.pay === p[0]} onPress={() => setPay(p[0])}><Row><Icon name={p[3]} size={20} color={th.ink} /><View style={{flex: 1}}><T size={14.5} weight="700">{p[1]}</T><T size={12.5} color={th.mut}>{p[2]}</T></View></Row></Radio>)}
-    {!previewOnly && !providerInfo.demo && !S.hasWallet ? <Card style={{borderColor: th.br}}><T weight="800">Wantiss wallet not found</T><T size={12.5} color={th.mut} style={{marginVertical: 6}}>Create a wallet to pay for Goodies orders with your balance.</T><Cta label="Create wallet" onPress={createWallet} /></Card> : null}
-    {!previewOnly && !providerInfo.demo && S.hasWallet && S.wallet < t.total ? <Card style={{borderColor: th.br, backgroundColor: th.brt}}><T weight="800">Insufficient wallet balance</T><T size={12.5} color={th.mut} style={{marginTop: 4}}>Your balance is {money(S.wallet)}. You need {money(Math.max(0, t.total - S.wallet))} more to pay with your Wantiss wallet.</T><Cta small label="Open Wallet" onPress={() => go('payments')} /></Card> : null}
-    {S.pay === 'card' ? <Card style={{marginTop: 10}}>
-      <T weight="800">Choose a saved card</T>
-      {S.cards.length ? S.cards.map((card: any) => <Radio key={card.id} on={S.selectedCardId === card.id} onPress={() => setCard(card.id)}>
-        <Row><Icon name="card" size={20} color={th.ink} /><View style={{flex: 1}}><T size={13.5} weight="700">{card.b} •••• {card.l4}{card.isDefault ? ' · Default' : ''}</T><T size={11.5} color={th.mut}>{card.expiryMonth && card.expiryYear ? 'Expires ' + String(card.expiryMonth).padStart(2,'0') + '/' + card.expiryYear : 'Saved securely with Stripe'}</T></View></Row>
-      </Radio>) : <><Empty title="No saved cards" text="Add a card in Wallet settings to pay for Goodies orders." /><Cta label="Add a card" onPress={() => go('payments')} /></>}
+    <T cmsKey={'lbl.checkoutPaymentMethod'} size={15} weight="600" style={{marginBottom: 8}}>{label('lbl.checkoutPaymentMethod', 'Payment method')}</T>
+    {pays.map(p => <Radio key={p[0]} on={S.pay === p[0]} onPress={() => setPay(p[0])}><Row><Icon name={p[3]} size={20} color={th.ink} /><View style={{flex: 1}}><T size={14.5} weight="600">{p[1]}</T><T size={12.5} color={th.mut}>{p[2]}</T></View></Row></Radio>)}
+    {!providerInfo.demo && !S.hasWallet ? <Card style={{borderColor: th.br}}><T cmsKey={'lbl.checkoutWalletNotFound'} weight="600">{label('lbl.checkoutWalletNotFound', 'Wantiss wallet not found')}</T><T cmsKey={'lbl.checkoutWalletHint'} size={12.5} color={th.mut} style={{marginVertical: 6}}>{label('lbl.checkoutWalletHint', 'Create a wallet to pay for Goodies orders with your balance.')}</T><Cta cmsKey={"lbl.shopAutoFLJ2MD"} label={label("lbl.shopAutoFLJ2MD", "Create wallet")} onPress={createWallet} /></Card> : null}
+    {!providerInfo.demo && S.pay === 'wallet' && (!S.hasWallet || S.wallet < t.total) ? <View style={{paddingVertical:10}}>
+      <T cmsKeys={['lbl.checkoutWalletNotFound','lbl.checkoutInsufficient']} size={14} weight="600" color={th.red}>{!S.hasWallet ? label('lbl.checkoutWalletNotFound', 'Wantiss wallet not found') : label('lbl.checkoutInsufficient', 'Insufficient wallet balance')}</T>
+      <T cmsKeys={["lbl.cms.cbbfe5f88c2e","lbl.cms.181c95d39d9a","lbl.cms.b11cd484018f","lbl.cms.e0b12ec3af49"]} size={12.5} color={th.mut} style={{marginTop:4}}>{!S.hasWallet ? label("lbl.cms.cbbfe5f88c2e", "Create a Wantiss wallet or choose another payment method.") : label("lbl.cms.181c95d39d9a", "Balance: ") + money(S.wallet) + label("lbl.cms.b11cd484018f", " · Add at least ") + money(Math.max(0, t.total - S.wallet)) + label("lbl.cms.e0b12ec3af49", " to continue.")}</T>
+      <Pressable onPress={() => go('payments')} style={{alignSelf:'flex-start',paddingVertical:7}}><T cmsKey={'lbl.checkoutOpenWallet'} size={13} weight="600" color={th.br}>{label('lbl.checkoutOpenWallet', 'Open Wallet')}</T></Pressable>
+    </View> : null}
+    <Pressable accessibilityRole="button" onPress={() => go('help-pay-preview')} style={{paddingVertical: 13, marginTop: 8}}><T cmsKey={"lbl.cms.42b822c31c92"} size={14} weight="600" color={th.br}>{label("lbl.cms.42b822c31c92", "Help Pay / Share Bill · Preview")}</T><T cmsKey={"lbl.cms.d0b078223c9e"} size={12} color={th.mut}>{label("lbl.cms.d0b078223c9e", "Explore the flow without sending a request or charging anyone")}</T></Pressable>
+    {S.pay === 'card' ? <Card style={{marginTop: 10, padding: 12}}>
+      <T cmsKey={'lbl.checkoutSavedCard'} weight="600" style={{marginBottom: 10}}>{label('lbl.checkoutSavedCard', 'Choose a saved card')}</T>
+      {S.cards.length ? S.cards.map((card: any) => <Pressable key={card.id} accessibilityRole="radio" accessibilityState={{checked:S.selectedCardId === card.id}} onPress={() => setCard(card.id)} style={{marginBottom:10,borderRadius:16,borderWidth:S.selectedCardId === card.id ? 2 : 1,borderColor:S.selectedCardId === card.id ? '#8FAF84' : th.line,overflow:'hidden'}}>
+        <View style={{backgroundColor:'#1A2517',padding:14,minHeight:104,justifyContent:'space-between'}}>
+          <Row sp><T cmsKey={"lbl.cms.1ea8cb359549"} size={11} weight="600" color="#ACC8A2">{label("lbl.cms.1ea8cb359549", "WANTISS · ")}{String(card.b || 'CARD').toUpperCase()}</T>{card.isDefault ? <T cmsKey={"lbl.cms.2982d9de568c"} size={10} weight="600" color="#ACC8A2">{label("lbl.cms.2982d9de568c", "DEFAULT")}</T> : null}</Row>
+          <View style={{flexDirection:'row',alignItems:'center',gap:9}}>
+            <View style={{width:32,height:23,borderRadius:5,backgroundColor:'#ACC8A2',padding:4}}><View style={{flex:1,borderRadius:2,backgroundColor:'rgba(26,37,23,0.16)'}} /></View>
+            <T size={15} weight="600" color="#FFFFFF">••••  ••••  ••••  {card.l4}</T>
+          </View>
+          <Row sp><T cmsKeys={["lbl.cms.ea6b7c9309ba","lbl.cms.270cfd8932e4"]} size={10} color="#ACC8A2">{card.expiryMonth && card.expiryYear ? label("lbl.cms.ea6b7c9309ba", "EXP ") + String(card.expiryMonth).padStart(2,'0') + '/' + String(card.expiryYear).slice(-2) : label("lbl.cms.270cfd8932e4", "SAVED CARD")}</T><T cmsKey={"lbl.cms.24b1ece4f51b"} size={11} weight="600" color="#ACC8A2">{label("lbl.cms.24b1ece4f51b", "WANTISS")}</T></Row>
+        </View>
+        <View style={{paddingHorizontal:12,paddingVertical:10,backgroundColor:S.selectedCardId === card.id ? '#EAF2E5' : th.soft,flexDirection:'row',alignItems:'center',justifyContent:'space-between'}}>
+          <T cmsKey={"lbl.cms.daaf245c613a"} size={13} weight="600">{card.b} {label("lbl.cms.daaf245c613a", "ending in ")}{card.l4}</T>
+          <View style={{width:19,height:19,borderRadius:10,borderWidth:2,borderColor:S.selectedCardId === card.id ? '#557B4C' : th.mut,alignItems:'center',justifyContent:'center'}}>{S.selectedCardId === card.id ? <Icon name="check" size={12} color="#557B4C"/> : null}</View>
+        </View>
+      </Pressable>) : <View style={{alignItems:'center',paddingVertical:20,paddingHorizontal:10}}>
+        <View style={{width:62,height:62,borderRadius:20,backgroundColor:'#DCE8D2',alignItems:'center',justifyContent:'center',marginBottom:10}}><Icon name="card" size={30} color="#1A2517"/></View>
+        <T cmsKey={'lbl.checkoutNoCards'} weight="600">{label('lbl.checkoutNoCards', 'No saved cards yet')}</T>
+        <T cmsKeys={["lbl.cms.1a0545c55765","lbl.cms.0175f1d4a19a"]} size={12.5} color={th.mut} align="center" style={{marginTop:5,lineHeight:18}}>{S.hasWallet ? label("lbl.cms.1a0545c55765", "Add a debit or credit card to your Wantiss Wallet to pay here.") : label("lbl.cms.0175f1d4a19a", "Your Wantiss Wallet is not set up yet. Create your wallet to add and use saved cards.")}</T>
+        <Cta cmsKeys={['lbl.checkoutAddCard',"lbl.cms.7f28264e6c5c"]} label={S.hasWallet ? label('lbl.checkoutAddCard', 'Add a card') : label("lbl.cms.7f28264e6c5c", "Create wallet")} onPress={() => go('payments')} />
+      </View>}
     </Card> : null}
-    {!previewOnly && !providerInfo.demo ? <T size={12} color={th.mut}>{S.pay === 'card' ? 'Your saved card is authorized and charged securely by Stripe. If authorization fails, your order will not be placed.' : 'Wantiss Wallet payments debit your available balance.'}</T> : <T size={12} color={th.mut}>Demo preview only. No real payment is taken and no order is sent to a shop.</T>}
+    {!providerInfo.demo ? <T cmsKeys={["lbl.cms.3b2939c58c05","lbl.cms.c3f6f449738e"]} size={12} color={th.mut}>{S.pay === 'card' ? label("lbl.cms.3b2939c58c05", "Your payment is processed securely.") : label("lbl.cms.c3f6f449738e", "Wantiss Wallet payments debit your available balance.")}</T> : <T cmsKey={"lbl.shopAuto12HC9JV"} size={12} color={th.mut}>{label("lbl.shopAuto12HC9JV", "Demo only. No real payment is taken.")}</T>}
   </>);
   if (S.cs === 3) body = (<>
-    <Card><T weight="700">{st.n}</T>{S.cart.lines.map((l: any) => <Row key={l.k} sp style={{marginTop: 8, alignItems: 'flex-start'}}><View style={{flex: 1}}><T size={14}>{l.q}× {l.n}</T>{l.d ? <T size={12} color={th.mut}>{l.d}</T> : null}</View><T size={14}>{money(l.p * l.q)}</T></Row>)}</Card>
-    <Sum rows={[[pk ? 'Pickup' : 'Delivery to', pk ? st.n : a.t], ['When', S.sch ? fmtDay(new Date(S.sch)) + ', ' + fmtTime(new Date(S.sch)) : 'ASAP'], ['Contact', ct.ph], ['Payment', S.pay === 'card' ? 'Card •••• ' + ((S.cards.find((card: any) => card.id === S.selectedCardId) || S.cards[0])?.l4 || '') : ({wallet: 'Wallet', moncash: 'MonCash', cash: 'Cash'} as any)[S.pay]], ...(S.note ? [['Note', S.note] as any] : [])]} />
-    {hasAlcohol() ? <Card style={{borderColor: th.br}}><T weight="800">Alcohol order. Please confirm.</T><T size={13} color={th.mut} style={{marginVertical: 6}}>{rgText('rg.refund', 'If the ID check fails, the alcohol returns to the store and you are refunded to your Wantiss wallet minus the delivery fee.', alcAge(S.cart.sid).age)}</T><Pressable onPress={() => setConsent(!S.alcConsent)} accessibilityRole="checkbox" accessibilityState={{checked: !!S.alcConsent}} style={{flexDirection: 'row', gap: 10, alignItems: 'center', marginTop: 4}}><View style={{width: 22, height: 22, borderRadius: 6, borderWidth: 2, borderColor: th.br, backgroundColor: S.alcConsent ? th.br : 'transparent', alignItems: 'center', justifyContent: 'center'}}>{S.alcConsent ? <Icon name="check" size={14} color="#fff" /> : null}</View><T size={13.5} style={{flex: 1}}>{rgText('rg.consent', 'I am {age} or older and will show valid government photo ID on delivery or pickup.', alcAge(S.cart.sid).age)}</T></Pressable></Card> : null}
-    <Sum rows={[['Subtotal', money(t.sub)], ['Delivery fee', pk ? 'Pickup' : t.free ? 'Free' : money(t.fee), t.free ? 'g' : undefined as any], ['Service fee', money(t.svc)], ...(t.disc ? [['Discount', '-' + money(t.disc), 'g'] as any] : []), ...(t.tip ? [['Tip', money(t.tip)] as any] : [])]} total={['Total', money(t.total)]} />
+    <Card>{!multi && st.cover ? <Image source={{uri:st.cover}} style={{width:"100%",height:100,borderRadius:12,marginBottom:10}} resizeMode="cover" /> : null}{multi ? <T cmsKey={"lbl.cms.014bc9ccf696"} weight="600">{stops.length} {label("lbl.cms.014bc9ccf696", "stores · one delivery")}</T> : <Row style={{gap:10, alignItems:"center"}}><Tile e={st.e} bg={st.bg} size={46} photo={st.thumbnail || st.logo} /><View style={{flex:1}}><T weight="600">{st.n}</T><T cmsKey={"lbl.cms.aa7b44ff793b"} size={12} color={th.mut}>{label("lbl.cms.aa7b44ff793b", "Your order from this store")}</T></View></Row>}{S.cart.lines.map((l: any, li: number) => <React.Fragment key={l.k}>{multi && (li === 0 || lineStore(l) !== lineStore(S.cart.lines[li - 1])) ? <T size={12.5} weight="600" color={th.mut} style={{marginTop: 14}}>{STB[lineStore(l)]?.n}</T> : null}<Row sp style={{marginTop: 10, alignItems: "center"}}><Row style={{flex:1, gap:9, alignItems:"center"}}><Tile e={l.e} bg="bg0" size={42} photo={l.photo} /><View style={{flex:1}}><T size={14}>{l.q}× {l.n}</T>{l.d ? <T size={12} color={th.mut}>{l.d}</T> : null}</View></Row><T size={14}>{money(l.p * l.q)}</T></Row></React.Fragment>)}</Card>
+    {S.pay === 'wallet' && !providerInfo.demo && (!S.hasWallet || S.wallet < t.total) ? <View style={{paddingVertical:10}}>
+      <T cmsKeys={["lbl.cms.dcdea3f94cd3","lbl.cms.1b69bdd92811"]} size={14} weight="600" color={th.red}>{!S.hasWallet ? label("lbl.cms.dcdea3f94cd3", "Wantiss Wallet is not available.") : label("lbl.cms.1b69bdd92811", "Insufficient Wantiss Wallet balance.")}</T>
+      <T cmsKeys={["lbl.cms.a878cc26f08f","lbl.cms.ffb62b872edd","lbl.cms.d2f0b5c9f696","lbl.cms.e1ce1d9b44e5"]} size={12.5} color={th.mut} style={{marginTop:3}}>{!S.hasWallet ? label("lbl.cms.a878cc26f08f", "Create a wallet or choose another payment method.") : label("lbl.cms.ffb62b872edd", "Your balance is ") + money(S.wallet) + label("lbl.cms.d2f0b5c9f696", ". Add ") + money(Math.max(0,t.total-S.wallet)) + label("lbl.cms.e1ce1d9b44e5", " or choose another payment method.")}</T>
+      <Pressable onPress={() => go('payments')} style={{alignSelf:'flex-start',paddingVertical:6}}><T cmsKey={"lbl.cms.bf6e025c5d90"} size={13} weight="600" color={th.br}>{label("lbl.cms.bf6e025c5d90", "Open Wallet")}</T></Pressable>
+    </View> : null}
+    <Sum rows={[[pk ? label("lbl.cms.c036c1628698","Pickup") : label("lbl.cms.4f41d93f89c6","Delivery to"), pk ? st.n : a.t], [label("lbl.cms.b7e3f7d2bbc4","When"), S.sch ? fmtStoreDay(st.id,S.sch) + ', ' + fmtStoreTime(st.id,S.sch) : label("lbl.cms.2d27b416d70d","ASAP")], [label("lbl.cms.b38dad2419ef","Contact"), ct.ph], [label("lbl.cms.f2c657366cc0","Payment"), S.pay === 'card' ? label("lbl.cms.9d0a083bbac9","Card •••• ") + ((S.cards.find((card: any) => card.id === S.selectedCardId) || S.cards[0])?.l4 || '') : ({wallet: label("lbl.cms.8895dfda4351","Wallet"), moncash: label("lbl.cms.0cad80a25b4b","MonCash"), cash: label("lbl.cms.ffb25a7171b4","Cash")} as any)[S.pay]], ...(S.note ? [[label("lbl.cms.5a9d0e767b9b","Note"), S.note] as any] : [])]} />
+    {hasAlcohol() ? <Card style={{borderColor: th.br}}><T cmsKey={'lbl.checkoutAlcoholConfirm'} weight="600">{label('lbl.checkoutAlcoholConfirm', 'Alcohol order. Please confirm.')}</T><T size={13} color={th.mut} style={{marginVertical: 6}}>{rgText('rg.refund', 'If the ID check fails, the alcohol returns to the store and you are refunded to your Wantiss wallet minus the delivery fee.', alcAge(S.cart.sid).age)}</T><Pressable onPress={() => setConsent(!S.alcConsent)} accessibilityRole="checkbox" accessibilityState={{checked: !!S.alcConsent}} style={{flexDirection: 'row', gap: 10, alignItems: 'center', marginTop: 4}}><View style={{width: 22, height: 22, borderRadius: 6, borderWidth: 2, borderColor: th.br, backgroundColor: S.alcConsent ? th.br : 'transparent', alignItems: 'center', justifyContent: 'center'}}>{S.alcConsent ? <Icon name="check" size={14} color="#fff" /> : null}</View><T size={13.5} style={{flex: 1}}>{rgText('rg.consent', 'I am {age} or older and will show valid government photo ID on delivery or pickup.', alcAge(S.cart.sid).age)}</T></Pressable></Card> : null}
+    <Sum rows={[[label("lbl.cms.87110ca073a0","Subtotal"), money(t.sub)], [label("lbl.cms.375ef58f2e7a","Delivery fee"), pk ? label("lbl.cms.c036c1628698","Pickup") : t.free ? label("lbl.cms.b9a67ad4232a","Free") : money(t.fee), t.free ? 'g' : undefined as any], [label("lbl.cms.b0d33600a790","Service fee"), money(t.svc)], ...(t.disc ? [[label("lbl.cms.157ca315044a","Discount"), '-' + money(t.disc), 'g'] as any] : []), ...(t.tip ? [[label("lbl.cms.4e0609617fa9","Tip"), money(t.tip)] as any] : [])]} total={[label("lbl.cms.85a0073d9a54","Total"), money(t.total)]} />
   </>);
   return (
     <View>
-      <Bar title="Checkout" onBack={back} />
+      <Bar cmsKey={'lbl.checkoutTitle'} title={label('lbl.checkoutTitle', 'Checkout')} onBack={back} />
       <View style={{paddingHorizontal: 16}}>
-        {previewOnly ? <Card style={{borderColor: th.br, marginBottom: 10}}><T weight="800">DEMO PREVIEW · NO PAYMENT</T><T size={12.5} color={th.mut} style={{marginTop: 3}}>You can explore every checkout step and complete the confirmation screen. This preview never charges a card, debits a wallet or sends an order.</T></Card> : null}
         <View style={{flexDirection: 'row', gap: 6, marginBottom: 6}}>{stp.map((x, n) => <View key={x} style={{flex: 1, alignItems: 'center'}}><View style={{height: 5, borderRadius: 3, alignSelf: 'stretch', backgroundColor: n <= S.cs ? th.br : th.line}} /><T size={11.5} weight={n === S.cs ? '800' : '500'} style={{marginTop: 5}}>{x}</T></View>)}</View>
         {body}
       </View>
     </View>
   );
 }
-export const CheckoutFoot = () => <Cta label={S.cs === 3 ? (previewOnly ? 'Complete demo checkout · ' : 'Place order · ') + money(totals().total) : 'Continue'} disabled={S.cs === 3 && hasAlcohol() && !S.alcConsent} onPress={S.cs === 3 ? placeOrder : checkoutNext} />;
+export const CheckoutFoot = () => {const insufficientWallet = S.cs === 3 && !providerInfo.demo && S.pay === 'wallet' && (!S.hasWallet || S.wallet < totals().total); return <Cta cmsKeys={['lbl.checkoutPlaceOrder','lbl.checkoutContinue']} label={S.cs === 3 ? label('lbl.checkoutPlaceOrder', 'Place order') + ' · ' + money(totals().total) : label('lbl.checkoutContinue', 'Continue')} disabled={(S.cs === 3 && hasAlcohol() && !S.alcConsent) || insufficientWallet} onPress={S.cs === 3 ? placeOrder : checkoutNext} />;};
 
 export function Confirm({id}: {id: string}) {
   const th = useTheme(), o = S.orders.filter((x: any) => x.id === id)[0];
-  if (!o || (!o.backendId && !previewOnly) || !STB[o.sid]) return <View><Bar title="Order" onBack={back} /><Empty emoji="📦" title="Order unavailable" text="This order is not available from the live Wantiss order service." button="Go home" onPress={browse} /></View>;
+  if (!o || !o.backendId || !STB[o.sid]) return <View><Bar cmsKey={"lbl.shopAuto15CA8YK"} title={label("lbl.shopAuto15CA8YK", "Order")} onBack={back} /><Empty emoji="📦" title={label('lbl.orderUnavailable', 'Order unavailable')} text={label('lbl.orderLiveUnavailable', 'This order is not available from the live Wantiss order service.')} button={label('lbl.orderGoHome', 'Go home')} onPress={browse} /></View>;
   return (
     <View style={{paddingHorizontal: 16, paddingTop: 50, alignItems: 'center'}}>
       <Text style={{fontSize: 70}}>✅</Text>
-      <T size={24} weight="800" style={{marginTop: 10, marginBottom: 4}}>{previewOnly ? 'Demo checkout completed' : 'Order placed'}</T>
-      <T color={th.mut} align="center">{previewOnly ? 'Preview only · no real order was sent and no payment was taken.' : 'Order ' + o.id + ' with ' + STB[o.sid].n + '.'}</T>
+      <T cmsKey={'lbl.confirmOrderPlaced'} size={24} weight="600" style={{marginTop: 10, marginBottom: 4}}>{label('lbl.confirmOrderPlaced', 'Order placed')}</T>
+      <T cmsKeys={["lbl.cms.f7925b4ff6ef","lbl.cms.e2119bae7932"]} color={th.mut} align="center">{label("lbl.cms.f7925b4ff6ef", "Order ")}{o.id} {label("lbl.cms.e2119bae7932", "with ")}{STB[o.sid].n}.</T>
       <View style={{alignSelf: 'stretch', marginTop: 20}}>
-        <Sum rows={o.lines.map((l: any) => [l.q + '× ' + l.n, money(l.p * l.q)])} total={['Total', money(o.total)]} />
-        <Cta label="Track order" onPress={() => go('track', o.id)} /><View style={{height: 10}} /><Cta ghost label="Back to Goodies" onPress={() => tab('home')} />
+        <Sum rows={o.lines.map((l: any) => [l.q + '× ' + l.n, money(l.p * l.q)])} total={[label("lbl.cms.85a0073d9a54","Total"), money(o.total)]} />
+        <Cta cmsKey={'lbl.confirmTrackOrder'} label={label('lbl.confirmTrackOrder', 'Track order')} onPress={() => go('track', o.id)} /><View style={{height: 10}} /><Cta cmsKey={'lbl.confirmBackGoodies'} ghost label={label('lbl.confirmBackGoodies', 'Back to Goodies')} onPress={() => tab('home')} />
       </View>
     </View>
   );
 }
 
-function DeliveryRouteMap() {
+function DeliveryRouteMap({orderId, origin, destination, route}: {orderId: string; origin: any; destination: any; route: any}) {
   const th = useTheme();
-  return <Card style={{padding: 12}}><T size={15} weight="800">Live delivery route</T><Empty title="Live tracking unavailable" text="Driver location has not been provided by the order service." /></Card>;
+  const [courier, setCourier] = useState<any>(null);
+  const [assignmentStatus, setAssignmentStatus] = useState('');
+  const [locationStale, setLocationStale] = useState(false);
+  useEffect(() => {
+    let active = true;
+    const load = async () => {
+      const {data, error} = await supabase.from('goodies_delivery_assignments')
+        .select('latitude,longitude,status,location_updated_at')
+        .eq('order_id', orderId).maybeSingle();
+      if (active && !error && data) {
+        setAssignmentStatus(String(data.status || ''));
+        const fresh=!!data.location_updated_at && Date.now()-new Date(data.location_updated_at).getTime()<=120000;
+        setLocationStale(!!data.location_updated_at&&!fresh);
+        if (fresh && Number.isFinite(Number(data.latitude)) && Number.isFinite(Number(data.longitude)) && data.latitude != null && data.longitude != null) {
+          setCourier({latitude: Number(data.latitude), longitude: Number(data.longitude), updatedAt: data.location_updated_at});
+        } else setCourier(null);
+      }
+    };
+    void load();
+    const channel = supabase.channel('goodies-courier-map-' + orderId)
+      .on('postgres_changes', {event: '*', schema: 'public', table: 'goodies_delivery_assignments', filter: 'order_id=eq.' + orderId}, () => { void load(); })
+      .subscribe();
+    return () => { active = false; void supabase.removeChannel(channel); };
+  }, [orderId]);
+  const valid = (p: any) => p && p.latitude != null && p.longitude != null && Number.isFinite(Number(p.latitude)) && Number.isFinite(Number(p.longitude));
+  const routeCoords = Array.isArray(route?.coordinates) ? (route.type === 'MultiLineString' ? route.coordinates.flat(1) : route.coordinates).map((p:any)=>({latitude:Number(p[1]),longitude:Number(p[0])})).filter((p:any)=>Number.isFinite(p.latitude)&&Number.isFinite(p.longitude)) : [];
+  const points = [origin, destination, courier].filter(valid);
+  const center = points.length ? {latitude: points.reduce((n,p)=>n+Number(p.latitude),0)/points.length, longitude: points.reduce((n,p)=>n+Number(p.longitude),0)/points.length} : null;
+  return <Card style={{padding: 12}}>
+    <T cmsKey={'lbl.orderLiveTracking'} size={15} weight="600">{label('lbl.orderLiveTracking', 'Live delivery route')}</T>
+    {center ? <MapView style={{height: 250, borderRadius: 14, marginTop: 10}} region={{...center,latitudeDelta:0.04,longitudeDelta:0.04}} showsCompass>
+      {valid(origin) ? <Marker coordinate={origin} title={label('lbl.orderStoreOrigin','Store')} pinColor="#2E8B57" /> : null}
+      {valid(destination) ? <Marker coordinate={destination} title={label('lbl.orderDeliveryDestination','Delivery address')} pinColor="#D97706" /> : null}
+      {valid(courier) ? <Marker coordinate={courier} title={label('lbl.orderCourierLocation','Courier')} description={courier.updatedAt ? label('lbl.orderCourierUpdated','Updated {time}').replace('{time}',new Date(courier.updatedAt).toLocaleTimeString()) : ''} /> : null}
+      {routeCoords.length > 1 ? <Polyline coordinates={routeCoords} strokeWidth={4} strokeColor={th.br} /> : valid(origin) && valid(destination) ? <Polyline coordinates={[origin,destination]} strokeWidth={3} strokeColor={th.br} lineDashPattern={[5,5]} /> : null}
+    </MapView> : <Empty title={label('lbl.orderMapPreparing','Preparing delivery map')} text={label('lbl.orderMapPreparingHint','The map appears when the delivery address has been geocoded.')} />}
+    <T cmsKeys={['lbl.orderCourierLive',"lbl.cms.015a04ab6e9c",'lbl.orderCourierOffer',"lbl.cms.a5199d9cdd76",'lbl.orderCourierPending']} size={12} color={th.mut} style={{marginTop:8}}>{valid(courier) ? label('lbl.orderCourierLive','Courier GPS location is updating live.') : locationStale ? label("lbl.cms.015a04ab6e9c", "The courier GPS signal is temporarily stale. Waiting for a fresh location update.") : assignmentStatus === 'offered' ? label('lbl.orderCourierOffer','Waiting for the courier to accept the delivery.') : assignmentStatus === 'accepted' || assignmentStatus === 'picked_up' ? label("lbl.cms.a5199d9cdd76", "Courier accepted. Waiting for the first GPS location.") : label('lbl.orderCourierPending','Waiting for courier assignment. The map will update when a courier starts sharing GPS.')}</T>
+  </Card>;
 }
 
 function PickupLocationMap() {
-  return <Card style={{padding: 12}}><T size={15} weight="800">Pickup location</T><Empty title="Live location unavailable" text="Pickup coordinates have not been provided by the store." /></Card>;
+  return <Card style={{padding: 12}}><T cmsKey={'lbl.orderPickupLocation'} size={15} weight="600">{label('lbl.orderPickupLocation', 'Pickup location')}</T><Empty title={label('lbl.orderPickupUnavailable', 'Live location unavailable')} text={label("lbl.shopAuto1WOHU9O", "Pickup coordinates have not been provided by the store.")} /></Card>;
 }
 
 export function Track({id}: {id: string}) {
   const th = useTheme(), o = S.orders.filter((x: any) => x.id === id)[0];
+  const [receiptBusy, setReceiptBusy] = useState(false);
+  const [reportOpen, setReportOpen] = useState(false);
+  const [reportText, setReportText] = useState('');
+  const receiptCall = async (fn: 'goodies_customer_confirm_received' | 'goodies_customer_dispute_delivery', args: any, okMessage: string) => {
+    setReceiptBusy(true);
+    const {error} = await supabase.rpc(fn, args);
+    setReceiptBusy(false);
+    if (error) {console.warn('Receipt action failed', error.message); toast(/24-hour|already|reported/i.test(error.message) ? error.message : label("lbl.cms.d87606c1f3c5", "Could not send this. Please try again.")); return;}
+    toast(okMessage); setReportOpen(false); setReportText('');
+    if (fn === 'goodies_customer_confirm_received') {o.serverStatus = 'completed'; o.st = require('../store').stage(o);} else o.deliveryDispute = 'open';
+    save(); emit();
+  };
   useEffect(() => {
-    if (previewOnly || !o?.backendId) return;
+    if (!o?.backendId) return;
     let active = true;
     const sync = async () => {
-      const {data, error} = await supabase.from('goodies_orders').select('status,scheduled_for,acceptance_deadline_at,decline_reason_public,payment_status,payment_method,payment_provider_ref').eq('id', o.backendId).maybeSingle();
+      const {data, error} = await supabase.from('goodies_orders').select('status,scheduled_for,acceptance_deadline_at,decline_reason_public,payment_status,payment_method,payment_provider_ref,store_latitude,store_longitude,delivery_latitude,delivery_longitude,delivery_route,courier_id,self_delivery,self_driver_name,self_driver_phone,delivery_proof_url,vendor_delivered_at,receipt_deadline_at,delivery_dispute_status').eq('id', o.backendId).maybeSingle();
       if (!active || error || !data) return;
       o.serverStatus = data.status;
       o.acceptanceDeadlineAt = data.acceptance_deadline_at;
       o.declineReasonPublic = data.decline_reason_public;
       o.paymentStatus = data.payment_status;
+      o.storeLatitude = data.store_latitude == null ? null : Number(data.store_latitude);
+      o.storeLongitude = data.store_longitude == null ? null : Number(data.store_longitude);
+      o.deliveryLatitude = data.delivery_latitude == null ? null : Number(data.delivery_latitude);
+      o.deliveryLongitude = data.delivery_longitude == null ? null : Number(data.delivery_longitude);
+      o.deliveryRoute = data.delivery_route || null;
+      o.courierId = data.courier_id || null;
+      o.selfDelivery = !!data.self_delivery; o.selfDriverName = data.self_driver_name || ''; o.selfDriverPhone = data.self_driver_phone || '';
+      o.proofUrl = data.delivery_proof_url || ''; o.vendorDeliveredAt = data.vendor_delivered_at || null; o.receiptDeadlineAt = data.receipt_deadline_at || null; o.deliveryDispute = data.delivery_dispute_status || null;
       if (data.payment_method === 'card' && ['declined','expired','cancelled'].includes(String(data.status)) && ['paid','refund_pending'].includes(data.payment_status) && !o.refundRequested) {
         o.refundRequested = true;
         const refund = await supabase.functions.invoke('refund-goodies-card-order', { body: { order_id: o.backendId } });
@@ -310,45 +512,59 @@ export function Track({id}: {id: string}) {
       o.expired = data.status === 'expired';
       if (data.scheduled_for) o.sch = new Date(data.scheduled_for).getTime();
       o.cx = ['cancelled', 'declined', 'expired'].includes(data.status) ? 1 : 0;
-      o.st = stage(o);
+      o.st = require('../store').stage(o);
       save(); emit();
     };
     void sync();
     const channel = supabase.channel('goodies-order-status-' + o.backendId).on('postgres_changes', {event: 'UPDATE', schema: 'public', table: 'goodies_orders', filter: 'id=eq.' + o.backendId}, () => { void sync(); }).subscribe();
     return () => { active = false; void supabase.removeChannel(channel); };
   }, [o?.backendId]);
-  if (!o) return <View><Bar title="Order" onBack={back} /><Empty emoji="📦" title="Order not found" button="Go home" onPress={browse} /></View>;
+  if (!o) return <View><Bar cmsKey={"lbl.shopAuto15CA8YK"} title={label("lbl.shopAuto15CA8YK", "Order")} onBack={back} /><Empty emoji="📦" title={label('lbl.orderNotFound', 'Order not found')} button={label('lbl.orderGoHome', 'Go home')} onPress={browse} /></View>;
   const s = STB[o.sid], T_: string[] = stageLabels(!!o.pk, o.pk ? TP : TL), dn = done(o);
   const serverStatus = String(o.serverStatus || '').toLowerCase();
-  const eta = o.declined ? 'Store declined the order' : o.expired ? 'Response window expired' : o.cx ? 'Cancelled' : dn ? (o.pk ? 'Picked up' : 'Delivered') : o.backendId ? (serverStatus === 'scheduled' && o.sch && Date.now() < o.sch ? 'Scheduled for ' + fmtTime(new Date(o.sch)) : serverStatus === 'scheduled' || serverStatus === 'placed' ? 'Waiting for store to accept' : serverStatus === 'accepted' ? 'Order accepted by store' : serverStatus === 'preparing' ? 'Store is preparing your order' : serverStatus === 'ready' ? (o.pk ? 'Ready for pickup' : 'Ready for courier pickup') : 'Order update') : o.sch && Date.now() < o.sch ? 'Scheduled for ' + fmtTime(new Date(o.sch)) : 'Simulated ETA · ' + Math.max(1, T_.length - 1 - o.st) * 5 + ' sec';
+  const eta = o.declined ? label('lbl.orderStoreDeclined', 'Store declined the order') : o.expired ? label('lbl.orderExpired', 'Response window expired') : o.cx ? label('lbl.orderCancelled', 'Cancelled') : dn ? (o.pk ? label('lbl.orderPickedUp', 'Picked up') : label('lbl.orderDelivered', 'Delivered')) : o.backendId ? (serverStatus === 'scheduled' && o.sch && Date.now() < o.sch ? label('lbl.orderScheduledFor', 'Scheduled for {time}').replace('{time}', fmtTime(new Date(o.sch))) : serverStatus === 'scheduled' || serverStatus === 'placed' ? label('lbl.orderWaitingStore', 'Waiting for store to accept') : serverStatus === 'accepted' ? label('lbl.orderAccepted', 'Order accepted by store') : serverStatus === 'preparing' ? label('lbl.orderPreparing', 'Store is preparing your order') : serverStatus === 'ready' ? (o.pk ? label('lbl.orderReadyPickup', 'Ready for pickup') : label('lbl.orderReadyCourier', 'Ready for courier pickup')) : serverStatus === 'courier_assigned' ? label('lbl.orderCourierAssigned', 'A courier has been assigned') : serverStatus === 'picked_up' ? label('lbl.orderCourierPickedUp', 'Your courier has picked up the order') : label('lbl.orderUpdated', 'Order update')) : o.sch && Date.now() < o.sch ? label('lbl.orderScheduledFor', 'Scheduled for {time}').replace('{time}', fmtTime(new Date(o.sch))) : label('lbl.orderUpdated', 'Order update');
   return (
     <View>
-      <Bar title={'Order ' + o.id} onBack={back} />
+      <Bar cmsKey={"lbl.cms.f7925b4ff6ef"} title={label("lbl.cms.f7925b4ff6ef", "Order ") + o.id} onBack={back} />
       <View style={{paddingHorizontal: 16}}>
         <Card>
-          <Row><Tile e={s.e} bg={s.bg} /><View style={{flex: 1}}><T weight="700">{s.n}</T><T size={13} color={th.mut}>{o.pk ? 'Pickup' : 'To ' + (o.ad ? o.ad.t + (o.ad.apt ? ', ' + o.ad.apt : '') : o.addr)}</T></View></Row>
+          <Row><Tile e={s.e} bg={s.bg} photo={s.thumbnail || s.cover || s.logo} /><View style={{flex: 1}}><T weight="600">{s.n}</T><T cmsKeys={['lbl.orderPickupShort','lbl.orderToAddress']} size={13} color={th.mut}>{o.pk ? label('lbl.orderPickupShort', 'Pickup') : label('lbl.orderToAddress', 'To {address}').replace('{address}', o.ad ? o.ad.t + (o.ad.apt ? ', ' + o.ad.apt : '') : o.addr)}</T></View></Row>
           <View style={{marginTop: 10}}><Badge green={!!(dn && !o.cx)} label={eta} /></View>
-          {o.cx ? <T size={14} color={th.mut} style={{marginTop: 12}}>{o.declined ? 'The store could not accept your order. ' + (o.declineReasonPublic || 'Please try another store.') : o.expired ? 'The store did not respond within 15 minutes. Your order was cancelled.' : 'This order was cancelled'}{o.pay === 'card' ? (o.paymentStatus === 'refunded' ? ' Your card refund has been submitted. It may take a few business days to appear.' : ' Your card refund is being processed. It may take a few business days to appear.') : o.paymentStatus === 'refunded' || o.pay === 'wallet' ? ' Any applicable refund will be shown in your Wantiss wallet activity.' : ' You were not charged for this order.'}</T> : (<>
+          {o.selfDelivery && serverStatus === 'picked_up' ? <View style={{marginTop: 14}}>
+            <T cmsKey={"lbl.cms.159703b671cc"} size={13} color={th.mut}>{label("lbl.cms.159703b671cc", "Delivered by the store · ")}{o.selfDriverName}{o.selfDriverPhone ? ' · ' + o.selfDriverPhone : ''}</T>
+            {o.vendorDeliveredAt ? <View style={{marginTop: 10}}>
+              {o.proofUrl ? <Image source={{uri: o.proofUrl}} style={{width: '100%', height: 190, borderRadius: 14, backgroundColor: th.soft}} resizeMode="cover" /> : null}
+              {o.deliveryDispute === 'open' ? <T cmsKey={"lbl.cms.8acc0d99b9d7"} size={13.5} weight="600" style={{marginTop: 10}}>{label("lbl.cms.8acc0d99b9d7", "Your report was sent. Our team is reviewing it.")}</T> : <>
+                <T cmsKeys={["lbl.cms.86aa98d055a3","lbl.cms.227331420344"]} size={13.5} style={{marginTop: 10}}>{label("lbl.cms.86aa98d055a3", "The store says this order was delivered. Please confirm, or report a problem before ")}{o.receiptDeadlineAt ? new Date(o.receiptDeadlineAt).toLocaleString() : label("lbl.cms.227331420344", "the deadline")}.</T>
+                <View style={{marginTop: 10}}><Cta cmsKeys={["lbl.cms.4531925b5cf1","lbl.cms.b17be51367a9"]} label={receiptBusy ? label("lbl.cms.4531925b5cf1", "Please wait…") : label("lbl.cms.b17be51367a9", "I received my order")} disabled={receiptBusy} onPress={() => void receiptCall('goodies_customer_confirm_received', {p_order_id: o.backendId}, 'Thanks for confirming.')} /></View>
+                {reportOpen ? <View style={{marginTop: 10}}>
+                  <Input cmsPlaceholderKey={"lbl.cms.7b49bfc70d42"} value={reportText} onChange={setReportText} placeholder={label("lbl.cms.7b49bfc70d42", "What went wrong?")} />
+                  <View style={{marginTop: 10}}><Cta cmsKey={"lbl.cms.c814afa2abd9"} ghost label={label("lbl.cms.c814afa2abd9", "Send report")} disabled={receiptBusy || reportText.trim().length < 3} onPress={() => void receiptCall('goodies_customer_dispute_delivery', {p_order_id: o.backendId, p_reason: reportText}, 'Your report was sent.')} /></View>
+                </View> : <Pressable onPress={() => setReportOpen(true)} style={{marginTop: 12, alignItems: 'center'}}><T cmsKey={"lbl.cms.1ef1997e7f65"} size={13.5} weight="600" color={th.red}>{label("lbl.cms.1ef1997e7f65", "I have a problem with this order")}</T></Pressable>}
+              </>}
+            </View> : <T cmsKey={"lbl.cms.74d8ca9709e9"} size={13} color={th.mut} style={{marginTop: 6}}>{label("lbl.cms.74d8ca9709e9", "Your order is on its way.")}</T>}
+          </View> : null}
+          {o.cx ? <T cmsKeys={['lbl.orderDeclinedMessage','lbl.orderDeclinedFallback','lbl.orderExpiredMessage','lbl.orderCancelledMessage',"lbl.cms.0b1f18ae2490","lbl.cms.55da95a03134","lbl.cms.4a0be576ba7b","lbl.cms.345fec0110b5"]} size={14} color={th.mut} style={{marginTop: 12}}>{o.declined ? label('lbl.orderDeclinedMessage', 'The store could not accept your order. {reason}').replace('{reason}', o.declineReasonPublic || label('lbl.orderDeclinedFallback', 'Please try another store.')) : o.expired ? label('lbl.orderExpiredMessage', 'The store did not respond within 15 minutes. Your order was cancelled.') : label('lbl.orderCancelledMessage', 'This order was cancelled')}{o.pay === 'card' ? (o.paymentStatus === 'refunded' ? label("lbl.cms.0b1f18ae2490", " Your card refund has been submitted. It may take a few business days to appear.") : label("lbl.cms.55da95a03134", " Your card refund is being processed. It may take a few business days to appear.")) : o.paymentStatus === 'refunded' || o.pay === 'wallet' ? label("lbl.cms.4a0be576ba7b", " Any applicable refund will be shown in your Wantiss wallet activity.") : label("lbl.cms.345fec0110b5", " You were not charged for this order.")}</T> : (<>
             <View style={{flexDirection: 'row', gap: 6, marginVertical: 14}}>{T_.map((x, i) => <View key={i} style={{flex: 1, height: 6, borderRadius: 3, backgroundColor: i <= o.st ? th.br : th.line}} />)}</View>
             {T_.map((x, i) => <View key={i} style={{flexDirection: 'row', gap: 12, marginVertical: 12, alignItems: 'center'}}><View style={{width: 22, height: 22, borderRadius: 11, borderWidth: 2, borderColor: i <= o.st ? th.br : th.line, backgroundColor: i <= o.st ? th.br : 'transparent', alignItems: 'center', justifyContent: 'center'}}>{i <= o.st ? <Icon name="check" size={12} color="#fff" /> : null}</View><T size={14} color={i <= o.st ? th.ink : th.mut} weight={i <= o.st ? '700' : undefined}>{x}</T></View>)}
           </>)}
-          <T size={11.5} color={th.mut}>Order status is provided by the live order service.</T>
+          <T cmsKey={'lbl.orderStatusHeading'} size={11.5} color={th.mut}>{label('lbl.orderStatusHeading', 'Order status is provided by the live order service.')}</T>
         </Card>
         {o.pk && o.st >= 3 && !o.cx ? <PickupLocationMap /> : null}
-        {!o.pk && o.st >= 4 && !dn ? <DeliveryRouteMap /> : null}
-        {o.alc ? <Card style={{borderColor: o.alc.status === 'failed' ? th.red : th.br}}><Row><Text style={{fontSize: 26}}>🪪</Text><View style={{flex: 1}}><T weight="800">ID check · {o.alc.age}+ ({o.alc.who === 'shop' ? 'checked by the shop' : 'checked by the courier'})</T><T size={13} color={th.mut}>{o.alc.status === 'pending' ? 'Have your valid government photo ID ready. The order is completed only after it is checked.' : o.alc.status === 'passed' ? 'ID checked.' : (o.pay === 'cash' ? 'ID check failed. You were not charged.' : 'ID check failed. ' + money(o.refund || 0) + ' was refunded to your Wantiss wallet. The delivery fee is not refunded.')}</T></View></Row>{providerInfo.demo && o.alc.status === 'pending' && o.st >= (o.pk ? 3 : 5) ? <View style={{flexDirection: 'row', gap: 8, marginTop: 10}}><Cta small ghost label="Demo: ID valid" onPress={() => idResult(o.id, true)} /><Cta small ghost label="Demo: ID failed" onPress={() => idResult(o.id, false)} /></View> : null}</Card> : null}
-        {dn && !o.cx && (!o.rated || (!o.pk && !o.driverRated)) ? <Card><Row sp style={{alignItems:'center'}}><View style={{flex:1}}><T weight="800">Rate your order</T><T size={12} color={th.mut}>Order and delivery feedback</T></View><View style={{flexDirection:'row',gap:3}}>{[1,2,3,4,5].map(k=><Pressable key={k} accessibilityRole="button" accessibilityLabel={'Rate order ' + k + ' stars'} onPress={()=>{S.rt=k;ui.sheet({kind:'review',id:o.id,initialStars:k});}}><Icon name="star" size={23} color={o.rated>=k?'#FFB400':th.line} fill /></Pressable>)}</View></Row>{o.rated ? <T size={12} color={th.mut} style={{marginTop:5}}>Your rating: {o.rated} ★</T> : null}{!o.pk ? <><View style={{height:1,backgroundColor:th.line,marginVertical:10}}/><Row sp style={{alignItems:'center'}}><View style={{flex:1}}><T weight="800">Rate your driver</T><T size={12} color={th.mut}>Delivery experience</T></View>{o.driverRated ? <T weight="700">{o.driverRated} ★</T> : <View style={{flexDirection:'row',gap:3}}>{[1,2,3,4,5].map(k=><Pressable key={k} accessibilityRole="button" accessibilityLabel={'Rate driver ' + k + ' stars'} onPress={()=>{S.rt=k;ui.sheet({kind:'driver-review',id:o.id,initialStars:k});}}><Icon name="star" size={23} color="#FFB400" fill /></Pressable>)}</View>}</Row></> : null}</Card> : null}
+        {!o.pk && o.st >= 4 && !dn && o.backendId ? <DeliveryRouteMap orderId={o.backendId} origin={{latitude:o.storeLatitude,longitude:o.storeLongitude}} destination={{latitude:o.deliveryLatitude,longitude:o.deliveryLongitude}} route={o.deliveryRoute} /> : null}
+        {o.alc ? <Card style={{borderColor: o.alc.status === 'failed' ? th.red : th.br}}><Row><Text style={{fontSize: 26}}>🪪</Text><View style={{flex: 1}}><T cmsKeys={["lbl.cms.5a0595a94ee9","lbl.cms.b76c533d659a","lbl.cms.e6097512cd01"]} weight="600">{label("lbl.cms.5a0595a94ee9", "ID check · ")}{o.alc.age}+ ({o.alc.who === 'shop' ? label("lbl.cms.b76c533d659a", "checked by the shop") : label("lbl.cms.e6097512cd01", "checked by the courier")})</T><T cmsKeys={["lbl.cms.d78ba6e23dc0","lbl.cms.3dc4a54dd622","lbl.cms.dab075b135b8","lbl.cms.08bec5419d29","lbl.cms.6c1b35aaee08"]} size={13} color={th.mut}>{o.alc.status === 'pending' ? label("lbl.cms.d78ba6e23dc0", "Have your valid government photo ID ready. The order is completed only after it is checked.") : o.alc.status === 'passed' ? label("lbl.cms.3dc4a54dd622", "ID checked.") : (o.pay === 'cash' ? label("lbl.cms.dab075b135b8", "ID check failed. You were not charged.") : label("lbl.cms.08bec5419d29", "ID check failed. ") + money(o.refund || 0) + label("lbl.cms.6c1b35aaee08", " was refunded to your Wantiss wallet. The delivery fee is not refunded."))}</T></View></Row>{providerInfo.demo && o.alc.status === 'pending' && o.st >= (o.pk ? 3 : 5) ? <View style={{flexDirection: 'row', gap: 8, marginTop: 10}}><Cta cmsKey={"lbl.shopAuto1RR9Q6U"} small ghost label={label("lbl.shopAuto1RR9Q6U", "Demo: ID valid")} onPress={() => idResult(o.id, true)} /><Cta cmsKey={"lbl.shopAuto2L0NX5"} small ghost label={label("lbl.shopAuto2L0NX5", "Demo: ID failed")} onPress={() => idResult(o.id, false)} /></View> : null}</Card> : null}
+        {dn && !o.cx && (!o.rated || (!o.pk && !o.driverRated)) ? <Card><Row sp style={{alignItems:'center'}}><View style={{flex:1}}><T cmsKey={'lbl.orderRate'} weight="600">{label('lbl.orderRate', 'Rate your order')}</T><T cmsKey={'lbl.orderFeedback'} size={12} color={th.mut}>{label('lbl.orderFeedback', 'Order and delivery feedback')}</T></View><View style={{flexDirection:'row',gap:3}}>{[1,2,3,4,5].map(k=><Pressable key={k} accessibilityRole="button" accessibilityLabel={label('lbl.a11yRateOrder', 'Rate order {n} stars').replace('{n}', String(k))} onPress={()=>{S.rt=k;require('../store').ui.sheet({kind:'review',id:o.id,initialStars:k});}}><Icon name="star" size={23} color={o.rated>=k?'#FFB400':th.line} fill /></Pressable>)}</View></Row>{o.rated ? <T cmsKey={'lbl.orderYourRating'} size={12} color={th.mut} style={{marginTop:5}}>{label('lbl.orderYourRating', 'Your rating: {n} ★').replace('{n}', String(o.rated))}</T> : null}{!o.pk ? <><View style={{height:1,backgroundColor:th.line,marginVertical:10}}/><Row sp style={{alignItems:'center'}}><View style={{flex:1}}><T cmsKey={'lbl.orderRateDriver'} weight="600">{label('lbl.orderRateDriver', 'Rate your driver')}</T><T cmsKey={'lbl.orderDeliveryExperience'} size={12} color={th.mut}>{label('lbl.orderDeliveryExperience', 'Delivery experience')}</T></View>{o.driverRated ? <T weight="600">{o.driverRated} ★</T> : <View style={{flexDirection:'row',gap:3}}>{[1,2,3,4,5].map(k=><Pressable key={k} accessibilityRole="button" accessibilityLabel={label('lbl.a11yRateDriver', 'Rate driver {n} stars').replace('{n}', String(k))} onPress={()=>{S.rt=k;require('../store').ui.sheet({kind:'driver-review',id:o.id,initialStars:k});}}><Icon name="star" size={23} color="#FFB400" fill /></Pressable>)}</View>}</Row></> : null}</Card> : null}
         {o.rated && (o.pk || o.driverRated) ? <Card>
-          <T weight="700" align="center">Thank you for your feedback!</T>
-          {o.orderReview?.t ? <T size={12.5} color={th.mut} style={{marginTop:8}}>Your shop/order comment: “{o.orderReview.t}”</T> : null}
-          {o.driverReview?.t ? <T size={12.5} color={th.mut} style={{marginTop:6}}>Your driver comment: “{o.driverReview.t}”</T> : null}
+          <T cmsKey={'lbl.orderThanksFeedback'} weight="600" align="center">{label('lbl.orderThanksFeedback', 'Thank you for your feedback!')}</T>
+          {o.orderReview?.t ? <T cmsKey={"lbl.cms.dae6f942d4dd"} size={12.5} color={th.mut} style={{marginTop:8}}>{label("lbl.cms.dae6f942d4dd", "Your shop/order comment: “")}{o.orderReview.t}”</T> : null}
+          {o.driverReview?.t ? <T cmsKey={"lbl.cms.46f72c090911"} size={12.5} color={th.mut} style={{marginTop:6}}>{label("lbl.cms.46f72c090911", "Your driver comment: “")}{o.driverReview.t}”</T> : null}
         </Card> : null}
-        <Sum rows={[...o.lines.map((l: any) => [l.q + '× ' + l.n, money(l.p * l.q)] as any), ['Fees', money(o.fee + o.svc)], ...(o.disc ? [['Discount', '-' + money(o.disc), 'g'] as any] : []), ...(o.tip ? [['Tip', money(o.tip)] as any] : []), ['Contact', (o.ph || 'n/a') + (o.phl ? ' (' + o.phl + ')' : '')], ...(o.ad && o.ad.inst ? [['Instructions', o.ad.inst] as any] : []), ...(o.note ? [['Note', o.note] as any] : [])]} total={['Total · ' + o.payl, money(o.total)]} />
-        {!dn && o.st <= 2 ? <><Card style={{padding: 0, borderWidth: 0}}><Pressable onPress={() => cancelAsk(o.id)} style={{height: 52, borderRadius: 16, backgroundColor: th.soft, alignItems: 'center', justifyContent: 'center'}}><T size={15.5} weight="800" color={th.red}>Cancel order</T></Pressable></Card></> : null}
-        <Cta ghost label="Order again" onPress={() => reorder(o.id)} /><View style={{height: 10}} />
-        {!o.cx ? <><Cta ghost label="Message store" onPress={() => go('storechat', o.sid)} /><View style={{height: 10}} /></> : null}
-        <Cta ghost label="Get help with this order" onPress={() => go('contact', {o: true, oid: o.id})} /><View style={{height: 10}} />
-        <Cta label="Go to Orders" onPress={() => tab('orders')} />
+        <Card style={{padding:12}}><T cmsKey={"lbl.cms.8d5e1a5fadd8"} size={14} weight="600" style={{marginBottom:8}}>{label("lbl.cms.8d5e1a5fadd8", "Items")}</T>{o.lines.map((l:any,index:number)=><Row key={l.k || l.id || index} style={{alignItems:'center',paddingVertical:6}}><Tile e={l.e || '🛍️'} bg={s?.bg || 'bg0'} photo={l.photo || IT[l.id]?.photo} size={46}/><View style={{flex:1}}><T weight="600">{l.q}× {l.n}</T>{l.d ? <T size={11.5} color={th.mut}>{l.d}</T> : null}</View><T weight="600">{money(l.p*l.q)}</T></Row>)}</Card><Sum rows={ [[label("lbl.cms.ef4acf6a72bb","Fees"), money(o.fee + o.svc)], ...(o.disc ? [[label("lbl.cms.157ca315044a","Discount"), '-' + money(o.disc), 'g'] as any] : []), ...(o.tip ? [[label("lbl.cms.4e0609617fa9","Tip"), money(o.tip)] as any] : []), [label("lbl.cms.b38dad2419ef","Contact"), (o.ph || label("lbl.cms.6ae0f21e3435","n/a")) + (o.phl ? ' (' + o.phl + ')' : '')], ...(o.ad && o.ad.inst ? [[label("lbl.cms.234ba50b0bb2","Instructions"), o.ad.inst] as any] : []), ...(o.note ? [[label("lbl.cms.5a9d0e767b9b","Note"), o.note] as any] : [])]} total={[label("lbl.cms.2a83279eab59","Total · ") + o.payl, money(o.total)]} />
+        {!dn && o.st <= 2 ? <><Card style={{padding: 0, borderWidth: 0}}><Pressable onPress={() => cancelAsk(o.id)} style={{height: 52, borderRadius: 16, backgroundColor: th.soft, alignItems: 'center', justifyContent: 'center'}}><T cmsKey={'lbl.orderCancelAction'} size={15.5} weight="600" color={th.red}>{label('lbl.orderCancelAction', 'Cancel order')}</T></Pressable></Card></> : null}
+        <Cta cmsKey={'lbl.orderAgain'} ghost label={label('lbl.orderAgain', 'Order again')} onPress={() => reorder(o.id)} /><View style={{height: 10}} />
+        {!o.cx ? <><Cta cmsKey={'lbl.orderMessageStore'} ghost label={label('lbl.orderMessageStore', 'Message store')} onPress={() => go('storechat', o.sid)} /><View style={{height: 10}} /></> : null}
+        <Cta cmsKey={'lbl.orderGetHelp'} ghost label={label('lbl.orderGetHelp', 'Get help with this order')} onPress={() => go('contact', {o: true, oid: o.id})} /><View style={{height: 10}} />
+        <Cta cmsKey={'lbl.orderGoToOrders'} label={label('lbl.orderGoToOrders', 'Go to Orders')} onPress={() => tab('orders')} />
       </View>
     </View>
   );
@@ -357,7 +573,6 @@ export function Track({id}: {id: string}) {
 export function Orders() {
   const backendIds = S.orders.map((o: any) => o.backendId).filter(Boolean).join(',');
   useEffect(() => {
-    if (previewOnly) return;
     let active = true;
     let channel: ReturnType<typeof supabase.channel> | undefined;
     const start = async () => {
@@ -381,7 +596,7 @@ export function Orders() {
           order.expired = row.status === 'expired';
           order.cx = ['cancelled', 'declined', 'expired'].includes(row.status) ? 1 : 0;
           if (row.scheduled_for) order.sch = new Date(row.scheduled_for).getTime();
-          order.st = stage(order);
+          order.st = require('../store').stage(order);
           changed = true;
         }
         if (changed) { save(); emit(); }
@@ -396,26 +611,26 @@ export function Orders() {
     return () => { active = false; if (channel) void supabase.removeChannel(channel); };
   }, [backendIds]);
   const th = useTheme(), a = S.orders.filter((o: any) => (S.ot === 'active' ? !done(o) : done(o)));
-  const stTxt = (o: any) => (o.cx ? 'Cancelled' : stageLabels(!!o.pk, o.pk ? TP : TL)[o.st]);
+  const stTxt = (o: any) => (o.cx ? label('lbl.orderCancelled', 'Cancelled') : stageLabels(!!o.pk, o.pk ? TP : TL)[o.st]);
   return (
     <View>
-      <Bar title="Your orders" onBack={() => back()} />
+      <Bar cmsKey={'lbl.ordersTitle'} title={label('lbl.ordersTitle', 'Your orders')} onBack={() => require('../actions').back()} />
       <View style={{paddingHorizontal: 16}}>
-        <Seg list={[['active', 'Active'], ['past', 'Past']]} on={S.ot} onPick={setOrdersTab} />
+        <Seg list={[['active', label('lbl.ordersActive', 'Active')], ['past', label('lbl.ordersPast', 'Past')]]} on={S.ot} onPick={setOrdersTab} />
         <View style={{height: 14}} />
         {a.length ? a.map((o: any) => {
           const s = STB[o.sid], d = new Date(o.t0);
           return (
             <Card key={o.id}>
               <Pressable onPress={() => go('track', o.id)} style={{flexDirection: 'row', alignItems: 'center', gap: 12}}>
-                <Tile e={s.e} bg={s.bg} />
-                <View style={{flex: 1}}><T weight="700">{s.n}</T><T size={12.5} color={th.mut}>{o.id} · {fmtDay(d)} · {money(o.total)}</T><View style={{marginTop: 5}}><Badge green={!!(done(o) && !o.cx)} label={stTxt(o)} /></View></View>
+                <Tile e={s.e} bg={s.bg} photo={s.thumbnail || s.cover || s.logo} />
+                <View style={{flex: 1}}><T weight="600">{s.n}</T><T size={12.5} color={th.mut}>{o.id} · {fmtDay(d)} · {money(o.total)}</T><View style={{marginTop: 5}}><Badge green={!!(done(o) && !o.cx)} label={stTxt(o)} /></View></View>
                 <Icon name="chevR" size={16} color={th.ink} />
               </Pressable>
-              <Row style={{marginTop: 12}}><Cta small ghost label="Reorder" onPress={() => reorder(o.id)} /><Cta small label={done(o) ? 'Details' : 'Track'} onPress={() => go('track', o.id)} /></Row>
+              <Row style={{marginTop: 12}}><Cta cmsKey={'lbl.ordersReorder'} small ghost label={label('lbl.ordersReorder', 'Reorder')} onPress={() => reorder(o.id)} /><Cta cmsKeys={['lbl.ordersDetails','lbl.ordersTrack']} small label={done(o) ? label('lbl.ordersDetails', 'Details') : label('lbl.ordersTrack', 'Track')} onPress={() => go('track', o.id)} /></Row>
             </Card>
           );
-        }) : <Empty emoji={S.ot === 'active' ? '🍽️' : '🧾'} title={S.ot === 'active' ? 'No active orders' : 'No past orders yet'} text="Your orders will show up here." button="Browse stores" onPress={() => go('explore')} />}
+        }) : <Empty emoji={S.ot === 'active' ? '🍽️' : '🧾'} title={S.ot === 'active' ? label('lbl.ordersNoActive', 'No active orders') : label('lbl.ordersNoPast', 'No past orders yet')} text={label('lbl.ordersEmptyText', 'Your orders will show up here.')} button={label('lbl.ordersBrowse', 'Browse stores')} onPress={() => go('explore')} />}
       </View>
     </View>
   );
@@ -425,30 +640,30 @@ export function Favs() {
   const th = useTheme(), st = ST.filter(s => S.fav.indexOf(s.id) > -1), it = S.favp.map((id: string) => IT[id]).filter(Boolean);
   return (
     <View>
-      <Bar title="Favorites" onBack={back} />
-      <View style={{paddingHorizontal: 16}}><Seg list={[['stores', 'Stores (' + st.length + ')'], ['items', 'Items (' + it.length + ')']]} on={S.ft} onPick={k => {S.ft = k; emit();}} /></View>
-      {S.ft === 'stores' ? (st.length ? <View style={{gap: 22, padding: 16}}>{st.map(s => <StoreCard key={s.id} s={s} />)}</View> : <Empty icon="heart" title="No favorite stores yet" text="Save the stores you love by tapping the heart on a store." button="Browse stores" onPress={browse} />)
-        : (it.length ? <View style={{paddingHorizontal: 16, marginTop: 6}}>{it.map((i: any) => <ItemRow key={i.id} i={i} />)}</View> : <Empty icon="heart" title="No favorite items yet" text="Tap the heart on a product to keep it here for later." button="Browse stores" onPress={browse} />)}
+      <Bar cmsKey={'lbl.favoritesTitle'} title={label('lbl.favoritesTitle', 'Your favorites')} onBack={back} />
+      <View style={{paddingHorizontal: 16}}><Seg list={[['stores', label('lbl.searchTabStores', 'Stores ({n})').replace('{n}', String(st.length))], ['items', label('lbl.searchTabItems', 'Items ({n})').replace('{n}', String(it.length))]]} on={S.ft} onPick={k => {S.ft = k; emit();}} /></View>
+      {S.ft === 'stores' ? (st.length ? <View style={{gap: 22, padding: 16}}>{st.map(s => <StoreCard key={s.id} s={s} />)}</View> : <Empty icon="heart" title={label('lbl.favoritesEmpty', 'Nothing saved yet')} text={label('lbl.favoritesEmptyText', 'Save stores and products to find them here.')} button={label("lbl.shopAuto1GWRJAO", "Browse stores")} onPress={browse} />)
+        : (it.length ? <View style={{paddingHorizontal: 16, marginTop: 6}}>{it.map((i: any) => <ItemRow key={i.id} i={i} />)}</View> : <Empty icon="heart" title={label('lbl.favoritesEmpty', 'Nothing saved yet')} text={label('lbl.favoritesEmptyText', 'Save stores and products to find them here.')} button={label("lbl.shopAuto1GWRJAO", "Browse stores")} onPress={browse} />)}
     </View>
   );
 }
 
-const FAQ: [string, string][] = [['How do I track my order?', 'Open Orders, then tap Track on an active order. You also get a notification at every step.'], ['Delivery information', 'Delivery takes about 15 to 55 minutes depending on the store. Your first order ships free; after that each store sets its own fee.'], ['Payment information', 'Pay with your Wallet, MonCash, a saved card or cash. This prototype simulates payments only.'], ['Refunds and cancellation', 'You can cancel before the store finishes preparing your order. Wallet payments are refunded to your wallet. Full policy: placeholder for the demo.'], ['What if an item is missing?', 'Open the order, tap Get help, and tell us what happened.']];
+const FAQ: [string, string][] = [];
 export function Help() {
   const th = useTheme(), [open, setOpen] = useState(-1);
   return (
     <View>
-      <Bar title="Help center" onBack={back} />
+      <Bar cmsKey={'lbl.helpTitle'} title={label('lbl.helpTitle', 'Help center')} onBack={back} />
       <View style={{paddingHorizontal: 16}}>
         {faqList(FAQ).map((x, k) => (
           <Pressable key={k} onPress={() => setOpen(open === k ? -1 : k)} style={{borderBottomWidth: 1, borderBottomColor: th.line, paddingVertical: 14, paddingHorizontal: 4}}>
-            <T size={14.5} weight="700">{x[0]}</T>
+            <T size={14.5} weight="600">{x[0]}</T>
             {open === k ? <T size={13.5} color={th.mut} style={{marginTop: 8, lineHeight: 20}}>{x[1]}</T> : null}
           </Pressable>
         ))}
-        <View style={{height: 18}} /><Cta label="Contact support" onPress={() => go('contact')} /><View style={{height: 10}} />
-        <Cta ghost label="Report an order problem" onPress={() => go('contact', {o: true, oid: ''})} /><View style={{height: 10}} />
-        <Cta ghost label="Terms and policies" onPress={() => go('policies')} />
+        <View style={{height: 18}} /><Cta cmsKey={'lbl.helpContact'} label={label('lbl.helpContact', 'Contact support')} onPress={() => go('contact')} /><View style={{height: 10}} />
+        <Cta cmsKey={'lbl.helpOrders'} ghost label={label('lbl.helpOrders', 'Report an order problem')} onPress={() => go('contact', {o: true, oid: ''})} /><View style={{height: 10}} />
+        <Cta cmsKey={'lbl.accountTermsPolicies'} ghost label={label('lbl.accountTermsPolicies', 'Terms and policies')} onPress={() => go('policies')} />
       </View>
     </View>
   );

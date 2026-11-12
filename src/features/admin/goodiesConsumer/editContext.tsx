@@ -1,9 +1,11 @@
 /* Edit selection stays isolated; outside edit mode, consumer elements render unchanged. */
+import {C} from './content';
+import {tx} from './i18n';
 import React, {createContext, useContext} from 'react';
 import {Pressable, Text, View, ViewStyle} from 'react-native';
 
 export type GoodiesField = 'title' | 'sub' | 'btn' | 'text' | 'art';
-export type GoodiesKind = 'mode' | 'promo' | 'category' | 'label';
+export type GoodiesKind = 'mode' | 'promo' | 'category' | 'label' | 'library';
 export type GoodiesSelection = {kind: GoodiesKind; id: string; field: GoodiesField};
 
 export const selKey = (s: GoodiesSelection) => s.kind + ':' + s.id + ':' + s.field;
@@ -13,7 +15,7 @@ export const sameSel = (a: GoodiesSelection | null | undefined, b: GoodiesSelect
 export type BuilderTarget = {builderId: string; part: 'builder' | 'group' | 'ingredient' | 'addGroup' | 'addIngredient'; groupId?: string; itemId?: string};
 export const sameTarget = (a: BuilderTarget | null | undefined, b: BuilderTarget) => !!a && a.builderId === b.builderId && a.part === b.part && (a.groupId || '') === (b.groupId || '') && (a.itemId || '') === (b.itemId || '');
 
-type EditCtx = {selected: GoodiesSelection | null; select: (selection: GoodiesSelection) => void; pick?: (target: BuilderTarget) => void; picked?: BuilderTarget | null};
+type EditCtx = {selected: GoodiesSelection | null; select: (selection: GoodiesSelection) => void; pick?: (target: BuilderTarget) => void; picked?: BuilderTarget | null; choose?: (ids:string[])=>void};
 export const EditContext = createContext<EditCtx | null>(null);
 
 /** True only inside the admin editor's edit mode. */
@@ -55,3 +57,24 @@ export function AddChip({target, label}: {target: BuilderTarget; label: string})
     </Pressable>
   );
 }
+
+/** Resolve only an unambiguous platform text label; never select customer/vendor values by fuzzy match. */
+export function useEditableText(value: unknown, id?:string, ids?:string[]): {onPress?: (event:{stopPropagation:()=>void})=>void} {
+  const context = useContext(EditContext);
+  if (!context) return {};
+  const explicit=[...new Set([...(id?[id]:[]),...(ids||[])])].filter(key=>(C?.labels||[]).some((entry:any)=>entry.id===key));
+  const matches=explicit;
+  if(!matches.length)return {};
+  return {onPress:event=>{
+    event.stopPropagation();
+    if(matches.length===1)context.select({kind:'label',id:matches[0],field:'text'});
+    else context.choose?.(matches);
+  }};
+}
+
+export function useContentSelection(target?:GoodiesSelection){
+ const context=useContext(EditContext);
+ return context&&target?.id?{onPress:(event:any)=>{event.stopPropagation();context.select(target);}}:{};
+}
+/** Event handler is created at component render; safe inside asset conditionals/maps. */
+export function useAssetSelectionContext(){const context=useContext(EditContext);return (target:GoodiesSelection)=>(event:any)=>{if(context&&target.id){event.stopPropagation();context.select(target);}};}
