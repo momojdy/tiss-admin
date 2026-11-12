@@ -293,7 +293,7 @@ export function GoodiesAdminScreen() {
     {module==='Delivery surcharge'?<>
       <View style={cardStyle}>
         <Text style={valueStyle}>Additional-store delivery fee (USD)</Text>
-        <Text style={{fontSize:11,color:'#697466',marginTop:4}}>One flat fee for each additional store in a multi-store order. This amount is included in the final server-calculated delivery price.</Text>
+        <Text style={{fontSize:11,color:'#697466',marginTop:4}}>One flat fee for each additional store in a multi-store order. This amount is included in the final delivery price.</Text>
         <TextInput value={additionalStoreFee} onChangeText={setAdditionalStoreFee} keyboardType="decimal-pad" style={{borderWidth:1,borderColor:'#DCE4D7',borderRadius:10,padding:11,marginTop:8,color:'#1B2619'}}/>
         <Text style={{...valueStyle,marginTop:14}}>Extra-distance rate per kilometre (USD)</Text>
         <TextInput value={extraDistancePerKm} onChangeText={setExtraDistancePerKm} keyboardType="decimal-pad" style={{borderWidth:1,borderColor:'#DCE4D7',borderRadius:10,padding:11,marginTop:8,color:'#1B2619'}}/>
