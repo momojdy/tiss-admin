@@ -1,5 +1,6 @@
 import {EditableNativeText as Text} from '../EditableNativeText';
 import {GOODIES_SHARED_PAYMENTS_RELEASED} from '../helpPayApi';
+import {friendlyError} from '../friendlyError';
 import {loadOlderGoodiesOrders} from '../serverSync';
 import {useStoreReviews} from '../reviews';
 import {coordinate, courierLocation, routeSegments, trackingRegion} from '../deliveryTracking';
@@ -40,37 +41,42 @@ export function Store({id}: {id: string}) {
   const [shareFriends,setShareFriends]=useState<Array<{id:string;name:string;avatar:string|null}>>([]);
   const storeShareUrl='wantiss://goodies/store/'+encodeURIComponent(id);
   const openStoreShare=async()=>{
+    const accountId=S.accountId;
     setShareOpen(true);setShareLoading(true);
     try{
       const {data:{user}}=await supabase.auth.getUser();
-      if(!user){setShareFriends([]);return;}
+      if(S.accountId!==accountId||!user||user.id!==accountId){setShareFriends([]);return;}
       const [{data:friendships,error:friendError},{data:profiles,error:profileError}]=await Promise.all([
         supabase.from('user_friendships').select('requester_id,recipient_id').eq('status','accepted').or('requester_id.eq.'+user.id+',recipient_id.eq.'+user.id),
         supabase.rpc('wantiss_message_contact_profiles')
       ]);
+      if(S.accountId!==accountId)return;
       if(friendError||profileError)throw friendError||profileError;
       const ids=new Set((friendships||[]).map(f=>f.requester_id===user.id?f.recipient_id:f.requester_id));
       setShareFriends((profiles||[]).filter((p:any)=>ids.has(p.id)).map((p:any)=>({id:p.id,name:p.full_name||p.wantiss_number||'Wantiss friend',avatar:p.avatar_url||null})));
-    }catch(e){Alert.alert(label("lbl.cms.2bb2b73d8ff1", "Friends unavailable"),e instanceof Error?e.message:label("lbl.cms.5ee02dc1f983", "Could not load friends."));}
+    }catch(e){Alert.alert(label("lbl.cms.2bb2b73d8ff1", "Friends unavailable"),friendlyError(e,label("lbl.cms.5ee02dc1f983", "Could not load friends.")));}
     finally{setShareLoading(false);}
   };
   const sendStoreToFriend=async(friendId:string)=>{
-    if(shareSending)return;setShareSending(friendId);
+    if(shareSending)return;const accountId=S.accountId;setShareSending(friendId);
     try{
-      const {data:{user}}=await supabase.auth.getUser();if(!user)throw new Error('Please sign in.');
+      const {data:{user}}=await supabase.auth.getUser();if(S.accountId!==accountId||user?.id!==accountId)return;if(!user)throw new Error('Please sign in.');
       const {data:existing,error:findError}=await supabase.from('conversations').select('id').eq('feature','friends').contains('participant_ids',[user.id,friendId]).limit(1).maybeSingle();
+      if(S.accountId!==accountId)return;
       if(findError)throw findError;
       let conversationId=existing?.id;
       if(!conversationId){
         const {data:created,error:createError}=await supabase.from('conversations').insert({participant_ids:[user.id,friendId],customer_id:user.id,feature:'friends',status:'active',title:'Wantiss conversation'}).select('id').single();
         if(createError)throw createError;conversationId=created.id;
       }
+      if(S.accountId!==accountId)return;
       const body='[wantiss-attachment-v1]'+JSON.stringify({kind:'store',name:STB[id]?.n||'Goodies store',reference:storeShareUrl,image:STB[id]?.cover||STB[id]?.thumbnail||STB[id]?.logo||undefined});
       const {error:sendError}=await supabase.from('messages').insert({conversation_id:conversationId,sender_id:user.id,body});
+      if(S.accountId!==accountId)return;
       if(sendError)throw sendError;
       await supabase.from('conversations').update({updated_at:new Date().toISOString()}).eq('id',conversationId);
       setShareOpen(false);toast(label("lbl.cms.3c2b5e6ec88d", "Store shared in Wantiss Messages"));
-    }catch(e){Alert.alert(label("lbl.cms.80f7eb45bdba", "Could not share store"),e instanceof Error?e.message:label("lbl.cms.c097a7fccce6", "Please try again."));}
+    }catch(e){Alert.alert(label("lbl.cms.80f7eb45bdba", "Could not share store"),friendlyError(e,label("lbl.cms.c097a7fccce6", "Please try again.")));}
     finally{setShareSending(null);}
   };
   const th = useTheme(), s = STB[id], address = addr(), t = S.ss[id + 't'] || 'all', q = (S.ss[id] || '').toLowerCase();
