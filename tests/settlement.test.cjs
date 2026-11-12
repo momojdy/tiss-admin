@@ -1,0 +1,11 @@
+const {test}=require('node:test'),assert=require('node:assert/strict'),fs=require('node:fs'),vm=require('node:vm'),ts=require('typescript');
+const source=ts.createSourceFile('settlement.tsx',fs.readFileSync('src/features/admin/screens/goodies/GoodiesSettlementAdmin.tsx','utf8'),99,true);
+function extract(name,context,evaluate=false){let match;function visit(node){if(ts.isVariableDeclaration(node)&&node.name.getText(source)===name)match=node.initializer;ts.forEachChild(node,visit);}visit(source);assert.ok(match);const module={exports:{}};const code='module.exports='+(evaluate?'()=>('+match.getText(source)+')':match.getText(source))+';';vm.runInNewContext(ts.transpileModule(code,{compilerOptions:{target:ts.ScriptTarget.ES2022,module:ts.ModuleKind.CommonJS}}).outputText,{module,...context});return module.exports;}
+test('financial confirmation validates the transferred currency amount and requires receipt evidence',()=>{
+ const check=amount=>extract('valid',{canManage:true,action:{kind:'payout',decision:'completed',expected:500},reason:'Verified transfer with bank',receipt:true,reference:'real-receipt-reference',needsAmount:true,amount},true)();assert.equal(check('5'),false);assert.equal(check('500'),true);assert.equal(check('NaN'),false);
+ const missingReceipt=extract('valid',{canManage:true,action:{kind:'payout',decision:'completed',expected:500},reason:'Verified transfer with bank',receipt:true,reference:'',needsAmount:true,amount:'500'},true);assert.equal(missingReceipt(),false);
+});
+test('admin settlement actions send exact receipt amounts and never expose backend errors',async()=>{
+ const calls=[],errors=[],context={canManage:true,action:{kind:'payout',id:'payout-id',decision:'completed'},valid:true,lock:{current:false},active:{current:true},setBusy(){},setError:value=>errors.push(value),setAction(){},setDetails(){},setRefresh(){},reason:'Verified transfer with bank',reference:'verified-receipt',needsAmount:true,amount:'500',supabase:{rpc:async(name,args)=>{calls.push({name,args});return{error:{message:'private SQL finance schema'}};}}};
+ await extract('submit',context)();assert.equal(calls[0].args.p_amount,500);assert.equal(calls[0].args.p_reference,'verified-receipt');assert.ok(errors.at(-1).includes('Check the current status'));assert.ok(!errors.at(-1).includes('SQL'));assert.equal(context.lock.current,false);
+});

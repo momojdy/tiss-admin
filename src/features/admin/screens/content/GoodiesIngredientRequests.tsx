@@ -1,8 +1,9 @@
+import {can, edit, hasServerPermission} from '../../state/access';
 import { useCallback, useEffect, useState } from 'react';
 import { Image, TextInput, View } from 'react-native';
 import * as ImagePicker from 'expo-image-picker';
 import { supabase } from '../../lib/supabase';
-import { publishCmsAsset, uploadCmsAsset } from '../../lib/adminBackend';
+import { listCmsAssets, publishCmsAsset, uploadCmsAsset } from '../../lib/adminBackend';
 import { useTheme } from '../../theme/ThemeContext';
 import { Section } from '../../ui/Card';
 import { OutlineBtn } from '../../ui/Controls';
@@ -38,6 +39,8 @@ async function storeAsset(name: string, file: Picked): Promise<string> {
 }
 
 export function GoodiesIngredientRequests({ canEdit }: { canEdit: boolean }) {
+  canEdit = canEdit && can(edit(1));
+  const canPublishAssets = hasServerPermission('content.assets','manage');
   const { c } = useTheme();
   const [requests, setRequests] = useState<Req[]>([]);
   const [library, setLibrary] = useState<Lib[]>([]);
@@ -46,11 +49,13 @@ export function GoodiesIngredientRequests({ canEdit }: { canEdit: boolean }) {
   const [rules, setRules] = useState('');
   const [showAll, setShowAll] = useState(false);
   const [busy, setBusy] = useState('');
+  const [loading, setLoading] = useState(true), [loadFailed, setLoadFailed] = useState(false);
   const [msg, setMsg] = useState('');
   const [newName, setNewName] = useState('');
   const [newBuilder, setNewBuilder] = useState('pizza');
 
   const load = useCallback(async () => {
+    setLoading(true);setLoadFailed(false);
     try {
       const [reqs, libs, rule] = await Promise.all([
         supabase.rpc('wantiss_admin_list_ingredient_requests'),
@@ -58,33 +63,38 @@ export function GoodiesIngredientRequests({ canEdit }: { canEdit: boolean }) {
         supabase.rpc('goodies_get_ingredient_rules'),
       ]);
       if (reqs.error) throw reqs.error;
+      if (libs.error) throw libs.error;
+      if (rule.error) throw rule.error;
       const reqRows = (reqs.data || []) as Req[];
       const libRows = (libs.data || []) as Lib[];
       setRequests(reqRows); setLibrary(libRows); setRules(typeof rule.data === 'string' ? rule.data : '');
       const next: Record<string, string> = {};
       const vendorPaths = reqRows.map((r) => r.image_path).filter(Boolean) as string[];
       if (vendorPaths.length) {
-        const { data } = await supabase.storage.from(REQ_BUCKET).createSignedUrls(vendorPaths, 3600);
+        const { data, error } = await supabase.storage.from(REQ_BUCKET).createSignedUrls(vendorPaths, 3600);
+        if(error || data?.some(d=>d.error))throw new Error('Photo unavailable');
         (data || []).forEach((d: any) => { if (d?.path && d?.signedUrl) next['v:' + d.path] = d.signedUrl; });
       }
-      const { data: assets } = await supabase.rpc('wantiss_admin_list_cms_assets');
+      const assets = await listCmsAssets();
       const keys = new Set([...reqRows.map((r) => r.admin_asset_key), ...libRows.map((l) => l.asset_key)].filter(Boolean) as string[]);
       const picked = (Array.isArray(assets) ? assets : []).filter((a: any) => keys.has(a.asset_key));
       if (picked.length) {
-        const { data } = await supabase.storage.from(CMS_BUCKET).createSignedUrls(picked.map((a: any) => a.storage_path), 3600);
+        const { data, error } = await supabase.storage.from(CMS_BUCKET).createSignedUrls(picked.map((a: any) => a.storage_path), 3600);
+        if(error || data?.some(d=>d.error))throw new Error('Photo unavailable');
         const byPath = new Map<string, string>();
         (data || []).forEach((d: any) => { if (d?.path && d?.signedUrl) byPath.set(d.path, d.signedUrl); });
         picked.forEach((a: any) => { const u = byPath.get(a.storage_path); if (u) next['a:' + a.asset_key] = u; });
       }
       setUrls(next);
-    } catch (e) { setMsg(e instanceof Error ? e.message : 'Ingredient requests could not be loaded.'); }
+    } catch {setLoadFailed(true);setMsg('Ingredient requests or photos could not be loaded. Please try again.');}
+    finally {setLoading(false);}
   }, []);
   useEffect(() => { void load(); }, [load]);
 
   const run = async (label: string, work: () => Promise<void>) => {
     if (busy) return;
     setBusy(label); setMsg('');
-    try { await work(); await load(); } catch (e: any) { setMsg(e?.message || 'That did not work.'); } finally { setBusy(''); }
+    try { await work(); await load(); } catch (e: any) { setMsg('Could not save this change. Check your access and try again.'); } finally { setBusy(''); }
   };
 
   const review = (r: Req, status: 'approved' | 'denied' | 'needs_info', replacement?: Picked | null) => run(r.id, async () => {
@@ -125,10 +135,12 @@ export function GoodiesIngredientRequests({ canEdit }: { canEdit: boolean }) {
   const field = { borderWidth: 1, borderColor: c.bd, borderRadius: 9, paddingHorizontal: 9, paddingVertical: 7, marginTop: 4, marginBottom: 7, color: c.ink, backgroundColor: c.card, fontSize: 11 } as const;
   const thumb = (uri?: string) => uri ? <Image source={{ uri }} resizeMode="contain" style={{ width: 72, height: 72, borderRadius: 8, backgroundColor: '#FFFFFF' }} /> : <View style={{ width: 72, height: 72, borderRadius: 8, backgroundColor: c.inset, alignItems: 'center', justifyContent: 'center' }}><Txt size={8.5} mut>No photo</Txt></View>;
   const shown = requests.filter((r) => showAll || r.status === 'submitted' || r.status === 'needs_info');
-  const off = !canEdit || !!busy;
+  const off = !canEdit || !!busy || loading || loadFailed;
 
   return (
     <Section title="Ingredient requests">
+      {loading ? <View style={{height:100,borderRadius:10,backgroundColor:c.inset,marginBottom:8}}><Txt size={10} mut>Loading ingredient requests…</Txt></View> : null}
+      {loadFailed ? <OutlineBtn onPress={()=>void load()}>Try again</OutlineBtn> : null}
       {msg ? <Txt size={10} color={c.or} style={{ marginBottom: 7 }}>{msg}</Txt> : null}
 
       <Txt size={11} weight={600}>Photo rules vendors see</Txt>
@@ -139,7 +151,7 @@ export function GoodiesIngredientRequests({ canEdit }: { canEdit: boolean }) {
         <Txt size={11} weight={600}>{showAll ? 'All requests' : 'Waiting for review'} ({shown.length})</Txt>
         <OutlineBtn onPress={() => setShowAll(!showAll)}>{showAll ? 'Show waiting' : 'Show all'}</OutlineBtn>
       </View>
-      {!shown.length ? <Txt size={10} mut>No requests here.</Txt> : null}
+      {!loading && !loadFailed && !shown.length ? <Txt size={10} mut>No requests here.</Txt> : null}
       {shown.map((r) => (
         <View key={r.id} style={{ borderWidth: 1, borderColor: c.bd, borderRadius: 10, padding: 9, marginBottom: 8 }}>
           <View style={{ flexDirection: 'row', gap: 10 }}>
@@ -154,8 +166,8 @@ export function GoodiesIngredientRequests({ canEdit }: { canEdit: boolean }) {
           </View>
           <TextInput value={notes[r.id] ?? ''} onChangeText={(v) => setNotes({ ...notes, [r.id]: v })} placeholder="Note to the vendor (required to decline or ask for info)" placeholderTextColor={c.mut} style={field} />
           <View style={{ flexDirection: 'row', flexWrap: 'wrap', gap: 6 }}>
-            <OutlineBtn primary disabled={off || r.status === 'approved'} onPress={() => review(r, 'approved')}>{busy === r.id ? 'Working…' : 'Approve'}</OutlineBtn>
-            <OutlineBtn disabled={off} onPress={() => replacePhoto(r)}>Replace photo</OutlineBtn>
+            <OutlineBtn primary disabled={off || !canPublishAssets || r.status === 'approved'} onPress={() => review(r, 'approved')}>{busy === r.id ? 'Working…' : 'Approve'}</OutlineBtn>
+            <OutlineBtn disabled={off || !canPublishAssets} onPress={() => replacePhoto(r)}>Replace photo</OutlineBtn>
             <OutlineBtn disabled={off} onPress={() => review(r, 'needs_info')}>Ask for info</OutlineBtn>
             <OutlineBtn disabled={off} onPress={() => review(r, 'denied')}>Decline</OutlineBtn>
           </View>
@@ -167,8 +179,8 @@ export function GoodiesIngredientRequests({ canEdit }: { canEdit: boolean }) {
       <TextInput value={newName} onChangeText={setNewName} placeholder="New ingredient name (e.g. Whipped cream)" placeholderTextColor={c.mut} style={field} />
       <View style={{ flexDirection: 'row', flexWrap: 'wrap', gap: 6, marginBottom: 6 }}>
         {BUILDERS.map((b) => <OutlineBtn key={b} primary={newBuilder === b} onPress={() => setNewBuilder(b)}>{b}</OutlineBtn>)}
-        <OutlineBtn disabled={off || newName.trim().length < 2} onPress={() => saveLib({ name: newName.trim(), builder: newBuilder })}>Add</OutlineBtn>
-        <OutlineBtn disabled={off || newName.trim().length < 2} onPress={async () => { try { const f = await pickImage(); if (f) await saveLib({ name: newName.trim(), builder: newBuilder }, f); } catch (e: any) { setMsg(e?.message || 'Photo failed.'); } }}>Add with photo</OutlineBtn>
+        <OutlineBtn disabled={off || !canPublishAssets || newName.trim().length < 2} onPress={() => saveLib({ name: newName.trim(), builder: newBuilder })}>Add</OutlineBtn>
+        <OutlineBtn disabled={off || !canPublishAssets || newName.trim().length < 2} onPress={async () => { try { const f = await pickImage(); if (f) await saveLib({ name: newName.trim(), builder: newBuilder }, f); } catch (e: any) { setMsg('The photo could not be loaded or saved. Please try again.'); } }}>Add with photo</OutlineBtn>
       </View>
       {library.map((l) => (
         <View key={l.id} style={{ flexDirection: 'row', alignItems: 'center', gap: 10, borderTopWidth: 1, borderColor: c.bd, paddingVertical: 7 }}>
@@ -178,7 +190,7 @@ export function GoodiesIngredientRequests({ canEdit }: { canEdit: boolean }) {
             <Txt size={9} mut>{l.builder}{l.role ? ' · ' + l.role : ''}{l.active ? '' : ' · hidden'}</Txt>
           </View>
           <View style={{ gap: 5 }}>
-            <OutlineBtn disabled={off} onPress={async () => { try { const f = await pickImage(); if (f) await saveLib(l, f); } catch (e: any) { setMsg(e?.message || 'Photo failed.'); } }}>Photo</OutlineBtn>
+            <OutlineBtn disabled={off || !canPublishAssets} onPress={async () => { try { const f = await pickImage(); if (f) await saveLib(l, f); } catch (e: any) { setMsg('The photo could not be loaded or saved. Please try again.'); } }}>Photo</OutlineBtn>
             <OutlineBtn disabled={off} onPress={() => saveLib({ ...l, active: !l.active })}>{l.active ? 'Hide' : 'Show'}</OutlineBtn>
           </View>
         </View>

@@ -1,3 +1,4 @@
+import {GoodiesSettlementAdmin} from '../goodies/GoodiesSettlementAdmin';
 import React, { useEffect, useState } from 'react';
 import { View } from 'react-native';
 import { bump, db, mny, ui, useDb } from '../../state/db';
@@ -88,7 +89,7 @@ export function FinanceScreen() {
   const right = (label: string, extra?: string) => (<View style={{ flexDirection: 'row', alignItems: 'center', gap: 6 }}>{extra === 'navigate' ? <AppIcon name="chevron-right" size={12} /> : extra ? <Txt size={10.1}>{extra}</Txt> : null}<StatusPill label={label} /></View>);
 
   let body;
-  if (ui.fv === 'Transactions') {
+  if (ui.fv === 'Goodies settlement') {body=<GoodiesSettlementAdmin/>;} else if (ui.fv === 'Transactions') {
     body = (
       <>
         <Card>
@@ -121,12 +122,12 @@ export function FinanceScreen() {
 
   return (
     <View>
-      <Heading title="Money & Transactions" kpis={[
+      <Heading title="Money & Transactions" kpis={ui.fv==='Goodies settlement'?[]:[
         { icon: 'wallet', value: mny(sum(cs)), label: 'Completed', onPress: () => go('finance', { fv: 'Transactions', fs: 'Completed' }) },
         { icon: 'clock-alert', value: mny(sum(ps)), label: 'Pending settlement', onPress: () => go('finance', { fv: 'Transactions', fs: 'Pending' }) },
         { icon: 'shield-alert', value: mny(sum(fl)), label: 'Failed or flagged', tag: fl.length + ' to review', tone: 'r', onPress: () => go('finance', { fv: 'Transactions', fs: 'Failed' }) },
       ]} />
-      <SelectMenu label="Financial area" options={['Transactions', 'Wallet', 'Refunds', 'Settlements', 'Payouts', 'Reconciliation'] as const} value={ui.fv} onChange={(v) => set('fv', v)} />
+      <SelectMenu label="Financial area" options={['Transactions', 'Wallet', 'Refunds', 'Settlements', 'Payouts', 'Reconciliation', 'Goodies settlement'] as const} value={ui.fv} onChange={(v) => set('fv', v)} />
       {body}
     </View>
   );

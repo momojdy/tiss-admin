@@ -1,3 +1,4 @@
+import {can, edit} from '../../state/access';
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { Image, TextInput, View } from 'react-native';
 import { CollapsibleColorField } from './CollapsibleColorField';
@@ -26,6 +27,7 @@ export function GoodiesBuilderConfigEditor({ canEdit, focus = null, imageUrls = 
   onDraft?: (row: BuilderRow | null) => void;
   onClose?: () => void;
 }) {
+  canEdit = canEdit && can(edit(1));
   const { c } = useTheme();
   const [rows, setRows] = useState<BuilderRow[]>([]);
   const [selected, setSelected] = useState<BuilderRow | null>(null);
@@ -34,6 +36,7 @@ export function GoodiesBuilderConfigEditor({ canEdit, focus = null, imageUrls = 
   const [busy, setBusy] = useState('');
   const [error, setError] = useState('');
   const [notice, setNotice] = useState('');
+  const [ingredientsLoading,setIngredientsLoading]=useState(true),[ingredientsError,setIngredientsError]=useState(false),[ingredientsAttempt,setIngredientsAttempt]=useState(0);
   const [library, setLibrary] = useState<any[]>([]);
   const [requests, setRequests] = useState<any[]>([]);
   const handled = useRef<BuilderTarget | null>(null);
@@ -43,16 +46,20 @@ export function GoodiesBuilderConfigEditor({ canEdit, focus = null, imageUrls = 
       const { data, error: rpcError } = await supabase.rpc('wantiss_admin_list_goodies_builder_configs');
       if (rpcError) throw rpcError;
       setRows(Array.isArray(data) ? (data as BuilderRow[]) : []);
-    } catch (e) { setError((e as any)?.message || 'Builders could not be loaded.'); }
+    } catch (e) { setError('Builders could not be loaded. Please try again.'); }
   }, []);
   useEffect(() => { void load(); }, [load]);
   useEffect(() => {
+    let active=true;setIngredientsLoading(true);setIngredientsError(false);
     (async () => {
       const [lib, req] = await Promise.all([supabase.rpc('wantiss_admin_list_library_ingredients'), supabase.rpc('wantiss_admin_list_ingredient_requests')]);
+      if(lib.error || req.error)throw new Error('Ingredients unavailable');
+      if(!active)return;
       setLibrary(Array.isArray(lib.data) ? lib.data : []);
       setRequests(Array.isArray(req.data) ? req.data : []);
-    })().catch(() => {});
-  }, []);
+    })().catch(() => {if(active)setIngredientsError(true);}).finally(()=>{if(active)setIngredientsLoading(false);});
+    return()=>{active=false;};
+  }, [ingredientsAttempt]);
   useEffect(() => { onRows?.(rows); }, [rows]);
   useEffect(() => { onDraft?.(selected); }, [selected]);
 
@@ -88,7 +95,7 @@ export function GoodiesBuilderConfigEditor({ canEdit, focus = null, imageUrls = 
 
   const group = (selected?.config?.groups || []).find((g: any) => g.id === part?.groupId);
   const item = (group?.items || []).find((it: any) => it.id === part?.itemId);
-  const requestsHere = useMemo(() => requests.filter((r: any) => selected && r.business_id === selected.business_id && r.status !== 'rejected'), [requests, selected?.business_id]);
+  const requestsHere = useMemo(() => requests.filter((r: any) => selected && r.business_id === selected.business_id && r.status === 'approved'), [requests, selected?.business_id]);
 
   const persist = async (row: BuilderRow) => {
     const names = [row.config?.name, ...(row.config?.groups || []).flatMap((g: any) => [g.name, ...(g.items || []).map((i: any) => i.name)])];
@@ -100,8 +107,8 @@ export function GoodiesBuilderConfigEditor({ canEdit, focus = null, imageUrls = 
         p_business_id: row.business_id, p_builder_id: row.builder_id, p_config: config, p_enabled: !!row.enabled,
       });
       if (rpcError) throw rpcError;
-      setSelected({ ...row, config }); setNotice('Saved.'); await load(); return true;
-    } catch (e) { setError((e as any)?.message || 'It could not be saved.'); return false; }
+      setSelected({ ...row, config }); setNotice('Saved to the live store. These changes are separate from the page content draft.'); await load(); return true;
+    } catch (e) { setError('It could not be saved. Check your access and try again.'); return false; }
     finally { setSaving(false); }
   };
   const save = () => { if (selected && canEdit && !saving) void persist(selected); };
@@ -119,7 +126,7 @@ export function GoodiesBuilderConfigEditor({ canEdit, focus = null, imageUrls = 
     try {
       const key = await chooseAndUploadIngredientImage(source, part.itemId);
       if (key) { patchItem(part.groupId, part.itemId, { img: { assetKey: key } }); setNotice('Picture added. Tap Save to keep it.'); }
-    } catch (e) { setError(e instanceof Error ? e.message : 'The picture could not be uploaded.'); }
+    } catch (e) { setError('The picture could not be uploaded.'); }
     finally { setBusy(''); }
   };
   const useRequest = (request: any) => {
@@ -142,9 +149,11 @@ export function GoodiesBuilderConfigEditor({ canEdit, focus = null, imageUrls = 
 
   return (
     <View style={{ borderWidth: 2, borderStyle: 'dashed', borderColor: '#FD802E', borderRadius: 14, padding: 10, marginTop: 10 }}>
+      {ingredientsLoading?<Txt size={10} mut>Loading ingredient choices…</Txt>:ingredientsError?<View><Txt size={10} mut>Ingredient choices could not load.</Txt><OutlineBtn onPress={()=>setIngredientsAttempt(n=>n+1)}>Try again</OutlineBtn></View>:null}
       <Txt size={9.5} weight={600} color={c.or} style={{ marginBottom: 6 }}>Selected Build Your Own field · edit below</Txt>
       <Section title={title}>
       {error ? <Txt size={10.5} color={c.or} style={{ marginBottom: 8 }}>{error}</Txt> : null}
+      <Txt size={10} mut style={{marginBottom:8}}>Saving a builder updates the live store immediately. Page content uses the separate draft and publish controls.</Txt>
       {notice ? <Txt size={10} mut style={{ marginBottom: 8 }}>{notice}</Txt> : null}
       {!canEdit && part ? <Txt size={9.5} color={c.or} style={{ marginBottom: 8 }}>View access only: editing and saving are disabled.</Txt> : null}
       {part?.part === 'builder' ? (
@@ -181,7 +190,7 @@ export function GoodiesBuilderConfigEditor({ canEdit, focus = null, imageUrls = 
       ) : null}
       {part ? (
         <View style={{ flexDirection: 'row', flexWrap: 'wrap', gap: 6 }}>
-          <OutlineBtn primary onPress={save} disabled={!canEdit || saving || !!busy}>{saving ? 'Saving…' : 'Save'}</OutlineBtn>
+          <OutlineBtn primary onPress={save} disabled={!canEdit || saving || !!busy}>{saving ? 'Saving…' : 'Save live builder'}</OutlineBtn>
           {part.part !== 'builder' ? <OutlineBtn onPress={() => { void remove(); }} disabled={!canEdit || saving || !!busy}>{part.part === 'group' ? 'Remove section' : 'Remove ingredient'}</OutlineBtn> : null}
           <OutlineBtn onPress={close} disabled={saving}>Close</OutlineBtn>
         </View>

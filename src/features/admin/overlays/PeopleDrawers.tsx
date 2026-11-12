@@ -1,3 +1,4 @@
+import {permissionKey} from '../state/permissionKeys';
 import { useEffect, useState } from 'react';
 import { Pressable, Switch, View } from 'react-native';
 import { bump, db, mny, TODAY, useDb } from '../state/db';
@@ -5,9 +6,8 @@ import { acs, can, effOf, expireStaff, LN, needs, nm, RIGHTS, session, staffByNa
 import { liveGrantsFor } from '../state/grants';
 import { REQ, useGuard } from '../state/requirements';
 import {
-  ACC_TONE, accById, accStatus, accStatusLabel, cancelInvite, createRole, editSuspension, expireAccounts, inviteCode, inviteEmail, liftRestriction, markAppeal,
-  openItems, reinstateStaff, resendInvite, restoreStaff, restrictAccount, RESTRICT_REASONS, revokeStaff, saveRoleTemplate, saveStaffAccess, scopeTxt, STAFF_TONE, suspendStaff,
-  svcNames, upholdBan, type AccessEdit, type RightChoice,
+  ACC_TONE, accById, accStatus, accStatusLabel, createRole, expireAccounts, inviteCode, inviteEmail, markAppeal,
+  openItems, RESTRICT_REASONS, saveRoleTemplate, scopeTxt, STAFF_TONE, svcNames, upholdBan,
 } from '../state/people';
 import { Section } from '../ui/Card';
 import { OutlineBtn, Pill, StatusPill } from '../ui/Controls';
@@ -110,8 +110,6 @@ export function StaffDrawer({ id, close }: { id: string; close: () => void }) {
   );
 }
 
-const RIGHT_OPTS = (on: boolean) => ['From role (' + (on ? 'on' : 'off') + ')', 'Grant', 'Remove'];
-const RIGHT_KEYS: RightChoice[] = ['role', 'grant', 'remove'];
 
 function EditAccessSheet({ name, onClose, onSaved }: { name: string; onClose: () => void; onSaved: () => void }) {
   const { c } = useTheme();
@@ -125,17 +123,6 @@ function EditAccessSheet({ name, onClose, onSaved }: { name: string; onClose: ()
   const [busy, setBusy] = useState(false);
 
   const permissionOptions = [...new Set([...db.SEC, ...RIGHTS])];
-  const permissionKey = (label: string) => {
-    const known: Record<string, string> = {
-      'Manage permissions': 'staff.manage',
-      'Manage content': 'content.manage',
-      'Publish content': 'content.publish',
-      'Archive content': 'content.archive',
-      'Manage assets': 'content.assets',
-      'Read audit log': 'audit.read',
-    };
-    return known[label] || label.toLowerCase().replace(/[^a-z0-9]+/g, '.').replace(/^\\.|\\.$/g, '');
-  };
 
   const refresh = async () => {
     if (!staff?.userId) return;
@@ -361,7 +348,13 @@ export function AccountDrawer({ id, close }: { id: string; close: () => void }) 
       } catch (e) { return e instanceof Error ? e.message : 'The suspension could not be updated.'; }
     } });
   const uphold = () => form({ title: 'Uphold ban · ' + a.n, sub: 'The ban stays in force and the appeal is closed.', fields: [{ id: 'nt', label: 'Decision note', type: 'textarea', required: true }],
-    buttons: [{ label: 'Uphold ban', key: 's', primary: true }], onSubmit: (_k, x) => { upholdBan(a, String(x.nt)); done('Ban upheld'); } });
+    buttons: [{ label: 'Uphold ban', key: 's', primary: true }], onSubmit: async (_k, x) => { try { await upholdBan(a, String(x.nt)); await hydrateAdminState(); done('Ban upheld'); } catch(error) { return error instanceof Error ? error.message : 'Could not save the appeal decision.'; } } });
+
+  const receiveAppeal = () => form({title: 'Record appeal · ' + a.n, fields: [{id:'note',label:'Appeal details',type:'textarea',required:true}],
+    buttons: [{label:'Record appeal',key:'save',primary:true}], onSubmit: async (_key, values) => {
+      try {await markAppeal(a, String(values.note)); await hydrateAdminState(); done('Appeal recorded for review.');}
+      catch(error) {return error instanceof Error ? error.message : 'Could not record the appeal.';}
+    }});
 
   const what = a.type === 'Customer'
     ? (s === 'Active' ? 'No restrictions.' : 'New purchases and bookings are blocked for the scope shown. Sessions are revoked for a full-account restriction. Wallet funds and order history are kept.')
@@ -374,7 +367,7 @@ export function AccountDrawer({ id, close }: { id: string; close: () => void }) 
       {a.type === 'Customer' && canSusp ? <OutlineBtn onPress={() => restrictGoodies('Suspension')}>Suspend Goodies access</OutlineBtn> : null}
       {a.type === 'Customer' && canBan ? <OutlineBtn onPress={() => restrictGoodies('Ban')}>Permanently ban from Goodies</OutlineBtn> : null}
       {canBan ? <OutlineBtn onPress={ban}>Ban account</OutlineBtn> : <Txt size={9.5} mut style={{ marginBottom: 6 }}>Ban: Super Admin only</Txt>}
-      {s === 'Banned' && canBan ? <OutlineBtn onPress={() => { markAppeal(a); done('Appeal logged. Status: In review'); }}>Mark appeal received</OutlineBtn> : null}
+      {s === 'Banned' && canBan ? <OutlineBtn onPress={receiveAppeal}>Mark appeal received</OutlineBtn> : null}
       {s === 'In review' && canBan ? <OutlineBtn onPress={uphold}>Uphold ban</OutlineBtn> : null}
     </>
   );

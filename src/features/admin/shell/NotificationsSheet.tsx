@@ -11,6 +11,7 @@ import { DrawerBody } from '../ui/Overlay';
 import { ListRows } from '../ui/Lists';
 import { Txt } from '../ui/Txt';
 
+const NOTICE_TYPES = ['goodies_ingredient_request', 'goodies_admin_product_submission'];
 const FILTERS = ['All', 'Unread', 'Mine'] as const;
 
 /** Notifications for the current staff identity; selecting one opens its related item. */
@@ -21,30 +22,58 @@ export function NotificationsSheet({ onClose }: { onClose: () => void }) {
   const { go } = useNav();
   const [f, setF] = useState<(typeof FILTERS)[number]>('All');
   const [serverNotices, setServerNotices] = useState<any[]>([]);
+  const [problem, setProblem] = useState('');
   useEffect(() => {
     let active = true;
-    const load = async () => {
-      const { data: session } = await supabase.auth.getUser();
-      const userId = session.user?.id;
-      if (!userId) return;
-      const { data } = await supabase.from('notifications').select('id,title,body,read,created_at,destination,metadata').eq('user_id', userId).eq('notification_type', 'goodies_ingredient_request').order('created_at', { ascending: false }).limit(30);
-      if (active) setServerNotices((data || []).map((n: any) => ({ ...n, t: n.title || 'Goodies ingredient request', w: n.body || '', f: n.read ? '' : 'unread', d: n.destination || 'goodiesIngredientRequests', v: n.metadata?.request_id, serverId: n.id, read: !!n.read })));
+    let channel: ReturnType<typeof supabase.channel> | null = null;
+    const load = async (userId: string) => {
+      const {data, error} = await supabase.from('notifications').select('id,title,body,read,created_at,destination,metadata')
+        .eq('user_id',userId).in('notification_type',NOTICE_TYPES).order('created_at',{ascending:false}).limit(50);
+      if (!active) return;
+      if (error) {setProblem('Could not refresh Goodies notifications.'); return;}
+      setProblem('');
+      setServerNotices((data || []).map((n:any) => ({...n,t:n.title || 'Goodies update',w:n.body || '',f:n.read ? '' : 'unread',d:n.destination,v:n.metadata?.request_id,serverId:n.id,read:!!n.read})));
     };
-    void load();
-    const channel = supabase.channel('admin-goodies-ingredient-notifications')
-      .on('postgres_changes', { event: 'INSERT', schema: 'public', table: 'notifications', filter: 'notification_type=eq.goodies_ingredient_request' }, () => { void load(); })
-      .subscribe();
-    return () => { active = false; void supabase.removeChannel(channel); };
+    void (async () => {
+      const {data,error} = await supabase.auth.getUser();
+      if (!active) return;
+      if (error || !data.user) {setProblem('Sign in to view notifications.');return;}
+      const userId=data.user.id;
+      await load(userId);
+      if (!active) return;
+      channel=supabase.channel('admin-goodies-notifications-'+userId)
+        .on('postgres_changes',{event:'*',schema:'public',table:'notifications',filter:'user_id=eq.'+userId},()=>{void load(userId);}).subscribe();
+    })().catch(()=>{if(active)setProblem('Could not load Goodies notifications.');});
+    return () => {active=false;if(channel)void supabase.removeChannel(channel);};
   }, []);
   const l = [...serverNotices, ...myNotices()].filter((n) => f === 'All' || (f === 'Unread' ? (n.serverId ? !n.read : isUnread(n)) : n.f.includes('mine') || n.to !== undefined || !!n.serverId));
+  const markServerAll = async () => {
+    const {data} = await supabase.auth.getUser();
+    if (!data.user) {setProblem('Sign in to update notifications.');return;}
+    const {error} = await supabase.from('notifications').update({read:true}).eq('user_id',data.user.id).in('notification_type',NOTICE_TYPES);
+    if (error) {setProblem('Could not mark notifications read.');return;}
+    markAllRead();setServerNotices(rows=>rows.map(row=>({...row,read:true,f:''})));setProblem('');bump();
+  };
+  const openNotice = async (n:any) => {
+    if (n.serverId) {
+      const {error} = await supabase.from('notifications').update({read:true}).eq('id',n.serverId);
+      if (error) {setProblem('Could not mark this notification read.');return;}
+      setServerNotices(rows=>rows.map(row=>row.serverId===n.serverId?{...row,read:true,f:''}:row));
+    } else markRead(n);
+    bump();
+    if (n.d==='goodiesIngredientRequests') {onClose();go('goodiesRequests');return;}
+    if (n.d==='goodiesProducts') {onClose();go('goodies',{goodiesModule:'Product review'});return;}
+    open(n.d,n.v);
+  };
   return (
-    <DrawerBody title="Notifications" onClose={onClose} actions={<OutlineBtn onPress={() => { markAllRead(); void supabase.auth.getUser().then(({ data }) => data.user?.id ? supabase.from('notifications').update({ read: true }).eq('user_id', data.user.id).eq('notification_type', 'goodies_ingredient_request') : undefined); setServerNotices((rows) => rows.map((row) => ({ ...row, read: true, f: '' }))); bump(); }}>Mark all read</OutlineBtn>}>
+    <DrawerBody title="Notifications" onClose={onClose} actions={<OutlineBtn onPress={()=>{void markServerAll();}}>Mark all read</OutlineBtn>}>
+      {problem ? <Txt size={11}>{problem}</Txt> : null}
       <Chips options={FILTERS} value={f} onChange={setF} />
       <ListRows empty="Nothing here." rows={l.map((n, i) => ({
         key: String(i) + n.t,
         main: <View style={{ flexDirection: 'row', alignItems: 'center' }}>{isUnread(n) ? <Dot color={n.f.includes('crit') ? 'or' : 'gr'} /> : null}<Txt size={10.1} weight={isUnread(n) ? 600 : 400} style={{ flex: 1 }}>{n.t}</Txt></View>,
         sub: n.w,
-        onPress: () => { if (n.serverId) { void supabase.from('notifications').update({ read: true }).eq('id', n.serverId); setServerNotices((rows) => rows.map((row) => row.serverId === n.serverId ? { ...row, read: true, f: '' } : row)); } else markRead(n); bump(); if (n.d === 'goodiesIngredientRequests') { go('goodiesRequests'); return; } open(n.d, n.v); },
+        onPress: () => {void openNotice(n);},
       }))} />
     </DrawerBody>
   );
