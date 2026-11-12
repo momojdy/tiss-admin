@@ -25,8 +25,8 @@ export function HelpPayPreview(){
  const [error,setError]=useState('');
  const total=Math.round(Number(totals().total||0)*100);
  const remaining=snapshot?.remaining_cents??Math.max(0,total-(mode==='share'?Math.ceil(total*0.6):0));
- const expires=snapshot?Math.max(0,Math.ceil((Date.parse(snapshot.expires_at)-now)/1000)):1800;
- const clock=`${Math.floor(expires/60)}:${String(expires%60).padStart(2,'0')}`;
+ const expires=snapshot?Math.max(0,Math.ceil((Date.parse(snapshot.expires_at)-now)/1000)):0;
+ const clock=snapshot?`${Math.floor(expires/60)}:${String(expires%60).padStart(2,'0')}`:'—';
  const funded=snapshot?(snapshot.initial_cents+snapshot.contributed_cents)/Math.max(1,snapshot.total_cents):0;
  const load=async(requestId:string)=>{
    try{const next=await fetchHelpPayStatus(requestId);setSnapshot(next);setError('');}
@@ -78,7 +78,7 @@ export function HelpPayPreview(){
    Alert.alert(label("lbl.sharedPay.620e8c691a5e", "Sent in Wantiss"),label("lbl.sharedPay.0ea70b1eccd8", "The Help Pay card was sent to ")+friend.name+label("lbl.sharedPay.5235c824c0e8", ". They can tap it in Messages to pay."));
  }catch(e:any){Alert.alert(label("lbl.sharedPay.88295663710d", "Could not share"),label('lbl.helpPayShareError','Could not share this request. Please retry.'));}finally{setShareBusy(null);}};
  const nativeShare=async()=>{if(!snapshot)return;try{await Share.share({
-   message:`Help me pay for my Goodies order on Wantiss. ${cents(snapshot.remaining_cents)} remaining. ${helpPayQRValue(snapshot.id)}`,
+   message:label('lbl.helpPayShareMessage','Help me pay for my Goodies order on Wantiss. {amount} remaining. {link}').replace('{amount}',cents(snapshot.remaining_cents)).replace('{link}',helpPayQRValue(snapshot.id)),
  });}catch(e:any){Alert.alert(label("lbl.sharedPay.88295663710d", "Could not share"),label('lbl.helpPayShareError','Could not share this request. Please retry.'));}};
  const cancel=()=>{if(!snapshot)return;Alert.alert(label("lbl.sharedPay.93ac77559da0", "Cancel Help Pay?"),label("lbl.sharedPay.e0f309639ee2", "All reserved Wallet contributions, including your upfront share, will be refunded."),[
    {text:label("lbl.sharedPay.3259de868228", "Keep request"),style:'cancel'},{text:label("lbl.sharedPay.f95fe35ec83a", "Cancel and refund"),style:'destructive',onPress:()=>{void(async()=>{setBusy(true);try{
@@ -110,11 +110,11 @@ export function HelpPayPreview(){
          </T>
        </Card>
        <T color={th.mut} size={12}>{label('lbl.helpPayExpiresExplainer', "The request expires after 30 minutes. If it is not funded, every Wallet contribution is automatically refunded. The order is only created once the entire bill is paid.")}</T>
-       <Cta label={busy?label("lbl.sharedPay.443643141b0d", "Preparing secure request…"):mode==='share'?`Pay ${cents(Math.ceil(total*0.6))} and create request`:label("lbl.sharedPay.17fd54ffc83e", "Create full-payment request")}
+       <Cta label={busy?label("lbl.sharedPay.443643141b0d", "Preparing secure request…"):mode==='share'?label('lbl.helpPayCreateShare','Pay {amount} and create request').replace('{amount}',cents(Math.ceil(total*0.6))):label("lbl.sharedPay.17fd54ffc83e", "Create full-payment request")}
          disabled={!GOODIES_SHARED_PAYMENTS_RELEASED||busy||total<=0} onPress={()=>void create()}/>
        {busy?<ActivityIndicator color={th.br}/>:null}
      </>:<><Row sp>
-       <View style={{flex:1}}><T size={23} weight="600">{snapshot?.status==='fulfilled'?label("lbl.sharedPay.d82f324531d1", "Order funded"):snapshot?.status==='expired'?label("lbl.sharedPay.0ff5e16d4eb0", "Request expired"):snapshot?.status==='cancelled'?label("lbl.sharedPay.7108183f1888", "Request cancelled"):label("lbl.sharedPay.9cd2ba51b7a1", "Help Pay is ready")}</T>
+       <View style={{flex:1}}><T size={23} weight="600">{!snapshot?(error?label('lbl.helpPayUnavailableStatus','Request unavailable'):label('lbl.helpPayLoadingStatus','Loading request…')):snapshot.status==='fulfilled'?label("lbl.sharedPay.d82f324531d1", "Order funded"):snapshot.status==='expired'?label("lbl.sharedPay.0ff5e16d4eb0", "Request expired"):snapshot.status==='cancelled'?label("lbl.sharedPay.7108183f1888", "Request cancelled"):label("lbl.sharedPay.9cd2ba51b7a1", "Help Pay is ready")}</T>
          <T color={th.mut} size={12} style={{marginTop:4}}>{label('lbl.helpPayGoodiesPrefix','Goodies · ')}{snapshot?.mode==='full'?label("lbl.sharedPay.38e31e9e9664", "Full bill"):label("lbl.sharedPay.368953429e33", "Share bill · 60/40")}</T>
        </View><T color={th.br} weight="600" size={12}>{clock}{label('lbl.helpPayLeftSuffix',' left')}</T>
      </Row>

@@ -5428,6 +5428,13 @@
     ]
   },
   {
+    "id": "lbl.helpPayCreateShare",
+    "text": "Pay {amount} and create request",
+    "pages": [
+      "Shared Bill requests"
+    ]
+  },
+  {
     "id": "lbl.helpPayExpiresExplainer",
     "text": "The request expires after 30 minutes. If it is not funded, every Wallet contribution is automatically refunded. The order is only created once the entire bill is paid.",
     "pages": [
@@ -5482,6 +5489,13 @@
     "pages": [
       "Shared Bill requests",
       "Shared Bill contribution"
+    ]
+  },
+  {
+    "id": "lbl.helpPayLoadingStatus",
+    "text": "Loading request…",
+    "pages": [
+      "Shared Bill requests"
     ]
   },
   {
@@ -5590,6 +5604,13 @@
     ]
   },
   {
+    "id": "lbl.helpPayShareMessage",
+    "text": "Help me pay for my Goodies order on Wantiss. {amount} remaining. {link}",
+    "pages": [
+      "Shared Bill requests"
+    ]
+  },
+  {
     "id": "lbl.helpPayTitle",
     "text": "Help Pay · Goodies",
     "pages": [
@@ -5599,6 +5620,13 @@
   {
     "id": "lbl.helpPayUnavailable",
     "text": "Shared payments are not available yet.",
+    "pages": [
+      "Shared Bill requests"
+    ]
+  },
+  {
+    "id": "lbl.helpPayUnavailableStatus",
+    "text": "Request unavailable",
     "pages": [
       "Shared Bill requests"
     ]

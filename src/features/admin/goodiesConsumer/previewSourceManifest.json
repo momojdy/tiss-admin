@@ -294,7 +294,7 @@
       "origins": [
         {
           "file": "src/features/Goodies/screens/HelpPayPreview.tsx",
-          "sha256": "9ff344a67c739fb8cb856e950e101667da134f3a87d0d25ef1798aa2b94ead1e"
+          "sha256": "e6bf4cd4273220a2601b0c22f8f410dc0cdae80d101e768e231fb913bf168719"
         }
       ]
     },
