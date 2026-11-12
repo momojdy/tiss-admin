@@ -424,7 +424,7 @@ function GroupOrderSheet({close, showTitle = true, showDone = true, storeId = ''
     if(groupCheckoutLock.current)return;
     if(!group.serverBacked||!group.groupId){toast(label('lbl.groupCreateFirst','Create or join a group order first.'));return;}
     if(!groupMembers.some((member:any)=>member.user_id===currentUserId&&member.role==='host')){toast(label("lbl.cms.540c5531f480", "Only the group host can check out."));return;}
-    if(!checkoutPreview){toast(label("lbl.cms.6e9eb3a9a0bb", "Review and validate the combined cart first."));return;}
+    if(!Array.isArray(checkoutPreview?.items)||!checkoutPreview.items.length){toast(label("lbl.cms.6e9eb3a9a0bb", "Review and validate the combined cart first."));return;}
     if(!checkoutEstimate || checkoutEstimate.group_id!==group.groupId || checkoutEstimate.order_type!==groupCheckoutType){toast(label("lbl.cms.d2905bdbca8c", "Review the current group-order total before placing the order."));return;}
     if(!S.pf.ph||!phoneOK(S.pf.ph)){toast(label("lbl.cms.fdc79fde4a45", "Add a valid contact phone number in your profile before checkout."));return;}
     groupCheckoutLock.current=true;
@@ -438,14 +438,16 @@ function GroupOrderSheet({close, showTitle = true, showDone = true, storeId = ''
       if(!S.hasWallet){toast(label("lbl.cms.fa32c0873181", "Your Wantiss Wallet is not available. Create a wallet before placing this group order."));return;}
       const estimatedTotal=Number(checkoutEstimate?.estimated_total||0);
       if(estimatedTotal>0&&S.wallet<estimatedTotal){toast(label("lbl.cms.9da7b95cc86d", "Insufficient Wantiss Wallet balance. Add ")+money(estimatedTotal-S.wallet)+label("lbl.cms.66e750d050b2", " or choose another payment method."));return;}
-      let addressPayload:any=null;
+      if(!Number.isFinite(estimatedTotal)||estimatedTotal<=0){toast(label('lbl.groupQuoteChanged','The group cart or total changed. Review it again before paying.'));return;}
+      const reviewed={_goodies_expected_total:estimatedTotal,_goodies_expected_items:checkoutPreview.items};
+      let addressPayload:any={...reviewed};
       if(groupCheckoutType==='delivery'){
         const selected=(S.addr||[]).find((item:any)=>String(item.id)===String(groupAddressId))||(S.addr||[]).find((item:any)=>item.id===S.as)||(S.addr||[])[0];
         if(!selected?.t){toast(label("lbl.cms.0a46732ca884", "Add or select a complete delivery address first."));return;}
         if(!groupDeliveryQuote||groupDeliveryQuote.addressId!==String(selected.id)||groupDeliveryQuote.expiresAt<=Date.now()){
           toast(label("lbl.cms.ce7c584db7be", "Calculate the delivery fee and review it before placing the order."));return;
         }
-        addressPayload={l:selected.l,t:selected.t,apt:selected.apt||'',inst:selected.inst||'',city:selected.city||'',department:selected.department||'',country:selected.country||'',delivery_quote_id:groupDeliveryQuote.quoteId};
+        addressPayload={l:selected.l,t:selected.t,apt:selected.apt||'',inst:selected.inst||'',city:selected.city||'',department:selected.department||'',country:selected.country||'',delivery_quote_id:groupDeliveryQuote.quoteId,...reviewed};
       }
       const {data,error}=await supabase.rpc('goodies_group_order_checkout',{
         p_idempotency_key:'group-'+group.groupId+'-checkout',
@@ -459,7 +461,7 @@ function GroupOrderSheet({close, showTitle = true, showDone = true, storeId = ''
       });
       if(S.accountId!==accountId)return;
       const order=Array.isArray(data)?data[0]:data;
-      if(error||!order?.id){toast(friendlyError(error, label("lbl.cms.1be63d4ce4d0", "Group order checkout failed.")));return;}
+      if(error||!order?.id){if(error?.code==='P4210'){setCheckoutPreview(null);setCheckoutEstimate(null);}toast(friendlyError(error, label("lbl.cms.1be63d4ce4d0", "Group order checkout failed.")));return;}
       S.cart.lines=S.cart.lines.filter((line:any)=>paidLines.get(line.k)!==JSON.stringify(line));
       if(!S.cart.lines.length)S.cart.sid=null;
       if(S.groupOrder?.groupId===group.groupId)clearActiveGroup();
@@ -740,12 +742,13 @@ function CtForm({id,bottomInset=0}: {id: any; bottomInset?: number}) {
     const dg = p.replace(/\D/g, '');
     if (dg === S.pf.ph.replace(/\D/g, '')) return toast(label('lbl.sheetSameWantissPhone', 'That is already your Wantiss number'));
     if (S.gc.some((x: any) => x.id != id && String(x.ph).replace(/\D/g, '') === dg)) return toast(label('lbl.sheetDuplicateNumber', 'You already saved that number'));
-    setSaving(true);
+    const accountId=S.accountId;setSaving(true);
     try {
       await persistGoodiesContactNumber(p,l.trim(),typeof id==='string'&&/^[0-9a-f-]{36}$/i.test(id)?id:undefined);
+      if(S.accountId!==accountId)return;
       toast(label('lbl.sheetNumberSaved', 'Number saved for Goodies checkout'));
       ui.sheet({kind:'contacts'});
-    } catch(e:any) {toast(friendlyError(e,label('lbl.contactSaveFailed','Could not save this number. Please retry.')));}
+    } catch(e:any) {if(S.accountId===accountId)toast(friendlyError(e,label('lbl.contactSaveFailed','Could not save this number. Please retry.')));}
     finally {setSaving(false);}
   };
   return <View style={{flex:1,minHeight:0,paddingBottom:Math.max(0,bottomInset-20)}}>

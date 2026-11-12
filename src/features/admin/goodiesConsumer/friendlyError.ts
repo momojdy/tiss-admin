@@ -10,7 +10,9 @@ export function friendlyError(error: any, fallback: string): string {
     console.warn('[Goodies] Request failed:', code || 'request_unavailable');
   }
 
-  // Translate the one known actionable server condition into app-owned copy.
+  if(error?.code==='P4210')return label('lbl.groupQuoteChanged','The group cart or total changed. Review it again before paying.');
+
+  // Translate known actionable conditions into app-owned copy.
   if (/\binsufficient\s+(?:(?:wantiss\s+)?wallet\s+)?(?:funds?|balance)\b/i.test(raw)) {
     return label('lbl.actionWalletInsufficient', "Insufficient Wantiss wallet balance. Add funds or choose another payment method.");
   }

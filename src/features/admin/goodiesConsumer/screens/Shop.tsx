@@ -36,16 +36,18 @@ const Hero = ({s, onBack, right}: any) => (
 export function Store({id}: {id: string}) {
   const [shareOpen,setShareOpen]=useState(false);
   const [shareLoading,setShareLoading]=useState(false);
+  const [shareProblem,setShareProblem]=useState('');
   const [shareSending,setShareSending]=useState<string|null>(null);
   const [shareQuery,setShareQuery]=useState('');
   const [shareFriends,setShareFriends]=useState<Array<{id:string;name:string;avatar:string|null}>>([]);
   const storeShareUrl='wantiss://goodies/store/'+encodeURIComponent(id);
   const openStoreShare=async()=>{
     const accountId=S.accountId;
-    setShareOpen(true);setShareLoading(true);
+    setShareOpen(true);setShareLoading(true);setShareProblem('');
     try{
       const {data:{user}}=await supabase.auth.getUser();
-      if(S.accountId!==accountId||!user||user.id!==accountId){setShareFriends([]);return;}
+      if(S.accountId!==accountId)return;
+      if(!user||user.id!==accountId){setShareFriends([]);setShareProblem(label("lbl.cms.5ee02dc1f983", "Could not load friends."));return;}
       const [{data:friendships,error:friendError},{data:profiles,error:profileError}]=await Promise.all([
         supabase.from('user_friendships').select('requester_id,recipient_id').eq('status','accepted').or('requester_id.eq.'+user.id+',recipient_id.eq.'+user.id),
         supabase.rpc('wantiss_message_contact_profiles')
@@ -54,7 +56,7 @@ export function Store({id}: {id: string}) {
       if(friendError||profileError)throw friendError||profileError;
       const ids=new Set((friendships||[]).map(f=>f.requester_id===user.id?f.recipient_id:f.requester_id));
       setShareFriends((profiles||[]).filter((p:any)=>ids.has(p.id)).map((p:any)=>({id:p.id,name:p.full_name||p.wantiss_number||'Wantiss friend',avatar:p.avatar_url||null})));
-    }catch(e){Alert.alert(label("lbl.cms.2bb2b73d8ff1", "Friends unavailable"),friendlyError(e,label("lbl.cms.5ee02dc1f983", "Could not load friends.")));}
+    }catch(e){if(S.accountId===accountId){const message=friendlyError(e,label("lbl.cms.5ee02dc1f983", "Could not load friends."));setShareProblem(message);Alert.alert(label("lbl.cms.2bb2b73d8ff1", "Friends unavailable"),message);}}
     finally{setShareLoading(false);}
   };
   const sendStoreToFriend=async(friendId:string)=>{
@@ -103,7 +105,7 @@ export function Store({id}: {id: string}) {
         <Pressable onPress={async()=>{await Clipboard.setStringAsync(storeShareUrl);toast(label("lbl.cms.eb1f7b6d929c", "Store link copied"));}} style={{padding:12,borderRadius:12,backgroundColor:'#FFFFFF',flexDirection:'row',gap:9,alignItems:'center'}}><MaterialCommunityIcons name="content-copy" size={19} color="#BF008E"/><Text cmsKey={"lbl.cms.48feb130cb0a"} style={{color:'#BF008E',fontWeight:'600'}}>{label("lbl.cms.48feb130cb0a", "Copy store link")}</Text></Pressable>
         <Text cmsKey={"lbl.cms.edaff19cc43c"} style={{fontSize:14,fontWeight:'600',color:'#302631'}}>{label("lbl.cms.edaff19cc43c", "Send to a Wantiss friend")}</Text>
         <TextInput value={shareQuery} onChangeText={setShareQuery} placeholder={label("lbl.cms.eb7b802f12ab", "Search friends")} style={{backgroundColor:'#FFFFFF',borderRadius:11,paddingHorizontal:12,paddingVertical:10,color:'#302631'}}/>
-        {shareLoading?<ActivityIndicator color="#BF008E"/>:<ScrollView style={{maxHeight:205}} keyboardShouldPersistTaps="handled">{shareFriends.filter(friend=>friend.name.toLowerCase().includes(shareQuery.trim().toLowerCase())).map(friend=><Pressable key={friend.id} disabled={!!shareSending} onPress={()=>void sendStoreToFriend(friend.id)} style={{paddingVertical:10,flexDirection:'row',alignItems:'center',gap:10}}>{friend.avatar?<Image source={{uri:friend.avatar}} style={{width:38,height:38,borderRadius:19}}/>:<View style={{width:38,height:38,borderRadius:19,backgroundColor:'#EBD7E7',alignItems:'center',justifyContent:'center'}}><MaterialCommunityIcons name="account" size={20} color="#BF008E"/></View>}<Text style={{color:'#302631',flex:1}} numberOfLines={1}>{friend.name}</Text>{shareSending===friend.id?<ActivityIndicator size="small" color="#BF008E"/>:<MaterialCommunityIcons name="send-outline" size={20} color="#BF008E"/>}</Pressable>)}{!shareFriends.length?<Text cmsKey={"lbl.cms.908e66f0e1a3"} style={{color:'#827783',padding:8}}>{label("lbl.cms.908e66f0e1a3", "No accepted friends to show yet.")}</Text>:null}</ScrollView>}
+        {shareLoading?<ActivityIndicator color="#BF008E"/>:shareProblem?<View><Text style={{color:th.red}}>{shareProblem}</Text><Pressable onPress={()=>void openStoreShare()} style={{paddingVertical:8}}><Text cmsKey={'lbl.retry'} style={{color:'#BF008E'}}>{label('lbl.retry','Try again')}</Text></Pressable></View>:<ScrollView style={{maxHeight:205}} keyboardShouldPersistTaps="handled">{shareFriends.filter(friend=>friend.name.toLowerCase().includes(shareQuery.trim().toLowerCase())).map(friend=><Pressable key={friend.id} disabled={!!shareSending} onPress={()=>void sendStoreToFriend(friend.id)} style={{paddingVertical:10,flexDirection:'row',alignItems:'center',gap:10}}>{friend.avatar?<Image source={{uri:friend.avatar}} style={{width:38,height:38,borderRadius:19}}/>:<View style={{width:38,height:38,borderRadius:19,backgroundColor:'#EBD7E7',alignItems:'center',justifyContent:'center'}}><MaterialCommunityIcons name="account" size={20} color="#BF008E"/></View>}<Text style={{color:'#302631',flex:1}} numberOfLines={1}>{friend.name}</Text>{shareSending===friend.id?<ActivityIndicator size="small" color="#BF008E"/>:<MaterialCommunityIcons name="send-outline" size={20} color="#BF008E"/>}</Pressable>)}{!shareFriends.length?<Text cmsKey={"lbl.cms.908e66f0e1a3"} style={{color:'#827783',padding:8}}>{label("lbl.cms.908e66f0e1a3", "No accepted friends to show yet.")}</Text>:null}</ScrollView>}
       </View>:null}
       <View style={{paddingHorizontal: 16}}>
         <T size={24} weight="600" style={{marginTop: 16}}>{s.n}</T>

@@ -45,9 +45,12 @@ export function GoodiesApp({onExit, embedded = true, onUniversalAction, unreadNo
   useEffect(() => onContent(() => emit()), []);
   const th = useTheme(), ins = useSafeAreaInsets();
   const scroll = useRef<React.ElementRef<typeof ScrollView>>(null);
-  const [sheet, setSheet] = useState<any>(null), [toastTxt, setToastTxt] = useState(''), [goodiesLoaded, setGoodiesLoaded] = useState(false), [refreshing, setRefreshing] = useState(false);
+  const [sheetRecord, setSheetRecord] = useState<any>(null), [toastTxt, setToastTxt] = useState(''), [goodiesLoaded, setGoodiesLoaded] = useState(false), [refreshing, setRefreshing] = useState(false);
+  const sheet=sheetRecord?.accountId===S.accountId?sheetRecord?.value:null;
+  const setSheet=(value:any)=>setSheetRecord(value?{accountId:S.accountId,value}:null);
   const toastT = useRef<any>(null);
   const [quickMenuOpen, setQuickMenuOpen] = useState(false);
+  useEffect(()=>{setSheetRecord(null);setToastTxt('');setQuickMenuOpen(false);},[S.accountId]);
   const goodiesUnreadCount = Math.max(Number(S.serverUnread || 0), S.notifs.filter((n: any) => n.u).length);
   const [startupError, setStartupError] = useState(false), [startupAttempt, setStartupAttempt] = useState(0);
 
@@ -84,7 +87,7 @@ export function GoodiesApp({onExit, embedded = true, onUniversalAction, unreadNo
     let active = true;
     let stopSync: (() => void) | null = null;
     void (async () => {
-      setStartupError(false);
+      setGoodiesLoaded(false);setStartupError(false);
       const contentReady = loadContent();
       await load();
       // Initial destination is applied synchronously before first render; never replay it after loading.
@@ -182,7 +185,8 @@ export function GoodiesApp({onExit, embedded = true, onUniversalAction, unreadNo
     case 'help': body = <Help />; break;
     default: body = <Account r={r} p={c.p} onOpenWallet={onUniversalAction?()=>onUniversalAction('wallet'):undefined} />;
   }
-  if (startupError) body = <View style={{padding:20}}><Ttl>{label('lbl.startupFailed', 'Goodies could not load')}</Ttl><T cmsKey={'lbl.catalogRetryHint'}>{label('lbl.catalogRetryHint', 'Check your connection and try again.')}</T><Cta cmsKey={'lbl.retry'} label={label('lbl.retry', 'Try again')} onPress={()=>setStartupAttempt(n=>n+1)} /></View>;
+  const startupFailure = startupError ? <View style={{padding:20}}><Ttl>{label('lbl.startupFailed', 'Goodies could not load')}</Ttl><T cmsKey={'lbl.catalogRetryHint'}>{label('lbl.catalogRetryHint', 'Check your connection and try again.')}</T><Cta cmsKey={'lbl.retry'} label={label('lbl.retry', 'Try again')} onPress={()=>setStartupAttempt(n=>n+1)} /></View> : null;
+  if (startupError) body = startupFailure;
   const accessBlocked = S.goodiesAccess?.status === 'suspended' || S.goodiesAccess?.status === 'banned';
   const accessRoutes = ['home', 'cats', 'cart', 'explore', 'search', 'catlist', 'store', 'product', 'checkout', 'byo', 'promos', 'favs'];
   if (accessBlocked && accessRoutes.includes(r)) {
@@ -216,11 +220,12 @@ export function GoodiesApp({onExit, embedded = true, onUniversalAction, unreadNo
     onPanResponderTerminate: () => Animated.spring(cartDragX, {toValue: 0, useNativeDriver: true}).start(),
   }), [cartDragX]);
 
-  if (!goodiesLoaded && initialRoute?.startsWith('store:')) return <View style={{flex:1,backgroundColor:th.bg,alignItems:'center',justifyContent:'center',paddingHorizontal:28}} accessibilityRole="progressbar" accessibilityLabel={initialRoute?.startsWith('store:')?label("lbl.cms.6bc6c58f3cfb", "Opening store"):label("lbl.cms.a256d1f083f5", "Loading Goodies")}>
+  if (!goodiesLoaded && startupError) return <View accessibilityRole="alert" style={{flex:1,backgroundColor:th.bg}}><StatusBar barStyle={th.dark?'light-content':'dark-content'} />{startupFailure}</View>;
+  if (!goodiesLoaded) return <View style={{flex:1,backgroundColor:th.bg,alignItems:'center',justifyContent:'center',paddingHorizontal:28}} accessibilityRole="progressbar" accessibilityLabel={initialRoute?.startsWith('store:')?label("lbl.cms.6bc6c58f3cfb", "Opening store"):label("lbl.cms.a256d1f083f5", "Loading Goodies")}>
     <StatusBar barStyle={th.dark?'light-content':'dark-content'} />
     <View style={{alignItems:'center',gap:16}}>
       <Image source={{uri:"https://raw.githubusercontent.com/momojdy/tiss_icons_assets/refs/heads/main/Goodies.PNG"}} style={{width:112,height:112}} resizeMode="contain" accessibilityLabel={label("lbl.cms.9c6764b3fb4b", "Goodies")} />
-      <Text cmsKey={"lbl.cms.9c6764b3fb4b"} style={{fontSize:20,fontWeight:'500',color:'#000000'}}>{label("lbl.cms.9c6764b3fb4b", "Goodies")}</Text>
+      <Text cmsKey={"lbl.cms.9c6764b3fb4b"} style={{fontSize:20,fontWeight:'500',color:th.dark?th.ink:'#000000'}}>{label("lbl.cms.9c6764b3fb4b", "Goodies")}</Text>
       <ActivityIndicator size="small" color="#BF008E" />
       <Text cmsKeys={["lbl.cms.e161497dcb67","lbl.cms.2da7d46cf638"]} style={{fontSize:13,color:th.mut,textAlign:'center'}}>{initialRoute?.startsWith('store:')?label("lbl.cms.e161497dcb67", "Opening store…"):label("lbl.cms.2da7d46cf638", "Getting everything ready…")}</Text>
     </View>

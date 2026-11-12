@@ -5372,6 +5372,14 @@
     ]
   },
   {
+    "id": "lbl.groupQuoteChanged",
+    "text": "The group cart or total changed. Review it again before paying.",
+    "pages": [
+      "Group orders",
+      "Shared components"
+    ]
+  },
+  {
     "id": "lbl.groupYou",
     "text": "You",
     "pages": [

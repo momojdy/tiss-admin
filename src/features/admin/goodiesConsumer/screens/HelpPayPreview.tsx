@@ -90,7 +90,7 @@ export function HelpPayPreview(){
  return <View style={{flex:1,backgroundColor:th.bg}}>
    <Bar title={label('lbl.helpPayTitle','Help Pay · Goodies')} onBack={()=>{navBack();emit();}}/>
    <ScrollView contentContainerStyle={{paddingHorizontal:20,paddingTop:18,paddingBottom:56,gap:15}}>
-     {!id&&!GOODIES_SHARED_PAYMENTS_RELEASED?<T color={th.mut}>{label('lbl.helpPayUnavailable','Shared payments are not available yet.')}</T>:null}
+     {!GOODIES_SHARED_PAYMENTS_RELEASED&&(!snapshot||snapshot.status==='active')?<T color={th.mut}>{label('lbl.helpPayUnavailable','Shared payments are not available yet.')}</T>:null}
      {!id?<><T size={24} weight="600">{label('lbl.helpPayPayTogether', "Pay together.")}</T><T color={th.mut} size={13}>
        {label('lbl.helpPayExplainer', "Create a secure Wallet request for your Goodies checkout. Friends can pay by scanning your QR code or opening your Wantiss message.")}
      </T><Row style={{gap:8}}>
@@ -130,7 +130,7 @@ export function HelpPayPreview(){
          <Row sp style={{marginTop:10}}><T size={12} color={th.mut}>{Math.round(funded*100)}{label('lbl.helpPayPercentFundedSuffix','% funded')}</T>
            <T size={13} weight="600" color={th.br}>{cents(snapshot.remaining_cents)}{label('lbl.helpPayRemainingSuffix',' remaining')}</T></Row>
        </Card>
-       {snapshot.status==='active'&&expires>0?<><Card style={{alignItems:'center',borderRadius:20,padding:18}}>
+       {GOODIES_SHARED_PAYMENTS_RELEASED&&snapshot.status==='active'&&expires>0?<><Card style={{alignItems:'center',borderRadius:20,padding:18}}>
          <T size={16} weight="600">{label('lbl.helpPayScanTitle', "Scan to help pay")}</T><T size={12} color={th.mut} style={{marginTop:5,marginBottom:14}}>{label('lbl.helpPayScanInstructions', "Scan using the Wantiss Wallet scanner")}</T>
          <View style={{backgroundColor:'#FFF',padding:15,borderRadius:14}}><QRCode value={helpPayQRValue(snapshot.id)} size={180} color="#1A2517" backgroundColor="#FFF"/></View>
          <Pressable onPress={()=>void nativeShare()} style={{marginTop:15,paddingVertical:12,paddingHorizontal:18,borderRadius:12,backgroundColor:th.brt}}>
