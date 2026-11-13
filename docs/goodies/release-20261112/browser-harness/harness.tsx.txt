@@ -1,0 +1,8 @@
+import React,{useState} from 'react';import {createRoot} from 'react-dom/client';
+import {GoodiesConsumerPreview} from '../../../../src/features/admin/screens/content/GoodiesConsumerPreview';
+import {buildStarterDraft} from '../../../../src/features/admin/goodiesConsumer/draft';
+import {S,emit} from '../../../../src/features/admin/goodiesConsumer/store';
+import {previewRequests} from '../../../../src/features/admin/goodiesConsumer/previewRuntime';
+class Boundary extends React.Component<any,{error:string}>{state={error:''};static getDerivedStateFromError(e:any){return {error:String(e.stack||e)}};render(){return this.state.error?<pre id="failure">{this.state.error}</pre>:this.props.children}}
+function App(){const [draft,setDraft]=useState(buildStarterDraft),[selection,setSelection]=useState(null),[locale,setLocale]=useState('en');(window as any).cms={S,emit,previewRequests,setDraft,setLocale};return <><output id="selection">{JSON.stringify(selection)}</output><Boundary><GoodiesConsumerPreview editMode contentDraft={draft} assetUrls={{}} selectedTarget={selection} onSelectTarget={setSelection as any} locale={locale} onLocaleChange={setLocale}/></Boundary></>};
+createRoot(document.getElementById('root')!).render(<App/>);

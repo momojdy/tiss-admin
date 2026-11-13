@@ -1,0 +1,144 @@
+{
+  "branch": "main",
+  "baseline": "3cd2df9f75ee9af670982d08b5765280b56bdb61",
+  "implementationHead": "42cb1613b62826fd792e41e1c69ad61f191e7199",
+  "commits": [
+    {
+      "commit": "ddbfbcca599bb0743777ac0b249592127b4e645e",
+      "subject": "Repair Goodies moderation, operational failures and settlement administration",
+      "files": [
+        "M\t.github/workflows/admin-validation.yml",
+        "M\tpackage.json",
+        "M\tsrc/features/admin/lib/adminBackend.ts",
+        "A\tsrc/features/admin/lib/goodiesDeliveryProof.ts",
+        "M\tsrc/features/admin/lib/hydrateAdminState.ts",
+        "M\tsrc/features/admin/overlays/PeopleDrawers.tsx",
+        "M\tsrc/features/admin/screens/content/GoodiesBuilderConfigEditor.tsx",
+        "M\tsrc/features/admin/screens/content/GoodiesIngredientRequests.tsx",
+        "M\tsrc/features/admin/screens/finance/FinanceScreen.tsx",
+        "M\tsrc/features/admin/screens/goodies/GoodiesAdminScreen.tsx",
+        "M\tsrc/features/admin/screens/goodies/GoodiesAssetLibrary.tsx",
+        "A\tsrc/features/admin/screens/goodies/GoodiesSettlementAdmin.tsx",
+        "M\tsrc/features/admin/shell/NotificationsSheet.tsx",
+        "M\tsrc/features/admin/state/access.ts",
+        "M\tsrc/features/admin/state/people.ts",
+        "A\tsrc/features/admin/state/permissionKeys.ts",
+        "A\ttests/access.test.cjs",
+        "A\ttests/settlement.test.cjs"
+      ]
+    },
+    {
+      "commit": "29b7ded2c8e00358d3e635b53d5bff385303192e",
+      "subject": "Mirror current Goodies screens and editable states in isolated CMS preview",
+      "files": [
+        "M\tsrc/features/admin/goodiesConsumer/GoodiesApp.tsx",
+        "A\tsrc/features/admin/goodiesConsumer/accountCache.ts",
+        "M\tsrc/features/admin/goodiesConsumer/actions.ts",
+        "M\tsrc/features/admin/goodiesConsumer/builders/Builder.tsx",
+        "M\tsrc/features/admin/goodiesConsumer/builders/engine.tsx",
+        "A\tsrc/features/admin/goodiesConsumer/cacheRecovery.ts",
+        "M\tsrc/features/admin/goodiesConsumer/components/Overlays.tsx",
+        "M\tsrc/features/admin/goodiesConsumer/components/Sheets.tsx",
+        "M\tsrc/features/admin/goodiesConsumer/components/cards.tsx",
+        "M\tsrc/features/admin/goodiesConsumer/content.ts",
+        "M\tsrc/features/admin/goodiesConsumer/criticalContentKeys.json",
+        "M\tsrc/features/admin/goodiesConsumer/customerLabelCatalog.json",
+        "M\tsrc/features/admin/goodiesConsumer/customerPageCatalog.json",
+        "M\tsrc/features/admin/goodiesConsumer/data/promoText.ts",
+        "M\tsrc/features/admin/goodiesConsumer/data/seed.ts",
+        "M\tsrc/features/admin/goodiesConsumer/data/types.ts",
+        "A\tsrc/features/admin/goodiesConsumer/deliveryTracking.ts",
+        "M\tsrc/features/admin/goodiesConsumer/draft.ts",
+        "A\tsrc/features/admin/goodiesConsumer/draftCategories.ts",
+        "M\tsrc/features/admin/goodiesConsumer/friendlyError.ts",
+        "M\tsrc/features/admin/goodiesConsumer/helpPayApi.ts",
+        "M\tsrc/features/admin/goodiesConsumer/i18n/index.ts",
+        "A\tsrc/features/admin/goodiesConsumer/notifications.ts",
+        "A\tsrc/features/admin/goodiesConsumer/orderReviews.ts",
+        "A\tsrc/features/admin/goodiesConsumer/previewLocales.ts",
+        "M\tsrc/features/admin/goodiesConsumer/previewRuntime.ts",
+        "M\tsrc/features/admin/goodiesConsumer/previewSourceManifest.json",
+        "A\tsrc/features/admin/goodiesConsumer/reviews.ts",
+        "M\tsrc/features/admin/goodiesConsumer/screens/Account.tsx",
+        "M\tsrc/features/admin/goodiesConsumer/screens/Browse.tsx",
+        "M\tsrc/features/admin/goodiesConsumer/screens/CardAuthentication.tsx",
+        "M\tsrc/features/admin/goodiesConsumer/screens/HelpPayPreview.tsx",
+        "M\tsrc/features/admin/goodiesConsumer/screens/Payments.tsx",
+        "M\tsrc/features/admin/goodiesConsumer/screens/Shop.tsx",
+        "M\tsrc/features/admin/goodiesConsumer/serverSync.ts",
+        "M\tsrc/features/admin/goodiesConsumer/store.ts"
+      ]
+    },
+    {
+      "commit": "2ce12e01fe6a58b3b6381546e7cb380aad03506c",
+      "subject": "Synchronize gated Shared Bill recovery copy in CMS preview",
+      "files": [
+        "M\tsrc/features/admin/goodiesConsumer/criticalContentKeys.json",
+        "M\tsrc/features/admin/goodiesConsumer/customerLabelCatalog.json",
+        "M\tsrc/features/admin/goodiesConsumer/customerPageCatalog.json",
+        "M\tsrc/features/admin/goodiesConsumer/previewSourceManifest.json",
+        "M\tsrc/features/admin/goodiesConsumer/screens/HelpPayPreview.tsx"
+      ]
+    },
+    {
+      "commit": "2830cecb5d2e842af40c343e17e64ebff099daf4",
+      "subject": "Keep CMS recovery preview aligned with final failure handling",
+      "files": [
+        "M\tsrc/features/admin/goodiesConsumer/components/Sheets.tsx",
+        "M\tsrc/features/admin/goodiesConsumer/friendlyError.ts",
+        "M\tsrc/features/admin/goodiesConsumer/previewSourceManifest.json"
+      ]
+    },
+    {
+      "commit": "fc7f03c29258c2760bdf9f56c93a305fc3eab7df",
+      "subject": "Register shared-account Goodies copy and safe group errors in CMS",
+      "files": [
+        "M\tsrc/features/admin/goodiesConsumer/components/Sheets.tsx",
+        "M\tsrc/features/admin/goodiesConsumer/criticalContentKeys.json",
+        "M\tsrc/features/admin/goodiesConsumer/customerLabelCatalog.json",
+        "M\tsrc/features/admin/goodiesConsumer/customerPageCatalog.json",
+        "M\tsrc/features/admin/goodiesConsumer/previewSourceManifest.json"
+      ]
+    },
+    {
+      "commit": "493b147081d959a44fd14574b0ee15eef30639da",
+      "subject": "Keep isolated store-sharing preview aligned with safe error handling",
+      "files": [
+        "M\tsrc/features/admin/goodiesConsumer/previewSourceManifest.json",
+        "M\tsrc/features/admin/goodiesConsumer/screens/Shop.tsx"
+      ]
+    },
+    {
+      "commit": "3c99ca31dfb7e10ffd3bb9ab779903212d13e832",
+      "subject": "Mirror final Goodies account protection and checkout consent states",
+      "files": [
+        "M\tsrc/features/admin/goodiesConsumer/GoodiesApp.tsx",
+        "M\tsrc/features/admin/goodiesConsumer/components/Sheets.tsx",
+        "M\tsrc/features/admin/goodiesConsumer/criticalContentKeys.json",
+        "M\tsrc/features/admin/goodiesConsumer/customerLabelCatalog.json",
+        "M\tsrc/features/admin/goodiesConsumer/customerPageCatalog.json",
+        "M\tsrc/features/admin/goodiesConsumer/friendlyError.ts",
+        "M\tsrc/features/admin/goodiesConsumer/previewSourceManifest.json",
+        "M\tsrc/features/admin/goodiesConsumer/screens/HelpPayPreview.tsx",
+        "M\tsrc/features/admin/goodiesConsumer/screens/Shop.tsx"
+      ]
+    },
+    {
+      "commit": "657b5c1ff5f4401131f48ae4261ac7bbfe276024",
+      "subject": "Keep shared staff permission errors safe and validate grant expiry dates",
+      "files": [
+        "M\tsrc/features/admin/overlays/PeopleDrawers.tsx",
+        "M\ttests/access.test.cjs"
+      ]
+    },
+    {
+      "commit": "42cb1613b62826fd792e41e1c69ad61f191e7199",
+      "subject": "Keep Goodies administrative guidance actionable without server details",
+      "files": [
+        "M\tsrc/features/admin/overlays/PeopleDrawers.tsx",
+        "M\tsrc/features/admin/screens/goodies/GoodiesAdminScreen.tsx"
+      ]
+    }
+  ],
+  "remotePublication": "NOT VERIFIED: push blocked by automatic approval review; no source commit was pushed in this turn."
+}
