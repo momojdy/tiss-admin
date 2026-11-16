@@ -7,7 +7,7 @@ import {useTheme} from '../../theme/ThemeContext';
 import {GoodiesAssetLibrary} from './GoodiesAssetLibrary';
 
 type Dashboard = {stats:any;merchants:any[];products:any[];orders:any[]};
-const MODULES=['Overview','Merchants','Product review','Orders','Delivery reports','Couriers','Fees','Delivery surcharge','Analytics','Goodies assets','Content editor'];
+const MODULES=['Overview','Merchants','Product review','Reviews','Orders','Delivery reports','Couriers','Fees','Delivery surcharge','Analytics','Goodies assets','Content editor'];
 const money=(v:any)=>new Intl.NumberFormat('en-US',{style:'currency',currency:'USD'}).format(Number(v)||0);
 const cardStyle={backgroundColor:'#fff',borderWidth:1,borderColor:'#E1E6DE',borderRadius:14,padding:14,marginBottom:10} as const;
 const btn=(bg:string)=>({paddingVertical:10,paddingHorizontal:12,borderRadius:10,backgroundColor:bg,alignItems:'center' as const});
@@ -21,6 +21,9 @@ export function GoodiesAdminScreen() {
   const [analytics,setAnalytics]=useState<any>(null);
   const [courierCandidates,setCourierCandidates]=useState<any[]>([]);
   const [reports,setReports]=useState<any[]>([]);
+  const [customerReviews,setCustomerReviews]=useState<any[]>([]);
+  const [reviewRejectId,setReviewRejectId]=useState<string|null>(null);
+  const [reviewRejectNote,setReviewRejectNote]=useState('');
   const [loading,setLoading]=useState(false);
   const [busy,setBusy]=useState('');
   const [rejectionTarget,setRejectionTarget]=useState<string|null>(null);
@@ -75,6 +78,26 @@ export function GoodiesAdminScreen() {
     return rows;
   };
   useEffect(()=>{if(module==='Delivery reports')void loadReports();},[module]);
+  const loadCustomerReviews=async()=>{
+    const {data,error}=await supabase.rpc('goodies_admin_list_reviews');
+    if(error){toast(error.message);return;}
+    setCustomerReviews(data||[]);
+  };
+  useEffect(()=>{if(module==='Reviews')void loadCustomerReviews();},[module]);
+  const reviewCustomerRating=async(row:any,status:'approved'|'rejected',note:string|null=null)=>{
+    if(status==='rejected'&&!note?.trim()){toast('Enter a review rejection reason.');return;}
+    setBusy(row.id);
+    try{
+      const {error}=await supabase.rpc('goodies_admin_review_order_review',{
+        p_review_id:row.id,p_status:status,p_note:status==='rejected'?note?.trim()||null:null,
+      });
+      if(error)throw error;
+      setReviewRejectId(null);setReviewRejectNote('');
+      toast(status==='approved'?'Customer review published':'Customer review rejected');
+      await loadCustomerReviews();
+    }catch(error:any){toast(error?.message||'Could not review this rating.');}
+    finally{setBusy('');}
+  };
   const resolveReport=(item:any,resolution:'release'|'refund')=>{
     Alert.alert(resolution==='refund'?'Refund the customer':'Confirm delivery',
       resolution==='refund'?'Cancel '+item.order_code+' and refund '+money(item.total)+' to the customer?':'Mark '+item.order_code+' as delivered and release it to the store?',[
@@ -211,6 +234,26 @@ export function GoodiesAdminScreen() {
           <View style={{flexDirection:'row',gap:8,marginTop:8}}>
             <Pressable disabled={!!busy||!rejectionNote.trim()} onPress={()=>void reviewProduct(p,'rejected',rejectionNote)} style={{...btn('#F7EAE8'),flex:1,opacity:rejectionNote.trim()?1:0.5}}><Text style={{color:'#8D3932',fontWeight:'800'}}>Confirm rejection</Text></Pressable>
             <Pressable onPress={()=>{setRejectionTarget(null);setRejectionNote('');}} style={{...btn('#EDF0EA'),flex:1}}><Text style={{fontWeight:'700',color:'#394A3C'}}>Cancel</Text></Pressable>
+          </View>
+        </View>:null}
+      </View>)}
+    </>:null}
+    {module==='Reviews'?<>
+      <Text style={{fontSize:12,color:'#687365',marginBottom:10}}>Reviews from completed Goodies orders. Only approved reviews are shown publicly.</Text>
+      {!customerReviews.length?<Text style={labelStyle}>No customer reviews submitted yet.</Text>:customerReviews.map(r=><View key={r.id} style={cardStyle}>
+        <View style={{flexDirection:'row',justifyContent:'space-between'}}><Text style={valueStyle}>{r.store_name||'Store'} · {r.review_target==='courier'?'Courier':'Store'}</Text><Text style={{fontSize:12,fontWeight:'800',color:r.review_status==='pending'?'#9B5A27':'#286A35'}}>{r.review_status}</Text></View>
+        <Text style={labelStyle}>{'★ '.repeat(Number(r.rating)||0)} · {String(r.order_id).slice(0,8)}</Text>
+        {r.comment?<Text style={{fontSize:13,color:'#394A3C',marginBottom:8}}>{r.comment}</Text>:null}
+        {r.review_note?<Text style={{fontSize:12,color:'#8D3932',marginBottom:8}}>Review reason: {r.review_note}</Text>:null}
+        {r.review_status==='pending'?<View style={{flexDirection:'row',gap:8}}>
+          <Pressable disabled={!!busy} onPress={()=>void reviewCustomerRating(r,'approved')} style={{...btn('#E8F2E5'),flex:1}}><Text style={{fontWeight:'800',color:'#28552B'}}>Publish</Text></Pressable>
+          <Pressable disabled={!!busy} onPress={()=>{setReviewRejectId(r.id);setReviewRejectNote('');}} style={{...btn('#F7EAE8'),flex:1}}><Text style={{fontWeight:'800',color:'#8D3932'}}>Reject</Text></Pressable>
+        </View>:null}
+        {r.review_status==='pending'&&reviewRejectId===r.id?<View style={{marginTop:10}}>
+          <TextInput accessibilityLabel="Review rejection reason" value={reviewRejectNote} onChangeText={setReviewRejectNote} multiline maxLength={500} placeholder="Why cannot this review be published?" style={{minHeight:70,padding:10,borderWidth:1,borderRadius:10,borderColor:'#D5DAD2',color:'#1B2619',textAlignVertical:'top'}} />
+          <View style={{flexDirection:'row',gap:8,marginTop:8}}>
+            <Pressable disabled={!!busy||!reviewRejectNote.trim()} onPress={()=>void reviewCustomerRating(r,'rejected',reviewRejectNote)} style={{...btn('#F7EAE8'),flex:1,opacity:reviewRejectNote.trim()?1:0.5}}><Text style={{color:'#8D3932',fontWeight:'800'}}>Confirm rejection</Text></Pressable>
+            <Pressable onPress={()=>{setReviewRejectId(null);setReviewRejectNote('');}} style={{...btn('#EDF0EA'),flex:1}}><Text style={{fontWeight:'700',color:'#394A3C'}}>Cancel</Text></Pressable>
           </View>
         </View>:null}
       </View>)}
