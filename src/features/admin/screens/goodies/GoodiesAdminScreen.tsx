@@ -23,6 +23,8 @@ export function GoodiesAdminScreen() {
   const [reports,setReports]=useState<any[]>([]);
   const [loading,setLoading]=useState(false);
   const [busy,setBusy]=useState('');
+  const [rejectionTarget,setRejectionTarget]=useState<string|null>(null);
+  const [rejectionNote,setRejectionNote]=useState('');
   const [fee,setFee]=useState('0');
   const [firstFree,setFirstFree]=useState(false);
   const [wallet,setWallet]=useState(true);
@@ -129,11 +131,19 @@ export function GoodiesAdminScreen() {
       })();}}
     ]);
   };
-  const reviewProduct=async(item:any,status:'approved'|'rejected')=>{
+  const reviewProduct=async(item:any,status:'approved'|'rejected',note:string|null=null)=>{
+    if(status==='rejected' && !note?.trim()){toast('A rejection reason is required.');return;}
     setBusy(item.id);
-    const {error}=await supabase.rpc('goodies_admin_review_product',{p_product_id:item.id,p_status:status,p_note:null});
-    if(error)toast(error.message);else{toast(status==='approved'?'Product approved':'Product rejected');await reload();}
-    setBusy('');
+    try {
+      const {error}=await supabase.rpc('goodies_admin_review_product',{
+        p_product_id:item.id,p_status:status,p_note:status==='rejected'?note?.trim()||null:null,
+      });
+      if(error)throw error;
+      setRejectionTarget(null);setRejectionNote('');
+      toast(status==='approved'?'Product approved':'Product rejected');
+      await reload();
+    } catch(error:any){toast(error?.message||'Could not review the product.');}
+    finally{setBusy('');}
   };
   const saveFees=async()=>{
     const amount=Number(fee);
@@ -194,7 +204,15 @@ export function GoodiesAdminScreen() {
         <View style={{flexDirection:'row',justifyContent:'space-between'}}><Text style={valueStyle}>{p.name}</Text><Text style={{fontSize:11,fontWeight:'800',color:p.review_status==='pending'?'#9B5A27':p.review_status==='approved'?'#286A35':'#9B4036'}}>{p.review_status}</Text></View>
         <Text style={labelStyle}>{p.store_name||'Store'} · {money(p.price)} · Stock {p.stock}</Text>
         {p.description?<Text style={{fontSize:12,color:'#5F6B5A',marginBottom:8}}>{p.description}</Text>:null}
-        {p.review_status==='pending'?<View style={{flexDirection:'row',gap:8}}><Pressable disabled={!!busy} onPress={()=>void reviewProduct(p,'approved')} style={{...btn('#E8F2E5'),flex:1}}><Text style={{fontWeight:'800',color:'#28552B'}}>Approve</Text></Pressable><Pressable disabled={!!busy} onPress={()=>void reviewProduct(p,'rejected')} style={{...btn('#F7EAE8'),flex:1}}><Text style={{fontWeight:'800',color:'#8D3932'}}>Reject</Text></Pressable></View>:null}
+        {p.review_note?<Text style={{fontSize:12,color:'#8D3932',marginBottom:8}}>Review reason: {p.review_note}</Text>:null}
+        {p.review_status==='pending'?<View style={{flexDirection:'row',gap:8}}><Pressable disabled={!!busy} onPress={()=>void reviewProduct(p,'approved')} style={{...btn('#E8F2E5'),flex:1}}><Text style={{fontWeight:'800',color:'#28552B'}}>Approve</Text></Pressable><Pressable disabled={!!busy} onPress={()=>{setRejectionTarget(p.id);setRejectionNote('');}} style={{...btn('#F7EAE8'),flex:1}}><Text style={{fontWeight:'800',color:'#8D3932'}}>Reject</Text></Pressable></View>:null}
+        {p.review_status==='pending'&&rejectionTarget===p.id?<View style={{marginTop:10}}>
+          <TextInput accessibilityLabel="Product rejection reason" value={rejectionNote} onChangeText={setRejectionNote} multiline maxLength={500} placeholder="Explain what the vendor must correct" style={{minHeight:74,padding:10,borderWidth:1,borderRadius:10,borderColor:'#D5DAD2',color:'#1B2619',textAlignVertical:'top'}} />
+          <View style={{flexDirection:'row',gap:8,marginTop:8}}>
+            <Pressable disabled={!!busy||!rejectionNote.trim()} onPress={()=>void reviewProduct(p,'rejected',rejectionNote)} style={{...btn('#F7EAE8'),flex:1,opacity:rejectionNote.trim()?1:0.5}}><Text style={{color:'#8D3932',fontWeight:'800'}}>Confirm rejection</Text></Pressable>
+            <Pressable onPress={()=>{setRejectionTarget(null);setRejectionNote('');}} style={{...btn('#EDF0EA'),flex:1}}><Text style={{fontWeight:'700',color:'#394A3C'}}>Cancel</Text></Pressable>
+          </View>
+        </View>:null}
       </View>)}
     </>:null}
     {module==='Orders'?<>
