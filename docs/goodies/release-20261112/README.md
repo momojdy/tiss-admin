@@ -1,3 +1,5 @@
+> See [the 17 November assessment](../release-20261117/README.md) for the newer verified source, Shared Bill/CMS changes and remaining release gates. This is an archived snapshot.
+
 # Goodies admin candidate — 2026-11-13
 
 **NOT PRODUCTION-READY; NOT DEPLOYED OR PUSHED.** Admin changes are committed locally on `main`. Automatic approval review requires explicit authorization before updating remote `main`.

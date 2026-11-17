@@ -1,0 +1,29 @@
+{
+  "scope": "Local admin verification; source commit be410637a3550ce056e9ac5a7f1ec4e9e23408a6; no deployment",
+  "files": [
+    {
+      "file": "README.md",
+      "sha256": "9a4a1bbc8892c9f179d449b3fd896198067f883c94cb3fefb4b899e08d10da8f"
+    },
+    {
+      "file": "admin-tests.log",
+      "sha256": "e5fe8a1c25c12f70c6706aa6f2fe3de77ff895a0900bca2983b3da96b97c86b5"
+    },
+    {
+      "file": "admin-typecheck.log",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "file": "android-export.log",
+      "sha256": "57597cbecfa7f19a546ca247609f6a1b697733fdaf120bfa00e9c4d9f1a6ec74"
+    },
+    {
+      "file": "cms-interactions.json",
+      "sha256": "9246217fe6005d9de8aa56911b995e105fce29cdf674a36bce32ee8a9d1e7dfc"
+    },
+    {
+      "file": "ios-export.log",
+      "sha256": "14950e67914aa87e146a6bf0c90893838e6bed81772b746e49d6b08b0ae45a46"
+    }
+  ]
+}

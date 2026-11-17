@@ -1,0 +1,69 @@
+
+> wantiss-admin-rn@0.12.0 test:goodies
+> node tests/access.test.cjs && node tests/cms.test.cjs && node tests/settlement.test.cjs && node tests/shared-bill-refunds.test.cjs
+
+✔ signed-out and revoked sessions never inherit prototype permissions (109.499362ms)
+✔ CMS and account controls use canonical server keys and required manage level (29.773921ms)
+✔ expired and revoked grants cannot authorize controls (63.917279ms)
+✔ permanent bans remain Super Admin only despite arbitrary granted labels (30.703837ms)
+✔ admin invocation hides transport, exception and backend response details (19.631587ms)
+✔ staff access actions never render backend or transport exception details (56.747023ms)
+✔ invalid expiration dates are rejected before a staff permission write (65.698222ms)
+ℹ tests 7
+ℹ suites 0
+ℹ pass 7
+ℹ fail 0
+ℹ cancelled 0
+ℹ skipped 0
+ℹ todo 0
+ℹ duration_ms 399.227397
+✔ every registered source field is manually editable in all five locales and survives save serialization (96.888759ms)
+✔ opening an existing draft preserves all edited content, translations and protected configuration (9.489424ms)
+✔ every discovered route has a page entry and every referenced label exists in the starter (8.578576ms)
+✔ FAQ, support topics and policy edits preserve all locales through serialization (13.92392ms)
+✔ required dynamic placeholders cannot disappear on save and edits never promote human review (51.988314ms)
+✔ real structured editor controls save edits and honor read-only access (31.295955ms)
+✔ editing legacy string content preserves its English wording (0.151818ms)
+✔ the existing starter draft remains valid without requiring unrelated text changes (55.261147ms)
+✔ CMS wording never replaces internal payment configuration keys (45.869024ms)
+✔ asset listing reaches beyond the legacy 500-row cap and never reports partial results as complete (13.460594ms)
+✔ critical publication requires explicit review and never promotes translation status (45.616951ms)
+✔ all registered fields complete a local edit-save-review-serialization-consumer lookup round trip (61.262384ms)
+✔ store preview preserves the actual consumer hero geometry and asset behavior (128.699255ms)
+✔ every customer route is available in the preview selector, including secure card and group pages (1.321033ms)
+✔ preview backend blocks writes, checkout, publication and provider calls without any network client (37.24172ms)
+✔ preview retains customer group/card visual attributes and records source provenance (122.41581ms)
+✔ explicit field identities resolve duplicate and dynamic wording while explicit multiple identities open a chooser (40.605567ms)
+✔ four approved languages can publish while unfinished Creole keeps its value/status and uses reviewed English (13.053104ms)
+✔ every mirrored preview dependency is declared for a clean admin install (291.871366ms)
+✔ Shared Bill preview fixtures can read their own sample status but every funding/refund RPC remains blocked (13.212021ms)
+ℹ tests 20
+ℹ suites 0
+ℹ pass 20
+ℹ fail 0
+ℹ cancelled 0
+ℹ skipped 0
+ℹ todo 0
+ℹ duration_ms 1102.492771
+✔ financial confirmation validates the transferred currency amount and requires receipt evidence (79.771771ms)
+✔ admin settlement actions send exact receipt amounts and never expose backend errors (13.100034ms)
+ℹ tests 2
+ℹ suites 0
+ℹ pass 2
+ℹ fail 0
+ℹ cancelled 0
+ℹ skipped 0
+ℹ todo 0
+ℹ duration_ms 102.120646
+✔ Shared Bill refund parsing rejects corrupt amounts rather than displaying zero (49.306869ms)
+✔ Shared Bill refund retry needs finance permission and a review reason before dispatch (48.914219ms)
+✔ Shared Bill refund retry uses a synchronous lock and reports a pending refund accurately (15.21619ms)
+✔ Shared Bill refund failures and stale list responses cannot expose private server details (18.564956ms)
+ℹ tests 4
+ℹ suites 0
+ℹ pass 4
+ℹ fail 0
+ℹ cancelled 0
+ℹ skipped 0
+ℹ todo 0
+ℹ duration_ms 141.192779
