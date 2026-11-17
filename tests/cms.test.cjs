@@ -200,3 +200,8 @@ test('every mirrored preview dependency is declared for a clean admin install',(
  function visitDirectory(dir){for(const entry of fs.readdirSync(dir,{withFileTypes:true})){const file=path.join(dir,entry.name);if(entry.isDirectory())visitDirectory(file);else if(/\.tsx?$/.test(file)){const ast=ts.createSourceFile(file,fs.readFileSync(file,'utf8'),99,true);for(const node of ast.statements)if(ts.isImportDeclaration(node)){const id=node.moduleSpecifier.text;if(!id.startsWith('.')){const name=id.startsWith('@')?id.split('/').slice(0,2).join('/'):id.split('/')[0];assert.ok(declared.has(name),'Declare '+name+' imported by '+path.relative(root,file));}}}}}
  visitDirectory(root);
 });
+test('Shared Bill preview fixtures can read their own sample status but every funding/refund RPC remains blocked',async()=>{
+ const {previewBackend,previewRequests,setPreviewScenario,previewSharedBillId}=loadModule(path.join(root,'previewRuntime.ts'));setPreviewScenario('default');
+ const status=await previewBackend.rpc('help_pay_status',{p_request_id:previewSharedBillId});assert.equal(status.data.id,previewSharedBillId);assert.equal(status.data.service,'goodies');
+ for(const name of ['help_pay_create_request','help_pay_create_for_account','help_pay_contribute_wallet','help_pay_contribute_for_account','help_pay_cancel_request','help_pay_admin_retry_refund','help_pay_set_wallet_enabled','help_pay_share_to_friend','place_goodies_order_with_payment_once']){const result=await previewBackend.rpc(name,{});assert.equal(result.data,null);assert.equal(result.error.code,'PREVIEW_ONLY');assert.equal(previewRequests.at(-1).blocked,true);}
+});

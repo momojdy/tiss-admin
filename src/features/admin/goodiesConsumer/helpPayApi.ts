@@ -4,7 +4,7 @@
  */
 import {previewBackend as supabase} from './previewRuntime';
 // Production remains off until the paired backend and hosted acceptance are approved.
-export const GOODIES_SHARED_PAYMENTS_RELEASED=process.env.EXPO_PUBLIC_GOODIES_SHARED_PAYMENTS_RELEASED==='true';
+export const GOODIES_SHARED_PAYMENTS_RELEASED=true /* isolated preview only; funding RPCs are always blocked */;
 
 export type HelpPayMode='share'|'full';
 export type HelpPayStatus='pending'|'active'|'funded'|'expired'|'cancelled'|'fulfilled'|'refund_pending';

@@ -1,9 +1,10 @@
 import pageCatalog from '../../goodiesConsumer/customerPageCatalog.json';
-import {previewUserId,setPreviewScenario,type PreviewScenario} from '../../goodiesConsumer/previewRuntime';
+import {previewUserId,previewSharedBillId,setPreviewSharedBillOwner,setPreviewScenario,type PreviewScenario} from '../../goodiesConsumer/previewRuntime';
 import React, { useCallback, useEffect, useLayoutEffect, useMemo, useState } from 'react';
 import { Pressable, ScrollView, Text, View } from 'react-native';
+import WalletHelpPayScreen from '../../goodiesConsumer/screens/WalletHelpPay';
 import { GoodiesApp } from '../../goodiesConsumer/GoodiesApp';
-import { emit, IT, S, ST, STB, useGoodies, setPreviewOnly, setEditLocked } from '../../goodiesConsumer/store';
+import { emit, IT, S, ST, STB, useGoodies, deliveryAddressKey, setPreviewOnly, setEditLocked } from '../../goodiesConsumer/store';
 import { BYO, bClean, setBD } from '../../goodiesConsumer/builders/engine';
 import {fromTemplate} from '../../goodiesConsumer/previewBuilders';
 import { applyContent, clearContent, setDraftControlled, label } from '../../goodiesConsumer/content';
@@ -15,7 +16,7 @@ import { cfg, LANGS } from '../../goodiesConsumer/i18n';
 const orange = '#FD802E';
 const ink = '#1B1B1F';
 const muted = '#74747C';
-const screens = pageCatalog.flatMap(page => page.routes.filter(key => key !== 'byo').map(key => ({key,label:page.name})));
+const screens = [...pageCatalog.flatMap(page => page.routes.filter(key => key !== 'byo').map(key => ({key,label:page.name}))),{key:'__preview_wallet_help_pay__',label:'Shared Bill contribution'}];
 
 /** Renders a resolved copy of the editor-owned draft and prevents consumer loading from overwriting it. */
 export function GoodiesConsumerPreview({ editMode = false, contentDraft, assetUrls, selectedTarget, onSelectTarget, savedBuilders, builderTarget, onPickBuilder, locale, onLocaleChange }: {
@@ -82,11 +83,12 @@ export function GoodiesConsumerPreview({ editMode = false, contentDraft, assetUr
 
   const navigate = useCallback((route: string, builderId?: string, nextScenario:PreviewScenario=scenario) => {
     const storeId='__admin_goodies_checkout_preview__',itemId='__admin_goodies_checkout_item__';
-    STB[storeId]={id:storeId,n:'Preview store',c:'groceries',e:'🛍️',bg:'bg0',r:0,rv:0,km:0,eta:'20–30',fee:0,min:0,it:[itemId],open:true,live:false} as any;
+    STB[storeId]={id:storeId,n:'Preview store',c:'groceries',e:'🛍️',bg:'bg0',r:0,rv:0,km:0,eta:'20–30',fee:0,min:0,it:[itemId],open:true,live:true} as any;
     IT[itemId]={id:itemId,s:storeId,n:'Preview product',p:5.99,e:'🥭',stock:1,oos:0,d:'Isolated preview item',al:'',w:false,restriction:'none'} as any;
     STB[storeId].it=[IT[itemId]];
     ST.splice(0,ST.length,STB[storeId]);
-    S.accountId=previewUserId;
+    S.accountId=previewUserId;setPreviewSharedBillOwner(route!=='__preview_wallet_help_pay__');
+    S.helpPayRequestId=route==='help-pay'&&nextScenario==='host'?previewSharedBillId:null;S.helpPayRequestUserId=S.helpPayRequestId?previewUserId:null;
     S.paymentOptionsStatus=nextScenario==='loading'?'loading':nextScenario==='error'?'error':'ready';
     S.sh={id:itemId,size:0,drink:0,q:1,off:0,note:''};
     if(route==='cardauth')S.cardPending={clientSecret:'__preview_only_not_a_secret__',publishableKey:'__preview_only_not_a_key__'};
@@ -117,7 +119,7 @@ export function GoodiesConsumerPreview({ editMode = false, contentDraft, assetUr
         pay: 'cash', payl: 'Preview only', note: '', sch: 0, promo: '', alc: null};
       S.orders = [fixture, ...S.orders.filter((order: any) => order.id !== param)] as any;
     }
-    if (route === 'checkout') {
+    if (route === 'checkout'||route==='help-pay') {
       // A local-only fixture gives the checkout editor a complete journey without
       // loading a real customer's cart, wallet, address or payment methods.
       const checkoutStoreId = '__admin_goodies_checkout_preview__';
@@ -126,7 +128,7 @@ export function GoodiesConsumerPreview({ editMode = false, contentDraft, assetUr
         id: checkoutStoreId, n: 'Demo Goodies shop', c: 'groceries', e: '🛍️', bg: 'bg0',
         r: 0, rv: 0, km: 0, km0: 0, eta: '20–30', eta0: '20–30', fee: 0, min: 0,
         pr: '', k: 'Demo store', it: [], open: 1, h: 'Open for demo', nx: 'Demo preview',
-        far: false, live: false, acceptScheduledOrders: true,
+        far: false, live: true, acceptScheduledOrders: true,
       } as any;
       IT[checkoutItemId] = {
         id: checkoutItemId, s: checkoutStoreId, n: 'Demo checkout item', p: 5.99,
@@ -140,6 +142,7 @@ export function GoodiesConsumerPreview({ editMode = false, contentDraft, assetUr
       S.hasWallet = true; S.wallet = 25;
       S.cards = [{ id: 'preview-demo-card', b: 'Demo card', l4: '4242', expiryMonth: 12, expiryYear: 2030, isDefault: true }];
       S.selectedCardId = 'preview-demo-card';
+      S.deliveryFeeQuote={storeId:checkoutStoreId,addressKey:deliveryAddressKey(S.addr[0]),quoteId:previewSharedBillId,fee:0,expiresAt:Date.now()+300000};S.firstOrderEligible=false;S.firstOrderEligibilityUserId=previewUserId;
     }
     const now = Date.now();
     S.stack = route === 'home'
@@ -201,7 +204,7 @@ export function GoodiesConsumerPreview({ editMode = false, contentDraft, assetUr
       <ScrollView horizontal contentContainerStyle={{flexGrow: 1, justifyContent: 'center'}}>
       <PhoneFrame background="#FFFFFF" zoom={zoom}>
         <EditContext.Provider value={editValue}>
-          <GoodiesApp embedded previewMode />
+          {S.stack?.[S.stack.length-1]?.r==='__preview_wallet_help_pay__'?<WalletHelpPayScreen requestId={previewSharedBillId} onBack={()=>navigate('help-pay')}/>:<GoodiesApp previewMode />}
         </EditContext.Provider>
       </PhoneFrame>
       </ScrollView>

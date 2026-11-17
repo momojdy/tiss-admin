@@ -4,6 +4,9 @@ export type PreviewScenario = 'default'|'loading'|'error'|'host'|'guest'|'saving
 let scenario: PreviewScenario = 'default';
 const listeners = new Set<() => void>();
 export const previewUserId = '__cms_preview_user__';
+export const previewSharedBillId='a0000000-0000-4000-8000-000000000099';
+let sharedBillOwner=false;
+export const setPreviewSharedBillOwner=(owner:boolean)=>{sharedBillOwner=owner;};
 export const previewGroupId = '__cms_preview_group__';
 export const previewRequests: {kind:string;name:string;blocked:boolean}[] = [];
 export const getPreviewScenario = () => scenario;
@@ -17,6 +20,7 @@ async function response<T>(read:()=>T):Promise<{data:T|null;error:null|{code:str
  return {data:read(),error:null};
 }
 export function previewRows(table:string):any[] {
+ if(table==='wallets')return [{id:'preview-wallet-only',balance:25}];
  if(table==='goodies_group_order_items')return [{id:'__preview_line__',user_id:previewUserId,line_key:'__preview_item__',quantity:1,options:{},note:'',product:{name:'Preview item',price:5,emoji:'🥭',photo_url:null}}];
  return [];
 }
@@ -36,10 +40,13 @@ export const previewBackend = {
  from:query,
  auth:{getUser:async()=>({data:{user:{id:previewUserId}},error:null}),getSession:async()=>({data:{session:null},error:null}),onAuthStateChange:()=>({data:{subscription:{unsubscribe(){}}}})},
  rpc:async(name:string,_args?:any)=>{
-  const permitted=['goodies_group_order_create','goodies_group_order_join','goodies_group_order_get_status','goodies_group_order_list_members','goodies_group_order_my_invites','goodies_group_order_list_friends','goodies_group_order_checkout_preview','goodies_group_order_checkout_estimate','goodies_group_order_end'];
+  const permitted=['help_pay_status','help_pay_wallet_enabled','help_pay_request_for_checkout','help_pay_contribution_status','goodies_group_order_create','goodies_group_order_join','goodies_group_order_get_status','goodies_group_order_list_members','goodies_group_order_my_invites','goodies_group_order_list_friends','goodies_group_order_checkout_preview','goodies_group_order_checkout_estimate','goodies_group_order_end'];
   const blocked=!permitted.includes(name);previewRequests.push({kind:'rpc',name,blocked});
   if(blocked)return failure();
   return response(()=>{
+   if(name==='help_pay_wallet_enabled')return true;
+   if(name==='help_pay_request_for_checkout'||name==='help_pay_contribution_status')return {found:false};
+   if(name==='help_pay_status')return {id:previewSharedBillId,service:'goodies',mode:'share',status:'active',total_cents:1100,initial_cents:660,contributed_cents:0,remaining_cents:440,my_contributed_cents:sharedBillOwner?660:0,my_refunded_cents:0,is_creator:sharedBillOwner,expires_at:new Date(Date.now()+1800000).toISOString(),contributors:[],order_id:null};
    if(/create|join|get_status/.test(name))return group();
    if(name==='goodies_group_order_list_members')return [{user_id:previewUserId,role:scenario==='guest'?'member':'host',full_name:'Preview customer',display_name:'Preview customer',is_host:scenario!=='guest'}];
    if(name==='goodies_group_order_checkout_preview')return {group_id:previewGroupId,store_id:group().store_id,items:[{name:'Preview item',quantity:1,unit_price:5,line_total:5}],subtotal:5,total:5};

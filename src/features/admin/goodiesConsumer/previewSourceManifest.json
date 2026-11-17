@@ -380,6 +380,15 @@
       ]
     },
     {
+      "target": "screens/WalletHelpPay.tsx",
+      "origins": [
+        {
+          "file": "src/screens/Wallet/WalletHelpPayScreen.tsx",
+          "sha256": "f3882968b614a5c9fa1b28ac75941e0bd93ca63d6f9468826db5ecc131848a34"
+        }
+      ]
+    },
+    {
       "target": "screens/AddCard.tsx",
       "origins": [
         {
