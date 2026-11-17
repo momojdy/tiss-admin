@@ -621,7 +621,8 @@
     "id": "lbl.actionRetryProduct",
     "text": "Please select the product again and retry.",
     "pages": [
-      "Shared actions and validation"
+      "Shared actions and validation",
+      "Shared state messages"
     ]
   },
   {
@@ -4862,13 +4863,6 @@
     ]
   },
   {
-    "id": "lbl.cms.e2cafebf4b38",
-    "text": "Delivery in progress · GPS tracking active",
-    "pages": [
-      "Courier"
-    ]
-  },
-  {
     "id": "lbl.cms.e3168f3cd560",
     "text": " for \"",
     "pages": [
@@ -7087,13 +7081,6 @@
     ]
   },
   {
-    "id": "lbl.orderStatusHeading",
-    "text": "Order status is provided by the live order service.",
-    "pages": [
-      "Order tracking"
-    ]
-  },
-  {
     "id": "lbl.ordersTitle",
     "text": "Your orders",
     "pages": [
@@ -7147,6 +7134,13 @@
     "text": "Order {id} picked up 🎉",
     "pages": [
       "Shared navigation and access states"
+    ]
+  },
+  {
+    "id": "lbl.orderTrackingFailed",
+    "text": "Could not refresh this order. Please try again.",
+    "pages": [
+      "Order tracking"
     ]
   },
   {
@@ -7362,13 +7356,6 @@
   {
     "id": "lbl.page.GoodiesCourierScreen.5adac531a4",
     "text": "Your live location is shared with the customer for this delivery.",
-    "pages": [
-      "Courier"
-    ]
-  },
-  {
-    "id": "lbl.page.GoodiesCourierScreen.5f0c80ecc7",
-    "text": "Could not refresh deliveries",
     "pages": [
       "Courier"
     ]
@@ -8034,12 +8021,15 @@
     "text": "Try again",
     "pages": [
       "Shared navigation and access states",
+      "Courier",
       "Home",
       "Card verification",
       "Store",
       "Store reviews",
       "Cart",
       "Checkout",
+      "Order tracking",
+      "Order history",
       "Shared account addresses"
     ]
   },
@@ -9579,48 +9569,6 @@
     ]
   },
   {
-    "id": "lbl.sheetCourierAtGate",
-    "text": "I am at the gate",
-    "pages": [
-      "Sheets · msg"
-    ]
-  },
-  {
-    "id": "lbl.sheetCourierCall",
-    "text": "Please call me",
-    "pages": [
-      "Sheets · msg"
-    ]
-  },
-  {
-    "id": "lbl.sheetCourierDoor",
-    "text": "Leave it at the door",
-    "pages": [
-      "Sheets · msg"
-    ]
-  },
-  {
-    "id": "lbl.sheetCourierLate",
-    "text": "Running 5 min late",
-    "pages": [
-      "Sheets · msg"
-    ]
-  },
-  {
-    "id": "lbl.sheetCourierSent",
-    "text": "Sent: {message}",
-    "pages": [
-      "Sheets · msg"
-    ]
-  },
-  {
-    "id": "lbl.sheetCourierTitle",
-    "text": "Message courier",
-    "pages": [
-      "Sheets · msg"
-    ]
-  },
-  {
     "id": "lbl.sheetDefaultNumber",
     "text": "Default Wantiss number",
     "pages": [
@@ -10332,6 +10280,7 @@
     "id": "lbl.storeBackToStores",
     "text": "Back to stores",
     "pages": [
+      "Sheets · sinfo",
       "Store reviews"
     ]
   },
@@ -10508,9 +10457,14 @@
     "id": "lbl.storeNotFound",
     "text": "Store not found",
     "pages": [
+      "Shared actions and validation",
+      "Build Your Own",
+      "Sheets · sinfo",
       "Store reviews",
+      "Order confirmation",
       "Order tracking",
-      "Order history"
+      "Order history",
+      "Shared state messages"
     ]
   },
   {

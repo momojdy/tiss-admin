@@ -309,7 +309,7 @@ export function startGoodiesSync() {
     if (stopped || initialEpoch !== authEpoch) return;
     if(error){S.ordersLoading=false;S.ordersError='unavailable';emit();return;}
     applyUser(data.session?.user?.id || null);
-  }).catch(() => {});
+  }).catch(() => {if (!stopped && initialEpoch === authEpoch) {S.ordersLoading=false;S.ordersError='unavailable';emit();}});
 
   appStateSub = AppState.addEventListener('change', (state: AppStateStatus) => {
     if (state === 'active') void refresh();

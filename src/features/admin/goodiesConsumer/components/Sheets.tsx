@@ -4,7 +4,7 @@ import {notifyStoreReviewsChanged} from '../reviews';
 import React, {useEffect, useMemo, useRef, useState} from 'react';
 import {View, Text as UnusedNativeText, Pressable, Modal as UnusedNativeModal, ScrollView, KeyboardAvoidingView, Share as UnusedNativeShare, Image, Platform, TextInput, useWindowDimensions, PanResponder} from 'react-native';
 import {PreviewDateTimePicker as DateTimePicker} from '../previewNative';
-import {T, Cta, Row, Card, Badge, Input, Radio, Seg, SheetBox, Bar, useTheme} from './ui';
+import {T, Cta, Row, Card, Badge, Input, Radio, Seg, SheetBox, Bar, Empty, useTheme} from './ui';
 import {Icon} from './Icon';
 import {CameraView, useCameraPermissions} from '../previewNative';
 import QRCode from 'react-native-qrcode-svg';
@@ -70,7 +70,7 @@ export function Sheets({sheet, close}: {sheet: any; close: () => void}) {
   if (k === 'sinfo') {
     const s = STB[sheet.id];
     const row = (a: string, b: string) => <View key={a} style={{flexDirection: 'row', alignItems: 'flex-start', gap: 12, paddingVertical: 11, borderBottomWidth: 0.5, borderBottomColor: th.line}}><T color={th.mut} style={{width: '38%'}}>{a}</T><T color={th.ink} weight="600" style={{flex: 1, textAlign: 'right'}}>{b}</T></View>;
-    content = (<>
+    content = !s ? <Empty title={label('lbl.storeNotFound', 'Store not found')} button={label('lbl.storeBackToStores', 'Back to stores')} onPress={() => {close(); A.browse();}} /> : (<>
       <T size={23} weight="600">{s.businessName || s.n}</T>
       <T color={th.mut} style={{marginTop: 6, marginBottom: 14, lineHeight: 21}}>{s.businessDescription || s.k}</T>
       <Card style={{padding: 16}}>
@@ -95,7 +95,6 @@ export function Sheets({sheet, close}: {sheet: any; close: () => void}) {
       </Card>
     </>);
   }
-  if (k === 'msg') content = (<><T cmsKey={'lbl.sheetCourierTitle'} size={20} weight="600" style={{marginBottom: 14}}>{label('lbl.sheetCourierTitle', 'Message courier')}</T><View style={{flexDirection: 'row', flexWrap: 'wrap', gap: 8}}>{[{id: 'lbl.sheetCourierAtGate', text: label('lbl.sheetCourierAtGate', 'I am at the gate')}, {id: 'lbl.sheetCourierCall', text: label('lbl.sheetCourierCall', 'Please call me')}, {id: 'lbl.sheetCourierDoor', text: label('lbl.sheetCourierDoor', 'Leave it at the door')}, {id: 'lbl.sheetCourierLate', text: label('lbl.sheetCourierLate', 'Running 5 min late')}].map(x => <Pressable key={x.id} onPress={() => {close(); toast(label('lbl.sheetCourierSent', 'Sent: {message}').replace('{message}', x.text));}} style={{paddingVertical: 9, paddingHorizontal: 14, borderRadius: 18, backgroundColor: th.soft}}><T size={13.5} weight="600">{x.text}</T></Pressable>)}</View></>);
   if (k === 'review' || k === 'driver-review') content = <ReviewSheet key={String(sheet.id) + ':' + k} id={sheet.id} stars={stars} driver={k === 'driver-review'} initialStars={sheet.initialStars} />;
   if (k === 'addr') content = (<><T cmsKey={'lbl.sheetDeliverToTitle'} size={20} weight="600" style={{marginBottom: 4}}>{label('lbl.sheetDeliverToTitle', 'Deliver to')}</T><T cmsKey={'lbl.sheetAddressScope'} size={12.5} color={th.mut} style={{marginBottom: 12}}>{label('lbl.sheetAddressScope', 'Choosing an address here only changes Goodies. Your Wantiss default stays the same.')}</T>{S.addr.map((a: any) => <Radio key={a.id} on={a.id === S.as} onPress={() => A.selectAddr(a.id)}><Row style={{gap: 6}}><T weight="600">{a.l}</T>{a.def ? <Badge cmsKey={"lbl.sheetAutoCKTN2B"} green label={label("lbl.sheetAutoCKTN2B", "Wantiss default")} /> : null}{a.goodiesDefault ? <View style={{backgroundColor: '#FD802E', borderRadius: 8, paddingHorizontal: 8, paddingVertical: 3}}><T cmsKey={"lbl.cms.7f7b502a8d5a"} size={10} weight="600" color="#fff">{label("lbl.cms.7f7b502a8d5a", "GOODIES")}</T></View> : null}</Row><T size={12.5} color={th.mut}>{a.t}</T></Radio>)}<Cta cmsKey={"lbl.sheetAuto16NJT2W"} ghost label={label("lbl.sheetAuto16NJT2W", "Manage addresses")} onPress={() => {close(); A.go('addresses');}} /></>);
 

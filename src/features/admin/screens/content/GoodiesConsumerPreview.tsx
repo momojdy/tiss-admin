@@ -204,7 +204,7 @@ export function GoodiesConsumerPreview({ editMode = false, contentDraft, assetUr
       <ScrollView horizontal contentContainerStyle={{flexGrow: 1, justifyContent: 'center'}}>
       <PhoneFrame background="#FFFFFF" zoom={zoom}>
         <EditContext.Provider value={editValue}>
-          {S.stack?.[S.stack.length-1]?.r==='__preview_wallet_help_pay__'?<WalletHelpPayScreen requestId={previewSharedBillId} onBack={()=>navigate('help-pay')}/>:<GoodiesApp previewMode />}
+          {S.stack?.[S.stack.length-1]?.r==='__preview_wallet_help_pay__'?<WalletHelpPayScreen requestId={previewSharedBillId} onBack={()=>navigate('help-pay')}/>:<GoodiesApp previewMode embedded={false} />}
         </EditContext.Provider>
       </PhoneFrame>
       </ScrollView>

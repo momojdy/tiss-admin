@@ -719,7 +719,8 @@ export function totals() {
 }
 export const qtyIn = (id: string) => S.cart.lines.filter((l: CartLine) => l.id === id).reduce((a: number, l: CartLine) => a + l.q, 0);
 export function canBuy(i: Item) {
-  const s = STB[i.s];
+  const s = i && STB[i.s];
+  if (!i || !s || !s.live || !IT[i.id]) {toast(label('lbl.actionRetryProduct', 'Please select the product again and retry.')); return false;}
   if (!s.open && !s.acceptScheduledOrders) {toast(label('lbl.actionStoreClosedNext', '{store} is closed. {next}').replace('{store}', s.n).replace('{next}', s.nx)); return false;}
   if (i.oos) {toast(label('lbl.actionOutOfStock', 'Sorry, {item} is out of stock').replace('{item}', i.n)); return false;}
   return true;
@@ -795,9 +796,12 @@ export async function removeGroupOrderCartLine(groupId: string, lineKey: string)
 }
 
 export function cartAdd(i: Item, o: {q: number; size?: number; drink?: number; off?: number; note?: string}, addStop = false) {
-  if (!canBuy(i)) return;
+  const current = i && IT[i.id];
+  if (!current || current.s !== i.s) {toast(label('lbl.actionRetryProduct', 'Please select the product again and retry.')); return;}
+  if (!canBuy(current)) return;
+  i = current;
   const c = S.cart;
-  if (!addStop && c.sid && c.lines.length && !cartStoreIds().includes(i.s)) {S.pend = [i, o]; ui.sheet({kind: 'newcart', from: STB[c.sid].n, to: STB[i.s].n, canMerge: canAddStop(i.s), stops: cartStoreIds().length, max: maxStops()}); return;}
+  if (!addStop && c.sid && c.lines.length && !cartStoreIds().includes(i.s)) {S.pend = [i, o]; ui.sheet({kind: 'newcart', from: STB[c.sid]?.n || label('lbl.storeNotFound', 'Store not found'), to: STB[i.s].n, canMerge: canAddStop(i.s), stops: cartStoreIds().length, max: maxStops()}); return;}
   if (qtyIn(i.id) + o.q > i.stock) {toast(label('lbl.actionOnlyAvailable', 'Only {count} available').replace('{count}', String(i.stock))); return;}
   if ((i as any).restriction === 'alcohol' && !S.alcAck) {S.pend = [i, o]; ui.sheet({kind: 'alcrules'}); return;}
   if (!c.sid || !c.lines.length) c.sid = i.s;
@@ -817,14 +821,20 @@ export function cartAdd(i: Item, o: {q: number; size?: number; drink?: number; o
 export function reorderLines(o: Order) {
   const s = STB[o.sid], miss: string[] = [], ok: CartLine[] = [];
   o.lines.forEach(l => {
+    if (!s?.live || !s.open) {miss.push(l.n); return;}
     if (l.byo) {
       const b = hooks.bGet(l.byo.sid, l.byo.bid), d = {sid: l.byo.sid, size: l.byo.size, sel: l.byo.sel, note: l.nt || ''};
       if (!b || !s.open || !hooks.bCheck(b, d).ok) {miss.push(l.n); return;}
       ok.push(hooks.bLine(b, d, l.q)); return;
     }
     const i = IT[l.id];
-    if (!i || i.oos || !s.open || i.stock < 1) miss.push(l.n);
-    else ok.push({k: l.k, id: l.id, n: l.n, e: l.e, photo: i.photo || l.photo || null, p: l.p, q: Math.min(l.q, i.stock), d: l.d});
+    if (!i || i.s !== o.sid || i.oos || !s.open || i.stock < 1) miss.push(l.n);
+    else {
+      const sized = ['restaurants', 'bakery', 'beverages'].includes(STB[i.s]?.c);
+      const options = {size: sized ? l.options?.size || (/\bLarge\b/.test(l.d) ? 'large' : 'regular') : null, drink: sized && (l.options?.drink ?? /\+ drink\b/.test(l.d)), discount_pct: 0} as NonNullable<CartLine['options']>;
+      const p = i.p + (options.size === 'large' ? 1.5 : 0) + (options.drink ? 1 : 0);
+      ok.push({...l, s: i.s, n: i.n, e: i.e, photo: i.photo || l.photo || null, p, q: Math.min(l.q, i.stock), options});
+    }
   });
   return {ok, miss};
 }

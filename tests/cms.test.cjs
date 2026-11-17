@@ -130,6 +130,7 @@ test('store preview preserves the actual consumer hero geometry and asset behavi
 
 test('every customer route is available in the preview selector, including secure card and group pages',()=>{
  const preview=fs.readFileSync(path.resolve(root,'../screens/content/GoodiesConsumerPreview.tsx'),'utf8');
+ assert.match(preview,/<GoodiesApp previewMode embedded=\{false\}/,'Returning from the shared Wallet preview must preserve the selected route');
  assert.match(preview,/pageCatalog\.flatMap/);assert.match(preview,/key !== 'byo'/);assert.match(preview,/navigate\('byo'/);
  const app=fs.readFileSync(path.join(root,'GoodiesApp.tsx'),'utf8');
  for(const [route,component] of [['grouporder','GroupOrderPage'],['addcard','WalletAddNewCardScreen'],['cardauth','CardAuthentication']])assert.match(app,new RegExp("case '"+route+"': body = [^;]*<"+component));
@@ -140,6 +141,7 @@ test('every customer route is available in the preview selector, including secur
 test('preview backend blocks writes, checkout, publication and provider calls without any network client',async()=>{
  const runtime=loadModule(path.join(root,'previewRuntime.ts'));runtime.setPreviewScenario('default');
  assert.ok((await runtime.previewBackend.from('goodies_orders').insert({amount:1})).error);
+ const order=await runtime.previewBackend.from('goodies_orders').select('status').eq('id','__admin_goodies_sample_order__').maybeSingle();assert.equal(order.data.status,'accepted');assert.equal(order.data.id,'__admin_goodies_sample_order__');
  for(const rpc of ['goodies_checkout','goodies_group_order_checkout','issue_refund','publish_content'])assert.ok((await runtime.previewBackend.rpc(rpc,{})).error,rpc);
  assert.ok((await runtime.previewBackend.functions.invoke('charge-card')).error);
  assert.ok((await runtime.previewBackend.storage.from('proofs').upload('file','data')).error);

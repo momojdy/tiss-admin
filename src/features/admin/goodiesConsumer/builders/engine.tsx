@@ -167,7 +167,7 @@ const upd = () => {bDraftSave(); emit();};
 /* ---------- actions ---------- */
 export function byoOpen(sid: string, bid: string) {
   const b = bGet(sid, bid);
-  if (!b || !b.enabled || !b.available || BYO.store[sid] === false) {toast(label('lbl.byoNotAvailableNow', 'This builder is not available right now')); return;}
+  if (!b || !STB[sid] || !b.enabled || !b.available || BYO.store[sid] === false) {toast(label('lbl.byoNotAvailableNow', 'This builder is not available right now')); return;}
   if (!STB[sid].open) {toast(label('lbl.byoStoreClosedNow', '{store} is closed right now').replace('{store}', STB[sid].n)); return;}
   BD = bDraft(b, sid); push('byo', sid + '|' + b.id);
 }
@@ -240,8 +240,14 @@ export function bzAddOrder() {
   const ck = bCheck(b, BD); if (!ck.ok) {toast(ck.errs[0] || ck.conf[0]); return;}
   BD.busy = 1; const ln = bLine(b, BD, BD.q), c = S.cart;
   if (!BD.edit && c.sid && c.sid !== BD.sid && c.lines.length) {
-    BD.busy = 0; S.pend = [null, null, () => {S.cart = {sid: null, lines: []}; S.promo = ''; ui.close(); animateCommit(b, ln);}];
-    ui.sheet({kind: 'newcart', from: STB[c.sid].n, to: STB[BD.sid].n}); return;
+    BD.busy = 0; const draft = BD, accountId = S.accountId;
+    S.pend = [null, null, () => {
+      if (BD !== draft || S.accountId !== accountId) {ui.close(); return;}
+      const current = bGet(BD.sid, BD.bid), check = current && bCheck(current, BD);
+      if (!current || !check?.ok) {ui.close(); toast(label('lbl.byoNotAvailableNow', 'This builder is not available right now')); return;}
+      S.cart = {sid: null, lines: []}; S.promo = ''; ui.close(); animateCommit(current, bLine(current, BD, BD.q));
+    }];
+    ui.sheet({kind: 'newcart', from: STB[c.sid]?.n || label('lbl.storeNotFound', 'Store not found'), to: STB[BD.sid]?.n || label('lbl.storeNotFound', 'Store not found')}); return;
   }
   animateCommit(b, ln);
 }

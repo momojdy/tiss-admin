@@ -1,14 +1,15 @@
 import {EditableNativeText as Text} from '../EditableNativeText';
 import {GOODIES_SHARED_PAYMENTS_RELEASED} from '../helpPayApi';
 import {friendlyError} from '../friendlyError';
-import {loadOlderGoodiesOrders} from '../serverSync';
+import {loadOlderGoodiesOrders, refreshGoodiesOrders} from '../serverSync';
 import {useStoreReviews} from '../reviews';
 import {coordinate, courierLocation, routeSegments, trackingRegion} from '../deliveryTracking';
 import {previewDeliveryProof as resolveGoodiesDeliveryProof} from '../previewRuntime';
-import React, {useState, useEffect} from 'react';
+import {createGoodiesRefresh} from '../refreshScope';
+import React, {useState, useEffect, useRef} from 'react';
 import {previewClipboard as Clipboard} from '../previewNative';
 import {MaterialCommunityIcons} from '@expo/vector-icons';
-import {View, Text as UnusedNativeText, Pressable, ScrollView, useWindowDimensions, Image, TextInput, ActivityIndicator, Alert} from 'react-native';
+import {View, Text as UnusedNativeText, Pressable, ScrollView, useWindowDimensions, Image, TextInput, ActivityIndicator, Alert, AppState} from 'react-native';
 import {Icon} from '../components/Icon';
 import {T, Grad, Circ, Bar, Sh, Rail, Chips, Cta, Card, Row, Badge, Ttl, Empty, Tile, Radio, Seg, Stepper, Input, Switch, bgIdx, useTheme} from '../components/ui';
 import {Dish, StoreCard, ItemRow} from '../components/cards';
@@ -177,7 +178,7 @@ export function Product() {
   const th = useTheme(), {width} = useWindowDimensions(), h = S.sh, i = h && IT[h.id];
   const [photoIndex, setPhotoIndex] = useState(0);
   useEffect(() => { setPhotoIndex(0); }, [h?.id]);
-  if (!i) return <View><Bar cmsKey={'lbl.productTitle'} title={label('lbl.productTitle', 'Product')} onBack={back} /><Empty emoji="📦" title={label('lbl.productNotFound', 'Product not found')} button={label('lbl.productBackGoodies', 'Back to Goodies')} onPress={browse} /></View>;
+  if (!i || !STB[i.s]) return <View><Bar cmsKey={'lbl.productTitle'} title={label('lbl.productTitle', 'Product')} onBack={back} /><Empty emoji="📦" title={label('lbl.productNotFound', 'Product not found')} button={label('lbl.productBackGoodies', 'Back to Goodies')} onPress={browse} /></View>;
   const s = STB[i.s], o = CHOOSE_SIZE_CATS.indexOf(s.c) > -1, u = ['restaurants', 'bakery'].indexOf(s.c) > -1;
   const base = h.off ? dp(i, h.off) : i.p, unit = base + (h.size > 0 ? 1.5 : 0) + (h.drink ? 1 : 0);
   const rel = s.it.filter(x => x.id !== i.id).concat(ST.filter(x => x.c === s.c && x.id !== s.id).flatMap(x => x.it)).slice(0, 6);
@@ -465,12 +466,12 @@ export const CheckoutFoot = () => {
 
 export function Confirm({id}: {id: string}) {
   const th = useTheme(), o = S.orders.filter((x: any) => x.id === id)[0];
-  if (!o || !o.backendId || !STB[o.sid]) return <View><Bar cmsKey={"lbl.shopAuto15CA8YK"} title={label("lbl.shopAuto15CA8YK", "Order")} onBack={back} /><Empty emoji="📦" title={label('lbl.orderUnavailable', 'Order unavailable')} text={label('lbl.orderLiveUnavailable', 'This order is not available from the live Wantiss order service.')} button={label('lbl.orderGoHome', 'Go home')} onPress={browse} /></View>;
+  if (!o || !o.backendId) return <View><Bar cmsKey={"lbl.shopAuto15CA8YK"} title={label("lbl.shopAuto15CA8YK", "Order")} onBack={back} /><Empty emoji="📦" title={label('lbl.orderUnavailable', 'Order unavailable')} text={label('lbl.orderLiveUnavailable', 'This order is not available from the live Wantiss order service.')} button={label('lbl.orderGoHome', 'Go home')} onPress={browse} /></View>;
   return (
     <View style={{paddingHorizontal: 16, paddingTop: 50, alignItems: 'center'}}>
       <Text style={{fontSize: 70}}>✅</Text>
       <T cmsKey={'lbl.confirmOrderPlaced'} size={24} weight="600" style={{marginTop: 10, marginBottom: 4}}>{label('lbl.confirmOrderPlaced', 'Order placed')}</T>
-      <T cmsKeys={["lbl.cms.f7925b4ff6ef","lbl.cms.e2119bae7932"]} color={th.mut} align="center">{label("lbl.cms.f7925b4ff6ef", "Order ")}{o.id} {label("lbl.cms.e2119bae7932", "with ")}{STB[o.sid].n}.</T>
+      <T cmsKeys={["lbl.cms.f7925b4ff6ef","lbl.cms.e2119bae7932",'lbl.storeNotFound']} color={th.mut} align="center">{label("lbl.cms.f7925b4ff6ef", "Order ")}{o.id} {label("lbl.cms.e2119bae7932", "with ")}{STB[o.sid]?.n || o.sn || label('lbl.storeNotFound', 'Store not found')}.</T>
       <View style={{alignSelf: 'stretch', marginTop: 20}}>
         <Sum rows={o.lines.map((l: any) => [l.q + '× ' + l.n, money(l.p * l.q)])} total={[label("lbl.cms.85a0073d9a54","Total"), money(o.total)]} />
         <Cta cmsKey={'lbl.confirmTrackOrder'} label={label('lbl.confirmTrackOrder', 'Track order')} onPress={() => go('track', o.id)} /><View style={{height: 10}} /><Cta cmsKey={'lbl.confirmBackGoodies'} ghost label={label('lbl.confirmBackGoodies', 'Back to Goodies')} onPress={() => tab('home')} />
@@ -545,57 +546,91 @@ export function Track({id}: {id: string}) {
   const [receiptBusy, setReceiptBusy] = useState(false);
   const [reportOpen, setReportOpen] = useState(false);
   const [reportText, setReportText] = useState('');
+  const accountId = S.accountId, identity = `${accountId}:${id}:${o?.backendId || ''}`;
+  const scopeRef = useRef({identity, active: true});
+  if (scopeRef.current.identity !== identity) {scopeRef.current.active = false; scopeRef.current = {identity, active: true};}
+  const receiptLock = useRef<object | null>(null);
+  const [trackingStatus, setTrackingStatus] = useState<'loading' | 'ready' | 'error'>('loading');
+  const [trackingRetry, setTrackingRetry] = useState(0);
+  useEffect(() => {
+    const scope = scopeRef.current; scope.active = true;
+    setReceiptBusy(false); setReportOpen(false); setReportText('');
+    return () => {scope.active = false;};
+  }, [identity]);
   const receiptCall = async (fn: 'goodies_customer_confirm_received' | 'goodies_customer_dispute_delivery', args: any, okMessage: string) => {
-    setReceiptBusy(true);
+    const scope = scopeRef.current, token = {};
+    if (receiptLock.current || !scope.active || !o?.backendId || S.accountId !== accountId) return;
+    receiptLock.current = token; setReceiptBusy(true);
+    const current = () => scope.active && scopeRef.current === scope && S.accountId === accountId;
     let error: any;
     try {({error} = await supabase.rpc(fn, args));}
     catch {error = {message: 'Request unavailable'};}
-    finally {setReceiptBusy(false);}
-    if (error) {console.warn('Receipt action failed'); toast(label("lbl.cms.d87606c1f3c5", "Could not send this. Please try again.")); return;}
+    finally {if (receiptLock.current === token) receiptLock.current = null; if (current()) setReceiptBusy(false);}
+    if (!current()) return;
+    if (error) {toast(label("lbl.cms.d87606c1f3c5", "Could not send this. Please try again.")); return;}
+    const order = S.orders.find((row: any) => row.backendId === o.backendId);
+    if (!order) return;
     toast(okMessage); setReportOpen(false); setReportText('');
-    if (fn === 'goodies_customer_confirm_received') {o.serverStatus = 'completed'; o.st = require('../store').stage(o);} else o.deliveryDispute = 'open';
-    save(); emit();
+    if (fn === 'goodies_customer_confirm_received') {order.serverStatus = 'completed'; order.st = require('../store').stage(order);} else order.deliveryDispute = 'open';
+    save(); emit(); setTrackingRetry(value => value + 1);
   };
   useEffect(() => {
     if (!o?.backendId) return;
-    let active = true;
-    const sync = async () => {
-      const {data, error} = await supabase.from('goodies_orders').select('status,scheduled_for,acceptance_deadline_at,decline_reason_public,payment_status,payment_method,payment_provider_ref,store_latitude,store_longitude,delivery_latitude,delivery_longitude,delivery_route,courier_id,self_delivery,self_driver_name,self_driver_phone,delivery_proof_url,vendor_delivered_at,receipt_deadline_at,delivery_dispute_status').eq('id', o.backendId).maybeSingle();
-      if (!active || error || !data) return;
-      o.serverStatus = data.status;
-      o.acceptanceDeadlineAt = data.acceptance_deadline_at;
-      o.declineReasonPublic = data.decline_reason_public;
-      o.paymentStatus = data.payment_status;
-      o.storeLatitude = data.store_latitude == null ? null : Number(data.store_latitude);
-      o.storeLongitude = data.store_longitude == null ? null : Number(data.store_longitude);
-      o.deliveryLatitude = data.delivery_latitude == null ? null : Number(data.delivery_latitude);
-      o.deliveryLongitude = data.delivery_longitude == null ? null : Number(data.delivery_longitude);
-      o.deliveryRoute = data.delivery_route || null;
-      o.courierId = data.courier_id || null;
-      o.selfDelivery = !!data.self_delivery; o.selfDriverName = data.self_driver_name || ''; o.selfDriverPhone = data.self_driver_phone || '';
-      try {
-        o.proofUrl = await resolveGoodiesDeliveryProof(data.delivery_proof_url || '');
-        o.proofError = '';
-      } catch {o.proofUrl = ''; o.proofError = label('lbl.orderProofUnavailable', 'Delivery photo unavailable. Please try again later.');}
-      if (!active) return;
-      o.vendorDeliveredAt = data.vendor_delivered_at || null; o.receiptDeadlineAt = data.receipt_deadline_at || null; o.deliveryDispute = data.delivery_dispute_status || null;
-      if (data.payment_method === 'card' && ['declined','expired','cancelled'].includes(String(data.status)) && ['paid','refund_pending'].includes(data.payment_status) && !o.refundRequested) {
-        o.refundRequested = true;
-        const refund = await supabase.functions.invoke('refund-goodies-card-order', { body: { order_id: o.backendId } });
-        if (refund.error || refund.data?.error) o.refundRequested = false;
-        else if (refund.data?.status) o.paymentStatus = refund.data.status;
-      }
-      o.declined = data.status === 'declined';
-      o.expired = data.status === 'expired';
-      if (data.scheduled_for) o.sch = new Date(data.scheduled_for).getTime();
-      o.cx = ['cancelled', 'declined', 'expired'].includes(data.status) ? 1 : 0;
-      o.st = require('../store').stage(o);
-      save(); emit();
-    };
-    void sync();
-    const channel = supabase.channel('goodies-order-status-' + o.backendId).on('postgres_changes', {event: 'UPDATE', schema: 'public', table: 'goodies_orders', filter: 'id=eq.' + o.backendId}, () => { void sync(); }).subscribe();
-    return () => { active = false; void supabase.removeChannel(channel); };
-  }, [o?.backendId]);
+    const scope = scopeRef.current, backendId = o.backendId;
+    const current = () => scope.active && scopeRef.current === scope && S.accountId === accountId;
+    const refresh = createGoodiesRefresh({
+      current,
+      state: setTrackingStatus,
+      read: async () => {
+        const {data, error} = await supabase.from('goodies_orders').select('status,scheduled_for,acceptance_deadline_at,decline_reason_public,payment_status,payment_method,payment_provider_ref,store_latitude,store_longitude,delivery_latitude,delivery_longitude,delivery_route,courier_id,self_delivery,self_driver_name,self_driver_phone,delivery_proof_url,vendor_delivered_at,receipt_deadline_at,delivery_dispute_status').eq('id', backendId).maybeSingle();
+        if (error || !data) throw error || new Error('Order unavailable');
+        let proofUrl = '', proofError = '';
+        try {proofUrl = await resolveGoodiesDeliveryProof(data.delivery_proof_url || '');}
+        catch {proofError = label('lbl.orderProofUnavailable', 'Delivery photo unavailable. Please try again later.');}
+        return {data, proofUrl, proofError};
+      },
+      commit: ({data, proofUrl, proofError}) => {
+        const order = S.orders.find((row: any) => row.backendId === backendId);
+        if (!order) return;
+        order.serverStatus = data.status;
+        order.acceptanceDeadlineAt = data.acceptance_deadline_at;
+        order.declineReasonPublic = data.decline_reason_public;
+        order.paymentStatus = data.payment_status;
+        order.storeLatitude = data.store_latitude == null ? null : Number(data.store_latitude);
+        order.storeLongitude = data.store_longitude == null ? null : Number(data.store_longitude);
+        order.deliveryLatitude = data.delivery_latitude == null ? null : Number(data.delivery_latitude);
+        order.deliveryLongitude = data.delivery_longitude == null ? null : Number(data.delivery_longitude);
+        order.deliveryRoute = data.delivery_route || null;
+        order.courierId = data.courier_id || null;
+        order.selfDelivery = !!data.self_delivery; order.selfDriverName = data.self_driver_name || ''; order.selfDriverPhone = data.self_driver_phone || '';
+        order.proofUrl = proofUrl; order.proofError = proofError;
+        order.vendorDeliveredAt = data.vendor_delivered_at || null; order.receiptDeadlineAt = data.receipt_deadline_at || null; order.deliveryDispute = data.delivery_dispute_status || null;
+        order.declined = data.status === 'declined'; order.expired = data.status === 'expired';
+        order.sch = data.scheduled_for ? new Date(data.scheduled_for).getTime() : 0;
+        order.cx = ['cancelled', 'declined', 'expired'].includes(data.status) ? 1 : 0;
+        order.st = require('../store').stage(order);
+        save(); emit();
+        if (data.payment_method === 'card' && ['declined','expired','cancelled'].includes(String(data.status)) && ['paid','refund_pending'].includes(data.payment_status) && !order.refundRequested) {
+          order.refundRequested = true;
+          void (async () => {
+            try {
+              const refund = await supabase.functions.invoke('refund-goodies-card-order', {body: {order_id: backendId}});
+              if (!current()) return;
+              if (!refund.error && !refund.data?.error && refund.data?.status) order.paymentStatus = refund.data.status;
+            } catch {} finally {
+              order.refundRequested = false;
+              if (current()) {save(); emit();}
+            }
+          })();
+        }
+      },
+    });
+    void refresh.refresh();
+    const channel = supabase.channel('goodies-order-status-' + backendId).on('postgres_changes', {event: 'UPDATE', schema: 'public', table: 'goodies_orders', filter: 'id=eq.' + backendId}, () => {void refresh.refresh();}).subscribe();
+    const poll = setInterval(() => {if (AppState.currentState === 'active') void refresh.refresh();}, 30000);
+    const foreground = AppState.addEventListener('change', state => {if (state === 'active') void refresh.refresh();});
+    return () => {refresh.stop(); clearInterval(poll); foreground.remove(); void supabase.removeChannel(channel);};
+  }, [o?.backendId, accountId, identity, trackingRetry]);
   if (!o) return <View><Bar cmsKey={"lbl.shopAuto15CA8YK"} title={label("lbl.shopAuto15CA8YK", "Order")} onBack={back} /><Empty emoji="📦" title={label('lbl.orderNotFound', 'Order not found')} button={label('lbl.orderGoHome', 'Go home')} onPress={browse} /></View>;
   const s = STB[o.sid] || {n: o.sn || label('lbl.storeNotFound', 'Store not found'), e: '🏪', bg: 0}, T_: string[] = stageLabels(!!o.pk, o.pk ? TP : TL), dn = done(o);
   const serverStatus = String(o.serverStatus || '').toLowerCase();
@@ -626,7 +661,8 @@ export function Track({id}: {id: string}) {
             <View style={{flexDirection: 'row', gap: 6, marginVertical: 14}}>{T_.map((x, i) => <View key={i} style={{flex: 1, height: 6, borderRadius: 3, backgroundColor: i <= o.st ? th.br : th.line}} />)}</View>
             {T_.map((x, i) => <View key={i} style={{flexDirection: 'row', gap: 12, marginVertical: 12, alignItems: 'center'}}><View style={{width: 22, height: 22, borderRadius: 11, borderWidth: 2, borderColor: i <= o.st ? th.br : th.line, backgroundColor: i <= o.st ? th.br : 'transparent', alignItems: 'center', justifyContent: 'center'}}>{i <= o.st ? <Icon name="check" size={12} color="#fff" /> : null}</View><T size={14} color={i <= o.st ? th.ink : th.mut} weight={i <= o.st ? '700' : undefined}>{x}</T></View>)}
           </>)}
-          <T cmsKey={'lbl.orderStatusHeading'} size={11.5} color={th.mut}>{label('lbl.orderStatusHeading', 'Order status is provided by the live order service.')}</T>
+          {trackingStatus === 'loading' ? <ActivityIndicator size="small" /> : null}
+          {trackingStatus === 'error' ? <View><T cmsKey={'lbl.orderTrackingFailed'} size={12} color={th.red}>{label('lbl.orderTrackingFailed', 'Could not refresh this order. Please try again.')}</T><Cta cmsKey={'lbl.retry'} small ghost label={label('lbl.retry', 'Try again')} onPress={() => setTrackingRetry(value => value + 1)} /></View> : null}
         </Card>
         {o.pk && o.st >= 3 && !o.cx ? <PickupLocationMap origin={{latitude: o.storeLatitude, longitude: o.storeLongitude}} /> : null}
         {!o.pk && o.st >= 4 && !dn && o.backendId ? <DeliveryRouteMap orderId={o.backendId} origin={{latitude:o.storeLatitude,longitude:o.storeLongitude}} destination={{latitude:o.deliveryLatitude,longitude:o.deliveryLongitude}} route={o.deliveryRoute} /> : null}
@@ -649,45 +685,7 @@ export function Track({id}: {id: string}) {
 }
 
 export function Orders() {
-  const backendIds = S.orders.map((o: any) => o.backendId).filter(Boolean).join(',');
-  useEffect(() => {
-    let active = true;
-    let channel: ReturnType<typeof supabase.channel> | undefined;
-    const start = async () => {
-      const {data: auth} = await supabase.auth.getUser();
-      if (!active || !auth.user || !backendIds) return;
-      const ids = backendIds.split(',');
-      const sync = async () => {
-        const {data, error} = await supabase.from('goodies_orders')
-          .select('id,status,scheduled_for,acceptance_deadline_at,decline_reason_public,payment_status')
-          .eq('customer_id', auth.user!.id).in('id', ids);
-        if (!active || error || !data) return;
-        let changed = false;
-        for (const row of data) {
-          const order: any = S.orders.find((o: any) => o.backendId === row.id);
-          if (!order) continue;
-          order.serverStatus = row.status;
-          order.acceptanceDeadlineAt = row.acceptance_deadline_at;
-          order.declineReasonPublic = row.decline_reason_public;
-          order.paymentStatus = row.payment_status;
-          order.declined = row.status === 'declined';
-          order.expired = row.status === 'expired';
-          order.cx = ['cancelled', 'declined', 'expired'].includes(row.status) ? 1 : 0;
-          if (row.scheduled_for) order.sch = new Date(row.scheduled_for).getTime();
-          order.st = require('../store').stage(order);
-          changed = true;
-        }
-        if (changed) { save(); emit(); }
-      };
-      await sync();
-      if (!active) return;
-      channel = supabase.channel('goodies-orders-list-' + auth.user.id)
-        .on('postgres_changes', {event: 'UPDATE', schema: 'public', table: 'goodies_orders', filter: 'customer_id=eq.' + auth.user.id}, () => { void sync(); })
-        .subscribe();
-    };
-    void start();
-    return () => { active = false; if (channel) void supabase.removeChannel(channel); };
-  }, [backendIds]);
+  useEffect(() => {void refreshGoodiesOrders();}, [S.accountId]);
   const th = useTheme(), a = S.orders.filter((o: any) => (S.ot === 'active' ? !done(o) : done(o)));
   const stTxt = (o: any) => (o.cx ? label('lbl.orderCancelled', 'Cancelled') : stageLabels(!!o.pk, o.pk ? TP : TL)[o.st]);
   return (
@@ -697,7 +695,7 @@ export function Orders() {
         <Seg list={[['active', label('lbl.ordersActive', 'Active')], ['past', label('lbl.ordersPast', 'Past')]]} on={S.ot} onPick={setOrdersTab} />
         <View style={{height: 14}} />
         {S.ordersLoading && !S.orders.length ? <Card><View style={{height:64,borderRadius:12,backgroundColor:th.soft}} /><T cmsKey={'lbl.ordersLoading'} color={th.mut}>{label('lbl.ordersLoading', 'Loading orders…')}</T></Card> : null}
-        {S.ordersError ? <T cmsKey={'lbl.ordersRefreshFailed'} color={th.red}>{label('lbl.ordersRefreshFailed', 'Could not refresh orders. Pull down to try again.')}</T> : null}
+        {S.ordersError ? <View><T cmsKey={'lbl.ordersRefreshFailed'} color={th.red}>{label('lbl.ordersRefreshFailed', 'Could not refresh orders. Pull down to try again.')}</T><Cta cmsKey={'lbl.retry'} small ghost label={label('lbl.retry', 'Try again')} onPress={() => void refreshGoodiesOrders()} /></View> : null}
         {a.length ? a.map((o: any) => {
           const s = STB[o.sid] || {e: '🏪', bg: 0, n: o.sn || label('lbl.storeNotFound', 'Store not found')}, d = new Date(o.t0);
           return (

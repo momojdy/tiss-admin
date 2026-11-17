@@ -21,6 +21,7 @@ async function response<T>(read:()=>T):Promise<{data:T|null;error:null|{code:str
 }
 export function previewRows(table:string):any[] {
  if(table==='wallets')return [{id:'preview-wallet-only',balance:25}];
+ if(table==='goodies_orders')return [{id:'__admin_goodies_sample_order__',status:'accepted',payment_method:'cash',payment_status:'pending',self_delivery:false,delivery_route:null}];
  if(table==='goodies_group_order_items')return [{id:'__preview_line__',user_id:previewUserId,line_key:'__preview_item__',quantity:1,options:{},note:'',product:{name:'Preview item',price:5,emoji:'🥭',photo_url:null}}];
  return [];
 }

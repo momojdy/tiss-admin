@@ -3,7 +3,7 @@ import {fees, label} from './content';
 import {previewBackend as supabase} from './previewRuntime';
 import {friendlyError} from './friendlyError';
 import {
-  cartStoreIds, lineStore, storeSub, maxStops, hasAlcohol, alcAge, S, IT, STB, ui, toast, emit, save, push, reset, navBack, cartAdd, qtyIn, cnt, totals, pChk, isPk, addr, ctOf, phoneOK, reorderLines, money, hooks, done, cur, refreshLiveSchedules, refreshGoodiesAccess, first, contentHooks, getGoodiesCheckoutAttempt, completeGoodiesCheckoutAttempt, syncGroupOrderCartLine, removeGroupOrderCartLine, savedPoint, deliveryAddressPayload, deliveryQuoteReady, refreshGoodiesDeliveryQuote, refreshFirstDeliveryEligibility, syncActiveGroup, validateActiveGroup, clearActiveGroup,
+  canBuy, cartStoreIds, lineStore, storeSub, maxStops, hasAlcohol, alcAge, S, IT, STB, ui, toast, emit, save, push, reset, navBack, cartAdd, qtyIn, cnt, totals, pChk, isPk, addr, ctOf, phoneOK, reorderLines, money, hooks, done, cur, refreshLiveSchedules, refreshGoodiesAccess, first, contentHooks, getGoodiesCheckoutAttempt, completeGoodiesCheckoutAttempt, syncGroupOrderCartLine, removeGroupOrderCartLine, savedPoint, deliveryAddressPayload, deliveryQuoteReady, refreshGoodiesDeliveryQuote, refreshFirstDeliveryEligibility, syncActiveGroup, validateActiveGroup, clearActiveGroup,
 } from './store';
 
 export const CHOOSE_SIZE_CATS = ['restaurants', 'bakery', 'beverages'];
@@ -25,12 +25,14 @@ export function favp(id: string) {
 }
 export function openProduct(id: string, off = 0) {
   const i = IT[id];
+  if (!i || !STB[i.s]) {toast(label('lbl.actionRetryProduct', 'Please select the product again and retry.')); return;}
   S.sh = {id, off, size: CHOOSE_SIZE_CATS.indexOf(STB[i.s].c) > -1 ? -1 : 0, drink: 0, q: 1, note: ''};
   S.rv = [id].concat(S.rv.filter((x: string) => x !== id)).slice(0, 8);
   push('product', id);
 }
 export function quickAdd(id: string, off = 0) {
-  const i = IT[id], s = STB[i.s];
+  const i = IT[id], s = i && STB[i.s];
+  if (!i || !s) {toast(label('lbl.actionRetryProduct', 'Please select the product again and retry.')); return;}
   if (CHOOSE_SIZE_CATS.indexOf(s.c) > -1) {openProduct(id, off); return;}
   cartAdd(i, {q: 1, size: 0, drink: 0, off});
 }
@@ -42,12 +44,14 @@ export const setSize = (n: number) => {S.sh.size = n; emit();};
 export const toggleDrink = () => {S.sh.drink = S.sh.drink ? 0 : 1; emit();};
 export function productQty(delta: number) {
   const i = IT[S.sh.id], n = S.sh.q + delta;
+  if (!i || !STB[i.s]) {toast(label('lbl.actionRetryProduct', 'Please select the product again and retry.')); return;}
   if (n < 1) return;
   if (n + qtyIn(i.id) > i.stock) {toast(label('lbl.actionOnlyAvailable', 'Only {count} available').replace('{count}', String(i.stock))); return;}
   S.sh.q = n; emit();
 }
 export function productAdd() {
   const h = S.sh, i = IT[h.id];
+  if (!i || !STB[i.s]) {toast(label('lbl.actionRetryProduct', 'Please select the product again and retry.')); return;}
   if (CHOOSE_SIZE_CATS.indexOf(STB[i.s].c) > -1 && h.size < 0) {toast(label('lbl.actionChooseSize', 'Choose a size first')); return;}
   const n0 = cnt();
   cartAdd(i, {q: h.q, size: h.size, drink: h.drink, off: h.off, note: (h.note || '').trim()});
@@ -55,12 +59,17 @@ export function productAdd() {
 }
 export function newCart() {
   const p = S.pend;
-  if (!p || !p[0] || !p[1]) {
-    ui.close();
+  if (p && typeof p[2] === 'function') {S.pend = null; p[2](); return;}
+  const product = p?.[0] && IT[p[0].id];
+  if (!p || !product || !STB[product.s] || !p[1]) {
+    S.pend = null; ui.close();
     toast(label('lbl.actionRetryProduct', 'Please select the product again and retry.'));
     return;
   }
-  if (p[2]) { S.pend = null; p[2](); return; }
+  if (!canBuy(product)) {S.pend = null; ui.close(); return;}
+  if (!Number.isSafeInteger(p[1].q) || p[1].q < 1 || p[1].q > product.stock) {
+    S.pend = null; ui.close(); toast(label('lbl.actionOnlyAvailable', 'Only {count} available').replace('{count}', String(product.stock))); return;
+  }
   // Clear the pending cross-store action before re-adding so the confirmation
   // cannot reopen itself or leave stale vendor/product data.
   S.pend = null;
@@ -68,13 +77,15 @@ export function newCart() {
   S.promo = '';
   ui.close();
   const n0 = cnt();
-  cartAdd(p[0], p[1]);
+  cartAdd(product, p[1]);
   if (cnt() > n0 && cur().r === 'product') navBack();
 }
 export function qty(k: string, v: number) {
   const l = S.cart.lines;
   for (let i = 0; i < l.length; i++) if (l[i].k === k) {
-    const n = l[i].q + v, mx = l[i].byo ? 20 : IT[l[i].id].stock;
+    const n = l[i].q + v, product = IT[l[i].id];
+    if (v > 0 && !l[i].byo && (!product || !STB[product.s])) {toast(label('lbl.actionRetryProduct', 'Please select the product again and retry.')); return;}
+    const mx = l[i].byo ? 20 : product?.stock ?? l[i].q;
     if (n > mx && v > 0) {toast(label('lbl.actionOnlyAvailable', 'Only {count} available').replace('{count}', String(mx))); return;}
     l[i].q = n;
     const changedLine = {...l[i]};
@@ -439,7 +450,7 @@ export function reorder(id: string) {
   const r = reorderLines(o);
   if (!r.ok.length) {toast(r.miss.length ? label('lbl.actionReorderUnavailable', 'Those items are unavailable right now') : label('lbl.actionNothingToReorder', 'Nothing to reorder')); return;}
   const run = () => {S.cart = {sid: o.sid, lines: r.ok}; S.promo = ''; ui.close(); reset('cart'); toast(r.miss.length ? label('lbl.actionReorderPartial', 'Added available items. Unavailable: {items}').replace('{items}', r.miss.join(', ')) : label('lbl.actionReorderAdded', 'Items added to your cart'));};
-  if (S.cart.sid && S.cart.sid !== o.sid && S.cart.lines.length) {S.ro = run; ui.sheet({kind: 'replace', from: STB[S.cart.sid].n});} else run();
+  if (S.cart.sid && S.cart.sid !== o.sid && S.cart.lines.length) {S.ro = run; ui.sheet({kind: 'replace', from: STB[S.cart.sid]?.n || label('lbl.storeNotFound', 'Store not found')});} else run();
 }
 export const runReorder = () => {if (S.ro) S.ro();};
 export const setOrdersTab = (t: string) => {S.ot = t; emit();};
