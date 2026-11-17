@@ -1,4 +1,5 @@
 import {GoodiesSettlementAdmin} from './GoodiesSettlementAdmin';
+import {GoodiesSharedBillRefunds} from './GoodiesSharedBillRefunds';
 import {ui as adminUi} from '../../state/db';
 import React, {useCallback, useEffect, useState} from 'react';
 import {Alert, Image, Pressable, ScrollView, Text, TextInput, View} from 'react-native';
@@ -224,6 +225,7 @@ export function GoodiesAdminScreen() {
     {rejection?<View style={cardStyle}><Text style={valueStyle}>Reject {rejection.item.name}</Text><TextInput accessibilityLabel="Rejection reason" placeholder="Explain what the vendor needs to change" value={rejection.reason} maxLength={500} multiline onChangeText={reason=>setRejection({...rejection,reason})} style={{borderWidth:1,borderColor:'#E1E6DE',padding:12,marginVertical:10,borderRadius:10}} /><View style={{flexDirection:'row',gap:8}}><Pressable disabled={!!busy} onPress={()=>setRejection(null)} style={btn('#E9EEE6')}><Text>Back</Text></Pressable><Pressable disabled={!!busy||!rejection.reason.trim()} onPress={()=>void reviewProduct(rejection.item,'rejected',rejection.reason)} style={btn('#F7EAE8')}><Text>{busy?'Saving…':'Confirm rejection'}</Text></Pressable></View></View>:null}
     {loading?<Text style={{padding:20,color:'#697466'}}>Loading live Goodies data…</Text>:null}
     {module==='Settlement'?<GoodiesSettlementAdmin/>:null}
+    {module==='Orders'||module==='Settlement'?<GoodiesSharedBillRefunds/>:null}
     {module==='Overview'&&!loading&&!loadError?<>
       <View style={{flexDirection:'row',flexWrap:'wrap',gap:8}}>
         {Object.entries({Stores:dashboard.stats.stores??0,'Live stores':dashboard.stats.live_stores??0,Products:dashboard.stats.products??0,'Awaiting review':dashboard.stats.pending_products??0,Orders:dashboard.stats.orders??0,'Open orders':dashboard.stats.open_orders??0}).map(([k,v])=><View key={k} style={{...cardStyle,width:'48%',marginBottom:0}}><Text style={labelStyle}>{k}</Text><Text style={{fontSize:24,fontWeight:'800',color:'#1B2619'}}>{String(v)}</Text></View>)}
