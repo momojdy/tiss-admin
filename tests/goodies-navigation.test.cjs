@@ -20,7 +20,8 @@ const workspaceModules = labels(modules);
 function fixture() {
   const ui = {}, history = [];
   const db = {GMAP: {}};
-  const context = {exports: {}, module: {exports: {}}, console,
+  const module = {exports: {}};
+  const context = {exports: module.exports, module, console,
     require(id) {
       if (id === 'react') return {useCallback: fn => fn};
       if (id === '../../state/db') return {ui, db};
