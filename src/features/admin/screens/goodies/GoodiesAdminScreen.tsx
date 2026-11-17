@@ -12,7 +12,7 @@ import {GoodiesAssetLibrary} from './GoodiesAssetLibrary';
 import {resolveGoodiesDeliveryProof} from '../../lib/goodiesDeliveryProof';
 
 type Dashboard = {stats:any;merchants:any[];products:any[];orders:any[]};
-const MODULES=['Overview','Merchants','Product review','Customer reviews','Orders','Delivery reports','Couriers','Settlement','Fees','Delivery surcharge','Analytics','Goodies assets','Content editor'];
+const MODULES=['Overview','Merchants','Product review','Customer reviews','Orders','Delivery reports','Couriers','Support','Settlement','Fees','Delivery surcharge','Analytics','Goodies assets','Content editor'];
 const money=(v:any)=>new Intl.NumberFormat('en-US',{style:'currency',currency:'USD'}).format(Number(v)||0);
 const cardStyle={backgroundColor:'#fff',borderWidth:1,borderColor:'#E1E6DE',borderRadius:14,padding:14,marginBottom:10} as const;
 const btn=(bg:string)=>({paddingVertical:10,paddingHorizontal:12,borderRadius:10,backgroundColor:bg,alignItems:'center' as const});
@@ -43,6 +43,12 @@ export function GoodiesAdminScreen() {
   const [reviewRejectId,setReviewRejectId]=useState<string|null>(null),[reviewRejectNote,setReviewRejectNote]=useState('');
   const reviewLock=useRef(false);const canReview=hasServerPermission('goodies.ops','manage');
   const [orderRows,setOrderRows]=useState<any[]>([]);
+  const [supportRows,setSupportRows]=useState<any[]>([]);
+  const [supportPage,setSupportPage]=useState(0);
+  const [supportLoaded,setSupportLoaded]=useState(false);
+  const [supportError,setSupportError]=useState('');
+  const supportCanRead=hasServerPermission('operations','view');
+  const supportCanEdit=hasServerPermission('operations','edit');
   const [reports,setReports]=useState<any[]>([]);
   const [loading,setLoading]=useState(true);
   const [busy,setBusy]=useState('');
@@ -100,6 +106,37 @@ export function GoodiesAdminScreen() {
     finally {setBusy('');}
   };
   useEffect(()=>{if(module==='Orders')void loadOrderPage();},[module,orderPage]);
+  const loadSupportTickets=async()=>{
+    setSupportLoaded(false);setSupportError('');
+    if(!supportCanRead){
+      setSupportRows([]);setSupportError('Operations view permission is required to read customer support tickets.');
+      setSupportLoaded(true);return;
+    }
+    try{
+      const {data,error}=await supabase.from('settings_support_requests')
+        .select('id,ticket_code,email,subject,message,status,created_at')
+        .ilike('subject','Goodies · %')
+        .order('created_at',{ascending:false})
+        .range(supportPage*50,supportPage*50+49);
+      if(error)throw error;
+      setSupportRows(data||[]);
+    }catch{setSupportRows([]);setSupportError('Could not load Goodies support tickets. Please retry.');}
+    finally{setSupportLoaded(true);}
+  };
+  useEffect(()=>{if(module==='Support')void loadSupportTickets();},[module,supportPage]);
+  const updateSupportTicket=async(ticketId:string,status:'in_progress'|'resolved'|'open')=>{
+    if(!supportCanEdit){toast('Operations edit permission is required.');return;}
+    setBusy(ticketId);
+    try{
+      const {data,error}=await supabase.from('settings_support_requests')
+        .update({status}).eq('id',ticketId).ilike('subject','Goodies · %')
+        .select('id').single();
+      if(error||!data?.id)throw error||new Error('Ticket was not updated');
+      toast(status==='in_progress'?'Ticket marked in progress':status==='resolved'?'Ticket marked resolved':'Ticket reopened');
+      await loadSupportTickets();
+    }catch{toast('Could not update ticket status. Please refresh and retry.');}
+    finally{setBusy('');}
+  };
   const loadReports=async()=>{
     setReportsLoaded(false);setBusy('reports');setSectionErrors(e=>({...e,'Delivery reports':''}));
     const {data,error}=await goodiesRequest('goodies_admin_list_delivery_reports');
@@ -268,6 +305,23 @@ export function GoodiesAdminScreen() {
       {r.review_status==='pending'&&canReview?<View style={{flexDirection:'row',gap:8,marginTop:10}}><Pressable disabled={!!busy} onPress={()=>void reviewCustomerRating(r,'approved')} style={btn('#E8F2E5')}><Text>Publish</Text></Pressable><Pressable disabled={!!busy} onPress={()=>{setReviewRejectId(r.id);setReviewRejectNote('');}} style={btn('#F7EAE8')}><Text>Reject</Text></Pressable></View>:null}
       {r.review_status==='pending'&&reviewRejectId===r.id&&canReview?<View><TextInput accessibilityLabel="Review rejection reason" value={reviewRejectNote} onChangeText={setReviewRejectNote} maxLength={500} multiline placeholder="Why cannot this review be published?" style={{borderWidth:1,borderColor:'#D5DAD2',padding:10,borderRadius:10,marginTop:10}}/><View style={{flexDirection:'row',gap:8,marginTop:8}}><Pressable disabled={!!busy||!reviewRejectNote.trim()} onPress={()=>void reviewCustomerRating(r,'rejected',reviewRejectNote)} style={btn('#F7EAE8')}><Text>Confirm rejection</Text></Pressable><Pressable disabled={!!busy} onPress={()=>setReviewRejectId(null)} style={btn('#EDF0EA')}><Text>Cancel</Text></Pressable></View></View>:null}</View>):<Text style={labelStyle}>No reviews yet.</Text>}
       <View style={{flexDirection:'row',gap:8}}><Pressable disabled={reviewsPage===0||reviewsLoading} onPress={()=>setReviewsPage(n=>n-1)} style={btn('#E9EEE6')}><Text>Previous page</Text></Pressable><Pressable disabled={customerReviews.length<50||reviewsLoading} onPress={()=>setReviewsPage(n=>n+1)} style={btn('#E9EEE6')}><Text>Next page</Text></Pressable></View>
+    </>:null}
+    {module==='Support'?<>
+      <Text style={{fontSize:12,color:'#687365',marginBottom:10}}>Goodies customer tickets recorded in the shared Wantiss support inbox. Changing status does not send a message to the customer.</Text>
+      {!supportLoaded?<Text style={labelStyle}>Loading support tickets…</Text>:supportError?<View style={cardStyle}><Text style={{fontSize:13,color:'#8D3932',marginBottom:8}}>{supportError}</Text><Pressable onPress={()=>void loadSupportTickets()} style={btn('#E9EEE6')}><Text>Retry</Text></Pressable></View>:supportRows.length===0?<Text style={labelStyle}>No Goodies support tickets on this page.</Text>:supportRows.map(ticket=><View key={ticket.id} style={cardStyle}>
+        <View style={{flexDirection:'row',justifyContent:'space-between',gap:8}}><Text style={valueStyle}>{ticket.ticket_code||'Support ticket'}</Text><Text style={{fontSize:12,color:'#596554'}}>{ticket.status}</Text></View>
+        <Text style={labelStyle}>{ticket.subject} · {dateText(ticket.created_at)}</Text>
+        <Text style={{fontSize:12,color:'#596554',marginBottom:8}}>{ticket.email||'Email unavailable'}</Text>
+        <Text style={{fontSize:13,color:'#1B2619'}}>{ticket.message}</Text>
+        {supportCanEdit?<View style={{flexDirection:'row',gap:8,marginTop:10}}>
+          {ticket.status!=='in_progress'?<Pressable disabled={!!busy} onPress={()=>void updateSupportTicket(ticket.id,'in_progress')} style={{...btn('#E9EEE6'),flex:1}}><Text style={{fontWeight:'700',color:'#344531'}}>In progress</Text></Pressable>:null}
+          {ticket.status!=='resolved'?<Pressable disabled={!!busy} onPress={()=>void updateSupportTicket(ticket.id,'resolved')} style={{...btn('#E8F2E5'),flex:1}}><Text style={{fontWeight:'700',color:'#28552B'}}>Resolve</Text></Pressable>:<Pressable disabled={!!busy} onPress={()=>void updateSupportTicket(ticket.id,'open')} style={{...btn('#E9EEE6'),flex:1}}><Text style={{fontWeight:'700',color:'#344531'}}>Reopen</Text></Pressable>}
+        </View>:null}
+      </View>)}
+      <View style={{flexDirection:'row',gap:8,marginTop:8}}>
+        <Pressable disabled={supportPage===0||!supportLoaded} onPress={()=>setSupportPage(n=>Math.max(0,n-1))} style={btn('#E9EEE6')}><Text>Previous page</Text></Pressable>
+        <Pressable disabled={!supportLoaded||supportRows.length<50} onPress={()=>setSupportPage(n=>n+1)} style={btn('#E9EEE6')}><Text>Next page</Text></Pressable>
+      </View>
     </>:null}
     {module==='Orders'?<>
       {busy==='orders'?<Text style={labelStyle}>Loading orders…</Text>:null}
