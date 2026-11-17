@@ -428,13 +428,6 @@
     ]
   },
   {
-    "id": "lbl.actionCardDeclinedDemo",
-    "text": "Card declined (demo). Your cart is safe. Try another method.",
-    "pages": [
-      "Shared actions and validation"
-    ]
-  },
-  {
     "id": "lbl.actionCartCleared",
     "text": "Cart cleared",
     "pages": [
@@ -491,13 +484,6 @@
     ]
   },
   {
-    "id": "lbl.actionDemoOrderPlaced",
-    "text": "Demo order placed!",
-    "pages": [
-      "Shared actions and validation"
-    ]
-  },
-  {
     "id": "lbl.actionFavoriteRemoved",
     "text": "Removed from favorites",
     "pages": [
@@ -507,20 +493,6 @@
   {
     "id": "lbl.actionFavoriteSaved",
     "text": "Saved to favorites",
-    "pages": [
-      "Shared actions and validation"
-    ]
-  },
-  {
-    "id": "lbl.actionIdFailed",
-    "text": "ID check failed. Order cancelled",
-    "pages": [
-      "Shared actions and validation"
-    ]
-  },
-  {
-    "id": "lbl.actionIdPassed",
-    "text": "ID checked. Order can be completed",
     "pages": [
       "Shared actions and validation"
     ]
@@ -701,13 +673,6 @@
     "pages": [
       "Shared actions and validation",
       "Shared components"
-    ]
-  },
-  {
-    "id": "lbl.actionWalletLow",
-    "text": "Wallet balance is too low. Top up or pick another method.",
-    "pages": [
-      "Shared actions and validation"
     ]
   },
   {
@@ -5443,6 +5408,13 @@
     ]
   },
   {
+    "id": "lbl.helpPayCreateUnconfirmed",
+    "text": "Could not confirm this request. Reopen Shared Bill to recover its status before trying again.",
+    "pages": [
+      "Shared actions and validation"
+    ]
+  },
+  {
     "id": "lbl.helpPayExpiresExplainer",
     "text": "The request expires after 30 minutes. If it is not funded, every Wallet contribution is automatically refunded. The order is only created once the entire bill is paid.",
     "pages": [
@@ -5466,6 +5438,13 @@
   {
     "id": "lbl.helpPayFriendsContributed",
     "text": "Friends contributed",
+    "pages": [
+      "Shared Bill requests"
+    ]
+  },
+  {
+    "id": "lbl.helpPayFriendsError",
+    "text": "Could not load your friends. Please retry.",
     "pages": [
       "Shared Bill requests"
     ]
@@ -5552,6 +5531,14 @@
     "id": "lbl.helpPayRefunded",
     "text": "This request could not be finalized. Your Wallet has been refunded.",
     "pages": [
+      "Shared Bill contribution"
+    ]
+  },
+  {
+    "id": "lbl.helpPayRefundPending",
+    "text": "Your Wallet refund is being processed. Check Wallet activity for confirmation.",
+    "pages": [
+      "Shared Bill requests",
       "Shared Bill contribution"
     ]
   },
@@ -7112,22 +7099,8 @@
     ]
   },
   {
-    "id": "lbl.page.actions.0316618817",
-    "text": "ID check failed",
-    "pages": [
-      "Shared actions and validation"
-    ]
-  },
-  {
     "id": "lbl.page.actions.0e483440c6",
     "text": "Choose Wantiss Wallet or cash to order from several stores.",
-    "pages": [
-      "Shared actions and validation"
-    ]
-  },
-  {
-    "id": "lbl.page.actions.0e7f1cefe2",
-    "text": ". Tap to track it.",
     "pages": [
       "Shared actions and validation"
     ]
@@ -7142,20 +7115,6 @@
   {
     "id": "lbl.page.actions.25b66787be",
     "text": "). Check the delivery address and try again.",
-    "pages": [
-      "Shared actions and validation"
-    ]
-  },
-  {
-    "id": "lbl.page.actions.353a2b3bb1",
-    "text": " The total was refunded to your wallet.",
-    "pages": [
-      "Shared actions and validation"
-    ]
-  },
-  {
-    "id": "lbl.page.actions.56d63db38f",
-    "text": "The ID check failed, so the order was not handed over. You were not charged.",
     "pages": [
       "Shared actions and validation"
     ]
@@ -7203,22 +7162,8 @@
     ]
   },
   {
-    "id": "lbl.page.actions.9983301c3b",
-    "text": "Demo order sent to ",
-    "pages": [
-      "Shared actions and validation"
-    ]
-  },
-  {
     "id": "lbl.page.actions.ad7e8cd3a2",
     "text": "Card payment could not be completed.",
-    "pages": [
-      "Shared actions and validation"
-    ]
-  },
-  {
-    "id": "lbl.page.actions.c010aa83cd",
-    "text": "Your order was cancelled.",
     "pages": [
       "Shared actions and validation"
     ]
@@ -7240,20 +7185,6 @@
   {
     "id": "lbl.page.actions.d1c9a01d57",
     "text": "Wallet",
-    "pages": [
-      "Shared actions and validation"
-    ]
-  },
-  {
-    "id": "lbl.page.actions.d2c68bb213",
-    "text": "Ordering from several stores needs a live connection.",
-    "pages": [
-      "Shared actions and validation"
-    ]
-  },
-  {
-    "id": "lbl.page.actions.e13f05dc32",
-    "text": " was refunded to your Wantiss wallet. The delivery fee is not refunded.",
     "pages": [
       "Shared actions and validation"
     ]
@@ -7598,13 +7529,6 @@
   {
     "id": "lbl.page.store.d8aea5db73",
     "text": "This cart item is not linked to a live catalogue product.",
-    "pages": [
-      "Shared state messages"
-    ]
-  },
-  {
-    "id": "lbl.page.store.fb54363a03",
-    "text": "Reset demo data",
     "pages": [
       "Shared state messages"
     ]
@@ -8880,13 +8804,6 @@
     ]
   },
   {
-    "id": "lbl.sharedPay.1da621181d3d",
-    "text": " placed",
-    "pages": [
-      "Shared actions and validation"
-    ]
-  },
-  {
     "id": "lbl.sharedPay.20a7aa907eeb",
     "text": "Or exact amount (USD)",
     "pages": [
@@ -8953,6 +8870,7 @@
     "id": "lbl.sharedPay.416f4bdc7db9",
     "text": "Not accepting payments",
     "pages": [
+      "Shared Bill requests",
       "Shared Bill contribution"
     ]
   },
@@ -9070,13 +8988,6 @@
     ]
   },
   {
-    "id": "lbl.sharedPay.884d5bff79c1",
-    "text": "GD",
-    "pages": [
-      "Shared actions and validation"
-    ]
-  },
-  {
     "id": "lbl.sharedPay.901b78876685",
     "text": "This is your own request. Share your QR or message card with friends; you cannot pay yourself.",
     "pages": [
@@ -9189,13 +9100,6 @@
     ]
   },
   {
-    "id": "lbl.sharedPay.cd46246db8c2",
-    "text": " cancelled",
-    "pages": [
-      "Shared actions and validation"
-    ]
-  },
-  {
     "id": "lbl.sharedPay.cf8698e6a85f",
     "text": "Your Wallet contributions:",
     "pages": [
@@ -9207,13 +9111,6 @@
     "text": "BILL SUMMARY",
     "pages": [
       "Shared Bill contribution"
-    ]
-  },
-  {
-    "id": "lbl.sharedPay.d337d826db7e",
-    "text": "Order ",
-    "pages": [
-      "Shared actions and validation"
     ]
   },
   {
@@ -9249,13 +9146,6 @@
     "text": "Order funded",
     "pages": [
       "Shared Bill requests"
-    ]
-  },
-  {
-    "id": "lbl.sharedPay.dc142ba53499",
-    "text": "Payment refunded",
-    "pages": [
-      "Shared Bill contribution"
     ]
   },
   {
@@ -10141,13 +10031,6 @@
     ]
   },
   {
-    "id": "lbl.shopAuto12HC9JV",
-    "text": "Demo only. No real payment is taken.",
-    "pages": [
-      "Checkout"
-    ]
-  },
-  {
     "id": "lbl.shopAuto15CA8YK",
     "text": "Order",
     "pages": [
@@ -10170,13 +10053,6 @@
     ]
   },
   {
-    "id": "lbl.shopAuto1RR9Q6U",
-    "text": "Demo: ID valid",
-    "pages": [
-      "Order tracking"
-    ]
-  },
-  {
     "id": "lbl.shopAuto1TZ3XVT",
     "text": "Goodies checkout number",
     "pages": [
@@ -10195,13 +10071,6 @@
     "text": "Change",
     "pages": [
       "Checkout"
-    ]
-  },
-  {
-    "id": "lbl.shopAuto2L0NX5",
-    "text": "Demo: ID failed",
-    "pages": [
-      "Order tracking"
     ]
   },
   {

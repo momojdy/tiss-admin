@@ -12,13 +12,11 @@ import {previewBackend as supabase} from '../previewRuntime';
 import {previewPublishedContent as fetchPublishedWantissContent} from '../previewRuntime';
 import {label} from '../content';
 import {S, STB, ui, toast, emit, save, push, navBack, cur, hooks, money} from '../store';
-import {TEMPLATES} from './templates';
 import {T, useTheme, Tile} from '../components/ui';
 
 export const BKEY = 'goodies-byo-v4';
 const r2 = (n: number) => Math.round(n * 100) / 100;
 const cl = <X,>(o: X): X => JSON.parse(JSON.stringify(o));
-const rid = () => Math.random().toString(36).slice(2, 10);
 
 export type BItem = {id: string; name: string; price: number; free: boolean; avail: boolean; assetId: string | null; col: string; max?: number; img?: {assetKey?: string; data?: string}};
 export type BGroup = {id: string; name: string; kind: 'one' | 'many'; req: boolean; min: number; max: number; inc: number; me: number; items: BItem[]};
@@ -42,16 +40,6 @@ export function bClean(b: any): Builder | null {
     };
   } catch (e) {return null;}
 }
-/* template -> builder with fresh ids */
-export function fromTemplate(type: 'pizza' | 'burger' | 'custom'): Builder {
-  const t = TEMPLATES[type];
-  return bClean({
-    id: rid(), type, name: t.name, desc: t.desc, emoji: t.emoji, base: t.base, notes: true,
-    sizes: t.sizes.map(s => ({id: rid(), name: s.name, add: s.add, avail: true})),
-    groups: t.groups.map(g => ({...g, id: rid(), items: g.items.map(i => ({...i, id: rid(), avail: true}))})),
-  }) as Builder;
-}
-
 let builderLoadGeneration = 0;
 export const BYO: {loading: boolean; error: string; cfg: Record<string, Builder[]>; store: Record<string, boolean>; drafts: Record<string, any>} = {loading: false, error: '', cfg: {}, store: {}, drafts: {}};
 export async function loadBuilders() {

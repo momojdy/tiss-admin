@@ -1,8 +1,5 @@
-/* Five-language support. PROPOSED model.
-   - Interface strings: bundled key tables below (en is complete; other languages are machine DRAFTS until a human marks them reviewed).
-   - Admin-managed content: Txt objects {en:{v,s}, fr:{...}, ...}, resolved by tx().
-   Rules: selected language -> configured default (en). Haitian Creole is shown only when human reviewed.
-   Machine drafts are never shown in production; the demo may show them so all five languages can be exercised. */
+/* Published CMS translations fall back to reviewed English.
+   Unreviewed bundled strings are available only in the isolated admin preview. */
 import {S} from '../store';
 import type {LangCode, Txt} from '../data/types';
 import {interfaceText} from './interfaceContent';
@@ -31,7 +28,7 @@ const drafts: Record<string, Table> = {
 };
 /* languages whose bundled strings were human reviewed (production uses only these) */
 export const REVIEWED: LangCode[] = ['en'];
-const allowed = (l: string) => REVIEWED.includes(l as LangCode) || (cfg.showMachineDrafts && l !== 'ht') || (cfg.showMachineDrafts && l === 'ht'); /* demo may show drafts; production: REVIEWED only */
+const allowed = (l: string) => REVIEWED.includes(l as LangCode) || (cfg.showMachineDrafts && l !== 'ht') || (cfg.showMachineDrafts && l === 'ht'); /* Draft access is enabled only by the isolated CMS preview. */
 
 export function t(key: string, vars?: Record<string, string | number>): string {
   const l: string = S.lang || DEFAULT_LANG;

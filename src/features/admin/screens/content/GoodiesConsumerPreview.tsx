@@ -4,7 +4,8 @@ import React, { useCallback, useEffect, useLayoutEffect, useMemo, useState } fro
 import { Pressable, ScrollView, Text, View } from 'react-native';
 import { GoodiesApp } from '../../goodiesConsumer/GoodiesApp';
 import { emit, IT, S, ST, STB, useGoodies, setPreviewOnly, setEditLocked } from '../../goodiesConsumer/store';
-import { BYO, bClean, fromTemplate, setBD } from '../../goodiesConsumer/builders/engine';
+import { BYO, bClean, setBD } from '../../goodiesConsumer/builders/engine';
+import {fromTemplate} from '../../goodiesConsumer/previewBuilders';
 import { applyContent, clearContent, setDraftControlled, label } from '../../goodiesConsumer/content';
 import { resolveForRender } from '../../goodiesConsumer/draft';
 import { EditContext, type BuilderTarget, type GoodiesSelection } from '../../goodiesConsumer/editContext';

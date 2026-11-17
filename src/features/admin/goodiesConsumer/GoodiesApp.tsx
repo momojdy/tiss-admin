@@ -17,7 +17,7 @@ import {Account} from './screens/Account';
 import {Sheets, GroupOrderPage} from './components/Sheets';
 import WalletAddNewCardScreen from './screens/AddCard';
 import {CardAuthentication} from './screens/CardAuthentication';
-import {HelpPayPreview} from './screens/HelpPayPreview';
+import {HelpPay} from './screens/HelpPay';
 import {ByoScreen, ByoFoot} from './builders/Builder';
 import {loadBuilders, BD} from './builders/engine';
 import {loadContent, label, stageLabels, onContent, catName} from './content';
@@ -26,7 +26,7 @@ import {t as tr} from './i18n';
 import GoodiesQuickMenu, {type GoodiesMenuAction} from './GoodiesQuickMenu';
 
 const TABS = ['home', 'cats', 'orders', 'cart'];
-const NOCB = ['cart', 'checkout', 'help-pay', 'confirm', 'track', 'notifs', 'storechat', 'grouporder', 'settings', 'payments', 'help', 'contact', 'supdone', 'profile', 'addresses', 'product', 'wantiss', 'ndetail', 'policies', 'policy', 'byo', 'seller', 'sellerEdit'];
+const NOCB = ['cart', 'checkout', 'help-pay', 'confirm', 'track', 'notifs', 'storechat', 'grouporder', 'settings', 'payments', 'help', 'contact', 'supdone', 'profile', 'addresses', 'product', 'wantiss', 'ndetail', 'policies', 'policy', 'byo'];
 const FOOTED = ['product', 'checkout'];
 
 export function GoodiesApp({onExit, embedded = true, onUniversalAction, unreadNotifications = 0, unreadMessages = 0, initialRoute, previewMode=false}: {onExit?: () => void; embedded?: boolean; onUniversalAction?: (action:GoodiesMenuAction)=>void; unreadNotifications?:number; unreadMessages?:number; initialRoute?:string;previewMode?:boolean}) {
@@ -172,7 +172,7 @@ export function GoodiesApp({onExit, embedded = true, onUniversalAction, unreadNo
     case 'reviews': body = <StoreReviews id={c.p} />; break;
     case 'product': body = <Product />; break;
     case 'checkout': body = <Checkout />; break;
-    case 'help-pay': body = <HelpPayPreview />; break;
+    case 'help-pay': body = <HelpPay key={S.accountId||'signed-out'} />; break;
     case 'addcard': body = <WalletAddNewCardScreen contentLabel={label} onBack={A.back} onSaved={() => {void A.refreshPaymentOptions();}} />; break;
     case 'cardauth': body = S.cardPending ? <CardAuthentication clientSecret={S.cardPending.clientSecret} publishableKey={S.cardPending.publishableKey} onComplete={() => {void A.completeCardOrder();}} onCancel={() => {void A.cancelPendingCardOrder();}} /> : <Account r="payments" p={undefined} onOpenWallet={onUniversalAction?()=>onUniversalAction('wallet'):undefined} />; break;
     case 'confirm': body = <Confirm id={c.p} />; break;

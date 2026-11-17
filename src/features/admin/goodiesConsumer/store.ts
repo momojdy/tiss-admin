@@ -3,7 +3,6 @@ import {recoverShoppingSnapshots} from './cacheRecovery';
 import {useSyncExternalStore} from 'react';
 import {previewStorage as AsyncStorage} from './previewRuntime';
 import {previewBackend as supabase} from './previewRuntime';
-import {providerInfo} from './providers';
 import {label} from './content';
 import type {Store, Item, Address, CartLine, Order} from './data/types';
 import {STAGES_DELIVERY, STAGES_PICKUP} from './data/seed';
@@ -235,11 +234,7 @@ export async function refreshLiveSchedules() {
 /* ---------- persistence ---------- */
 export async function refreshGoodiesAccess() {
   const accountId = S.accountId;
-  if (providerInfo.demo) {
-    S.goodiesAccess = {status: 'active', reason: '', endsAt: null};
-    emit();
-    return S.goodiesAccess;
-  }
+
   const {data, error} = await supabase.rpc('get_my_goodies_access_status');
   if (S.accountId !== accountId) return S.goodiesAccess;
   if (error) {
@@ -259,7 +254,7 @@ export async function refreshGoodiesAccess() {
 
 export async function refreshGoodiesContactNumbers() {
   const accountId=S.accountId;
-  if (providerInfo.demo) return S.gc;
+
   const {data:{user}} = await supabase.auth.getUser();
   if (!user||S.accountId!==accountId) return S.gc;
   const {data,error} = await supabase.from('goodies_contact_numbers').select('id,phone_number,label').eq('user_id',user.id).order('created_at',{ascending:true});
@@ -298,7 +293,7 @@ export async function removeGoodiesContactNumber(id:string) {
   await refreshGoodiesContactNumbers();await save();
 }
 export async function refreshUserAddresses() {
-  if (providerInfo.demo) return S.addr;
+
   const {data: auth, error: authError} = await supabase.auth.getUser();
   if (authError) throw authError;
   if (!auth.user) {S.addr = []; S.as = 0; emit(); return S.addr;}
@@ -363,7 +358,7 @@ export async function load() {
       await refreshGoodiesContactNumbers().catch(()=>undefined);
     }
   } catch (e) {}
-  if (!providerInfo.demo) {
+  {
     try {
       const {data: sessionData} = await supabase.auth.getUser();
       const userId = sessionData.user?.id;
@@ -394,9 +389,9 @@ export async function load() {
   await refreshLiveSchedules();
   if (S.accountId !== ownerId) return;
   recoverShoppingSnapshots(S, IT, STB, placeholderStore);
-  S.addr = S.addr.filter((a: any) => a && a.t); if (!S.addr.length && providerInfo.demo) S.addr = WDEF().addr;
+  S.addr = S.addr.filter((a: any) => a && a.t);
   S.addr.forEach((a: any) => {if (typeof a.z !== 'number') a.z = zoneOf(a.t); if (!a.cc) a.cc = 'HT';});
-  if (S.addr.length && !S.addr.some((a: Address) => a.def) && providerInfo.demo) S.addr[0].def = 1;
+
   if (!S.pf || !S.pf.n) S.pf = WDEF().pf; if (!S.pf.ph) S.pf.ph = WDEF().pf.ph;
   S.gc = S.gc.filter((c: any) => c && c.id && c.ph);
   if (S.cc !== 'w' && !S.gc.some((c: any) => c.id === S.cc)) S.cc = 'w';
@@ -453,7 +448,7 @@ export const addr = (): Address => S.addr.filter((a: Address) => a.id === S.as)[
 export const cur = (): Route => S.stack[S.stack.length - 1];
 export const cnt = () => S.cart.lines.reduce((a: number, l: CartLine) => a + l.q, 0);
 export const unread = () => Number(S.serverUnread || 0) > 0 || S.notifs.some((n: any) => n.u);
-export const first = () => S.firstOrderEligible === true && S.orders.length === 0;
+export const first = () => S.firstOrderEligible === true && !S.orders.some((order:any)=>!order.pk);
 export const isPk = () => S.mode === 'pickup' || !!(S.cart.sid && STB[S.cart.sid]?.far);
 /** Exact coordinates saved with the address (captured with "Use my current location"); more precise than geocoding the text. */
 export const savedPoint = (address: any): [number, number] | null => {const la = Number(address?.latitude), lo = Number(address?.longitude); return address?.latitude != null && address?.longitude != null && Number.isFinite(la) && Number.isFinite(lo) && Math.abs(la) <= 90 && Math.abs(lo) <= 180 ? [la, lo] : null;};
@@ -737,16 +732,6 @@ export const FCH:[string,string][] = [
   filterChoice('open',()=>label('lbl.filterOpen','Open now')),
   filterChoice('near',()=>label('lbl.filterNearest','Nearest')),
 ];
-
-/* demo only: wipes local data */
-export async function resetDemo() {
-  const {assertDemoOnly} = require('./providers');
-  assertDemoOnly(label("lbl.page.store.fb54363a03", "Reset demo data"));
-  await AsyncStorage.multiRemove([KEY, WKEY, 'goodies-checkout-attempt-v1']);
-  Object.assign(S, WDEF(), GDEF());
-  S.stack = [{r: 'home', u: ++uid}];
-  applyZone(); emit();
-}
 
 /* ---------- restricted goods (alcohol) ---------- */
 export const hasAlcohol = (lines?: CartLine[]) => (lines || S.cart.lines).some((l: any) => !l.byo && IT[l.id] && (IT[l.id] as any).restriction === 'alcohol');

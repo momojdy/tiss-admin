@@ -1,5 +1,4 @@
 /* Actions. 1:1 port of the Goodies v24 `A` handlers. Messages stay in English here and move to i18n keys during the localization pass. */
-import {providerInfo} from './providers';
 import {fees, label} from './content';
 import {previewBackend as supabase} from './previewRuntime';
 import {friendlyError} from './friendlyError';
@@ -63,7 +62,7 @@ export function newCart() {
   }
   if (p[2]) { S.pend = null; p[2](); return; }
   // Clear the pending cross-store action before re-adding so the confirmation
-  // cannot reopen itself or leave stale vendor/product data in demo mode.
+  // cannot reopen itself or leave stale vendor/product data.
   S.pend = null;
   S.cart = {sid: null, lines: []};
   S.promo = '';
@@ -169,9 +168,16 @@ async function placeOrderWork(helpPayMode?: 'share' | 'full') {
   const access = await refreshGoodiesAccess();
   if (S.accountId !== accountId) return;
   if (access.status === 'suspended' || access.status === 'banned') {toast(access.status === 'banned' ? label("lbl.cms.3282b7d2663b", "Your access to Goodies has been permanently restricted.") : label("lbl.cms.b66a41c46241", "Your access to Goodies is temporarily suspended.")); return;}
+  if((accountId)){
+    const {recoverHelpPayCreation}=await import('./helpPayRecovery');
+    let previous=await recoverHelpPayCreation();
+    if(!previous&&S.helpPayRequestId&&S.helpPayRequestUserId===accountId){const {fetchHelpPayStatus}=await import('./helpPayApi');previous=await fetchHelpPayStatus(S.helpPayRequestId);}
+    if(S.accountId!==accountId)return;
+    if(previous){S.helpPayRequestId=previous.id;S.helpPayRequestUserId=accountId;if(S.stack.at(-1)?.r!=='help-pay')push('help-pay');await save();emit();return;}
+  }
   // A first-delivery discount must be based on server-confirmed history,
   // not on an empty local cache during account initialization.
-  if (!providerInfo.demo && contentHooks.fees?.().firstFree) {
+  if ((contentHooks.fees?.().firstFree)) {
     const {data: auth, error: authError} = await supabase.auth.getUser();
     if (S.accountId !== accountId) return;
     if (authError || !auth.user) {
@@ -180,7 +186,7 @@ async function placeOrderWork(helpPayMode?: 'share' | 'full') {
     }
     const {count, error: historyError} = await supabase.from('goodies_orders')
       .select('id', {count: 'exact', head: true})
-      .eq('customer_id', auth.user.id);
+      .eq('customer_id', auth.user.id).eq('order_type','delivery');
     if (S.accountId !== accountId) return;
     if (historyError || count == null) {
       S.firstOrderEligible = null;
@@ -194,7 +200,7 @@ async function placeOrderWork(helpPayMode?: 'share' | 'full') {
   if (cartStoreIds().length > 1) {if(helpPay){toast(label("lbl.sharedPay.fd720ee2314f", "Help Pay requests must contain items from one store."));return;}return placeMultiOrder();}
   const t = totals(), st = t.st!;
   if (!S.cart.lines.length) {toast(label('lbl.actionCartEmpty', 'Your cart is empty')); return;}
-  if (!providerInfo.demo) {
+  {
     if (!helpPay && !['cash', 'wallet', 'card'].includes(S.pay)) {toast(label('lbl.actionChoosePayment', 'Choose Wantiss Wallet, a saved card, or cash.')); S.cs = 2; emit(); return;}
     if (!helpPay && S.pay === 'card' && !S.cards.length) {toast(label('lbl.actionAddSavedCard', 'Add a saved card before checking out.')); push('payments'); return;}
     // The ID check result cannot be recorded yet, so age-restricted orders stay blocked in live mode.
@@ -211,19 +217,19 @@ async function placeOrderWork(helpPayMode?: 'share' | 'full') {
   if (!phoneOK(ct.ph)) {toast(label('lbl.actionValidPhone', 'Choose a valid contact number')); S.cs = 0; emit(); return;}
   // Refresh the wallet before doing delivery routing so an insufficient balance
   // is explained immediately instead of being masked by an unrelated quote error.
-  const walletVerified = providerInfo.demo ? true : await refreshPaymentOptions();
+  const walletVerified = (await refreshPaymentOptions());
   if (S.accountId !== accountId) return;
-  if (!providerInfo.demo && (helpPay ? helpPayMode === 'share' : S.pay === 'wallet') && !walletVerified) {
+  if (((helpPay ? helpPayMode === 'share' : S.pay === 'wallet')) && !walletVerified) {
     S.busy = 0; toast(label("lbl.cms.9e67ba6cf31c", "Could not verify your live Wantiss Wallet balance. Please retry before placing the order.")); emit(); return;
   }
-  if (!providerInfo.demo && (helpPay ? helpPayMode === 'share' : S.pay === 'wallet') && !S.hasWallet) {
+  if (((helpPay ? helpPayMode === 'share' : S.pay === 'wallet')) && !S.hasWallet) {
     S.busy = 0; S.cs = 2; toast(label('lbl.actionWalletUnavailable', 'Your Wantiss wallet is not available. Create a wallet or choose another payment method.')); emit(); return;
   }
-  if (!providerInfo.demo && (helpPay ? helpPayMode === 'share' : S.pay === 'wallet') && S.wallet < (helpPay ? helpPayUpfront(t.total) : t.total)) {
+  if (((helpPay ? helpPayMode === 'share' : S.pay === 'wallet')) && S.wallet < (helpPay ? helpPayUpfront(t.total) : t.total)) {
     S.busy = 0; S.cs = 2; toast(label('lbl.actionWalletInsufficient', 'Insufficient Wantiss wallet balance. Add funds or choose a saved card or cash.')); emit(); return;
   }
   let deliveryQuoteId: string | null = null;
-  if (!providerInfo.demo && !pk) {
+  if ((!pk)) {
     const pin = savedPoint(a);
     const addressPayload = {l: a.l, t: a.t, apt: a.apt, inst: a.inst, city: a.city, department: a.department, country: a.country, ...(pin ? {latitude: pin[0], longitude: pin[1]} : {})};
     const addressKey = JSON.stringify(addressPayload);
@@ -278,31 +284,27 @@ async function placeOrderWork(helpPayMode?: 'share' | 'full') {
       return;
     }
   }
-  const walletVerifiedAfterQuote = providerInfo.demo ? true : await refreshPaymentOptions();
+  const walletVerifiedAfterQuote = (await refreshPaymentOptions());
   if (S.accountId !== accountId) return;
-  if (!providerInfo.demo && (helpPay ? helpPayMode === 'share' : S.pay === 'wallet') && !walletVerifiedAfterQuote) {
+  if (((helpPay ? helpPayMode === 'share' : S.pay === 'wallet')) && !walletVerifiedAfterQuote) {
     S.busy = 0; toast(label("lbl.cms.9e67ba6cf31c", "Could not verify your live Wantiss Wallet balance. Please retry before placing the order.")); emit(); return;
   }
-  if (!providerInfo.demo && (helpPay ? helpPayMode === 'share' : S.pay === 'wallet') && !S.hasWallet) {S.cs = 3; toast(label('lbl.actionWalletUnavailable', 'Your Wantiss wallet is not available. Create a wallet or choose another payment method.')); emit(); return;}
-  if (!providerInfo.demo && (helpPay ? helpPayMode === 'share' : S.pay === 'wallet') && S.wallet < (helpPay ? helpPayUpfront(t.total) : t.total)) {S.cs = 3; toast(label('lbl.actionWalletInsufficient', 'Insufficient Wantiss wallet balance. Add funds or choose a saved card or cash.')); emit(); return;}
+  if (((helpPay ? helpPayMode === 'share' : S.pay === 'wallet')) && !S.hasWallet) {S.cs = 3; toast(label('lbl.actionWalletUnavailable', 'Your Wantiss wallet is not available. Create a wallet or choose another payment method.')); emit(); return;}
+  if (((helpPay ? helpPayMode === 'share' : S.pay === 'wallet')) && S.wallet < (helpPay ? helpPayUpfront(t.total) : t.total)) {S.cs = 3; toast(label('lbl.actionWalletInsufficient', 'Insufficient Wantiss wallet balance. Add funds or choose a saved card or cash.')); emit(); return;}
   const alc = hasAlcohol();
   if (alc && !S.alcConsent) {toast(label('lbl.actionConfirmAlcohol', 'Please confirm the alcohol rules to continue')); return;}
   if (alc && !S.hasWallet) {toast(label('lbl.actionCreateWalletAlcohol', 'Create your Wantiss wallet first. Refunds for alcohol orders go there.')); push('payments'); return;}
   if (S.promo && t.perr) {S.promo = ''; toast(label('lbl.actionPromoInvalid', 'Your promo code no longer applies. Totals updated')); emit(); return;}
   if (S.sch && S.sch < Date.now()) {S.sch = 0; S.cs = 1; toast(label('lbl.actionTimePassed', 'That time has passed. Pick another')); emit(); return;}
-  if (providerInfo.demo && S.pay === 'wallet' && S.wallet < t.total) {toast(label('lbl.actionWalletLow', 'Wallet balance is too low. Top up or pick another method.')); push('payments'); return;}
-  if (providerInfo.demo && S.pay === 'card') {
-    if (!S.cards.length) {push('payments'); return;}
-    if (S.cards[0].l4 === '0002') {toast(label('lbl.actionCardDeclinedDemo', 'Card declined (demo). Your cart is safe. Try another method.')); S.cs = 2; emit(); return;}
-  }
-  /* Demo orders are local; live wallet/card orders use authenticated server payment flows below. */
+
+
+  // Payments and orders use authenticated server operations.
   S.busy = 1; emit();
   const selectedCard: any = S.cards.find((card: any) => card.id === S.selectedCardId) || S.cards.find((card: any) => card.isDefault) || S.cards[0];
   const pl: any = {wallet: 'Wallet', moncash: 'MonCash', card: label("lbl.page.actions.e7cb25f2ef", "Card •••• ") + (selectedCard ? selectedCard.l4 : ''), cash: 'Cash'}[S.pay as string];
-  let id: string;
-  do {id = label("lbl.sharedPay.884d5bff79c1", "GD") + Math.floor(1000 + Math.random() * 9000);} while (S.orders.some((x: any) => x.id === id));
+  let id = '';
   let backendOrderId: string | null = null;
-  if (!providerInfo.demo) {
+  {
     // Live: the server validates the store, mode, schedule and totals, and assigns the order code.
     const r2 = (n: number) => Math.round(n * 100) / 100;
     const orderPayload = {
@@ -320,16 +322,17 @@ async function placeOrderWork(helpPayMode?: 'share' | 'full') {
       const snapshotFingerprint = JSON.stringify({...orderPayload,payment_method:'help-pay',mode:helpPayMode});
       try {
         const attempt = await getGoodiesCheckoutAttempt(snapshotFingerprint);
-        const {createHelpPayDraft} = await import('./helpPayApi');
-        const requestId = await createHelpPayDraft(helpPayMode,Math.round(orderPayload.p_total*100),attempt.key,orderPayload);
+        const {createRecoverableHelpPay} = await import('./helpPayRecovery');
+        const requestId = await createRecoverableHelpPay(helpPayMode,Math.round(orderPayload.p_total*100),attempt.key,orderPayload,accountId!);
+        if(S.accountId!==accountId)return;
         (S as any).helpPayRequestId=requestId;
-        (S as any).helpPayRequestUserId=(await supabase.auth.getUser()).data.user?.id||null;
+        S.helpPayRequestUserId=accountId;
         S.busy=0;
         if (S.stack[S.stack.length-1]?.r !== 'help-pay') push('help-pay');
         await save();emit();
       } catch (error: any) {
         S.busy=0;emit();
-        toast(friendlyError(error,'Could not create this Help Pay request. No payment has been confirmed.'));
+        toast(friendlyError(error,label('lbl.helpPayCreateUnconfirmed','Could not confirm this request. Reopen Shared Bill to recover its status before trying again.')));
       }
       return;
     }
@@ -366,7 +369,7 @@ async function placeOrderWork(helpPayMode?: 'share' | 'full') {
     if (error || !row?.id) {
       S.busy = 0;
       const detail = String(error?.message || data?.error || '');
-      if (error || !row?.id) console.warn('Goodies checkout failed', {payment: S.pay, error, data});
+      if (error || !row?.id) console.warn('Goodies checkout failed', {payment: S.pay, code: /^[A-Z0-9]{5}$/.test(String(error?.code||''))?error.code:'unavailable'});
       if (S.pay === 'wallet') {
         const verified = await refreshPaymentOptions();
         if (/insufficient|not enough|balance too low/i.test(detail) || (verified && (!S.hasWallet || S.wallet < t.total))) {
@@ -383,11 +386,11 @@ async function placeOrderWork(helpPayMode?: 'share' | 'full') {
       S.cardPending = {id: row.id, orderCode: row.order_code, status: row.status, clientSecret: data.client_secret, publishableKey: data.publishable_key, paymentMethodId: data.stripe_payment_method_id};
       S.busy = 0; push('cardauth'); emit(); return;
     }
-    backendOrderId = row.id; id = row.order_code || id;
+    backendOrderId = row.id; id = row.order_code || row.id;
     if (S.pay === 'wallet') await refreshPaymentOptions();
   }
   if (S.accountId !== accountId) return;
-  if (providerInfo.demo && S.pay === 'wallet') S.wallet -= t.total;
+
   const o = {
     id, backendId: backendOrderId, serverStatus: backendOrderId ? (S.sch && S.sch > Date.now() ? 'scheduled' : 'placed') : null, sid: S.cart.sid, lines: S.cart.lines.map((l: any) => ({k: l.k, id: l.id, n: l.n, e: l.e, photo: l.photo || IT[l.id]?.photo || null, p: l.p, q: l.q, d: l.d, nt: l.nt, byo: l.byo})),
     sn: st.n, sub: t.sub, fee: t.fee, svc: t.svc, disc: t.disc, tip: t.tip, total: t.total, t0: Date.now(), st: 0, rated: 0, cx: 0, pk,
@@ -397,9 +400,8 @@ async function placeOrderWork(helpPayMode?: 'share' | 'full') {
   };
   S.orders.unshift(o);
   S.cart = {sid: null, lines: []}; S.promo = ''; S.tip = 0; S.note = ''; S.sch = 0; S.cs = 0; S.cc = 'w'; S.alcConsent = false;
-  if (!backendOrderId) S.notifs.unshift({id: Date.now() + Math.random(), t: label("lbl.sharedPay.d337d826db7e", "Order ") + o.id + label("lbl.sharedPay.1da621181d3d", " placed"), d: label("lbl.page.actions.9983301c3b", "Demo order sent to ") + st.n + label("lbl.page.actions.0e7f1cefe2", ". Tap to track it."), r: 'track', p: o.id, u: 1});
   S.stack = [{r: 'home', u: Date.now()}, {r: 'confirm', p: o.id, u: Date.now() + 1}];
-  S.busy = 0; toast(backendOrderId ? label('lbl.actionOrderSent', 'Order sent to the store') : label('lbl.actionDemoOrderPlaced', 'Demo order placed!'));
+  S.busy = 0; toast(label('lbl.actionOrderSent', 'Order sent to the store'));
   await save();
   if (backendOrderId) await completeGoodiesCheckoutAttempt(backendOrderId);
   emit();
@@ -469,9 +471,8 @@ export async function cancelOrder(id: string) {
     }
   }
   o.cx = 1;
-  if (providerInfo.demo && o.pay === 'wallet') S.wallet += o.total;
-  else if (o.backendId && o.pay === 'wallet') await refreshPaymentOptions();
-  if (providerInfo.demo) S.notifs.unshift({id: Date.now() + Math.random(), t: label("lbl.sharedPay.d337d826db7e", "Order ") + o.id + label("lbl.sharedPay.cd46246db8c2", " cancelled"), d: label("lbl.page.actions.c010aa83cd", "Your order was cancelled.") + (o.pay === 'wallet' ? label("lbl.page.actions.353a2b3bb1", " The total was refunded to your wallet.") : ''), r: 'track', p: o.id, u: 1});
+  if (o.backendId && o.pay === 'wallet') await refreshPaymentOptions();
+
   toast(label('lbl.actionOrderCancelled', 'Order cancelled')); save(); emit();
   if (o.backendId) void refreshLiveSchedules(); /* stock was restored on the server */
 }
@@ -499,7 +500,7 @@ export const togglePref = async (k: 'orders' | 'promos') => {
   finally {preferenceSaving.delete(k);}
 };
 export const selectAddr = async (id: string | number) => {
-  if (!providerInfo.demo) {
+  {
     const {error} = await supabase.auth.updateUser({data: {goodies_default_address_id: String(id)}});
     if (error) { toast(friendlyError(error, label("lbl.cms.61e7d6d50f9b", "Could not update the Goodies delivery address."))); return; }
   }
@@ -566,23 +567,6 @@ export async function createWallet() {
     toast(friendlyError(e, label('lbl.actionWalletCreateFailed', 'Could not create your Wantiss wallet. Please try again.')));
   }
 }
-/* DEMO ONLY: in production the courier app (delivery) or the Vendor Dashboard (pickup) records this result. */
-export function idResult(id: string, ok: boolean) {
-  require('./providers').assertDemoOnly('Simulated ID check');
-  const o = S.orders.filter((x: any) => x.id === id)[0]; if (!o || !o.alc || o.alc.status !== 'pending') return;
-  const F = require('./store').contentHooks.fees ? require('./store').contentHooks.fees() : {rfSvc: true, rfTip: true};
-  if (ok) {o.alc.status = 'passed'; toast(label('lbl.actionIdPassed', 'ID checked. Order can be completed'));}
-  else {
-    o.alc.status = 'failed'; o.cx = 1; o.idFail = 1;
-    const refund = Math.round((o.sub - o.disc + (F.rfSvc ? o.svc : 0) + (F.rfTip ? o.tip : 0)) * 100) / 100;
-    o.refund = o.pay === 'cash' ? 0 : refund;
-    if (o.pay !== 'cash') S.wallet += refund;
-    S.notifs.unshift({id: Date.now() + Math.random(), t: label("lbl.page.actions.0316618817", "ID check failed"), d: o.pay === 'cash' ? label("lbl.page.actions.56d63db38f", "The ID check failed, so the order was not handed over. You were not charged.") : money(refund) + label("lbl.page.actions.e13f05dc32", " was refunded to your Wantiss wallet. The delivery fee is not refunded."), r: 'track', p: o.id, u: 1});
-    toast(label('lbl.actionIdFailed', 'ID check failed. Order cancelled'));
-  }
-  save(); emit();
-}
-
 /* ---------- several stores in one order ---------- */
 const stopItems = (sid: string) => S.cart.lines.filter((l: any) => lineStore(l) === sid).map((l: any) => ({
   k: l.k, id: l.id, n: l.n, e: l.e, photo: l.photo || IT[l.id]?.photo || null, p: l.p, q: l.q, d: l.d, nt: l.nt, byo: l.byo,
@@ -593,7 +577,7 @@ async function placeMultiOrder() {
   const ids = cartStoreIds();
   const r2 = (n: number) => Math.round(n * 100) / 100;
   const stop = (message: string, step?: number) => {S.busy = 0; if (step != null) S.cs = step; toast(message); emit();};
-  if (providerInfo.demo) return stop(label("lbl.page.actions.d2c68bb213", "Ordering from several stores needs a live connection."));
+
   if (ids.length > maxStops()) return stop(label("lbl.page.actions.737e259f91", "You can order from up to ") + maxStops() + label("lbl.page.actions.78645fb5f6", " stores at once."));
   if (isPk()) return stop(label("lbl.cms.bcfa3aa2ef5b", "Ordering from several stores is available for delivery only."));
   if (!['wallet', 'cash'].includes(S.pay)) return stop(label("lbl.page.actions.0e483440c6", "Choose Wantiss Wallet or cash to order from several stores."), 2);

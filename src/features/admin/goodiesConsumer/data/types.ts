@@ -1,4 +1,4 @@
-/* Types mirror the v24 prototype shapes. PROPOSED contracts: text fields carry five languages (see i18n). */
+/* Goodies catalog and CMS contracts. Text fields use the configured five-language structure. */
 export type LangCode = 'en' | 'fr' | 'ht' | 'es' | 'zh-Hans';
 export type Txt = Partial<Record<LangCode, {v: string; s: 'missing' | 'draft' | 'reviewed'}>> | string;
 

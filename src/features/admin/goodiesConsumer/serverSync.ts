@@ -161,7 +161,7 @@ export function startGoodiesSync() {
         refreshAgain = false;
         const requestUserId: string = userId;refreshAccount=requestUserId;
         const requestGeneration = generation;
-        const [unreadResult, ordersResult, walletResult, profileResult, settingsResult] = await Promise.all([
+        const [unreadResult, ordersResult, walletResult, profileResult, settingsResult, deliveryHistoryResult] = await Promise.all([
           supabase.from('notifications')
             .select('id', { count: 'exact', head: true })
             .eq('user_id', requestUserId)
@@ -176,6 +176,7 @@ export function startGoodiesSync() {
           supabase.from('wallets').select('id,balance').eq('user_id', requestUserId).maybeSingle(),
           supabase.from('profiles').select('full_name,email,phone_number,avatar_url').eq('id', requestUserId).maybeSingle(),
           supabase.from('user_settings').select('language,notification_preferences').eq('user_id',requestUserId).maybeSingle(),
+          supabase.from('goodies_orders').select('id',{count:'exact',head:true}).eq('customer_id',requestUserId).eq('order_type','delivery'),
         ]);
         if (stopped || requestGeneration !== generation || requestUserId !== userId) continue;
 
@@ -207,7 +208,7 @@ export function startGoodiesSync() {
         }
 
         if (!ordersResult.error) {
-          S.firstOrderEligible = (ordersResult.data || []).length === 0;
+          S.firstOrderEligible = deliveryHistoryResult.error||deliveryHistoryResult.count==null?null:deliveryHistoryResult.count===0;
           const cached = new Map<string, any>(
             (S.orders || []).filter((order: any) => order?.backendId).map((order: any) => [String(order.backendId), order]),
           );

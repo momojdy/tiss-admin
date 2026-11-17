@@ -6,7 +6,7 @@
       "origins": [
         {
           "file": "src/features/Goodies/GoodiesApp.tsx",
-          "sha256": "38cf75b14545489114af9eb3d276b322227c9a54e50db1998963477721ae1646"
+          "sha256": "8ef3067470d7a76916e29c2e1305284daa82aac0ac4902bf4b93a54fa8ee66d0"
         }
       ]
     },
@@ -33,7 +33,7 @@
       "origins": [
         {
           "file": "src/features/Goodies/actions.ts",
-          "sha256": "3eb3f1f9e7f3a542743dc16dee9716931b41546bafff3dcb911da75fefd6123c"
+          "sha256": "79858bf25d469fc55d5d884e6a0896f9466a783ea8a88cc90e80923fe446768b"
         }
       ]
     },
@@ -51,7 +51,7 @@
       "origins": [
         {
           "file": "src/features/Goodies/builders/engine.tsx",
-          "sha256": "f7275b61e3b664ba6f4dc5e4c25ea6aec1c5958d63c22c661775fc4299671d16"
+          "sha256": "8819222d16ad2f333668c74f3eea10c8e0a6264f494fd370e2b2cab6276a1497"
         }
       ]
     },
@@ -61,15 +61,6 @@
         {
           "file": "src/features/Goodies/builders/pizzaArt.ts",
           "sha256": "e360aeed5962642e27f21f4adb533b757b25a811f78c60bbe1d3c75ded956af8"
-        }
-      ]
-    },
-    {
-      "target": "builders/templates.ts",
-      "origins": [
-        {
-          "file": "src/features/Goodies/builders/templates.ts",
-          "sha256": "10d1d7d2574098233660e300714d4d0e7bbb7c1688bf2368359accea350cd265"
         }
       ]
     },
@@ -114,7 +105,7 @@
       "origins": [
         {
           "file": "src/features/Goodies/components/cards.tsx",
-          "sha256": "6b4a42cf467fa44453cb626c6daeb75e5af4fb133ee107716940f28b61ad1e21"
+          "sha256": "6327a7ec2703c01dc37d03caa64cafc128886086254c7f778b6d0ef7541c28e0"
         }
       ]
     },
@@ -159,7 +150,7 @@
       "origins": [
         {
           "file": "src/features/Goodies/data/types.ts",
-          "sha256": "c821db96a7bca30beab3787d2b58f2a5b57fea3106c848dcf0ca2c2ec696d486"
+          "sha256": "ee1fd37ba078447a0fad9ebf073ea5869a2020303111736200c8765596ad96d7"
         }
       ]
     },
@@ -186,7 +177,16 @@
       "origins": [
         {
           "file": "src/features/Goodies/helpPayApi.ts",
-          "sha256": "c2d162c34eed3054e3bedc54e6bd8e06bf28150fb6cec4517dba6d5d631dc17b"
+          "sha256": "d10796dec56e3d3dda9558dcbd7b83f8528d6fff3c5673ca40c3d0942e7c81cb"
+        }
+      ]
+    },
+    {
+      "target": "helpPayRecovery.ts",
+      "origins": [
+        {
+          "file": "src/features/Goodies/helpPayRecovery.ts",
+          "sha256": "2f72e60b019a890ed441ade5e60593053acb73a4007f1f9b69d7d0552f5ac29a"
         }
       ]
     },
@@ -195,7 +195,7 @@
       "origins": [
         {
           "file": "src/features/Goodies/i18n/dict.ts",
-          "sha256": "3030b8cc5980c6f10b8b50110e563cb05bb34d6cffabc26091445d99ca6fb97a"
+          "sha256": "7fdff4a1da4f8dcfbd9ce7d6d67079fa4a9548ffb58b9fee5bfe710897b7081c"
         }
       ]
     },
@@ -204,7 +204,7 @@
       "origins": [
         {
           "file": "src/features/Goodies/i18n/index.ts",
-          "sha256": "3cca362969ef4f4923ae521e7b113a50207649dafc5c9e12b1ff2cb975890c7b"
+          "sha256": "de4e4f10c6876a0b87c7d79cd0ec359c64e699f9b93a3d5cdb7abd2b2646e632"
         }
       ]
     },
@@ -245,15 +245,6 @@
       ]
     },
     {
-      "target": "providers/index.ts",
-      "origins": [
-        {
-          "file": "src/features/Goodies/providers/index.ts",
-          "sha256": "32733e0ef40accb80808399810f795cc96caf5bd72375acec36d3263f07bc66d"
-        }
-      ]
-    },
-    {
       "target": "reviews.ts",
       "origins": [
         {
@@ -290,11 +281,11 @@
       ]
     },
     {
-      "target": "screens/HelpPayPreview.tsx",
+      "target": "screens/HelpPay.tsx",
       "origins": [
         {
-          "file": "src/features/Goodies/screens/HelpPayPreview.tsx",
-          "sha256": "8a76dad38ce8e4f31f00e97f42a09c7c3862af4eb02080082efda3d9acce2481"
+          "file": "src/features/Goodies/screens/HelpPay.tsx",
+          "sha256": "52d628c8f629f296089e339b7ccf7ffca3ad4629915d85e503f925e293bb4b95"
         }
       ]
     },
@@ -312,7 +303,7 @@
       "origins": [
         {
           "file": "src/features/Goodies/screens/Shop.tsx",
-          "sha256": "4af1848f0ff9b3c42ba5bd2bd048b41f989263b4b2a0c296051a443b84ef626d"
+          "sha256": "77cb1c2f21b9ad165774c5c77900fa0246b3a67ef9b804c93ab3f3b357feb4c5"
         }
       ]
     },
@@ -321,7 +312,7 @@
       "origins": [
         {
           "file": "src/features/Goodies/serverSync.ts",
-          "sha256": "a46eed58e44d6a8d80ff9a1691263639093718c7c2a8f23f0e6edc87b34ed37c"
+          "sha256": "77a7b8440f32fe6ecf382cb70057b5b5bc948886284ccf5059f04519039532ca"
         }
       ]
     },
@@ -330,7 +321,7 @@
       "origins": [
         {
           "file": "src/features/Goodies/store.ts",
-          "sha256": "eb7a98758142f8fc310ee819aaa105a7761c637f56f4cb412a94985ef037fb8d"
+          "sha256": "7fed24ff2be236308c0bef163da6cd8d2af4a78c33b7b9f0b9708dfabacf8591"
         }
       ]
     },
@@ -340,6 +331,15 @@
         {
           "file": "src/features/Goodies/theme.ts",
           "sha256": "ba5f334f32000923d74bbeac26853d2fadff7d1f22c59aa4c9109d569f9a5578"
+        }
+      ]
+    },
+    {
+      "target": "previewBuilderTemplates.ts",
+      "origins": [
+        {
+          "file": "src/screens/businessSpace/goodiesTemplates.ts",
+          "sha256": "10d1d7d2574098233660e300714d4d0e7bbb7c1688bf2368359accea350cd265"
         }
       ]
     },
