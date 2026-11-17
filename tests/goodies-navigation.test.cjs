@@ -69,3 +69,11 @@ test('an unknown Goodies module fails safely to Overview rather than another ser
   assert.equal(f.history.at(-1),'goodies');
   assert.equal(f.ui.wsvc,'Goodies');
 });
+
+test('admin invitation acceptance uses server-owned staff state, never editable user metadata',()=>{
+  const auth = fs.readFileSync(path.join(root,'auth/AuthFlow.tsx'),'utf8');
+  assert.doesNotMatch(auth,/user_metadata[?.]*\.?wantiss_invite_accepted/);
+  assert.match(auth,/staff\.invited_at\s*&&\s*staff\.invitation_expires_at/);
+  assert.match(auth,/rpc\('wantiss_admin_accept_invitation'\)/);
+  assert.match(auth,/pendingInvite\.invitation_expires_at\s*&&/);
+});
