@@ -1,6 +1,7 @@
 {
   "scope": "Actual Help/FAQ rendering in the local isolated CMS preview; no hosted publication or native device. Five FAQs in four approved locales plus reviewed-English fallback for unfinished Creole.",
   "status": "PASS",
+  "payloadSha256": "158305e5b8f5599a04411735f22741e6025ca734093a0b8548b922e243997d73",
   "results": [
     {
       "locale": "en",
