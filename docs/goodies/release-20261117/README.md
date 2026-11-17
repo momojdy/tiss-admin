@@ -1,5 +1,7 @@
 # Goodies admin acceptance — 17 November 2026
 
+> Historical snapshot. The latest [paired Goodies follow-up audit](https://github.com/momojdy/tiss_tiss_beta/blob/main/docs/goodies/deep-audit-20261117/README.md) records the verified fixes, approved pushes and remaining release blockers.
+
 Verified source commit: `be410637a3550ce056e9ac5a7f1ec4e9e23408a6`, on local `main`, preserving remote main `f5c0a14ad284e5ca8f37684ae6cb5c91491523b2`. Later commits add documentation only. No push, publication, production write or deployment was performed.
 
 **PASS:** 33 admin tests; full TypeScript check; Android and iOS Expo bundle exports. These exports are not signed native builds. The customer repository's existing suite also passes 29 cross-source reproductions against this admin source.
