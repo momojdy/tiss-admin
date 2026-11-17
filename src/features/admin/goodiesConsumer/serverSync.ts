@@ -3,13 +3,15 @@ import {wantissLocale} from './previewLocales';
 import {CUSTOMER_NOTIFICATION_FILTER} from './notifications';
 import { AppState, type AppStateStatus } from 'react-native';
 import {previewBackend as supabase} from './previewRuntime';
-import { S, STB, IT, emit, save, switchGoodiesAccount, refreshUserAddresses } from './store';
+import { S, STB, IT, emit, save, switchGoodiesAccount, refreshUserAddresses, ensureGoodiesOrderStore } from './store';
 
 type ServerOrder = {
   id: string;
   order_code: string;
   parent_id: string | null;
   stop_index: number | null;
+  courier_id: string | null;
+  self_delivery: boolean;
   store_id: string;
   status: string;
   created_at: string;
@@ -37,6 +39,8 @@ const stageByStatus: Record<string, number> = {
   accepted: 1,
   preparing: 2,
   ready: 3,
+  courier_assigned: 4,
+  picked_up: 5,
   completed: 6,
   cancelled: 0,
   declined: 0,
@@ -45,6 +49,7 @@ const stageByStatus: Record<string, number> = {
 
 function mapOrder(row: ServerOrder) {
   const sid = String(row.store_id || '');
+  ensureGoodiesOrderStore(sid);
   const pk = row.order_type === 'pickup';
   const address = row.address && typeof row.address === 'object' ? row.address : null;
   const items = Array.isArray(row.items) ? row.items : [];
@@ -53,6 +58,8 @@ function mapOrder(row: ServerOrder) {
     backendId: row.id,
     parentId: row.parent_id || undefined,
     stop: row.stop_index == null ? undefined : Number(row.stop_index),
+    courierId: row.courier_id || null,
+    selfDelivery: !!row.self_delivery,
     serverStatus: String(row.status || 'placed').toLowerCase(),
     serverUpdatedAt: row.updated_at,
     serverCreatedAt: row.created_at,
@@ -66,7 +73,7 @@ function mapOrder(row: ServerOrder) {
     tip: Number(row.tip || 0),
     total: Number(row.total || 0),
     t0: Date.parse(row.created_at) || Date.now(),
-    st: stageByStatus[String(row.status || '').toLowerCase()] ?? 0,
+    st: String(row.status || '').toLowerCase()==='completed'&&pk?4:stageByStatus[String(row.status || '').toLowerCase()] ?? 0,
 
     cx: ['cancelled', 'declined', 'expired'].includes(String(row.status || '').toLowerCase()) ? 1 : 0,
     pk,
@@ -83,7 +90,7 @@ function mapOrder(row: ServerOrder) {
 
 async function readOrderReviews(orders: any[], account: string) {
   if (!orders.length) return;
-  const {data, error} = await supabase.from('goodies_order_reviews').select('order_id,target,rating,comment,created_at')
+  const {data, error} = await supabase.from('goodies_order_reviews').select('order_id,review_target,rating,comment,created_at')
     .eq('customer_id', account).in('order_id', orders.map(order => order.backendId));
   if (!error && Array.isArray(data)) applyOrderReviews(orders, data, S.lang);
 }
@@ -93,7 +100,7 @@ export async function fetchGoodiesOrderForNotification(orderId?: string, orderCo
   if (authError) throw authError;
   if (!auth.user) throw new Error('Please sign in again.');
   let query = supabase.from('goodies_orders')
-    .select('id,order_code,parent_id,stop_index,store_id,status,created_at,scheduled_for,order_type,items,subtotal,delivery_fee,service_fee,discount,tip,total,notes,address,contact_phone,payment_method,payment_status,promo_code,updated_at')
+    .select('id,order_code,parent_id,stop_index,courier_id,self_delivery,store_id,status,created_at,scheduled_for,order_type,items,subtotal,delivery_fee,service_fee,discount,tip,total,notes,address,contact_phone,payment_method,payment_status,promo_code,updated_at')
     .eq('customer_id', auth.user.id);
   if (orderId && /^[0-9a-f]{8}-[0-9a-f]{4}-[1-8][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i.test(orderId)) query = query.eq('id', orderId);
   else if (orderCode || orderId) query = query.eq('order_code', orderCode || orderId);
@@ -169,7 +176,7 @@ export function startGoodiesSync() {
             .or(CUSTOMER_NOTIFICATION_FILTER)
             .eq('read', false),
           supabase.from('goodies_orders')
-            .select('id,order_code,parent_id,stop_index,store_id,status,created_at,scheduled_for,order_type,items,subtotal,delivery_fee,service_fee,discount,tip,total,notes,address,contact_phone,payment_method,payment_status,promo_code,updated_at')
+            .select('id,order_code,parent_id,stop_index,courier_id,self_delivery,store_id,status,created_at,scheduled_for,order_type,items,subtotal,delivery_fee,service_fee,discount,tip,total,notes,address,contact_phone,payment_method,payment_status,promo_code,updated_at')
             .eq('customer_id', requestUserId)
             .order('created_at', { ascending: false }).order('id', {ascending: false})
             .limit(100),

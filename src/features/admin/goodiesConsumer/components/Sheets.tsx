@@ -689,12 +689,12 @@ function ReviewSheet({id, stars, driver = false, initialStars = 0}: {id: string;
       if (!o) {toast(label('lbl.sheetOrderNotFound', 'Order not found')); return;}
       if (t.trim().length > 1000) {toast(label('lbl.reviewTooLong', 'Keep your review under 1,000 characters.'));return;}
       if (!n) {toast(label('lbl.sheetPickRating', 'Pick a star rating')); return;}
-      if (!o.backendId) {toast(label('lbl.sheetOrderNotFound', 'Order not found'));return;}
+      if (!o.backendId||o.serverStatus!=='completed'||(driver&&(!o.courierId||o.selfDelivery||o.pk))) {toast(label('lbl.sheetOrderNotFound', 'Order not found'));return;}
       const account = S.accountId;
       submitLock.current = true;setSaving(true);
       try {
-        const {error} = await supabase.rpc('goodies_submit_order_review', {p_order_id: o.backendId, p_target: driver ? 'driver' : 'store', p_rating: n, p_comment: t.trim()});
-        if (error) throw error;
+        const {data,error} = await supabase.rpc('goodies_submit_order_review', {p_order_id: o.backendId, p_review_target: driver ? 'courier' : 'store', p_rating: n, p_comment: t.trim()});
+        if (error||typeof data!=='string'||!data) throw error||Error('Review not confirmed');
         if (S.accountId !== account) return;
       } catch {toast(label('lbl.reviewSaveFailed', 'Could not submit your review. Please try again.'));return;}
       finally {submitLock.current = false;setSaving(false);}
@@ -710,7 +710,7 @@ function ReviewSheet({id, stars, driver = false, initialStars = 0}: {id: string;
         o.orderReview = {r: n, t: t.trim(), d: label("lbl.page.components.Sheets.66f53417d3", "Just now")};
       }
       if (!driver) void notifyStoreReviewsChanged(o.sid);
-      S.rt = 0; ui.close(); toast(driver ? label('lbl.sheetDriverReviewThanks', 'Thanks for rating your driver!') : label('lbl.sheetReviewThanks', 'Thanks for your review!')); save(); emit();
+      S.rt = 0; ui.close(); toast((driver ? label('lbl.sheetDriverReviewThanks', 'Thanks for rating your driver!') : label('lbl.sheetReviewThanks', 'Thanks for your review!'))+' '+label('lbl.reviewPending','Your review is awaiting approval.')); save(); emit();
     }} />
   </>);
 }

@@ -42,9 +42,8 @@ export function routeSegments(geometry: any): Coordinate[][] {
 export function trackingRegion(points: any[]) {
   const valid = points.map(coordinate).filter((point): point is Coordinate => !!point);
   if (!valid.length) return null;
-  const latitudes = valid.map(point => point.latitude), longitudes = valid.map(point => point.longitude);
-  const south = Math.min(...latitudes), north = Math.max(...latitudes);
-  const west = Math.min(...longitudes), east = Math.max(...longitudes);
+  let south=90,north=-90,west=180,east=-180;
+  for(const point of valid){south=Math.min(south,point.latitude);north=Math.max(north,point.latitude);west=Math.min(west,point.longitude);east=Math.max(east,point.longitude);}
   return {latitude: (south + north) / 2, longitude: (west + east) / 2,
     latitudeDelta: Math.max(0.01, (north - south) * 1.3), longitudeDelta: Math.max(0.01, (east - west) * 1.3)};
 }

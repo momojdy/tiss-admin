@@ -220,10 +220,9 @@ export function useRoleEditor() {
     form({ title: 'Role template · ' + role, sub: role === 'Super Admin' ? 'Super Admin always keeps full access.' : 'Applies immediately to everyone with this role who has no personal override.',
       fields: [...db.SEC.map((s, i) => ({ id: 'p' + i, label: s, type: 'select' as const, options: db.LV, value: db.LV[p[i]] })), ...RIGHTS.map((x, i) => ({ id: 'x' + i, label: x, type: 'check' as const, value: rg.includes(x) }))],
       buttons: [{ label: 'Save template', key: 's', primary: true }],
-      onSubmit: (_k, v) => {
+      onSubmit: (_k, _v) => {
         if (!can(needs('Manage permissions'))) return 'This needs the “Manage permissions” right.';
-        saveRoleTemplate(role, db.SEC.map((_s, i) => db.LV.indexOf(String(v['p' + i]))), RIGHTS.filter((_x, i) => !!v['x' + i]));
-        closeAll(); bump(); toast('Template saved');
+        return 'Role-template publishing is not connected to server-authorized permissions. No changes were made.';
       } });
   };
 }
@@ -235,7 +234,10 @@ export function useNewRole() {
   return () => form({ title: 'New role template',
     fields: [{ id: 'n', label: 'Role name', type: 'text', required: true }, { id: 'b', label: 'Start from', type: 'select', options: Object.keys(db.ROLES), required: true }],
     buttons: [{ label: 'Create', key: 's', primary: true }],
-    onSubmit: (_k, v) => { if (!can(needs('Manage permissions'))) return 'This needs the “Manage permissions” right.'; const er = createRole(String(v.n), String(v.b)); if (er) return er; closeAll(); bump(); toast('Role created. Edit its access next.'); } });
+    onSubmit: (_k, _v) => {
+      if (!can(needs('Manage permissions'))) return 'This needs the “Manage permissions” right.';
+      return 'Role creation is unavailable until it can be persisted with server-enforced permissions. No role was created.';
+    } });
 }
 
 export function AccountDrawer({ id, close }: { id: string; close: () => void }) {

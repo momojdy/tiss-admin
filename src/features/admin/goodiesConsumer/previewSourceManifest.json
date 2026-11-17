@@ -6,7 +6,7 @@
       "origins": [
         {
           "file": "src/features/Goodies/GoodiesApp.tsx",
-          "sha256": "8ef3067470d7a76916e29c2e1305284daa82aac0ac4902bf4b93a54fa8ee66d0"
+          "sha256": "f8ca1ae8de621beaae2b8e3baf0379dcd9dada8ec5958bc1b842948f2ceb2e5e"
         }
       ]
     },
@@ -33,7 +33,7 @@
       "origins": [
         {
           "file": "src/features/Goodies/actions.ts",
-          "sha256": "79858bf25d469fc55d5d884e6a0896f9466a783ea8a88cc90e80923fe446768b"
+          "sha256": "d6d9c32f809e9ba618e239dd7df4699beb96b3a95572c108cbbd620a4b83cb94"
         }
       ]
     },
@@ -96,7 +96,7 @@
       "origins": [
         {
           "file": "src/features/Goodies/components/Sheets.tsx",
-          "sha256": "a7cfe515993f866751d7813e1031a81b8304741a4a046a9c32e67fbb15de1503"
+          "sha256": "c96176c29340e5fe4b9774017909319674789d682262394757437b7bcb13c32d"
         }
       ]
     },
@@ -128,20 +128,20 @@
       ]
     },
     {
+      "target": "data/orderStages.ts",
+      "origins": [
+        {
+          "file": "src/features/Goodies/data/orderStages.ts",
+          "sha256": "fb645eb0aa3926394461d35dcf1d8206a62dedd1a2232ac53f7358fb3dc06c24"
+        }
+      ]
+    },
+    {
       "target": "data/promoText.ts",
       "origins": [
         {
           "file": "src/features/Goodies/data/promoText.ts",
           "sha256": "8bb794bf3908447d580fcc947108bf0648663fbc38c6f715ceaf8f5fff6c919a"
-        }
-      ]
-    },
-    {
-      "target": "data/seed.ts",
-      "origins": [
-        {
-          "file": "src/features/Goodies/data/seed.ts",
-          "sha256": "ab1bb9dcd2f71dd2271dab1bc8bef68dcf17fa9d9a3a82c50e1f56198868f874"
         }
       ]
     },
@@ -159,7 +159,7 @@
       "origins": [
         {
           "file": "src/features/Goodies/deliveryTracking.ts",
-          "sha256": "f28c4a26887c84a3bc82b15d2dc2517e7d5c06b505a2e98084d8cf6f5d7650f9"
+          "sha256": "ffb0f3ad2aac9603dcd5d93e1997fe58c47ea09cc716a681d029e9ea15bcf796"
         }
       ]
     },
@@ -240,7 +240,7 @@
       "origins": [
         {
           "file": "src/features/Goodies/orderReviews.ts",
-          "sha256": "287bdef377fb61744d02ce86c46aa542ce9c23797c495f62de00324c71c3c90a"
+          "sha256": "2adb3af728e05316c4d1a5254412142c8a03ac57b6a322e62e6129c2b870b0d5"
         }
       ]
     },
@@ -267,7 +267,7 @@
       "origins": [
         {
           "file": "src/features/Goodies/screens/Browse.tsx",
-          "sha256": "863765bf76419637769a981e8a42ed8a0b26c78c78bf5e658eb3ba2fdac98b43"
+          "sha256": "a743dd2e0e5530f87cc87b03b5d15ff1cfc117aad7977ba1c947f0990f682f54"
         }
       ]
     },
@@ -303,7 +303,7 @@
       "origins": [
         {
           "file": "src/features/Goodies/screens/Shop.tsx",
-          "sha256": "77cb1c2f21b9ad165774c5c77900fa0246b3a67ef9b804c93ab3f3b357feb4c5"
+          "sha256": "cbe8542b7e70dff4701760b617748575a976ec4c34d69196fdc407cb8b17dba9"
         }
       ]
     },
@@ -312,7 +312,7 @@
       "origins": [
         {
           "file": "src/features/Goodies/serverSync.ts",
-          "sha256": "77a7b8440f32fe6ecf382cb70057b5b5bc948886284ccf5059f04519039532ca"
+          "sha256": "ee5ea9ed53edf65a8f7c539dff2892af2d6f92b89ac786519a57c0c07b7d1ed3"
         }
       ]
     },
@@ -321,7 +321,7 @@
       "origins": [
         {
           "file": "src/features/Goodies/store.ts",
-          "sha256": "7fed24ff2be236308c0bef163da6cd8d2af4a78c33b7b9f0b9708dfabacf8591"
+          "sha256": "a1581822a2a196bc7d532524ab03bc4b5f3fa9fb14cfd2bec929b123218b907c"
         }
       ]
     },

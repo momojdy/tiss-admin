@@ -5,7 +5,7 @@ import {previewStorage as AsyncStorage} from './previewRuntime';
 import {previewBackend as supabase} from './previewRuntime';
 import {label} from './content';
 import type {Store, Item, Address, CartLine, Order} from './data/types';
-import {STAGES_DELIVERY, STAGES_PICKUP} from './data/seed';
+import {STAGES_DELIVERY, STAGES_PICKUP} from './data/orderStages';
 import {friendlyError} from './friendlyError';
 import {ownedCache, cacheEnvelope} from './accountCache';
 import {wantissLocale, WANTISS_LANGUAGES} from './previewLocales';
@@ -70,6 +70,7 @@ export function switchGoodiesAccount(userId: string | null) {
   Object.assign(S, WDEF(), GDEF(), {accountId: userId, cardPending: null, pendingGroupInviteCode: '',
     cs: 0, sch: 0, note: '', sh: null, pend: null, ro: null, busy: 0, currentLocation: null,
     pin: '', alcConsent: false, alcAck: 0});
+  S.firstOrderEligibilityUserId=null;S.firstOrderEligibilityError='';S.deliveryFeeQuote=null;S.deliveryQuoteLoading=false;S.deliveryQuoteError='';
   S.stack = [{r: 'home', u: Date.now()}];
   ui.close?.();
   emit();
@@ -164,6 +165,8 @@ function placeholderStore(sid: string, _name: string): Store {
     open: 0, h: '', nx: label("lbl.page.store.4f45fc13d6", "No longer taking orders"), far: false, acceptScheduledOrders: false,
   };
 }
+export function ensureGoodiesOrderStore(sid:string,name='Store'){if(sid&&!STB[sid])STB[sid]=placeholderStore(sid,name);}
+
 
 let liveTimer: any = null;
 export async function refreshLiveSchedules() {
@@ -569,6 +572,123 @@ export const cartStoreIds = (): string[] => {
 export const maxStops = (): number => Math.max(1, Math.min(8, Number((feesNow() as any).maxStops) || 3));
 /** Cart subtotal for one store. */
 export const storeSub = (storeId: string): number => S.cart.lines.filter((l: CartLine) => lineStore(l) === storeId).reduce((a: number, l: CartLine) => a + l.p * l.q, 0);
+/* All Goodies fee calculations and checkout use the same address fingerprint.
+   Previously the cart used an address key without coordinates while checkout used
+   a key with coordinates, so a valid road quote was ignored until order submission. */
+export const deliveryAddressPayload = (address: Address) => {
+  const pin = savedPoint(address);
+  return {
+    l: address.l, t: address.t, apt: address.apt, inst: address.inst,
+    city: address.city, department: address.department, country: address.country,
+    ...(pin ? {latitude: pin[0], longitude: pin[1]} : {}),
+  };
+};
+export const deliveryAddressKey = (address: Address | null | undefined): string =>
+  address?.t?.trim() ? JSON.stringify(deliveryAddressPayload(address)) : '';
+
+let firstDeliveryRequest: Promise<boolean | null> | null = null;
+let firstDeliveryRequestUser: string | null = null;
+/** Check the authenticated customer's real order history, never local demo/history state. */
+export async function refreshFirstDeliveryEligibility(force = false): Promise<boolean | null> {
+  if (!feesNow().firstFree) return false;
+  const {data, error} = await supabase.auth.getUser();
+  const userId = data?.user?.id;
+  if (S.accountId!==userId)return null;
+  if (error || !userId) {
+    S.firstOrderEligible = null;
+    S.firstOrderEligibilityUserId = null;
+    S.firstOrderEligibilityError = label('lbl.deliverySignIn','Sign in to verify your first-delivery offer.');
+    emit();
+    return null;
+  }
+  if (firstDeliveryRequest && firstDeliveryRequestUser === userId) return firstDeliveryRequest;
+  if (!force && S.firstOrderEligibilityUserId === userId && typeof S.firstOrderEligible === 'boolean') return S.firstOrderEligible;
+  firstDeliveryRequestUser = userId;
+  firstDeliveryRequest = (async () => {
+    const {count, error: historyError} = await supabase.from('goodies_orders')
+      .select('id', {count: 'exact', head: true}).eq('customer_id', userId).eq('order_type', 'delivery');
+    if (historyError || count == null) throw historyError || new Error('First-delivery eligibility could not be verified.');
+    if(S.accountId!==userId)return null;
+    const eligible = count === 0;
+    S.firstOrderEligible = eligible;
+    S.firstOrderEligibilityUserId = userId;
+    S.firstOrderEligibilityError = '';
+    emit();
+    return eligible;
+  })().catch((err: any) => {
+    if(S.accountId!==userId)return null;
+    S.firstOrderEligible = null;
+    S.firstOrderEligibilityUserId = userId;
+    S.firstOrderEligibilityError = friendlyError(err,label('lbl.deliveryEligibilityFailed','Could not verify first-delivery eligibility.'));
+    emit();
+    return null;
+  }).finally(() => {if(firstDeliveryRequestUser===userId){firstDeliveryRequest = null; firstDeliveryRequestUser = null;}});
+  return firstDeliveryRequest;
+}
+
+function quoteFee(value:unknown):number|null{
+  if((typeof value!=='number'&&typeof value!=='string')||String(value).trim()==='')return null;
+  const amount=Number(value);return Number.isFinite(amount)&&amount>=0&&amount<=1000000&&Math.abs(amount*100-Math.round(amount*100))<0.000001?amount:null;
+}
+let activeQuoteRequest: {key: string; promise: Promise<any>} | null = null;
+/** Only a server quote for the exact cart and address is usable for payment. */
+export function deliveryQuoteReady(): boolean {
+  if (isPk()) return true;
+  const addressKey = deliveryAddressKey(addr());
+  const ids = cartStoreIds(), q = S.deliveryFeeQuote;
+  if (!ids.length || !addressKey || !q || Number(q.expiresAt) <= Date.now()) return false;
+  return ids.length === 1
+    ? !q.multi && q.storeId === ids[0] && q.addressKey === addressKey && !!q.quoteId
+    : !!q.multi && q.storeKey === ids.join(',') && q.addressKey === addressKey &&
+      ids.every((id: string) => !!q.perStore?.[id]?.id);
+}
+/** Start road pricing when the cart is viewed, not after the customer taps Pay. */
+export async function refreshGoodiesDeliveryQuote(): Promise<any | null> {
+  const address = addr(), ids = cartStoreIds(),owner=S.accountId;
+  if (!address?.t?.trim() || !ids.length || isPk() || ids.some((id: string) => !STB[id]?.live)) return null;
+  const addressKey = deliveryAddressKey(address), storeKey = ids.join(',');
+  if (deliveryQuoteReady() && Number(S.deliveryFeeQuote?.expiresAt) > Date.now() + 30_000) return S.deliveryFeeQuote;
+  const key = owner+'|'+storeKey + '|' + addressKey;
+  if (activeQuoteRequest?.key === key) return activeQuoteRequest.promise;
+  S.deliveryQuoteLoading = true; S.deliveryQuoteError = ''; emit();
+  const request = (async () => {
+    const payload = ids.length === 1
+      ? {store_id: ids[0], address: deliveryAddressPayload(address)}
+      : {store_ids: ids, address: deliveryAddressPayload(address)};
+    const {data, error} = await supabase.functions.invoke('goodies-delivery-quote', {body: payload});
+    if (error || !data) throw error || new Error('Could not calculate your delivery fee.');
+    const expiresAt = Date.now() + Math.max(30, Number(data.expires_in_seconds) || 300) * 1000;
+    let quote: any;
+    if (ids.length === 1) {
+      if (!data.quote_id || quoteFee(data.fee)===null) throw new Error(data.error || 'No valid delivery quotation was returned.');
+      quote = {quoteId: String(data.quote_id), fee: quoteFee(data.fee)!, storeId: ids[0], addressKey, expiresAt};
+    } else {
+      const quotes = Array.isArray(data.quotes) ? data.quotes : [];
+      if (quotes.length !== ids.length || quoteFee(data.delivery_fee)===null) throw new Error(data.error || 'No valid multi-store delivery quotation was returned.');
+      const perStore: Record<string, {id: string; fee: number}> = {};
+      quotes.forEach((q: any) => {perStore[String(q.store_id)] = {id: String(q.id), fee: quoteFee(q.fee) as number};});
+      if (ids.some((id: string) => !perStore[id]?.id || perStore[id].fee===null)) throw new Error('Incomplete delivery quotation.');
+      quote = {multi: true, storeKey, addressId: S.as, addressKey, fee: quoteFee(data.delivery_fee)!, perStore, expiresAt};
+    }
+    if (S.accountId===owner&&cartStoreIds().join(',') === storeKey && deliveryAddressKey(addr()) === addressKey && !isPk()) {
+      S.deliveryFeeQuote = quote;
+      S.deliveryQuoteError = '';
+      emit();
+    }
+    return quote;
+  })().catch((err: any) => {
+    if (S.accountId===owner&&cartStoreIds().join(',') === storeKey && deliveryAddressKey(addr()) === addressKey) {
+      S.deliveryQuoteError = friendlyError(err,label('lbl.deliveryFeeFailed','Could not calculate the delivery fee. Please try again.'));
+      emit();
+    }
+    return null;
+  }).finally(() => {
+    if (activeQuoteRequest?.key === key){activeQuoteRequest = null;if(S.accountId===owner){S.deliveryQuoteLoading = false; emit();}}
+  });
+  activeQuoteRequest = {key, promise: request};
+  return request;
+}
+
 export const canAddStop = (storeId: string): boolean => {
   const ids = cartStoreIds();
   if (!ids.length || ids.includes(storeId)) return true;
@@ -582,13 +702,13 @@ export function totals() {
   const F = feesNow();
   const selectedAddress = addr();
   const quote = (S as any).deliveryFeeQuote;
-  const quoteAddressKey = selectedAddress ? JSON.stringify({l: selectedAddress.l, t: selectedAddress.t, apt: selectedAddress.apt, inst: selectedAddress.inst, city: selectedAddress.city, department: selectedAddress.department, country: selectedAddress.country}) : '';
+  const quoteAddressKey = deliveryAddressKey(selectedAddress);
   const quoteValid = !!st && st.deliveryPricingMode === 'distance' && quote?.storeId === st.id && quote?.addressKey === quoteAddressKey && Number(quote?.expiresAt) > Date.now();
   const stops = cartStoreIds();
   if (stops.length > 1) {
     /* Several stores: one combined delivery fee (the extra-store surcharge is added on the server and not itemised), one service fee, no promo code. */
     const mq = (S as any).deliveryFeeQuote;
-    const mqValid = !!mq?.multi && mq.storeKey === stops.join(',') && String(mq.addressId) === String(S.as) && Number(mq.expiresAt) > Date.now();
+    const mqValid = !!mq?.multi && mq.storeKey === stops.join(',') && mq.addressKey === quoteAddressKey && Number(mq.expiresAt) > Date.now();
     const mFee = pk ? 0 : first() && F.firstFree ? 0 : mqValid ? Number(mq.fee) : stops.reduce((a: number, id: string) => a + (Number(STB[id]?.fee) || 0), 0);
     const mSvc = sub ? F.svc : 0, mTip = pk ? 0 : S.tip;
     return {st, sub, fee: mFee, svc: mSvc, disc: 0, tip: mTip, total: sub + mFee + mSvc + mTip, free: false, perr: '', pok: false, stops};

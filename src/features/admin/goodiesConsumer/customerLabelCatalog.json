@@ -647,6 +647,13 @@
     ]
   },
   {
+    "id": "lbl.actionStoreUnavailable",
+    "text": "This store is no longer available. Your cart is saved.",
+    "pages": [
+      "Shared actions and validation"
+    ]
+  },
+  {
     "id": "lbl.actionTimePassed",
     "text": "That time has passed. Pick another",
     "pages": [
@@ -1031,6 +1038,7 @@
     "id": "lbl.browseNoStores",
     "text": "No stores match right now",
     "pages": [
+      "Home",
       "Explore"
     ]
   },
@@ -1726,8 +1734,7 @@
     "id": "lbl.cartBrowse",
     "text": "Browse stores",
     "pages": [
-      "Cart",
-      "Checkout"
+      "Cart"
     ]
   },
   {
@@ -1789,6 +1796,13 @@
   {
     "id": "lbl.cartEmptyTitle",
     "text": "Your cart is empty",
+    "pages": [
+      "Cart"
+    ]
+  },
+  {
+    "id": "lbl.cartFirstDeliveryFree",
+    "text": "Free (first delivery)",
     "pages": [
       "Cart"
     ]
@@ -1878,6 +1892,13 @@
     ]
   },
   {
+    "id": "lbl.cartReviewUnavailableStore",
+    "text": "Your saved cart includes an unavailable store. Please review it.",
+    "pages": [
+      "Checkout"
+    ]
+  },
+  {
     "id": "lbl.cartServiceFee",
     "text": "Service fee",
     "pages": [
@@ -1892,11 +1913,25 @@
     ]
   },
   {
+    "id": "lbl.cartStoreMissingKeepCart",
+    "text": "One of the stores in your saved cart is no longer available. Your cart has not been cleared.",
+    "pages": [
+      "Cart"
+    ]
+  },
+  {
     "id": "lbl.cartStoreOrder",
     "text": "Your order from this store",
     "pages": [
       "Cart",
       "Checkout"
+    ]
+  },
+  {
+    "id": "lbl.cartStoreTemporarilyUnavailable",
+    "text": "Store temporarily unavailable",
+    "pages": [
+      "Cart"
     ]
   },
   {
@@ -1907,10 +1942,18 @@
     ]
   },
   {
+    "id": "lbl.cartTapRetryDelivery",
+    "text": " · Tap to retry",
+    "pages": [
+      "Cart"
+    ]
+  },
+  {
     "id": "lbl.cartTitle",
     "text": "Your cart",
     "pages": [
-      "Cart"
+      "Cart",
+      "Checkout"
     ]
   },
   {
@@ -2152,8 +2195,9 @@
   },
   {
     "id": "lbl.checkoutAddAddress",
-    "text": "Add address",
+    "text": "Choose delivery address",
     "pages": [
+      "Cart",
       "Checkout"
     ]
   },
@@ -2203,7 +2247,6 @@
     "id": "lbl.checkoutCartUnavailable",
     "text": "Your cart is unavailable",
     "pages": [
-      "Cart",
       "Checkout"
     ]
   },
@@ -2822,7 +2865,7 @@
   },
   {
     "id": "lbl.cms.23eaba046138",
-    "text": "Could not calculate the road distance. Please check the delivery address.",
+    "text": "Could not calculate the delivery fee. Please check your address.",
     "pages": [
       "Shared actions and validation"
     ]
@@ -4170,13 +4213,6 @@
     ]
   },
   {
-    "id": "lbl.cms.a323e7a83705",
-    "text": "Free (first order)",
-    "pages": [
-      "Cart"
-    ]
-  },
-  {
     "id": "lbl.cms.a366719f0771",
     "text": "Close",
     "pages": [
@@ -4280,13 +4316,6 @@
     "text": "Main default",
     "pages": [
       "Addresses"
-    ]
-  },
-  {
-    "id": "lbl.cms.b054edffa0ed",
-    "text": "Could not calculate the delivery fee. Please check the delivery address.",
-    "pages": [
-      "Shared actions and validation"
     ]
   },
   {
@@ -4724,6 +4753,14 @@
     "text": ". Adding from ",
     "pages": [
       "Sheets · newcart"
+    ]
+  },
+  {
+    "id": "lbl.cms.deliveryCalculating",
+    "text": "Calculating…",
+    "pages": [
+      "Cart",
+      "Shop · shared"
     ]
   },
   {
@@ -5194,6 +5231,48 @@
     "text": "Codes you can use at checkout",
     "pages": [
       "Home"
+    ]
+  },
+  {
+    "id": "lbl.deliveryEligibilityFailed",
+    "text": "Could not verify first-delivery eligibility.",
+    "pages": [
+      "Shared state messages"
+    ]
+  },
+  {
+    "id": "lbl.deliveryEligibilityLoading",
+    "text": "Checking first-delivery offer…",
+    "pages": [
+      "Cart"
+    ]
+  },
+  {
+    "id": "lbl.deliveryFeeFailed",
+    "text": "Could not calculate the delivery fee. Please try again.",
+    "pages": [
+      "Shared state messages"
+    ]
+  },
+  {
+    "id": "lbl.deliveryFeeLoading",
+    "text": "Calculating…",
+    "pages": [
+      "Cart"
+    ]
+  },
+  {
+    "id": "lbl.deliverySignIn",
+    "text": "Sign in to verify your first-delivery offer.",
+    "pages": [
+      "Shared state messages"
+    ]
+  },
+  {
+    "id": "lbl.deliveryUnavailableRetry",
+    "text": "Unavailable — retry",
+    "pages": [
+      "Cart"
     ]
   },
   {
@@ -7113,13 +7192,6 @@
     ]
   },
   {
-    "id": "lbl.page.actions.25b66787be",
-    "text": "). Check the delivery address and try again.",
-    "pages": [
-      "Shared actions and validation"
-    ]
-  },
-  {
     "id": "lbl.page.actions.66a268bc9d",
     "text": "Sign in to create a Wantiss wallet.",
     "pages": [
@@ -7979,6 +8051,13 @@
     ]
   },
   {
+    "id": "lbl.reviewPending",
+    "text": "Your review is awaiting approval.",
+    "pages": [
+      "Review sheet"
+    ]
+  },
+  {
     "id": "lbl.reviewSaveFailed",
     "text": "Could not submit your review. Please try again.",
     "pages": [
@@ -8773,13 +8852,6 @@
     "pages": [
       "Shared Bill requests",
       "Shared Bill contribution"
-    ]
-  },
-  {
-    "id": "lbl.sharedPay.12076fe48d8c",
-    "text": "Delivery quote failed (HTTP ",
-    "pages": [
-      "Shared actions and validation"
     ]
   },
   {

@@ -1,7 +1,8 @@
 import {GoodiesSettlementAdmin} from './GoodiesSettlementAdmin';
 import {GoodiesSharedBillRefunds} from './GoodiesSharedBillRefunds';
-import {ui as adminUi} from '../../state/db';
-import React, {useCallback, useEffect, useState} from 'react';
+import {ui as adminUi,useDb} from '../../state/db';
+import {hasServerPermission} from '../../state/access';
+import React, {useCallback, useEffect, useRef, useState} from 'react';
 import {Alert, Image, Pressable, ScrollView, Text, TextInput, View} from 'react-native';
 import {supabase} from '../../lib/supabase';
 import {useNav} from '../../shell/Nav';
@@ -24,6 +25,7 @@ async function goodiesRequest(name:string,args?:Record<string,unknown>) {
 }
 
 export function GoodiesAdminScreen() {
+  useDb();
   const {go,navKey}=useNav(); const toast=useToast(); const {c}=useTheme();
   const [module,setModule]=useState('Overview');
   useEffect(()=>{const target=String(adminUi.goodiesModule||'');if(MODULES.includes(target)){setModule(target);delete adminUi.goodiesModule;}},[navKey]);
@@ -38,6 +40,8 @@ export function GoodiesAdminScreen() {
   const [reviewsLoading,setReviewsLoading]=useState(true);
   const [reviewsError,setReviewsError]=useState(false);
   const [reviewsAttempt,setReviewsAttempt]=useState(0);
+  const [reviewRejectId,setReviewRejectId]=useState<string|null>(null),[reviewRejectNote,setReviewRejectNote]=useState('');
+  const reviewLock=useRef(false);const canReview=hasServerPermission('goodies.ops','manage');
   const [orderRows,setOrderRows]=useState<any[]>([]);
   const [reports,setReports]=useState<any[]>([]);
   const [loading,setLoading]=useState(true);
@@ -109,6 +113,15 @@ export function GoodiesAdminScreen() {
     return rows;
   };
   useEffect(()=>{if(module==='Delivery reports')void loadReports();},[module]);
+  const reviewCustomerRating=async(row:any,status:'approved'|'rejected',note:string|null=null)=>{
+    if(!canReview||reviewLock.current)return;
+    if(status==='rejected'&&!note?.trim()){toast('Enter a review rejection reason.');return;}
+    reviewLock.current=true;setBusy(row.id);
+    try{const {error}=await goodiesRequest('goodies_admin_review_order_review',{p_review_id:row.id,p_status:status,p_note:status==='rejected'?note?.trim()||null:null});if(error)throw error;
+      setReviewRejectId(null);setReviewRejectNote('');toast(status==='approved'?'Customer review published':'Customer review rejected');setReviewsAttempt(n=>n+1);
+    }catch{toast('Could not confirm this review decision. Refresh its status and retry.');}
+    finally{reviewLock.current=false;setBusy('');}
+  };
   const resolveReport=(item:any,resolution:'release'|'refund')=>{
     Alert.alert(resolution==='refund'?'Refund the customer':'Confirm delivery',
       resolution==='refund'?'Cancel '+item.order_code+' and refund '+money(item.total)+' to the customer?':'Mark '+item.order_code+' as delivered and release it to the store?',[
@@ -151,7 +164,7 @@ export function GoodiesAdminScreen() {
   useEffect(()=>{
     if(module!=='Customer reviews')return;
     let active=true;setReviewsLoading(true);setReviewsError(false);
-    void Promise.resolve(supabase.from('goodies_order_reviews').select('order_id,business_id,target,rating,comment,created_at').order('created_at',{ascending:false}).order('order_id',{ascending:false}).order('target').range(reviewsPage*50,reviewsPage*50+49))
+    void Promise.resolve(goodiesRequest('goodies_admin_list_reviews',{p_offset:reviewsPage*50,p_limit:50}))
       .then(({data,error})=>{if(!active)return;if(error)throw error;setCustomerReviews(data||[]);})
       .catch(()=>{if(active)setReviewsError(true);}).finally(()=>{if(active)setReviewsLoading(false);});
     return()=>{active=false;};
@@ -251,7 +264,9 @@ export function GoodiesAdminScreen() {
       </View>)}
     </>:null}
     {module==='Customer reviews'?<>
-      {reviewsLoading?<Text style={labelStyle}>Loading reviews…</Text>:reviewsError?<View style={cardStyle}><Text>Could not load reviews.</Text><Pressable onPress={()=>setReviewsAttempt(n=>n+1)} style={btn('#E9EEE6')}><Text>Try again</Text></Pressable></View>:customerReviews.length?customerReviews.map(r=><View key={r.order_id+r.target} style={cardStyle}><Text style={valueStyle}>{r.rating} / 5 · {r.target==='driver'?'Delivery':'Store'}</Text><Text style={labelStyle}>{r.order_id} · {dateText(r.created_at)}</Text><Text>{r.comment||'No comment'}</Text></View>):<Text style={labelStyle}>No reviews yet.</Text>}
+      {reviewsLoading?<Text style={labelStyle}>Loading reviews…</Text>:reviewsError?<View style={cardStyle}><Text>Could not load reviews.</Text><Pressable onPress={()=>setReviewsAttempt(n=>n+1)} style={btn('#E9EEE6')}><Text>Try again</Text></Pressable></View>:customerReviews.length?customerReviews.map(r=><View key={r.id} style={cardStyle}><Text style={valueStyle}>{r.rating} / 5 · {r.review_target==='courier'?'Delivery':'Store'} · {r.review_status}</Text><Text style={labelStyle}>{r.order_id} · {dateText(r.created_at)}</Text><Text>{r.comment||'No comment'}</Text>{r.review_note?<Text style={labelStyle}>Review reason: {r.review_note}</Text>:null}
+      {r.review_status==='pending'&&canReview?<View style={{flexDirection:'row',gap:8,marginTop:10}}><Pressable disabled={!!busy} onPress={()=>void reviewCustomerRating(r,'approved')} style={btn('#E8F2E5')}><Text>Publish</Text></Pressable><Pressable disabled={!!busy} onPress={()=>{setReviewRejectId(r.id);setReviewRejectNote('');}} style={btn('#F7EAE8')}><Text>Reject</Text></Pressable></View>:null}
+      {r.review_status==='pending'&&reviewRejectId===r.id&&canReview?<View><TextInput accessibilityLabel="Review rejection reason" value={reviewRejectNote} onChangeText={setReviewRejectNote} maxLength={500} multiline placeholder="Why cannot this review be published?" style={{borderWidth:1,borderColor:'#D5DAD2',padding:10,borderRadius:10,marginTop:10}}/><View style={{flexDirection:'row',gap:8,marginTop:8}}><Pressable disabled={!!busy||!reviewRejectNote.trim()} onPress={()=>void reviewCustomerRating(r,'rejected',reviewRejectNote)} style={btn('#F7EAE8')}><Text>Confirm rejection</Text></Pressable><Pressable disabled={!!busy} onPress={()=>setReviewRejectId(null)} style={btn('#EDF0EA')}><Text>Cancel</Text></Pressable></View></View>:null}</View>):<Text style={labelStyle}>No reviews yet.</Text>}
       <View style={{flexDirection:'row',gap:8}}><Pressable disabled={reviewsPage===0||reviewsLoading} onPress={()=>setReviewsPage(n=>n-1)} style={btn('#E9EEE6')}><Text>Previous page</Text></Pressable><Pressable disabled={customerReviews.length<50||reviewsLoading} onPress={()=>setReviewsPage(n=>n+1)} style={btn('#E9EEE6')}><Text>Next page</Text></Pressable></View>
     </>:null}
     {module==='Orders'?<>
