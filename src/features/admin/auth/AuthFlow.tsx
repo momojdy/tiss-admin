@@ -62,10 +62,10 @@ export function AuthFlow({ notice, noticeBad, onDone }: Props) {
     void Linking.getInitialURL().then(consumeAuthLink);
     void supabase.auth.getSession().then(async ({ data }) => {
       const user = data.session?.user;
-      if (!active || !user?.email_confirmed_at || user.user_metadata?.wantiss_invite_accepted === true) return;
+      if (!active || !user?.email_confirmed_at) return;
       const { data: pendingInvite } = await supabase.from('wantiss_admin_staff')
         .select('invited_at,invitation_expires_at').eq('user_id', user.id).maybeSingle();
-      if (active && pendingInvite?.invited_at && (!pendingInvite.invitation_expires_at || Date.parse(pendingInvite.invitation_expires_at) > Date.now())) {
+      if (active && pendingInvite?.invited_at && pendingInvite.invitation_expires_at && Date.parse(pendingInvite.invitation_expires_at) > Date.now()) {
         setView('invite');
         message(INVITATION_VERIFIED_MESSAGE);
       }
@@ -106,7 +106,7 @@ export function AuthFlow({ notice, noticeBad, onDone }: Props) {
         setView('blocked');
         throw new Error(staff.status === 'suspended' ? 'Your staff access is suspended. Contact a Super Admin.' : staff.status === 'revoked' ? 'Your staff access has been revoked.' : 'This invitation expired. Ask a Super Admin to send a new invitation.');
       }
-      if (staff.invited_at && data.user.user_metadata?.wantiss_invite_accepted !== true) {
+      if (staff.invited_at && staff.invitation_expires_at) {
         setView('invite');
         message(INVITATION_VERIFIED_MESSAGE);
         return;
@@ -172,8 +172,7 @@ export function AuthFlow({ notice, noticeBad, onDone }: Props) {
       if (acceptingInvite) {
         const { error: acceptError } = await supabase.rpc('wantiss_admin_accept_invitation');
         if (acceptError) throw acceptError;
-        const { error: metadataError } = await supabase.auth.updateUser({ data: { wantiss_invite_accepted: true } });
-        if (metadataError) throw metadataError;
+        // The protected acceptance RPC, not editable user metadata, authorizes staff access.
       }
       setPassword(''); setConfirm(''); setView('in');
       await supabase.auth.signOut();
