@@ -143,6 +143,22 @@ export function openState(hours: Record<string, DayHours> | null | undefined, no
   return {open: 0, h, nx: label('lbl.storeCurrentlyClosed', 'Currently closed')};
 }
 
+/** Mirror the checkout server's opening-hours and earliest-local-clock admission for every cart stop. */
+export function canScheduleGoodiesStore(storeId:string, timestamp:number):boolean {
+  const store=STB[storeId];
+  if(!store?.live||!store.acceptScheduledOrders||!Number.isFinite(timestamp)||timestamp<=0)return false;
+  const timezone=store.scheduledOrderTimezone||'UTC';
+  if(!openState(store.scheduleHours,new Date(timestamp),timezone).open)return false;
+  const minimum=/^([01]\d|2[0-3]):([0-5]\d)$/.exec(String(store.scheduledOrderStartTime||'10:00').slice(0,5));
+  if(!minimum)return false;
+  try {
+    const parts=new Intl.DateTimeFormat('en-US',{timeZone:timezone,hour:'2-digit',minute:'2-digit',hourCycle:'h23'}).formatToParts(new Date(timestamp));
+    const hour=Number(parts.find(part=>part.type==='hour')?.value);
+    const minute=Number(parts.find(part=>part.type==='minute')?.value);
+    return Number.isInteger(hour)&&Number.isInteger(minute)&&hour*60+minute>=Number(minimum[1])*60+Number(minimum[2]);
+  }catch{return false;}
+}
+
 function liveStore(r: any, items: Item[]): Store {
   const id = String(r.store_id || r.business_id), names = r.names && typeof r.names === 'object' ? r.names : {};
   const eMin = Number(r.eta_min) || 20, eMax = Number(r.eta_max) || 35, st = openState(r.hours, new Date(), String(r.scheduled_order_timezone || 'UTC'));
