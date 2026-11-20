@@ -11,3 +11,11 @@ export function groupInviteCodeFromLink(url: unknown): string|null {
     return /^[A-Z0-9]{8,16}$/.test(code)?code:null;
   } catch {return null;}
 }
+
+/** Only Wantiss group links or literal invite codes can be scanned. */
+export function groupInviteCodeFromScan(value: unknown): string|null {
+  if(typeof value!=='string')return null;
+  const candidate=value.trim();
+  if(/^[A-Z0-9]{8,16}$/i.test(candidate))return candidate.toUpperCase();
+  return groupInviteCodeFromLink(candidate);
+}

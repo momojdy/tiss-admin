@@ -18,6 +18,7 @@ import {useSafeAreaInsets} from 'react-native-safe-area-context';
 import {BottomSheet, ConfirmDialog} from './Overlays';
 import {friendlyError} from '../friendlyError';
 import {fetchOpenHostedGoodiesGroup} from '../groupRecovery';
+import {groupInviteCodeFromScan} from '../groupInviteLinks';
 import {fetchGoodiesOrderForNotification} from '../serverSync';
 import {push, reset} from '../store';
 import {wantissLocale} from '../previewLocales';
@@ -807,10 +808,8 @@ function GroupOrderSheet({close, showTitle = true, showDone = true, storeId = ''
       <View style={{flex:1,backgroundColor:'#000000'}}>
         <CameraView style={{flex:1}} facing="back" barcodeScannerSettings={{barcodeTypes:['qr']}} onBarcodeScanned={({data})=>{
           setScannerOpen(false);
-          const scanned=String(data||'').trim();
-          const linkCode=scanned.match(/[?&]code=([^&]+)/i)?.[1] || scanned.match(/^wantiss:\/\/goodies\/group\/([^/?#]+)/i)?.[1];
-          let code=linkCode ? decodeURIComponent(linkCode) : scanned;
-          code=code.trim().toUpperCase();
+          const code=groupInviteCodeFromScan(data);
+          if(!code){toast(label('lbl.groupInviteUnavailable','This group invitation is unavailable. Create or join a group order again.'));return;}
           setInviteCode(code);
           toast(label("lbl.cms.c90943bbdf87", "QR code scanned. Tap Join group order to continue."));
         }}/>

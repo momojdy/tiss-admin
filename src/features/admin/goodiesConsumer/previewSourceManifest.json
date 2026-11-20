@@ -96,7 +96,7 @@
       "origins": [
         {
           "file": "src/features/Goodies/components/Sheets.tsx",
-          "sha256": "623ae02009777990ec398bf51a94805f5b6ebb40355ef1f473c6a2cca8acd935"
+          "sha256": "6d82690b86c16af41d726e72334158b1c3fc19e82b8b75fdda13434842bbe417"
         }
       ]
     },
@@ -195,7 +195,7 @@
       "origins": [
         {
           "file": "src/features/Goodies/groupInviteLinks.ts",
-          "sha256": "e37a424565dc60f34a316d63eded5afa3dbfee95ad8fd43abcbf48c67a5a01c4"
+          "sha256": "b75da0f763d8d9ae099434b56dee308e9b26b5c75e0f48fec1674722937dab00"
         }
       ]
     },
