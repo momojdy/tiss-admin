@@ -270,7 +270,7 @@ export function Cart() {
               <T cmsKey={"lbl.cms.2fb4e79b6c80"} weight="600">{label("lbl.cms.2fb4e79b6c80", "Order time")}</T>
               <T cmsKey={"lbl.cms.2d27b416d70d"} size={13} color={th.mut} style={{marginTop:3}}>{S.sch > Date.now() ? fmtStoreDay(S.cart.sid,S.sch) + ' · ' + fmtStoreTime(S.cart.sid,S.sch) : label("lbl.cms.2d27b416d70d", "ASAP")}</T>
             </View>
-            {st.acceptScheduledOrders ? <Pressable onPress={() => setScheduleOpen(v => !v)}><T cmsKeys={["lbl.cms.a366719f0771","lbl.cms.c349a59278cd","lbl.cms.482e3b899f84"]} size={13.5} weight="600" color={th.br}>{scheduleOpen ? label("lbl.cms.a366719f0771", "Close") : S.sch > Date.now() ? label("lbl.cms.c349a59278cd", "Change time") : label("lbl.cms.482e3b899f84", "Choose time")}</T></Pressable> : <Badge cmsKey={"lbl.cms.2d27b416d70d"} label={label("lbl.cms.2d27b416d70d", "ASAP")} />}
+            {st.acceptScheduledOrders && stops.every(id=>STB[id]?.acceptScheduledOrders) ? <Pressable onPress={() => setScheduleOpen(v => !v)}><T cmsKeys={["lbl.cms.a366719f0771","lbl.cms.c349a59278cd","lbl.cms.482e3b899f84"]} size={13.5} weight="600" color={th.br}>{scheduleOpen ? label("lbl.cms.a366719f0771", "Close") : S.sch > Date.now() ? label("lbl.cms.c349a59278cd", "Change time") : label("lbl.cms.482e3b899f84", "Choose time")}</T></Pressable> : <Badge cmsKey={"lbl.cms.2d27b416d70d"} label={label("lbl.cms.2d27b416d70d", "ASAP")} />}
           </Row>
           {S.sch > Date.now() ? <Pressable onPress={() => {setSch(0);setScheduleOpen(false);}} style={{alignSelf:'flex-start',marginTop:8}}><T cmsKey={"lbl.cms.655123d67917"} size={12.5} weight="600" color={th.br}>{label("lbl.cms.655123d67917", "Switch to ASAP")}</T></Pressable> : null}
           {scheduleOpen ? <ScheduleInline close={() => setScheduleOpen(false)} /> : null}
@@ -340,9 +340,9 @@ export function Checkout() {
     void refreshPaymentOptions();
     return () => { active = false; };
   }, [st?.id, st?.live, a?.t, a?.apt, a?.inst, a?.city, a?.department, a?.country]);
-  useEffect(() => { if (st?.id && !st.acceptScheduledOrders && S.sch) setSch(0); }, [st?.id, st?.acceptScheduledOrders]);
+  useEffect(() => { if (st?.id && (!st.acceptScheduledOrders || stops.some(id=>!STB[id]?.acceptScheduledOrders)) && S.sch) setSch(0); }, [st?.id, st?.acceptScheduledOrders, stops.join(',')]);
   /* A closed store can only be ordered from by scheduling: open the picker so the customer is not left on an empty "Schedule" choice. */
-  useEffect(() => { if (st?.id && !st.open && st.acceptScheduledOrders && !S.sch) setScheduleOpen(true); }, [st?.id, st?.open, st?.acceptScheduledOrders]);
+  useEffect(() => { if (st?.id && !st.open && st.acceptScheduledOrders && stops.every(id=>STB[id]?.acceptScheduledOrders) && !S.sch) setScheduleOpen(true); }, [st?.id, st?.open, st?.acceptScheduledOrders, stops.join(',')]);
   useEffect(() => {
     let active = true;
     setCashEligible(false);setCashError(false);
@@ -386,7 +386,7 @@ export function Checkout() {
         <T cmsKey={"lbl.cms.40babc6bdeb6"} size={12.5} color={th.mut}>{st.eta} {label("lbl.cms.40babc6bdeb6", "min")}</T>
       </Row>
     </Radio> : null}
-    {st.acceptScheduledOrders ? <Radio on={!!S.sch} onPress={() => setScheduleOpen(v => !v)}>
+    {st.acceptScheduledOrders && stops.every(id=>STB[id]?.acceptScheduledOrders) ? <Radio on={!!S.sch} onPress={() => setScheduleOpen(v => !v)}>
       <Row sp style={{alignItems:'center',flex:1}}>
         <View style={{flex:1,minWidth:0}}>
           <T cmsKey={'lbl.checkoutScheduleOption'} weight="600">{label('lbl.checkoutScheduleOption','Schedule')}</T>
@@ -395,7 +395,7 @@ export function Checkout() {
         <Icon name="edit" size={17} color={th.br}/>
       </Row>
     </Radio> : null}
-    {scheduleOpen && st.acceptScheduledOrders ? <ScheduleInline close={() => setScheduleOpen(false)} /> : null}
+    {scheduleOpen && st.acceptScheduledOrders && stops.every(id=>STB[id]?.acceptScheduledOrders) ? <ScheduleInline close={() => setScheduleOpen(false)} /> : null}
     {pk ? null : (<><Ttl>{label('lbl.checkoutCourierTip', 'Tip your courier')}</Ttl><View style={{flexDirection: 'row', flexWrap: 'wrap', gap: 8}}>{fees().tips.map((v: number) => <Pressable key={v} onPress={() => setTip(v)} style={{paddingVertical: 9, paddingHorizontal: 14, borderRadius: 18, backgroundColor: S.tip === v ? th.br : th.soft}}><T cmsKey={'lbl.checkoutNoTip'} size={13.5} weight="600" color={S.tip === v ? '#fff' : th.ink}>{v ? money(v) : label('lbl.checkoutNoTip', 'No tip')}</T></Pressable>)}</View></>)}
     <Input cmsPlaceholderKey={'lbl.checkoutOptional'} label={pk ? label('lbl.checkoutStoreNote', 'Note for the store') : label('lbl.checkoutDeliveryInstructions', 'Delivery instructions')} value={S.note} onChange={v => {S.note = v; emit();}} placeholder={label('lbl.checkoutOptional', 'Optional')} multiline />
   </>);
