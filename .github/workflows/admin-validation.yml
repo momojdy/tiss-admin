@@ -6,15 +6,29 @@ on:
   push:
     branches: [main, audit/shared-backend-foundation]
 
+defaults:
+  run:
+    working-directory: tiss-admin
+
 jobs:
   typecheck:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
+        with:
+          path: tiss-admin
+      - name: Checkout paired Goodies consumer source
+        uses: actions/checkout@v4
+        with:
+          repository: momojdy/tiss_tiss_beta
+          ref: 41d8e9242c5dcfd3a1e8a2a8ee53a00de70b4778
+          path: tiss_tiss_beta
+          persist-credentials: false
       - uses: actions/setup-node@v4
         with:
           node-version: 22
           cache: npm
+          cache-dependency-path: tiss-admin/package-lock.json
       - run: npm ci
       - name: Goodies permissions, CMS and settlement tests
         run: npm run test:goodies
