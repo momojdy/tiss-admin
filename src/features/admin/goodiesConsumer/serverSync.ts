@@ -1,5 +1,6 @@
 import {applyOrderReviews} from './orderReviews';
 import {wantissLocale} from './previewLocales';
+import {label} from './content';
 import {CUSTOMER_NOTIFICATION_FILTER} from './notifications';
 import { AppState, type AppStateStatus } from 'react-native';
 import {previewBackend as supabase} from './previewRuntime';
@@ -51,6 +52,7 @@ function mapOrder(row: ServerOrder) {
   const sid = String(row.store_id || '');
   ensureGoodiesOrderStore(sid);
   const pk = row.order_type === 'pickup';
+  const payment = String(row.payment_method ?? '').trim().toLowerCase();
   const address = row.address && typeof row.address === 'object' ? row.address : null;
   const items = Array.isArray(row.items) ? row.items : [];
   return {
@@ -80,8 +82,14 @@ function mapOrder(row: ServerOrder) {
     addr: pk ? (STB[sid]?.n || 'Store') : String(address?.t || ''),
     ad: pk ? null : address,
     ph: String(row.contact_phone || ''),
-    pay: String(row.payment_method || 'cash').toLowerCase(),
+    pay: payment,
+    payl: payment === 'wallet' ? label('lbl.checkoutWallet', 'Wantiss Wallet')
+      : payment === 'card' ? label('lbl.checkoutCard', 'Credit / debit card')
+      : payment === 'cash' ? label('lbl.cms.ffb25a7171b4', 'Cash')
+      : payment === 'moncash' ? label('lbl.checkoutMoncash', 'MonCash')
+      : label('lbl.checkoutPaymentMethod', 'Payment method'),
     payStatus: row.payment_status || null,
+    paymentStatus: row.payment_status || null,
     note: String(row.notes || ''),
     sch: row.scheduled_for ? Date.parse(row.scheduled_for) || 0 : 0,
     promo: String(row.promo_code || ''),

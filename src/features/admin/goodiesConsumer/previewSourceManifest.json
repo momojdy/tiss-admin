@@ -6,7 +6,7 @@
       "origins": [
         {
           "file": "src/features/Goodies/GoodiesApp.tsx",
-          "sha256": "f8ca1ae8de621beaae2b8e3baf0379dcd9dada8ec5958bc1b842948f2ceb2e5e"
+          "sha256": "acb60d866ba055071b5b2c93c5689e250465a0f979689d434ca1e19853378826"
         }
       ]
     },
@@ -33,7 +33,7 @@
       "origins": [
         {
           "file": "src/features/Goodies/actions.ts",
-          "sha256": "c50db1e71e1749b6e8c0d81bf9a2682c41919ee312009e8d65f54957f457d881"
+          "sha256": "d8e187e887ab3a95cc67eecd296113aec01488239440f1592222d557e3090bcf"
         }
       ]
     },
@@ -96,7 +96,7 @@
       "origins": [
         {
           "file": "src/features/Goodies/components/Sheets.tsx",
-          "sha256": "3f5f829f7e61315b963915e31ac87c673c4ec58c2634a3f9b153b846555ff559"
+          "sha256": "c8d088b2e53d7e23704d2dd541d9e7164631a025e3d6beb3c96f5c468417a7ce"
         }
       ]
     },
@@ -164,11 +164,20 @@
       ]
     },
     {
+      "target": "deliveryDistance.ts",
+      "origins": [
+        {
+          "file": "src/features/Goodies/deliveryDistance.ts",
+          "sha256": "8375c24ab7049898c38c5aa1beaef3bec6df3d61f027a8b32ceff70b720fd340"
+        }
+      ]
+    },
+    {
       "target": "deliveryTracking.ts",
       "origins": [
         {
           "file": "src/features/Goodies/deliveryTracking.ts",
-          "sha256": "2807c091d11a19554070feffc2b3446b807c6190789147d73777ab35f7b6e413"
+          "sha256": "388d77d1289e97104d5abfbe4cfee1441d8fbab16b095b8f3dab59bbb6cdaf44"
         }
       ]
     },
@@ -321,7 +330,7 @@
       "origins": [
         {
           "file": "src/features/Goodies/screens/Shop.tsx",
-          "sha256": "8f955dc846138b261e48f9df4520d650f352b229f039f0022073d64adb216211"
+          "sha256": "d92e6d9ded877eabf89ee5ed9d4eabf1a5cb71ab909aea67293a46ecbf3d76c1"
         }
       ]
     },
@@ -330,7 +339,7 @@
       "origins": [
         {
           "file": "src/features/Goodies/serverSync.ts",
-          "sha256": "900cc2b25d12c5d6619fcba0e3f8be5ce8d75886d51bcc99b3d08fa64df10e66"
+          "sha256": "06398d0aa7318affab7934fe6a8055ecbe21acbde2e46019121fde43ab5179e8"
         }
       ]
     },
@@ -339,7 +348,7 @@
       "origins": [
         {
           "file": "src/features/Goodies/store.ts",
-          "sha256": "827ebd9ad5b908200f6222fec6b277a3018677cbb1ee23785a4483c7b8a18f45"
+          "sha256": "16a7dedd0dbec8d4d344f40c767889d669470030ab337cb93833cb3ead41d565"
         }
       ]
     },

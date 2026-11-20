@@ -152,7 +152,7 @@ export function GoodiesApp({onExit, embedded = true, onUniversalAction, unreadNo
   }), [sheet]);
 
   const c = cur(), r = c.r;
-  useEffect(() => { if (goodiesLoaded && ['home','cats','cart','explore','search','catlist','store','product','checkout','byo','promos','favs'].includes(r)) void refreshGoodiesAccess(); }, [goodiesLoaded, r]);
+  useEffect(() => { if (goodiesLoaded && ['home', 'cats', 'cart', 'explore', 'search', 'catlist', 'store', 'product', 'checkout', 'byo', 'promos', 'flashdeals', 'favs', 'reviews', 'grouporder'].includes(r)) void refreshGoodiesAccess(); }, [goodiesLoaded, r]);
   const key = c.u + '|' + (r === 'checkout' ? S.cs : '');
   const lastKey = useRef('');
   useEffect(() => {if (key !== lastKey.current) {scroll.current?.scrollTo({y: c.sy || 0, animated: false}); lastKey.current = key;}}, [key]);
@@ -188,8 +188,7 @@ export function GoodiesApp({onExit, embedded = true, onUniversalAction, unreadNo
   const startupFailure = startupError ? <View style={{padding:20}}><Ttl>{label('lbl.startupFailed', 'Goodies could not load')}</Ttl><T cmsKey={'lbl.catalogRetryHint'}>{label('lbl.catalogRetryHint', 'Check your connection and try again.')}</T><Cta cmsKey={'lbl.retry'} label={label('lbl.retry', 'Try again')} onPress={()=>setStartupAttempt(n=>n+1)} /></View> : null;
   if (startupError) body = startupFailure;
   const accessBlocked = S.goodiesAccess?.status === 'suspended' || S.goodiesAccess?.status === 'banned';
-  const accessRoutes = ['home', 'cats', 'cart', 'explore', 'search', 'catlist', 'store', 'product', 'checkout', 'byo', 'promos', 'favs'];
-  if (accessBlocked && accessRoutes.includes(r)) {
+  if (accessBlocked && ['home', 'cats', 'cart', 'explore', 'search', 'catlist', 'store', 'product', 'checkout', 'byo', 'promos', 'flashdeals', 'favs', 'reviews', 'grouporder'].includes(r)) {
     const banned = S.goodiesAccess.status === 'banned';
     body = <View style={{padding: 20, paddingTop: 36}}>
       <Card>

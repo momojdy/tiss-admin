@@ -7,6 +7,7 @@ import {label} from './content';
 import type {Store, Item, Address, CartLine, Order} from './data/types';
 import {STAGES_DELIVERY, STAGES_PICKUP} from './data/orderStages';
 import {friendlyError} from './friendlyError';
+import {roadDistanceKm} from './deliveryDistance';
 import {ownedCache, cacheEnvelope} from './accountCache';
 import {wantissLocale, WANTISS_LANGUAGES} from './previewLocales';
 export let previewOnly = false;
@@ -436,6 +437,10 @@ export function save(): Promise<void> {
 export async function getGoodiesCheckoutAttempt(fingerprint: string): Promise<{key: string; fingerprint: string}> {
   const ownerId=S.accountId,current = S.checkoutAttempt;
   if (current && current.ownerId===ownerId && !current.completed && current.fingerprint === fingerprint && typeof current.key === 'string') {
+    // Retry persistence before dispatching any payment. A previous disk write
+    // may have failed, even if the attempt still exists in memory.
+    await AsyncStorage.setItem('goodies-checkout-attempt-v1:'+String(ownerId), JSON.stringify(current));
+    if(S.accountId!==ownerId)throw new Error('Checkout account changed');
     return {key: current.key, fingerprint: current.fingerprint};
   }
   const attempt = {
@@ -444,9 +449,10 @@ export async function getGoodiesCheckoutAttempt(fingerprint: string): Promise<{k
     fingerprint,
     completed: false,
   };
-  S.checkoutAttempt = attempt;
+  // Never expose an unpersisted idempotency key to a checkout RPC.
   await AsyncStorage.setItem('goodies-checkout-attempt-v1:'+String(ownerId), JSON.stringify(attempt));
   if(S.accountId!==ownerId)throw new Error('Checkout account changed');
+  S.checkoutAttempt = attempt;
   return {key: attempt.key, fingerprint: attempt.fingerprint};
 }
 
@@ -488,7 +494,7 @@ const currentDistanceAddressKey = () => {
 export async function refreshStoreDistances(storeIds: string[], address: Address | null = addr()) {
   if(previewOnly)return {};
   if (!address?.t?.trim()) return {};
-  const addressKey = distanceAddressKey(address);
+  const addressKey = distanceAddressKey(address), owner = S.accountId;
   const pending = [...new Set(storeIds)].map(id => STB[id]).filter(store =>
     store?.live && (!store.distanceReady || store.distanceAddressKey !== addressKey));
   if (!pending.length) return Object.fromEntries(storeIds.map(id => [id, STB[id]?.km ?? null]));
@@ -506,7 +512,7 @@ export async function refreshStoreDistances(storeIds: string[], address: Address
     const {data, error} = await supabase.functions.invoke('goodies-delivery-quote', {
       body: {store_ids: batch.map(store => store.id), address: payloadAddress, distance_only: true},
     });
-    if (currentDistanceAddressKey() !== addressKey) return distances;
+    if (S.accountId !== owner || currentDistanceAddressKey() !== addressKey) return distances;
     if (error) {
       batch.forEach(store => { store.distanceError = friendlyError(error, label("lbl.cms.5abb6f216652", "Distance is unavailable for this address.")); });
       emit();
@@ -516,20 +522,14 @@ export async function refreshStoreDistances(storeIds: string[], address: Address
     const byId = new Map(rows.map((row: any) => [String(row.store_id), row]));
     batch.forEach(store => {
       const row: any = byId.get(store.id);
-      const meters = row?.distance_m == null ? NaN : Number(row.distance_m);
-      if (!Number.isFinite(meters) || meters < 0) {
+      const roadKm = roadDistanceKm(row?.distance_m);
+      if (roadKm === null) {
         store.distanceError = row?.error || label("lbl.cms.5abb6f216652", "Distance is unavailable for this address.");
         distances[store.id] = null;
         return;
       }
-      const gps = location && store.storeLatitude != null && store.storeLongitude != null && Number.isFinite(Number(store.storeLatitude)) && Number.isFinite(Number(store.storeLongitude)) ? location : null;
-      if (gps) {
-        const rad = (degrees: number) => degrees * Math.PI / 180;
-        const dLat = rad(Number(store.storeLatitude) - Number(gps.latitude));
-        const dLon = rad(Number(store.storeLongitude) - Number(gps.longitude));
-        const a = Math.sin(dLat / 2) ** 2 + Math.cos(rad(Number(gps.latitude))) * Math.cos(rad(Number(store.storeLatitude))) * Math.sin(dLon / 2) ** 2;
-        store.km = 6371 * 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
-      } else store.km = meters / 1000;
+      // The displayed distance must match Geoapify's road route, even when a GPS pin exists.
+      store.km = roadKm;
       store.far = row.outside_delivery_area === true ||
         (store.maxDeliveryDistanceKm != null && store.km > store.maxDeliveryDistanceKm);
       store.distanceReady = true;
@@ -550,7 +550,7 @@ export function applyZone() {
   const z = addr()?.z || 0, d = Math.round(z * 3);
   ST.forEach(s => {
     /* Live stores have no geo data yet, so no invented distance or ETA padding. */
-    if (s.live) {const a = addr(); const key = a ? JSON.stringify({t:a.t,apt:a.apt,inst:a.inst,city:a.city,department:a.department,country:a.country}) : ''; if (s.distanceAddressKey !== key) {s.km = 0; s.distanceReady = false; s.distanceError = ''; s.distanceAddressKey = key;} s.eta = s.eta0; s.far = false; return;}
+    if (s.live) {const a = addr(); const key = a ? distanceAddressKey(a) : ''; if (s.distanceAddressKey !== key) {s.km = 0; s.distanceReady = false; s.distanceError = ''; s.distanceAddressKey = key;} s.eta = s.eta0; s.far = false; return;}
     s.km = Math.round((s.km0 + z) * 10) / 10;
     const q = s.eta0.split('–');
     s.eta = (+q[0] + d) + '–' + (+q[1] + d);

@@ -2248,7 +2248,8 @@
     "id": "lbl.checkoutCard",
     "text": "Credit / debit card",
     "pages": [
-      "Checkout"
+      "Checkout",
+      "Shared components"
     ]
   },
   {
@@ -2375,7 +2376,8 @@
     "id": "lbl.checkoutMoncash",
     "text": "MonCash",
     "pages": [
-      "Checkout"
+      "Checkout",
+      "Shared components"
     ]
   },
   {
@@ -2431,7 +2433,8 @@
     "id": "lbl.checkoutPaymentMethod",
     "text": "Payment method",
     "pages": [
-      "Checkout"
+      "Checkout",
+      "Shared components"
     ]
   },
   {
@@ -2552,7 +2555,8 @@
     "id": "lbl.checkoutWallet",
     "text": "Wantiss Wallet",
     "pages": [
-      "Checkout"
+      "Checkout",
+      "Shared components"
     ]
   },
   {
@@ -5070,7 +5074,8 @@
     "id": "lbl.cms.ffb25a7171b4",
     "text": "Cash",
     "pages": [
-      "Checkout"
+      "Checkout",
+      "Shared components"
     ]
   },
   {
@@ -7688,6 +7693,7 @@
     "id": "lbl.page.store.d8aea5db73",
     "text": "This cart item is not linked to a live catalogue product.",
     "pages": [
+      "Group orders",
       "Shared state messages"
     ]
   },

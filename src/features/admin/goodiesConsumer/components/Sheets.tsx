@@ -8,7 +8,7 @@ import {T, Cta, Row, Card, Badge, Input, Radio, Seg, SheetBox, Bar, Empty, useTh
 import {Icon} from './Icon';
 import {CameraView, useCameraPermissions} from '../previewNative';
 import QRCode from 'react-native-qrcode-svg';
-import {S, STB, money, emit, save, toast, ui, addr, defAddr, done, phoneOK, fmtDay, fmtTime, alcAge, cartStoreIds, canScheduleGoodiesStore, syncGroupOrderCartLine, removeGroupOrderCartLine, refreshUserAddresses, persistGoodiesContactNumber, removeGoodiesContactNumber, clearActiveGroup} from '../store';
+import {S, STB, money, emit, save, toast, ui, addr, defAddr, done, phoneOK, fmtDay, fmtTime, alcAge, cartStoreIds, canScheduleGoodiesStore, lineStore, IT, syncGroupOrderCartLine, removeGroupOrderCartLine, refreshUserAddresses, persistGoodiesContactNumber, removeGoodiesContactNumber, clearActiveGroup} from '../store';
 import * as A from '../actions';
 import {previewBackend as supabase} from '../previewRuntime';
 import {PROMO_DETAIL} from '../data/promoText';
@@ -272,7 +272,14 @@ function GroupOrderSheet({close, showTitle = true, showDone = true, storeId = ''
     if(groupActionLock.current||groupCheckoutLock.current)return;
     const targetStoreId = storeId || S.cart.sid || group.storeId || '';
     if (!targetStoreId) {toast(label("lbl.cms.9ad0840772c3", "Open a store first to create its group invitation."));return;}
-    if (S.cart.lines.length && S.cart.sid !== targetStoreId) {toast(label("lbl.cms.a6b2201002c6", "Your current cart belongs to another store. Clear it before creating this group."));return;}
+    if (S.cart.lines.some((line:any)=>lineStore(line)!==targetStoreId)) {
+      toast(label("lbl.cms.a6b2201002c6", "Your current cart belongs to another store. Clear it before creating this group."));
+      return;
+    }
+    if (S.cart.lines.some((line:any)=>!IT[line.id])) {
+      toast(label("lbl.page.store.d8aea5db73", "This cart item is not linked to a live catalogue product."));
+      return;
+    }
     const owner=accountId,previousGroupId=String(group.groupId||''),cartLines=JSON.parse(JSON.stringify(S.cart.sid===targetStoreId?S.cart.lines:[]));
     groupActionLock.current=true;setGroupBusy(true);let created=false;
     try {
@@ -362,12 +369,15 @@ function GroupOrderSheet({close, showTitle = true, showDone = true, storeId = ''
       }catch{if(valid()&&request===statusRequest)setStatusError(label('lbl.groupRefreshFailed','Could not refresh this group order. Please try again.'));}
     };
     void loadItems(); void loadMembers(); void refreshGroupStatus();
+    // A group can expire without any database UPDATE or Realtime event.
+    // Refresh the server-owned status while this sheet is open.
+    const statusPoll=setInterval(()=>{if(active)void refreshGroupStatus();},30000);
     const channel=supabase.channel('goodies-group-live-'+group.groupId)
       .on('postgres_changes',{event:'*',schema:'public',table:'goodies_group_order_items',filter:'group_id=eq.'+group.groupId},()=>{void loadItems();})
       .on('postgres_changes',{event:'*',schema:'public',table:'goodies_group_order_members',filter:'group_id=eq.'+group.groupId},()=>{void loadMembers();})
       .on('postgres_changes',{event:'UPDATE',schema:'public',table:'goodies_group_orders',filter:'id=eq.'+group.groupId},()=>{void refreshGroupStatus();})
       .subscribe();
-    return ()=>{active=false;void supabase.removeChannel(channel);};
+    return ()=>{active=false;clearInterval(statusPoll);void supabase.removeChannel(channel);};
   },[group.serverBacked,group.groupId,accountId,groupReload]);
 
   /* Friends picker (host) and invitations from friends (guest). */
@@ -453,8 +463,11 @@ function GroupOrderSheet({close, showTitle = true, showDone = true, storeId = ''
     if(typeof value!=='number'&&!(typeof value==='string'&&/^-?\d+(?:\.\d+)?$/.test(value.trim())))return null;
     const amount=Number(value);return Number.isFinite(amount)&&amount>=0?amount:null;
   };
-  const validEstimate=(value:any)=>!!value&&value.group_id===group.groupId&&['pickup','delivery'].includes(value.order_type)
-    &&['subtotal','delivery_fee','service_fee','estimated_total'].every(key=>groupAmount(value[key])!==null)&&Number(value.estimated_total)>0;
+  const validEstimate=(value:any)=>!!value&&value.group_id===group.groupId&&value.currency==='USD'&&['pickup','delivery'].includes(value.order_type)
+    &&['subtotal','delivery_fee','service_fee','estimated_total'].every(key=>groupAmount(value[key])!==null)
+    &&Number(value.estimated_total)>0
+    &&['subtotal','delivery_fee','service_fee','estimated_total'].every(key=>Number.isSafeInteger(Math.round(Number(value[key])*100))&&Math.abs(Number(value[key])*100-Math.round(Number(value[key])*100))<0.00001)
+    &&Math.round(Number(value.estimated_total)*100)===Math.round(Number(value.subtotal)*100)+Math.round(Number(value.delivery_fee)*100)+Math.round(Number(value.service_fee)*100);
   const loadGroupEstimate=async(type:'pickup'|'delivery',address:any={})=>{
     const owner=accountId,groupId=String(group.groupId||''),request=++estimateVersion.current,selected=selection.current;
     if(!await requireAccount(owner)||!current(owner,groupId)||request!==estimateVersion.current||selection.current!==selected)return;

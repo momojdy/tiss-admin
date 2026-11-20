@@ -171,6 +171,7 @@
       "lbl.groupYou",
       "lbl.cms.9ad0840772c3",
       "lbl.cms.a6b2201002c6",
+      "lbl.page.store.d8aea5db73",
       "lbl.page.components.Sheets.a686a8f76f",
       "lbl.cms.184f5c8af282",
       "lbl.cms.9e385df54370",
@@ -1413,7 +1414,12 @@
       "lbl.category.drugstore",
       "lbl.category.fallback",
       "lbl.reviewYou",
-      "lbl.reviewCustomer"
+      "lbl.reviewCustomer",
+      "lbl.checkoutPaymentMethod",
+      "lbl.checkoutWallet",
+      "lbl.checkoutMoncash",
+      "lbl.checkoutCard",
+      "lbl.cms.ffb25a7171b4"
     ]
   },
   {
@@ -1970,6 +1976,7 @@
       "lbl.storeNotFound",
       "lbl.storeCurrentlyClosed",
       "lbl.filterFree",
+      "lbl.page.store.d8aea5db73",
       "lbl.sheetDefaultNumber",
       "lbl.sheetGoodiesNumber",
       "lbl.filterAll",
@@ -1997,7 +2004,6 @@
       "lbl.deliveryEligibilityFailed",
       "lbl.deliveryFeeFailed",
       "lbl.actionOutOfStock",
-      "lbl.page.store.d8aea5db73",
       "lbl.cms.b0b30ad199f5",
       "lbl.actionAddedToCart",
       "lbl.filterOffers",
@@ -2161,9 +2167,9 @@
       "lbl.vendor.orders.20a23c4b5a",
       "lbl.vendor.orders.96786592cd",
       "lbl.vendor.orders.9a2b5e5fe2",
+      "lbl.vendor.orders.ad5634db80",
       "lbl.vendor.orders.35556087e1",
       "lbl.vendor.orders.b7ff1a6fb9",
-      "lbl.vendor.orders.ad5634db80",
       "lbl.vendor.orders.cashEnabled",
       "lbl.vendor.orders.0cfb6bc682",
       "lbl.vendor.orders.e9c1d38743",

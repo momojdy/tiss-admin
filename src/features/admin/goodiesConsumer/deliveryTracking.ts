@@ -1,6 +1,9 @@
 /** Pure tracking rules shared by the map and regression tests. */
 export type Coordinate = {latitude: number; longitude: number};
 export const GPS_MAX_AGE_MS = 120_000;
+// A received device fix must be recent when sent to the server. The customer
+// map may retain the last genuinely recorded fix for longer while GPS is lost.
+export const GPS_SAMPLE_MAX_AGE_MS = 30_000;
 
 export function coordinate(value: any): Coordinate | null {
   const numeric = (part: unknown) => typeof part === 'number'
@@ -24,7 +27,7 @@ export function courierLocation(assignment: any, now = Date.now()): (Coordinate 
 export function freshGpsSample(sample: any, now = Date.now()): boolean {
   const timestamp = sample?.timestamp;
   return typeof timestamp === 'number' && Number.isFinite(timestamp)
-    && now - timestamp >= -30_000 && now - timestamp <= GPS_MAX_AGE_MS
+    && now - timestamp >= -30_000 && now - timestamp <= GPS_SAMPLE_MAX_AGE_MS
     && !!coordinate(sample?.coords);
 }
 
