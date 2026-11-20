@@ -116,6 +116,7 @@ export function Sheets({sheet, close}: {sheet: any; close: () => void}) {
 function ScheduleSheet({close, inline = false}: {close: () => void; inline?: boolean}) {
   const th = useTheme(), store: any = STB[S.cart.sid];
   const customerZone = Intl.DateTimeFormat().resolvedOptions().timeZone || 'Etc/GMT';
+  const customerNow = new Date();
   const isAvailableInstant = (instant:Date) => {
     const stores=cartStoreIds();
     return stores.length>0&&stores.every(storeId=>canScheduleGoodiesStore(storeId,instant.getTime()));
