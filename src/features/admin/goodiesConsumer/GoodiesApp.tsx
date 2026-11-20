@@ -21,6 +21,7 @@ import {HelpPay} from './screens/HelpPay';
 import {ByoScreen, ByoFoot} from './builders/Builder';
 import {loadBuilders, BD} from './builders/engine';
 import {loadContent, label, stageLabels, onContent, catName} from './content';
+import {groupInviteCodeFromLink} from './groupInviteLinks';
 import {PROMO} from './theme';
 import {t as tr} from './i18n';
 import GoodiesQuickMenu, {type GoodiesMenuAction} from './GoodiesQuickMenu';
@@ -35,7 +36,7 @@ export function GoodiesApp({onExit, embedded = true, onUniversalAction, unreadNo
   if (!initialDestination.current) {
     initialDestination.current = true;
     if (initialRoute) {
-      if (initialRoute.startsWith('product:')) { reset('home'); const productId=initialRoute.slice(8); if(productId in require('./store').IT) A.openProduct(productId); } else if (initialRoute.startsWith('store:')) { reset('home'); push('store', initialRoute.slice(6)); } else if (initialRoute === 'favs:stores' || initialRoute === 'favs:items') {
+      if (initialRoute.startsWith('groupinvite:')) { (S as any).pendingGroupInviteCode=initialRoute.slice(12);reset('grouporder'); } else if (initialRoute.startsWith('product:')) { reset('home'); const productId=initialRoute.slice(8); if(productId in require('./store').IT) A.openProduct(productId); } else if (initialRoute.startsWith('store:')) { reset('home'); push('store', initialRoute.slice(6)); } else if (initialRoute === 'favs:stores' || initialRoute === 'favs:items') {
         S.ft = initialRoute.split(':')[1];
         reset('favs');
       } else reset(initialRoute);
@@ -65,13 +66,13 @@ export function GoodiesApp({onExit, embedded = true, onUniversalAction, unreadNo
       if(productMatch){try{const productId=decodeURIComponent(productMatch[1]);if(productId in require('./store').IT)A.openProduct(productId);}catch{}return;}
       const storeMatch=url.match(/^wantiss:\/\/goodies\/store\/([^?#]+)/i);
       if(storeMatch){try{const storeId=decodeURIComponent(storeMatch[1]);if(STB[storeId])push('store',storeId);}catch{}return;}
-      const match = url.match(/wantiss:\/\/goodies\/group\?code=([^&]+)/i);
-      if (!match) return;
-      try {(S as any).pendingGroupInviteCode = decodeURIComponent(match[1]).trim().toUpperCase();}
-      catch {return;}
+      const inviteCode=groupInviteCodeFromLink(url);
+      if(!inviteCode)return;
+      (S as any).pendingGroupInviteCode=inviteCode;
       ui.sheet({kind: 'group-order'});
     };
-    void Linking.getInitialURL().then(url => {if (active) openInvite(url);});
+    // The app shell already handed off this cold-start invite. Do not reopen a duplicate sheet.
+    if(!initialRoute?.startsWith('groupinvite:'))void Linking.getInitialURL().then(url => {if (active) openInvite(url);});
     const subscription = Linking.addEventListener('url', ({url}) => openInvite(url));
     return () => {active = false; subscription.remove();};
   }, [goodiesLoaded]);
@@ -94,7 +95,10 @@ export function GoodiesApp({onExit, embedded = true, onUniversalAction, unreadNo
       await contentReady;
       if (active) {
         // Restore the requested destination after persistence/catalog hydration, before exposing the screen.
-        if (initialRoute?.startsWith('product:')) {
+        if (initialRoute?.startsWith('groupinvite:')) {
+          (S as any).pendingGroupInviteCode=initialRoute.slice(12);
+          reset('grouporder');
+        } else if (initialRoute?.startsWith('product:')) {
           reset('home');
           const productId=initialRoute.slice(8);
           if(productId in require('./store').IT) A.openProduct(productId);

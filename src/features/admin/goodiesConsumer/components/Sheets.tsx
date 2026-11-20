@@ -277,7 +277,7 @@ function GroupOrderSheet({close, showTitle = true, showDone = true, storeId = ''
       return;
     }
     if (S.cart.lines.some((line:any)=>!IT[line.id])) {
-      toast(label("lbl.page.store.d8aea5db73", "This cart item is not linked to a live catalogue product."));
+      toast(label("lbl.cms.a9d496a784b4", "Could not create the group invitation. Please try again."));
       return;
     }
     const owner=accountId,previousGroupId=String(group.groupId||''),cartLines=JSON.parse(JSON.stringify(S.cart.sid===targetStoreId?S.cart.lines:[]));

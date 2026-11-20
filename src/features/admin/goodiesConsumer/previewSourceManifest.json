@@ -6,7 +6,7 @@
       "origins": [
         {
           "file": "src/features/Goodies/GoodiesApp.tsx",
-          "sha256": "acb60d866ba055071b5b2c93c5689e250465a0f979689d434ca1e19853378826"
+          "sha256": "2bdd2b456165b55450c7d16c14e916881b832b6028b55f97a19198e0f7cd7727"
         }
       ]
     },
@@ -96,7 +96,7 @@
       "origins": [
         {
           "file": "src/features/Goodies/components/Sheets.tsx",
-          "sha256": "c8d088b2e53d7e23704d2dd541d9e7164631a025e3d6beb3c96f5c468417a7ce"
+          "sha256": "37beca54ed6211d5b35e804af9d230daeb6264b7134cc19d3ac832d2e9941f9a"
         }
       ]
     },
@@ -187,6 +187,15 @@
         {
           "file": "src/features/Goodies/friendlyError.ts",
           "sha256": "eb928d87bc616bf65bf95f625f7fa4c28485e22df2fd6cca8f7faabab609225f"
+        }
+      ]
+    },
+    {
+      "target": "groupInviteLinks.ts",
+      "origins": [
+        {
+          "file": "src/features/Goodies/groupInviteLinks.ts",
+          "sha256": "e37a424565dc60f34a316d63eded5afa3dbfee95ad8fd43abcbf48c67a5a01c4"
         }
       ]
     },
