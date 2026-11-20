@@ -6551,6 +6551,13 @@
     ]
   },
   {
+    "id": "lbl.notification.openFailed",
+    "text": "This update could not be opened. Please try again from your notifications.",
+    "pages": [
+      "Notification templates"
+    ]
+  },
+  {
     "id": "lbl.notification.orderAccepted.body",
     "text": "{details}",
     "pages": [
@@ -6700,6 +6707,20 @@
   {
     "id": "lbl.notification.paymentFailed.title",
     "text": "Goodies payment failed",
+    "pages": [
+      "Notification templates"
+    ]
+  },
+  {
+    "id": "lbl.notification.push.body",
+    "text": "Open Wantiss to see your update.",
+    "pages": [
+      "Notification templates"
+    ]
+  },
+  {
+    "id": "lbl.notification.push.title",
+    "text": "Goodies update",
     "pages": [
       "Notification templates"
     ]

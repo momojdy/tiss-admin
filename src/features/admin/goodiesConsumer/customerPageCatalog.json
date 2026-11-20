@@ -2704,7 +2704,10 @@
       "lbl.notification.goodies_vendor_settlement_commission_due.title",
       "lbl.notification.goodies_vendor_settlement_commission_due.body",
       "lbl.notification.goodies_vendor_settlement_commission_due_soon.title",
-      "lbl.notification.goodies_vendor_settlement_commission_due_soon.body"
+      "lbl.notification.goodies_vendor_settlement_commission_due_soon.body",
+      "lbl.notification.push.title",
+      "lbl.notification.push.body",
+      "lbl.notification.openFailed"
     ]
   }
 ]
