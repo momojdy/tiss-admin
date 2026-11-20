@@ -8,7 +8,7 @@ import {T, Cta, Row, Card, Badge, Input, Radio, Seg, SheetBox, Bar, Empty, useTh
 import {Icon} from './Icon';
 import {CameraView, useCameraPermissions} from '../previewNative';
 import QRCode from 'react-native-qrcode-svg';
-import {S, STB, money, emit, save, toast, ui, addr, defAddr, done, phoneOK, fmtDay, fmtTime, alcAge, syncGroupOrderCartLine, removeGroupOrderCartLine, refreshUserAddresses, persistGoodiesContactNumber, removeGoodiesContactNumber, clearActiveGroup} from '../store';
+import {S, STB, money, emit, save, toast, ui, addr, defAddr, done, phoneOK, fmtDay, fmtTime, alcAge, cartStoreIds, canScheduleGoodiesStore, syncGroupOrderCartLine, removeGroupOrderCartLine, refreshUserAddresses, persistGoodiesContactNumber, removeGoodiesContactNumber, clearActiveGroup} from '../store';
 import * as A from '../actions';
 import {previewBackend as supabase} from '../previewRuntime';
 import {PROMO_DETAIL} from '../data/promoText';
@@ -116,43 +116,9 @@ export function Sheets({sheet, close}: {sheet: any; close: () => void}) {
 function ScheduleSheet({close, inline = false}: {close: () => void; inline?: boolean}) {
   const th = useTheme(), store: any = STB[S.cart.sid];
   const customerZone = Intl.DateTimeFormat().resolvedOptions().timeZone || 'Etc/GMT';
-  const storeZone = store?.scheduledOrderTimezone || customerZone;
-  const dayNames = ['Sunday','Monday','Tuesday','Wednesday','Thursday','Friday','Saturday'];
-  const storeParts = (instant: Date) => {
-    const parts = new Intl.DateTimeFormat('en-US',{timeZone:storeZone,year:'numeric',month:'2-digit',day:'2-digit',weekday:'long',hour:'2-digit',minute:'2-digit',hourCycle:'h23'}).formatToParts(instant);
-    const get = (key:string) => parts.find(part=>part.type===key)?.value || '';
-    return {year:Number(get('year')),month:Number(get('month')),day:Number(get('day')),weekday:get('weekday'),hour:Number(get('hour')),minute:Number(get('minute'))};
-  };
-  const customerNow = new Date();
-  const minimumOrderTime = String(store?.scheduledOrderStartTime || '10:00').slice(0,5);
-  const [minimumHour,minimumMinute] = minimumOrderTime.split(':').map(Number);
   const isAvailableInstant = (instant:Date) => {
-    const p=storeParts(instant);
-    const minute=p.hour*60+p.minute, minimum=(minimumHour||0)*60+(minimumMinute||0);
-    // The server enforces this minimum clock time even for overnight orders.
-    if(minute<minimum)return false;
-    const schedule=store?.scheduleHours;
-    // Never invent 08:00–22:00 availability for a merchant without published hours.
-    if(!schedule||typeof schedule!=='object'||!Object.keys(schedule).length)return false;
-    const parseWindow=(entry:any):{open:number;close:number}|null=>{
-      if(!entry||entry.closed===true)return null;
-      const minutes=(value:any):number|null=>{
-        const match=/^(\d{1,2}):(\d{2})(?::\d{2})?$/.exec(String(value||''));
-        if(!match)return null;
-        const hour=Number(match[1]),minute=Number(match[2]);
-        return hour<=23&&minute<=59?hour*60+minute:null;
-      };
-      const open=minutes(entry.open),close=minutes(entry.close);
-      return open===null||close===null?null:{open,close};
-    };
-    const today=parseWindow(schedule[p.weekday]);
-    const dayIndex=dayNames.indexOf(p.weekday);
-    const yesterday=dayIndex<0?null:parseWindow(schedule[dayNames[(dayIndex+6)%7]]);
-    const todayOpen=!!today&&(today.open<today.close
-      ? minute>=today.open&&minute<today.close : minute>=today.open);
-    // Previous day's late shift can remain open after midnight.
-    const yesterdayOpen=!!yesterday&&yesterday.open>=yesterday.close&&minute<yesterday.close;
-    return todayOpen||yesterdayOpen;
+    const stores=cartStoreIds();
+    return stores.length>0&&stores.every(storeId=>canScheduleGoodiesStore(storeId,instant.getTime()));
   };
   const customerDayStart = (offset:number) => {const d=new Date(customerNow);d.setHours(0,0,0,0);d.setDate(d.getDate()+offset);return d;};
   const slotsForDay = (offset:number) => {
