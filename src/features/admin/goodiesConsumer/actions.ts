@@ -3,7 +3,7 @@ import {fees, label} from './content';
 import {previewBackend as supabase} from './previewRuntime';
 import {friendlyError} from './friendlyError';
 import {
-  canBuy, cartStoreIds, lineStore, storeSub, maxStops, hasAlcohol, alcAge, S, IT, STB, ui, toast, emit, save, push, reset, navBack, cartAdd, qtyIn, cnt, totals, pChk, isPk, addr, ctOf, phoneOK, reorderLines, money, hooks, done, cur, refreshLiveSchedules, refreshGoodiesAccess, first, contentHooks, getGoodiesCheckoutAttempt, completeGoodiesCheckoutAttempt, syncGroupOrderCartLine, removeGroupOrderCartLine, savedPoint, deliveryAddressPayload, deliveryQuoteReady, refreshGoodiesDeliveryQuote, refreshFirstDeliveryEligibility, syncActiveGroup, validateActiveGroup, clearActiveGroup,
+  canBuy, cartStoreIds, canScheduleGoodiesStore, lineStore, storeSub, maxStops, hasAlcohol, alcAge, S, IT, STB, ui, toast, emit, save, push, reset, navBack, cartAdd, qtyIn, cnt, totals, pChk, isPk, addr, ctOf, phoneOK, reorderLines, money, hooks, done, cur, refreshLiveSchedules, refreshGoodiesAccess, first, contentHooks, getGoodiesCheckoutAttempt, completeGoodiesCheckoutAttempt, syncGroupOrderCartLine, removeGroupOrderCartLine, savedPoint, deliveryAddressPayload, deliveryQuoteReady, refreshGoodiesDeliveryQuote, refreshFirstDeliveryEligibility, syncActiveGroup, validateActiveGroup, clearActiveGroup,
 } from './store';
 
 export const CHOOSE_SIZE_CATS = ['restaurants', 'bakery', 'beverages'];
@@ -597,6 +597,8 @@ async function placeMultiOrder() {
   for (const sid of ids) {
     const s = STB[sid];
     if (!s?.live) return stop(label("lbl.page.actions.0e98e7865b", "One of the stores is no longer taking orders."));
+    if (S.sch && !canScheduleGoodiesStore(sid,S.sch))
+      return stop(label('lbl.actionStoreClosedSchedule','This store cannot accept the selected time. Choose a different scheduled time.').replace('{store}',s.n),1);
     if (!s.open && !(s.acceptScheduledOrders && S.sch > Date.now())) return stop(label('lbl.actionStoreClosedCheckout', '{store} is closed. Choose a future pickup or delivery time if scheduling is available.').replace('{store}', s.n), 1);
     if (storeSub(sid) < s.min) {toast(s.n + ': ' + label('lbl.actionMinimumOrder', 'Minimum order is {amount}').replace('{amount}', money(s.min))); reset('cart'); return;}
   }
