@@ -127,16 +127,32 @@ function ScheduleSheet({close, inline = false}: {close: () => void; inline?: boo
   const minimumOrderTime = String(store?.scheduledOrderStartTime || '10:00').slice(0,5);
   const [minimumHour,minimumMinute] = minimumOrderTime.split(':').map(Number);
   const isAvailableInstant = (instant:Date) => {
-    const p=storeParts(instant), hours=store?.scheduleHours?.[p.weekday] || null;
-    if (hours && hours.closed) return false;
-    let openMinute=8*60, closeMinute=22*60;
-    if (hours && hours.open && hours.close) {
-      const [oh,om]=String(hours.open).slice(0,5).split(':').map(Number);
-      const [ch,cm]=String(hours.close).slice(0,5).split(':').map(Number);
-      openMinute=oh*60+(om||0); closeMinute=ch*60+(cm||0);
-    } else if (store?.scheduleHours && Object.keys(store.scheduleHours).length && !hours) return false;
+    const p=storeParts(instant);
     const minute=p.hour*60+p.minute, minimum=(minimumHour||0)*60+(minimumMinute||0);
-    return minute>=Math.max(openMinute,minimum) && minute<closeMinute;
+    // The server enforces this minimum clock time even for overnight orders.
+    if(minute<minimum)return false;
+    const schedule=store?.scheduleHours;
+    // Never invent 08:00–22:00 availability for a merchant without published hours.
+    if(!schedule||typeof schedule!=='object'||!Object.keys(schedule).length)return false;
+    const parseWindow=(entry:any):{open:number;close:number}|null=>{
+      if(!entry||entry.closed===true)return null;
+      const minutes=(value:any):number|null=>{
+        const match=/^(\d{1,2}):(\d{2})(?::\d{2})?$/.exec(String(value||''));
+        if(!match)return null;
+        const hour=Number(match[1]),minute=Number(match[2]);
+        return hour<=23&&minute<=59?hour*60+minute:null;
+      };
+      const open=minutes(entry.open),close=minutes(entry.close);
+      return open===null||close===null?null:{open,close};
+    };
+    const today=parseWindow(schedule[p.weekday]);
+    const dayIndex=dayNames.indexOf(p.weekday);
+    const yesterday=dayIndex<0?null:parseWindow(schedule[dayNames[(dayIndex+6)%7]]);
+    const todayOpen=!!today&&(today.open<today.close
+      ? minute>=today.open&&minute<today.close : minute>=today.open);
+    // Previous day's late shift can remain open after midnight.
+    const yesterdayOpen=!!yesterday&&yesterday.open>=yesterday.close&&minute<yesterday.close;
+    return todayOpen||yesterdayOpen;
   };
   const customerDayStart = (offset:number) => {const d=new Date(customerNow);d.setHours(0,0,0,0);d.setDate(d.getDate()+offset);return d;};
   const slotsForDay = (offset:number) => {
