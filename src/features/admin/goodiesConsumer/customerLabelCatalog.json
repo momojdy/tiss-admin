@@ -880,6 +880,13 @@
     ]
   },
   {
+    "id": "lbl.addressesLoading",
+    "text": "Loading addresses…",
+    "pages": [
+      "Addresses"
+    ]
+  },
+  {
     "id": "lbl.addressSelectedFallback",
     "text": "your selected address",
     "pages": [
@@ -2273,10 +2280,24 @@
     ]
   },
   {
+    "id": "lbl.checkoutCashUnavailable",
+    "text": "Could not check cash-on-delivery availability. Please retry or choose another payment method.",
+    "pages": [
+      "Checkout"
+    ]
+  },
+  {
     "id": "lbl.checkoutChange",
     "text": "Change",
     "pages": [
       "Checkout"
+    ]
+  },
+  {
+    "id": "lbl.checkoutChanged",
+    "text": "Your checkout changed. Review the current items and total before trying again.",
+    "pages": [
+      "Shared actions and validation"
     ]
   },
   {
@@ -3372,13 +3393,6 @@
     ]
   },
   {
-    "id": "lbl.cms.52bdf65af3cd",
-    "text": "Card payment could not be completed. Your order has not been confirmed.",
-    "pages": [
-      "Shared actions and validation"
-    ]
-  },
-  {
     "id": "lbl.cms.53af57ba3af5",
     "text": "Your account can no longer use Goodies.",
     "pages": [
@@ -3959,13 +3973,6 @@
     "text": "Store",
     "pages": [
       "Contact support"
-    ]
-  },
-  {
-    "id": "lbl.cms.8e4755e555e1",
-    "text": "Could not calculate the final estimate.",
-    "pages": [
-      "Group orders"
     ]
   },
   {
@@ -4687,13 +4694,6 @@
     ]
   },
   {
-    "id": "lbl.cms.d37983f61070",
-    "text": "Could not join this group order. It may have closed.",
-    "pages": [
-      "Group orders"
-    ]
-  },
-  {
     "id": "lbl.cms.d78ba6e23dc0",
     "text": "Have your valid government photo ID ready. The order is completed only after it is checked.",
     "pages": [
@@ -5228,6 +5228,55 @@
     ]
   },
   {
+    "id": "lbl.courierAcceptedStatus",
+    "text": "Delivery accepted",
+    "pages": [
+      "Courier"
+    ]
+  },
+  {
+    "id": "lbl.courierForegroundGpsActive",
+    "text": "Live location sharing is active while Wantiss is open.",
+    "pages": [
+      "Courier"
+    ]
+  },
+  {
+    "id": "lbl.courierMapUnavailable",
+    "text": "Could not open the map",
+    "pages": [
+      "Courier"
+    ]
+  },
+  {
+    "id": "lbl.courierOfferStatus",
+    "text": "Delivery offer",
+    "pages": [
+      "Courier"
+    ]
+  },
+  {
+    "id": "lbl.courierOpenDeliveryMap",
+    "text": "Open delivery map",
+    "pages": [
+      "Courier"
+    ]
+  },
+  {
+    "id": "lbl.courierOpenPickupMap",
+    "text": "Open pickup map",
+    "pages": [
+      "Courier"
+    ]
+  },
+  {
+    "id": "lbl.courierPickupStore",
+    "text": "Pickup store",
+    "pages": [
+      "Courier"
+    ]
+  },
+  {
     "id": "lbl.deliveryEligibilityFailed",
     "text": "Could not verify first-delivery eligibility.",
     "pages": [
@@ -5253,6 +5302,13 @@
     "text": "Calculating…",
     "pages": [
       "Cart"
+    ]
+  },
+  {
+    "id": "lbl.deliveryOutOfRange",
+    "text": "Delivery is unavailable for this address. Choose pickup or another address.",
+    "pages": [
+      "Checkout"
     ]
   },
   {
@@ -5403,8 +5459,36 @@
     ]
   },
   {
+    "id": "lbl.groupDeclineFailed",
+    "text": "Could not decline this invitation. Please try again.",
+    "pages": [
+      "Group orders"
+    ]
+  },
+  {
+    "id": "lbl.groupInvitesFailed",
+    "text": "Could not load invitations. Please try again.",
+    "pages": [
+      "Group orders"
+    ]
+  },
+  {
+    "id": "lbl.groupInvitesLoading",
+    "text": "Loading invitations…",
+    "pages": [
+      "Group orders"
+    ]
+  },
+  {
     "id": "lbl.groupInviteUnavailable",
     "text": "This group invitation is unavailable. Create or join a group order again.",
+    "pages": [
+      "Group orders"
+    ]
+  },
+  {
+    "id": "lbl.groupOrderClosed",
+    "text": "This group order is no longer active. Check Orders for its payment status.",
     "pages": [
       "Group orders"
     ]
@@ -5415,6 +5499,13 @@
     "pages": [
       "Group orders",
       "Shared components"
+    ]
+  },
+  {
+    "id": "lbl.groupRefreshFailed",
+    "text": "Could not refresh this group order. Please try again.",
+    "pages": [
+      "Group orders"
     ]
   },
   {
@@ -6066,9 +6157,18 @@
     ]
   },
   {
+    "id": "lbl.loading",
+    "text": "Loading…",
+    "pages": [
+      "Group orders"
+    ]
+  },
+  {
     "id": "lbl.loadMore",
     "text": "Load more",
     "pages": [
+      "Store conversation",
+      "Notifications",
       "Store",
       "Store reviews",
       "Order history"
@@ -6642,6 +6742,13 @@
     ]
   },
   {
+    "id": "lbl.notificationsLoading",
+    "text": "Loading notifications…",
+    "pages": [
+      "Notifications"
+    ]
+  },
+  {
     "id": "lbl.notifsEmpty",
     "text": "You’re all caught up",
     "pages": [
@@ -6667,6 +6774,7 @@
     "text": "Notifications",
     "pages": [
       "Settings",
+      "Account subpages",
       "Notifications"
     ]
   },
@@ -6801,6 +6909,7 @@
     "id": "lbl.orderDeliveryDestination",
     "text": "Delivery address",
     "pages": [
+      "Courier",
       "Shop · shared"
     ]
   },
@@ -6921,6 +7030,7 @@
     "id": "lbl.orderPickedUp",
     "text": "Picked up",
     "pages": [
+      "Courier",
       "Order tracking"
     ]
   },
@@ -6928,6 +7038,7 @@
     "id": "lbl.orderPickupLocation",
     "text": "Pickup location",
     "pages": [
+      "Courier",
       "Shop · shared"
     ]
   },
@@ -6942,6 +7053,7 @@
     "id": "lbl.orderPickupUnavailable",
     "text": "Live location unavailable",
     "pages": [
+      "Courier",
       "Shop · shared"
     ]
   },
@@ -7154,6 +7266,7 @@
     "id": "lbl.orderUpdated",
     "text": "Order update",
     "pages": [
+      "Courier",
       "Order tracking"
     ]
   },
@@ -7186,13 +7299,6 @@
     ]
   },
   {
-    "id": "lbl.page.actions.66a268bc9d",
-    "text": "Sign in to create a Wantiss wallet.",
-    "pages": [
-      "Shared actions and validation"
-    ]
-  },
-  {
     "id": "lbl.page.actions.672fe60e14",
     "text": ": cash on delivery is not currently available. Choose Wantiss Wallet or try again later.",
     "pages": [
@@ -7202,13 +7308,6 @@
   {
     "id": "lbl.page.actions.737e259f91",
     "text": "You can order from up to ",
-    "pages": [
-      "Shared actions and validation"
-    ]
-  },
-  {
-    "id": "lbl.page.actions.756aec8c65",
-    "text": "Wallet creation was not confirmed by the server. Please retry.",
     "pages": [
       "Shared actions and validation"
     ]
@@ -7911,7 +8010,8 @@
     "id": "lbl.productUnavailable",
     "text": "This product is unavailable.",
     "pages": [
-      "Shared navigation and access states"
+      "Shared navigation and access states",
+      "Notifications"
     ]
   },
   {
@@ -8022,7 +8122,10 @@
     "pages": [
       "Shared navigation and access states",
       "Courier",
+      "Group orders",
+      "Addresses",
       "Home",
+      "Notifications",
       "Card verification",
       "Store",
       "Store reviews",
@@ -8284,13 +8387,6 @@
     ]
   },
   {
-    "id": "lbl.settlement.cashEnabled",
-    "text": "Cash on delivery enabled for your store.",
-    "pages": [
-      "Vendor orders"
-    ]
-  },
-  {
     "id": "lbl.settlement.cashLimit",
     "text": "Settle Goodies cash-order commission to accept more cash orders.",
     "pages": [
@@ -8365,20 +8461,6 @@
     "text": "2 days",
     "pages": [
       "Vendor settlement"
-    ]
-  },
-  {
-    "id": "lbl.settlement.dispatchFailed",
-    "text": "Could not check delivery options.",
-    "pages": [
-      "Vendor orders"
-    ]
-  },
-  {
-    "id": "lbl.settlement.dispatchLoading",
-    "text": "Checking delivery options…",
-    "pages": [
-      "Vendor orders"
     ]
   },
   {
@@ -10460,6 +10542,7 @@
       "Shared actions and validation",
       "Build Your Own",
       "Sheets · sinfo",
+      "Contact support",
       "Store reviews",
       "Order confirmation",
       "Order tracking",
@@ -10624,6 +10707,2890 @@
     "pages": [
       "Sheets · sinfo",
       "Store"
+    ]
+  },
+  {
+    "id": "lbl.vendor.builders.0357f9024b",
+    "text": "Product details",
+    "pages": [
+      "Vendor builders"
+    ]
+  },
+  {
+    "id": "lbl.vendor.builders.0ac7949b77",
+    "text": "Move section up",
+    "pages": [
+      "Vendor builders"
+    ]
+  },
+  {
+    "id": "lbl.vendor.builders.0bc637e5e9",
+    "text": "Extra price ($)",
+    "pages": [
+      "Vendor builders"
+    ]
+  },
+  {
+    "id": "lbl.vendor.builders.1068fb6099",
+    "text": "Give this custom product a name",
+    "pages": [
+      "Vendor builders"
+    ]
+  },
+  {
+    "id": "lbl.vendor.builders.1083157e68",
+    "text": "{value0}: \"{value1}\" limit must be between 1 and the group maximum",
+    "pages": [
+      "Vendor builders"
+    ]
+  },
+  {
+    "id": "lbl.vendor.builders.1211c3c98e",
+    "text": "Pick several",
+    "pages": [
+      "Vendor builders"
+    ]
+  },
+  {
+    "id": "lbl.vendor.builders.14a6924966",
+    "text": "+ Ingredient",
+    "pages": [
+      "Vendor builders"
+    ]
+  },
+  {
+    "id": "lbl.vendor.builders.179359b39e",
+    "text": "Save changes",
+    "pages": [
+      "Vendor builders"
+    ]
+  },
+  {
+    "id": "lbl.vendor.builders.258956aad9",
+    "text": "{value0}: \"same ingredient\" limit must be at least 1",
+    "pages": [
+      "Vendor builders"
+    ]
+  },
+  {
+    "id": "lbl.vendor.builders.260ff8ae71",
+    "text": "Move down",
+    "pages": [
+      "Vendor builders"
+    ]
+  },
+  {
+    "id": "lbl.vendor.builders.344d1cb236",
+    "text": "Every size needs a name",
+    "pages": [
+      "Vendor builders"
+    ]
+  },
+  {
+    "id": "lbl.vendor.builders.3e2c570409",
+    "text": "Included",
+    "pages": [
+      "Vendor builders"
+    ]
+  },
+  {
+    "id": "lbl.vendor.builders.41ba477e5b",
+    "text": "Max per product",
+    "pages": [
+      "Vendor builders"
+    ]
+  },
+  {
+    "id": "lbl.vendor.builders.4238dc4122",
+    "text": "Choose one",
+    "pages": [
+      "Vendor builders"
+    ]
+  },
+  {
+    "id": "lbl.vendor.builders.44873b76a6",
+    "text": "Custom product",
+    "pages": [
+      "Vendor builders"
+    ]
+  },
+  {
+    "id": "lbl.vendor.builders.490fd462be",
+    "text": "Pick one",
+    "pages": [
+      "Vendor builders"
+    ]
+  },
+  {
+    "id": "lbl.vendor.builders.4b78613147",
+    "text": "ingredients ·",
+    "pages": [
+      "Vendor builders"
+    ]
+  },
+  {
+    "id": "lbl.vendor.builders.4e06f8eb7a",
+    "text": "Unnamed ingredient",
+    "pages": [
+      "Vendor builders"
+    ]
+  },
+  {
+    "id": "lbl.vendor.builders.513a775255",
+    "text": "Request an ingredient",
+    "pages": [
+      "Vendor builders"
+    ]
+  },
+  {
+    "id": "lbl.vendor.builders.55f8ebc805",
+    "text": "Description",
+    "pages": [
+      "Vendor builders"
+    ]
+  },
+  {
+    "id": "lbl.vendor.builders.55fbc59fd2",
+    "text": "Custom product added",
+    "pages": [
+      "Vendor builders"
+    ]
+  },
+  {
+    "id": "lbl.vendor.builders.583a5e0da7",
+    "text": "· Max",
+    "pages": [
+      "Vendor builders"
+    ]
+  },
+  {
+    "id": "lbl.vendor.builders.644cbb99e4",
+    "text": "Add at least one group",
+    "pages": [
+      "Vendor builders"
+    ]
+  },
+  {
+    "id": "lbl.vendor.builders.644cec20e9",
+    "text": "Base price ($)",
+    "pages": [
+      "Vendor builders"
+    ]
+  },
+  {
+    "id": "lbl.vendor.builders.68294aebf9",
+    "text": "· Required",
+    "pages": [
+      "Vendor builders"
+    ]
+  },
+  {
+    "id": "lbl.vendor.builders.6c46da464b",
+    "text": "Back to Products",
+    "pages": [
+      "Vendor builders"
+    ]
+  },
+  {
+    "id": "lbl.vendor.builders.6f2b4d63b7",
+    "text": "Ingredient name",
+    "pages": [
+      "Vendor builders"
+    ]
+  },
+  {
+    "id": "lbl.vendor.builders.6ff2ef30e1",
+    "text": "Move section down",
+    "pages": [
+      "Vendor builders"
+    ]
+  },
+  {
+    "id": "lbl.vendor.builders.709a23220f",
+    "text": "Name",
+    "pages": [
+      "Vendor builders"
+    ]
+  },
+  {
+    "id": "lbl.vendor.builders.72d896200b",
+    "text": "{value0} needs at least one ingredient",
+    "pages": [
+      "Vendor builders"
+    ]
+  },
+  {
+    "id": "lbl.vendor.builders.75d2a1be46",
+    "text": "{value0}: minimum cannot be above maximum",
+    "pages": [
+      "Vendor builders"
+    ]
+  },
+  {
+    "id": "lbl.vendor.builders.75e2b3c1f8",
+    "text": "Section name",
+    "pages": [
+      "Vendor builders"
+    ]
+  },
+  {
+    "id": "lbl.vendor.builders.7c62a14244",
+    "text": "Available",
+    "pages": [
+      "Vendor builders"
+    ]
+  },
+  {
+    "id": "lbl.vendor.builders.7cc61b7395",
+    "text": "Add-on price ($)",
+    "pages": [
+      "Vendor builders"
+    ]
+  },
+  {
+    "id": "lbl.vendor.builders.7efcfe59ac",
+    "text": "Custom product saved",
+    "pages": [
+      "Vendor builders"
+    ]
+  },
+  {
+    "id": "lbl.vendor.builders.85f3f1d2ea",
+    "text": "Add custom product",
+    "pages": [
+      "Vendor builders"
+    ]
+  },
+  {
+    "id": "lbl.vendor.builders.890268ab02",
+    "text": "Base price must be 0 or more",
+    "pages": [
+      "Vendor builders"
+    ]
+  },
+  {
+    "id": "lbl.vendor.builders.8a6092adf0",
+    "text": "Free / included",
+    "pages": [
+      "Vendor builders"
+    ]
+  },
+  {
+    "id": "lbl.vendor.builders.96ae91f43b",
+    "text": "Choose several",
+    "pages": [
+      "Vendor builders"
+    ]
+  },
+  {
+    "id": "lbl.vendor.builders.96de489fe3",
+    "text": "Sizes",
+    "pages": [
+      "Vendor builders"
+    ]
+  },
+  {
+    "id": "lbl.vendor.builders.9841bb5a06",
+    "text": "{value0} is required but has no available ingredient",
+    "pages": [
+      "Vendor builders"
+    ]
+  },
+  {
+    "id": "lbl.vendor.builders.9f3236d30d",
+    "text": "A group",
+    "pages": [
+      "Vendor builders"
+    ]
+  },
+  {
+    "id": "lbl.vendor.builders.9f7f662909",
+    "text": "Size \"{value0}\" needs a price of 0 or more",
+    "pages": [
+      "Vendor builders"
+    ]
+  },
+  {
+    "id": "lbl.vendor.builders.a0152991fc",
+    "text": "Colour (hex, optional)",
+    "pages": [
+      "Vendor builders"
+    ]
+  },
+  {
+    "id": "lbl.vendor.builders.a8717db58c",
+    "text": "This custom product could not be found for this store. Return to Products and add a custom product there.",
+    "pages": [
+      "Vendor builders"
+    ]
+  },
+  {
+    "id": "lbl.vendor.builders.acdee40f13",
+    "text": "Available to customers",
+    "pages": [
+      "Vendor builders"
+    ]
+  },
+  {
+    "id": "lbl.vendor.builders.addSection",
+    "text": "Add section",
+    "pages": [
+      "Vendor builders"
+    ]
+  },
+  {
+    "id": "lbl.vendor.builders.addSize",
+    "text": "Add",
+    "pages": [
+      "Vendor builders"
+    ]
+  },
+  {
+    "id": "lbl.vendor.builders.b22b52c951",
+    "text": "{value0}: included picks cannot be above the maximum",
+    "pages": [
+      "Vendor builders"
+    ]
+  },
+  {
+    "id": "lbl.vendor.builders.b474575d2c",
+    "text": "Max same ingredient",
+    "pages": [
+      "Vendor builders"
+    ]
+  },
+  {
+    "id": "lbl.vendor.builders.b4f57cd0cd",
+    "text": "Move up",
+    "pages": [
+      "Vendor builders"
+    ]
+  },
+  {
+    "id": "lbl.vendor.builders.b69df538a9",
+    "text": "Every group needs a name",
+    "pages": [
+      "Vendor builders"
+    ]
+  },
+  {
+    "id": "lbl.vendor.builders.bc094912f8",
+    "text": "{value0}: \"{value1}\" needs a price of 0 or more",
+    "pages": [
+      "Vendor builders"
+    ]
+  },
+  {
+    "id": "lbl.vendor.builders.c99b180cd7",
+    "text": "Size name",
+    "pages": [
+      "Vendor builders"
+    ]
+  },
+  {
+    "id": "lbl.vendor.builders.cb25ec6741",
+    "text": "{value0}: maximum is more than the number of ingredients",
+    "pages": [
+      "Vendor builders"
+    ]
+  },
+  {
+    "id": "lbl.vendor.builders.d00da9ef2c",
+    "text": "Custom product unavailable",
+    "pages": [
+      "Vendor builders"
+    ]
+  },
+  {
+    "id": "lbl.vendor.builders.d28f91d944",
+    "text": "Remove size",
+    "pages": [
+      "Vendor builders"
+    ]
+  },
+  {
+    "id": "lbl.vendor.builders.d3c81046b6",
+    "text": "Fix these first",
+    "pages": [
+      "Vendor builders"
+    ]
+  },
+  {
+    "id": "lbl.vendor.builders.d7b31f7eaf",
+    "text": "Allow special instructions",
+    "pages": [
+      "Vendor builders"
+    ]
+  },
+  {
+    "id": "lbl.vendor.builders.d7e651f3fd",
+    "text": "Included free",
+    "pages": [
+      "Vendor builders"
+    ]
+  },
+  {
+    "id": "lbl.vendor.builders.da49fb3e5c",
+    "text": "Not offered",
+    "pages": [
+      "Vendor builders"
+    ]
+  },
+  {
+    "id": "lbl.vendor.builders.e0b4b419b6",
+    "text": "Sections and ingredients",
+    "pages": [
+      "Vendor builders"
+    ]
+  },
+  {
+    "id": "lbl.vendor.builders.e7eaff78b3",
+    "text": "Remove section",
+    "pages": [
+      "Vendor builders"
+    ]
+  },
+  {
+    "id": "lbl.vendor.builders.e963907dac",
+    "text": "Remove",
+    "pages": [
+      "Vendor builders"
+    ]
+  },
+  {
+    "id": "lbl.vendor.builders.eed6bfb410",
+    "text": "Required",
+    "pages": [
+      "Vendor builders"
+    ]
+  },
+  {
+    "id": "lbl.vendor.builders.ef3805eb1a",
+    "text": "Minimum picks",
+    "pages": [
+      "Vendor builders"
+    ]
+  },
+  {
+    "id": "lbl.vendor.builders.f42ca5f288",
+    "text": "Untitled section",
+    "pages": [
+      "Vendor builders"
+    ]
+  },
+  {
+    "id": "lbl.vendor.builders.f4a4a736be",
+    "text": "Maximum picks",
+    "pages": [
+      "Vendor builders"
+    ]
+  },
+  {
+    "id": "lbl.vendor.builders.fbe00241c0",
+    "text": "{value0}: every ingredient needs a name",
+    "pages": [
+      "Vendor builders"
+    ]
+  },
+  {
+    "id": "lbl.vendor.builders.fd6fe55df6",
+    "text": "Add at least one size",
+    "pages": [
+      "Vendor builders"
+    ]
+  },
+  {
+    "id": "lbl.vendor.orders.043b9cc08c",
+    "text": "Driver phone",
+    "pages": [
+      "Vendor orders"
+    ]
+  },
+  {
+    "id": "lbl.vendor.orders.06d84b4546",
+    "text": "Assign courier ·",
+    "pages": [
+      "Vendor orders"
+    ]
+  },
+  {
+    "id": "lbl.vendor.orders.06fb2ccbda",
+    "text": "Add context for your team…",
+    "pages": [
+      "Vendor orders"
+    ]
+  },
+  {
+    "id": "lbl.vendor.orders.09fef5d8d9",
+    "text": "Failed",
+    "pages": [
+      "Vendor orders"
+    ]
+  },
+  {
+    "id": "lbl.vendor.orders.0bab2aabc0",
+    "text": "Assign courier",
+    "pages": [
+      "Vendor orders"
+    ]
+  },
+  {
+    "id": "lbl.vendor.orders.0cfb6bc682",
+    "text": "Cash on delivery disabled.",
+    "pages": [
+      "Vendor orders"
+    ]
+  },
+  {
+    "id": "lbl.vendor.orders.10c06e234e",
+    "text": "Reason (required, at least 10 characters)",
+    "pages": [
+      "Vendor orders"
+    ]
+  },
+  {
+    "id": "lbl.vendor.orders.15e014f153",
+    "text": "Accepts cash",
+    "pages": [
+      "Vendor orders"
+    ]
+  },
+  {
+    "id": "lbl.vendor.orders.16927e1d6f",
+    "text": "Courier assigned",
+    "pages": [
+      "Vendor orders"
+    ]
+  },
+  {
+    "id": "lbl.vendor.orders.1798b3ba42",
+    "text": "Completed",
+    "pages": [
+      "Vendor orders"
+    ]
+  },
+  {
+    "id": "lbl.vendor.orders.1977c083e1",
+    "text": "Mark delivered with photo",
+    "pages": [
+      "Vendor orders"
+    ]
+  },
+  {
+    "id": "lbl.vendor.orders.1bda586997",
+    "text": "awaiting response on this page",
+    "pages": [
+      "Vendor orders"
+    ]
+  },
+  {
+    "id": "lbl.vendor.orders.1cd1bdad46",
+    "text": "Scheduled",
+    "pages": [
+      "Vendor orders"
+    ]
+  },
+  {
+    "id": "lbl.vendor.orders.1d4a885bd6",
+    "text": "Order marked as preparing",
+    "pages": [
+      "Vendor orders"
+    ]
+  },
+  {
+    "id": "lbl.vendor.orders.1eaf4f68bf",
+    "text": "Dispute won",
+    "pages": [
+      "Vendor orders"
+    ]
+  },
+  {
+    "id": "lbl.vendor.orders.1f585d7d3d",
+    "text": "Courier assignments could not refresh. Pull down to try again.",
+    "pages": [
+      "Vendor orders"
+    ]
+  },
+  {
+    "id": "lbl.vendor.orders.1fa4feae4f",
+    "text": "Order declined. Customer notified.",
+    "pages": [
+      "Vendor orders"
+    ]
+  },
+  {
+    "id": "lbl.vendor.orders.20a0418296",
+    "text": "Not provided",
+    "pages": [
+      "Vendor orders"
+    ]
+  },
+  {
+    "id": "lbl.vendor.orders.20a23c4b5a",
+    "text": "Could not load the delivery photo.",
+    "pages": [
+      "Vendor orders"
+    ]
+  },
+  {
+    "id": "lbl.vendor.orders.20c7c5522f",
+    "text": "Ready",
+    "pages": [
+      "Vendor orders"
+    ]
+  },
+  {
+    "id": "lbl.vendor.orders.2a4a8a9231",
+    "text": "Cancel order ·",
+    "pages": [
+      "Vendor orders"
+    ]
+  },
+  {
+    "id": "lbl.vendor.orders.2d6166da35",
+    "text": "Choose the cancellation reason for your store’s records. The customer receives a separate, respectful explanation rather than your selected reason or private note.",
+    "pages": [
+      "Vendor orders"
+    ]
+  },
+  {
+    "id": "lbl.vendor.orders.2e4837b5c8",
+    "text": "Address not provided",
+    "pages": [
+      "Vendor orders"
+    ]
+  },
+  {
+    "id": "lbl.vendor.orders.2e4c05df9f",
+    "text": "Could not load cash settings.",
+    "pages": [
+      "Vendor orders"
+    ]
+  },
+  {
+    "id": "lbl.vendor.orders.3023cc8a9b",
+    "text": "Loading available couriers…",
+    "pages": [
+      "Vendor orders"
+    ]
+  },
+  {
+    "id": "lbl.vendor.orders.34539b869d",
+    "text": "Customer phone:",
+    "pages": [
+      "Vendor orders"
+    ]
+  },
+  {
+    "id": "lbl.vendor.orders.35556087e1",
+    "text": "Allow camera or photo access to add the delivery photo.",
+    "pages": [
+      "Vendor orders"
+    ]
+  },
+  {
+    "id": "lbl.vendor.orders.3dc41c87a6",
+    "text": "km away",
+    "pages": [
+      "Vendor orders"
+    ]
+  },
+  {
+    "id": "lbl.vendor.orders.3f82e91675",
+    "text": "Courier accepted the offer. Live GPS tracking starts now.",
+    "pages": [
+      "Vendor orders"
+    ]
+  },
+  {
+    "id": "lbl.vendor.orders.40b91e9354",
+    "text": "Explain why you cannot accept this order…",
+    "pages": [
+      "Vendor orders"
+    ]
+  },
+  {
+    "id": "lbl.vendor.orders.40e31a69cf",
+    "text": "Courier picked up this order.",
+    "pages": [
+      "Vendor orders"
+    ]
+  },
+  {
+    "id": "lbl.vendor.orders.43a5517e77",
+    "text": "Wallet/card only",
+    "pages": [
+      "Vendor orders"
+    ]
+  },
+  {
+    "id": "lbl.vendor.orders.4428e67f62",
+    "text": "Delivery address:",
+    "pages": [
+      "Vendor orders"
+    ]
+  },
+  {
+    "id": "lbl.vendor.orders.465681c687",
+    "text": "Disputed",
+    "pages": [
+      "Vendor orders"
+    ]
+  },
+  {
+    "id": "lbl.vendor.orders.4808dd2cde",
+    "text": "No phone",
+    "pages": [
+      "Vendor orders"
+    ]
+  },
+  {
+    "id": "lbl.vendor.orders.482e8c36d3",
+    "text": "The customer reported a problem. Our team is reviewing it.",
+    "pages": [
+      "Vendor orders"
+    ]
+  },
+  {
+    "id": "lbl.vendor.orders.49e73b03d8",
+    "text": "Card payment:",
+    "pages": [
+      "Vendor orders"
+    ]
+  },
+  {
+    "id": "lbl.vendor.orders.4bfc194b68",
+    "text": "Next page",
+    "pages": [
+      "Vendor orders"
+    ]
+  },
+  {
+    "id": "lbl.vendor.orders.50d8b4a941",
+    "text": "unknown",
+    "pages": [
+      "Vendor orders"
+    ]
+  },
+  {
+    "id": "lbl.vendor.orders.540385f4ee",
+    "text": "Product subtotal",
+    "pages": [
+      "Vendor orders"
+    ]
+  },
+  {
+    "id": "lbl.vendor.orders.556b1fc32c",
+    "text": "Wantiss Wallet is the default payment method. Cash on delivery is available when your store and an eligible courier both enable it.",
+    "pages": [
+      "Vendor orders"
+    ]
+  },
+  {
+    "id": "lbl.vendor.orders.56a2285c5b",
+    "text": "Saving…",
+    "pages": [
+      "Vendor orders"
+    ]
+  },
+  {
+    "id": "lbl.vendor.orders.584a740d20",
+    "text": "Customer order total (includes excluded fees)",
+    "pages": [
+      "Vendor orders"
+    ]
+  },
+  {
+    "id": "lbl.vendor.orders.5ae39c4a82",
+    "text": "Cancel order",
+    "pages": [
+      "Vendor orders"
+    ]
+  },
+  {
+    "id": "lbl.vendor.orders.5c3027fc66",
+    "text": "Your net product earnings",
+    "pages": [
+      "Vendor orders"
+    ]
+  },
+  {
+    "id": "lbl.vendor.orders.61a0572c48",
+    "text": "Accepted",
+    "pages": [
+      "Vendor orders"
+    ]
+  },
+  {
+    "id": "lbl.vendor.orders.63a7342acd",
+    "text": "Driver name",
+    "pages": [
+      "Vendor orders"
+    ]
+  },
+  {
+    "id": "lbl.vendor.orders.6c1a5f266f",
+    "text": "Live tracking is not available for your own driver. Add a delivery photo when the order arrives.",
+    "pages": [
+      "Vendor orders"
+    ]
+  },
+  {
+    "id": "lbl.vendor.orders.6fcad3b462",
+    "text": "Courier offer sent. The courier must accept before pickup.",
+    "pages": [
+      "Vendor orders"
+    ]
+  },
+  {
+    "id": "lbl.vendor.orders.717daa6816",
+    "text": "Wantiss commission (",
+    "pages": [
+      "Vendor orders"
+    ]
+  },
+  {
+    "id": "lbl.vendor.orders.74e381179a",
+    "text": "Dispute lost",
+    "pages": [
+      "Vendor orders"
+    ]
+  },
+  {
+    "id": "lbl.vendor.orders.75a2b4f43e",
+    "text": "Complete order",
+    "pages": [
+      "Vendor orders"
+    ]
+  },
+  {
+    "id": "lbl.vendor.orders.76d2531727",
+    "text": "Card refund is pending and may need support follow-up.",
+    "pages": [
+      "Vendor orders"
+    ]
+  },
+  {
+    "id": "lbl.vendor.orders.7cd4ffd44f",
+    "text": "Order accepted",
+    "pages": [
+      "Vendor orders"
+    ]
+  },
+  {
+    "id": "lbl.vendor.orders.7d925fd885",
+    "text": "Distance unavailable",
+    "pages": [
+      "Vendor orders"
+    ]
+  },
+  {
+    "id": "lbl.vendor.orders.7e0982279c",
+    "text": "Disable cash on delivery",
+    "pages": [
+      "Vendor orders"
+    ]
+  },
+  {
+    "id": "lbl.vendor.orders.7ff1b090bc",
+    "text": "Delivery photo saved. Waiting for the customer to confirm. It completes automatically after",
+    "pages": [
+      "Vendor orders"
+    ]
+  },
+  {
+    "id": "lbl.vendor.orders.7ffb864440",
+    "text": "Could not load available couriers. Please try again.",
+    "pages": [
+      "Vendor orders"
+    ]
+  },
+  {
+    "id": "lbl.vendor.orders.81f547195b",
+    "text": "Previous page",
+    "pages": [
+      "Vendor orders"
+    ]
+  },
+  {
+    "id": "lbl.vendor.orders.8bed86c951",
+    "text": "· refunded",
+    "pages": [
+      "Vendor orders"
+    ]
+  },
+  {
+    "id": "lbl.vendor.orders.8cafc23055",
+    "text": "Enable cash on delivery",
+    "pages": [
+      "Vendor orders"
+    ]
+  },
+  {
+    "id": "lbl.vendor.orders.8de6b3f946",
+    "text": "Enter at least 10 characters (",
+    "pages": [
+      "Vendor orders"
+    ]
+  },
+  {
+    "id": "lbl.vendor.orders.8f50353fe4",
+    "text": "Order completed",
+    "pages": [
+      "Vendor orders"
+    ]
+  },
+  {
+    "id": "lbl.vendor.orders.8fb6f28e1c",
+    "text": "Commissionable product amount",
+    "pages": [
+      "Vendor orders"
+    ]
+  },
+  {
+    "id": "lbl.vendor.orders.90977a5334",
+    "text": "Confirm cancellation",
+    "pages": [
+      "Vendor orders"
+    ]
+  },
+  {
+    "id": "lbl.vendor.orders.92079d38f3",
+    "text": "Start preparing",
+    "pages": [
+      "Vendor orders"
+    ]
+  },
+  {
+    "id": "lbl.vendor.orders.924a70ff4b",
+    "text": "Picked up",
+    "pages": [
+      "Vendor orders"
+    ]
+  },
+  {
+    "id": "lbl.vendor.orders.94ce937116",
+    "text": "· Scheduled fulfilment:",
+    "pages": [
+      "Vendor orders"
+    ]
+  },
+  {
+    "id": "lbl.vendor.orders.958e5dc8da",
+    "text": "No Goodies orders yet",
+    "pages": [
+      "Vendor orders"
+    ]
+  },
+  {
+    "id": "lbl.vendor.orders.9631af52c6",
+    "text": "Delivery",
+    "pages": [
+      "Vendor orders"
+    ]
+  },
+  {
+    "id": "lbl.vendor.orders.96786592cd",
+    "text": "Could not assign your driver. Check the order status and driver details, then try again.",
+    "pages": [
+      "Vendor orders"
+    ]
+  },
+  {
+    "id": "lbl.vendor.orders.96a9b7cdbe",
+    "text": "Preparing",
+    "pages": [
+      "Vendor orders"
+    ]
+  },
+  {
+    "id": "lbl.vendor.orders.96f608c16c",
+    "text": "Pending",
+    "pages": [
+      "Vendor orders"
+    ]
+  },
+  {
+    "id": "lbl.vendor.orders.971fad06e0",
+    "text": "Use my own driver",
+    "pages": [
+      "Vendor orders"
+    ]
+  },
+  {
+    "id": "lbl.vendor.orders.991f4cba92",
+    "text": "Authorized",
+    "pages": [
+      "Vendor orders"
+    ]
+  },
+  {
+    "id": "lbl.vendor.orders.99aff05594",
+    "text": "Refund pending",
+    "pages": [
+      "Vendor orders"
+    ]
+  },
+  {
+    "id": "lbl.vendor.orders.9a2b5e5fe2",
+    "text": "Your driver is assigned. Mark the order delivered with a photo once it arrives.",
+    "pages": [
+      "Vendor orders"
+    ]
+  },
+  {
+    "id": "lbl.vendor.orders.9b730cbf1e",
+    "text": "Goodies orders",
+    "pages": [
+      "Vendor orders"
+    ]
+  },
+  {
+    "id": "lbl.vendor.orders.9c1f9b164c",
+    "text": "Order marked ready",
+    "pages": [
+      "Vendor orders"
+    ]
+  },
+  {
+    "id": "lbl.vendor.orders.9dfcfb5db1",
+    "text": "Add private context for your team…",
+    "pages": [
+      "Vendor orders"
+    ]
+  },
+  {
+    "id": "lbl.vendor.orders.9fa54807df",
+    "text": "15-minute response required",
+    "pages": [
+      "Vendor orders"
+    ]
+  },
+  {
+    "id": "lbl.vendor.orders.a1bf92eff4",
+    "text": "Cancelled",
+    "pages": [
+      "Vendor orders"
+    ]
+  },
+  {
+    "id": "lbl.vendor.orders.a51122c100",
+    "text": "Pickup",
+    "pages": [
+      "Vendor orders"
+    ]
+  },
+  {
+    "id": "lbl.vendor.orders.a5f995a220",
+    "text": "Action required",
+    "pages": [
+      "Vendor orders"
+    ]
+  },
+  {
+    "id": "lbl.vendor.orders.a689a999a5",
+    "text": "Expired",
+    "pages": [
+      "Vendor orders"
+    ]
+  },
+  {
+    "id": "lbl.vendor.orders.aba5d16c4f",
+    "text": "Reassign courier",
+    "pages": [
+      "Vendor orders"
+    ]
+  },
+  {
+    "id": "lbl.vendor.orders.ad5634db80",
+    "text": "Could not save the delivery photo. Please try again.",
+    "pages": [
+      "Vendor orders"
+    ]
+  },
+  {
+    "id": "lbl.vendor.orders.aea7ce6af4",
+    "text": "Explain why your restaurant must cancel…",
+    "pages": [
+      "Vendor orders"
+    ]
+  },
+  {
+    "id": "lbl.vendor.orders.af033e24e6",
+    "text": "Accept order",
+    "pages": [
+      "Vendor orders"
+    ]
+  },
+  {
+    "id": "lbl.vendor.orders.b0e16f0dd9",
+    "text": "Only couriers currently online are listed. Cash orders are offered only to couriers who explicitly accept cash on delivery.",
+    "pages": [
+      "Vendor orders"
+    ]
+  },
+  {
+    "id": "lbl.vendor.orders.b1536fb05a",
+    "text": "Could not update this order. Refresh and try again.",
+    "pages": [
+      "Vendor orders"
+    ]
+  },
+  {
+    "id": "lbl.vendor.orders.b30522ada6",
+    "text": "Customer note:",
+    "pages": [
+      "Vendor orders"
+    ]
+  },
+  {
+    "id": "lbl.vendor.orders.b4b1b95374",
+    "text": "Confirm decline",
+    "pages": [
+      "Vendor orders"
+    ]
+  },
+  {
+    "id": "lbl.vendor.orders.b50b48689e",
+    "text": "Response deadline passed",
+    "pages": [
+      "Vendor orders"
+    ]
+  },
+  {
+    "id": "lbl.vendor.orders.b524936d7a",
+    "text": "Discount",
+    "pages": [
+      "Vendor orders"
+    ]
+  },
+  {
+    "id": "lbl.vendor.orders.b59cf9ed55",
+    "text": "Decline",
+    "pages": [
+      "Vendor orders"
+    ]
+  },
+  {
+    "id": "lbl.vendor.orders.b7ff1a6fb9",
+    "text": "Marked as delivered. The customer has 24 hours to confirm or report a problem.",
+    "pages": [
+      "Vendor orders"
+    ]
+  },
+  {
+    "id": "lbl.vendor.orders.ba0df03fa0",
+    "text": "Order cancelled. Customer notified.",
+    "pages": [
+      "Vendor orders"
+    ]
+  },
+  {
+    "id": "lbl.vendor.orders.be0b0bab55",
+    "text": "Courier",
+    "pages": [
+      "Vendor orders"
+    ]
+  },
+  {
+    "id": "lbl.vendor.orders.c04fbcb627",
+    "text": "Loading cash settings…",
+    "pages": [
+      "Vendor orders"
+    ]
+  },
+  {
+    "id": "lbl.vendor.orders.c612c0a4d6",
+    "text": "Partially refunded",
+    "pages": [
+      "Vendor orders"
+    ]
+  },
+  {
+    "id": "lbl.vendor.orders.c701cc4fb6",
+    "text": "left to respond",
+    "pages": [
+      "Vendor orders"
+    ]
+  },
+  {
+    "id": "lbl.vendor.orders.cashEnabled",
+    "text": "Cash on delivery enabled for your store.",
+    "pages": [
+      "Vendor orders"
+    ]
+  },
+  {
+    "id": "lbl.vendor.orders.ccc3d63c6f",
+    "text": "New customer orders will appear here with a 15-minute response window.",
+    "pages": [
+      "Vendor orders"
+    ]
+  },
+  {
+    "id": "lbl.vendor.orders.ce1e152b3f",
+    "text": "No eligible couriers online",
+    "pages": [
+      "Vendor orders"
+    ]
+  },
+  {
+    "id": "lbl.vendor.orders.cf07c3b59f",
+    "text": "Choose a reason. The customer will receive a clear, respectful explanation; your private note is not shared verbatim.",
+    "pages": [
+      "Vendor orders"
+    ]
+  },
+  {
+    "id": "lbl.vendor.orders.cf1db178d8",
+    "text": "Internal note (optional)",
+    "pages": [
+      "Vendor orders"
+    ]
+  },
+  {
+    "id": "lbl.vendor.orders.d4e4f40147",
+    "text": "New order",
+    "pages": [
+      "Vendor orders"
+    ]
+  },
+  {
+    "id": "lbl.vendor.orders.d63b7c105f",
+    "text": "Could not assign this courier. Please refresh and try again.",
+    "pages": [
+      "Vendor orders"
+    ]
+  },
+  {
+    "id": "lbl.vendor.orders.d6fbc7a82d",
+    "text": "Refunded",
+    "pages": [
+      "Vendor orders"
+    ]
+  },
+  {
+    "id": "lbl.vendor.orders.dacaad28c3",
+    "text": "Your driver:",
+    "pages": [
+      "Vendor orders"
+    ]
+  },
+  {
+    "id": "lbl.vendor.orders.dc9d4584a5",
+    "text": "Paid",
+    "pages": [
+      "Vendor orders"
+    ]
+  },
+  {
+    "id": "lbl.vendor.orders.dcd53826ac",
+    "text": "Delivery offer sent. Waiting for courier acceptance.",
+    "pages": [
+      "Vendor orders"
+    ]
+  },
+  {
+    "id": "lbl.vendor.orders.dispatchFailed",
+    "text": "Could not check delivery options.",
+    "pages": [
+      "Vendor orders"
+    ]
+  },
+  {
+    "id": "lbl.vendor.orders.dispatchLoading",
+    "text": "Checking delivery options…",
+    "pages": [
+      "Vendor orders"
+    ]
+  },
+  {
+    "id": "lbl.vendor.orders.e1cbec5f55",
+    "text": "No courier yet? You can use your own driver in",
+    "pages": [
+      "Vendor orders"
+    ]
+  },
+  {
+    "id": "lbl.vendor.orders.e5116ca1f1",
+    "text": "Please accept or decline each new order within 15 minutes. Orders not answered in time are automatically cancelled and the items are returned to your available stock.",
+    "pages": [
+      "Vendor orders"
+    ]
+  },
+  {
+    "id": "lbl.vendor.orders.e6c9229a08",
+    "text": "Mark ready",
+    "pages": [
+      "Vendor orders"
+    ]
+  },
+  {
+    "id": "lbl.vendor.orders.e9c1d38743",
+    "text": "Could not update cash-on-delivery settings. Please try again.",
+    "pages": [
+      "Vendor orders"
+    ]
+  },
+  {
+    "id": "lbl.vendor.orders.ec10013137",
+    "text": "Send delivery offer",
+    "pages": [
+      "Vendor orders"
+    ]
+  },
+  {
+    "id": "lbl.vendor.orders.ecdda59aea",
+    "text": "Item",
+    "pages": [
+      "Vendor orders"
+    ]
+  },
+  {
+    "id": "lbl.vendor.orders.eda24c6958",
+    "text": "Cash on delivery",
+    "pages": [
+      "Vendor orders"
+    ]
+  },
+  {
+    "id": "lbl.vendor.orders.eea364ed29",
+    "text": "Your own driver ·",
+    "pages": [
+      "Vendor orders"
+    ]
+  },
+  {
+    "id": "lbl.vendor.orders.f01a4bdff8",
+    "text": "Assign my driver",
+    "pages": [
+      "Vendor orders"
+    ]
+  },
+  {
+    "id": "lbl.vendor.orders.f4553c2513",
+    "text": "Try again when a courier is available and has enabled the required payment preference.",
+    "pages": [
+      "Vendor orders"
+    ]
+  },
+  {
+    "id": "lbl.vendor.orders.f4a042f986",
+    "text": "if there is no report.",
+    "pages": [
+      "Vendor orders"
+    ]
+  },
+  {
+    "id": "lbl.vendor.orders.f6bc8b8a23",
+    "text": "min.",
+    "pages": [
+      "Vendor orders"
+    ]
+  },
+  {
+    "id": "lbl.vendor.orders.ff59b80fe4",
+    "text": "Declined",
+    "pages": [
+      "Vendor orders"
+    ]
+  },
+  {
+    "id": "lbl.vendor.orders.reasonLength",
+    "text": "Enter at least 10 characters ({count}/10).",
+    "pages": [
+      "Vendor orders"
+    ]
+  },
+  {
+    "id": "lbl.vendor.products.01eb73e0be",
+    "text": "Pizza",
+    "pages": [
+      "Vendor products"
+    ]
+  },
+  {
+    "id": "lbl.vendor.products.081ae3fdc4",
+    "text": "Custom",
+    "pages": [
+      "Vendor products"
+    ]
+  },
+  {
+    "id": "lbl.vendor.products.10cc9577c1",
+    "text": "No restriction",
+    "pages": [
+      "Vendor products"
+    ]
+  },
+  {
+    "id": "lbl.vendor.products.1424b805b2",
+    "text": "Enter a price between 0 and 100,000",
+    "pages": [
+      "Vendor products"
+    ]
+  },
+  {
+    "id": "lbl.vendor.products.1a6eee07e8",
+    "text": "Price ($)",
+    "pages": [
+      "Vendor products"
+    ]
+  },
+  {
+    "id": "lbl.vendor.products.1d1e7045ee",
+    "text": "Save product",
+    "pages": [
+      "Vendor products"
+    ]
+  },
+  {
+    "id": "lbl.vendor.products.213417ecb4",
+    "text": "A product can have up to 5 photos",
+    "pages": [
+      "Vendor products"
+    ]
+  },
+  {
+    "id": "lbl.vendor.products.23b0a87d8e",
+    "text": "Customers will no longer see it. Past orders are not affected.",
+    "pages": [
+      "Vendor products"
+    ]
+  },
+  {
+    "id": "lbl.vendor.products.27eeb7a291",
+    "text": "Rejected",
+    "pages": [
+      "Vendor products"
+    ]
+  },
+  {
+    "id": "lbl.vendor.products.2939664d78",
+    "text": "Product deleted",
+    "pages": [
+      "Vendor products"
+    ]
+  },
+  {
+    "id": "lbl.vendor.products.29968e2868",
+    "text": "Description is up to 500 characters",
+    "pages": [
+      "Vendor products"
+    ]
+  },
+  {
+    "id": "lbl.vendor.products.29cc70a6ac",
+    "text": "You receive",
+    "pages": [
+      "Vendor products"
+    ]
+  },
+  {
+    "id": "lbl.vendor.products.2e10af9f72",
+    "text": "Burger",
+    "pages": [
+      "Vendor products"
+    ]
+  },
+  {
+    "id": "lbl.vendor.products.35fa6a7b51",
+    "text": "Alcohol",
+    "pages": [
+      "Vendor products"
+    ]
+  },
+  {
+    "id": "lbl.vendor.products.388de6fa3a",
+    "text": "Description (optional)",
+    "pages": [
+      "Vendor products"
+    ]
+  },
+  {
+    "id": "lbl.vendor.products.3c76cc4b87",
+    "text": "Stock must be a whole number from 0 to 100,000",
+    "pages": [
+      "Vendor products"
+    ]
+  },
+  {
+    "id": "lbl.vendor.products.3f1356ad0e",
+    "text": "In stock",
+    "pages": [
+      "Vendor products"
+    ]
+  },
+  {
+    "id": "lbl.vendor.products.4068f879dd",
+    "text": "This looks like alcohol. Set the restriction to Alcohol.",
+    "pages": [
+      "Vendor products"
+    ]
+  },
+  {
+    "id": "lbl.vendor.products.44873b76a6",
+    "text": "Custom product",
+    "pages": [
+      "Vendor products"
+    ]
+  },
+  {
+    "id": "lbl.vendor.products.4a95123769",
+    "text": "Delete this product?",
+    "pages": [
+      "Vendor products"
+    ]
+  },
+  {
+    "id": "lbl.vendor.products.4bfc194b68",
+    "text": "Next page",
+    "pages": [
+      "Vendor products"
+    ]
+  },
+  {
+    "id": "lbl.vendor.products.4fb08c0f26",
+    "text": "{value0} · {value1} base price",
+    "pages": [
+      "Vendor products"
+    ]
+  },
+  {
+    "id": "lbl.vendor.products.5037fdc818",
+    "text": "Use at most two decimals in the price",
+    "pages": [
+      "Vendor products"
+    ]
+  },
+  {
+    "id": "lbl.vendor.products.513a0e17b4",
+    "text": "Delete product",
+    "pages": [
+      "Vendor products"
+    ]
+  },
+  {
+    "id": "lbl.vendor.products.56a2285c5b",
+    "text": "Saving…",
+    "pages": [
+      "Vendor products"
+    ]
+  },
+  {
+    "id": "lbl.vendor.products.57f1763709",
+    "text": "Product photos ·",
+    "pages": [
+      "Vendor products"
+    ]
+  },
+  {
+    "id": "lbl.vendor.products.5a5a12dce6",
+    "text": "Awaiting review",
+    "pages": [
+      "Vendor products"
+    ]
+  },
+  {
+    "id": "lbl.vendor.products.5d7deda98a",
+    "text": "Could not load custom product types. Please try again.",
+    "pages": [
+      "Vendor products"
+    ]
+  },
+  {
+    "id": "lbl.vendor.products.5de5861112",
+    "text": "Restriction",
+    "pages": [
+      "Vendor products"
+    ]
+  },
+  {
+    "id": "lbl.vendor.products.60fa396946",
+    "text": "Service fee (10%)",
+    "pages": [
+      "Vendor products"
+    ]
+  },
+  {
+    "id": "lbl.vendor.products.6467786779",
+    "text": "{value0} · {value1}{value2}",
+    "pages": [
+      "Vendor products"
+    ]
+  },
+  {
+    "id": "lbl.vendor.products.656630dc05",
+    "text": "+ Add product",
+    "pages": [
+      "Vendor products"
+    ]
+  },
+  {
+    "id": "lbl.vendor.products.709a23220f",
+    "text": "Name",
+    "pages": [
+      "Vendor products"
+    ]
+  },
+  {
+    "id": "lbl.vendor.products.7657ccd6e5",
+    "text": "Selling price",
+    "pages": [
+      "Vendor products"
+    ]
+  },
+  {
+    "id": "lbl.vendor.products.77dfd2135f",
+    "text": "Cancel",
+    "pages": [
+      "Vendor products"
+    ]
+  },
+  {
+    "id": "lbl.vendor.products.7c37958a3f",
+    "text": "Add product",
+    "pages": [
+      "Vendor products"
+    ]
+  },
+  {
+    "id": "lbl.vendor.products.81f547195b",
+    "text": "Previous page",
+    "pages": [
+      "Vendor products"
+    ]
+  },
+  {
+    "id": "lbl.vendor.products.8800aabbb8",
+    "text": "Allow photo access to choose product photos",
+    "pages": [
+      "Vendor products"
+    ]
+  },
+  {
+    "id": "lbl.vendor.products.8b78c7aec4",
+    "text": "Out of stock",
+    "pages": [
+      "Vendor products"
+    ]
+  },
+  {
+    "id": "lbl.vendor.products.910b0cc6da",
+    "text": "Regular product",
+    "pages": [
+      "Vendor products"
+    ]
+  },
+  {
+    "id": "lbl.vendor.products.9728302382",
+    "text": "No products on this page",
+    "pages": [
+      "Vendor products"
+    ]
+  },
+  {
+    "id": "lbl.vendor.products.9df9d3eb0b",
+    "text": "Alcohol cannot be ordered online yet. Mark it so it stays blocked.",
+    "pages": [
+      "Vendor products"
+    ]
+  },
+  {
+    "id": "lbl.vendor.products.9ffca18168",
+    "text": "{count} in stock",
+    "pages": [
+      "Vendor products"
+    ]
+  },
+  {
+    "id": "lbl.vendor.products.b7b32a9c85",
+    "text": "Your earnings per unit",
+    "pages": [
+      "Vendor products"
+    ]
+  },
+  {
+    "id": "lbl.vendor.products.c345f2388a",
+    "text": "Product type",
+    "pages": [
+      "Vendor products"
+    ]
+  },
+  {
+    "id": "lbl.vendor.products.c744db253d",
+    "text": "Enter a product name (up to 120 characters)",
+    "pages": [
+      "Vendor products"
+    ]
+  },
+  {
+    "id": "lbl.vendor.products.c7c5dbc0c2",
+    "text": "Product saved and updated in your store.",
+    "pages": [
+      "Vendor products"
+    ]
+  },
+  {
+    "id": "lbl.vendor.products.cdc10422af",
+    "text": "Product added to your store.",
+    "pages": [
+      "Vendor products"
+    ]
+  },
+  {
+    "id": "lbl.vendor.products.d143493095",
+    "text": "Add photo",
+    "pages": [
+      "Vendor products"
+    ]
+  },
+  {
+    "id": "lbl.vendor.products.d2fb4b513c",
+    "text": "No products yet",
+    "pages": [
+      "Vendor products"
+    ]
+  },
+  {
+    "id": "lbl.vendor.products.da4e1e0b2f",
+    "text": "Custom products",
+    "pages": [
+      "Vendor products"
+    ]
+  },
+  {
+    "id": "lbl.vendor.products.f581fe6918",
+    "text": "Over the counter",
+    "pages": [
+      "Vendor products"
+    ]
+  },
+  {
+    "id": "lbl.vendor.products.f6fdbe48dc",
+    "text": "Delete",
+    "pages": [
+      "Vendor products"
+    ]
+  },
+  {
+    "id": "lbl.vendor.products.fbeabd233f",
+    "text": "Edit product",
+    "pages": [
+      "Vendor products"
+    ]
+  },
+  {
+    "id": "lbl.vendor.products.fe0a091fdb",
+    "text": "Products",
+    "pages": [
+      "Vendor products"
+    ]
+  },
+  {
+    "id": "lbl.vendor.requests.01eb73e0be",
+    "text": "Pizza",
+    "pages": [
+      "Vendor ingredient requests"
+    ]
+  },
+  {
+    "id": "lbl.vendor.requests.081ae3fdc4",
+    "text": "Custom",
+    "pages": [
+      "Vendor ingredient requests"
+    ]
+  },
+  {
+    "id": "lbl.vendor.requests.1759be7d1e",
+    "text": "Not approved",
+    "pages": [
+      "Vendor ingredient requests"
+    ]
+  },
+  {
+    "id": "lbl.vendor.requests.1d8ec4d7df",
+    "text": "What is it (topping, sauce, bun, patty…)",
+    "pages": [
+      "Vendor ingredient requests"
+    ]
+  },
+  {
+    "id": "lbl.vendor.requests.2d29367018",
+    "text": "Allow photo access to add a picture",
+    "pages": [
+      "Vendor ingredient requests"
+    ]
+  },
+  {
+    "id": "lbl.vendor.requests.2e10af9f72",
+    "text": "Burger",
+    "pages": [
+      "Vendor ingredient requests"
+    ]
+  },
+  {
+    "id": "lbl.vendor.requests.2f7360d6c2",
+    "text": "Use a clear, square, top-down photo of only the ingredient on a plain background.",
+    "pages": [
+      "Vendor ingredient requests"
+    ]
+  },
+  {
+    "id": "lbl.vendor.requests.33d3063284",
+    "text": "Waiting",
+    "pages": [
+      "Vendor ingredient requests"
+    ]
+  },
+  {
+    "id": "lbl.vendor.requests.3e8de24a3b",
+    "text": "✓ I have read the photo rules",
+    "pages": [
+      "Vendor ingredient requests"
+    ]
+  },
+  {
+    "id": "lbl.vendor.requests.40fea9a851",
+    "text": "No requests yet.",
+    "pages": [
+      "Vendor ingredient requests"
+    ]
+  },
+  {
+    "id": "lbl.vendor.requests.41b81eb8db",
+    "text": "Approved",
+    "pages": [
+      "Vendor ingredient requests"
+    ]
+  },
+  {
+    "id": "lbl.vendor.requests.42f37e978a",
+    "text": "Request sent to Wantiss",
+    "pages": [
+      "Vendor ingredient requests"
+    ]
+  },
+  {
+    "id": "lbl.vendor.requests.47fe8340e4",
+    "text": "Read the photo rules first",
+    "pages": [
+      "Vendor ingredient requests"
+    ]
+  },
+  {
+    "id": "lbl.vendor.requests.4a7eded8ed",
+    "text": "Choose photo",
+    "pages": [
+      "Vendor ingredient requests"
+    ]
+  },
+  {
+    "id": "lbl.vendor.requests.4bfc194b68",
+    "text": "Next page",
+    "pages": [
+      "Vendor ingredient requests"
+    ]
+  },
+  {
+    "id": "lbl.vendor.requests.513a775255",
+    "text": "Request an ingredient",
+    "pages": [
+      "Vendor ingredient requests"
+    ]
+  },
+  {
+    "id": "lbl.vendor.requests.677356e2db",
+    "text": "Enter the ingredient name",
+    "pages": [
+      "Vendor ingredient requests"
+    ]
+  },
+  {
+    "id": "lbl.vendor.requests.6a4afafecc",
+    "text": "Photo rules",
+    "pages": [
+      "Vendor ingredient requests"
+    ]
+  },
+  {
+    "id": "lbl.vendor.requests.6f2b4d63b7",
+    "text": "Ingredient name",
+    "pages": [
+      "Vendor ingredient requests"
+    ]
+  },
+  {
+    "id": "lbl.vendor.requests.7fbf2722db",
+    "text": "Could not load ingredient requests.",
+    "pages": [
+      "Vendor ingredient requests"
+    ]
+  },
+  {
+    "id": "lbl.vendor.requests.81f547195b",
+    "text": "Previous page",
+    "pages": [
+      "Vendor ingredient requests"
+    ]
+  },
+  {
+    "id": "lbl.vendor.requests.85a325745d",
+    "text": "No requests on this page.",
+    "pages": [
+      "Vendor ingredient requests"
+    ]
+  },
+  {
+    "id": "lbl.vendor.requests.87bf74571b",
+    "text": "For which custom product",
+    "pages": [
+      "Vendor ingredient requests"
+    ]
+  },
+  {
+    "id": "lbl.vendor.requests.90459ace80",
+    "text": "{value0}{value1}{value2}{value3}",
+    "pages": [
+      "Vendor ingredient requests"
+    ]
+  },
+  {
+    "id": "lbl.vendor.requests.91d672ff52",
+    "text": "Your requests",
+    "pages": [
+      "Vendor ingredient requests"
+    ]
+  },
+  {
+    "id": "lbl.vendor.requests.a89d641794",
+    "text": "Send request",
+    "pages": [
+      "Vendor ingredient requests"
+    ]
+  },
+  {
+    "id": "lbl.vendor.requests.d01d900383",
+    "text": "Photo",
+    "pages": [
+      "Vendor ingredient requests"
+    ]
+  },
+  {
+    "id": "lbl.vendor.requests.dd8023440a",
+    "text": "Ingredient requests",
+    "pages": [
+      "Vendor ingredient requests"
+    ]
+  },
+  {
+    "id": "lbl.vendor.requests.e2b9fff418",
+    "text": "Send a request with a photo and our team will review it. If approved, the ingredient appears in the library for your selected product type. You can then choose whether to offer it, set its price and define customer limits.",
+    "pages": [
+      "Vendor ingredient requests"
+    ]
+  },
+  {
+    "id": "lbl.vendor.requests.e76a8eae98",
+    "text": "I have read the photo rules",
+    "pages": [
+      "Vendor ingredient requests"
+    ]
+  },
+  {
+    "id": "lbl.vendor.requests.e9b6fb12d3",
+    "text": "Needs info",
+    "pages": [
+      "Vendor ingredient requests"
+    ]
+  },
+  {
+    "id": "lbl.vendor.requests.ed5690c3ae",
+    "text": "Change photo",
+    "pages": [
+      "Vendor ingredient requests"
+    ]
+  },
+  {
+    "id": "lbl.vendor.requests.f73f7d247c",
+    "text": "Notes for the team",
+    "pages": [
+      "Vendor ingredient requests"
+    ]
+  },
+  {
+    "id": "lbl.vendor.requests.fde020ffcb",
+    "text": "Photo sent",
+    "pages": [
+      "Vendor ingredient requests"
+    ]
+  },
+  {
+    "id": "lbl.vendor.reviews.0d8a7046c8",
+    "text": "Store",
+    "pages": [
+      "Vendor reviews"
+    ]
+  },
+  {
+    "id": "lbl.vendor.reviews.217856565b",
+    "text": "Goodies reviews",
+    "pages": [
+      "Vendor reviews"
+    ]
+  },
+  {
+    "id": "lbl.vendor.reviews.4bfc194b68",
+    "text": "Next page",
+    "pages": [
+      "Vendor reviews"
+    ]
+  },
+  {
+    "id": "lbl.vendor.reviews.81f547195b",
+    "text": "Previous page",
+    "pages": [
+      "Vendor reviews"
+    ]
+  },
+  {
+    "id": "lbl.vendor.reviews.8e785c90be",
+    "text": "No comment",
+    "pages": [
+      "Vendor reviews"
+    ]
+  },
+  {
+    "id": "lbl.vendor.reviews.9631af52c6",
+    "text": "Delivery",
+    "pages": [
+      "Vendor reviews"
+    ]
+  },
+  {
+    "id": "lbl.vendor.reviews.b06bc37417",
+    "text": "{value0} / 5 · {value1}",
+    "pages": [
+      "Vendor reviews"
+    ]
+  },
+  {
+    "id": "lbl.vendor.reviews.e4d2123a31",
+    "text": "No reviews yet",
+    "pages": [
+      "Vendor reviews"
+    ]
+  },
+  {
+    "id": "lbl.vendor.shared.063af6006f",
+    "text": "Only business owners and admins can edit Goodies.",
+    "pages": [
+      "Vendor shared interface"
+    ]
+  },
+  {
+    "id": "lbl.vendor.shared.1f6e57759b",
+    "text": "Couldn't load this",
+    "pages": [
+      "Vendor shared interface"
+    ]
+  },
+  {
+    "id": "lbl.vendor.shared.242104c5f5",
+    "text": "Cash ordering is temporarily unavailable. Please try again later.",
+    "pages": [
+      "Vendor shared interface"
+    ]
+  },
+  {
+    "id": "lbl.vendor.shared.96f5cf1cde",
+    "text": "Refund under review",
+    "pages": [
+      "Vendor shared interface"
+    ]
+  },
+  {
+    "id": "lbl.vendor.shared.9e8a3b648c",
+    "text": "Under review",
+    "pages": [
+      "Vendor shared interface"
+    ]
+  },
+  {
+    "id": "lbl.vendor.shared.9f5cd8a2e8",
+    "text": "Retry",
+    "pages": [
+      "Vendor shared interface"
+    ]
+  },
+  {
+    "id": "lbl.vendor.shared.ca18449697",
+    "text": "Unavailable",
+    "pages": [
+      "Vendor shared interface"
+    ]
+  },
+  {
+    "id": "lbl.vendor.shared.d0bcafdda7",
+    "text": "Settle Goodies cash-order commission to accept more cash orders.",
+    "pages": [
+      "Vendor shared interface"
+    ]
+  },
+  {
+    "id": "lbl.vendor.shared.ff9c5a4064",
+    "text": "Could not complete this request. Please try again.",
+    "pages": [
+      "Vendor shared interface"
+    ]
+  },
+  {
+    "id": "lbl.vendor.store.01eb73e0be",
+    "text": "Pizza",
+    "pages": [
+      "Vendor store"
+    ]
+  },
+  {
+    "id": "lbl.vendor.store.0508f492d4",
+    "text": "Minimum order ($)",
+    "pages": [
+      "Vendor store"
+    ]
+  },
+  {
+    "id": "lbl.vendor.store.0589b60d42",
+    "text": "Store saved",
+    "pages": [
+      "Vendor store"
+    ]
+  },
+  {
+    "id": "lbl.vendor.store.066a886133",
+    "text": "Store thumbnail",
+    "pages": [
+      "Vendor store"
+    ]
+  },
+  {
+    "id": "lbl.vendor.store.09a64acd69",
+    "text": "Accept orders for later",
+    "pages": [
+      "Vendor store"
+    ]
+  },
+  {
+    "id": "lbl.vendor.store.13ed6f261a",
+    "text": "Slowest (min)",
+    "pages": [
+      "Vendor store"
+    ]
+  },
+  {
+    "id": "lbl.vendor.store.146318c8ca",
+    "text": "Allow location access to pin your store. You can enable it in your device settings.",
+    "pages": [
+      "Vendor store"
+    ]
+  },
+  {
+    "id": "lbl.vendor.store.15e66373a2",
+    "text": "Drugstore",
+    "pages": [
+      "Vendor store"
+    ]
+  },
+  {
+    "id": "lbl.vendor.store.1ac0a74d97",
+    "text": "Unpublish",
+    "pages": [
+      "Vendor shared interface",
+      "Vendor store"
+    ]
+  },
+  {
+    "id": "lbl.vendor.store.1f74640d74",
+    "text": "By distance",
+    "pages": [
+      "Vendor store"
+    ]
+  },
+  {
+    "id": "lbl.vendor.store.1faa416418",
+    "text": "Store thumbnail selected. Save store setup to publish it.",
+    "pages": [
+      "Vendor store"
+    ]
+  },
+  {
+    "id": "lbl.vendor.store.21392896ce",
+    "text": "Maximum delivery distance in km (optional)",
+    "pages": [
+      "Vendor store"
+    ]
+  },
+  {
+    "id": "lbl.vendor.store.232d71339a",
+    "text": "Store cover photo",
+    "pages": [
+      "Vendor store"
+    ]
+  },
+  {
+    "id": "lbl.vendor.store.2a44ecc711",
+    "text": "Save store",
+    "pages": [
+      "Vendor store"
+    ]
+  },
+  {
+    "id": "lbl.vendor.store.2e10af9f72",
+    "text": "Burger",
+    "pages": [
+      "Vendor store"
+    ]
+  },
+  {
+    "id": "lbl.vendor.store.2ea69f1ae4",
+    "text": "Saved pin:",
+    "pages": [
+      "Vendor store"
+    ]
+  },
+  {
+    "id": "lbl.vendor.store.2f6c058fc6",
+    "text": "Location captured — review before saving",
+    "pages": [
+      "Vendor store"
+    ]
+  },
+  {
+    "id": "lbl.vendor.store.30d0eade5f",
+    "text": "Enter a valid delivery time range",
+    "pages": [
+      "Vendor store"
+    ]
+  },
+  {
+    "id": "lbl.vendor.store.30d1ea7183",
+    "text": "Update store location",
+    "pages": [
+      "Vendor store"
+    ]
+  },
+  {
+    "id": "lbl.vendor.store.32aae387db",
+    "text": "Allow photo access to choose a store cover",
+    "pages": [
+      "Vendor store"
+    ]
+  },
+  {
+    "id": "lbl.vendor.store.3585d7553d",
+    "text": "Restaurant",
+    "pages": [
+      "Vendor store"
+    ]
+  },
+  {
+    "id": "lbl.vendor.store.3818af74c1",
+    "text": "Street, building and number",
+    "pages": [
+      "Vendor store"
+    ]
+  },
+  {
+    "id": "lbl.vendor.store.422b63a00c",
+    "text": "Fastest (min)",
+    "pages": [
+      "Vendor store"
+    ]
+  },
+  {
+    "id": "lbl.vendor.store.4271627f4f",
+    "text": "City",
+    "pages": [
+      "Vendor store"
+    ]
+  },
+  {
+    "id": "lbl.vendor.store.44740cf9d3",
+    "text": "Save store location",
+    "pages": [
+      "Vendor store"
+    ]
+  },
+  {
+    "id": "lbl.vendor.store.45aceea954",
+    "text": "Store name translations",
+    "pages": [
+      "Vendor store"
+    ]
+  },
+  {
+    "id": "lbl.vendor.store.45acf3ed0c",
+    "text": "Earliest order time",
+    "pages": [
+      "Vendor store"
+    ]
+  },
+  {
+    "id": "lbl.vendor.store.484df3f383",
+    "text": "Pharmacy licence required during registration. Only over-the-counter products are allowed.",
+    "pages": [
+      "Vendor store"
+    ]
+  },
+  {
+    "id": "lbl.vendor.store.497a500af2",
+    "text": "Street address",
+    "pages": [
+      "Vendor store"
+    ]
+  },
+  {
+    "id": "lbl.vendor.store.4b789615bc",
+    "text": "Your store is live",
+    "pages": [
+      "Vendor shared interface",
+      "Vendor store"
+    ]
+  },
+  {
+    "id": "lbl.vendor.store.4d293c105f",
+    "text": "Delivery fee ($, 0 = free)",
+    "pages": [
+      "Vendor store"
+    ]
+  },
+  {
+    "id": "lbl.vendor.store.543f4e0747",
+    "text": "Shown on the customer home page and store listings.",
+    "pages": [
+      "Vendor store"
+    ]
+  },
+  {
+    "id": "lbl.vendor.store.58ea091f9f",
+    "text": "Location captured. Review it below, then save the pin.",
+    "pages": [
+      "Vendor store"
+    ]
+  },
+  {
+    "id": "lbl.vendor.store.5ae6b06086",
+    "text": "Enter the full store address, city and country",
+    "pages": [
+      "Vendor store"
+    ]
+  },
+  {
+    "id": "lbl.vendor.store.5dd2889f89",
+    "text": "Capture your store location first.",
+    "pages": [
+      "Vendor store"
+    ]
+  },
+  {
+    "id": "lbl.vendor.store.5eaa320621",
+    "text": "Earliest scheduled order",
+    "pages": [
+      "Vendor store"
+    ]
+  },
+  {
+    "id": "lbl.vendor.store.5fb4c375d0",
+    "text": "Stand at your shop entrance and capture its position. This gives delivery-distance quotes a precise starting point even when map services cannot find your street address.",
+    "pages": [
+      "Vendor store"
+    ]
+  },
+  {
+    "id": "lbl.vendor.store.603b4fb25b",
+    "text": "Base delivery fee ($)",
+    "pages": [
+      "Vendor store"
+    ]
+  },
+  {
+    "id": "lbl.vendor.store.65c821a596",
+    "text": "Live",
+    "pages": [
+      "Vendor shared interface",
+      "Vendor store"
+    ]
+  },
+  {
+    "id": "lbl.vendor.store.6a1f1120ba",
+    "text": "Choose a valid earliest order time",
+    "pages": [
+      "Vendor store"
+    ]
+  },
+  {
+    "id": "lbl.vendor.store.74192ee0fe",
+    "text": "Store type",
+    "pages": [
+      "Vendor store"
+    ]
+  },
+  {
+    "id": "lbl.vendor.store.77926b3396",
+    "text": "Add cover photo",
+    "pages": [
+      "Vendor store"
+    ]
+  },
+  {
+    "id": "lbl.vendor.store.7ac4a26ee0",
+    "text": "Use cover photo as thumbnail",
+    "pages": [
+      "Vendor store"
+    ]
+  },
+  {
+    "id": "lbl.vendor.store.7c401b0939",
+    "text": "Allow photo access to choose a store thumbnail",
+    "pages": [
+      "Vendor store"
+    ]
+  },
+  {
+    "id": "lbl.vendor.store.7e98f05e28",
+    "text": "Beverages",
+    "pages": [
+      "Vendor store"
+    ]
+  },
+  {
+    "id": "lbl.vendor.store.7eb704e710",
+    "text": "Name customers will see",
+    "pages": [
+      "Vendor store"
+    ]
+  },
+  {
+    "id": "lbl.vendor.store.80b169bf97",
+    "text": "Store category",
+    "pages": [
+      "Vendor store"
+    ]
+  },
+  {
+    "id": "lbl.vendor.store.85ded0ada2",
+    "text": "Price per kilometre ($)",
+    "pages": [
+      "Vendor store"
+    ]
+  },
+  {
+    "id": "lbl.vendor.store.87328054a9",
+    "text": "Change cover photo",
+    "pages": [
+      "Vendor store"
+    ]
+  },
+  {
+    "id": "lbl.vendor.store.8960674be5",
+    "text": "Add a language",
+    "pages": [
+      "Vendor store"
+    ]
+  },
+  {
+    "id": "lbl.vendor.store.8fd5db5884",
+    "text": "+ Add language",
+    "pages": [
+      "Vendor store"
+    ]
+  },
+  {
+    "id": "lbl.vendor.store.93458909aa",
+    "text": "Store address",
+    "pages": [
+      "Vendor store"
+    ]
+  },
+  {
+    "id": "lbl.vendor.store.9631af52c6",
+    "text": "Delivery",
+    "pages": [
+      "Vendor store"
+    ]
+  },
+  {
+    "id": "lbl.vendor.store.97239db863",
+    "text": "Haitian products",
+    "pages": [
+      "Vendor store"
+    ]
+  },
+  {
+    "id": "lbl.vendor.store.97ccc70c75",
+    "text": "Promotion line on your card (optional)",
+    "pages": [
+      "Vendor store"
+    ]
+  },
+  {
+    "id": "lbl.vendor.store.9aee064193",
+    "text": "Use my current location",
+    "pages": [
+      "Vendor store"
+    ]
+  },
+  {
+    "id": "lbl.vendor.store.9bd3f34c20",
+    "text": "Bakery & desserts",
+    "pages": [
+      "Vendor store"
+    ]
+  },
+  {
+    "id": "lbl.vendor.store.9c998ada9e",
+    "text": "Groceries",
+    "pages": [
+      "Vendor store"
+    ]
+  },
+  {
+    "id": "lbl.vendor.store.a065a911ec",
+    "text": "Keep delivery or pickup on",
+    "pages": [
+      "Vendor store"
+    ]
+  },
+  {
+    "id": "lbl.vendor.store.a33a4768ed",
+    "text": "Fixed fee",
+    "pages": [
+      "Vendor store"
+    ]
+  },
+  {
+    "id": "lbl.vendor.store.a3532e2f54",
+    "text": "Minimum order must be 0 or more",
+    "pages": [
+      "Vendor store"
+    ]
+  },
+  {
+    "id": "lbl.vendor.store.a51122c100",
+    "text": "Pickup",
+    "pages": [
+      "Vendor store"
+    ]
+  },
+  {
+    "id": "lbl.vendor.store.a7285b9867",
+    "text": "Delivery pricing",
+    "pages": [
+      "Vendor store"
+    ]
+  },
+  {
+    "id": "lbl.vendor.store.ab4b4c279f",
+    "text": "Store cover updated",
+    "pages": [
+      "Vendor store"
+    ]
+  },
+  {
+    "id": "lbl.vendor.store.af5935965f",
+    "text": "Minimum delivery fee ($)",
+    "pages": [
+      "Vendor store"
+    ]
+  },
+  {
+    "id": "lbl.vendor.store.b30b0d3064",
+    "text": "Meat & seafood",
+    "pages": [
+      "Vendor store"
+    ]
+  },
+  {
+    "id": "lbl.vendor.store.b5892b14ca",
+    "text": "Alcohol ads and promotions are prohibited on Wantiss",
+    "pages": [
+      "Vendor store"
+    ]
+  },
+  {
+    "id": "lbl.vendor.store.b8449f28d3",
+    "text": "Type any country name",
+    "pages": [
+      "Vendor store"
+    ]
+  },
+  {
+    "id": "lbl.vendor.store.b8d1bae42c",
+    "text": "Go live",
+    "pages": [
+      "Vendor shared interface",
+      "Vendor store"
+    ]
+  },
+  {
+    "id": "lbl.vendor.store.bbb03b20d3",
+    "text": "Save your store address first, then save its location.",
+    "pages": [
+      "Vendor store"
+    ]
+  },
+  {
+    "id": "lbl.vendor.store.bcff18e0a6",
+    "text": "Delivery fee must be 0 or more (use 0 for free delivery)",
+    "pages": [
+      "Vendor store"
+    ]
+  },
+  {
+    "id": "lbl.vendor.store.bf75e59c88",
+    "text": "Fresh produce",
+    "pages": [
+      "Vendor store"
+    ]
+  },
+  {
+    "id": "lbl.vendor.store.c5f3af6576",
+    "text": "Make sure you are physically at the shop. Save your address changes first if you edited the address above.",
+    "pages": [
+      "Vendor store"
+    ]
+  },
+  {
+    "id": "lbl.vendor.store.cb3b18e9f7",
+    "text": "Choose a store category",
+    "pages": [
+      "Vendor store"
+    ]
+  },
+  {
+    "id": "lbl.vendor.store.cded093321",
+    "text": "Orders",
+    "pages": [
+      "Vendor store"
+    ]
+  },
+  {
+    "id": "lbl.vendor.store.cf7d0ae846",
+    "text": "Not live",
+    "pages": [
+      "Vendor shared interface",
+      "Vendor store"
+    ]
+  },
+  {
+    "id": "lbl.vendor.store.d2e33e0b2e",
+    "text": "Enter valid distance delivery pricing values",
+    "pages": [
+      "Vendor store"
+    ]
+  },
+  {
+    "id": "lbl.vendor.store.d346a9bf85",
+    "text": "No store pin saved yet. Delivery distance may not work until you set one.",
+    "pages": [
+      "Vendor store"
+    ]
+  },
+  {
+    "id": "lbl.vendor.store.d523ebbd10",
+    "text": "Country",
+    "pages": [
+      "Vendor store"
+    ]
+  },
+  {
+    "id": "lbl.vendor.store.d53a2bec98",
+    "text": "Store location",
+    "pages": [
+      "Vendor store"
+    ]
+  },
+  {
+    "id": "lbl.vendor.store.d83dbff929",
+    "text": "Allow custom products",
+    "pages": [
+      "Vendor store"
+    ]
+  },
+  {
+    "id": "lbl.vendor.store.d99bf52681",
+    "text": "Upload thumbnail",
+    "pages": [
+      "Vendor store"
+    ]
+  },
+  {
+    "id": "lbl.vendor.store.da4e1e0b2f",
+    "text": "Custom products",
+    "pages": [
+      "Vendor store"
+    ]
+  },
+  {
+    "id": "lbl.vendor.store.e01a0ec6b7",
+    "text": "Discard captured location",
+    "pages": [
+      "Vendor store"
+    ]
+  },
+  {
+    "id": "lbl.vendor.store.e01ddbc892",
+    "text": "Store name",
+    "pages": [
+      "Vendor store"
+    ]
+  },
+  {
+    "id": "lbl.vendor.store.e0b431623a",
+    "text": "Enter a store name",
+    "pages": [
+      "Vendor store"
+    ]
+  },
+  {
+    "id": "lbl.vendor.store.e1ba5b5f09",
+    "text": "Store status",
+    "pages": [
+      "Vendor shared interface",
+      "Vendor store"
+    ]
+  },
+  {
+    "id": "lbl.vendor.store.e262806a52",
+    "text": "Personal care",
+    "pages": [
+      "Vendor store"
+    ]
+  },
+  {
+    "id": "lbl.vendor.store.e39355de2b",
+    "text": "Add a cover photo first",
+    "pages": [
+      "Vendor store"
+    ]
+  },
+  {
+    "id": "lbl.vendor.store.e89cf98b5c",
+    "text": "Store setup",
+    "pages": [
+      "Vendor store"
+    ]
+  },
+  {
+    "id": "lbl.vendor.store.e9b450d14b",
+    "text": "Done",
+    "pages": [
+      "Vendor store"
+    ]
+  },
+  {
+    "id": "lbl.vendor.store.ea93e61773",
+    "text": "Search languages",
+    "pages": [
+      "Vendor store"
+    ]
+  },
+  {
+    "id": "lbl.vendor.store.ebdec74335",
+    "text": "· accuracy about {value0} m",
+    "pages": [
+      "Vendor store"
+    ]
+  },
+  {
+    "id": "lbl.vendor.store.ef8caf3797",
+    "text": "Store location saved. Delivery quotes can now use this pin.",
+    "pages": [
+      "Vendor store"
+    ]
+  },
+  {
+    "id": "lbl.vendor.store.f66e947555",
+    "text": "Your store is unpublished",
+    "pages": [
+      "Vendor shared interface",
+      "Vendor store"
+    ]
+  },
+  {
+    "id": "lbl.vendor.tools.2a20f7d450",
+    "text": "Category, minimum order, delivery fee, time and publishing",
+    "pages": [
+      "Vendor tools"
+    ]
+  },
+  {
+    "id": "lbl.vendor.tools.4980af28a8",
+    "text": "Items, prices and stock customers can buy",
+    "pages": [
+      "Vendor tools"
+    ]
+  },
+  {
+    "id": "lbl.vendor.tools.76f75fca4b",
+    "text": "Read customer feedback on fulfilled orders",
+    "pages": [
+      "Vendor tools"
+    ]
+  },
+  {
+    "id": "lbl.vendor.tools.7f5de3cf37",
+    "text": "Goodies tools",
+    "pages": [
+      "Vendor tools"
+    ]
+  },
+  {
+    "id": "lbl.vendor.tools.b64350c575",
+    "text": "Review new orders and accept or decline within 15 minutes",
+    "pages": [
+      "Vendor tools"
+    ]
+  },
+  {
+    "id": "lbl.vendor.tools.b83c4cdafe",
+    "text": "Reviews",
+    "pages": [
+      "Vendor tools"
+    ]
+  },
+  {
+    "id": "lbl.vendor.tools.cded093321",
+    "text": "Orders",
+    "pages": [
+      "Vendor tools"
+    ]
+  },
+  {
+    "id": "lbl.vendor.tools.dd8023440a",
+    "text": "Ingredient requests",
+    "pages": [
+      "Vendor tools"
+    ]
+  },
+  {
+    "id": "lbl.vendor.tools.e5e9d55b6d",
+    "text": "Ask the platform to add a new ingredient",
+    "pages": [
+      "Vendor tools"
+    ]
+  },
+  {
+    "id": "lbl.vendor.tools.e89cf98b5c",
+    "text": "Store setup",
+    "pages": [
+      "Vendor tools"
+    ]
+  },
+  {
+    "id": "lbl.vendor.tools.fe0a091fdb",
+    "text": "Products",
+    "pages": [
+      "Vendor tools"
     ]
   },
   {

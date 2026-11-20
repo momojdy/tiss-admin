@@ -2,13 +2,14 @@ import {goodiesPublicationErrors} from '../../goodiesConsumer/publicationReview'
 import customerPageCatalog from '../../goodiesConsumer/customerPageCatalog.json';
 import {mergeMissingLabels, setLocalizedText, contentTextValues} from '../../goodiesConsumer/contentEditing';
 import {GoodiesPageContentFields} from './GoodiesPageContentFields';
-import { useCallback, useEffect, useMemo, useState } from 'react';
+import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { Image, Pressable, TextInput, View } from 'react-native';
 import * as ImagePicker from 'expo-image-picker';
 import * as DocumentPicker from 'expo-document-picker';
 import { supabase } from '../../lib/supabase';
 import { createAssetUploadId, listCmsAssets, publishCmsAsset, publishCmsVersion, saveCmsVersion, uploadCmsAsset } from '../../lib/adminBackend';
 import { fetchPublishedWantissContent } from '../../lib/wantissCms';
+import { goodiesBuilderPreviewId } from '../../lib/goodiesBuilderSelection';
 import { useTheme } from '../../theme/ThemeContext';
 import { clone } from '../../lib/clone';
 import { Card, Section } from '../../ui/Card';
@@ -96,6 +97,7 @@ export function GoodiesEditor({ canEdit, canPublish }: { canEdit: boolean; canPu
   const [byoDraft, setByoDraft] = useState<any | null>(null);
   const [byoFocus, setByoFocus] = useState<BuilderTarget | null>(null);
   const [byoUrls, setByoUrls] = useState<Record<string, string>>({});
+  const operationLock = useRef(false), assetLock = useRef(false);
 
   const clean = useMemo(() => (draft ? sanitizeForSave(draft) : null), [draft]);
   const dirty = !!clean && stable(clean) !== baseline;
@@ -173,9 +175,13 @@ export function GoodiesEditor({ canEdit, canPublish }: { canEdit: boolean; canPu
 
   const edit = (change: (next: any) => void) => {
     if (!draft || !editMode) return;
-    const next = clone(draft);
-    change(next);
-    setDraft(next); setNotice(null); setConfirmPublish(false);
+    setDraft((current: any) => {
+      if (!current) return current;
+      const next = clone(current);
+      change(next);
+      return next;
+    });
+    setNotice(null); setConfirmPublish(false);
   };
   const setLabelText = (id: string, value: string) => edit((next) => {
     const target = (next.labels || []).find((entry: any) => entry.id === id);
@@ -201,7 +207,7 @@ export function GoodiesEditor({ canEdit, canPublish }: { canEdit: boolean; canPu
   const previewBuilderConfigs = useMemo(() => byoRows.map((row: any) => {
     const live = byoDraft && byoDraft.builder_id === row.builder_id && byoDraft.business_id === row.business_id ? byoDraft : row;
     const groups = (live.config?.groups || []).map((g: any) => ({ ...g, items: (g.items || []).map((it: any) => (it?.img?.assetKey && byoUrls[it.img.assetKey] ? { ...it, img: { ...it.img, data: byoUrls[it.img.assetKey] } } : it)) }));
-    return { ...(live.config || {}), groups, id: row.builder_id, enabled: true, available: true };
+    return { ...(live.config || {}), groups, id: goodiesBuilderPreviewId(row), enabled: true, available: true };
   }), [byoRows, byoDraft, byoUrls]);
   // Pictures uploaded for ingredients: fetch preview links for any not loaded yet.
   useEffect(() => {
@@ -248,7 +254,10 @@ export function GoodiesEditor({ canEdit, canPublish }: { canEdit: boolean; canPu
     return {total:entries.length,filled:entries.filter((x:any)=>readText(x,editLanguage).trim()).length,reviewed:entries.filter((x:any)=>x?.[editLanguage]?.s==='reviewed').length};
   },[draft,editLanguage]);
   const setEmoji = (value: string) => edit((next) => { const target = selection && findItem(next, selection); if (target) target.emoji = value; });
-  const setImage = (image: any) => edit((next) => { const target = selection && findItem(next, selection); if (target) target[imageKey] = image; });
+  const setImage = (image: any, target = selection) => edit((next) => {
+    const item = target && findItem(next, target);
+    if (item && target) item[imageKeyFor(listKeyFor(target.kind))] = image;
+  });
   const setMeta = (kind: GoodiesSelection['kind'], id: string, key: string, value: string) => edit((next) => {
     const target = findItem(next, { kind, id, field: 'title' });
     if (target) target[key] = key === 'ord' ? (Number(value) || 0) : value;
@@ -271,10 +280,12 @@ export function GoodiesEditor({ canEdit, canPublish }: { canEdit: boolean; canPu
   const pickAsset = (asset: any) => setImage({ assetKey: asset.asset_key, w: asset.width || undefined, h: asset.height || undefined });
 
   const uploadHomeImage = async (source: 'photos' | 'files') => {
-    if (!selection || !canEdit || assetBusy) return;
+    if (!selection || !editMode || busy || assetLock.current) return;
+    const target = { ...selection };
+    assetLock.current = true; setAssetBusy(source);
     setAssetNote('');
     try {
-      let uri = '', fileName = selection.id + '-goodies-home-image', contentType = 'image/jpeg', byteSize = 0;
+      let uri = '', fileName = target.id + '-goodies-home-image', contentType = 'image/jpeg', byteSize = 0;
       if (source === 'photos') {
         const result = await ImagePicker.launchImageLibraryAsync({ mediaTypes: ['images'], allowsEditing: true, quality: 0.9 });
         if (result.canceled || !result.assets?.[0]) return;
@@ -290,21 +301,21 @@ export function GoodiesEditor({ canEdit, canPublish }: { canEdit: boolean; canPu
         byteSize = (await response.blob()).size;
       }
       if (!byteSize) throw new Error('The selected image size could not be read.');
-      setAssetBusy(source);
-      const key = (selection.kind === 'library' ? 'wantiss.goodies.lib.' : 'wantiss.goodies.home.') + selection.kind + '.' + selection.id + '.' + createAssetUploadId();
-      const id = await uploadCmsAsset({ key, uri, fileName, contentType, byteSize, altText: { en: 'Goodies ' + selection.kind + ' image' }, status: 'draft' });
+      const key = (target.kind === 'library' ? 'wantiss.goodies.lib.' : 'wantiss.goodies.home.') + target.kind + '.' + target.id + '.' + createAssetUploadId();
+      const id = await uploadCmsAsset({ key, uri, fileName, contentType, byteSize, altText: { en: 'Goodies ' + target.kind + ' image' }, status: 'draft' });
       setPendingAssets((current) => ({ ...current, [key]: id }));
-      setImage({ assetKey: key });
+      setImage({ assetKey: key }, target);
       await loadAssets();
       setAssetNote('Image uploaded as a private draft. Publish the image before publishing the Goodies content.');
     } catch (e) {
       setAssetNote('The image could not be uploaded.');
-    } finally { setAssetBusy(''); }
+    } finally { assetLock.current = false; setAssetBusy(''); }
   };
 
   const publishHomeImage = async (key: string) => {
     const id = pendingAssets[key];
-    if (!id || !canPublish || assetBusy) return;
+    if (!ready || !id || !canPublish || assetLock.current || operationLock.current) return;
+    assetLock.current = true;
     setAssetBusy('publish'); setAssetNote('');
     try {
       await publishCmsAsset(id);
@@ -312,7 +323,7 @@ export function GoodiesEditor({ canEdit, canPublish }: { canEdit: boolean; canPu
       await loadAssets();
       setAssetNote('Image published. Save the Goodies draft, then publish the Goodies content.');
     } catch (e) { setAssetNote('The image could not be published.'); }
-    finally { setAssetBusy(''); }
+    finally { assetLock.current = false; setAssetBusy(''); }
   };
 
   const applyLink = () => {
@@ -332,10 +343,10 @@ export function GoodiesEditor({ canEdit, canPublish }: { canEdit: boolean; canPu
   const discardStarter = () => { setDraft(null); setSource('none'); setBaseline(''); setSelection(null); setNotice(null); };
 
   const save = async () => {
-    if (!draft || !clean || !canEdit || busy) return;
+    if (!ready || !draft || !clean || !canEdit || busy || assetLock.current || operationLock.current) return;
     const errors = validateGoodiesDraft(clean, true);
     if (errors.length) { setNotice({ tone: 'error', text: 'Not saved. ' + errors[0] }); return; }
-    setBusy('save'); setNotice(null); setConfirmPublish(false);
+    operationLock.current = true; setBusy('save'); setNotice(null); setConfirmPublish(false);
     try {
       const id = await saveCmsVersion({ key: GOODIES_CONTENT_KEY, locale: 'en', payload: clean, status: 'draft' });
       const { data, error } = await supabase.from('wantiss_cms_content').select(COLUMNS).eq('id', id).maybeSingle();
@@ -351,15 +362,15 @@ export function GoodiesEditor({ canEdit, canPublish }: { canEdit: boolean; canPu
         setNotice({ tone: 'warn', text: 'Saved as version ' + saved.version + ' but the stored content differs from what was sent. Press Reload and review.' });
       }
     } catch (e) {
-      setNotice({ tone: 'error', text: 'Not saved. ' + ('The draft could not be saved.') });
-    } finally { setBusy(''); }
+      setNotice({ tone: 'error', text: 'The draft save could not be confirmed. Reload its status before saving again.' });
+    } finally { operationLock.current = false; setBusy(''); }
   };
 
   const publish = async () => {
-    if (!canPublish || !row || row.status !== 'draft' || dirty || busy || !draft) return;
+    if (!ready || !canPublish || !row || row.status !== 'draft' || dirty || busy || !draft || assetLock.current || operationLock.current) return;
     const reviewErrors = goodiesPublicationErrors(draft);
     if(reviewErrors.length){setNotice({tone:'error',text:reviewErrors[0]});return;}
-    setBusy('publish'); setNotice(null);
+    operationLock.current = true; setBusy('publish'); setNotice(null);
     try {
       const keys = referencedAssetKeys(draft);
       if (keys.length) {
@@ -372,14 +383,18 @@ export function GoodiesEditor({ canEdit, canPublish }: { canEdit: boolean; canPu
       }
       await publishCmsVersion(row.id);
       setRow({ ...row, status: 'published' }); setSource('published');
-      const remote = await fetchPublishedWantissContent('en');
-      const live = remote.content.find((entry) => entry.content_key === GOODIES_CONTENT_KEY);
-      setNotice(live && live.version === row.version
-        ? { tone: 'ok', text: 'Published version ' + row.version + ' and confirmed on the public endpoint.' }
-        : { tone: 'warn', text: 'Version ' + row.version + ' was published. The public endpoint caches for up to a minute, so press Reload shortly to confirm.' });
+      try {
+        const remote = await fetchPublishedWantissContent('en');
+        const live = remote.content.find((entry) => entry.content_key === GOODIES_CONTENT_KEY);
+        setNotice(live && live.version === row.version
+          ? { tone: 'ok', text: 'Published version ' + row.version + ' and confirmed on the public endpoint.' }
+          : { tone: 'warn', text: 'Version ' + row.version + ' was published. The public endpoint caches for up to a minute, so press Reload shortly to confirm.' });
+      } catch {
+        setNotice({ tone: 'warn', text: 'Version ' + row.version + ' was published, but the public endpoint could not be checked. Reload shortly to verify customer delivery.' });
+      }
     } catch (e) {
-      setNotice({ tone: 'error', text: 'Not published. ' + ('Publishing failed.') });
-    } finally { setBusy(''); setConfirmPublish(false); }
+      setNotice({ tone: 'error', text: 'Publication could not be confirmed. Reload its status before trying again.' });
+    } finally { operationLock.current = false; setBusy(''); setConfirmPublish(false); }
   };
 
   const toggleMode = (next: 'Edit' | 'Preview') => { setMode(next); setSelection(null); };
@@ -422,17 +437,17 @@ export function GoodiesEditor({ canEdit, canPublish }: { canEdit: boolean; canPu
         {source !== 'none' || row ? <Txt size={10.5} mut>{statusLine}{dirty ? ' · unsaved changes' : ''}</Txt> : null}
         
         <View style={{ flexDirection: 'row', flexWrap: 'wrap', gap: 6, marginTop: 8 }}>
-          <OutlineBtn primary onPress={() => { void save(); }} disabled={!ready || !canEdit || !dirty || !!busy}>{busy === 'save' ? 'Saving…' : 'Save draft'}</OutlineBtn>
-          <OutlineBtn onPress={() => { void load(); void loadAssets(); }} disabled={!!busy}>{dirty ? 'Discard changes & reload' : 'Reload'}</OutlineBtn>
+          <OutlineBtn primary onPress={() => { void save(); }} disabled={!ready || !canEdit || !dirty || !!busy || !!assetBusy}>{busy === 'save' ? 'Saving…' : 'Save draft'}</OutlineBtn>
+          <OutlineBtn onPress={() => { void load(); void loadAssets(); }} disabled={!!busy || !!assetBusy}>{dirty ? 'Discard changes & reload' : 'Reload'}</OutlineBtn>
           {source === 'starter' ? <OutlineBtn onPress={discardStarter}>Discard starter</OutlineBtn> : null}
-          {!confirmPublish ? <OutlineBtn onPress={() => setConfirmPublish(true)} disabled={!canPublish || !row || row.status !== 'draft' || dirty || !!busy}>Publish…</OutlineBtn> : null}
+          {!confirmPublish ? <OutlineBtn onPress={() => setConfirmPublish(true)} disabled={!ready || !canPublish || !row || row.status !== 'draft' || dirty || !!busy || !!assetBusy}>Publish…</OutlineBtn> : null}
         </View>
         {confirmPublish ? (
           <View style={{ marginTop: 6, padding: 10, borderWidth: 1, borderColor: c.or, borderRadius: 12 }}>
             <Txt size={11} weight={500}>Publish version {row?.version} to all customers?</Txt>
             <Txt size={10} mut style={{ marginTop: 2 }}>Publishing replaces the built-in defaults. The current version is archived.</Txt>
             <View style={{ flexDirection: 'row', flexWrap: 'wrap', gap: 6, marginTop: 8 }}>
-              <OutlineBtn primary onPress={() => { void publish(); }} disabled={!!busy}>{busy === 'publish' ? 'Publishing…' : 'Yes, publish'}</OutlineBtn>
+              <OutlineBtn primary onPress={() => { void publish(); }} disabled={!ready || !canPublish || !!busy || !!assetBusy}>{busy === 'publish' ? 'Publishing…' : 'Yes, publish'}</OutlineBtn>
               <OutlineBtn onPress={() => setConfirmPublish(false)} disabled={!!busy}>Cancel</OutlineBtn>
             </View>
           </View>

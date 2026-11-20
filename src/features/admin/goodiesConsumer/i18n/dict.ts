@@ -661,5 +661,30 @@ export const DICT: Record<string, Record<string, string>> = {
 "ht": "Mesaj",
 "es": "Mensaje",
 "zh-Hans": "消息"
+},
+"Could not refresh this group order. Please try again.": {
+  "fr": "Impossible d’actualiser cette commande de groupe. Veuillez réessayer.",
+  "es": "No se pudo actualizar este pedido de grupo. Inténtalo de nuevo.",
+  "zh-Hans": "无法刷新此团购订单。请重试。"
+},
+"Could not load invitations. Please try again.": {
+  "fr": "Impossible de charger les invitations. Veuillez réessayer.",
+  "es": "No se pudieron cargar las invitaciones. Inténtalo de nuevo.",
+  "zh-Hans": "无法加载邀请。请重试。"
+},
+"Could not decline this invitation. Please try again.": {
+  "fr": "Impossible de refuser cette invitation. Veuillez réessayer.",
+  "es": "No se pudo rechazar esta invitación. Inténtalo de nuevo.",
+  "zh-Hans": "无法拒绝此邀请。请重试。"
+},
+"Loading invitations…": {
+  "fr": "Chargement des invitations…",
+  "es": "Cargando invitaciones…",
+  "zh-Hans": "正在加载邀请…"
+},
+"This group order is no longer active. Check Orders for its payment status.": {
+  "fr": "Cette commande de groupe n’est plus active. Consultez Commandes pour connaître le statut du paiement.",
+  "es": "Este pedido de grupo ya no está activo. Consulta Pedidos para ver el estado del pago.",
+  "zh-Hans": "此团购订单已结束。请前往“订单”查看付款状态。"
 }
 };

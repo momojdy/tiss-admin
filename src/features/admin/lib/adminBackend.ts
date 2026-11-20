@@ -44,6 +44,14 @@ async function invoke<T>(name: string, body: Record<string, unknown>): Promise<T
   }
 }
 
+async function safeAdminResponse<T extends {error: unknown}>(work: () => PromiseLike<T>, fallback: string, denied?: string): Promise<T> {
+  let response: T;
+  try { response = await work(); }
+  catch { throw new Error(fallback); }
+  if (response.error) throw new Error((response.error as {code?: string}).code === '42501' && denied ? denied : fallback);
+  return response;
+}
+
 export async function inviteStaff(email: string, displayName: string, reason: string) {
   return invoke<{ ok: true; user_id: string; message: string }>('wantiss-admin-staff', {
     action: 'invite', email, display_name: displayName, reason,
@@ -85,20 +93,17 @@ export async function loadAdminDomain(domain: AdminDomain): Promise<Record<strin
 }
 export interface ApplicantBusiness { business_id: string; business_name: string; member_role: string }
 export async function listApplicationBusinesses(applicationId: string): Promise<ApplicantBusiness[]> {
-  const { data, error } = await supabase.rpc('wantiss_admin_application_businesses', { p_application_id: applicationId });
-  if (error) throw new Error(error.code === '42501' ? 'You do not have permission to view applicant businesses.' : error.message);
+  const { data, error } = await safeAdminResponse(() => supabase.rpc('wantiss_admin_application_businesses', { p_application_id: applicationId }), 'Applicant businesses could not be loaded. Please retry.', 'You do not have permission to view applicant businesses.');
   return (data || []) as ApplicantBusiness[];
 }
 export async function assignApplicationBusiness(applicationId: string, businessId: string) {
-  const { error } = await supabase.rpc('wantiss_admin_assign_business_application', { p_application_id: applicationId, p_business_id: businessId });
-  if (error) throw new Error(error.code === '42501' ? 'You do not have permission to link this application.' : error.message);
+  const { error } = await safeAdminResponse(() => supabase.rpc('wantiss_admin_assign_business_application', { p_application_id: applicationId, p_business_id: businessId }), 'The application link could not be confirmed. Refresh its status before retrying.', 'You do not have permission to link this application.');
 }
 
 export async function reviewBusinessApplication(id: string, status: 'approved' | 'rejected' | 'pending' | 'in_review' | 'needs_info', note: string, finalRejection = false) {
-  const { error } = await supabase.rpc('wantiss_admin_review_business_application', {
+  const { error } = await safeAdminResponse(() => supabase.rpc('wantiss_admin_review_business_application', {
     p_application_id: id, p_status: status, p_review_note: note, p_final_rejection: finalRejection,
-  });
-  if (error) throw new Error(error.code === '42501' ? 'You do not have permission to review applications.' : error.message);
+  }), 'The application decision could not be confirmed. Refresh its status before retrying.', 'You do not have permission to review applications.');
 }
 
 export type BusinessApplicationDocumentStatus = 'pending' | 'verified' | 'rejected' | 'missing';
@@ -116,37 +121,34 @@ export async function listBusinessApplicationDocuments(applicationId: string): P
   const { data, error } = await supabase.from('business_application_documents')
     .select('id,application_id,document_type,storage_path,status,review_note,submitted_at,reviewed_at')
     .eq('application_id', applicationId).order('submitted_at', { ascending: false });
-  if (error) throw new Error(error.message || 'Application documents are unavailable.');
+  if (error) throw new Error('Application documents are unavailable. Please retry.');
   return (data || []) as BusinessApplicationDocument[];
 }
 export async function setBusinessApplicationDocumentStatus(
   documentId: string, status: Exclude<BusinessApplicationDocumentStatus, 'pending'>, reason = '',
 ) {
-  const { error } = await supabase.rpc('wantiss_admin_set_application_document_status', {
+  const { error } = await safeAdminResponse(() => supabase.rpc('wantiss_admin_set_application_document_status', {
     p_document_id: documentId, p_status: status, p_review_note: reason || null,
-  });
-  if (error) throw new Error(error.code === '42501' ? 'You do not have permission to review documents.' : error.message);
+  }), 'The document decision could not be confirmed. Refresh its status before retrying.', 'You do not have permission to review documents.');
 }
 export async function getBusinessApplicationDocumentUrl(storagePath: string): Promise<string> {
   const { data, error } = await supabase.storage.from('business-application-documents').createSignedUrl(storagePath, 60);
-  if (error || !data?.signedUrl) throw new Error(error?.message || 'The document could not be opened.');
+  if (error || !data?.signedUrl) throw new Error('The document could not be opened. Please retry.');
   return data.signedUrl;
 }
 export type BusinessVerification = 'pending' | 'verified' | 'restricted';
 /** Updates general business verification independently from Goodies store publication. */
 export async function setBusinessVerification(businessId: string, status: BusinessVerification, reason: string) {
-  const { error } = await supabase.rpc('wantiss_admin_set_business_verification', {
+  const { error } = await safeAdminResponse(() => supabase.rpc('wantiss_admin_set_business_verification', {
     p_business: businessId, p_status: status, p_reason: reason,
-  });
-  if (error) throw new Error(error.code === '42501' ? 'You do not have permission to verify businesses.' : error.message);
+  }), 'Business verification could not be confirmed. Refresh its status before retrying.', 'You do not have permission to verify businesses.');
 }
 export async function saveCmsVersion(input: {
   key: string; locale: string; payload: Record<string, unknown>; status?: CmsStatus;
 }) {
-  const { data, error } = await supabase.rpc('wantiss_admin_save_cms_draft', {
+  const { data, error } = await safeAdminResponse(() => supabase.rpc('wantiss_admin_save_cms_draft', {
     p_content_key: input.key, p_locale: input.locale, p_payload: input.payload,
-  });
-  if (error) throw new Error(error.code === '42501' ? 'You do not have permission to save this content state.' : error.message);
+  }), 'The content save could not be confirmed. Reload its status before retrying.', 'You do not have permission to save this content state.');
   return String(data);
 }
 /** React Native does not guarantee a global Web Crypto API; this is a unique asset identifier, not a security token. */
@@ -185,16 +187,16 @@ export async function uploadCmsAsset(input: {
   const { error: uploadError } = await supabase.storage.from('wantiss-cms-assets').upload(path, body, {
     contentType, upsert: false,
   });
-  if (uploadError) throw new Error(uploadError.message);
+  if (uploadError) throw new Error('The asset upload could not be confirmed. Refresh the asset list before retrying.');
   const { data, error } = await supabase.rpc('wantiss_admin_upsert_asset', {
     p_asset_key: input.key, p_storage_path: path, p_content_type: contentType,
     p_byte_size: byteSize, p_alt_text: input.altText || {}, p_status: 'draft',
   });
   if (error) {
-    await supabase.storage.from('wantiss-cms-assets').remove([path]);
-    throw new Error(error.code === '42501' ? 'You do not have permission to publish or upload this asset.' : error.message);
+    throw new Error(error.code === '42501' ? 'You do not have permission to publish or upload this asset.' : 'The asset record could not be confirmed. Refresh the asset list before retrying.');
   }
-  return String(data);
+  if (typeof data !== 'string' || !data.trim()) throw new Error('The asset record could not be confirmed. Refresh the asset list before retrying.');
+  return data;
 }
 
 export async function listCmsAssets() {
@@ -202,20 +204,16 @@ export async function listCmsAssets() {
 }
 
 export async function publishCmsVersion(id: string) {
-  const { error } = await supabase.rpc('wantiss_admin_publish_cms_version', { p_content_id: id });
-  if (error) throw new Error(error.code === '42501' ? 'Publishing requires content.publish manage permission.' : error.message);
+  const { error } = await safeAdminResponse(() => supabase.rpc('wantiss_admin_publish_cms_version', { p_content_id: id }), 'Publication could not be confirmed. Reload its status before retrying.', 'Publishing requires content.publish manage permission.');
 }
 export async function archiveCmsVersion(id: string) {
-  const { error } = await supabase.rpc('wantiss_admin_archive_cms_version', { p_content_id: id });
-  if (error) throw new Error(error.code === '42501' ? 'Archiving requires content.archive manage permission.' : error.message);
+  const { error } = await safeAdminResponse(() => supabase.rpc('wantiss_admin_archive_cms_version', { p_content_id: id }), 'Content archiving could not be confirmed. Reload its status before retrying.', 'Archiving requires content.archive manage permission.');
 }
 export async function publishCmsAsset(id: string) {
-  const { error } = await supabase.rpc('wantiss_admin_set_cms_asset_status', { p_asset_id: id, p_status: 'published' });
-  if (error) throw new Error(error.code === '42501' ? 'Publishing requires content.assets manage permission.' : error.message);
+  const { error } = await safeAdminResponse(() => supabase.rpc('wantiss_admin_set_cms_asset_status', { p_asset_id: id, p_status: 'published' }), 'Asset publication could not be confirmed. Reload its status before retrying.', 'Publishing requires content.assets manage permission.');
 }
 export async function archiveCmsAsset(id: string) {
-  const { error } = await supabase.rpc('wantiss_admin_set_cms_asset_status', { p_asset_id: id, p_status: 'archived' });
-  if (error) throw new Error(error.code === '42501' ? 'Archiving requires content.archive manage permission.' : error.message);
+  const { error } = await safeAdminResponse(() => supabase.rpc('wantiss_admin_set_cms_asset_status', { p_asset_id: id, p_status: 'archived' }), 'Asset archiving could not be confirmed. Reload its status before retrying.', 'Archiving requires content.archive manage permission.');
 }
 
 export interface AdminAccountRestriction {
@@ -243,26 +241,23 @@ export async function applyAccountRestriction(input: {
   userId: string; kind: 'Suspension' | 'Ban'; scope: string; reason: string; notes: string;
   startsAt: string; endsAt?: string | null; notifyUser: boolean;
 }) {
-  const { data, error } = await supabase.rpc('wantiss_admin_apply_account_restriction', {
+  const { data, error } = await safeAdminResponse(() => supabase.rpc('wantiss_admin_apply_account_restriction', {
     p_user_id: input.userId, p_kind: input.kind, p_scope: input.scope, p_reason: input.reason,
     p_notes: input.notes, p_starts_at: input.startsAt, p_ends_at: input.endsAt || null,
     p_notify_user: input.notifyUser,
-  });
-  if (error) throw new Error(error.code === '42501' ? 'You do not have permission to restrict accounts.' : error.message);
+  }), 'The restriction could not be confirmed. Refresh its status before retrying.', 'You do not have permission to restrict accounts.');
   return String(data);
 }
 export async function liftAccountRestriction(restrictionId: string, reason: string) {
-  const { error } = await supabase.rpc('wantiss_admin_lift_account_restriction', {
+  const { error } = await safeAdminResponse(() => supabase.rpc('wantiss_admin_lift_account_restriction', {
     p_restriction_id: restrictionId, p_reason: reason,
-  });
-  if (error) throw new Error(error.code === '42501' ? 'You do not have permission to lift account restrictions.' : error.message);
+  }), 'The restriction change could not be confirmed. Refresh its status before retrying.', 'You do not have permission to lift account restrictions.');
 }
 
 export async function updateAccountRestriction(restrictionId: string, endsAt: string | null, reason: string) {
-  const { error } = await supabase.rpc('wantiss_admin_update_account_restriction', {
+  const { error } = await safeAdminResponse(() => supabase.rpc('wantiss_admin_update_account_restriction', {
     p_restriction_id: restrictionId, p_ends_at: endsAt, p_reason: reason,
-  });
-  if (error) throw new Error(error.code === '42501' ? 'You do not have permission to edit account restrictions.' : error.message);
+  }), 'The restriction update could not be confirmed. Refresh its status before retrying.', 'You do not have permission to edit account restrictions.');
 }
 
 export interface AdminFinancialAction {
@@ -307,8 +302,7 @@ export async function reviewFinancialAction(id: string, decision: 'approve' | 'r
 }
 
 export async function recordRestrictionAppeal(restrictionId: string, action: 'receive' | 'uphold', reason: string) {
-  const {error} = await supabase.rpc('wantiss_admin_record_restriction_appeal', {
+  const {error} = await safeAdminResponse(() => supabase.rpc('wantiss_admin_record_restriction_appeal', {
     p_restriction_id: restrictionId, p_action: action, p_reason: reason.trim(),
-  });
-  if (error) throw new Error(error.code === '42501' ? 'Super Admin account-restriction permission is required.' : error.message);
+  }), 'The appeal update could not be confirmed. Refresh its status before retrying.', 'Super Admin account-restriction permission is required.');
 }

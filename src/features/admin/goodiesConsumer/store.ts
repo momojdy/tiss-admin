@@ -296,21 +296,23 @@ export async function removeGoodiesContactNumber(id:string) {
   await refreshGoodiesContactNumbers();await save();
 }
 export async function refreshUserAddresses() {
-
+  const accountId=S.accountId;
   const {data: auth, error: authError} = await supabase.auth.getUser();
+  if(S.accountId!==accountId)return S.addr;
   if (authError) throw authError;
   if (!auth.user) {S.addr = []; S.as = 0; emit(); return S.addr;}
   const addressUserId = auth.user.id;
-  const baseColumns = 'id,recipient_name,phone_number,country,department,city,street_address,apartment,delivery_notes,is_default,created_at';
+  const baseColumns = 'id,recipient_name,phone_number,country,department,city,street_address,apartment,postal_code,delivery_notes,is_default,created_at';
   const read = (columns: string) => supabase.from('user_addresses').select(columns)
     .eq('user_id', auth.user.id).order('is_default', {ascending: false}).order('created_at', {ascending: true});
   /* Coordinates need the latitude/longitude columns; fall back cleanly until the migration is applied. */
   let {data, error} = await read(baseColumns + ',latitude,longitude');
-  if (error && /latitude|longitude/i.test(String(error.message))) ({data, error} = await read(baseColumns));
+  if (error && ['42703','PGRST204'].includes(String(error.code)) && /latitude|longitude/i.test(String(error.message))) ({data, error} = await read(baseColumns));
   if (error) throw error;
   const metadataAddressId = String(auth.user.user_metadata?.goodies_default_address_id || '');
   const rows = (data || []).map((row: any) => ({
     id: String(row.id), l: String(row.recipient_name || 'Home'),
+    street: String(row.street_address || ''), postal_code: String(row.postal_code || ''),
     t: [row.street_address, row.city, row.department, row.country].filter(Boolean).join(', '),
     apt: String(row.apartment || ''), inst: String(row.delivery_notes || ''),
     def: row.is_default ? 1 : 0, goodiesDefault: String(row.id) === metadataAddressId ? 1 : 0,
@@ -345,7 +347,8 @@ export async function load() {
   };
   await merge(WKEY, WDEF()); await merge(KEY, GDEF());
   try {
-    const attempt = JSON.parse((await AsyncStorage.getItem('goodies-checkout-attempt-v1')) || 'null');
+    const rawAttempt=await AsyncStorage.getItem('goodies-checkout-attempt-v1:'+String(ownerId))||await AsyncStorage.getItem('goodies-checkout-attempt-v1');
+    const attempt = JSON.parse(rawAttempt || 'null');
     if (S.accountId === ownerId && attempt?.ownerId === ownerId && typeof attempt.key === 'string' && typeof attempt.fingerprint === 'string') S.checkoutAttempt = attempt;
   } catch (e) {}
   S.wallet = 0; S.hasWallet = false; S.cards = []; S.selectedCardId = '';
@@ -415,25 +418,27 @@ export function save(): Promise<void> {
 }
 
 export async function getGoodiesCheckoutAttempt(fingerprint: string): Promise<{key: string; fingerprint: string}> {
-  const current = S.checkoutAttempt;
-  if (current && !current.completed && current.fingerprint === fingerprint && typeof current.key === 'string') {
+  const ownerId=S.accountId,current = S.checkoutAttempt;
+  if (current && current.ownerId===ownerId && !current.completed && current.fingerprint === fingerprint && typeof current.key === 'string') {
     return {key: current.key, fingerprint: current.fingerprint};
   }
   const attempt = {
-    ownerId: S.accountId,
+    ownerId,
     key: 'goodies-checkout-' + Date.now() + '-' + Math.random().toString(36).slice(2),
     fingerprint,
     completed: false,
   };
   S.checkoutAttempt = attempt;
-  await AsyncStorage.setItem('goodies-checkout-attempt-v1', JSON.stringify(attempt));
+  await AsyncStorage.setItem('goodies-checkout-attempt-v1:'+String(ownerId), JSON.stringify(attempt));
+  if(S.accountId!==ownerId)throw new Error('Checkout account changed');
   return {key: attempt.key, fingerprint: attempt.fingerprint};
 }
 
 export async function completeGoodiesCheckoutAttempt(orderId: string): Promise<void> {
-  if (!S.checkoutAttempt || !orderId) return;
-  S.checkoutAttempt = {...S.checkoutAttempt, completed: true, orderId};
-  try {await AsyncStorage.setItem('goodies-checkout-attempt-v1', JSON.stringify(S.checkoutAttempt));} catch (e) {}
+  const ownerId=S.accountId,attempt=S.checkoutAttempt;
+  if (!attempt || attempt.ownerId!==ownerId || !orderId) return;
+  S.checkoutAttempt = {...attempt, completed: true, orderId};
+  try {await AsyncStorage.setItem('goodies-checkout-attempt-v1:'+String(ownerId), JSON.stringify(S.checkoutAttempt));} catch (e) {}
 }
 export const setTheme = (t: 'light' | 'dark') => {S.theme = t; AsyncStorage.setItem('goodies-theme', t); emit();};
 export const setLang = async (l: string) => {
@@ -761,34 +766,44 @@ export function clearActiveGroup() {
   save(); emit();
 }
 export async function validateActiveGroup(): Promise<boolean> {
-  const g = S.groupOrder;
+  const g = S.groupOrder,owner=S.accountId;
   if (!g?.serverBacked || !g.groupId) return false;
-  if (g.expiresAt && new Date(g.expiresAt).getTime() <= Date.now()) {clearActiveGroup(); return false;}
+  const groupId=g.groupId,current=()=>S.accountId===owner&&S.groupOrder===g&&S.groupOrder.groupId===groupId;
+  if (g.expiresAt && new Date(g.expiresAt).getTime() <= Date.now()) {if(current())clearActiveGroup(); return false;}
   try {
-    const {data, error} = await supabase.rpc('goodies_group_order_get_status', {p_group_id: g.groupId});
+    const {data:auth,error:authError}=await supabase.auth.getUser();
+    if(!current())return false;
+    if(authError||!owner||auth.user?.id!==owner)return false;
+    const {data, error} = await supabase.rpc('goodies_group_order_get_status', {p_group_id: groupId});
+    if(!current())return false;
     if (error) {
       /* Only a definite "gone / not a member / closed" answer drops the group; a network error keeps it. */
-      if (['P0002', '42501', 'P0001'].includes(String((error as any).code))) {clearActiveGroup(); return false;}
-      console.warn('[Goodies] group status check failed', error);
+      if (['P0002', '42501'].includes(String((error as any).code))) {clearActiveGroup(); return false;}
       return true;
     }
     const row: any = Array.isArray(data) ? data[0] : data;
+    if(row&&(row.group_id!==groupId||!['open','locked','checked_out','closed','expired','cancelled'].includes(row.status)||!Number.isFinite(Date.parse(row.expires_at))))return true;
     if (!row || row.status !== 'open' || (row.expires_at && new Date(row.expires_at).getTime() <= Date.now())) {clearActiveGroup(); return false;}
     return true;
-  } catch (e) {
-    console.warn('[Goodies] group status check failed', e);
+  } catch {
+    if(!current())return false;
     return true;
   }
 }
 /** Mirror a personal-cart change into the active group. A failure is a plain, non-blocking notice and never stops the personal order. */
 export async function syncActiveGroup(op: {line?: CartLine; removeKey?: string}) {
-  const g = S.groupOrder;
+  const g = S.groupOrder,owner=S.accountId;
   if (!g?.serverBacked || !g.groupId) return;
-  if (!(await validateActiveGroup())) return;
-  const r: any = op.removeKey ? await removeGroupOrderCartLine(g.groupId, op.removeKey) : op.line ? await syncGroupOrderCartLine(g.groupId, op.line) : null;
-  if (r?.error) {
-    console.warn('[Goodies] group sync failed', r.error);
-    toast(label("lbl.cms.b0b30ad199f5", "Saved to your cart. It could not be shared with the group just now."));
+  const groupId=g.groupId,current=()=>S.accountId===owner&&S.groupOrder===g&&S.groupOrder.groupId===groupId;
+  try{
+    if (!(await validateActiveGroup())||!current()) return;
+    const {data:auth,error:authError}=await supabase.auth.getUser();
+    if(!current())return;
+    if(authError||!owner||auth.user?.id!==owner)throw new Error('Group account unavailable');
+    const r: any = op.removeKey ? await removeGroupOrderCartLine(groupId, op.removeKey) : op.line ? await syncGroupOrderCartLine(groupId, op.line) : null;
+    if(r?.error)throw r.error;
+  }catch{
+    if(current())toast(label("lbl.cms.b0b30ad199f5", "Saved to your cart. It could not be shared with the group just now."));
   }
 }
 export async function removeGroupOrderCartLine(groupId: string, lineKey: string) {

@@ -17,6 +17,7 @@ import { Txt } from '../../ui/Txt';
 import { PermissionsBody, RequestsBody } from './PermissionsPanels';
 import { useTheme } from '../../theme/ThemeContext';
 import type { StaffMember } from '../../data/types';
+import { AdminSnapshotBoundary } from '../../ui/AdminSnapshotBoundary';
 
 /** Requests and Permissions are for people who can manage permissions (Super Admin); everyone else asks from Account. */
 export const PEOPLE_SUBS = ['Staff', 'Requests', 'Permissions', 'Accounts', 'Restrictions', 'Customers', 'Businesses', 'Roles', 'Invitations', 'Audit log'] as const;
@@ -234,7 +235,7 @@ export function PeopleScreen() {
           {canInvite ? <Btn onPress={invite}>+ Invite</Btn> : null}
         </Row>
       ) : null}
-      {body()}
+      {sub === 'Accounts' || sub === 'Restrictions' ? <AdminSnapshotBoundary domain="restrictions">{body()}</AdminSnapshotBoundary> : sub === 'Businesses' ? <AdminSnapshotBoundary domain="ecosystem">{body()}</AdminSnapshotBoundary> : body()}
     </View>
   );
 }

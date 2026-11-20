@@ -1,7 +1,7 @@
 import {GoodiesSettlementAdmin} from './GoodiesSettlementAdmin';
 import {GoodiesSharedBillRefunds} from './GoodiesSharedBillRefunds';
 import {ui as adminUi,useDb} from '../../state/db';
-import {hasServerPermission} from '../../state/access';
+import {hasServerPermission,session} from '../../state/access';
 import React, {useCallback, useEffect, useRef, useState} from 'react';
 import {Alert, Image, Pressable, ScrollView, Text, TextInput, View} from 'react-native';
 import {supabase} from '../../lib/supabase';
@@ -13,7 +13,10 @@ import {resolveGoodiesDeliveryProof} from '../../lib/goodiesDeliveryProof';
 
 type Dashboard = {stats:any;merchants:any[];products:any[];orders:any[]};
 const MODULES=['Overview','Merchants','Product review','Customer reviews','Orders','Delivery reports','Couriers','Support','Settlement','Fees','Delivery surcharge','Analytics','Goodies assets','Content editor'];
-const money=(v:any)=>new Intl.NumberFormat('en-US',{style:'currency',currency:'USD'}).format(Number(v)||0);
+const money=(v:any)=>{
+  const amount=typeof v==='number'?v:typeof v==='string'&&v.trim()?Number(v):NaN;
+  return Number.isFinite(amount)&&amount>=0?new Intl.NumberFormat('en-US',{style:'currency',currency:'USD'}).format(amount):'Unavailable';
+};
 const cardStyle={backgroundColor:'#fff',borderWidth:1,borderColor:'#E1E6DE',borderRadius:14,padding:14,marginBottom:10} as const;
 const btn=(bg:string)=>({paddingVertical:10,paddingHorizontal:12,borderRadius:10,backgroundColor:bg,alignItems:'center' as const});
 const labelStyle={fontSize:12,color:'#687365',marginBottom:4} as const;
@@ -21,7 +24,7 @@ const valueStyle={fontSize:14,fontWeight:'700' as const,color:'#1B2619'};
 
 async function goodiesRequest(name:string,args?:Record<string,unknown>) {
   try {return await supabase.rpc(name,args);}
-  catch {return {data:null,error:{message:'The request could not be completed.'}};}
+  catch {return {data:null,error:{code:'',message:'The request could not be completed.'}};}
 }
 
 export function GoodiesAdminScreen() {
@@ -41,7 +44,7 @@ export function GoodiesAdminScreen() {
   const [reviewsError,setReviewsError]=useState(false);
   const [reviewsAttempt,setReviewsAttempt]=useState(0);
   const [reviewRejectId,setReviewRejectId]=useState<string|null>(null),[reviewRejectNote,setReviewRejectNote]=useState('');
-  const reviewLock=useRef(false);const canReview=hasServerPermission('goodies.ops','manage');
+  const reviewLock=useRef(false);const canOperate=hasServerPermission('goodies.ops','manage'),canFinance=hasServerPermission('finance.approve','manage');const canReview=canOperate;
   const [orderRows,setOrderRows]=useState<any[]>([]);
   const [supportRows,setSupportRows]=useState<any[]>([]);
   const [supportPage,setSupportPage]=useState(0);
@@ -66,18 +69,34 @@ export function GoodiesAdminScreen() {
   const [additionalStoreFee,setAdditionalStoreFee]=useState('0');
   const [extraDistancePerKm,setExtraDistancePerKm]=useState('0');
   const [maxStops,setMaxStops]=useState('3');
+  const reads=useRef<Record<string,number>>({}),mounted=useRef(true),mutationLock=useRef(false);
+  useEffect(()=>{mounted.current=true;return()=>{mounted.current=false;};},[]);
+  const beginRead=(scope:string)=>{
+    const request=(reads.current[scope]||0)+1,owner=session.userId;reads.current[scope]=request;
+    return()=>mounted.current&&reads.current[scope]===request&&session.userId===owner;
+  };
+  const runMutation=async(key:string,work:(current:()=>boolean)=>Promise<void>)=>{
+    if(!mounted.current||mutationLock.current)return;
+    const owner=session.userId;mutationLock.current=true;setBusy(key);
+    const current=()=>mounted.current&&session.userId===owner;
+    try{await work(current);}
+    finally{mutationLock.current=false;if(current())setBusy('');}
+  };
 
   const reload=useCallback(async()=>{
+    const current=beginRead('dashboard');
     setLoading(true);setFeesLoaded(false);setLoadError('');
     try {
       const [{data,error},cms]=await Promise.all([
         goodiesRequest('goodies_admin_dashboard'),
         supabase.from('wantiss_cms_content').select('payload').eq('content_key','goodies.content').eq('locale','en').eq('status','published').order('version',{ascending:false}).limit(1).maybeSingle()
       ]);
+      if(!current())return;
       if(error)throw error;
       if(cms.error)throw cms.error;
       if(!cms.data?.payload?.fees)throw new Error('Fee configuration unavailable');
       const d=(data||{}) as Dashboard;
+      if(!d.stats||['stores','live_stores','products','pending_products','orders','open_orders'].some(key=>!Number.isSafeInteger(d.stats[key])||d.stats[key]<0)||money(d.stats.gross_total)==='Unavailable'||!Array.isArray(d.merchants)||!Array.isArray(d.products)||!Array.isArray(d.orders))throw new Error('Administration unavailable');
       setDashboard({stats:d.stats||{},merchants:d.merchants||[],products:d.products||[],orders:d.orders||[]});
       const f=cms.data.payload.fees;
       if(typeof f!=='object'||Array.isArray(f)||typeof f.svc!=='number'||!Number.isFinite(f.svc)||f.svc<0||f.svc>1000||typeof f.tips!=='string'||!f.pay||['Wallet','Card','Cash'].some(k=>![true,false,0,1].includes(f.pay[k])))throw new Error('Invalid fee policy');
@@ -88,26 +107,29 @@ export function GoodiesAdminScreen() {
       setAdditionalStoreFee(String(f.additionalStoreFee??0));
       setExtraDistancePerKm(String(f.extraDistancePerKm??0));
       setMaxStops(String(f.maxStops??3));setFeesLoaded(true);
-    } catch {setLoadError('Could not load Goodies administration. Please refresh to try again.');toast('Could not load Goodies administration.');}
-    finally{setLoading(false);}
+    } catch {if(current()){setLoadError('Could not load Goodies administration. Please refresh to try again.');toast('Could not load Goodies administration.');}}
+    finally{if(current())setLoading(false);}
   },[toast]);
   useEffect(()=>{void reload();},[reload]);
   const loadCouriers=async()=>{
+    const current=beginRead('couriers');setCourierCandidates([]);
     setCouriersLoaded(false);setBusy('couriers');setSectionErrors(e=>({...e,Couriers:''}));
     const {data,error}=await goodiesRequest('goodies_admin_courier_candidates_page',{p_offset:courierPage*100,p_limit:100});
-    if(error){setSectionErrors(e=>({...e,Couriers:'Could not load couriers. Please try again.'}));}else setCourierCandidates(data||[]);
-    setCouriersLoaded(true);setBusy('');
+    if(!current())return;
+    if(error||!Array.isArray(data)){setSectionErrors(e=>({...e,Couriers:'Could not load couriers. Please try again.'}));}else setCourierCandidates(data||[]);
+    setCouriersLoaded(true);setBusy(value=>value==='couriers'?'':value);
   };
   useEffect(()=>{if(module==='Couriers')void loadCouriers();},[module,courierPage]);
   const loadOrderPage=async()=>{
+    const current=beginRead('orders');setOrderRows([]);
     setBusy('orders');setSectionErrors(e=>({...e,Orders:''}));
-    try {const {data,error}=await goodiesRequest('goodies_admin_orders_page',{p_offset:orderPage*100,p_limit:100});if(error)throw error;setOrderRows(data||[]);}
-    catch {setSectionErrors(e=>({...e,Orders:'Could not load orders. Please try again.'}));}
-    finally {setBusy('');}
+    try {const {data,error}=await goodiesRequest('goodies_admin_orders_page',{p_offset:orderPage*100,p_limit:100});if(!current())return;if(error||!Array.isArray(data))throw Error('Unavailable');setOrderRows(data);}
+    catch {if(current())setSectionErrors(e=>({...e,Orders:'Could not load orders. Please try again.'}));}
+    finally {if(current())setBusy(value=>value==='orders'?'':value);}
   };
   useEffect(()=>{if(module==='Orders')void loadOrderPage();},[module,orderPage]);
   const loadSupportTickets=async()=>{
-    setSupportLoaded(false);setSupportError('');
+    const current=beginRead('support');setSupportRows([]);setSupportLoaded(false);setSupportError('');
     if(!supportCanRead){
       setSupportRows([]);setSupportError('Operations view permission is required to read customer support tickets.');
       setSupportLoaded(true);return;
@@ -118,35 +140,38 @@ export function GoodiesAdminScreen() {
         .ilike('subject','Goodies · %')
         .order('created_at',{ascending:false})
         .range(supportPage*50,supportPage*50+49);
-      if(error)throw error;
-      setSupportRows(data||[]);
-    }catch{setSupportRows([]);setSupportError('Could not load Goodies support tickets. Please retry.');}
-    finally{setSupportLoaded(true);}
+      if(!current())return;
+      if(error||!Array.isArray(data))throw Error('Support tickets unavailable');
+      setSupportRows(data);
+    }catch{if(current()){setSupportRows([]);setSupportError('Could not load Goodies support tickets. Please retry.');}}
+    finally{if(current())setSupportLoaded(true);}
   };
-  useEffect(()=>{if(module==='Support')void loadSupportTickets();},[module,supportPage]);
+  useEffect(()=>{if(module==='Support')void loadSupportTickets();},[module,supportPage,supportCanRead,session.userId]);
   const updateSupportTicket=async(ticketId:string,status:'in_progress'|'resolved'|'open')=>{
     if(!supportCanEdit){toast('Operations edit permission is required.');return;}
-    setBusy(ticketId);
-    try{
+    await runMutation(ticketId,async current=>{try{
       const {data,error}=await supabase.from('settings_support_requests')
         .update({status}).eq('id',ticketId).ilike('subject','Goodies · %')
         .select('id').single();
-      if(error||!data?.id)throw error||new Error('Ticket was not updated');
+      if(!current())return;
+      if(error||data?.id!==ticketId)throw Error('Ticket update unconfirmed');
       toast(status==='in_progress'?'Ticket marked in progress':status==='resolved'?'Ticket marked resolved':'Ticket reopened');
       await loadSupportTickets();
-    }catch{toast('Could not update ticket status. Please refresh and retry.');}
-    finally{setBusy('');}
+    }catch{if(current())toast('Could not confirm ticket status. Refresh before trying again.');}});
   };
   const loadReports=async()=>{
+    const current=beginRead('reports');setReports([]);
     setReportsLoaded(false);setBusy('reports');setSectionErrors(e=>({...e,'Delivery reports':''}));
     const {data,error}=await goodiesRequest('goodies_admin_list_delivery_reports');
-    if(error){setSectionErrors(e=>({...e,'Delivery reports':'Could not load delivery reports. Please try again.'}));console.warn('Delivery reports failed',error.message);toast('Could not load delivery reports.');setReportsLoaded(true);setBusy('');return [];}
+    if(!current())return [];
+    if(error||!Array.isArray(data)){setSectionErrors(e=>({...e,'Delivery reports':'Could not load delivery reports. Please try again.'}));toast('Could not load delivery reports.');setReportsLoaded(true);setBusy(value=>value==='reports'?'':value);return [];}
     const rows=await Promise.all((data||[]).map(async (row:any)=>{
       try {return {...row,proof_url:await resolveGoodiesDeliveryProof(row.proof_url||''),proof_unavailable:false};}
       catch {return {...row,proof_url:'',proof_unavailable:true};}
     }));
+    if(!current())return [];
     setReports(rows);setReportsLoaded(true);
-    setBusy('');
+    setBusy(value=>value==='reports'?'':value);
     return rows;
   };
   useEffect(()=>{if(module==='Delivery reports')void loadReports();},[module]);
@@ -160,15 +185,19 @@ export function GoodiesAdminScreen() {
     finally{reviewLock.current=false;setBusy('');}
   };
   const resolveReport=(item:any,resolution:'release'|'refund')=>{
+    if(!canOperate||!canFinance)return;
+    if(money(item.total)==='Unavailable'){toast('Reload this delivery report before recording a decision.');return;}
+    const owner=session.userId;
     Alert.alert(resolution==='refund'?'Refund the customer':'Confirm delivery',
       resolution==='refund'?'Cancel '+item.order_code+' and refund '+money(item.total)+' to the customer?':'Mark '+item.order_code+' as delivered and release it to the store?',[
       {text:'Back',style:'cancel'},
-      {text:resolution==='refund'?'Refund':'Confirm',style:resolution==='refund'?'destructive':'default',onPress:()=>{void (async()=>{
-        setBusy(item.order_id);
+      {text:resolution==='refund'?'Refund':'Confirm',style:resolution==='refund'?'destructive':'default',onPress:()=>{if(session.userId!==owner)return;void runMutation(item.order_id,async current=>{
         const {error}=await goodiesRequest('goodies_admin_resolve_delivery_dispute',{p_order_id:item.order_id,p_resolution:resolution});
-        if(error){console.warn('Resolve report failed',error.message);toast('Could not save this decision. Please try again.');}
+        if(!current())return;
+        if(error){toast('Could not save this decision. Please try again.');}
         else{
           const updated=await loadReports();
+          if(!current())return;
           if(resolution==='release')toast('Order marked as delivered.');
           else{
             const latest=updated.find((r:any)=>r.order_id===item.order_id);
@@ -181,86 +210,99 @@ export function GoodiesAdminScreen() {
             }else toast('Refund decision saved.');
           }
         }
-        setBusy('');
-      })();}}
+      });}}
     ]);
   };
   const setCourierAccess=async(item:any,enabled:boolean)=>{
-    setBusy(item.courier_id);
-    const {error}=await goodiesRequest(enabled?'goodies_admin_add_courier':'goodies_admin_remove_courier',{p_courier_id:item.courier_id});
-    if(error)toast('Could not complete this request. Please try again.');else{toast(enabled?'Courier access approved':'Courier access removed');await loadCouriers();}
-    setBusy('');
+    if(!canOperate)return;
+    await runMutation(item.courier_id,async current=>{
+      const {error}=await goodiesRequest(enabled?'goodies_admin_add_courier':'goodies_admin_remove_courier',{p_courier_id:item.courier_id});
+      if(!current())return;
+      if(error)toast(error.code==='P4213'?'Resolve the courier delivery before removing access.':'Could not complete this request. Please try again.');else{toast(enabled?'Courier access approved':'Courier access removed');await loadCouriers();}
+    });
   };
   const loadAnalytics=async()=>{
+    const current=beginRead('analytics');setAnalytics(null);
     setAnalyticsLoaded(false);setBusy('analytics');setSectionErrors(e=>({...e,Analytics:''}));
     const {data,error}=await goodiesRequest('goodies_admin_analytics');
-    if(error){setSectionErrors(e=>({...e,Analytics:'Could not load analytics. Please try again.'}));}else setAnalytics(data);
-    setAnalyticsLoaded(true);setBusy('');
+    if(!current())return;
+    if(error||!data||typeof data!=='object'){setSectionErrors(e=>({...e,Analytics:'Could not load analytics. Please try again.'}));}else setAnalytics(data);
+    setAnalyticsLoaded(true);setBusy(value=>value==='analytics'?'':value);
   };
   useEffect(()=>{if(module==='Analytics')void loadAnalytics();},[module]);
-  useEffect(()=>{
-    if(module!=='Customer reviews')return;
-    let active=true;setReviewsLoading(true);setReviewsError(false);
-    void Promise.resolve(goodiesRequest('goodies_admin_list_reviews',{p_offset:reviewsPage*50,p_limit:50}))
-      .then(({data,error})=>{if(!active)return;if(error)throw error;setCustomerReviews(data||[]);})
-      .catch(()=>{if(active)setReviewsError(true);}).finally(()=>{if(active)setReviewsLoading(false);});
-    return()=>{active=false;};
-  },[module,reviewsPage,reviewsAttempt]);
+  const loadCustomerReviews=async()=>{
+    const current=beginRead('reviews');setCustomerReviews([]);setReviewsLoading(true);setReviewsError(false);
+    const {data,error}=await goodiesRequest('goodies_admin_list_reviews',{p_offset:reviewsPage*50,p_limit:50});
+    if(!current())return;
+    if(error||!Array.isArray(data))setReviewsError(true);else setCustomerReviews(data);
+    setReviewsLoading(false);
+  };
+  useEffect(()=>{if(module==='Customer reviews')void loadCustomerReviews();},[module,reviewsPage,reviewsAttempt]);
   const setMerchant=async(item:any)=>{
-    setBusy(item.business_id);
-    const {error}=await goodiesRequest('goodies_admin_set_merchant_status',{p_business_id:item.business_id,p_live:!item.is_live});
-    if(error)toast('Could not complete this request. Please try again.');else{toast(item.is_live?'Store taken offline':'Store is live');await reload();}
-    setBusy('');
+    if(!canOperate)return;
+    await runMutation(item.business_id,async current=>{
+      const {error}=await goodiesRequest('goodies_admin_set_merchant_status',{p_business_id:item.business_id,p_live:!item.is_live});
+      if(!current())return;
+      if(error)toast('Could not complete this request. Please try again.');else{toast(item.is_live?'Store taken offline':'Store is live');await reload();}
+    });
   };
   const cancelOrder=(item:any)=>{
+    if(!canOperate)return;
+    const owner=session.userId;
     Alert.alert('Cancel Goodies order', 'Cancel '+item.order_code+'? Stock will be restored and eligible payments will be refunded.',[
       {text:'Keep order',style:'cancel'},
-      {text:'Cancel order',style:'destructive',onPress:()=>{void (async()=>{
-        setBusy(item.id);
+      {text:'Cancel order',style:'destructive',onPress:()=>{if(session.userId!==owner)return;void runMutation(item.id,async current=>{
         const {error}=await goodiesRequest('goodies_admin_cancel_order',{p_order_id:item.id,p_reason:'The order was cancelled by Wantiss support.'});
+        if(!current())return;
         if(error)toast('Could not complete this request. Please try again.');else{toast('Order cancelled; refund processing was triggered where applicable.');await reload();await loadOrderPage();}
-        setBusy('');
-      })();}}
+      });}}
     ]);
   };
   const reviewProduct=async(item:any,status:'approved'|'rejected',reason='')=>{
+    if(!canOperate)return;
     if(status==='rejected'&&!reason.trim()){toast('Enter a rejection reason.');return;}
     if(busy)return;
-    setBusy(item.id);
-    const {error}=await goodiesRequest('goodies_admin_review_product',{p_product_id:item.id,p_status:status,p_note:status==='rejected'?reason.trim():null});
-    if(error)toast('Could not complete this request. Please try again.');else{setRejection(null);toast(status==='approved'?'Product approved':'Product rejected');await reload();}
-    setBusy('');
+    await runMutation(item.id,async current=>{
+      const {error}=await goodiesRequest('goodies_admin_review_product',{p_product_id:item.id,p_status:status,p_note:status==='rejected'?reason.trim():null});
+      if(!current())return;
+      if(error)toast('Could not complete this request. Please try again.');else{setRejection(null);toast(status==='approved'?'Product approved':'Product rejected');await reload();}
+    });
   };
   const saveFees=async()=>{
+    if(!canOperate||!canFinance)return;
     if(!feesLoaded||loading||busy){toast('Wait for fee settings to load before saving.');return;}
     const amount=Number(fee);
-    const tipValues=tips.split(',').map(x=>Number(x.trim())).filter(x=>Number.isFinite(x));
-    if(!Number.isFinite(amount)||amount<0||amount>1000){toast('Enter a valid service fee.');return;}
-    if(!tipValues.length||tipValues.some(x=>x<0||x>1000)){toast('Enter valid comma-separated tip amounts.');return;}
-    setBusy('fees');
-    const {error}=await goodiesRequest('goodies_admin_update_fee_policy',{p_service_fee:amount,p_first_order_free:firstFree,p_wallet_enabled:wallet,p_card_enabled:card,p_cash_enabled:cash,p_tips:tipValues});
-    if(error)toast('Could not complete this request. Please try again.');else toast('Goodies payment and fee policy updated.');
-    setBusy('');
+    const tipParts=tips.split(',').map(x=>x.trim());
+    const tipValues=tipParts.map(Number);
+    if(!fee.trim()||!Number.isFinite(amount)||amount<0||amount>1000){toast('Enter a valid service fee.');return;}
+    if(tipParts.some(x=>!x)||!tipValues.length||tipValues.some(x=>!Number.isFinite(x)||x<0||x>1000)){toast('Enter valid comma-separated tip amounts.');return;}
+    await runMutation('fees',async current=>{
+      const {error}=await goodiesRequest('goodies_admin_update_fee_policy',{p_service_fee:amount,p_first_order_free:firstFree,p_wallet_enabled:wallet,p_card_enabled:card,p_cash_enabled:cash,p_tips:tipValues});
+      if(!current())return;
+      if(error)toast('Could not complete this request. Please try again.');else toast('Goodies payment and fee policy updated.');
+    });
   };
   const saveDeliverySurcharge=async()=>{
+    if(!canOperate||!canFinance)return;
     if(!feesLoaded||loading||busy){toast('Wait for delivery settings to load before saving.');return;}
-    const flat=Number(additionalStoreFee), perKm=Number(extraDistancePerKm), stops=Math.floor(Number(maxStops));
-    if(!Number.isFinite(stops)||stops<1||stops>8){toast('Enter a number of stores from 1 to 8.');return;}
-    if(!Number.isFinite(flat)||flat<0||flat>1000||!Number.isFinite(perKm)||perKm<0||perKm>1000){
+    const flat=Number(additionalStoreFee), perKm=Number(extraDistancePerKm), stops=Number(maxStops);
+    if(!Number.isInteger(stops)||stops<1||stops>8){toast('Enter a number of stores from 1 to 8.');return;}
+    if(!additionalStoreFee.trim()||!extraDistancePerKm.trim()||!Number.isFinite(flat)||flat<0||flat>1000||!Number.isFinite(perKm)||perKm<0||perKm>1000){
       toast('Enter valid non-negative delivery surcharge amounts (maximum 1000).');return;
     }
-    setBusy('delivery-surcharge');
-    const {error}=await goodiesRequest('goodies_admin_update_multi_store_policy',{
+    await runMutation('delivery-surcharge',async current=>{
+      const {error}=await goodiesRequest('goodies_admin_update_multi_store_policy',{
       p_enabled:additionalStoreSurchargeEnabled,
       p_additional_store_fee:flat,
       p_extra_distance_per_km:perKm,
       p_max_stops:stops
+      });
+      if(!current())return;
+      if(error)toast('Could not save the delivery settings. Please try again.');else toast('Delivery settings saved and published.');
+      if(!error)await reload();
     });
-    if(error){console.warn('Delivery settings failed',error);toast('Could not save the delivery settings. Please try again.');}else toast('Delivery settings saved and published.');
-    setBusy('');
-    if(!error)await reload();
   };
-  const switchRow=(title:string,sub:string,on:boolean,set:(v:boolean)=>void)=><Pressable onPress={()=>set(!on)} style={{...cardStyle,flexDirection:'row',alignItems:'center',justifyContent:'space-between',marginBottom:8}}><View style={{flex:1,paddingRight:10}}><Text style={valueStyle}>{title}</Text><Text style={{fontSize:11,color:'#697466',marginTop:3}}>{sub}</Text></View><Text style={{fontWeight:'800',color:on?'#286A35':'#8B554B'}}>{on?'ON':'OFF'}</Text></Pressable>;
+  const switchRow=(title:string,sub:string,on:boolean,set:(v:boolean)=>void)=><Pressable disabled={!canOperate||!canFinance||!feesLoaded||loading||!!busy} onPress={()=>{if(canOperate&&canFinance)set(!on);}} style={{...cardStyle,flexDirection:'row',alignItems:'center',justifyContent:'space-between',marginBottom:8}}><View style={{flex:1,paddingRight:10}}><Text style={valueStyle}>{title}</Text><Text style={{fontSize:11,color:'#697466',marginTop:3}}>{sub}</Text></View><Text style={{fontWeight:'800',color:on?'#286A35':'#8B554B'}}>{on?'ON':'OFF'}</Text></Pressable>;
 
   return <ScrollView style={{flex:1,backgroundColor:c?.inset||'#F6F7F4'}} contentContainerStyle={{padding:16,paddingBottom:36}}>
     <View style={{flexDirection:'row',alignItems:'center',justifyContent:'space-between',marginBottom:12}}>
@@ -272,7 +314,7 @@ export function GoodiesAdminScreen() {
     </ScrollView>
     {sectionErrors[module]?<View style={cardStyle}><Text style={{color:'#8D3932'}}>{sectionErrors[module]}</Text><Pressable onPress={()=>void (module==='Analytics'?loadAnalytics():module==='Couriers'?loadCouriers():module==='Orders'?loadOrderPage():loadReports())} style={btn('#E9EEE6')}><Text>Try again</Text></Pressable></View>:null}
     {loadError?<View style={cardStyle}><Text style={{color:'#8D3932'}}>{loadError}</Text></View>:null}
-    {rejection?<View style={cardStyle}><Text style={valueStyle}>Reject {rejection.item.name}</Text><TextInput accessibilityLabel="Rejection reason" placeholder="Explain what the vendor needs to change" value={rejection.reason} maxLength={500} multiline onChangeText={reason=>setRejection({...rejection,reason})} style={{borderWidth:1,borderColor:'#E1E6DE',padding:12,marginVertical:10,borderRadius:10}} /><View style={{flexDirection:'row',gap:8}}><Pressable disabled={!!busy} onPress={()=>setRejection(null)} style={btn('#E9EEE6')}><Text>Back</Text></Pressable><Pressable disabled={!!busy||!rejection.reason.trim()} onPress={()=>void reviewProduct(rejection.item,'rejected',rejection.reason)} style={btn('#F7EAE8')}><Text>{busy?'Saving…':'Confirm rejection'}</Text></Pressable></View></View>:null}
+    {rejection?<View style={cardStyle}><Text style={valueStyle}>Reject {rejection.item.name}</Text><TextInput accessibilityLabel="Rejection reason" placeholder="Explain what the vendor needs to change" value={rejection.reason} maxLength={500} multiline onChangeText={reason=>setRejection({...rejection,reason})} style={{borderWidth:1,borderColor:'#E1E6DE',padding:12,marginVertical:10,borderRadius:10}} /><View style={{flexDirection:'row',gap:8}}><Pressable disabled={!canOperate||!!busy} onPress={()=>setRejection(null)} style={btn('#E9EEE6')}><Text>Back</Text></Pressable><Pressable disabled={!canOperate||!!busy||!rejection.reason.trim()} onPress={()=>void reviewProduct(rejection.item,'rejected',rejection.reason)} style={btn('#F7EAE8')}><Text>{busy?'Saving…':'Confirm rejection'}</Text></Pressable></View></View>:null}
     {loading?<Text style={{padding:20,color:'#697466'}}>Loading live Goodies data…</Text>:null}
     {module==='Settlement'?<GoodiesSettlementAdmin/>:null}
     {module==='Orders'||module==='Settlement'?<GoodiesSharedBillRefunds/>:null}
@@ -283,21 +325,21 @@ export function GoodiesAdminScreen() {
       <View style={{...cardStyle,marginTop:10}}><Text style={valueStyle}>Gross order value</Text><Text style={{fontSize:23,fontWeight:'800',marginTop:5,color:'#1B2619'}}>{money(dashboard.stats.gross_total)}</Text><Text style={{fontSize:11,color:'#697466',marginTop:4}}>Includes paid and pay-on-receipt orders.</Text></View>
       <Pressable onPress={()=>go('editor',{editorFeature:'Goodies'})} style={btn('#294E2C')}><Text style={{color:'#fff',fontWeight:'800'}}>Open Goodies Content Editor</Text></Pressable>
     </>:null}
-    {module==='Merchants'?<>
+    {module==='Merchants'&&!loading&&!loadError?<>
       <Text style={{fontSize:12,color:'#687365',marginBottom:10}}>Live records from Goodies store schedules.</Text>
       {!dashboard.merchants.length?<Text style={labelStyle}>No Goodies merchants registered yet.</Text>:dashboard.merchants.map(m=><View key={m.business_id} style={cardStyle}>
         <Text style={valueStyle}>{m.name||'Unnamed store'}</Text><Text style={labelStyle}>{m.category||'Uncategorised'} · {m.city||'City not set'} · {m.is_live?'Live':'Not live'}</Text>
         <Text style={{fontSize:12,color:'#596554',marginBottom:8}}>Delivery: {m.delivery_pricing_mode==='distance'?'Distance-based':'Fixed'} · {money(m.delivery_fee)} · COD {m.accept_cash_on_delivery?'enabled':'disabled'}</Text>
-        {m.is_live?<Pressable disabled={busy===m.business_id} onPress={()=>void setMerchant(m)} style={btn('#F7EAE8')}><Text style={{fontWeight:'800',color:'#8D3932'}}>{busy===m.business_id?'Saving…':'Take store offline'}</Text></Pressable>:<Text style={labelStyle}>The vendor can publish this store from Business Space.</Text>}
+        {m.is_live?<Pressable disabled={!canOperate||busy===m.business_id} onPress={()=>void setMerchant(m)} style={btn('#F7EAE8')}><Text style={{fontWeight:'800',color:'#8D3932'}}>{busy===m.business_id?'Saving…':'Take store offline'}</Text></Pressable>:<Text style={labelStyle}>The vendor can publish this store from Business Space.</Text>}
       </View>)}
     </>:null}
-    {module==='Product review'?<>
+    {module==='Product review'&&!loading&&!loadError?<>
       <Text style={{fontSize:12,color:'#687365',marginBottom:10}}>New vendor products remain hidden from customers until approved.</Text>
       {!dashboard.products.length?<Text style={labelStyle}>No products submitted yet.</Text>:dashboard.products.map(p=><View key={p.id} style={cardStyle}>
         <View style={{flexDirection:'row',justifyContent:'space-between'}}><Text style={valueStyle}>{p.name}</Text><Text style={{fontSize:11,fontWeight:'800',color:p.review_status==='pending'?'#9B5A27':p.review_status==='approved'?'#286A35':'#9B4036'}}>{p.review_status}</Text></View>
         <Text style={labelStyle}>{p.store_name||'Store'} · {money(p.price)} · Stock {p.stock}</Text>
         {p.description?<Text style={{fontSize:12,color:'#5F6B5A',marginBottom:8}}>{p.description}</Text>:null}
-        {p.review_status==='pending'?<View style={{flexDirection:'row',gap:8}}><Pressable disabled={!!busy} onPress={()=>void reviewProduct(p,'approved')} style={{...btn('#E8F2E5'),flex:1}}><Text style={{fontWeight:'800',color:'#28552B'}}>Approve</Text></Pressable><Pressable disabled={!!busy} onPress={()=>setRejection({item:p,reason:''})} style={{...btn('#F7EAE8'),flex:1}}><Text style={{fontWeight:'800',color:'#8D3932'}}>Reject</Text></Pressable></View>:null}
+        {p.review_status==='pending'?<View style={{flexDirection:'row',gap:8}}><Pressable disabled={!canOperate||!!busy} onPress={()=>void reviewProduct(p,'approved')} style={{...btn('#E8F2E5'),flex:1}}><Text style={{fontWeight:'800',color:'#28552B'}}>Approve</Text></Pressable><Pressable disabled={!canOperate||!!busy} onPress={()=>setRejection({item:p,reason:''})} style={{...btn('#F7EAE8'),flex:1}}><Text style={{fontWeight:'800',color:'#8D3932'}}>Reject</Text></Pressable></View>:null}
       </View>)}
     </>:null}
     {module==='Customer reviews'?<>
@@ -319,8 +361,8 @@ export function GoodiesAdminScreen() {
         </View>:null}
       </View>)}
       <View style={{flexDirection:'row',gap:8,marginTop:8}}>
-        <Pressable disabled={supportPage===0||!supportLoaded} onPress={()=>setSupportPage(n=>Math.max(0,n-1))} style={btn('#E9EEE6')}><Text>Previous page</Text></Pressable>
-        <Pressable disabled={!supportLoaded||supportRows.length<50} onPress={()=>setSupportPage(n=>n+1)} style={btn('#E9EEE6')}><Text>Next page</Text></Pressable>
+        <Pressable disabled={supportPage===0||!supportLoaded||!!busy} onPress={()=>setSupportPage(n=>Math.max(0,n-1))} style={btn('#E9EEE6')}><Text>Previous page</Text></Pressable>
+        <Pressable disabled={!supportLoaded||supportRows.length<50||!!busy} onPress={()=>setSupportPage(n=>n+1)} style={btn('#E9EEE6')}><Text>Next page</Text></Pressable>
       </View>
     </>:null}
     {module==='Orders'?<>
@@ -331,7 +373,7 @@ export function GoodiesAdminScreen() {
         <Text style={{fontSize:12,color:'#596554'}}>{o.payment_method} · {o.payment_status} · {money(o.total)}</Text>
         {o.scheduled_for?<Text style={{fontSize:12,color:'#596554'}}>Scheduled: {dateText(o.scheduled_for)}</Text>:null}
         {o.courier_id?<Text style={{fontSize:12,color:'#596554'}}>Courier assigned</Text>:null}
-        {!['completed','cancelled','declined','expired'].includes(o.status)?<Pressable disabled={busy===o.id} onPress={()=>cancelOrder(o)} style={{...btn('#F7EAE8'),marginTop:8}}><Text style={{fontWeight:'800',color:'#8D3932'}}>Cancel order</Text></Pressable>:null}
+        {!['completed','cancelled','declined','expired'].includes(o.status)?<Pressable disabled={!canOperate||busy===o.id} onPress={()=>cancelOrder(o)} style={{...btn('#F7EAE8'),marginTop:8}}><Text style={{fontWeight:'800',color:'#8D3932'}}>Cancel order</Text></Pressable>:null}
       </View>)}
     </>:null}
     {module==='Orders'?<View style={{flexDirection:'row',gap:8,marginBottom:12}}><Pressable disabled={orderPage===0||!!busy} onPress={()=>setOrderPage(p=>p-1)} style={btn('#E9EEE6')}><Text>Previous page</Text></Pressable><Pressable disabled={orderRows.length<100||!!busy} onPress={()=>setOrderPage(p=>p+1)} style={btn('#E9EEE6')}><Text>Next page</Text></Pressable></View>:null}
@@ -349,8 +391,8 @@ export function GoodiesAdminScreen() {
         <Text style={{fontSize:13,color:'#1B2619',marginBottom:8}}>“{r.reason}”</Text>
         {r.proof_url?<Image source={{uri:r.proof_url}} style={{width:'100%',height:200,borderRadius:10,backgroundColor:'#EEF1EB',marginBottom:8}} resizeMode="cover"/>:<Text style={labelStyle}>{r.proof_unavailable?'Delivery photo unavailable. Reload the reports to retry.':'No delivery photo.'}</Text>}
         {r.report_status==='open'?<View style={{flexDirection:'row',gap:8}}>
-          <Pressable disabled={!!busy} onPress={()=>resolveReport(r,'release')} style={{...btn('#E8F2E5'),flex:1}}><Text style={{fontWeight:'800',color:'#28552B'}}>Delivery confirmed</Text></Pressable>
-          <Pressable disabled={!!busy} onPress={()=>resolveReport(r,'refund')} style={{...btn('#F7EAE8'),flex:1}}><Text style={{fontWeight:'800',color:'#8D3932'}}>Refund customer</Text></Pressable>
+          <Pressable disabled={!canOperate||!canFinance||!!busy} onPress={()=>resolveReport(r,'release')} style={{...btn('#E8F2E5'),flex:1}}><Text style={{fontWeight:'800',color:'#28552B'}}>Delivery confirmed</Text></Pressable>
+          <Pressable disabled={!canOperate||!canFinance||!!busy} onPress={()=>resolveReport(r,'refund')} style={{...btn('#F7EAE8'),flex:1}}><Text style={{fontWeight:'800',color:'#8D3932'}}>Refund customer</Text></Pressable>
         </View>:null}
       </View>)}
     </>:null}
@@ -358,34 +400,34 @@ export function GoodiesAdminScreen() {
       <Text style={{fontSize:12,color:'#687365',marginBottom:10}}>Approve existing Wantiss accounts for Goodies courier work. Only approved couriers can go online, receive assignments, share GPS or accept COD.</Text>
       {busy==='couriers'||!couriersLoaded?<Text style={labelStyle}>Loading couriers…</Text>:!sectionErrors.Couriers&&!courierCandidates.length?<Text style={labelStyle}>No accounts found.</Text>:courierCandidates.map(person=><View key={person.courier_id} style={cardStyle}>
         <Text style={valueStyle}>{person.full_name||'Wantiss account'}</Text><Text style={labelStyle}>{person.phone_number||'No phone number'} · {person.courier_id}</Text>
-        <Pressable disabled={!!busy} onPress={()=>void setCourierAccess(person,!person.already_added)} style={btn(person.already_added?'#F7EAE8':'#E8F2E5')}><Text style={{fontWeight:'800',color:person.already_added?'#8D3932':'#28552B'}}>{busy===person.courier_id?'Saving…':person.already_added?'Remove courier access':'Approve as Goodies courier'}</Text></Pressable>
+        <Pressable disabled={!canOperate||!!busy} onPress={()=>void setCourierAccess(person,!person.already_added)} style={btn(person.already_added?'#F7EAE8':'#E8F2E5')}><Text style={{fontWeight:'800',color:person.already_added?'#8D3932':'#28552B'}}>{busy===person.courier_id?'Saving…':person.already_added?'Remove courier access':'Approve as Goodies courier'}</Text></Pressable>
       </View>)}
     </>:null}
     {module==='Delivery surcharge'?<>
       <View style={cardStyle}>
         <Text style={valueStyle}>Additional-store delivery fee (USD)</Text>
         <Text style={{fontSize:11,color:'#697466',marginTop:4}}>One flat fee for each additional store in a multi-store order. This amount is included in the final delivery price.</Text>
-        <TextInput value={additionalStoreFee} onChangeText={setAdditionalStoreFee} keyboardType="decimal-pad" style={{borderWidth:1,borderColor:'#DCE4D7',borderRadius:10,padding:11,marginTop:8,color:'#1B2619'}}/>
+        <TextInput editable={canOperate&&canFinance&&feesLoaded&&!loading&&!busy} value={additionalStoreFee} onChangeText={setAdditionalStoreFee} keyboardType="decimal-pad" style={{borderWidth:1,borderColor:'#DCE4D7',borderRadius:10,padding:11,marginTop:8,color:'#1B2619'}}/>
         <Text style={{...valueStyle,marginTop:14}}>Extra-distance rate per kilometre (USD)</Text>
-        <TextInput value={extraDistancePerKm} onChangeText={setExtraDistancePerKm} keyboardType="decimal-pad" style={{borderWidth:1,borderColor:'#DCE4D7',borderRadius:10,padding:11,marginTop:8,color:'#1B2619'}}/>
+        <TextInput editable={canOperate&&canFinance&&feesLoaded&&!loading&&!busy} value={extraDistancePerKm} onChangeText={setExtraDistancePerKm} keyboardType="decimal-pad" style={{borderWidth:1,borderColor:'#DCE4D7',borderRadius:10,padding:11,marginTop:8,color:'#1B2619'}}/>
         <Text style={{...valueStyle,marginTop:14}}>Maximum stores in one order</Text>
         <Text style={{fontSize:11,color:'#697466',marginTop:4}}>How many different stores a customer can combine in one order (1 to 8).</Text>
-        <TextInput value={maxStops} onChangeText={setMaxStops} keyboardType="number-pad" style={{borderWidth:1,borderColor:'#DCE4D7',borderRadius:10,padding:11,marginTop:8,color:'#1B2619'}}/>
+        <TextInput editable={canOperate&&canFinance&&feesLoaded&&!loading&&!busy} value={maxStops} onChangeText={setMaxStops} keyboardType="number-pad" style={{borderWidth:1,borderColor:'#DCE4D7',borderRadius:10,padding:11,marginTop:8,color:'#1B2619'}}/>
       </View>
       {switchRow('Enable additional-store surcharge','Apply the configured additional-store fee and extra-distance rate to eligible multi-store quotes.',additionalStoreSurchargeEnabled,setAdditionalStoreSurchargeEnabled)}
-      <Pressable disabled={!feesLoaded||loading||!!busy} onPress={()=>void saveDeliverySurcharge()} style={btn('#294E2C')}><Text style={{color:'#fff',fontWeight:'800'}}>{busy==='delivery-surcharge'?'Saving…':'Save and publish delivery surcharge'}</Text></Pressable>
+      <Pressable disabled={!canOperate||!canFinance||!feesLoaded||loading||!!busy} onPress={()=>void saveDeliverySurcharge()} style={btn('#294E2C')}><Text style={{color:'#fff',fontWeight:'800'}}>{busy==='delivery-surcharge'?'Saving…':'Save and publish delivery surcharge'}</Text></Pressable>
       <Text style={{fontSize:11,color:'#697466',marginTop:8}}>Saving publishes these delivery settings for new quotes.</Text>
     </>:null}
     {module==='Fees'?<>
       <View style={cardStyle}>
-        <Text style={valueStyle}>Service fee (USD)</Text><TextInput value={fee} onChangeText={setFee} keyboardType="decimal-pad" style={{borderWidth:1,borderColor:'#DCE4D7',borderRadius:10,padding:11,marginTop:8,color:'#1B2619'}}/>
-        <Text style={{...labelStyle,marginTop:12}}>Courier tip presets (comma-separated USD amounts)</Text><TextInput value={tips} onChangeText={setTips} style={{borderWidth:1,borderColor:'#DCE4D7',borderRadius:10,padding:11,color:'#1B2619'}}/>
+        <Text style={valueStyle}>Service fee (USD)</Text><TextInput editable={canOperate&&canFinance&&feesLoaded&&!loading&&!busy} value={fee} onChangeText={setFee} keyboardType="decimal-pad" style={{borderWidth:1,borderColor:'#DCE4D7',borderRadius:10,padding:11,marginTop:8,color:'#1B2619'}}/>
+        <Text style={{...labelStyle,marginTop:12}}>Courier tip presets (comma-separated USD amounts)</Text><TextInput editable={canOperate&&canFinance&&feesLoaded&&!loading&&!busy} value={tips} onChangeText={setTips} style={{borderWidth:1,borderColor:'#DCE4D7',borderRadius:10,padding:11,color:'#1B2619'}}/>
       </View>
       {switchRow('First order free delivery','Waive the delivery fee on the customer’s first Goodies order.',firstFree,setFirstFree)}
       {switchRow('Wantiss Wallet','Default Goodies payment method.',wallet,setWallet)}
       {switchRow('Credit / debit card','Enable saved-card checkout.',card,setCard)}
       {switchRow('Cash on delivery','Global switch only. Checkout also requires merchant and courier consent.',cash,setCash)}
-      <Pressable disabled={!feesLoaded||loading||!!busy} onPress={()=>void saveFees()} style={btn('#294E2C')}><Text style={{color:'#fff',fontWeight:'800'}}>{busy==='fees'?'Saving…':'Save live fee and payment policy'}</Text></Pressable>
+      <Pressable disabled={!canOperate||!canFinance||!feesLoaded||loading||!!busy} onPress={()=>void saveFees()} style={btn('#294E2C')}><Text style={{color:'#fff',fontWeight:'800'}}>{busy==='fees'?'Saving…':'Save live fee and payment policy'}</Text></Pressable>
       <Text style={{fontSize:11,color:'#697466',marginTop:8}}>MonCash checkout is currently unavailable. Cash orders require the merchant to accept cash payments.</Text>
     </>:null}
     {module==='Analytics'?<>

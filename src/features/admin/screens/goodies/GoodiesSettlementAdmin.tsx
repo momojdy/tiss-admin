@@ -1,4 +1,4 @@
-import {hasServerPermission} from '../../state/access';
+import {hasServerPermission,session} from '../../state/access';
 import {useDb} from '../../state/db';
 import React,{useCallback,useEffect,useRef,useState} from 'react';
 import {Pressable,Text,TextInput,View} from 'react-native';
@@ -7,6 +7,16 @@ const card={backgroundColor:'#fff',borderWidth:1,borderColor:'#E1E6DE',borderRad
 const button={padding:10,borderRadius:10,backgroundColor:'#E9EEE6',marginTop:8} as const;
 type Action={kind:string;id:string;decision:string;expected?:number;method?:string;enabled?:boolean};
 type Queue={channels:any[];destinations:any[];payouts:any[];cash_remittances:any[]};
+export function parseGoodiesSettlementQueue(value:unknown):Queue{
+ const data=value as Queue;
+ if(!data||!['channels','destinations','payouts','cash_remittances'].every(key=>Array.isArray((data as any)[key])))throw Error('Settlement queue unavailable');
+ const amount=(value:any)=>typeof value==='number'?Number.isFinite(value)&&value>=0:typeof value==='string'&&/^\d+(\.\d+)?$/.test(value)&&Number.isFinite(Number(value));
+ if(data.channels.some(row=>!row||typeof row.method!=='string'||typeof row.enabled!=='boolean')
+  ||data.destinations.some(row=>!row||typeof row.id!=='string'||typeof row.business_id!=='string'||typeof row.holder!=='string'||typeof row.masked!=='string')
+  ||data.payouts.some(row=>!row||typeof row.id!=='string'||!amount(row.amount)||Number(row.amount)<=0||!amount(row.payout_amount)||Number(row.payout_amount)<=0||typeof row.currency!=='string'||typeof row.payout_currency!=='string'||!Number.isFinite(Date.parse(row.eta_from))||!Number.isFinite(Date.parse(row.eta_to)))
+  ||data.cash_remittances.some(row=>!row||typeof row.id!=='string'||!amount(row.total)))throw Error('Settlement queue unavailable');
+ return data;
+}
 export function GoodiesSettlementAdmin(){
  useDb();const canManage=hasServerPermission('finance.approve','manage');
  const [data,setData]=useState<Queue|null>(null),[loading,setLoading]=useState(true),[error,setError]=useState(''),[page,setPage]=useState(0),[refresh,setRefresh]=useState(0);
@@ -14,16 +24,17 @@ export function GoodiesSettlementAdmin(){
  const [calendarCountry,setCalendarCountry]=useState('HT'),[calendarCoverage,setCalendarCoverage]=useState(''),[calendarDays,setCalendarDays]=useState('');
  const generation=useRef(0),active=useRef(true),lock=useRef(false);
  useEffect(()=>{active.current=true;return()=>{active.current=false;generation.current++;};},[]);
- const load=useCallback(async()=>{const request=++generation.current;setLoading(true);setError('');setData(null);try{const {data:next,error:failure}=await supabase.rpc('goodies_admin_settlement_queue',{p_offset:page*50,p_limit:50});if(failure||!next||!['channels','destinations','payouts','cash_remittances'].every(key=>Array.isArray(next[key])))throw Error('Unavailable');if(active.current&&request===generation.current)setData(next);}catch{if(active.current&&request===generation.current)setError('Goodies settlement operations are unavailable or you do not have finance access.');}finally{if(active.current&&request===generation.current)setLoading(false);}},[page,refresh]);
+ const load=useCallback(async()=>{const request=++generation.current,owner=session.userId;const current=()=>active.current&&request===generation.current&&session.userId===owner;setLoading(true);setError('');setData(null);try{const {data:next,error:failure}=await supabase.rpc('goodies_admin_settlement_queue',{p_offset:page*50,p_limit:50});if(failure)throw Error('Unavailable');const parsed=parseGoodiesSettlementQueue(next);if(current())setData(parsed);}catch{if(current())setError('Goodies settlement operations are unavailable or you do not have finance access.');}finally{if(current())setLoading(false);}},[page,refresh,session.userId]);
  useEffect(()=>{void load();},[load]);
+ useEffect(()=>{setAction(null);setDetails(null);setReason('');setReference('');setAmount('');},[session.userId,canManage]);
  const select=(next:Action)=>{setAction(next);setReason('');setReference('');setAmount('');setDetails(null);setError('');};
  const receipt=action?.kind==='cash_remittance'||action?.kind==='payout'&&(action.decision==='completed'||action.decision==='failed');
  const needsAmount=action?.kind==='cash_remittance'||action?.kind==='payout'&&action.decision==='completed';
  const valid=canManage&&!!action&&(action.kind!=='calendar'||(/^(HT|PH|US)$/.test(calendarCountry)&&/^\d{4}-\d{2}-\d{2}$/.test(calendarCoverage)))&&reason.trim().length>=10&&reason.length<=500&&(!receipt||reference.trim().length>=6)&&(!needsAmount||(/^\d+(\.\d{1,2})?$/.test(amount)&&Number(amount)===action.expected));
- const submit=async()=>{if(!action||!valid||lock.current)return;const chosen=action;lock.current=true;setBusy(true);setError('');try{
-  if(chosen.kind==='details'){const response=await supabase.rpc('goodies_admin_destination_details',{p_destination:chosen.id,p_reason:reason});if(response.error||!response.data)throw Error('Unavailable');if(active.current)setDetails(response.data);}
-  else {const response=chosen.kind==='calendar'?await supabase.rpc('goodies_admin_set_bank_calendar',{p_country:calendarCountry,p_reviewed_until:calendarCoverage,p_holidays:calendarDays.split(',').map(value=>value.trim()).filter(Boolean),p_reason:reason}):chosen.kind==='channel'?await supabase.rpc('goodies_admin_set_payout_channel',{p_method:chosen.method,p_enabled:chosen.enabled,p_reason:reason}):await supabase.rpc('goodies_admin_settlement_action',{p_kind:chosen.kind,p_id:chosen.id,p_decision:chosen.decision,p_reference:reference||null,p_reason:reason,p_amount:needsAmount?Number(amount):null});if(response.error)throw Error('Unavailable');if(active.current){setAction(null);setDetails(null);setRefresh(value=>value+1);}}
- }catch{if(active.current)setError('Could not record this action. Check the current status and details before retrying.');}finally{lock.current=false;if(active.current)setBusy(false);}};
+ const submit=async()=>{if(!action||!valid||lock.current)return;const chosen=action,owner=session.userId;const current=()=>active.current&&session.userId===owner;lock.current=true;setBusy(true);setError('');try{
+  if(chosen.kind==='details'){const response=await supabase.rpc('goodies_admin_destination_details',{p_destination:chosen.id,p_reason:reason});if(response.error||!response.data)throw Error('Unavailable');if(current())setDetails(response.data);}
+  else {const response=chosen.kind==='calendar'?await supabase.rpc('goodies_admin_set_bank_calendar',{p_country:calendarCountry,p_reviewed_until:calendarCoverage,p_holidays:calendarDays.split(',').map(value=>value.trim()).filter(Boolean),p_reason:reason}):chosen.kind==='channel'?await supabase.rpc('goodies_admin_set_payout_channel',{p_method:chosen.method,p_enabled:chosen.enabled,p_reason:reason}):await supabase.rpc('goodies_admin_settlement_action',{p_kind:chosen.kind,p_id:chosen.id,p_decision:chosen.decision,p_reference:reference||null,p_reason:reason,p_amount:needsAmount?Number(amount):null});if(response.error)throw Error('Unavailable');if(current()){setAction(null);setDetails(null);setRefresh(value=>value+1);}}
+ }catch{if(current())setError('Could not record this action. Check the current status and details before retrying.');}finally{lock.current=false;if(current())setBusy(false);}};
  return <View>
   <Text style={{fontWeight:'800',fontSize:18,marginBottom:10}}>Goodies settlement</Text>
   <Text style={{color:'#687365',marginBottom:10}}>Record external transfers only after verifying payment or definitive failure. Uncertain transfers must remain processing.</Text>

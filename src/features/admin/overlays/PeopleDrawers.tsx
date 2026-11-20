@@ -1,7 +1,7 @@
 import {permissionKey} from '../state/permissionKeys';
 import { useEffect, useState } from 'react';
 import { Pressable, Switch, View } from 'react-native';
-import { bump, db, mny, TODAY, useDb } from '../state/db';
+import { adminSnapshotStatus, bump, db, mny, TODAY, useDb } from '../state/db';
 import { acs, can, effOf, expireStaff, LN, needs, nm, RIGHTS, session, staffByName } from '../state/access';
 import { liveGrantsFor } from '../state/grants';
 import { REQ, useGuard } from '../state/requirements';
@@ -22,6 +22,7 @@ import { useNav } from '../shell/Nav';
 import { inviteStaff as inviteStaffBackend, setStaffStatus as setStaffStatusBackend, grantStaffPermission as grantStaffPermissionBackend, revokeStaffPermission as revokeStaffPermissionBackend, listPermissionGrants, applyAccountRestriction as applyAccountRestrictionBackend, liftAccountRestriction as liftAccountRestrictionBackend, updateAccountRestriction as updateAccountRestrictionBackend } from '../lib/adminBackend';
 import { hydrateAdminState } from '../lib/hydrateAdminState';
 import { StaffGrants } from './GrantDrawers';
+import { AdminSnapshotBoundary } from '../ui/AdminSnapshotBoundary';
 import { drawers, useReopen } from './registry';
 import type { Restriction } from '../data/types';
 
@@ -250,6 +251,7 @@ export function AccountDrawer({ id, close }: { id: string; close: () => void }) 
   const reopen = useReopen();
   const { closeAll } = useOverlay();
   const { c } = useTheme();
+  if (adminSnapshotStatus.restrictions === 'loading' || adminSnapshotStatus.restrictions === 'error') return <DrawerBody title="Account restrictions" onClose={close}><AdminSnapshotBoundary domain="restrictions" /></DrawerBody>;
   if (!a) return null;
   const s = accStatus(a);
   const canSusp = can(...REQ.pause), canBan = can(...REQ.ban);

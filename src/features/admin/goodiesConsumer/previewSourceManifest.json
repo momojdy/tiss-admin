@@ -33,7 +33,7 @@
       "origins": [
         {
           "file": "src/features/Goodies/actions.ts",
-          "sha256": "d88271106a647cdb85c5cbb7a3461a36fb7a5dfb80fcf400438fa04a4657097e"
+          "sha256": "c50db1e71e1749b6e8c0d81bf9a2682c41919ee312009e8d65f54957f457d881"
         }
       ]
     },
@@ -96,7 +96,7 @@
       "origins": [
         {
           "file": "src/features/Goodies/components/Sheets.tsx",
-          "sha256": "8d3adc369d19983cc86a4d46d05a637f97908deeb376ce8b98953a35b11b6c4e"
+          "sha256": "3f5f829f7e61315b963915e31ac87c673c4ec58c2634a3f9b153b846555ff559"
         }
       ]
     },
@@ -124,6 +124,15 @@
         {
           "file": "src/features/Goodies/content.ts",
           "sha256": "f4e50e7af6221495dc3b13b85274d2357619abb5854a79ba6985f9098a45d2e9"
+        }
+      ]
+    },
+    {
+      "target": "courierNavigation.ts",
+      "origins": [
+        {
+          "file": "src/features/Goodies/courierNavigation.ts",
+          "sha256": "e1a18517c182f3871ca6aa617babdf22c2780b397e641fb3d036ee32a979a99c"
         }
       ]
     },
@@ -159,7 +168,7 @@
       "origins": [
         {
           "file": "src/features/Goodies/deliveryTracking.ts",
-          "sha256": "ffb0f3ad2aac9603dcd5d93e1997fe58c47ea09cc716a681d029e9ea15bcf796"
+          "sha256": "2807c091d11a19554070feffc2b3446b807c6190789147d73777ab35f7b6e413"
         }
       ]
     },
@@ -195,7 +204,7 @@
       "origins": [
         {
           "file": "src/features/Goodies/i18n/dict.ts",
-          "sha256": "7fdff4a1da4f8dcfbd9ce7d6d67079fa4a9548ffb58b9fee5bfe710897b7081c"
+          "sha256": "e70ee3d161e7b1d65908b4193b2a4cebc6739c526b71b6436a1f85fe914a2606"
         }
       ]
     },
@@ -267,7 +276,7 @@
       "origins": [
         {
           "file": "src/features/Goodies/screens/Account.tsx",
-          "sha256": "1ffe3db707f831a291f61e65fefb5e65094b809f4479839778b970a56e2ee1aa"
+          "sha256": "ff385a4ccdce8002b00e59960bf643db8de9b1535825c6708b7fa883222ce385"
         }
       ]
     },
@@ -276,7 +285,7 @@
       "origins": [
         {
           "file": "src/features/Goodies/screens/Browse.tsx",
-          "sha256": "a743dd2e0e5530f87cc87b03b5d15ff1cfc117aad7977ba1c947f0990f682f54"
+          "sha256": "81cf186d0c825b5d3a35dbdd07476a994df0bb187b22b779881d46b8a4285723"
         }
       ]
     },
@@ -303,7 +312,7 @@
       "origins": [
         {
           "file": "src/features/Goodies/screens/Payments.tsx",
-          "sha256": "4fd791b79edd4d8face4908dd52cd559cb35e912ebabd264d44491b61a3f4801"
+          "sha256": "bc9df4c4419721b7287d8a58ab42d401f7e30193fa7096bb56e28c875bec52a6"
         }
       ]
     },
@@ -312,7 +321,7 @@
       "origins": [
         {
           "file": "src/features/Goodies/screens/Shop.tsx",
-          "sha256": "456a56b9ac9fcdbe00ae373ce853038abb7755bdfad7047b8f2a53600a74357f"
+          "sha256": "8f955dc846138b261e48f9df4520d650f352b229f039f0022073d64adb216211"
         }
       ]
     },
@@ -330,7 +339,7 @@
       "origins": [
         {
           "file": "src/features/Goodies/store.ts",
-          "sha256": "2e3462c39ad22bf6f0a1f83a0eee8708bff8e1d55b7050b722e888e6ca443748"
+          "sha256": "827ebd9ad5b908200f6222fec6b277a3018677cbb1ee23785a4483c7b8a18f45"
         }
       ]
     },
@@ -393,7 +402,7 @@
       "origins": [
         {
           "file": "src/screens/Wallet/WalletHelpPayScreen.tsx",
-          "sha256": "f3882968b614a5c9fa1b28ac75941e0bd93ca63d6f9468826db5ecc131848a34"
+          "sha256": "0b378402ed68cd61db77fdfe1ab959b8cd04a6da8253907dd023216d9ea68ca6"
         }
       ]
     },

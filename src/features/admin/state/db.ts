@@ -10,6 +10,10 @@ import type {
 
 /** The in-memory data snapshot. It is cloned from prototype fixtures until a live authorized backend populates it. */
 export let dataMode: 'prototype' | 'live' = 'prototype';
+export type AdminSnapshotDomain = 'operations' | 'ecosystem' | 'restrictions';
+export const adminSnapshotStatus: Record<AdminSnapshotDomain, 'idle' | 'loading' | 'ready' | 'error'> = {
+  operations: 'idle', ecosystem: 'idle', restrictions: 'idle',
+};
 export const db = Object.assign(clone(seed), { BIZ: [] as BusinessSnapshot[] }) as unknown as {
   APPS: Application[]; INV: Transaction[]; SVC: ServiceRow[]; BIZ: BusinessSnapshot[]; MOD: Record<string, string>; STAFF: StaffMember[];
   ROLES: Record<string, number[]>; RR: Record<string, string[]>; SEC: string[]; LV: string[];

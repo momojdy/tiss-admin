@@ -1,7 +1,7 @@
 /* Actual customer Help screen inside the existing isolated CMS preview. No publishing or external requests. */
 const fs=require('node:fs'),path=require('node:path'),assert=require('node:assert/strict'),{chromium}=require('playwright');
 const payload=require(path.resolve(__dirname,'../../../../../tiss_tiss_beta/docs/goodies/content-acceptance-release/publish-payload.json'));
-const out=path.resolve(__dirname,'../../acceptance-20261117');
+const out=process.env.GOODIES_PREVIEW_RECEIPT_DIR?path.resolve(process.env.GOODIES_PREVIEW_RECEIPT_DIR):path.resolve(__dirname,'../../acceptance-20261117');
 const {sha}=require(path.resolve(__dirname,'../../../../../tiss_tiss_beta/scripts/prepare-goodies-translations.cjs'));
 const text=(value,locale)=>value[locale]?.s==='reviewed'&&value[locale]?.v?value[locale].v:value.en.v;
 let browser;

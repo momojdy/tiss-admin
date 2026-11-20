@@ -1,0 +1,5074 @@
+{
+  "generatedAt": "2026-11-18T10:15:05.028Z",
+  "repository": "momojdy/tiss-admin",
+  "branch": "main",
+  "baselineCommit": "cbc71c2416489bcb6eea6c2e4dbdd34c5dbbb98d",
+  "sourceState": "Reviewed working tree; root owns final commit, central mirror sync and final combined tests.",
+  "productionWritesPerformed": false,
+  "ui": "Existing components/layout preserved. Necessary permission/loading/error/retry/pagination/navigation repairs only.",
+  "classificationRules": {
+    "PASS": "Only the stated local execution or source assertion passed.",
+    "FAIL": "A current executed check reproduced a defect.",
+    "NOT_VERIFIED": "The required hosted/provider/device acceptance was not run."
+  },
+  "typecheck": {
+    "command": "npm run typecheck",
+    "classification": "PASS",
+    "log": "logs/admin-typecheck.log.gz"
+  },
+  "testRuns": [
+    {
+      "command": "node tests/goodies-admin-recovery.test.cjs",
+      "classification": "PASS",
+      "scope": "Executed local actual-handler/source fixtures with synthetic transports; no hosted production writes",
+      "count": 30,
+      "tests": [
+        "successful CMS publication remains published when public readback fails",
+        "a lost CMS publication response is reported as unconfirmed and requires reload",
+        "same-tick CMS publication taps issue one write and disabled/loading editors issue none",
+        "same-tick draft saves issue one write and preserve readback uncertainty",
+        "deferred asset picking keeps the original field and locks duplicate picker calls",
+        "delayed edits preserve the latest draft instead of overwriting intervening changes",
+        "builders with the same store-scoped ID resolve to the intended merchant and save original protocol IDs",
+        "shared Goodies onboarding, restriction and CMS RPCs hide returned and thrown server details",
+        "courier removal with a picked-up delivery shows the owned action message",
+        "failed operations, business and restriction RPCs render an honest retry state instead of empty success",
+        "retrying the real snapshot boundary recovers the successful list after a failed load",
+        "late snapshot responses cannot overwrite a newer load or a different admin session",
+        "operational and financial handlers reject insufficient grants before alerts or writes",
+        "fee inputs reject malformed tip presets and fractional stop limits without publishing a different policy",
+        "a late operational page cannot replace a newer page or data for a new admin",
+        "invalid financial responses never become a displayed zero or settlement amount",
+        "same-tick operational taps dispatch once and late responses do not update a different admin",
+        "saved confirmation dialogs cannot mutate after switching admin accounts",
+        "malformed review pages show an error and late pages do not replace current account data",
+        "an uncertain CMS asset-record response preserves the successfully uploaded object",
+        "a builder image picker runs once and keeps the selected merchant scope",
+        "settlement reads and destination responses cannot expose the previous admin session",
+        "ingredient asset IDs do not require a native global Web Crypto API",
+        "ingredient decisions require an explanatory note and asset permission where needed",
+        "ingredient photo actions lock the whole picker and preserve the submitted name",
+        "builder ingredient choices load requests beyond the old cap and reject overlapping pages",
+        "ingredient request filtering is applied by the backend before paging and stale responses are ignored",
+        "every advertised Goodies hub module opens its connected destination rather than a stale or placeholder tab",
+        "Goodies support pages use the shared real inbox and ignore stale page or account responses",
+        "support status writes lock duplicate taps and require one confirmed Goodies ticket"
+      ],
+      "log": "logs/admin-recovery.log.gz"
+    },
+    {
+      "command": "node tests/goodies-navigation.test.cjs",
+      "classification": "PASS",
+      "scope": "Executed local actual-handler/source fixtures with synthetic transports; no hosted production writes",
+      "count": 4,
+      "tests": [
+        "every listed Goodies workspace section opens a supported live admin module",
+        "Goodies support, categories, promotions and settings do not fall into the prototype workspace",
+        "an unknown Goodies module fails safely to Overview rather than another service",
+        "admin invitation acceptance uses server-owned staff state, never editable user metadata"
+      ],
+      "log": "logs/admin-navigation.log.gz"
+    },
+    {
+      "command": "node tests/settlement.test.cjs",
+      "classification": "PASS",
+      "scope": "Executed local actual-handler/source fixtures with synthetic transports; no hosted production writes",
+      "count": 2,
+      "tests": [
+        "financial confirmation validates the transferred currency amount and requires receipt evidence",
+        "admin settlement actions send exact receipt amounts and never expose backend errors"
+      ],
+      "log": "logs/admin-settlement.log.gz"
+    },
+    {
+      "command": "node tests/shared-bill-refunds.test.cjs",
+      "classification": "PASS",
+      "scope": "Executed local actual-handler/source fixtures with synthetic transports; no hosted production writes",
+      "count": 5,
+      "tests": [
+        "Shared Bill refund parsing rejects corrupt amounts rather than displaying zero",
+        "Shared Bill refund retry needs finance permission and a review reason before dispatch",
+        "Shared Bill refund retry uses a synchronous lock and reports a pending refund accurately",
+        "Shared Bill refund failures and stale list responses cannot expose private server details",
+        "a refund retry response cannot update a different signed-in admin"
+      ],
+      "log": "logs/admin-shared-refunds.log.gz"
+    }
+  ],
+  "pendingFinalIntegration": [],
+  "notVerified": [
+    "Every hosted signed-in admin control and cross-role permission path",
+    "Production SQL/RLS deployment and hosted acceptance (root owns backend review)",
+    "CMS publication through installed-customer reload; FAQ/legal publishing deferred",
+    "Signed builds and real device file-picker behavior",
+    "External transfer/provider execution and financial reconciliation"
+  ],
+  "inventory": {
+    "files": 31,
+    "controls": 425,
+    "rpcCallSites": 51,
+    "navigationCallSites": 50,
+    "commentTokens": 54
+  },
+  "files": [
+    {
+      "file": "src/features/admin/screens/goodies/GoodiesAdminScreen.tsx",
+      "sha256": "035b3828e7328601ad4a36471d829951323f211cfb826683d0341eb1767ee5ca",
+      "lines": 447,
+      "commentTokens": 0,
+      "controls": [
+        {
+          "line": 194,
+          "owner": "resolveReport",
+          "component": "Object-based control/form/list action",
+          "event": "onPress",
+          "handler": "()=>{if(session.userId!==owner)return;void runMutation(item.order_id,async current=>{\n        const {error}=await goodiesRequest('goodies_admin_resolve_delivery_dispute',{p_order_id:item.order_id,p_resolution:resolution});\n        if(!current())return;\n        if(error){toast('Could not save this de",
+          "verification": "SOURCE_TRACE; hosted activation NOT VERIFIED"
+        },
+        {
+          "line": 254,
+          "owner": "cancelOrder",
+          "component": "Object-based control/form/list action",
+          "event": "onPress",
+          "handler": "()=>{if(session.userId!==owner)return;void runMutation(item.id,async current=>{\n        const {error}=await goodiesRequest('goodies_admin_cancel_order',{p_order_id:item.id,p_reason:'The order was cancelled by Wantiss support.'});\n        if(!current())return;\n        if(error)toast('Could not comple",
+          "verification": "SOURCE_TRACE; hosted activation NOT VERIFIED"
+        },
+        {
+          "line": 305,
+          "owner": "switchRow",
+          "component": "Pressable",
+          "event": "onPress",
+          "handler": "{()=>{if(canOperate&&canFinance)set(!on);}}",
+          "disabled": "{!canOperate||!canFinance||!feesLoaded||loading||!!busy}",
+          "verification": "SOURCE_TRACE; hosted activation NOT VERIFIED"
+        },
+        {
+          "line": 310,
+          "owner": "GoodiesAdminScreen",
+          "component": "Pressable",
+          "event": "onPress",
+          "handler": "{()=>void reload()}",
+          "disabled": null,
+          "verification": "SOURCE_TRACE; hosted activation NOT VERIFIED"
+        },
+        {
+          "line": 313,
+          "owner": "GoodiesAdminScreen",
+          "component": "Pressable",
+          "event": "onPress",
+          "handler": "{()=>setModule(x)}",
+          "disabled": null,
+          "verification": "SOURCE_TRACE; hosted activation NOT VERIFIED"
+        },
+        {
+          "line": 315,
+          "owner": "GoodiesAdminScreen",
+          "component": "Pressable",
+          "event": "onPress",
+          "handler": "{()=>void (module==='Analytics'?loadAnalytics():module==='Couriers'?loadCouriers():module==='Orders'?loadOrderPage():loadReports())}",
+          "disabled": null,
+          "verification": "SOURCE_TRACE; hosted activation NOT VERIFIED"
+        },
+        {
+          "line": 317,
+          "owner": "GoodiesAdminScreen",
+          "component": "TextInput",
+          "event": "onChangeText",
+          "handler": "{reason=>setRejection({...rejection,reason})}",
+          "disabled": null,
+          "verification": "SOURCE_TRACE; hosted activation NOT VERIFIED"
+        },
+        {
+          "line": 317,
+          "owner": "GoodiesAdminScreen",
+          "component": "Pressable",
+          "event": "onPress",
+          "handler": "{()=>setRejection(null)}",
+          "disabled": "{!canOperate||!!busy}",
+          "verification": "SOURCE_TRACE; hosted activation NOT VERIFIED"
+        },
+        {
+          "line": 317,
+          "owner": "GoodiesAdminScreen",
+          "component": "Pressable",
+          "event": "onPress",
+          "handler": "{()=>void reviewProduct(rejection.item,'rejected',rejection.reason)}",
+          "disabled": "{!canOperate||!!busy||!rejection.reason.trim()}",
+          "verification": "SOURCE_TRACE; hosted activation NOT VERIFIED"
+        },
+        {
+          "line": 326,
+          "owner": "GoodiesAdminScreen",
+          "component": "Pressable",
+          "event": "onPress",
+          "handler": "{()=>go('editor',{editorFeature:'Goodies'})}",
+          "disabled": null,
+          "verification": "SOURCE_TRACE; hosted activation NOT VERIFIED"
+        },
+        {
+          "line": 333,
+          "owner": "GoodiesAdminScreen",
+          "component": "Pressable",
+          "event": "onPress",
+          "handler": "{()=>void setMerchant(m)}",
+          "disabled": "{!canOperate||busy===m.business_id}",
+          "verification": "SOURCE_TRACE; hosted activation NOT VERIFIED"
+        },
+        {
+          "line": 342,
+          "owner": "GoodiesAdminScreen",
+          "component": "Pressable",
+          "event": "onPress",
+          "handler": "{()=>void reviewProduct(p,'approved')}",
+          "disabled": "{!canOperate||!!busy}",
+          "verification": "SOURCE_TRACE; hosted activation NOT VERIFIED"
+        },
+        {
+          "line": 342,
+          "owner": "GoodiesAdminScreen",
+          "component": "Pressable",
+          "event": "onPress",
+          "handler": "{()=>setRejection({item:p,reason:''})}",
+          "disabled": "{!canOperate||!!busy}",
+          "verification": "SOURCE_TRACE; hosted activation NOT VERIFIED"
+        },
+        {
+          "line": 346,
+          "owner": "GoodiesAdminScreen",
+          "component": "Pressable",
+          "event": "onPress",
+          "handler": "{()=>setReviewsAttempt(n=>n+1)}",
+          "disabled": null,
+          "verification": "SOURCE_TRACE; hosted activation NOT VERIFIED"
+        },
+        {
+          "line": 347,
+          "owner": "GoodiesAdminScreen",
+          "component": "Pressable",
+          "event": "onPress",
+          "handler": "{()=>void reviewCustomerRating(r,'approved')}",
+          "disabled": "{!!busy}",
+          "verification": "SOURCE_TRACE; hosted activation NOT VERIFIED"
+        },
+        {
+          "line": 347,
+          "owner": "GoodiesAdminScreen",
+          "component": "Pressable",
+          "event": "onPress",
+          "handler": "{()=>{setReviewRejectId(r.id);setReviewRejectNote('');}}",
+          "disabled": "{!!busy}",
+          "verification": "SOURCE_TRACE; hosted activation NOT VERIFIED"
+        },
+        {
+          "line": 348,
+          "owner": "GoodiesAdminScreen",
+          "component": "TextInput",
+          "event": "onChangeText",
+          "handler": "{setReviewRejectNote}",
+          "disabled": null,
+          "verification": "SOURCE_TRACE; hosted activation NOT VERIFIED"
+        },
+        {
+          "line": 348,
+          "owner": "GoodiesAdminScreen",
+          "component": "Pressable",
+          "event": "onPress",
+          "handler": "{()=>void reviewCustomerRating(r,'rejected',reviewRejectNote)}",
+          "disabled": "{!!busy||!reviewRejectNote.trim()}",
+          "verification": "SOURCE_TRACE; hosted activation NOT VERIFIED"
+        },
+        {
+          "line": 348,
+          "owner": "GoodiesAdminScreen",
+          "component": "Pressable",
+          "event": "onPress",
+          "handler": "{()=>setReviewRejectId(null)}",
+          "disabled": "{!!busy}",
+          "verification": "SOURCE_TRACE; hosted activation NOT VERIFIED"
+        },
+        {
+          "line": 349,
+          "owner": "GoodiesAdminScreen",
+          "component": "Pressable",
+          "event": "onPress",
+          "handler": "{()=>setReviewsPage(n=>n-1)}",
+          "disabled": "{reviewsPage===0||reviewsLoading}",
+          "verification": "SOURCE_TRACE; hosted activation NOT VERIFIED"
+        },
+        {
+          "line": 349,
+          "owner": "GoodiesAdminScreen",
+          "component": "Pressable",
+          "event": "onPress",
+          "handler": "{()=>setReviewsPage(n=>n+1)}",
+          "disabled": "{customerReviews.length<50||reviewsLoading}",
+          "verification": "SOURCE_TRACE; hosted activation NOT VERIFIED"
+        },
+        {
+          "line": 353,
+          "owner": "GoodiesAdminScreen",
+          "component": "Pressable",
+          "event": "onPress",
+          "handler": "{()=>void loadSupportTickets()}",
+          "disabled": null,
+          "verification": "SOURCE_TRACE; hosted activation NOT VERIFIED"
+        },
+        {
+          "line": 359,
+          "owner": "GoodiesAdminScreen",
+          "component": "Pressable",
+          "event": "onPress",
+          "handler": "{()=>void updateSupportTicket(ticket.id,'in_progress')}",
+          "disabled": "{!!busy}",
+          "verification": "SOURCE_TRACE; hosted activation NOT VERIFIED"
+        },
+        {
+          "line": 360,
+          "owner": "GoodiesAdminScreen",
+          "component": "Pressable",
+          "event": "onPress",
+          "handler": "{()=>void updateSupportTicket(ticket.id,'resolved')}",
+          "disabled": "{!!busy}",
+          "verification": "SOURCE_TRACE; hosted activation NOT VERIFIED"
+        },
+        {
+          "line": 360,
+          "owner": "GoodiesAdminScreen",
+          "component": "Pressable",
+          "event": "onPress",
+          "handler": "{()=>void updateSupportTicket(ticket.id,'open')}",
+          "disabled": "{!!busy}",
+          "verification": "SOURCE_TRACE; hosted activation NOT VERIFIED"
+        },
+        {
+          "line": 364,
+          "owner": "GoodiesAdminScreen",
+          "component": "Pressable",
+          "event": "onPress",
+          "handler": "{()=>setSupportPage(n=>Math.max(0,n-1))}",
+          "disabled": "{supportPage===0||!supportLoaded||!!busy}",
+          "verification": "SOURCE_TRACE; hosted activation NOT VERIFIED"
+        },
+        {
+          "line": 365,
+          "owner": "GoodiesAdminScreen",
+          "component": "Pressable",
+          "event": "onPress",
+          "handler": "{()=>setSupportPage(n=>n+1)}",
+          "disabled": "{!supportLoaded||supportRows.length<50||!!busy}",
+          "verification": "SOURCE_TRACE; hosted activation NOT VERIFIED"
+        },
+        {
+          "line": 376,
+          "owner": "GoodiesAdminScreen",
+          "component": "Pressable",
+          "event": "onPress",
+          "handler": "{()=>cancelOrder(o)}",
+          "disabled": "{!canOperate||busy===o.id}",
+          "verification": "SOURCE_TRACE; hosted activation NOT VERIFIED"
+        },
+        {
+          "line": 379,
+          "owner": "GoodiesAdminScreen",
+          "component": "Pressable",
+          "event": "onPress",
+          "handler": "{()=>setOrderPage(p=>p-1)}",
+          "disabled": "{orderPage===0||!!busy}",
+          "verification": "SOURCE_TRACE; hosted activation NOT VERIFIED"
+        },
+        {
+          "line": 379,
+          "owner": "GoodiesAdminScreen",
+          "component": "Pressable",
+          "event": "onPress",
+          "handler": "{()=>setOrderPage(p=>p+1)}",
+          "disabled": "{orderRows.length<100||!!busy}",
+          "verification": "SOURCE_TRACE; hosted activation NOT VERIFIED"
+        },
+        {
+          "line": 380,
+          "owner": "GoodiesAdminScreen",
+          "component": "Pressable",
+          "event": "onPress",
+          "handler": "{()=>setCourierPage(p=>p-1)}",
+          "disabled": "{courierPage===0||!!busy}",
+          "verification": "SOURCE_TRACE; hosted activation NOT VERIFIED"
+        },
+        {
+          "line": 380,
+          "owner": "GoodiesAdminScreen",
+          "component": "Pressable",
+          "event": "onPress",
+          "handler": "{()=>setCourierPage(p=>p+1)}",
+          "disabled": "{courierCandidates.length<100||!!busy}",
+          "verification": "SOURCE_TRACE; hosted activation NOT VERIFIED"
+        },
+        {
+          "line": 394,
+          "owner": "GoodiesAdminScreen",
+          "component": "Pressable",
+          "event": "onPress",
+          "handler": "{()=>resolveReport(r,'release')}",
+          "disabled": "{!canOperate||!canFinance||!!busy}",
+          "verification": "SOURCE_TRACE; hosted activation NOT VERIFIED"
+        },
+        {
+          "line": 395,
+          "owner": "GoodiesAdminScreen",
+          "component": "Pressable",
+          "event": "onPress",
+          "handler": "{()=>resolveReport(r,'refund')}",
+          "disabled": "{!canOperate||!canFinance||!!busy}",
+          "verification": "SOURCE_TRACE; hosted activation NOT VERIFIED"
+        },
+        {
+          "line": 403,
+          "owner": "GoodiesAdminScreen",
+          "component": "Pressable",
+          "event": "onPress",
+          "handler": "{()=>void setCourierAccess(person,!person.already_added)}",
+          "disabled": "{!canOperate||!!busy}",
+          "verification": "SOURCE_TRACE; hosted activation NOT VERIFIED"
+        },
+        {
+          "line": 410,
+          "owner": "GoodiesAdminScreen",
+          "component": "TextInput",
+          "event": "onChangeText",
+          "handler": "{setAdditionalStoreFee}",
+          "disabled": null,
+          "verification": "SOURCE_TRACE; hosted activation NOT VERIFIED"
+        },
+        {
+          "line": 412,
+          "owner": "GoodiesAdminScreen",
+          "component": "TextInput",
+          "event": "onChangeText",
+          "handler": "{setExtraDistancePerKm}",
+          "disabled": null,
+          "verification": "SOURCE_TRACE; hosted activation NOT VERIFIED"
+        },
+        {
+          "line": 415,
+          "owner": "GoodiesAdminScreen",
+          "component": "TextInput",
+          "event": "onChangeText",
+          "handler": "{setMaxStops}",
+          "disabled": null,
+          "verification": "SOURCE_TRACE; hosted activation NOT VERIFIED"
+        },
+        {
+          "line": 418,
+          "owner": "GoodiesAdminScreen",
+          "component": "Pressable",
+          "event": "onPress",
+          "handler": "{()=>void saveDeliverySurcharge()}",
+          "disabled": "{!canOperate||!canFinance||!feesLoaded||loading||!!busy}",
+          "verification": "SOURCE_TRACE; hosted activation NOT VERIFIED"
+        },
+        {
+          "line": 423,
+          "owner": "GoodiesAdminScreen",
+          "component": "TextInput",
+          "event": "onChangeText",
+          "handler": "{setFee}",
+          "disabled": null,
+          "verification": "SOURCE_TRACE; hosted activation NOT VERIFIED"
+        },
+        {
+          "line": 424,
+          "owner": "GoodiesAdminScreen",
+          "component": "TextInput",
+          "event": "onChangeText",
+          "handler": "{setTips}",
+          "disabled": null,
+          "verification": "SOURCE_TRACE; hosted activation NOT VERIFIED"
+        },
+        {
+          "line": 430,
+          "owner": "GoodiesAdminScreen",
+          "component": "Pressable",
+          "event": "onPress",
+          "handler": "{()=>void saveFees()}",
+          "disabled": "{!canOperate||!canFinance||!feesLoaded||loading||!!busy}",
+          "verification": "SOURCE_TRACE; hosted activation NOT VERIFIED"
+        },
+        {
+          "line": 434,
+          "owner": "GoodiesAdminScreen",
+          "component": "Pressable",
+          "event": "onPress",
+          "handler": "{()=>void loadAnalytics()}",
+          "disabled": null,
+          "verification": "SOURCE_TRACE; hosted activation NOT VERIFIED"
+        },
+        {
+          "line": 442,
+          "owner": "GoodiesAdminScreen",
+          "component": "Pressable",
+          "event": "onPress",
+          "handler": "{()=>go('editor',{editorFeature:'Goodies'})}",
+          "disabled": null,
+          "verification": "SOURCE_TRACE; hosted activation NOT VERIFIED"
+        }
+      ],
+      "rpc": [
+        {
+          "line": 91,
+          "owner": "GoodiesAdminScreen",
+          "name": "goodies_admin_dashboard"
+        },
+        {
+          "line": 117,
+          "owner": "loadCouriers",
+          "name": "goodies_admin_courier_candidates_page"
+        },
+        {
+          "line": 126,
+          "owner": "loadOrderPage",
+          "name": "goodies_admin_orders_page"
+        },
+        {
+          "line": 165,
+          "owner": "loadReports",
+          "name": "goodies_admin_list_delivery_reports"
+        },
+        {
+          "line": 182,
+          "owner": "reviewCustomerRating",
+          "name": "goodies_admin_review_order_review"
+        },
+        {
+          "line": 195,
+          "owner": "resolveReport",
+          "name": "goodies_admin_resolve_delivery_dispute"
+        },
+        {
+          "line": 227,
+          "owner": "loadAnalytics",
+          "name": "goodies_admin_analytics"
+        },
+        {
+          "line": 235,
+          "owner": "loadCustomerReviews",
+          "name": "goodies_admin_list_reviews"
+        },
+        {
+          "line": 244,
+          "owner": "setMerchant",
+          "name": "goodies_admin_set_merchant_status"
+        },
+        {
+          "line": 255,
+          "owner": "cancelOrder",
+          "name": "goodies_admin_cancel_order"
+        },
+        {
+          "line": 266,
+          "owner": "reviewProduct",
+          "name": "goodies_admin_review_product"
+        },
+        {
+          "line": 280,
+          "owner": "saveFees",
+          "name": "goodies_admin_update_fee_policy"
+        },
+        {
+          "line": 294,
+          "owner": "saveDeliverySurcharge",
+          "name": "goodies_admin_update_multi_store_policy"
+        }
+      ],
+      "navigation": [
+        {
+          "line": 326,
+          "owner": "GoodiesAdminScreen",
+          "target": "editor",
+          "registered": true,
+          "verification": "SOURCE_TRACE"
+        },
+        {
+          "line": 442,
+          "owner": "GoodiesAdminScreen",
+          "target": "editor",
+          "registered": true,
+          "verification": "SOURCE_TRACE"
+        }
+      ],
+      "markers": [
+        {
+          "line": 317,
+          "excerpt": "{rejection?<View style={cardStyle}><Text style={valueStyle}>Reject {rejection.item.name}</Text><TextInput accessibilityLabel=\"Rejection reason\" placeh",
+          "classification": "CONTEXT_REVIEW: technical comments, input examples and isolated preview fixtures are not live records"
+        },
+        {
+          "line": 348,
+          "excerpt": "{r.review_status==='pending'&&reviewRejectId===r.id&&canReview?<View><TextInput accessibilityLabel=\"Review rejection reason\" value={reviewRejectNote} ",
+          "classification": "CONTEXT_REVIEW: technical comments, input examples and isolated preview fixtures are not live records"
+        }
+      ]
+    },
+    {
+      "file": "src/features/admin/screens/goodies/GoodiesAssetLibrary.tsx",
+      "sha256": "bc11604fd7d54fe49533b8fe28b6bd3ac6c7ddf5df608e03bc48dc24739d5c8d",
+      "lines": 144,
+      "commentTokens": 2,
+      "controls": [
+        {
+          "line": 110,
+          "owner": "GoodiesAssetLibrary",
+          "component": "TextInput",
+          "event": "onChangeText",
+          "handler": "{setSearch}",
+          "disabled": null,
+          "verification": "SOURCE_TRACE; hosted activation NOT VERIFIED"
+        },
+        {
+          "line": 113,
+          "owner": "GoodiesAssetLibrary",
+          "component": "OutlineBtn",
+          "event": "onPress",
+          "handler": "{() => { void reload(); }}",
+          "disabled": "{loading}",
+          "verification": "SOURCE_TRACE; hosted activation NOT VERIFIED"
+        }
+      ],
+      "rpc": [],
+      "navigation": [],
+      "markers": [
+        {
+          "line": 110,
+          "excerpt": "<TextInput value={search} onChangeText={setSearch} placeholder=\"Search by name or section\u2026\" placeholderTextColor={c.mut} style={{ borderWidth: 1, bord",
+          "classification": "CONTEXT_REVIEW: technical comments, input examples and isolated preview fixtures are not live records"
+        }
+      ]
+    },
+    {
+      "file": "src/features/admin/screens/goodies/GoodiesSettlementAdmin.tsx",
+      "sha256": "1d630c6e1e74221d55670827b264fd19f1fa0056400d79c53f2632b8bfc7e0d5",
+      "lines": 56,
+      "commentTokens": 0,
+      "controls": [
+        {
+          "line": 41,
+          "owner": "GoodiesSettlementAdmin",
+          "component": "Pressable",
+          "event": "onPress",
+          "handler": "{()=>void load()}",
+          "disabled": "{busy}",
+          "verification": "SOURCE_TRACE; hosted activation NOT VERIFIED"
+        },
+        {
+          "line": 43,
+          "owner": "GoodiesSettlementAdmin",
+          "component": "TextInput",
+          "event": "onChangeText",
+          "handler": "{setReason}",
+          "disabled": null,
+          "verification": "SOURCE_TRACE; hosted activation NOT VERIFIED"
+        },
+        {
+          "line": 43,
+          "owner": "GoodiesSettlementAdmin",
+          "component": "TextInput",
+          "event": "onChangeText",
+          "handler": "{setReference}",
+          "disabled": null,
+          "verification": "SOURCE_TRACE; hosted activation NOT VERIFIED"
+        },
+        {
+          "line": 43,
+          "owner": "GoodiesSettlementAdmin",
+          "component": "TextInput",
+          "event": "onChangeText",
+          "handler": "{setAmount}",
+          "disabled": null,
+          "verification": "SOURCE_TRACE; hosted activation NOT VERIFIED"
+        },
+        {
+          "line": 44,
+          "owner": "GoodiesSettlementAdmin",
+          "component": "TextInput",
+          "event": "onChangeText",
+          "handler": "{setCalendarCountry}",
+          "disabled": null,
+          "verification": "SOURCE_TRACE; hosted activation NOT VERIFIED"
+        },
+        {
+          "line": 44,
+          "owner": "GoodiesSettlementAdmin",
+          "component": "TextInput",
+          "event": "onChangeText",
+          "handler": "{setCalendarCoverage}",
+          "disabled": null,
+          "verification": "SOURCE_TRACE; hosted activation NOT VERIFIED"
+        },
+        {
+          "line": 44,
+          "owner": "GoodiesSettlementAdmin",
+          "component": "TextInput",
+          "event": "onChangeText",
+          "handler": "{setCalendarDays}",
+          "disabled": null,
+          "verification": "SOURCE_TRACE; hosted activation NOT VERIFIED"
+        },
+        {
+          "line": 46,
+          "owner": "GoodiesSettlementAdmin",
+          "component": "Pressable",
+          "event": "onPress",
+          "handler": "{()=>void submit()}",
+          "disabled": "{!valid||busy}",
+          "verification": "SOURCE_TRACE; hosted activation NOT VERIFIED"
+        },
+        {
+          "line": 46,
+          "owner": "GoodiesSettlementAdmin",
+          "component": "Pressable",
+          "event": "onPress",
+          "handler": "{()=>{setAction(null);setDetails(null);}}",
+          "disabled": "{busy}",
+          "verification": "SOURCE_TRACE; hosted activation NOT VERIFIED"
+        },
+        {
+          "line": 48,
+          "owner": "GoodiesSettlementAdmin",
+          "component": "Pressable",
+          "event": "onPress",
+          "handler": "{()=>select({kind:'calendar',id:'calendar',decision:'Review bank calendar'})}",
+          "disabled": "{busy||!canManage}",
+          "verification": "SOURCE_TRACE; hosted activation NOT VERIFIED"
+        },
+        {
+          "line": 48,
+          "owner": "GoodiesSettlementAdmin",
+          "component": "Pressable",
+          "event": "onPress",
+          "handler": "{()=>select({kind:'channel',id:row.method,method:row.method,enabled:!row.enabled,decision:row.enabled?'Disable':'Enable verified manual payouts'})}",
+          "disabled": "{busy||!canManage}",
+          "verification": "SOURCE_TRACE; hosted activation NOT VERIFIED"
+        },
+        {
+          "line": 49,
+          "owner": "GoodiesSettlementAdmin",
+          "component": "Pressable",
+          "event": "onPress",
+          "handler": "{()=>select({kind:'details',id:row.id,decision:'View details'})}",
+          "disabled": "{busy||!canManage}",
+          "verification": "SOURCE_TRACE; hosted activation NOT VERIFIED"
+        },
+        {
+          "line": 49,
+          "owner": "GoodiesSettlementAdmin",
+          "component": "Pressable",
+          "event": "onPress",
+          "handler": "{()=>select({kind:'destination',id:row.id,decision})}",
+          "disabled": "{busy||!canManage}",
+          "verification": "SOURCE_TRACE; hosted activation NOT VERIFIED"
+        },
+        {
+          "line": 50,
+          "owner": "GoodiesSettlementAdmin",
+          "component": "Pressable",
+          "event": "onPress",
+          "handler": "{()=>select({kind:'details',id:row.destination_id,decision:'View verified destination'})}",
+          "disabled": "{busy||!canManage}",
+          "verification": "SOURCE_TRACE; hosted activation NOT VERIFIED"
+        },
+        {
+          "line": 50,
+          "owner": "GoodiesSettlementAdmin",
+          "component": "Pressable",
+          "event": "onPress",
+          "handler": "{()=>select({kind:'payout',id:row.id,decision,expected:Number(row.payout_amount)})}",
+          "disabled": "{busy||!canManage}",
+          "verification": "SOURCE_TRACE; hosted activation NOT VERIFIED"
+        },
+        {
+          "line": 51,
+          "owner": "GoodiesSettlementAdmin",
+          "component": "Pressable",
+          "event": "onPress",
+          "handler": "{()=>select({kind:'cash_remittance',id:row.id,decision:'received',expected:Number(row.total)})}",
+          "disabled": "{busy||!canManage}",
+          "verification": "SOURCE_TRACE; hosted activation NOT VERIFIED"
+        },
+        {
+          "line": 52,
+          "owner": "GoodiesSettlementAdmin",
+          "component": "Pressable",
+          "event": "onPress",
+          "handler": "{()=>setPage(value=>value-1)}",
+          "disabled": "{page===0||busy}",
+          "verification": "SOURCE_TRACE; hosted activation NOT VERIFIED"
+        },
+        {
+          "line": 52,
+          "owner": "GoodiesSettlementAdmin",
+          "component": "Pressable",
+          "event": "onPress",
+          "handler": "{()=>setPage(value=>value+1)}",
+          "disabled": "{busy||!['destinations','payouts','cash_remittances'].some(key=>(data as any)[key].length===50)}",
+          "verification": "SOURCE_TRACE; hosted activation NOT VERIFIED"
+        }
+      ],
+      "rpc": [
+        {
+          "line": 27,
+          "owner": "GoodiesSettlementAdmin",
+          "name": "goodies_admin_settlement_queue"
+        },
+        {
+          "line": 35,
+          "owner": "submit",
+          "name": "goodies_admin_destination_details"
+        },
+        {
+          "line": 36,
+          "owner": "submit",
+          "name": "goodies_admin_set_bank_calendar"
+        },
+        {
+          "line": 36,
+          "owner": "submit",
+          "name": "goodies_admin_set_payout_channel"
+        },
+        {
+          "line": 36,
+          "owner": "submit",
+          "name": "goodies_admin_settlement_action"
+        }
+      ],
+      "navigation": [],
+      "markers": [
+        {
+          "line": 43,
+          "excerpt": "{action?<View style={card}><Text style={{fontWeight:'700'}}>{action.kind} \u00b7 {action.decision}</Text>{needsAmount?<Text>Expected transferred amount: {a",
+          "classification": "CONTEXT_REVIEW: technical comments, input examples and isolated preview fixtures are not live records"
+        },
+        {
+          "line": 44,
+          "excerpt": "{action.kind==='calendar'?<><TextInput accessibilityLabel=\"Bank calendar country\" placeholder=\"Country: HT, PH or US\" value={calendarCountry} onChange",
+          "classification": "CONTEXT_REVIEW: technical comments, input examples and isolated preview fixtures are not live records"
+        }
+      ]
+    },
+    {
+      "file": "src/features/admin/screens/goodies/GoodiesSharedBillRefunds.tsx",
+      "sha256": "01c5fc5f8af7ebe02fdd46a874e77331b22956f2ed56ff3e7b63aebe9b229f26",
+      "lines": 29,
+      "commentTokens": 0,
+      "controls": [
+        {
+          "line": 23,
+          "owner": "GoodiesSharedBillRefunds",
+          "component": "Pressable",
+          "event": "onPress",
+          "handler": "{()=>void load()}",
+          "disabled": "{busy}",
+          "verification": "SOURCE_TRACE; hosted activation NOT VERIFIED"
+        },
+        {
+          "line": 24,
+          "owner": "GoodiesSharedBillRefunds",
+          "component": "Pressable",
+          "event": "onPress",
+          "handler": "{()=>{setSelected(row.id);setReason('');setNotice('');}}",
+          "disabled": "{busy}",
+          "verification": "SOURCE_TRACE; hosted activation NOT VERIFIED"
+        },
+        {
+          "line": 25,
+          "owner": "GoodiesSharedBillRefunds",
+          "component": "TextInput",
+          "event": "onChangeText",
+          "handler": "{setReason}",
+          "disabled": null,
+          "verification": "SOURCE_TRACE; hosted activation NOT VERIFIED"
+        },
+        {
+          "line": 25,
+          "owner": "GoodiesSharedBillRefunds",
+          "component": "Pressable",
+          "event": "onPress",
+          "handler": "{()=>void retry()}",
+          "disabled": "{busy||!canManage||reason.trim().length<10}",
+          "verification": "SOURCE_TRACE; hosted activation NOT VERIFIED"
+        },
+        {
+          "line": 25,
+          "owner": "GoodiesSharedBillRefunds",
+          "component": "Pressable",
+          "event": "onPress",
+          "handler": "{()=>setSelected(null)}",
+          "disabled": "{busy}",
+          "verification": "SOURCE_TRACE; hosted activation NOT VERIFIED"
+        },
+        {
+          "line": 26,
+          "owner": "GoodiesSharedBillRefunds",
+          "component": "Pressable",
+          "event": "onPress",
+          "handler": "{()=>setPage(value=>value-1)}",
+          "disabled": "{busy||loading}",
+          "verification": "SOURCE_TRACE; hosted activation NOT VERIFIED"
+        },
+        {
+          "line": 26,
+          "owner": "GoodiesSharedBillRefunds",
+          "component": "Pressable",
+          "event": "onPress",
+          "handler": "{()=>setPage(value=>value+1)}",
+          "disabled": "{busy||loading}",
+          "verification": "SOURCE_TRACE; hosted activation NOT VERIFIED"
+        }
+      ],
+      "rpc": [
+        {
+          "line": 17,
+          "owner": "GoodiesSharedBillRefunds",
+          "name": "help_pay_admin_refund_queue"
+        },
+        {
+          "line": 20,
+          "owner": "retry",
+          "name": "help_pay_admin_retry_refund"
+        }
+      ],
+      "navigation": [],
+      "markers": [
+        {
+          "line": 25,
+          "excerpt": "{selected?<View><TextInput accessibilityLabel=\"Shared Bill refund review reason\" value={reason} onChangeText={setReason} editable={!busy&&canManage} m",
+          "classification": "CONTEXT_REVIEW: technical comments, input examples and isolated preview fixtures are not live records"
+        }
+      ]
+    },
+    {
+      "file": "src/features/admin/screens/goodies/modules.ts",
+      "sha256": "ae4889f0ac2ec1a92739570394d3304392d38d629437fe7d0f8371da00ea604c",
+      "lines": 2,
+      "commentTokens": 0,
+      "controls": [],
+      "rpc": [],
+      "navigation": [],
+      "markers": []
+    },
+    {
+      "file": "src/features/admin/screens/content/GoodiesEditor.tsx",
+      "sha256": "a225546b1c53dc6e37e2e887a7d95e7c34915b1e209f8c3edaf7d034d4e2d05c",
+      "lines": 683,
+      "commentTokens": 9,
+      "controls": [
+        {
+          "line": 268,
+          "owner": "metaInput",
+          "component": "TextInput",
+          "event": "onChangeText",
+          "handler": "{(value) => setMeta(kind, entry.id, key, value)}",
+          "disabled": null,
+          "verification": "SOURCE_TRACE; hosted activation NOT VERIFIED"
+        },
+        {
+          "line": 272,
+          "owner": "toggleLive",
+          "component": "OutlineBtn",
+          "event": "onPress",
+          "handler": "{() => setMeta(kind, entry.id, key, entry[key] === active ? inactive : active)}",
+          "disabled": "{!editMode || !!busy || !!assetBusy}",
+          "verification": "SOURCE_TRACE; hosted activation NOT VERIFIED"
+        },
+        {
+          "line": 424,
+          "owner": "promoColorPicker",
+          "component": "Pressable",
+          "event": "onPress",
+          "handler": "{() => setPromoColor(entry, option.id)}",
+          "disabled": null,
+          "verification": "SOURCE_TRACE; hosted activation NOT VERIFIED"
+        },
+        {
+          "line": 426,
+          "owner": "promoColorPicker",
+          "component": "PromoColorPicker",
+          "event": "onChange",
+          "handler": "{(color) => setPromoColor(entry, color)}",
+          "disabled": "{!editMode || !!busy || !!assetBusy}",
+          "verification": "SOURCE_TRACE; hosted activation NOT VERIFIED"
+        },
+        {
+          "line": 434,
+          "owner": "GoodiesEditor",
+          "component": "OutlineBtn",
+          "event": "onPress",
+          "handler": "{() => toggleMode('Edit')}",
+          "disabled": "{!canEdit}",
+          "verification": "SOURCE_TRACE; hosted activation NOT VERIFIED"
+        },
+        {
+          "line": 435,
+          "owner": "GoodiesEditor",
+          "component": "OutlineBtn",
+          "event": "onPress",
+          "handler": "{() => toggleMode('Preview')}",
+          "disabled": null,
+          "verification": "SOURCE_TRACE; hosted activation NOT VERIFIED"
+        },
+        {
+          "line": 440,
+          "owner": "GoodiesEditor",
+          "component": "OutlineBtn",
+          "event": "onPress",
+          "handler": "{() => { void save(); }}",
+          "disabled": "{!ready || !canEdit || !dirty || !!busy || !!assetBusy}",
+          "verification": "SOURCE_TRACE; hosted activation NOT VERIFIED"
+        },
+        {
+          "line": 441,
+          "owner": "GoodiesEditor",
+          "component": "OutlineBtn",
+          "event": "onPress",
+          "handler": "{() => { void load(); void loadAssets(); }}",
+          "disabled": "{!!busy || !!assetBusy}",
+          "verification": "SOURCE_TRACE; hosted activation NOT VERIFIED"
+        },
+        {
+          "line": 442,
+          "owner": "GoodiesEditor",
+          "component": "OutlineBtn",
+          "event": "onPress",
+          "handler": "{discardStarter}",
+          "disabled": null,
+          "verification": "SOURCE_TRACE; hosted activation NOT VERIFIED"
+        },
+        {
+          "line": 443,
+          "owner": "GoodiesEditor",
+          "component": "OutlineBtn",
+          "event": "onPress",
+          "handler": "{() => setConfirmPublish(true)}",
+          "disabled": "{!ready || !canPublish || !row || row.status !== 'draft' || dirty || !!busy || !!assetBusy}",
+          "verification": "SOURCE_TRACE; hosted activation NOT VERIFIED"
+        },
+        {
+          "line": 450,
+          "owner": "GoodiesEditor",
+          "component": "OutlineBtn",
+          "event": "onPress",
+          "handler": "{() => { void publish(); }}",
+          "disabled": "{!ready || !canPublish || !!busy || !!assetBusy}",
+          "verification": "SOURCE_TRACE; hosted activation NOT VERIFIED"
+        },
+        {
+          "line": 451,
+          "owner": "GoodiesEditor",
+          "component": "OutlineBtn",
+          "event": "onPress",
+          "handler": "{() => setConfirmPublish(false)}",
+          "disabled": "{!!busy}",
+          "verification": "SOURCE_TRACE; hosted activation NOT VERIFIED"
+        },
+        {
+          "line": 459,
+          "owner": "GoodiesEditor",
+          "component": "PromoColorPicker",
+          "event": "onChange",
+          "handler": "{(hex) => edit((next) => { next.stripe = hex; })}",
+          "disabled": "{!canEdit || !!busy}",
+          "verification": "SOURCE_TRACE; hosted activation NOT VERIFIED"
+        },
+        {
+          "line": 471,
+          "owner": "GoodiesEditor",
+          "component": "OutlineBtn",
+          "event": "onPress",
+          "handler": "{() => { void load(); }}",
+          "disabled": null,
+          "verification": "SOURCE_TRACE; hosted activation NOT VERIFIED"
+        },
+        {
+          "line": 477,
+          "owner": "GoodiesEditor",
+          "component": "OutlineBtn",
+          "event": "onPress",
+          "handler": "{startStarter}",
+          "disabled": "{!canEdit}",
+          "verification": "SOURCE_TRACE; hosted activation NOT VERIFIED"
+        },
+        {
+          "line": 488,
+          "owner": "GoodiesEditor",
+          "component": "GoodiesBuilderConfigEditor",
+          "event": "onClose",
+          "handler": "{() => setByoFocus(null)}",
+          "disabled": null,
+          "verification": "SOURCE_TRACE; hosted activation NOT VERIFIED"
+        },
+        {
+          "line": 493,
+          "owner": "GoodiesEditor",
+          "component": "OutlineBtn",
+          "event": "onPress",
+          "handler": "{()=>setEditLanguage(lang)}",
+          "disabled": null,
+          "verification": "SOURCE_TRACE; hosted activation NOT VERIFIED"
+        },
+        {
+          "line": 499,
+          "owner": "GoodiesEditor",
+          "component": "OutlineBtn",
+          "event": "onPress",
+          "handler": "{createLabel}",
+          "disabled": "{!editMode}",
+          "verification": "SOURCE_TRACE; hosted activation NOT VERIFIED"
+        },
+        {
+          "line": 504,
+          "owner": "GoodiesEditor",
+          "component": "TextInput",
+          "event": "onChangeText",
+          "handler": "{setText}",
+          "disabled": null,
+          "verification": "SOURCE_TRACE; hosted activation NOT VERIFIED"
+        },
+        {
+          "line": 505,
+          "owner": "GoodiesEditor",
+          "component": "OutlineBtn",
+          "event": "onPress",
+          "handler": "{()=>setSelectedTranslationReviewed(item[textKeyFor(selection)]?.[editLanguage]?.s!=='reviewed')}",
+          "disabled": "{!editMode || !readText(item[textKeyFor(selection)],editLanguage).trim()}",
+          "verification": "SOURCE_TRACE; hosted activation NOT VERIFIED"
+        },
+        {
+          "line": 510,
+          "owner": "GoodiesEditor",
+          "component": "TextInput",
+          "event": "onChangeText",
+          "handler": "{setEmoji}",
+          "disabled": null,
+          "verification": "SOURCE_TRACE; hosted activation NOT VERIFIED"
+        },
+        {
+          "line": 520,
+          "owner": "GoodiesEditor",
+          "component": "OutlineBtn",
+          "event": "onPress",
+          "handler": "{() => { void uploadHomeImage('photos'); }}",
+          "disabled": "{!canEdit || !!assetBusy}",
+          "verification": "SOURCE_TRACE; hosted activation NOT VERIFIED"
+        },
+        {
+          "line": 521,
+          "owner": "GoodiesEditor",
+          "component": "OutlineBtn",
+          "event": "onPress",
+          "handler": "{() => { void uploadHomeImage('files'); }}",
+          "disabled": "{!canEdit || !!assetBusy}",
+          "verification": "SOURCE_TRACE; hosted activation NOT VERIFIED"
+        },
+        {
+          "line": 523,
+          "owner": "GoodiesEditor",
+          "component": "OutlineBtn",
+          "event": "onPress",
+          "handler": "{() => { void publishHomeImage(currentImage.assetKey); }}",
+          "disabled": "{!canPublish || !!assetBusy}",
+          "verification": "SOURCE_TRACE; hosted activation NOT VERIFIED"
+        },
+        {
+          "line": 528,
+          "owner": "GoodiesEditor",
+          "component": "TextInput",
+          "event": "onChangeText",
+          "handler": "{setAssetSearch}",
+          "disabled": null,
+          "verification": "SOURCE_TRACE; hosted activation NOT VERIFIED"
+        },
+        {
+          "line": 532,
+          "owner": "GoodiesEditor",
+          "component": "Pressable",
+          "event": "onPress",
+          "handler": "{() => pickAsset(asset)}",
+          "disabled": null,
+          "verification": "SOURCE_TRACE; hosted activation NOT VERIFIED"
+        },
+        {
+          "line": 546,
+          "owner": "GoodiesEditor",
+          "component": "TextInput",
+          "event": "onChangeText",
+          "handler": "{setLinkText}",
+          "disabled": null,
+          "verification": "SOURCE_TRACE; hosted activation NOT VERIFIED"
+        },
+        {
+          "line": 548,
+          "owner": "GoodiesEditor",
+          "component": "OutlineBtn",
+          "event": "onPress",
+          "handler": "{applyLink}",
+          "disabled": "{!linkText.trim()}",
+          "verification": "SOURCE_TRACE; hosted activation NOT VERIFIED"
+        },
+        {
+          "line": 549,
+          "owner": "GoodiesEditor",
+          "component": "OutlineBtn",
+          "event": "onPress",
+          "handler": "{() => setImage(null)}",
+          "disabled": "{!currentImage}",
+          "verification": "SOURCE_TRACE; hosted activation NOT VERIFIED"
+        },
+        {
+          "line": 554,
+          "owner": "GoodiesEditor",
+          "component": "OutlineBtn",
+          "event": "onPress",
+          "handler": "{() => setSelection(null)}",
+          "disabled": null,
+          "verification": "SOURCE_TRACE; hosted activation NOT VERIFIED"
+        },
+        {
+          "line": 571,
+          "owner": "GoodiesEditor",
+          "component": "OutlineBtn",
+          "event": "onPress",
+          "handler": "{() => select({ kind: 'mode', id: entry.id, field: 'title' })}",
+          "disabled": null,
+          "verification": "SOURCE_TRACE; hosted activation NOT VERIFIED"
+        },
+        {
+          "line": 572,
+          "owner": "GoodiesEditor",
+          "component": "OutlineBtn",
+          "event": "onPress",
+          "handler": "{() => select({ kind: 'mode', id: entry.id, field: 'sub' })}",
+          "disabled": null,
+          "verification": "SOURCE_TRACE; hosted activation NOT VERIFIED"
+        },
+        {
+          "line": 573,
+          "owner": "GoodiesEditor",
+          "component": "OutlineBtn",
+          "event": "onPress",
+          "handler": "{() => select({ kind: 'mode', id: entry.id, field: 'art' })}",
+          "disabled": null,
+          "verification": "SOURCE_TRACE; hosted activation NOT VERIFIED"
+        },
+        {
+          "line": 591,
+          "owner": "GoodiesEditor",
+          "component": "OutlineBtn",
+          "event": "onPress",
+          "handler": "{() => select({ kind: 'category', id: entry.id, field: 'title' })}",
+          "disabled": null,
+          "verification": "SOURCE_TRACE; hosted activation NOT VERIFIED"
+        },
+        {
+          "line": 592,
+          "owner": "GoodiesEditor",
+          "component": "OutlineBtn",
+          "event": "onPress",
+          "handler": "{() => select({ kind: 'category', id: entry.id, field: 'art' })}",
+          "disabled": null,
+          "verification": "SOURCE_TRACE; hosted activation NOT VERIFIED"
+        },
+        {
+          "line": 609,
+          "owner": "GoodiesEditor",
+          "component": "OutlineBtn",
+          "event": "onPress",
+          "handler": "{() => select({ kind: 'promo', id: entry.id, field: 'title' })}",
+          "disabled": null,
+          "verification": "SOURCE_TRACE; hosted activation NOT VERIFIED"
+        },
+        {
+          "line": 610,
+          "owner": "GoodiesEditor",
+          "component": "OutlineBtn",
+          "event": "onPress",
+          "handler": "{() => select({ kind: 'promo', id: entry.id, field: 'sub' })}",
+          "disabled": null,
+          "verification": "SOURCE_TRACE; hosted activation NOT VERIFIED"
+        },
+        {
+          "line": 611,
+          "owner": "GoodiesEditor",
+          "component": "OutlineBtn",
+          "event": "onPress",
+          "handler": "{() => select({ kind: 'promo', id: entry.id, field: 'btn' })}",
+          "disabled": null,
+          "verification": "SOURCE_TRACE; hosted activation NOT VERIFIED"
+        },
+        {
+          "line": 612,
+          "owner": "GoodiesEditor",
+          "component": "OutlineBtn",
+          "event": "onPress",
+          "handler": "{() => select({ kind: 'promo', id: entry.id, field: 'art' })}",
+          "disabled": null,
+          "verification": "SOURCE_TRACE; hosted activation NOT VERIFIED"
+        },
+        {
+          "line": 636,
+          "owner": "GoodiesEditor",
+          "component": "OutlineBtn",
+          "event": "onPress",
+          "handler": "{() => select({ kind: 'label', id: entry.id, field: 'text' })}",
+          "disabled": null,
+          "verification": "SOURCE_TRACE; hosted activation NOT VERIFIED"
+        },
+        {
+          "line": 643,
+          "owner": "GoodiesEditor",
+          "component": "OutlineBtn",
+          "event": "onPress",
+          "handler": "{()=>setEditLanguage(lang)}",
+          "disabled": null,
+          "verification": "SOURCE_TRACE; hosted activation NOT VERIFIED"
+        },
+        {
+          "line": 648,
+          "owner": "GoodiesEditor",
+          "component": "OutlineBtn",
+          "event": "onPress",
+          "handler": "{() => setPageChoice(activePage === page ? '' : page)}",
+          "disabled": null,
+          "verification": "SOURCE_TRACE; hosted activation NOT VERIFIED"
+        },
+        {
+          "line": 655,
+          "owner": "GoodiesEditor",
+          "component": "TextInput",
+          "event": "onChangeText",
+          "handler": "{(value) => setLabelText(entry.id, value)}",
+          "disabled": null,
+          "verification": "SOURCE_TRACE; hosted activation NOT VERIFIED"
+        },
+        {
+          "line": 656,
+          "owner": "GoodiesEditor",
+          "component": "OutlineBtn",
+          "event": "onPress",
+          "handler": "{()=>setLabelTranslationReviewed(entry.id,entry.t?.[editLanguage]?.s!=='reviewed')}",
+          "disabled": "{!editMode || !String(entry.t?.[editLanguage]?.v||'').trim()}",
+          "verification": "SOURCE_TRACE; hosted activation NOT VERIFIED"
+        },
+        {
+          "line": 665,
+          "owner": "GoodiesEditor",
+          "component": "OutlineBtn",
+          "event": "onPress",
+          "handler": "{()=>select({kind:'library',id:entry.id,field:'text'})}",
+          "disabled": null,
+          "verification": "SOURCE_TRACE; hosted activation NOT VERIFIED"
+        },
+        {
+          "line": 666,
+          "owner": "GoodiesEditor",
+          "component": "OutlineBtn",
+          "event": "onPress",
+          "handler": "{()=>select({kind:'library',id:entry.id,field:'art'})}",
+          "disabled": null,
+          "verification": "SOURCE_TRACE; hosted activation NOT VERIFIED"
+        },
+        {
+          "line": 671,
+          "owner": "GoodiesEditor",
+          "component": "TextInput",
+          "event": "onChangeText",
+          "handler": "{value=>edit(next=>{const target=next.lib.find((row:any)=>row.id===entry.id);const number=Number(value);if(target)target[key]=value.trim()&&Number.isFinite(number)?number:null;})}",
+          "disabled": null,
+          "verification": "SOURCE_TRACE; hosted activation NOT VERIFIED"
+        }
+      ],
+      "rpc": [],
+      "navigation": [],
+      "markers": [
+        {
+          "line": 504,
+          "excerpt": "<TextInput editable={editMode && !busy && !assetBusy} value={readText(item[textKeyFor(selection)], editLanguage)} onChangeText={setText} style={fieldS",
+          "classification": "CONTEXT_REVIEW: technical comments, input examples and isolated preview fixtures are not live records"
+        },
+        {
+          "line": 510,
+          "excerpt": "<TextInput editable={editMode && !busy && !assetBusy} value={String(item.emoji || '')} onChangeText={setEmoji} style={fieldStyle} placeholder=\"Emoji\" ",
+          "classification": "CONTEXT_REVIEW: technical comments, input examples and isolated preview fixtures are not live records"
+        },
+        {
+          "line": 528,
+          "excerpt": "<TextInput value={assetSearch} onChangeText={setAssetSearch} placeholder=\"Search all CMS images by asset key\" style={fieldStyle} />",
+          "classification": "CONTEXT_REVIEW: technical comments, input examples and isolated preview fixtures are not live records"
+        },
+        {
+          "line": 546,
+          "excerpt": "<TextInput value={linkText} onChangeText={setLinkText} style={fieldStyle} placeholder=\"https://\u2026\" autoCapitalize=\"none\" autoCorrect={false} />",
+          "classification": "CONTEXT_REVIEW: technical comments, input examples and isolated preview fixtures are not live records"
+        },
+        {
+          "line": 629,
+          "excerpt": "<Txt size={10} mut>Manage the search placeholder, offer-card text and Home section headings.</Txt>",
+          "classification": "CONTEXT_REVIEW: technical comments, input examples and isolated preview fixtures are not live records"
+        },
+        {
+          "line": 655,
+          "excerpt": "<TextInput value={readText(entry.t, editLanguage)} onChangeText={(value) => setLabelText(entry.id, value)} editable={editMode && !busy} multiline={rea",
+          "classification": "CONTEXT_REVIEW: technical comments, input examples and isolated preview fixtures are not live records"
+        }
+      ]
+    },
+    {
+      "file": "src/features/admin/screens/content/GoodiesPageContentFields.tsx",
+      "sha256": "29cd714804006106b57c74888a0c5933baebdc5aaf3d97d3e29490ae4efd92ec",
+      "lines": 55,
+      "commentTokens": 1,
+      "controls": [
+        {
+          "line": 17,
+          "owner": "field",
+          "component": "TextInput",
+          "event": "onChangeText",
+          "handler": "{text=>update(setLocalizedText(entry[key],locale,text))}",
+          "disabled": null,
+          "verification": "SOURCE_TRACE; hosted activation NOT VERIFIED"
+        },
+        {
+          "line": 18,
+          "owner": "field",
+          "component": "OutlineBtn",
+          "event": "onPress",
+          "handler": "{()=>update({...setLocalizedText(entry[key],locale,read(entry[key])),[locale]:{v:read(entry[key]),s:entry[key]?.[locale]?.s==='reviewed'?'draft':'reviewed'}})}",
+          "disabled": "{disabled || !read(entry[key]).trim()}",
+          "verification": "SOURCE_TRACE; hosted activation NOT VERIFIED"
+        },
+        {
+          "line": 29,
+          "owner": "GoodiesPageContentFields",
+          "component": "TextInput",
+          "event": "onChangeText",
+          "handler": "{id=>edit(next=>{next.legal[index].id=id;})}",
+          "disabled": null,
+          "verification": "SOURCE_TRACE; hosted activation NOT VERIFIED"
+        },
+        {
+          "line": 29,
+          "owner": "GoodiesPageContentFields",
+          "component": "OutlineBtn",
+          "event": "onPress",
+          "handler": "{()=>edit(next=>{next.legal[index].st=entry.st==='Live'?'Hidden':'Live';})}",
+          "disabled": "{disabled}",
+          "verification": "SOURCE_TRACE; hosted activation NOT VERIFIED"
+        },
+        {
+          "line": 32,
+          "owner": "GoodiesPageContentFields",
+          "component": "OutlineBtn",
+          "event": "onPress",
+          "handler": "{()=>edit(next=>{next[list.key]=moveContentEntry(next[list.key],index,-1);})}",
+          "disabled": "{disabled||index===0}",
+          "verification": "SOURCE_TRACE; hosted activation NOT VERIFIED"
+        },
+        {
+          "line": 33,
+          "owner": "GoodiesPageContentFields",
+          "component": "OutlineBtn",
+          "event": "onPress",
+          "handler": "{()=>edit(next=>{next[list.key]=moveContentEntry(next[list.key],index,1);})}",
+          "disabled": "{disabled||index===(draft[list.key]||[]).length-1}",
+          "verification": "SOURCE_TRACE; hosted activation NOT VERIFIED"
+        },
+        {
+          "line": 34,
+          "owner": "GoodiesPageContentFields",
+          "component": "OutlineBtn",
+          "event": "onPress",
+          "handler": "{()=>edit(next=>{next[list.key].splice(index,1);})}",
+          "disabled": "{disabled}",
+          "verification": "SOURCE_TRACE; hosted activation NOT VERIFIED"
+        },
+        {
+          "line": 37,
+          "owner": "GoodiesPageContentFields",
+          "component": "OutlineBtn",
+          "event": "onPress",
+          "handler": "{()=>edit(next=>{next[list.key]=[...(next[list.key]||[]),list.create()];})}",
+          "disabled": "{disabled}",
+          "verification": "SOURCE_TRACE; hosted activation NOT VERIFIED"
+        }
+      ],
+      "rpc": [],
+      "navigation": [],
+      "markers": []
+    },
+    {
+      "file": "src/features/admin/screens/content/GoodiesBuilderConfigEditor.tsx",
+      "sha256": "30066e152e65ee6484e1d647cc20b716b122d0cf657cf7a70443530238cfab62",
+      "lines": 219,
+      "commentTokens": 2,
+      "controls": [
+        {
+          "line": 160,
+          "owner": "nameInput",
+          "component": "TextInput",
+          "event": "onChangeText",
+          "handler": "{onChange}",
+          "disabled": null,
+          "verification": "SOURCE_TRACE; hosted activation NOT VERIFIED"
+        },
+        {
+          "line": 168,
+          "owner": "GoodiesBuilderConfigEditor",
+          "component": "OutlineBtn",
+          "event": "onPress",
+          "handler": "{()=>setIngredientsAttempt(n=>n+1)}",
+          "disabled": null,
+          "verification": "SOURCE_TRACE; hosted activation NOT VERIFIED"
+        },
+        {
+          "line": 172,
+          "owner": "GoodiesBuilderConfigEditor",
+          "component": "OutlineBtn",
+          "event": "onPress",
+          "handler": "{() => { void load(); }}",
+          "disabled": "{buildersLoading}",
+          "verification": "SOURCE_TRACE; hosted activation NOT VERIFIED"
+        },
+        {
+          "line": 180,
+          "owner": "GoodiesBuilderConfigEditor",
+          "component": "PromoColorPicker",
+          "event": "onChange",
+          "handler": "{(hex) => patchBuilder({ stageBgColor: hex })}",
+          "disabled": "{!canEdit || saving}",
+          "verification": "SOURCE_TRACE; hosted activation NOT VERIFIED"
+        },
+        {
+          "line": 191,
+          "owner": "GoodiesBuilderConfigEditor",
+          "component": "OutlineBtn",
+          "event": "onPress",
+          "handler": "{() => { void upload('photos'); }}",
+          "disabled": "{!canEdit || !!busy}",
+          "verification": "SOURCE_TRACE; hosted activation NOT VERIFIED"
+        },
+        {
+          "line": 192,
+          "owner": "GoodiesBuilderConfigEditor",
+          "component": "OutlineBtn",
+          "event": "onPress",
+          "handler": "{() => { void upload('files'); }}",
+          "disabled": "{!canEdit || !!busy}",
+          "verification": "SOURCE_TRACE; hosted activation NOT VERIFIED"
+        },
+        {
+          "line": 193,
+          "owner": "GoodiesBuilderConfigEditor",
+          "component": "OutlineBtn",
+          "event": "onPress",
+          "handler": "{() => patchItem(group.id, item.id, { img: undefined })}",
+          "disabled": "{!canEdit || !!busy}",
+          "verification": "SOURCE_TRACE; hosted activation NOT VERIFIED"
+        },
+        {
+          "line": 202,
+          "owner": "GoodiesBuilderConfigEditor",
+          "component": "OutlineBtn",
+          "event": "onPress",
+          "handler": "{() => useRequest(request)}",
+          "disabled": "{!canEdit || saving}",
+          "verification": "SOURCE_TRACE; hosted activation NOT VERIFIED"
+        },
+        {
+          "line": 210,
+          "owner": "GoodiesBuilderConfigEditor",
+          "component": "OutlineBtn",
+          "event": "onPress",
+          "handler": "{save}",
+          "disabled": "{!canEdit || saving || !!busy}",
+          "verification": "SOURCE_TRACE; hosted activation NOT VERIFIED"
+        },
+        {
+          "line": 211,
+          "owner": "GoodiesBuilderConfigEditor",
+          "component": "OutlineBtn",
+          "event": "onPress",
+          "handler": "{() => { void remove(); }}",
+          "disabled": "{!canEdit || saving || !!busy}",
+          "verification": "SOURCE_TRACE; hosted activation NOT VERIFIED"
+        },
+        {
+          "line": 212,
+          "owner": "GoodiesBuilderConfigEditor",
+          "component": "OutlineBtn",
+          "event": "onPress",
+          "handler": "{close}",
+          "disabled": "{saving}",
+          "verification": "SOURCE_TRACE; hosted activation NOT VERIFIED"
+        },
+        {
+          "line": 214,
+          "owner": "GoodiesBuilderConfigEditor",
+          "component": "OutlineBtn",
+          "event": "onPress",
+          "handler": "{close}",
+          "disabled": null,
+          "verification": "SOURCE_TRACE; hosted activation NOT VERIFIED"
+        }
+      ],
+      "rpc": [
+        {
+          "line": 51,
+          "owner": "GoodiesBuilderConfigEditor",
+          "name": "wantiss_admin_list_goodies_builder_configs"
+        },
+        {
+          "line": 62,
+          "owner": "GoodiesBuilderConfigEditor",
+          "name": "wantiss_admin_list_library_ingredients"
+        },
+        {
+          "line": 114,
+          "owner": "persist",
+          "name": "wantiss_admin_save_goodies_builder_config"
+        }
+      ],
+      "navigation": [],
+      "markers": [
+        {
+          "line": 78,
+          "excerpt": "handled.current = focus; setPart(null); setError('This is a sample, not one of your saved builders, so it cannot be edited.');",
+          "classification": "CONTEXT_REVIEW: technical comments, input examples and isolated preview fixtures are not live records"
+        },
+        {
+          "line": 160,
+          "excerpt": "<TextInput value={value} onChangeText={onChange} editable={canEdit && !saving} placeholder={label} placeholderTextColor={c.mut} style={field} />",
+          "classification": "CONTEXT_REVIEW: technical comments, input examples and isolated preview fixtures are not live records"
+        }
+      ]
+    },
+    {
+      "file": "src/features/admin/screens/content/GoodiesIngredientRequests.tsx",
+      "sha256": "4f81cd90f37bf28f406b0316b078145c9fd56e2c306f683da3fdc3c187aac84e",
+      "lines": 222,
+      "commentTokens": 1,
+      "controls": [
+        {
+          "line": 160,
+          "owner": "GoodiesIngredientRequests",
+          "component": "OutlineBtn",
+          "event": "onPress",
+          "handler": "{()=>void load()}",
+          "disabled": null,
+          "verification": "SOURCE_TRACE; hosted activation NOT VERIFIED"
+        },
+        {
+          "line": 164,
+          "owner": "GoodiesIngredientRequests",
+          "component": "TextInput",
+          "event": "onChangeText",
+          "handler": "{setRules}",
+          "disabled": null,
+          "verification": "SOURCE_TRACE; hosted activation NOT VERIFIED"
+        },
+        {
+          "line": 165,
+          "owner": "GoodiesIngredientRequests",
+          "component": "OutlineBtn",
+          "event": "onPress",
+          "handler": "{saveRules}",
+          "disabled": "{off}",
+          "verification": "SOURCE_TRACE; hosted activation NOT VERIFIED"
+        },
+        {
+          "line": 169,
+          "owner": "GoodiesIngredientRequests",
+          "component": "OutlineBtn",
+          "event": "onPress",
+          "handler": "{() => {setRequestPage(0);setShowAll(!showAll);}}",
+          "disabled": "{!!busy}",
+          "verification": "SOURCE_TRACE; hosted activation NOT VERIFIED"
+        },
+        {
+          "line": 184,
+          "owner": "GoodiesIngredientRequests",
+          "component": "TextInput",
+          "event": "onChangeText",
+          "handler": "{(v) => setNotes({ ...notes, [r.id]: v })}",
+          "disabled": null,
+          "verification": "SOURCE_TRACE; hosted activation NOT VERIFIED"
+        },
+        {
+          "line": 186,
+          "owner": "GoodiesIngredientRequests",
+          "component": "OutlineBtn",
+          "event": "onPress",
+          "handler": "{() => review(r, 'approved')}",
+          "disabled": "{off || !canPublishAssets || r.status === 'approved'}",
+          "verification": "SOURCE_TRACE; hosted activation NOT VERIFIED"
+        },
+        {
+          "line": 187,
+          "owner": "GoodiesIngredientRequests",
+          "component": "OutlineBtn",
+          "event": "onPress",
+          "handler": "{() => replacePhoto(r)}",
+          "disabled": "{off || !canPublishAssets}",
+          "verification": "SOURCE_TRACE; hosted activation NOT VERIFIED"
+        },
+        {
+          "line": 188,
+          "owner": "GoodiesIngredientRequests",
+          "component": "OutlineBtn",
+          "event": "onPress",
+          "handler": "{() => review(r, 'needs_info')}",
+          "disabled": "{off}",
+          "verification": "SOURCE_TRACE; hosted activation NOT VERIFIED"
+        },
+        {
+          "line": 189,
+          "owner": "GoodiesIngredientRequests",
+          "component": "OutlineBtn",
+          "event": "onPress",
+          "handler": "{() => review(r, 'denied')}",
+          "disabled": "{off}",
+          "verification": "SOURCE_TRACE; hosted activation NOT VERIFIED"
+        },
+        {
+          "line": 194,
+          "owner": "GoodiesIngredientRequests",
+          "component": "OutlineBtn",
+          "event": "onPress",
+          "handler": "{()=>setRequestPage(page=>page-1)}",
+          "disabled": "{requestPage===0||!!busy||loading||loadFailed}",
+          "verification": "SOURCE_TRACE; hosted activation NOT VERIFIED"
+        },
+        {
+          "line": 195,
+          "owner": "GoodiesIngredientRequests",
+          "component": "OutlineBtn",
+          "event": "onPress",
+          "handler": "{()=>setRequestPage(page=>page+1)}",
+          "disabled": "{requests.length<50||!!busy||loading||loadFailed}",
+          "verification": "SOURCE_TRACE; hosted activation NOT VERIFIED"
+        },
+        {
+          "line": 200,
+          "owner": "GoodiesIngredientRequests",
+          "component": "TextInput",
+          "event": "onChangeText",
+          "handler": "{setNewName}",
+          "disabled": null,
+          "verification": "SOURCE_TRACE; hosted activation NOT VERIFIED"
+        },
+        {
+          "line": 202,
+          "owner": "GoodiesIngredientRequests",
+          "component": "OutlineBtn",
+          "event": "onPress",
+          "handler": "{() => setNewBuilder(b)}",
+          "disabled": null,
+          "verification": "SOURCE_TRACE; hosted activation NOT VERIFIED"
+        },
+        {
+          "line": 203,
+          "owner": "GoodiesIngredientRequests",
+          "component": "OutlineBtn",
+          "event": "onPress",
+          "handler": "{() => saveLib({ name: newName.trim(), builder: newBuilder })}",
+          "disabled": "{off || !canPublishAssets || newName.trim().length < 2}",
+          "verification": "SOURCE_TRACE; hosted activation NOT VERIFIED"
+        },
+        {
+          "line": 204,
+          "owner": "GoodiesIngredientRequests",
+          "component": "OutlineBtn",
+          "event": "onPress",
+          "handler": "{() => saveLibWithPhoto({ name: newName.trim(), builder: newBuilder })}",
+          "disabled": "{off || !canPublishAssets || newName.trim().length < 2}",
+          "verification": "SOURCE_TRACE; hosted activation NOT VERIFIED"
+        },
+        {
+          "line": 214,
+          "owner": "GoodiesIngredientRequests",
+          "component": "OutlineBtn",
+          "event": "onPress",
+          "handler": "{() => saveLibWithPhoto(l)}",
+          "disabled": "{off || !canPublishAssets}",
+          "verification": "SOURCE_TRACE; hosted activation NOT VERIFIED"
+        },
+        {
+          "line": 215,
+          "owner": "GoodiesIngredientRequests",
+          "component": "OutlineBtn",
+          "event": "onPress",
+          "handler": "{() => saveLib({ ...l, active: !l.active })}",
+          "disabled": "{off}",
+          "verification": "SOURCE_TRACE; hosted activation NOT VERIFIED"
+        }
+      ],
+      "rpc": [
+        {
+          "line": 66,
+          "owner": "GoodiesIngredientRequests",
+          "name": "wantiss_admin_list_ingredient_requests_page"
+        },
+        {
+          "line": 67,
+          "owner": "GoodiesIngredientRequests",
+          "name": "wantiss_admin_list_library_ingredients"
+        },
+        {
+          "line": 68,
+          "owner": "GoodiesIngredientRequests",
+          "name": "goodies_get_ingredient_rules"
+        },
+        {
+          "line": 120,
+          "owner": "review",
+          "name": "wantiss_admin_review_ingredient_request"
+        },
+        {
+          "line": 129,
+          "owner": "replacePhoto",
+          "name": "wantiss_admin_review_ingredient_request"
+        },
+        {
+          "line": 136,
+          "owner": "persistLibrary",
+          "name": "wantiss_admin_save_library_ingredient"
+        },
+        {
+          "line": 147,
+          "owner": "saveRules",
+          "name": "wantiss_admin_set_ingredient_rules"
+        }
+      ],
+      "navigation": [],
+      "markers": [
+        {
+          "line": 184,
+          "excerpt": "<TextInput value={notes[r.id] ?? ''} onChangeText={(v) => setNotes({ ...notes, [r.id]: v })} placeholder=\"Note to the vendor (required to decline or a",
+          "classification": "CONTEXT_REVIEW: technical comments, input examples and isolated preview fixtures are not live records"
+        },
+        {
+          "line": 200,
+          "excerpt": "<TextInput value={newName} onChangeText={setNewName} placeholder=\"New ingredient name (e.g. Whipped cream)\" placeholderTextColor={c.mut} style={field}",
+          "classification": "CONTEXT_REVIEW: technical comments, input examples and isolated preview fixtures are not live records"
+        }
+      ]
+    },
+    {
+      "file": "src/features/admin/screens/content/GoodiesConsumerPreview.tsx",
+      "sha256": "d53ae81a8925be37dd27275d12f76b19bfdd1608185740b055a29a6a97165894",
+      "lines": 214,
+      "commentTokens": 11,
+      "controls": [
+        {
+          "line": 165,
+          "owner": "GoodiesConsumerPreview",
+          "component": "Pressable",
+          "event": "onPress",
+          "handler": "{() => {S.lang = locale.code; onLocaleChange?.(locale.code); emit();}}",
+          "disabled": null,
+          "verification": "SOURCE_TRACE; hosted activation NOT VERIFIED"
+        },
+        {
+          "line": 166,
+          "owner": "GoodiesConsumerPreview",
+          "component": "Pressable",
+          "event": "onPress",
+          "handler": "{() => setZoom(value)}",
+          "disabled": null,
+          "verification": "SOURCE_TRACE; hosted activation NOT VERIFIED"
+        },
+        {
+          "line": 169,
+          "owner": "GoodiesConsumerPreview",
+          "component": "Pressable",
+          "event": "onPress",
+          "handler": "{()=>{setPreviewScenario(value);setScenario(value);const current=S.stack[S.stack.length-1];navigate(current.r,undefined,value);}}",
+          "disabled": null,
+          "verification": "SOURCE_TRACE; hosted activation NOT VERIFIED"
+        },
+        {
+          "line": 171,
+          "owner": "GoodiesConsumerPreview",
+          "component": "Pressable",
+          "event": "onPress",
+          "handler": "{()=>{onSelectTarget({kind:'label',id,field:'text'});setChoices([]);}}",
+          "disabled": null,
+          "verification": "SOURCE_TRACE; hosted activation NOT VERIFIED"
+        },
+        {
+          "line": 176,
+          "owner": "GoodiesConsumerPreview",
+          "component": "Pressable",
+          "event": "onPress",
+          "handler": "{() => navigate(screen.key)}",
+          "disabled": null,
+          "verification": "SOURCE_TRACE; hosted activation NOT VERIFIED"
+        },
+        {
+          "line": 182,
+          "owner": "GoodiesConsumerPreview",
+          "component": "Pressable",
+          "event": "onPress",
+          "handler": "{() => setBuilderMenuOpen((open) => !open)}",
+          "disabled": null,
+          "verification": "SOURCE_TRACE; hosted activation NOT VERIFIED"
+        },
+        {
+          "line": 193,
+          "owner": "GoodiesConsumerPreview",
+          "component": "Pressable",
+          "event": "onPress",
+          "handler": "{() => { setSelectedBuilderId(builder.id); setBuilderMenuOpen(false); navigate('byo', builder.id); }}",
+          "disabled": null,
+          "verification": "SOURCE_TRACE; hosted activation NOT VERIFIED"
+        }
+      ],
+      "rpc": [],
+      "navigation": [],
+      "markers": [
+        {
+          "line": 42,
+          "excerpt": "// A local-only sample store keeps the real customer Build Your Own screen",
+          "classification": "CONTEXT_REVIEW: technical comments, input examples and isolated preview fixtures are not live records"
+        },
+        {
+          "line": 109,
+          "excerpt": "S.notifs=[{id:param,t:'Sample notification',d:'Preview only. No notification was sent.',r:'promos',p:null,read:false},...S.notifs.filter((notice:any)=",
+          "classification": "CONTEXT_REVIEW: technical comments, input examples and isolated preview fixtures are not live records"
+        },
+        {
+          "line": 113,
+          "excerpt": "STB[fixtureStore] = {id: fixtureStore, n: 'Sample Goodies store', c: 'groceries', e: '\ud83d\udecd\ufe0f', bg: 'bg0', r: 0, rv: 0, km: 0, eta: '20\u201330', fee: 0, min: ",
+          "classification": "CONTEXT_REVIEW: technical comments, input examples and isolated preview fixtures are not live records"
+        },
+        {
+          "line": 116,
+          "excerpt": "sn: 'Sample Goodies store', lines: [{id: '__preview_item__', k: '__preview_item__', n: 'Sample item', e: '\ud83e\udd6d', p: 5, q: 1, d: ''}],",
+          "classification": "CONTEXT_REVIEW: technical comments, input examples and isolated preview fixtures are not live records"
+        },
+        {
+          "line": 118,
+          "excerpt": "addr: 'Sample delivery address', ad: {t: 'Sample delivery address', apt: ''}, ph: '2025550100',",
+          "classification": "CONTEXT_REVIEW: technical comments, input examples and isolated preview fixtures are not live records"
+        },
+        {
+          "line": 128,
+          "excerpt": "id: checkoutStoreId, n: 'Demo Goodies shop', c: 'groceries', e: '\ud83d\udecd\ufe0f', bg: 'bg0',",
+          "classification": "CONTEXT_REVIEW: technical comments, input examples and isolated preview fixtures are not live records"
+        },
+        {
+          "line": 130,
+          "excerpt": "pr: '', k: 'Demo store', it: [], open: 1, h: 'Open for demo', nx: 'Demo preview',",
+          "classification": "CONTEXT_REVIEW: technical comments, input examples and isolated preview fixtures are not live records"
+        },
+        {
+          "line": 134,
+          "excerpt": "id: checkoutItemId, s: checkoutStoreId, n: 'Demo checkout item', p: 5.99,",
+          "classification": "CONTEXT_REVIEW: technical comments, input examples and isolated preview fixtures are not live records"
+        },
+        {
+          "line": 137,
+          "excerpt": "S.cart = { sid: checkoutStoreId, lines: [{ k: checkoutItemId, id: checkoutItemId, n: 'Demo checkout item', e: '\ud83e\udd6d', p: 5.99, q: 1, d: 'Preview item' }",
+          "classification": "CONTEXT_REVIEW: technical comments, input examples and isolated preview fixtures are not live records"
+        },
+        {
+          "line": 138,
+          "excerpt": "S.addr = [{ id: 1, l: 'Demo delivery address', t: '123 Demo Street', apt: '', inst: '', def: 1, z: 0, cc: 'US' }];",
+          "classification": "CONTEXT_REVIEW: technical comments, input examples and isolated preview fixtures are not live records"
+        },
+        {
+          "line": 140,
+          "excerpt": "S.pf = { ...S.pf, n: 'Demo customer', ph: '2025550100' };",
+          "classification": "CONTEXT_REVIEW: technical comments, input examples and isolated preview fixtures are not live records"
+        },
+        {
+          "line": 143,
+          "excerpt": "S.cards = [{ id: 'preview-demo-card', b: 'Demo card', l4: '4242', expiryMonth: 12, expiryYear: 2030, isDefault: true }];",
+          "classification": "CONTEXT_REVIEW: technical comments, input examples and isolated preview fixtures are not live records"
+        },
+        {
+          "line": 144,
+          "excerpt": "S.selectedCardId = 'preview-demo-card';",
+          "classification": "CONTEXT_REVIEW: technical comments, input examples and isolated preview fixtures are not live records"
+        },
+        {
+          "line": 161,
+          "excerpt": "{editMode ? 'Use the screen tabs to open a page, then tap editable text in the phone to select its matching field.' : 'Rendered using the current draf",
+          "classification": "CONTEXT_REVIEW: technical comments, input examples and isolated preview fixtures are not live records"
+        },
+        {
+          "line": 163,
+          "excerpt": "<Text style={{ color: muted, fontSize: 10, marginTop: 6 }}>Draft preview \u00b7 Sample data only \u00b7 Fixtures apply to group/card pages; no order, card or pa",
+          "classification": "CONTEXT_REVIEW: technical comments, input examples and isolated preview fixtures are not live records"
+        }
+      ]
+    },
+    {
+      "file": "src/features/admin/screens/content/CustomerPageEditorScreen.tsx",
+      "sha256": "98b3cc85563187cf62dec54d611ca0545c6bd8ed9e93e3b4cd3bf9a22e2e3c99",
+      "lines": 533,
+      "commentTokens": 2,
+      "controls": [
+        {
+          "line": 332,
+          "owner": "CustomerPageEditorScreen",
+          "component": "OutlineBtn",
+          "event": "onPress",
+          "handler": "{() => go('content', { cs: 'Editor' })}",
+          "disabled": null,
+          "verification": "SOURCE_TRACE; hosted activation NOT VERIFIED"
+        },
+        {
+          "line": 333,
+          "owner": "CustomerPageEditorScreen",
+          "component": "OutlineBtn",
+          "event": "onPress",
+          "handler": "{() => { void reload(); }}",
+          "disabled": "{loading}",
+          "verification": "SOURCE_TRACE; hosted activation NOT VERIFIED"
+        },
+        {
+          "line": 334,
+          "owner": "CustomerPageEditorScreen",
+          "component": "OutlineBtn",
+          "event": "onPress",
+          "handler": "{startBlankDraft}",
+          "disabled": "{!can(...REQ.content)}",
+          "verification": "SOURCE_TRACE; hosted activation NOT VERIFIED"
+        },
+        {
+          "line": 342,
+          "owner": "CustomerPageEditorScreen",
+          "component": "SelectMenu",
+          "event": "onChange",
+          "handler": "{(group) => {\n            const nextGroup = group as 'Main' | 'Services';\n            setPageGroup(nextGroup);\n            const first = nextGroup === 'Main' ? 'Authentication pages' : 'Goodies';\n            setPageChoice(first);\n            if (first === 'Authentication pages') {\n              setP",
+          "disabled": null,
+          "verification": "SOURCE_TRACE; hosted activation NOT VERIFIED"
+        },
+        {
+          "line": 366,
+          "owner": "CustomerPageEditorScreen",
+          "component": "SelectMenu",
+          "event": "onChange",
+          "handler": "{(label) => {\n            setPageChoice(label);\n            setPageStack([]);\n            setElementKey('');\n            setActualAuthEditor(label === 'Authentication pages');\n            setActualGoodiesPreview(label === 'Goodies');\n            const keyByLabel: Record<string, string> = {\n         ",
+          "disabled": null,
+          "verification": "SOURCE_TRACE; hosted activation NOT VERIFIED"
+        },
+        {
+          "line": 408,
+          "owner": "CustomerPageEditorScreen",
+          "component": "SelectMenu",
+          "event": "onChange",
+          "handler": "{(next) => {\n              // Match the original Edit and Preview controls: change mode and reset\n              // only the navigation stack, preserving the selected page and element.\n              setPageStack([]);\n              if (next === 'Published') {\n                setViewMode('Published');\n",
+          "disabled": null,
+          "verification": "SOURCE_TRACE; hosted activation NOT VERIFIED"
+        },
+        {
+          "line": 449,
+          "owner": "CustomerPageEditorScreen",
+          "component": "Pill",
+          "event": "onPress",
+          "handler": "{() => { setPageKey(key); setPageStack([]); setElementKey(''); }}",
+          "disabled": null,
+          "verification": "SOURCE_TRACE; hosted activation NOT VERIFIED"
+        },
+        {
+          "line": 450,
+          "owner": "CustomerPageEditorScreen",
+          "component": "OutlineBtn",
+          "event": "onPress",
+          "handler": "{addPage}",
+          "disabled": "{!editable}",
+          "verification": "SOURCE_TRACE; hosted activation NOT VERIFIED"
+        },
+        {
+          "line": 455,
+          "owner": "CustomerPageEditorScreen",
+          "component": "TextInput",
+          "event": "onChangeText",
+          "handler": "{updatePageTitle}",
+          "disabled": null,
+          "verification": "SOURCE_TRACE; hosted activation NOT VERIFIED"
+        },
+        {
+          "line": 461,
+          "owner": "CustomerPageEditorScreen",
+          "component": "Object-based control/form/list action",
+          "event": "onPress",
+          "handler": "() => setElementKey(id)",
+          "verification": "SOURCE_TRACE; hosted activation NOT VERIFIED"
+        },
+        {
+          "line": 470,
+          "owner": "CustomerPageEditorScreen",
+          "component": "TextInput",
+          "event": "onChangeText",
+          "handler": "{(value) => updateElement(field, value)}",
+          "disabled": null,
+          "verification": "SOURCE_TRACE; hosted activation NOT VERIFIED"
+        },
+        {
+          "line": 474,
+          "owner": "CustomerPageEditorScreen",
+          "component": "OutlineBtn",
+          "event": "onPress",
+          "handler": "{() => moveElement(-1)}",
+          "disabled": "{!editable}",
+          "verification": "SOURCE_TRACE; hosted activation NOT VERIFIED"
+        },
+        {
+          "line": 475,
+          "owner": "CustomerPageEditorScreen",
+          "component": "OutlineBtn",
+          "event": "onPress",
+          "handler": "{() => moveElement(1)}",
+          "disabled": "{!editable}",
+          "verification": "SOURCE_TRACE; hosted activation NOT VERIFIED"
+        },
+        {
+          "line": 476,
+          "owner": "CustomerPageEditorScreen",
+          "component": "OutlineBtn",
+          "event": "onPress",
+          "handler": "{toggleElement}",
+          "disabled": "{!editable}",
+          "verification": "SOURCE_TRACE; hosted activation NOT VERIFIED"
+        },
+        {
+          "line": 481,
+          "owner": "CustomerPageEditorScreen",
+          "component": "OutlineBtn",
+          "event": "onPress",
+          "handler": "{() => addElement('text')}",
+          "disabled": "{!editable}",
+          "verification": "SOURCE_TRACE; hosted activation NOT VERIFIED"
+        },
+        {
+          "line": 482,
+          "owner": "CustomerPageEditorScreen",
+          "component": "OutlineBtn",
+          "event": "onPress",
+          "handler": "{() => addElement('card')}",
+          "disabled": "{!editable}",
+          "verification": "SOURCE_TRACE; hosted activation NOT VERIFIED"
+        },
+        {
+          "line": 492,
+          "owner": "CustomerPageEditorScreen",
+          "component": "TextInput",
+          "event": "onChangeText",
+          "handler": "{(value) => { setJson(value); setError(''); }}",
+          "disabled": null,
+          "verification": "SOURCE_TRACE; hosted activation NOT VERIFIED"
+        },
+        {
+          "line": 501,
+          "owner": "CustomerPageEditorScreen",
+          "component": "OutlineBtn",
+          "event": "onPress",
+          "handler": "{() => { setJson(JSON.stringify(selected.payload, null, 2)); setError(''); }}",
+          "disabled": "{!editable}",
+          "verification": "SOURCE_TRACE; hosted activation NOT VERIFIED"
+        },
+        {
+          "line": 502,
+          "owner": "CustomerPageEditorScreen",
+          "component": "OutlineBtn",
+          "event": "onPress",
+          "handler": "{() => { void createDraft(); }}",
+          "disabled": "{saving || !editable}",
+          "verification": "SOURCE_TRACE; hosted activation NOT VERIFIED"
+        },
+        {
+          "line": 503,
+          "owner": "CustomerPageEditorScreen",
+          "component": "OutlineBtn",
+          "event": "onPress",
+          "handler": "{() => setConfirmPublish(true)}",
+          "disabled": "{!selected || selected.id === 'local-new' || selected.status !== 'draft' || !can(...REQ.publish) || publishing || editable && Boolean(parsedDraft && JSON.stringify(parsedDraft) !== JSON.stringify(selected.payload))}",
+          "verification": "SOURCE_TRACE; hosted activation NOT VERIFIED"
+        },
+        {
+          "line": 510,
+          "owner": "CustomerPageEditorScreen",
+          "component": "OutlineBtn",
+          "event": "onPress",
+          "handler": "{() => { void publishSelected(); }}",
+          "disabled": "{publishing}",
+          "verification": "SOURCE_TRACE; hosted activation NOT VERIFIED"
+        },
+        {
+          "line": 511,
+          "owner": "CustomerPageEditorScreen",
+          "component": "OutlineBtn",
+          "event": "onPress",
+          "handler": "{() => setConfirmPublish(false)}",
+          "disabled": "{publishing}",
+          "verification": "SOURCE_TRACE; hosted activation NOT VERIFIED"
+        },
+        {
+          "line": 527,
+          "owner": "CustomerPageEditorScreen",
+          "component": "Object-based control/form/list action",
+          "event": "onPress",
+          "handler": "() => openRow(row)",
+          "verification": "SOURCE_TRACE; hosted activation NOT VERIFIED"
+        }
+      ],
+      "rpc": [],
+      "navigation": [
+        {
+          "line": 332,
+          "owner": "CustomerPageEditorScreen",
+          "target": "content",
+          "registered": true,
+          "verification": "SOURCE_TRACE"
+        }
+      ],
+      "markers": [
+        {
+          "line": 455,
+          "excerpt": "<TextInput value={String(page.title || '')} onChangeText={updatePageTitle} editable={editable} style={fieldStyle} placeholder=\"Page title\" />",
+          "classification": "CONTEXT_REVIEW: technical comments, input examples and isolated preview fixtures are not live records"
+        },
+        {
+          "line": 470,
+          "excerpt": "<TextInput value={String(element[field] ?? '')} onChangeText={(value) => updateElement(field, value)} editable={editable} style={fieldStyle} placehold",
+          "classification": "CONTEXT_REVIEW: technical comments, input examples and isolated preview fixtures are not live records"
+        }
+      ]
+    },
+    {
+      "file": "src/features/admin/screens/content/ContentScreen.tsx",
+      "sha256": "8d5d1bd3ef739d4de07ffc01edb22325cf43f038e20c8477f04bc315aa23bcbf",
+      "lines": 432,
+      "commentTokens": 1,
+      "controls": [
+        {
+          "line": 89,
+          "owner": "newContent",
+          "component": "Object-based control/form/list action",
+          "event": "onSubmit",
+          "handler": "async (_key, values) => {\n      let payload: Record<string, unknown>;\n      try { payload = JSON.parse(String(values.payload || '{}')); }\n      catch { return 'Content payload must be valid JSON.'; }\n      if (!payload || Array.isArray(payload) || typeof payload !== 'object') return 'Content payload",
+          "verification": "SOURCE_TRACE; hosted activation NOT VERIFIED"
+        },
+        {
+          "line": 125,
+          "owner": "pickAsset",
+          "component": "Object-based control/form/list action",
+          "event": "onSubmit",
+          "handler": "async (_key, values) => {\n          setBusy(true);\n          try {\n            const id = await uploadCmsAsset({\n              key: [String(values.feature).toLowerCase().replace(/[^a-z0-9]+/g, '.'), String(values.placement).toLowerCase().replace(/[^a-z0-9]+/g, '.'), String(values.key).replace(/^[.]+",
+          "verification": "SOURCE_TRACE; hosted activation NOT VERIFIED"
+        },
+        {
+          "line": 158,
+          "owner": "cloneStatus",
+          "component": "Object-based control/form/list action",
+          "event": "onSubmit",
+          "handler": "async (_key, values) => {\n      try {\n        if (status === 'published') await publishCmsVersion(row.id);\n        else if (status === 'archived') await archiveCmsVersion(row.id);\n        else await saveCmsVersion({ key: row.content_key, locale: row.locale, payload: row.payload, status: 'draft' });\n",
+          "verification": "SOURCE_TRACE; hosted activation NOT VERIFIED"
+        },
+        {
+          "line": 204,
+          "owner": "openQuickCreate",
+          "component": "QuickCreateSheet",
+          "event": "onClose",
+          "handler": "{close}",
+          "disabled": null,
+          "verification": "SOURCE_TRACE; hosted activation NOT VERIFIED"
+        },
+        {
+          "line": 212,
+          "owner": "stageContentDraft",
+          "component": "Object-based control/form/list action",
+          "event": "onSubmit",
+          "handler": "async (_key, values) => {\n        const reason = String(values.reason || '').trim();\n        if (!reason) return 'Enter a reason for the audit trail.';\n        try {\n          await saveCmsVersion({ key: 'admin.' + kind + '.' + id, locale: 'en', payload: { ...payload, proposed_only: true, change_rea",
+          "verification": "SOURCE_TRACE; hosted activation NOT VERIFIED"
+        },
+        {
+          "line": 239,
+          "owner": "editBannerDraft",
+          "component": "Object-based control/form/list action",
+          "event": "onSubmit",
+          "handler": "async (_key, values) => {\n        const title = String(values.title || '').trim();\n        if (!title) return 'Enter a title.';\n        if (values.from && values.to && String(values.to) < String(values.from)) return 'End date cannot be before start date.';\n        try {\n          await saveCmsVersio",
+          "verification": "SOURCE_TRACE; hosted activation NOT VERIFIED"
+        },
+        {
+          "line": 265,
+          "owner": "editPromotionDraft",
+          "component": "Object-based control/form/list action",
+          "event": "onSubmit",
+          "handler": "async (_key, values) => {\n        if (String(values.to || '') < String(values.from || '')) return 'End date cannot be before start date.';\n        try {\n          await saveCmsVersion({ key: 'admin.promotion.' + promotion.id, locale: 'en', payload: { id: promotion.id, type: 'promotion', ...values, p",
+          "verification": "SOURCE_TRACE; hosted activation NOT VERIFIED"
+        },
+        {
+          "line": 285,
+          "owner": "editAnnouncementDraft",
+          "component": "Object-based control/form/list action",
+          "event": "onSubmit",
+          "handler": "async (_key, values) => {\n        try {\n          await saveCmsVersion({ key: 'admin.announcement.' + announcement.id, locale: 'en', payload: { id: announcement.id, type: 'announcement', title: values.title, audience: values.audience, schedule_date: values.date, proposed_only: true }, status: 'draft",
+          "verification": "SOURCE_TRACE; hosted activation NOT VERIFIED"
+        },
+        {
+          "line": 297,
+          "owner": "ContentScreen",
+          "component": "OutlineBtn",
+          "event": "onPress",
+          "handler": "{() => { void reload(); }}",
+          "disabled": "{loading}",
+          "verification": "SOURCE_TRACE; hosted activation NOT VERIFIED"
+        },
+        {
+          "line": 300,
+          "owner": "ContentScreen",
+          "component": "OutlineBtn",
+          "event": "onPress",
+          "handler": "{() => go('editor')}",
+          "disabled": null,
+          "verification": "SOURCE_TRACE; hosted activation NOT VERIFIED"
+        },
+        {
+          "line": 302,
+          "owner": "ContentScreen",
+          "component": "SelectMenu",
+          "event": "onChange",
+          "handler": "{changeSection}",
+          "disabled": null,
+          "verification": "SOURCE_TRACE; hosted activation NOT VERIFIED"
+        },
+        {
+          "line": 306,
+          "owner": "ContentScreen",
+          "component": "OutlineBtn",
+          "event": "onPress",
+          "handler": "{openQuickCreate}",
+          "disabled": null,
+          "verification": "SOURCE_TRACE; hosted activation NOT VERIFIED"
+        },
+        {
+          "line": 315,
+          "owner": "ContentScreen",
+          "component": "Object-based control/form/list action",
+          "event": "onPress",
+          "handler": "() => editBannerDraft(banner)",
+          "verification": "SOURCE_TRACE; hosted activation NOT VERIFIED"
+        },
+        {
+          "line": 318,
+          "owner": "ContentScreen",
+          "component": "OutlineBtn",
+          "event": "onPress",
+          "handler": "{openQuickCreate}",
+          "disabled": null,
+          "verification": "SOURCE_TRACE; hosted activation NOT VERIFIED"
+        },
+        {
+          "line": 322,
+          "owner": "ContentScreen",
+          "component": "Object-based control/form/list action",
+          "event": "onPress",
+          "handler": "() => editPromotionDraft(promotion)",
+          "verification": "SOURCE_TRACE; hosted activation NOT VERIFIED"
+        },
+        {
+          "line": 325,
+          "owner": "ContentScreen",
+          "component": "OutlineBtn",
+          "event": "onPress",
+          "handler": "{openQuickCreate}",
+          "disabled": null,
+          "verification": "SOURCE_TRACE; hosted activation NOT VERIFIED"
+        },
+        {
+          "line": 329,
+          "owner": "ContentScreen",
+          "component": "Object-based control/form/list action",
+          "event": "onPress",
+          "handler": "() => editAnnouncementDraft(announcement)",
+          "verification": "SOURCE_TRACE; hosted activation NOT VERIFIED"
+        },
+        {
+          "line": 335,
+          "owner": "ContentScreen",
+          "component": "OutlineBtn",
+          "event": "onPress",
+          "handler": "{openQuickCreate}",
+          "disabled": null,
+          "verification": "SOURCE_TRACE; hosted activation NOT VERIFIED"
+        },
+        {
+          "line": 336,
+          "owner": "ContentScreen",
+          "component": "OutlineBtn",
+          "event": "onPress",
+          "handler": "{() => editBannerDraft(banner)}",
+          "disabled": null,
+          "verification": "SOURCE_TRACE; hosted activation NOT VERIFIED"
+        },
+        {
+          "line": 336,
+          "owner": "ContentScreen",
+          "component": "Object-based control/form/list action",
+          "event": "onPress",
+          "handler": "() => editBannerDraft(banner)",
+          "verification": "SOURCE_TRACE; hosted activation NOT VERIFIED"
+        },
+        {
+          "line": 339,
+          "owner": "ContentScreen",
+          "component": "OutlineBtn",
+          "event": "onPress",
+          "handler": "{openQuickCreate}",
+          "disabled": null,
+          "verification": "SOURCE_TRACE; hosted activation NOT VERIFIED"
+        },
+        {
+          "line": 340,
+          "owner": "ContentScreen",
+          "component": "OutlineBtn",
+          "event": "onPress",
+          "handler": "{() => editPromotionDraft(promotion)}",
+          "disabled": null,
+          "verification": "SOURCE_TRACE; hosted activation NOT VERIFIED"
+        },
+        {
+          "line": 340,
+          "owner": "ContentScreen",
+          "component": "Object-based control/form/list action",
+          "event": "onPress",
+          "handler": "() => editPromotionDraft(promotion)",
+          "verification": "SOURCE_TRACE; hosted activation NOT VERIFIED"
+        },
+        {
+          "line": 343,
+          "owner": "ContentScreen",
+          "component": "OutlineBtn",
+          "event": "onPress",
+          "handler": "{openQuickCreate}",
+          "disabled": null,
+          "verification": "SOURCE_TRACE; hosted activation NOT VERIFIED"
+        },
+        {
+          "line": 344,
+          "owner": "ContentScreen",
+          "component": "OutlineBtn",
+          "event": "onPress",
+          "handler": "{() => editAnnouncementDraft(announcement)}",
+          "disabled": null,
+          "verification": "SOURCE_TRACE; hosted activation NOT VERIFIED"
+        },
+        {
+          "line": 344,
+          "owner": "ContentScreen",
+          "component": "Object-based control/form/list action",
+          "event": "onPress",
+          "handler": "() => editAnnouncementDraft(announcement)",
+          "verification": "SOURCE_TRACE; hosted activation NOT VERIFIED"
+        },
+        {
+          "line": 350,
+          "owner": "ContentScreen",
+          "component": "Object-based control/form/list action",
+          "event": "onPress",
+          "handler": "() => editBannerDraft(banner)",
+          "verification": "SOURCE_TRACE; hosted activation NOT VERIFIED"
+        },
+        {
+          "line": 351,
+          "owner": "ContentScreen",
+          "component": "Object-based control/form/list action",
+          "event": "onPress",
+          "handler": "() => editBannerDraft(banner)",
+          "verification": "SOURCE_TRACE; hosted activation NOT VERIFIED"
+        },
+        {
+          "line": 353,
+          "owner": "ContentScreen",
+          "component": "Object-based control/form/list action",
+          "event": "onPress",
+          "handler": "() => editPromotionDraft(promotion)",
+          "verification": "SOURCE_TRACE; hosted activation NOT VERIFIED"
+        },
+        {
+          "line": 354,
+          "owner": "ContentScreen",
+          "component": "Object-based control/form/list action",
+          "event": "onPress",
+          "handler": "() => editAnnouncementDraft(announcement)",
+          "verification": "SOURCE_TRACE; hosted activation NOT VERIFIED"
+        },
+        {
+          "line": 360,
+          "owner": "ContentScreen",
+          "component": "OutlineBtn",
+          "event": "onPress",
+          "handler": "{() => stageContentDraft('approval.' + banner.id, banner.id, { item_type: 'banner', proposed_action: 'review', item_id: banner.id })}",
+          "disabled": null,
+          "verification": "SOURCE_TRACE; hosted activation NOT VERIFIED"
+        },
+        {
+          "line": 361,
+          "owner": "ContentScreen",
+          "component": "OutlineBtn",
+          "event": "onPress",
+          "handler": "{() => stageContentDraft('approval.' + promotion.id, promotion.id, { item_type: 'promotion', proposed_action: 'review', item_id: promotion.id })}",
+          "disabled": null,
+          "verification": "SOURCE_TRACE; hosted activation NOT VERIFIED"
+        },
+        {
+          "line": 376,
+          "owner": "ContentScreen",
+          "component": "Object-based control/form/list action",
+          "event": "onPress",
+          "handler": "() => stageContentDraft('media', String(index), { media_key: media[0], used_in: media[1] })",
+          "verification": "SOURCE_TRACE; hosted activation NOT VERIFIED"
+        },
+        {
+          "line": 379,
+          "owner": "ContentScreen",
+          "component": "OutlineBtn",
+          "event": "onPress",
+          "handler": "{() => { void pickAsset(); }}",
+          "disabled": "{busy}",
+          "verification": "SOURCE_TRACE; hosted activation NOT VERIFIED"
+        },
+        {
+          "line": 380,
+          "owner": "ContentScreen",
+          "component": "OutlineBtn",
+          "event": "onPress",
+          "handler": "{() => { void reload(); }}",
+          "disabled": "{busy}",
+          "verification": "SOURCE_TRACE; hosted activation NOT VERIFIED"
+        },
+        {
+          "line": 383,
+          "owner": "ContentScreen",
+          "component": "TextInput",
+          "event": "onChangeText",
+          "handler": "{setAssetSearch}",
+          "disabled": null,
+          "verification": "SOURCE_TRACE; hosted activation NOT VERIFIED"
+        },
+        {
+          "line": 384,
+          "owner": "ContentScreen",
+          "component": "SelectMenu",
+          "event": "onChange",
+          "handler": "{setAssetFeature}",
+          "disabled": null,
+          "verification": "SOURCE_TRACE; hosted activation NOT VERIFIED"
+        },
+        {
+          "line": 385,
+          "owner": "ContentScreen",
+          "component": "SelectMenu",
+          "event": "onChange",
+          "handler": "{setAssetPlacement}",
+          "disabled": null,
+          "verification": "SOURCE_TRACE; hosted activation NOT VERIFIED"
+        },
+        {
+          "line": 391,
+          "owner": "ContentScreen",
+          "component": "OutlineBtn",
+          "event": "onPress",
+          "handler": "{() => { void setAssetStatus(asset, 'published'); }}",
+          "disabled": null,
+          "verification": "SOURCE_TRACE; hosted activation NOT VERIFIED"
+        },
+        {
+          "line": 392,
+          "owner": "ContentScreen",
+          "component": "OutlineBtn",
+          "event": "onPress",
+          "handler": "{() => { void setAssetStatus(asset, 'archived'); }}",
+          "disabled": null,
+          "verification": "SOURCE_TRACE; hosted activation NOT VERIFIED"
+        },
+        {
+          "line": 402,
+          "owner": "ContentScreen",
+          "component": "SelectMenu",
+          "event": "onChange",
+          "handler": "{(group) => {\n          setEditorGroup(group);\n          setCustomerFeature(group === 'Main' ? 'Authentication pages' : 'Goodies');\n        }}",
+          "disabled": null,
+          "verification": "SOURCE_TRACE; hosted activation NOT VERIFIED"
+        },
+        {
+          "line": 406,
+          "owner": "ContentScreen",
+          "component": "FeaturePicker",
+          "event": "onChange",
+          "handler": "{setCustomerFeature}",
+          "disabled": null,
+          "verification": "SOURCE_TRACE; hosted activation NOT VERIFIED"
+        },
+        {
+          "line": 407,
+          "owner": "ContentScreen",
+          "component": "OutlineBtn",
+          "event": "onPress",
+          "handler": "{() => go('editor', { editorFeature: editorTarget(customerFeature) })}",
+          "disabled": null,
+          "verification": "SOURCE_TRACE; hosted activation NOT VERIFIED"
+        },
+        {
+          "line": 412,
+          "owner": "ContentScreen",
+          "component": "OutlineBtn",
+          "event": "onPress",
+          "handler": "{() => { newContent(); }}",
+          "disabled": null,
+          "verification": "SOURCE_TRACE; hosted activation NOT VERIFIED"
+        },
+        {
+          "line": 413,
+          "owner": "ContentScreen",
+          "component": "OutlineBtn",
+          "event": "onPress",
+          "handler": "{() => { void pickAsset(); }}",
+          "disabled": "{busy}",
+          "verification": "SOURCE_TRACE; hosted activation NOT VERIFIED"
+        },
+        {
+          "line": 414,
+          "owner": "ContentScreen",
+          "component": "OutlineBtn",
+          "event": "onPress",
+          "handler": "{() => { void reload(); }}",
+          "disabled": "{busy}",
+          "verification": "SOURCE_TRACE; hosted activation NOT VERIFIED"
+        },
+        {
+          "line": 423,
+          "owner": "ContentScreen",
+          "component": "OutlineBtn",
+          "event": "onPress",
+          "handler": "{() => cloneStatus(row, 'published')}",
+          "disabled": null,
+          "verification": "SOURCE_TRACE; hosted activation NOT VERIFIED"
+        },
+        {
+          "line": 424,
+          "owner": "ContentScreen",
+          "component": "OutlineBtn",
+          "event": "onPress",
+          "handler": "{() => cloneStatus(row, 'archived')}",
+          "disabled": null,
+          "verification": "SOURCE_TRACE; hosted activation NOT VERIFIED"
+        }
+      ],
+      "rpc": [],
+      "navigation": [
+        {
+          "line": 300,
+          "owner": "ContentScreen",
+          "target": "editor",
+          "registered": true,
+          "verification": "SOURCE_TRACE"
+        },
+        {
+          "line": 407,
+          "owner": "ContentScreen",
+          "target": "editor",
+          "registered": true,
+          "verification": "SOURCE_TRACE"
+        }
+      ],
+      "markers": [
+        {
+          "line": 84,
+          "excerpt": "{ id: 'key', label: 'Content key', type: 'text', required: true, placeholder: 'goodies.home.hero' },",
+          "classification": "CONTEXT_REVIEW: technical comments, input examples and isolated preview fixtures are not live records"
+        },
+        {
+          "line": 169,
+          "excerpt": "const prototypeSnapshot = dataMode === 'prototype';",
+          "classification": "CONTEXT_REVIEW: technical comments, input examples and isolated preview fixtures are not live records"
+        },
+        {
+          "line": 383,
+          "excerpt": "<TextInput value={assetSearch} onChangeText={setAssetSearch} placeholder=\"Search asset key, feature, placement\u2026\" placeholderTextColor={c.mut} style={{",
+          "classification": "CONTEXT_REVIEW: technical comments, input examples and isolated preview fixtures are not live records"
+        }
+      ]
+    },
+    {
+      "file": "src/features/admin/screens/content/builderImages.ts",
+      "sha256": "2718a2f9e3a552d2e60ceb20ff15ed7520afb3b63a4ba56989bf109f54d5cccd",
+      "lines": 50,
+      "commentTokens": 3,
+      "controls": [],
+      "rpc": [],
+      "navigation": [],
+      "markers": []
+    },
+    {
+      "file": "src/features/admin/lib/adminBackend.ts",
+      "sha256": "00d3699f40558c09683d22bd5f7f8c63395bbe666e06ccd1ff88863a76da18f5",
+      "lines": 309,
+      "commentTokens": 4,
+      "controls": [],
+      "rpc": [
+        {
+          "line": 90,
+          "owner": "loadAdminDomain",
+          "name": "wantiss_admin_dashboard_snapshot"
+        },
+        {
+          "line": 96,
+          "owner": "listApplicationBusinesses",
+          "name": "wantiss_admin_application_businesses"
+        },
+        {
+          "line": 100,
+          "owner": "assignApplicationBusiness",
+          "name": "wantiss_admin_assign_business_application"
+        },
+        {
+          "line": 104,
+          "owner": "reviewBusinessApplication",
+          "name": "wantiss_admin_review_business_application"
+        },
+        {
+          "line": 130,
+          "owner": "setBusinessApplicationDocumentStatus",
+          "name": "wantiss_admin_set_application_document_status"
+        },
+        {
+          "line": 142,
+          "owner": "setBusinessVerification",
+          "name": "wantiss_admin_set_business_verification"
+        },
+        {
+          "line": 149,
+          "owner": "saveCmsVersion",
+          "name": "wantiss_admin_save_cms_draft"
+        },
+        {
+          "line": 191,
+          "owner": "uploadCmsAsset",
+          "name": "wantiss_admin_upsert_asset"
+        },
+        {
+          "line": 207,
+          "owner": "publishCmsVersion",
+          "name": "wantiss_admin_publish_cms_version"
+        },
+        {
+          "line": 210,
+          "owner": "archiveCmsVersion",
+          "name": "wantiss_admin_archive_cms_version"
+        },
+        {
+          "line": 213,
+          "owner": "publishCmsAsset",
+          "name": "wantiss_admin_set_cms_asset_status"
+        },
+        {
+          "line": 216,
+          "owner": "archiveCmsAsset",
+          "name": "wantiss_admin_set_cms_asset_status"
+        },
+        {
+          "line": 244,
+          "owner": "applyAccountRestriction",
+          "name": "wantiss_admin_apply_account_restriction"
+        },
+        {
+          "line": 252,
+          "owner": "liftAccountRestriction",
+          "name": "wantiss_admin_lift_account_restriction"
+        },
+        {
+          "line": 258,
+          "owner": "updateAccountRestriction",
+          "name": "wantiss_admin_update_account_restriction"
+        },
+        {
+          "line": 289,
+          "owner": "requestFinancialAction",
+          "name": "wantiss_admin_request_financial_action"
+        },
+        {
+          "line": 298,
+          "owner": "reviewFinancialAction",
+          "name": "wantiss_admin_review_financial_action"
+        },
+        {
+          "line": 305,
+          "owner": "recordRestrictionAppeal",
+          "name": "wantiss_admin_record_restriction_appeal"
+        }
+      ],
+      "navigation": [],
+      "markers": []
+    },
+    {
+      "file": "src/features/admin/lib/hydrateAdminState.ts",
+      "sha256": "50616be07a71bd1dced3b927c101e3d4470c90101d086d0f16c781e08e1edb08",
+      "lines": 120,
+      "commentTokens": 0,
+      "controls": [],
+      "rpc": [
+        {
+          "line": 57,
+          "owner": "hydrateAdminState",
+          "name": "wantiss_admin_audit_read"
+        }
+      ],
+      "navigation": [],
+      "markers": []
+    },
+    {
+      "file": "src/features/admin/lib/goodiesBuilderSelection.ts",
+      "sha256": "6a28ae06b8c8b6fd94fa065f8d941fb2f077e1f65b1eb0874f415cd98ccfe0ca",
+      "lines": 9,
+      "commentTokens": 1,
+      "controls": [],
+      "rpc": [],
+      "navigation": [],
+      "markers": []
+    },
+    {
+      "file": "src/features/admin/lib/goodiesIngredientRequests.ts",
+      "sha256": "4299e5039eb1d6f7b4c9d7101c50b6fb256e64378e8c3a5f488b8ae22605ff0b",
+      "lines": 16,
+      "commentTokens": 1,
+      "controls": [],
+      "rpc": [
+        {
+          "line": 7,
+          "owner": "loadAllGoodiesIngredientRequests",
+          "name": "wantiss_admin_list_ingredient_requests_page"
+        }
+      ],
+      "navigation": [],
+      "markers": []
+    },
+    {
+      "file": "src/features/admin/lib/goodiesDeliveryProof.ts",
+      "sha256": "a04c3b161e4df7f21aa28834652a153f89f3dee27d6ee6c53130c3e14055e6e7",
+      "lines": 14,
+      "commentTokens": 1,
+      "controls": [],
+      "rpc": [],
+      "navigation": [],
+      "markers": []
+    },
+    {
+      "file": "src/features/admin/ui/AdminSnapshotBoundary.tsx",
+      "sha256": "c3713fa0276ee114b1eb6667d748e37ba7d34ad22b3ffa7eb72bf1715aece12c",
+      "lines": 27,
+      "commentTokens": 1,
+      "controls": [
+        {
+          "line": 24,
+          "owner": "AdminSnapshotBoundary",
+          "component": "OutlineBtn",
+          "event": "onPress",
+          "handler": "{() => { void retry(); }}",
+          "disabled": "{retrying}",
+          "verification": "SOURCE_TRACE; hosted activation NOT VERIFIED"
+        }
+      ],
+      "rpc": [],
+      "navigation": [],
+      "markers": []
+    },
+    {
+      "file": "src/features/admin/screens/ecosystem/BusinessDetailsScreen.tsx",
+      "sha256": "415fc4fe0613e8fa44983124e5cece1d2e22fff49519a958a5485a36f6a122f9",
+      "lines": 122,
+      "commentTokens": 1,
+      "controls": [
+        {
+          "line": 42,
+          "owner": "changeVerification",
+          "component": "Object-based control/form/list action",
+          "event": "onSubmit",
+          "handler": "async (_key, values) => {\n      if (!business) return 'The business record is no longer available.';\n      const reason = String(values.reason || '').trim();\n      if (!reason) return 'Enter a reason for the audit log.';\n      try {\n        await setBusinessVerification(business.id, next, reason);\n ",
+          "verification": "SOURCE_TRACE; hosted activation NOT VERIFIED"
+        },
+        {
+          "line": 59,
+          "owner": "BusinessDetailsScreen",
+          "component": "OutlineBtn",
+          "event": "onPress",
+          "handler": "{() => go('ecosystem')}",
+          "disabled": null,
+          "verification": "SOURCE_TRACE; hosted activation NOT VERIFIED"
+        },
+        {
+          "line": 69,
+          "owner": "BusinessDetailsScreen",
+          "component": "Object-based control/form/list action",
+          "event": "onPress",
+          "handler": "() => go('business', { businessId: row.id })",
+          "verification": "SOURCE_TRACE; hosted activation NOT VERIFIED"
+        },
+        {
+          "line": 76,
+          "owner": "BusinessDetailsScreen",
+          "component": "OutlineBtn",
+          "event": "onPress",
+          "handler": "{() => go('business', { businessId: '' })}",
+          "disabled": null,
+          "verification": "SOURCE_TRACE; hosted activation NOT VERIFIED"
+        },
+        {
+          "line": 97,
+          "owner": "BusinessDetailsScreen",
+          "component": "OutlineBtn",
+          "event": "onPress",
+          "handler": "{guard(REQ.ecosystem, () => changeVerification('verified', 'Verify', 'Verify business'))}",
+          "disabled": null,
+          "verification": "SOURCE_TRACE; hosted activation NOT VERIFIED"
+        },
+        {
+          "line": 98,
+          "owner": "BusinessDetailsScreen",
+          "component": "OutlineBtn",
+          "event": "onPress",
+          "handler": "{guard(REQ.ecosystem, () => changeVerification('pending', 'Withdraw verification for', 'Withdraw verification'))}",
+          "disabled": null,
+          "verification": "SOURCE_TRACE; hosted activation NOT VERIFIED"
+        },
+        {
+          "line": 99,
+          "owner": "BusinessDetailsScreen",
+          "component": "OutlineBtn",
+          "event": "onPress",
+          "handler": "{guard(REQ.ecosystem, () => changeVerification('restricted', 'Restrict', 'Restrict business'))}",
+          "disabled": null,
+          "verification": "SOURCE_TRACE; hosted activation NOT VERIFIED"
+        },
+        {
+          "line": 109,
+          "owner": "BusinessDetailsScreen",
+          "component": "Object-based control/form/list action",
+          "event": "onPress",
+          "handler": "() => go('operations', { oq: row.n })",
+          "verification": "SOURCE_TRACE; hosted activation NOT VERIFIED"
+        }
+      ],
+      "rpc": [],
+      "navigation": [
+        {
+          "line": 59,
+          "owner": "BusinessDetailsScreen",
+          "target": "ecosystem",
+          "registered": true,
+          "verification": "SOURCE_TRACE"
+        },
+        {
+          "line": 69,
+          "owner": "BusinessDetailsScreen",
+          "target": "business",
+          "registered": true,
+          "verification": "SOURCE_TRACE"
+        },
+        {
+          "line": 76,
+          "owner": "BusinessDetailsScreen",
+          "target": "business",
+          "registered": true,
+          "verification": "SOURCE_TRACE"
+        },
+        {
+          "line": 109,
+          "owner": "BusinessDetailsScreen",
+          "target": "operations",
+          "registered": true,
+          "verification": "SOURCE_TRACE"
+        }
+      ],
+      "markers": [
+        {
+          "line": 64,
+          "excerpt": "<ListRows empty={dataMode === 'prototype' ? 'Not connected yet.' : 'No business records loaded.'} rows={db.BIZ.map((row) => ({",
+          "classification": "CONTEXT_REVIEW: technical comments, input examples and isolated preview fixtures are not live records"
+        },
+        {
+          "line": 104,
+          "excerpt": "<ListRows empty={dataMode === 'prototype' ? 'Not connected yet.' : 'No applications for this business.'} rows={applications.map((row) => ({",
+          "classification": "CONTEXT_REVIEW: technical comments, input examples and isolated preview fixtures are not live records"
+        }
+      ]
+    },
+    {
+      "file": "src/features/admin/screens/ecosystem/EcosystemScreen.tsx",
+      "sha256": "e987239bab5003f06a3b0b90ec194182ff0396ef55d19c71e3c91774f2c2e1de",
+      "lines": 119,
+      "commentTokens": 0,
+      "controls": [
+        {
+          "line": 47,
+          "owner": "addService",
+          "component": "Object-based control/form/list action",
+          "event": "onSubmit",
+          "handler": "async (_k, v) => {\n      const name = String(v.n || '').trim();\n      const reason = String(v.reason || '').trim();\n      if (!name) return 'Enter a service name.';\n      if (!reason) return 'Enter a reason for the proposal.';\n      if (db.SVC.some((row) => row[0].toLowerCase() === name.toLowerCase(",
+          "verification": "SOURCE_TRACE; hosted activation NOT VERIFIED"
+        },
+        {
+          "line": 72,
+          "owner": "grid",
+          "component": "Pressable",
+          "event": "onPress",
+          "handler": "{() => go('hub', { hub: s[0] })}",
+          "disabled": null,
+          "verification": "SOURCE_TRACE; hosted activation NOT VERIFIED"
+        },
+        {
+          "line": 74,
+          "owner": "grid",
+          "component": "Pressable",
+          "event": "onPress",
+          "handler": "{() => { s[6] = s[6] ? 0 : 1; bump(); }}",
+          "disabled": null,
+          "verification": "SOURCE_TRACE; hosted activation NOT VERIFIED"
+        },
+        {
+          "line": 94,
+          "owner": "table",
+          "component": "Object-based control/form/list action",
+          "event": "onPress",
+          "handler": "() => go('hub', { hub: s[0] })",
+          "verification": "SOURCE_TRACE; hosted activation NOT VERIFIED"
+        },
+        {
+          "line": 101,
+          "owner": "EcosystemScreen",
+          "component": "Object-based control/form/list action",
+          "event": "onPress",
+          "handler": "() => go('business')",
+          "verification": "SOURCE_TRACE; hosted activation NOT VERIFIED"
+        },
+        {
+          "line": 102,
+          "owner": "EcosystemScreen",
+          "component": "Object-based control/form/list action",
+          "event": "onPress",
+          "handler": "() => go('operations')",
+          "verification": "SOURCE_TRACE; hosted activation NOT VERIFIED"
+        },
+        {
+          "line": 106,
+          "owner": "EcosystemScreen",
+          "component": "SearchInput",
+          "event": "onChangeText",
+          "handler": "{(v) => set('eq', v)}",
+          "disabled": null,
+          "verification": "SOURCE_TRACE; hosted activation NOT VERIFIED"
+        },
+        {
+          "line": 107,
+          "owner": "EcosystemScreen",
+          "component": "Chips",
+          "event": "onChange",
+          "handler": "{(v) => set('ec', v)}",
+          "disabled": null,
+          "verification": "SOURCE_TRACE; hosted activation NOT VERIFIED"
+        },
+        {
+          "line": 109,
+          "owner": "EcosystemScreen",
+          "component": "Pill",
+          "event": "onPress",
+          "handler": "{() => set('es', nextSort)}",
+          "disabled": null,
+          "verification": "SOURCE_TRACE; hosted activation NOT VERIFIED"
+        },
+        {
+          "line": 110,
+          "owner": "EcosystemScreen",
+          "component": "Seg",
+          "event": "onChange",
+          "handler": "{(v) => set('ev', v)}",
+          "disabled": null,
+          "verification": "SOURCE_TRACE; hosted activation NOT VERIFIED"
+        },
+        {
+          "line": 111,
+          "owner": "EcosystemScreen",
+          "component": "Pill",
+          "event": "onPress",
+          "handler": "{exportCsv}",
+          "disabled": null,
+          "verification": "SOURCE_TRACE; hosted activation NOT VERIFIED"
+        },
+        {
+          "line": 112,
+          "owner": "EcosystemScreen",
+          "component": "Btn",
+          "event": "onPress",
+          "handler": "{addService}",
+          "disabled": null,
+          "verification": "SOURCE_TRACE; hosted activation NOT VERIFIED"
+        },
+        {
+          "line": 113,
+          "owner": "EcosystemScreen",
+          "component": "Pill",
+          "event": "onPress",
+          "handler": "{() => go('business')}",
+          "disabled": null,
+          "verification": "SOURCE_TRACE; hosted activation NOT VERIFIED"
+        }
+      ],
+      "rpc": [],
+      "navigation": [
+        {
+          "line": 72,
+          "owner": "grid",
+          "target": "hub",
+          "registered": true,
+          "verification": "SOURCE_TRACE"
+        },
+        {
+          "line": 94,
+          "owner": "table",
+          "target": "hub",
+          "registered": true,
+          "verification": "SOURCE_TRACE"
+        },
+        {
+          "line": 101,
+          "owner": "EcosystemScreen",
+          "target": "business",
+          "registered": true,
+          "verification": "SOURCE_TRACE"
+        },
+        {
+          "line": 102,
+          "owner": "EcosystemScreen",
+          "target": "operations",
+          "registered": true,
+          "verification": "SOURCE_TRACE"
+        },
+        {
+          "line": 113,
+          "owner": "EcosystemScreen",
+          "target": "business",
+          "registered": true,
+          "verification": "SOURCE_TRACE"
+        }
+      ],
+      "markers": [
+        {
+          "line": 106,
+          "excerpt": "<Row><SearchInput value={ui.eq} onChangeText={(v) => set('eq', v)} placeholder=\"Search services\" /></Row>",
+          "classification": "CONTEXT_REVIEW: technical comments, input examples and isolated preview fixtures are not live records"
+        }
+      ]
+    },
+    {
+      "file": "src/features/admin/screens/ecosystem/ServiceHubScreen.tsx",
+      "sha256": "4ca7ef6b2cf4678f453e63c98362012ef5a0e9b08627eeb96d773e5e5e954542",
+      "lines": 70,
+      "commentTokens": 0,
+      "controls": [
+        {
+          "line": 35,
+          "owner": "ServiceHubScreen",
+          "component": "Pill",
+          "event": "onPress",
+          "handler": "{() => go('ecosystem')}",
+          "disabled": null,
+          "verification": "SOURCE_TRACE; hosted activation NOT VERIFIED"
+        },
+        {
+          "line": 39,
+          "owner": "ServiceHubScreen",
+          "component": "Object-based control/form/list action",
+          "event": "onPress",
+          "handler": "() => go('finance')",
+          "verification": "SOURCE_TRACE; hosted activation NOT VERIFIED"
+        },
+        {
+          "line": 40,
+          "owner": "ServiceHubScreen",
+          "component": "Object-based control/form/list action",
+          "event": "onPress",
+          "handler": "() => go('operations')",
+          "verification": "SOURCE_TRACE; hosted activation NOT VERIFIED"
+        },
+        {
+          "line": 49,
+          "owner": "ServiceHubScreen",
+          "component": "Object-based control/form/list action",
+          "event": "onPress",
+          "handler": "() => openModule(serviceName, module)",
+          "verification": "SOURCE_TRACE; hosted activation NOT VERIFIED"
+        },
+        {
+          "line": 59,
+          "owner": "ServiceHubScreen",
+          "component": "Object-based control/form/list action",
+          "event": "onPress",
+          "handler": "() => open('ban', banner.id)",
+          "verification": "SOURCE_TRACE; hosted activation NOT VERIFIED"
+        }
+      ],
+      "rpc": [],
+      "navigation": [
+        {
+          "line": 35,
+          "owner": "ServiceHubScreen",
+          "target": "ecosystem",
+          "registered": true,
+          "verification": "SOURCE_TRACE"
+        },
+        {
+          "line": 39,
+          "owner": "ServiceHubScreen",
+          "target": "finance",
+          "registered": true,
+          "verification": "SOURCE_TRACE"
+        },
+        {
+          "line": 40,
+          "owner": "ServiceHubScreen",
+          "target": "operations",
+          "registered": true,
+          "verification": "SOURCE_TRACE"
+        }
+      ],
+      "markers": []
+    },
+    {
+      "file": "src/features/admin/screens/ecosystem/useOpenModule.ts",
+      "sha256": "3e301780fe5256f28b93f098b805ebfd4973f8a4b27067fcb74eddd9e5471e4e",
+      "lines": 38,
+      "commentTokens": 4,
+      "controls": [],
+      "rpc": [],
+      "navigation": [
+        {
+          "line": 12,
+          "owner": "useOpenModule",
+          "target": "potssy",
+          "registered": true,
+          "verification": "SOURCE_TRACE"
+        },
+        {
+          "line": 31,
+          "owner": "useOpenModule",
+          "target": "goodies",
+          "registered": true,
+          "verification": "SOURCE_TRACE"
+        },
+        {
+          "line": 35,
+          "owner": "useOpenModule",
+          "target": "workspace",
+          "registered": true,
+          "verification": "SOURCE_TRACE"
+        }
+      ],
+      "markers": [
+        {
+          "line": 14,
+          "excerpt": "// Never route a Goodies module into the generic workspace's prototype records.",
+          "classification": "CONTEXT_REVIEW: technical comments, input examples and isolated preview fixtures are not live records"
+        }
+      ]
+    },
+    {
+      "file": "src/features/admin/screens/workspace/ServiceWorkspaceScreen.tsx",
+      "sha256": "40757612272c24860c9183b8d421da3d2d83fd3ee55e44d9ce6d50d1fc61ab55",
+      "lines": 142,
+      "commentTokens": 0,
+      "controls": [
+        {
+          "line": 67,
+          "owner": "ServiceWorkspaceScreen",
+          "component": "Pill",
+          "event": "onPress",
+          "handler": "{() => go('ecosystem')}",
+          "disabled": null,
+          "verification": "SOURCE_TRACE; hosted activation NOT VERIFIED"
+        },
+        {
+          "line": 71,
+          "owner": "ServiceWorkspaceScreen",
+          "component": "Object-based control/form/list action",
+          "event": "onPress",
+          "handler": "() => go('finance')",
+          "verification": "SOURCE_TRACE; hosted activation NOT VERIFIED"
+        },
+        {
+          "line": 72,
+          "owner": "ServiceWorkspaceScreen",
+          "component": "Object-based control/form/list action",
+          "event": "onPress",
+          "handler": "() => go('operations')",
+          "verification": "SOURCE_TRACE; hosted activation NOT VERIFIED"
+        },
+        {
+          "line": 76,
+          "owner": "ServiceWorkspaceScreen",
+          "component": "SelectMenu",
+          "event": "onChange",
+          "handler": "{setModule}",
+          "disabled": null,
+          "verification": "SOURCE_TRACE; hosted activation NOT VERIFIED"
+        },
+        {
+          "line": 76,
+          "owner": "ServiceWorkspaceScreen",
+          "component": "Pill",
+          "event": "onPress",
+          "handler": "{() => setModule(name)}",
+          "disabled": null,
+          "verification": "SOURCE_TRACE; hosted activation NOT VERIFIED"
+        },
+        {
+          "line": 83,
+          "owner": "ServiceWorkspaceScreen",
+          "component": "Object-based control/form/list action",
+          "event": "onPress",
+          "handler": "() => setModule(name)",
+          "verification": "SOURCE_TRACE; hosted activation NOT VERIFIED"
+        },
+        {
+          "line": 86,
+          "owner": "ServiceWorkspaceScreen",
+          "component": "Pill",
+          "event": "onPress",
+          "handler": "{() => go('operations')}",
+          "disabled": null,
+          "verification": "SOURCE_TRACE; hosted activation NOT VERIFIED"
+        },
+        {
+          "line": 88,
+          "owner": "ServiceWorkspaceScreen",
+          "component": "Object-based control/form/list action",
+          "event": "onPress",
+          "handler": "row.action",
+          "verification": "SOURCE_TRACE; hosted activation NOT VERIFIED"
+        },
+        {
+          "line": 95,
+          "owner": "ServiceWorkspaceScreen",
+          "component": "Chips",
+          "event": "onChange",
+          "handler": "{(value) => { ui.AR = value; bump(); }}",
+          "disabled": null,
+          "verification": "SOURCE_TRACE; hosted activation NOT VERIFIED"
+        },
+        {
+          "line": 117,
+          "owner": "ServiceWorkspaceScreen",
+          "component": "SearchInput",
+          "event": "onChangeText",
+          "handler": "{(value) => { ui.wq = value; bump(); }}",
+          "disabled": null,
+          "verification": "SOURCE_TRACE; hosted activation NOT VERIFIED"
+        },
+        {
+          "line": 118,
+          "owner": "ServiceWorkspaceScreen",
+          "component": "Pill",
+          "event": "onPress",
+          "handler": "{() => { ui.wq = ''; bump(); }}",
+          "disabled": null,
+          "verification": "SOURCE_TRACE; hosted activation NOT VERIFIED"
+        },
+        {
+          "line": 120,
+          "owner": "ServiceWorkspaceScreen",
+          "component": "Pill",
+          "event": "onPress",
+          "handler": "{() => { ui.wf = ui.wf === 'All' ? 'Pending' : 'All'; bump(); }}",
+          "disabled": null,
+          "verification": "SOURCE_TRACE; hosted activation NOT VERIFIED"
+        },
+        {
+          "line": 124,
+          "owner": "ServiceWorkspaceScreen",
+          "component": "Object-based control/form/list action",
+          "event": "onPress",
+          "handler": "row.action",
+          "verification": "SOURCE_TRACE; hosted activation NOT VERIFIED"
+        },
+        {
+          "line": 131,
+          "owner": "ServiceWorkspaceScreen",
+          "component": "OutlineBtn",
+          "event": "onPress",
+          "handler": "{() => go('operations')}",
+          "disabled": null,
+          "verification": "SOURCE_TRACE; hosted activation NOT VERIFIED"
+        },
+        {
+          "line": 132,
+          "owner": "ServiceWorkspaceScreen",
+          "component": "OutlineBtn",
+          "event": "onPress",
+          "handler": "{() => go('finance')}",
+          "disabled": null,
+          "verification": "SOURCE_TRACE; hosted activation NOT VERIFIED"
+        },
+        {
+          "line": 133,
+          "owner": "ServiceWorkspaceScreen",
+          "component": "OutlineBtn",
+          "event": "onPress",
+          "handler": "{() => go('people')}",
+          "disabled": null,
+          "verification": "SOURCE_TRACE; hosted activation NOT VERIFIED"
+        },
+        {
+          "line": 134,
+          "owner": "ServiceWorkspaceScreen",
+          "component": "OutlineBtn",
+          "event": "onPress",
+          "handler": "{() => go('content')}",
+          "disabled": null,
+          "verification": "SOURCE_TRACE; hosted activation NOT VERIFIED"
+        }
+      ],
+      "rpc": [],
+      "navigation": [
+        {
+          "line": 40,
+          "owner": "ServiceWorkspaceScreen",
+          "target": "content",
+          "registered": true,
+          "verification": "SOURCE_TRACE"
+        },
+        {
+          "line": 67,
+          "owner": "ServiceWorkspaceScreen",
+          "target": "ecosystem",
+          "registered": true,
+          "verification": "SOURCE_TRACE"
+        },
+        {
+          "line": 71,
+          "owner": "ServiceWorkspaceScreen",
+          "target": "finance",
+          "registered": true,
+          "verification": "SOURCE_TRACE"
+        },
+        {
+          "line": 72,
+          "owner": "ServiceWorkspaceScreen",
+          "target": "operations",
+          "registered": true,
+          "verification": "SOURCE_TRACE"
+        },
+        {
+          "line": 86,
+          "owner": "ServiceWorkspaceScreen",
+          "target": "operations",
+          "registered": true,
+          "verification": "SOURCE_TRACE"
+        },
+        {
+          "line": 131,
+          "owner": "ServiceWorkspaceScreen",
+          "target": "operations",
+          "registered": true,
+          "verification": "SOURCE_TRACE"
+        },
+        {
+          "line": 132,
+          "owner": "ServiceWorkspaceScreen",
+          "target": "finance",
+          "registered": true,
+          "verification": "SOURCE_TRACE"
+        },
+        {
+          "line": 133,
+          "owner": "ServiceWorkspaceScreen",
+          "target": "people",
+          "registered": true,
+          "verification": "SOURCE_TRACE"
+        },
+        {
+          "line": 134,
+          "owner": "ServiceWorkspaceScreen",
+          "target": "content",
+          "registered": true,
+          "verification": "SOURCE_TRACE"
+        }
+      ],
+      "markers": [
+        {
+          "line": 117,
+          "excerpt": "<View style={{ flex: 1, minWidth: 160 }}><SearchInput value={String(ui.wq || '')} onChangeText={(value) => { ui.wq = value; bump(); }} placeholder={'S",
+          "classification": "CONTEXT_REVIEW: technical comments, input examples and isolated preview fixtures are not live records"
+        }
+      ]
+    },
+    {
+      "file": "src/features/admin/screens/operations/OperationsScreen.tsx",
+      "sha256": "f585ddb64a42eff13a3e7a36834fabf76610425caa8146aff4b7fc753b2229ce",
+      "lines": 98,
+      "commentTokens": 0,
+      "controls": [
+        {
+          "line": 49,
+          "owner": "col",
+          "component": "Deal",
+          "event": "onPress",
+          "handler": "{() => open('app', a.id)}",
+          "disabled": null,
+          "verification": "SOURCE_TRACE; hosted activation NOT VERIFIED"
+        },
+        {
+          "line": 68,
+          "owner": "body",
+          "component": "Object-based control/form/list action",
+          "event": "onPress",
+          "handler": "() => open('app', a.id)",
+          "verification": "SOURCE_TRACE; hosted activation NOT VERIFIED"
+        },
+        {
+          "line": 74,
+          "owner": "body",
+          "component": "Object-based control/form/list action",
+          "event": "onPress",
+          "handler": "() => open('app', x[0].id)",
+          "verification": "SOURCE_TRACE; hosted activation NOT VERIFIED"
+        },
+        {
+          "line": 77,
+          "owner": "body",
+          "component": "Object-based control/form/list action",
+          "event": "onPress",
+          "handler": "() => open('app', a.id)",
+          "verification": "SOURCE_TRACE; hosted activation NOT VERIFIED"
+        },
+        {
+          "line": 83,
+          "owner": "OperationsScreen",
+          "component": "Object-based control/form/list action",
+          "event": "onPress",
+          "handler": "() => go('operations', { ov: 'Board', o48: 0, ou: 0 })",
+          "verification": "SOURCE_TRACE; hosted activation NOT VERIFIED"
+        },
+        {
+          "line": 84,
+          "owner": "OperationsScreen",
+          "component": "Object-based control/form/list action",
+          "event": "onPress",
+          "handler": "() => go('operations', { ov: 'Documents' })",
+          "verification": "SOURCE_TRACE; hosted activation NOT VERIFIED"
+        },
+        {
+          "line": 85,
+          "owner": "OperationsScreen",
+          "component": "Object-based control/form/list action",
+          "event": "onPress",
+          "handler": "() => go('operations', { ov: 'List', o48: 1 })",
+          "verification": "SOURCE_TRACE; hosted activation NOT VERIFIED"
+        },
+        {
+          "line": 87,
+          "owner": "OperationsScreen",
+          "component": "SearchInput",
+          "event": "onChangeText",
+          "handler": "{(v) => set('oq', v)}",
+          "disabled": null,
+          "verification": "SOURCE_TRACE; hosted activation NOT VERIFIED"
+        },
+        {
+          "line": 88,
+          "owner": "OperationsScreen",
+          "component": "Chips",
+          "event": "onChange",
+          "handler": "{(v) => set('ov', v)}",
+          "disabled": null,
+          "verification": "SOURCE_TRACE; hosted activation NOT VERIFIED"
+        },
+        {
+          "line": 90,
+          "owner": "OperationsScreen",
+          "component": "Btn",
+          "event": "onPress",
+          "handler": "{guard(REQ.review, assignWork)}",
+          "disabled": null,
+          "verification": "SOURCE_TRACE; hosted activation NOT VERIFIED"
+        },
+        {
+          "line": 91,
+          "owner": "OperationsScreen",
+          "component": "Pill",
+          "event": "onPress",
+          "handler": "{() => set('o48', 0)}",
+          "disabled": null,
+          "verification": "SOURCE_TRACE; hosted activation NOT VERIFIED"
+        },
+        {
+          "line": 92,
+          "owner": "OperationsScreen",
+          "component": "Pill",
+          "event": "onPress",
+          "handler": "{() => set('ou', 0)}",
+          "disabled": null,
+          "verification": "SOURCE_TRACE; hosted activation NOT VERIFIED"
+        }
+      ],
+      "rpc": [],
+      "navigation": [
+        {
+          "line": 83,
+          "owner": "OperationsScreen",
+          "target": "operations",
+          "registered": true,
+          "verification": "SOURCE_TRACE"
+        },
+        {
+          "line": 84,
+          "owner": "OperationsScreen",
+          "target": "operations",
+          "registered": true,
+          "verification": "SOURCE_TRACE"
+        },
+        {
+          "line": 85,
+          "owner": "OperationsScreen",
+          "target": "operations",
+          "registered": true,
+          "verification": "SOURCE_TRACE"
+        }
+      ],
+      "markers": [
+        {
+          "line": 87,
+          "excerpt": "<Row><SearchInput value={ui.oq} onChangeText={(v) => set('oq', v)} placeholder=\"Search business, reviewer, service\" /></Row>",
+          "classification": "CONTEXT_REVIEW: technical comments, input examples and isolated preview fixtures are not live records"
+        }
+      ]
+    },
+    {
+      "file": "src/features/admin/screens/people/PeopleScreen.tsx",
+      "sha256": "28593ea29b1a2a47b13078d53934955eca3b2661894be4153d2ea4298a0a6654",
+      "lines": 246,
+      "commentTokens": 2,
+      "controls": [
+        {
+          "line": 58,
+          "owner": "header",
+          "component": "Object-based control/form/list action",
+          "event": "onPress",
+          "handler": "() => go('people', { ps: 'Staff', sst: 'Active' })",
+          "verification": "SOURCE_TRACE; hosted activation NOT VERIFIED"
+        },
+        {
+          "line": 59,
+          "owner": "header",
+          "component": "Object-based control/form/list action",
+          "event": "onPress",
+          "handler": "() => go('people', { ps: 'Staff', sst: 'Suspended' })",
+          "verification": "SOURCE_TRACE; hosted activation NOT VERIFIED"
+        },
+        {
+          "line": 60,
+          "owner": "header",
+          "component": "Object-based control/form/list action",
+          "event": "onPress",
+          "handler": "() => go('people', { ps: 'Staff', sst: 'Revoked' })",
+          "verification": "SOURCE_TRACE; hosted activation NOT VERIFIED"
+        },
+        {
+          "line": 66,
+          "owner": "header",
+          "component": "Object-based control/form/list action",
+          "event": "onPress",
+          "handler": "() => go('people', { ps: 'Requests', rqf: 'Pending' })",
+          "verification": "SOURCE_TRACE; hosted activation NOT VERIFIED"
+        },
+        {
+          "line": 67,
+          "owner": "header",
+          "component": "Object-based control/form/list action",
+          "event": "onPress",
+          "handler": "() => go('people', { ps: 'Permissions', grf: 'Active' })",
+          "verification": "SOURCE_TRACE; hosted activation NOT VERIFIED"
+        },
+        {
+          "line": 68,
+          "owner": "header",
+          "component": "Object-based control/form/list action",
+          "event": "onPress",
+          "handler": "() => go('people', { ps: 'Permissions', grf: 'Active' })",
+          "verification": "SOURCE_TRACE; hosted activation NOT VERIFIED"
+        },
+        {
+          "line": 73,
+          "owner": "header",
+          "component": "Object-based control/form/list action",
+          "event": "onPress",
+          "handler": "() => go('people', { ps: 'Accounts', ast: 'All', at: 'All' })",
+          "verification": "SOURCE_TRACE; hosted activation NOT VERIFIED"
+        },
+        {
+          "line": 74,
+          "owner": "header",
+          "component": "Object-based control/form/list action",
+          "event": "onPress",
+          "handler": "() => go('people', { ps: 'Accounts', ast: 'Suspended' })",
+          "verification": "SOURCE_TRACE; hosted activation NOT VERIFIED"
+        },
+        {
+          "line": 75,
+          "owner": "header",
+          "component": "Object-based control/form/list action",
+          "event": "onPress",
+          "handler": "() => go('people', { ps: 'Accounts', ast: 'Banned' })",
+          "verification": "SOURCE_TRACE; hosted activation NOT VERIFIED"
+        },
+        {
+          "line": 80,
+          "owner": "header",
+          "component": "Object-based control/form/list action",
+          "event": "onPress",
+          "handler": "() => go('people', { ps: 'Staff' })",
+          "verification": "SOURCE_TRACE; hosted activation NOT VERIFIED"
+        },
+        {
+          "line": 81,
+          "owner": "header",
+          "component": "Object-based control/form/list action",
+          "event": "onPress",
+          "handler": "() => go('operations', { ov: 'List', ou: 1 })",
+          "verification": "SOURCE_TRACE; hosted activation NOT VERIFIED"
+        },
+        {
+          "line": 82,
+          "owner": "header",
+          "component": "Object-based control/form/list action",
+          "event": "onPress",
+          "handler": "() => go('people', { ps: 'Roles' })",
+          "verification": "SOURCE_TRACE; hosted activation NOT VERIFIED"
+        },
+        {
+          "line": 99,
+          "owner": "matrix",
+          "component": "Pressable2",
+          "event": "onPress",
+          "handler": "{() => open('staff', s.n)}",
+          "disabled": null,
+          "verification": "SOURCE_TRACE; hosted activation NOT VERIFIED"
+        },
+        {
+          "line": 128,
+          "owner": "staffBody",
+          "component": "Pressable",
+          "event": "onPress",
+          "handler": "{() => set('ps', 'Requests')}",
+          "disabled": null,
+          "verification": "SOURCE_TRACE; hosted activation NOT VERIFIED"
+        },
+        {
+          "line": 136,
+          "owner": "staffBody",
+          "component": "Object-based control/form/list action",
+          "event": "onPress",
+          "handler": "() => open('staff', s.n)",
+          "verification": "SOURCE_TRACE; hosted activation NOT VERIFIED"
+        },
+        {
+          "line": 150,
+          "owner": "accountsBody",
+          "component": "Object-based control/form/list action",
+          "event": "onPress",
+          "handler": "() => open('acc', a.id)",
+          "verification": "SOURCE_TRACE; hosted activation NOT VERIFIED"
+        },
+        {
+          "line": 161,
+          "owner": "restrictionsBody",
+          "component": "Object-based control/form/list action",
+          "event": "onPress",
+          "handler": "() => open('acc', a.id)",
+          "verification": "SOURCE_TRACE; hosted activation NOT VERIFIED"
+        },
+        {
+          "line": 167,
+          "owner": "customersBody",
+          "component": "Object-based control/form/list action",
+          "event": "onPress",
+          "handler": "() => open('cust', x[0])",
+          "verification": "SOURCE_TRACE; hosted activation NOT VERIFIED"
+        },
+        {
+          "line": 173,
+          "owner": "businessesBody",
+          "component": "Object-based control/form/list action",
+          "event": "onPress",
+          "handler": "() => go('business')",
+          "verification": "SOURCE_TRACE; hosted activation NOT VERIFIED"
+        },
+        {
+          "line": 179,
+          "owner": "rolesBody",
+          "component": "Btn",
+          "event": "onPress",
+          "handler": "{newRole}",
+          "disabled": null,
+          "verification": "SOURCE_TRACE; hosted activation NOT VERIFIED"
+        },
+        {
+          "line": 180,
+          "owner": "rolesBody",
+          "component": "Object-based control/form/list action",
+          "event": "onPress",
+          "handler": "() => editRole(r)",
+          "verification": "SOURCE_TRACE; hosted activation NOT VERIFIED"
+        },
+        {
+          "line": 186,
+          "owner": "invitationsBody",
+          "component": "Object-based control/form/list action",
+          "event": "onPress",
+          "handler": "() => open('staff', s.n)",
+          "verification": "SOURCE_TRACE; hosted activation NOT VERIFIED"
+        },
+        {
+          "line": 192,
+          "owner": "auditBody",
+          "component": "Object-based control/form/list action",
+          "event": "onPress",
+          "handler": "() => open('aud', String(i))",
+          "verification": "SOURCE_TRACE; hosted activation NOT VERIFIED"
+        },
+        {
+          "line": 218,
+          "owner": "PeopleScreen",
+          "component": "SelectMenu",
+          "event": "onChange",
+          "handler": "{(v) => set('ps', v)}",
+          "disabled": null,
+          "verification": "SOURCE_TRACE; hosted activation NOT VERIFIED"
+        },
+        {
+          "line": 221,
+          "owner": "PeopleScreen",
+          "component": "Chips",
+          "event": "onChange",
+          "handler": "{(v) => set('sst', v)}",
+          "disabled": null,
+          "verification": "SOURCE_TRACE; hosted activation NOT VERIFIED"
+        },
+        {
+          "line": 222,
+          "owner": "PeopleScreen",
+          "component": "SelectMenu",
+          "event": "onChange",
+          "handler": "{(v) => set('pr', v)}",
+          "disabled": null,
+          "verification": "SOURCE_TRACE; hosted activation NOT VERIFIED"
+        },
+        {
+          "line": 227,
+          "owner": "PeopleScreen",
+          "component": "Chips",
+          "event": "onChange",
+          "handler": "{(v) => set('at', v)}",
+          "disabled": null,
+          "verification": "SOURCE_TRACE; hosted activation NOT VERIFIED"
+        },
+        {
+          "line": 228,
+          "owner": "PeopleScreen",
+          "component": "Chips",
+          "event": "onChange",
+          "handler": "{(v) => set('ast', v)}",
+          "disabled": null,
+          "verification": "SOURCE_TRACE; hosted activation NOT VERIFIED"
+        },
+        {
+          "line": 231,
+          "owner": "PeopleScreen",
+          "component": "Chips",
+          "event": "onChange",
+          "handler": "{(v) => set('rf', v)}",
+          "disabled": null,
+          "verification": "SOURCE_TRACE; hosted activation NOT VERIFIED"
+        },
+        {
+          "line": 234,
+          "owner": "PeopleScreen",
+          "component": "SearchInput",
+          "event": "onChangeText",
+          "handler": "{(v) => set('pq', v)}",
+          "disabled": null,
+          "verification": "SOURCE_TRACE; hosted activation NOT VERIFIED"
+        },
+        {
+          "line": 235,
+          "owner": "PeopleScreen",
+          "component": "Btn",
+          "event": "onPress",
+          "handler": "{invite}",
+          "disabled": null,
+          "verification": "SOURCE_TRACE; hosted activation NOT VERIFIED"
+        },
+        {
+          "line": 244,
+          "owner": "Pressable2",
+          "component": "Pressable",
+          "event": "onPress",
+          "handler": "{onPress}",
+          "disabled": null,
+          "verification": "SOURCE_TRACE; hosted activation NOT VERIFIED"
+        }
+      ],
+      "rpc": [],
+      "navigation": [
+        {
+          "line": 58,
+          "owner": "header",
+          "target": "people",
+          "registered": true,
+          "verification": "SOURCE_TRACE"
+        },
+        {
+          "line": 59,
+          "owner": "header",
+          "target": "people",
+          "registered": true,
+          "verification": "SOURCE_TRACE"
+        },
+        {
+          "line": 60,
+          "owner": "header",
+          "target": "people",
+          "registered": true,
+          "verification": "SOURCE_TRACE"
+        },
+        {
+          "line": 66,
+          "owner": "header",
+          "target": "people",
+          "registered": true,
+          "verification": "SOURCE_TRACE"
+        },
+        {
+          "line": 67,
+          "owner": "header",
+          "target": "people",
+          "registered": true,
+          "verification": "SOURCE_TRACE"
+        },
+        {
+          "line": 68,
+          "owner": "header",
+          "target": "people",
+          "registered": true,
+          "verification": "SOURCE_TRACE"
+        },
+        {
+          "line": 73,
+          "owner": "header",
+          "target": "people",
+          "registered": true,
+          "verification": "SOURCE_TRACE"
+        },
+        {
+          "line": 74,
+          "owner": "header",
+          "target": "people",
+          "registered": true,
+          "verification": "SOURCE_TRACE"
+        },
+        {
+          "line": 75,
+          "owner": "header",
+          "target": "people",
+          "registered": true,
+          "verification": "SOURCE_TRACE"
+        },
+        {
+          "line": 80,
+          "owner": "header",
+          "target": "people",
+          "registered": true,
+          "verification": "SOURCE_TRACE"
+        },
+        {
+          "line": 81,
+          "owner": "header",
+          "target": "operations",
+          "registered": true,
+          "verification": "SOURCE_TRACE"
+        },
+        {
+          "line": 82,
+          "owner": "header",
+          "target": "people",
+          "registered": true,
+          "verification": "SOURCE_TRACE"
+        },
+        {
+          "line": 173,
+          "owner": "businessesBody",
+          "target": "business",
+          "registered": true,
+          "verification": "SOURCE_TRACE"
+        }
+      ],
+      "markers": [
+        {
+          "line": 234,
+          "excerpt": "{showSearch ? <SearchInput value={ui.pq} onChangeText={(v) => set('pq', v)} placeholder={searchHint} /> : null}",
+          "classification": "CONTEXT_REVIEW: technical comments, input examples and isolated preview fixtures are not live records"
+        }
+      ]
+    },
+    {
+      "file": "src/features/admin/overlays/ApplicationDrawers.tsx",
+      "sha256": "2e6c8607a4afd3539bb4cdbbd2fdef50bea1d0baeb09e8360da6b1e376b80517",
+      "lines": 260,
+      "commentTokens": 1,
+      "controls": [
+        {
+          "line": 83,
+          "owner": "chooseBusiness",
+          "component": "Object-based control/form/list action",
+          "event": "onSubmit",
+          "handler": "async (_k, v) => {\n        const selected = businessCandidates.find((b) => `${b.business_name} \u00b7 ${b.business_id}` === String(v.business));\n        if (!selected) return 'Choose a valid business workspace.';\n        try { await assignApplicationBusiness(id, selected.business_id); await hydrateAdminS",
+          "verification": "SOURCE_TRACE; hosted activation NOT VERIFIED"
+        },
+        {
+          "line": 91,
+          "owner": "startReview",
+          "component": "Object-based control/form/list action",
+          "event": "onSubmit",
+          "handler": "async (_k, v) => { await reviewBusinessApplication(a.id, 'in_review', String(v.n || '')); await hydrateAdminState(); closeAll(); toast('Review started \u00b7 ' + a.n); }",
+          "verification": "SOURCE_TRACE; hosted activation NOT VERIFIED"
+        },
+        {
+          "line": 93,
+          "owner": "requestInfo",
+          "component": "Object-based control/form/list action",
+          "event": "onSubmit",
+          "handler": "async (_k, v) => { await reviewBusinessApplication(a.id, 'needs_info', String(v.m)); await hydrateAdminState(); closeAll(); toast('Information requested \u00b7 ' + a.n); }",
+          "verification": "SOURCE_TRACE; hosted activation NOT VERIFIED"
+        },
+        {
+          "line": 103,
+          "owner": "approve",
+          "component": "Object-based control/form/list action",
+          "event": "onSubmit",
+          "handler": "async (_k, v) => { await reviewBusinessApplication(a.id, 'approved', String(v.n || '')); await hydrateAdminState(); closeAll(); toast('Approved \u00b7 ' + a.n); }",
+          "verification": "SOURCE_TRACE; hosted activation NOT VERIFIED"
+        },
+        {
+          "line": 110,
+          "owner": "reject",
+          "component": "Object-based control/form/list action",
+          "event": "onSubmit",
+          "handler": "async (_k, v) => { await reviewBusinessApplication(a.id, 'rejected', String(v.r) + ': ' + String(v.m), !!v.f); await hydrateAdminState(); closeAll(); toast((v.f ? 'Rejected permanently \u00b7 ' : 'Rejected \u00b7 ') + a.n); }",
+          "verification": "SOURCE_TRACE; hosted activation NOT VERIFIED"
+        },
+        {
+          "line": 116,
+          "owner": "ApplicationDrawer",
+          "component": "OutlineBtn",
+          "event": "onPress",
+          "handler": "{guard(REQ.review, chooseBusiness)}",
+          "disabled": null,
+          "verification": "SOURCE_TRACE; hosted activation NOT VERIFIED"
+        },
+        {
+          "line": 117,
+          "owner": "ApplicationDrawer",
+          "component": "OutlineBtn",
+          "event": "onPress",
+          "handler": "{guard(REQ.review, startReview)}",
+          "disabled": null,
+          "verification": "SOURCE_TRACE; hosted activation NOT VERIFIED"
+        },
+        {
+          "line": 118,
+          "owner": "ApplicationDrawer",
+          "component": "OutlineBtn",
+          "event": "onPress",
+          "handler": "{guard(REQ.review, requestInfo)}",
+          "disabled": null,
+          "verification": "SOURCE_TRACE; hosted activation NOT VERIFIED"
+        },
+        {
+          "line": 119,
+          "owner": "ApplicationDrawer",
+          "component": "OutlineBtn",
+          "event": "onPress",
+          "handler": "{guard(REQ.approve, approve)}",
+          "disabled": null,
+          "verification": "SOURCE_TRACE; hosted activation NOT VERIFIED"
+        },
+        {
+          "line": 120,
+          "owner": "ApplicationDrawer",
+          "component": "OutlineBtn",
+          "event": "onPress",
+          "handler": "{guard(REQ.approve, reject)}",
+          "disabled": null,
+          "verification": "SOURCE_TRACE; hosted activation NOT VERIFIED"
+        },
+        {
+          "line": 124,
+          "owner": "ApplicationDrawer",
+          "component": "DrawerBody",
+          "event": "onClose",
+          "handler": "{close}",
+          "disabled": null,
+          "verification": "SOURCE_TRACE; hosted activation NOT VERIFIED"
+        },
+        {
+          "line": 131,
+          "owner": "ApplicationDrawer",
+          "component": "Object-based control/form/list action",
+          "event": "onPress",
+          "handler": "chooseBusiness",
+          "verification": "SOURCE_TRACE; hosted activation NOT VERIFIED"
+        },
+        {
+          "line": 148,
+          "owner": "ApplicationDrawer",
+          "component": "OutlineBtn",
+          "event": "onPress",
+          "handler": "{async () => {\n                try { const url = await getBusinessApplicationDocumentUrl(doc.storage_path); await Linking.openURL(url); }\n                catch (error) { toast(error instanceof Error ? error.message : 'Could not open document.'); }\n              }}",
+          "disabled": null,
+          "verification": "SOURCE_TRACE; hosted activation NOT VERIFIED"
+        },
+        {
+          "line": 152,
+          "owner": "ApplicationDrawer",
+          "component": "OutlineBtn",
+          "event": "onPress",
+          "handler": "{async () => {\n                try { await setBusinessApplicationDocumentStatus(doc.id, 'verified'); await reloadServerDocs(); toast('Document verified'); }\n                catch (error) { toast(error instanceof Error ? error.message : 'Could not verify document.'); }\n              }}",
+          "disabled": null,
+          "verification": "SOURCE_TRACE; hosted activation NOT VERIFIED"
+        },
+        {
+          "line": 156,
+          "owner": "ApplicationDrawer",
+          "component": "OutlineBtn",
+          "event": "onPress",
+          "handler": "{() => form({\n                title: 'Request replacement document',\n                fields: [{ id: 'r', label: 'Reason (required)', type: 'textarea', required: true, maxLength: 1000 }],\n                buttons: [{ label: 'Request replacement', key: 's', primary: true }],\n                onSubmit: a",
+          "disabled": null,
+          "verification": "SOURCE_TRACE; hosted activation NOT VERIFIED"
+        },
+        {
+          "line": 160,
+          "owner": "ApplicationDrawer",
+          "component": "Object-based control/form/list action",
+          "event": "onSubmit",
+          "handler": "async (_k, v) => {\n                  await setBusinessApplicationDocumentStatus(doc.id, 'rejected', String(v.r));\n                  await reloadServerDocs(); toast('Replacement requested');\n                }",
+          "verification": "SOURCE_TRACE; hosted activation NOT VERIFIED"
+        },
+        {
+          "line": 170,
+          "owner": "ApplicationDrawer",
+          "component": "Object-based control/form/list action",
+          "event": "onPress",
+          "handler": "() => { closeAll(); nav.go('business'); }",
+          "verification": "SOURCE_TRACE; hosted activation NOT VERIFIED"
+        },
+        {
+          "line": 189,
+          "owner": "reject",
+          "component": "Object-based control/form/list action",
+          "event": "onSubmit",
+          "handler": "() => res('rejected', 'Document rejected')",
+          "verification": "SOURCE_TRACE; hosted activation NOT VERIFIED"
+        },
+        {
+          "line": 197,
+          "owner": "DocumentDrawer",
+          "component": "OutlineBtn",
+          "event": "onPress",
+          "handler": "{guard(REQ.review, () => res('verified', 'Document verified'))}",
+          "disabled": null,
+          "verification": "SOURCE_TRACE; hosted activation NOT VERIFIED"
+        },
+        {
+          "line": 198,
+          "owner": "DocumentDrawer",
+          "component": "OutlineBtn",
+          "event": "onPress",
+          "handler": "{guard(REQ.review, reject)}",
+          "disabled": null,
+          "verification": "SOURCE_TRACE; hosted activation NOT VERIFIED"
+        },
+        {
+          "line": 199,
+          "owner": "DocumentDrawer",
+          "component": "OutlineBtn",
+          "event": "onPress",
+          "handler": "{guard(REQ.review, () => res('missing', 'Replacement requested'))}",
+          "disabled": null,
+          "verification": "SOURCE_TRACE; hosted activation NOT VERIFIED"
+        },
+        {
+          "line": 200,
+          "owner": "DocumentDrawer",
+          "component": "OutlineBtn",
+          "event": "onPress",
+          "handler": "{() => { closeAll(); open('app', id); }}",
+          "disabled": null,
+          "verification": "SOURCE_TRACE; hosted activation NOT VERIFIED"
+        },
+        {
+          "line": 204,
+          "owner": "DocumentDrawer",
+          "component": "DrawerBody",
+          "event": "onClose",
+          "handler": "{close}",
+          "disabled": null,
+          "verification": "SOURCE_TRACE; hosted activation NOT VERIFIED"
+        },
+        {
+          "line": 212,
+          "owner": "DocumentDrawer",
+          "component": "Pill",
+          "event": "onPress",
+          "handler": "{() => setZoom((z) => Math.max(0.5, z - 0.25))}",
+          "disabled": null,
+          "verification": "SOURCE_TRACE; hosted activation NOT VERIFIED"
+        },
+        {
+          "line": 213,
+          "owner": "DocumentDrawer",
+          "component": "Pill",
+          "event": "onPress",
+          "handler": "{() => setZoom((z) => Math.min(2, z + 0.25))}",
+          "disabled": null,
+          "verification": "SOURCE_TRACE; hosted activation NOT VERIFIED"
+        },
+        {
+          "line": 214,
+          "owner": "DocumentDrawer",
+          "component": "Pill",
+          "event": "onPress",
+          "handler": "{download}",
+          "disabled": null,
+          "verification": "SOURCE_TRACE; hosted activation NOT VERIFIED"
+        },
+        {
+          "line": 230,
+          "owner": "resolve",
+          "component": "Object-based control/form/list action",
+          "event": "onSubmit",
+          "handler": "() => { cs.st = 'Resolved'; aud('Case resolved \u00b7 ' + id, session.view); closeAll(); bump(); toast('Case ' + id + ' resolved'); }",
+          "verification": "SOURCE_TRACE; hosted activation NOT VERIFIED"
+        },
+        {
+          "line": 231,
+          "owner": "CaseDrawer",
+          "component": "OutlineBtn",
+          "event": "onPress",
+          "handler": "{guard(REQ.review, assignMe)}",
+          "disabled": null,
+          "verification": "SOURCE_TRACE; hosted activation NOT VERIFIED"
+        },
+        {
+          "line": 231,
+          "owner": "CaseDrawer",
+          "component": "OutlineBtn",
+          "event": "onPress",
+          "handler": "{guard(REQ.review, resolve)}",
+          "disabled": null,
+          "verification": "SOURCE_TRACE; hosted activation NOT VERIFIED"
+        },
+        {
+          "line": 233,
+          "owner": "CaseDrawer",
+          "component": "DrawerBody",
+          "event": "onClose",
+          "handler": "{close}",
+          "disabled": null,
+          "verification": "SOURCE_TRACE; hosted activation NOT VERIFIED"
+        },
+        {
+          "line": 253,
+          "owner": "useAssignWork",
+          "component": "Object-based control/form/list action",
+          "event": "onSubmit",
+          "handler": "(_k, v) => { const a = findById(db.APPS, String(v.a).split(' ')[0]); if (!a) return 'Choose an application.'; a.o = String(v.o); a.due = String(v.due || a.due); finish(a, 'Assigned to ' + v.o); }",
+          "verification": "SOURCE_TRACE; hosted activation NOT VERIFIED"
+        }
+      ],
+      "rpc": [],
+      "navigation": [
+        {
+          "line": 170,
+          "owner": "ApplicationDrawer",
+          "target": "business",
+          "registered": true,
+          "verification": "SOURCE_TRACE"
+        }
+      ],
+      "markers": []
+    },
+    {
+      "file": "src/features/admin/overlays/PeopleDrawers.tsx",
+      "sha256": "4a7e501e5353206af96f94ef3c3238708012a77dc803cd8b88de8c3872698932",
+      "lines": 431,
+      "commentTokens": 2,
+      "controls": [
+        {
+          "line": 50,
+          "owner": "edit",
+          "component": "EditAccessSheet",
+          "event": "onClose",
+          "handler": "{done}",
+          "disabled": null,
+          "verification": "SOURCE_TRACE; hosted activation NOT VERIFIED"
+        },
+        {
+          "line": 54,
+          "owner": "suspend",
+          "component": "Object-based control/form/list action",
+          "event": "onSubmit",
+          "handler": "async (_k, v) => { if (!s.userId) return 'This staff record is not linked to a Wantiss account.'; await setStaffStatusBackend(s.userId, 'suspended', [String(v.r), String(v.nt)].filter(Boolean).join(': ')); await hydrateAdminState(); reopen('staff', id); toast('Access suspended. Active sessions ended",
+          "verification": "SOURCE_TRACE; hosted activation NOT VERIFIED"
+        },
+        {
+          "line": 57,
+          "owner": "restore",
+          "component": "Object-based control/form/list action",
+          "event": "onSubmit",
+          "handler": "async (_k, v) => { if (!s.userId) return 'This staff record is not linked to a Wantiss account.'; await setStaffStatusBackend(s.userId, 'active', String(v.nt)); await hydrateAdminState(); reopen('staff', id); toast('Access restored'); }",
+          "verification": "SOURCE_TRACE; hosted activation NOT VERIFIED"
+        },
+        {
+          "line": 62,
+          "owner": "revoke",
+          "component": "Object-based control/form/list action",
+          "event": "onSubmit",
+          "handler": "async (_k, v) => { if (String(v.cf) !== 'REVOKE') return 'Type REVOKE to confirm.'; if (!s.userId) return 'This staff record is not linked to a Wantiss account.'; await setStaffStatusBackend(s.userId, 'revoked', [String(v.r), String(v.nt)].join(': ')); await hydrateAdminState(); reopen('staff', id);",
+          "verification": "SOURCE_TRACE; hosted activation NOT VERIFIED"
+        },
+        {
+          "line": 66,
+          "owner": "reinstate",
+          "component": "Object-based control/form/list action",
+          "event": "onSubmit",
+          "handler": "async (_k, v) => { if (!s.userId) return 'This staff record is not linked to a Wantiss account.'; await setStaffStatusBackend(s.userId, 'active', String(v.nt) + ' \u00b7 role remains server-assigned'); await hydrateAdminState(); reopen('staff', id); toast('Staff access restored.'); }",
+          "verification": "SOURCE_TRACE; hosted activation NOT VERIFIED"
+        },
+        {
+          "line": 69,
+          "owner": "cancel",
+          "component": "Object-based control/form/list action",
+          "event": "onSubmit",
+          "handler": "async () => { if (!s.userId) return 'This invitation is not linked to a Wantiss account.'; await setStaffStatusBackend(s.userId, 'revoked', 'Invitation cancelled by Super Admin'); await hydrateAdminState(); reopen('staff', id); toast('Invitation cancelled'); }",
+          "verification": "SOURCE_TRACE; hosted activation NOT VERIFIED"
+        },
+        {
+          "line": 74,
+          "owner": "StaffDrawer",
+          "component": "OutlineBtn",
+          "event": "onPress",
+          "handler": "{guard(P, edit)}",
+          "disabled": null,
+          "verification": "SOURCE_TRACE; hosted activation NOT VERIFIED"
+        },
+        {
+          "line": 74,
+          "owner": "StaffDrawer",
+          "component": "OutlineBtn",
+          "event": "onPress",
+          "handler": "{guard(P, suspend)}",
+          "disabled": null,
+          "verification": "SOURCE_TRACE; hosted activation NOT VERIFIED"
+        },
+        {
+          "line": 74,
+          "owner": "StaffDrawer",
+          "component": "OutlineBtn",
+          "event": "onPress",
+          "handler": "{guard(P, revoke)}",
+          "disabled": null,
+          "verification": "SOURCE_TRACE; hosted activation NOT VERIFIED"
+        },
+        {
+          "line": 75,
+          "owner": "StaffDrawer",
+          "component": "OutlineBtn",
+          "event": "onPress",
+          "handler": "{guard(P, restore)}",
+          "disabled": null,
+          "verification": "SOURCE_TRACE; hosted activation NOT VERIFIED"
+        },
+        {
+          "line": 75,
+          "owner": "StaffDrawer",
+          "component": "OutlineBtn",
+          "event": "onPress",
+          "handler": "{guard(P, revoke)}",
+          "disabled": null,
+          "verification": "SOURCE_TRACE; hosted activation NOT VERIFIED"
+        },
+        {
+          "line": 76,
+          "owner": "StaffDrawer",
+          "component": "OutlineBtn",
+          "event": "onPress",
+          "handler": "{guard(P, reinstate)}",
+          "disabled": null,
+          "verification": "SOURCE_TRACE; hosted activation NOT VERIFIED"
+        },
+        {
+          "line": 77,
+          "owner": "StaffDrawer",
+          "component": "OutlineBtn",
+          "event": "onPress",
+          "handler": "{guard(P, resend)}",
+          "disabled": null,
+          "verification": "SOURCE_TRACE; hosted activation NOT VERIFIED"
+        },
+        {
+          "line": 77,
+          "owner": "StaffDrawer",
+          "component": "OutlineBtn",
+          "event": "onPress",
+          "handler": "{guard(P, cancel)}",
+          "disabled": null,
+          "verification": "SOURCE_TRACE; hosted activation NOT VERIFIED"
+        },
+        {
+          "line": 89,
+          "owner": "StaffDrawer",
+          "component": "DrawerBody",
+          "event": "onClose",
+          "handler": "{close}",
+          "disabled": null,
+          "verification": "SOURCE_TRACE; hosted activation NOT VERIFIED"
+        },
+        {
+          "line": 170,
+          "owner": "EditAccessSheet",
+          "component": "DialogCard",
+          "event": "onClose",
+          "handler": "{onClose}",
+          "disabled": null,
+          "verification": "SOURCE_TRACE; hosted activation NOT VERIFIED"
+        },
+        {
+          "line": 172,
+          "owner": "EditAccessSheet",
+          "component": "Field",
+          "event": "onChange",
+          "handler": "{(v) => setPermission(String(v))}",
+          "disabled": null,
+          "verification": "SOURCE_TRACE; hosted activation NOT VERIFIED"
+        },
+        {
+          "line": 173,
+          "owner": "EditAccessSheet",
+          "component": "Field",
+          "event": "onChange",
+          "handler": "{(v) => setLevel(String(v))}",
+          "disabled": null,
+          "verification": "SOURCE_TRACE; hosted activation NOT VERIFIED"
+        },
+        {
+          "line": 174,
+          "owner": "EditAccessSheet",
+          "component": "Field",
+          "event": "onChange",
+          "handler": "{(v) => setUntil(String(v))}",
+          "disabled": null,
+          "verification": "SOURCE_TRACE; hosted activation NOT VERIFIED"
+        },
+        {
+          "line": 175,
+          "owner": "EditAccessSheet",
+          "component": "Field",
+          "event": "onChange",
+          "handler": "{(v) => { setWhy(String(v)); setError(''); }}",
+          "disabled": null,
+          "verification": "SOURCE_TRACE; hosted activation NOT VERIFIED"
+        },
+        {
+          "line": 177,
+          "owner": "EditAccessSheet",
+          "component": "OutlineBtn",
+          "event": "onPress",
+          "handler": "{() => { void save(); }}",
+          "disabled": null,
+          "verification": "SOURCE_TRACE; hosted activation NOT VERIFIED"
+        },
+        {
+          "line": 183,
+          "owner": "EditAccessSheet",
+          "component": "OutlineBtn",
+          "event": "onPress",
+          "handler": "{() => { void revoke(g.id); }}",
+          "disabled": "{busy}",
+          "verification": "SOURCE_TRACE; hosted activation NOT VERIFIED"
+        },
+        {
+          "line": 186,
+          "owner": "EditAccessSheet",
+          "component": "OutlineBtn",
+          "event": "onPress",
+          "handler": "{onClose}",
+          "disabled": null,
+          "verification": "SOURCE_TRACE; hosted activation NOT VERIFIED"
+        },
+        {
+          "line": 205,
+          "owner": "useInvite",
+          "component": "Object-based control/form/list action",
+          "event": "onSubmit",
+          "handler": "async (_k, v) => {\n      if (session.role !== 'super_admin' && !can(needs('staff.manage'))) return 'This requires staff management permission.';\n      await inviteStaffBackend(String(v.e), String(v.n), String(v.r));\n      await hydrateAdminState();\n      closeAll();\n      toast('Invitation email sen",
+          "verification": "SOURCE_TRACE; hosted activation NOT VERIFIED"
+        },
+        {
+          "line": 224,
+          "owner": "useRoleEditor",
+          "component": "Object-based control/form/list action",
+          "event": "onSubmit",
+          "handler": "(_k, _v) => {\n        if (!can(needs('Manage permissions'))) return 'This needs the \u201cManage permissions\u201d right.';\n        return 'Role-template publishing is not connected to server-authorized permissions. No changes were made.';\n      }",
+          "verification": "SOURCE_TRACE; hosted activation NOT VERIFIED"
+        },
+        {
+          "line": 238,
+          "owner": "useNewRole",
+          "component": "Object-based control/form/list action",
+          "event": "onSubmit",
+          "handler": "(_k, _v) => {\n      if (!can(needs('Manage permissions'))) return 'This needs the \u201cManage permissions\u201d right.';\n      return 'Role creation is unavailable until it can be persisted with server-enforced permissions. No role was created.';\n    }",
+          "verification": "SOURCE_TRACE; hosted activation NOT VERIFIED"
+        },
+        {
+          "line": 254,
+          "owner": "AccountDrawer",
+          "component": "DrawerBody",
+          "event": "onClose",
+          "handler": "{close}",
+          "disabled": null,
+          "verification": "SOURCE_TRACE; hosted activation NOT VERIFIED"
+        },
+        {
+          "line": 279,
+          "owner": "restrict",
+          "component": "Object-based control/form/list action",
+          "event": "onSubmit",
+          "handler": "async (_k, v) => {\n        if (!(ban ? canBan : canSusp)) return 'You do not have permission for this action.';\n        if (ban && String(v.cf ?? '') !== 'BAN') return 'Type BAN in capitals to confirm.';\n        if (!a.id) return 'This record is not linked to a Wantiss account.';\n        const start",
+          "verification": "SOURCE_TRACE; hosted activation NOT VERIFIED"
+        },
+        {
+          "line": 315,
+          "owner": "restrictGoodies",
+          "component": "Object-based control/form/list action",
+          "event": "onSubmit",
+          "handler": "async(_k,v)=>{\n        if(!(ban?canBan:canSusp))return 'You do not have permission for this action.';\n        if(ban&&String(v.cf||'')!=='BAN')return 'Type BAN in capitals to confirm.';\n        const end=String(v.en||'');\n        if(!ban&&end&&end<TODAY)return 'The end date cannot be in the past.';\n",
+          "verification": "SOURCE_TRACE; hosted activation NOT VERIFIED"
+        },
+        {
+          "line": 340,
+          "owner": "lift",
+          "component": "Object-based control/form/list action",
+          "event": "onSubmit",
+          "handler": "async (_k, x) => {\n        try {\n          await liftAccountRestrictionBackend(r.id, String(x.nt));\n          await hydrateAdminState();\n          done('Reinstated \u00b7 ' + a.n);\n        } catch (e) { return e instanceof Error ? e.message : 'The restriction could not be lifted.'; }\n      }",
+          "verification": "SOURCE_TRACE; hosted activation NOT VERIFIED"
+        },
+        {
+          "line": 351,
+          "owner": "editSusp",
+          "component": "Object-based control/form/list action",
+          "event": "onSubmit",
+          "handler": "async (_k, x) => {\n      const end = String(x.en || '');\n      if (end && end < r.start) return 'The end date cannot be before the start date.';\n      try {\n        await updateAccountRestrictionBackend(r.id, end ? new Date(end + 'T23:59:59.999Z').toISOString() : null, String(x.nt));\n        await h",
+          "verification": "SOURCE_TRACE; hosted activation NOT VERIFIED"
+        },
+        {
+          "line": 361,
+          "owner": "uphold",
+          "component": "Object-based control/form/list action",
+          "event": "onSubmit",
+          "handler": "async (_k, x) => { try { await upholdBan(a, String(x.nt)); await hydrateAdminState(); done('Ban upheld'); } catch(error) { return error instanceof Error ? error.message : 'Could not save the appeal decision.'; } }",
+          "verification": "SOURCE_TRACE; hosted activation NOT VERIFIED"
+        },
+        {
+          "line": 364,
+          "owner": "receiveAppeal",
+          "component": "Object-based control/form/list action",
+          "event": "onSubmit",
+          "handler": "async (_key, values) => {\n      try {await markAppeal(a, String(values.note)); await hydrateAdminState(); done('Appeal recorded for review.');}\n      catch(error) {return error instanceof Error ? error.message : 'Could not record the appeal.';}\n    }",
+          "verification": "SOURCE_TRACE; hosted activation NOT VERIFIED"
+        },
+        {
+          "line": 375,
+          "owner": "AccountDrawer",
+          "component": "OutlineBtn",
+          "event": "onPress",
+          "handler": "{pause}",
+          "disabled": null,
+          "verification": "SOURCE_TRACE; hosted activation NOT VERIFIED"
+        },
+        {
+          "line": 376,
+          "owner": "AccountDrawer",
+          "component": "OutlineBtn",
+          "event": "onPress",
+          "handler": "{() => restrict('Suspension', true)}",
+          "disabled": null,
+          "verification": "SOURCE_TRACE; hosted activation NOT VERIFIED"
+        },
+        {
+          "line": 377,
+          "owner": "AccountDrawer",
+          "component": "OutlineBtn",
+          "event": "onPress",
+          "handler": "{() => restrictGoodies('Suspension')}",
+          "disabled": null,
+          "verification": "SOURCE_TRACE; hosted activation NOT VERIFIED"
+        },
+        {
+          "line": 378,
+          "owner": "AccountDrawer",
+          "component": "OutlineBtn",
+          "event": "onPress",
+          "handler": "{() => restrictGoodies('Ban')}",
+          "disabled": null,
+          "verification": "SOURCE_TRACE; hosted activation NOT VERIFIED"
+        },
+        {
+          "line": 379,
+          "owner": "AccountDrawer",
+          "component": "OutlineBtn",
+          "event": "onPress",
+          "handler": "{ban}",
+          "disabled": null,
+          "verification": "SOURCE_TRACE; hosted activation NOT VERIFIED"
+        },
+        {
+          "line": 380,
+          "owner": "AccountDrawer",
+          "component": "OutlineBtn",
+          "event": "onPress",
+          "handler": "{receiveAppeal}",
+          "disabled": null,
+          "verification": "SOURCE_TRACE; hosted activation NOT VERIFIED"
+        },
+        {
+          "line": 381,
+          "owner": "AccountDrawer",
+          "component": "OutlineBtn",
+          "event": "onPress",
+          "handler": "{uphold}",
+          "disabled": null,
+          "verification": "SOURCE_TRACE; hosted activation NOT VERIFIED"
+        },
+        {
+          "line": 386,
+          "owner": "AccountDrawer",
+          "component": "DrawerBody",
+          "event": "onClose",
+          "handler": "{close}",
+          "disabled": null,
+          "verification": "SOURCE_TRACE; hosted activation NOT VERIFIED"
+        },
+        {
+          "line": 396,
+          "owner": "AccountDrawer",
+          "component": "OutlineBtn",
+          "event": "onPress",
+          "handler": "{() => editSusp(r)}",
+          "disabled": null,
+          "verification": "SOURCE_TRACE; hosted activation NOT VERIFIED"
+        },
+        {
+          "line": 396,
+          "owner": "AccountDrawer",
+          "component": "OutlineBtn",
+          "event": "onPress",
+          "handler": "{() => lift(r)}",
+          "disabled": null,
+          "verification": "SOURCE_TRACE; hosted activation NOT VERIFIED"
+        },
+        {
+          "line": 397,
+          "owner": "AccountDrawer",
+          "component": "OutlineBtn",
+          "event": "onPress",
+          "handler": "{() => lift(r)}",
+          "disabled": null,
+          "verification": "SOURCE_TRACE; hosted activation NOT VERIFIED"
+        },
+        {
+          "line": 402,
+          "owner": "AccountDrawer",
+          "component": "Object-based control/form/list action",
+          "event": "onPress",
+          "handler": "() => { closeAll(); nav.go('finance', { fv: 'Transactions', fs: 'All', fq: a.n }); }",
+          "verification": "SOURCE_TRACE; hosted activation NOT VERIFIED"
+        },
+        {
+          "line": 420,
+          "owner": "AuditDrawer",
+          "component": "DrawerBody",
+          "event": "onClose",
+          "handler": "{close}",
+          "disabled": null,
+          "verification": "SOURCE_TRACE; hosted activation NOT VERIFIED"
+        }
+      ],
+      "rpc": [],
+      "navigation": [
+        {
+          "line": 402,
+          "owner": "AccountDrawer",
+          "target": "finance",
+          "registered": true,
+          "verification": "SOURCE_TRACE"
+        }
+      ],
+      "markers": []
+    },
+    {
+      "file": "src/features/admin/shell/NotificationsSheet.tsx",
+      "sha256": "48f12b8e3cb5c08ef641349ca8786319a078f97d74a95b65d1f98373dd7cdbea",
+      "lines": 81,
+      "commentTokens": 1,
+      "controls": [
+        {
+          "line": 69,
+          "owner": "NotificationsSheet",
+          "component": "DrawerBody",
+          "event": "onClose",
+          "handler": "{onClose}",
+          "disabled": null,
+          "verification": "SOURCE_TRACE; hosted activation NOT VERIFIED"
+        },
+        {
+          "line": 69,
+          "owner": "NotificationsSheet",
+          "component": "OutlineBtn",
+          "event": "onPress",
+          "handler": "{()=>{void markServerAll();}}",
+          "disabled": null,
+          "verification": "SOURCE_TRACE; hosted activation NOT VERIFIED"
+        },
+        {
+          "line": 71,
+          "owner": "NotificationsSheet",
+          "component": "Chips",
+          "event": "onChange",
+          "handler": "{setF}",
+          "disabled": null,
+          "verification": "SOURCE_TRACE; hosted activation NOT VERIFIED"
+        },
+        {
+          "line": 76,
+          "owner": "NotificationsSheet",
+          "component": "Object-based control/form/list action",
+          "event": "onPress",
+          "handler": "() => {void openNotice(n);}",
+          "verification": "SOURCE_TRACE; hosted activation NOT VERIFIED"
+        }
+      ],
+      "rpc": [],
+      "navigation": [
+        {
+          "line": 64,
+          "owner": "openNotice",
+          "target": "goodiesRequests",
+          "registered": true,
+          "verification": "SOURCE_TRACE"
+        },
+        {
+          "line": 65,
+          "owner": "openNotice",
+          "target": "goodies",
+          "registered": true,
+          "verification": "SOURCE_TRACE"
+        }
+      ],
+      "markers": []
+    },
+    {
+      "file": "src/features/admin/shell/ScreenHost.tsx",
+      "sha256": "f74dc0b303353595065f58c67ba2caea598775643ea90d9d97944331edce6614",
+      "lines": 75,
+      "commentTokens": 1,
+      "controls": [
+        {
+          "line": 53,
+          "owner": "NoAccess",
+          "component": "OutlineBtn",
+          "event": "onPress",
+          "handler": "{() => request({ sec })}",
+          "disabled": null,
+          "verification": "SOURCE_TRACE; hosted activation NOT VERIFIED"
+        },
+        {
+          "line": 54,
+          "owner": "NoAccess",
+          "component": "OutlineBtn",
+          "event": "onPress",
+          "handler": "{() => go('overview')}",
+          "disabled": null,
+          "verification": "SOURCE_TRACE; hosted activation NOT VERIFIED"
+        }
+      ],
+      "rpc": [],
+      "navigation": [
+        {
+          "line": 54,
+          "owner": "NoAccess",
+          "target": "overview",
+          "registered": true,
+          "verification": "SOURCE_TRACE"
+        }
+      ],
+      "markers": [
+        {
+          "line": 26,
+          "excerpt": "/** Unported screens render a placeholder until implemented. */",
+          "classification": "CONTEXT_REVIEW: technical comments, input examples and isolated preview fixtures are not live records"
+        },
+        {
+          "line": 63,
+          "excerpt": "<Txt size={10.6} mut style={{ marginTop: 6 }}>This screen is coming soon.</Txt>",
+          "classification": "CONTEXT_REVIEW: technical comments, input examples and isolated preview fixtures are not live records"
+        }
+      ]
+    },
+    {
+      "file": "src/features/admin/auth/AuthFlow.tsx",
+      "sha256": "986e0087279a0f9841289dee789db98562881bb7ed4b05f533c76afe62036c6a",
+      "lines": 259,
+      "commentTokens": 2,
+      "controls": [
+        {
+          "line": 198,
+          "owner": "AuthFlow",
+          "component": "AuthField",
+          "event": "onChangeText",
+          "handler": "{(value) => { setEmail(value); setPassword(''); }}",
+          "disabled": null,
+          "verification": "SOURCE_TRACE; hosted activation NOT VERIFIED"
+        },
+        {
+          "line": 199,
+          "owner": "AuthFlow",
+          "component": "AuthField",
+          "event": "onChangeText",
+          "handler": "{setPassword}",
+          "disabled": null,
+          "verification": "SOURCE_TRACE; hosted activation NOT VERIFIED"
+        },
+        {
+          "line": 200,
+          "owner": "AuthFlow",
+          "component": "LinkText",
+          "event": "onPress",
+          "handler": "{() => { setView('forgot'); message(''); }}",
+          "disabled": null,
+          "verification": "SOURCE_TRACE; hosted activation NOT VERIFIED"
+        },
+        {
+          "line": 201,
+          "owner": "AuthFlow",
+          "component": "PrimaryButton",
+          "event": "onPress",
+          "handler": "{signIn}",
+          "disabled": null,
+          "verification": "SOURCE_TRACE; hosted activation NOT VERIFIED"
+        },
+        {
+          "line": 204,
+          "owner": "AuthFlow",
+          "component": "SecondaryButton",
+          "event": "onPress",
+          "handler": "{() => { setView('create'); message(''); }}",
+          "disabled": null,
+          "verification": "SOURCE_TRACE; hosted activation NOT VERIFIED"
+        },
+        {
+          "line": 211,
+          "owner": "AuthFlow",
+          "component": "PrimaryButton",
+          "event": "onPress",
+          "handler": "{() => { setView('in'); message(''); }}",
+          "disabled": null,
+          "verification": "SOURCE_TRACE; hosted activation NOT VERIFIED"
+        },
+        {
+          "line": 216,
+          "owner": "AuthFlow",
+          "component": "AuthField",
+          "event": "onChangeText",
+          "handler": "{setEmail}",
+          "disabled": null,
+          "verification": "SOURCE_TRACE; hosted activation NOT VERIFIED"
+        },
+        {
+          "line": 218,
+          "owner": "AuthFlow",
+          "component": "PrimaryButton",
+          "event": "onPress",
+          "handler": "{sendReset}",
+          "disabled": null,
+          "verification": "SOURCE_TRACE; hosted activation NOT VERIFIED"
+        },
+        {
+          "line": 219,
+          "owner": "AuthFlow",
+          "component": "SecondaryButton",
+          "event": "onPress",
+          "handler": "{() => { setView('in'); message(''); }}",
+          "disabled": null,
+          "verification": "SOURCE_TRACE; hosted activation NOT VERIFIED"
+        },
+        {
+          "line": 225,
+          "owner": "AuthFlow",
+          "component": "AuthField",
+          "event": "onChangeText",
+          "handler": "{setEmail}",
+          "disabled": null,
+          "verification": "SOURCE_TRACE; hosted activation NOT VERIFIED"
+        },
+        {
+          "line": 226,
+          "owner": "AuthFlow",
+          "component": "AuthField",
+          "event": "onChangeText",
+          "handler": "{setResetCode}",
+          "disabled": null,
+          "verification": "SOURCE_TRACE; hosted activation NOT VERIFIED"
+        },
+        {
+          "line": 228,
+          "owner": "AuthFlow",
+          "component": "PrimaryButton",
+          "event": "onPress",
+          "handler": "{verifyResetCode}",
+          "disabled": null,
+          "verification": "SOURCE_TRACE; hosted activation NOT VERIFIED"
+        },
+        {
+          "line": 229,
+          "owner": "AuthFlow",
+          "component": "SecondaryButton",
+          "event": "onPress",
+          "handler": "{sendReset}",
+          "disabled": null,
+          "verification": "SOURCE_TRACE; hosted activation NOT VERIFIED"
+        },
+        {
+          "line": 230,
+          "owner": "AuthFlow",
+          "component": "SecondaryButton",
+          "event": "onPress",
+          "handler": "{() => { setView('in'); message(''); }}",
+          "disabled": null,
+          "verification": "SOURCE_TRACE; hosted activation NOT VERIFIED"
+        },
+        {
+          "line": 235,
+          "owner": "AuthFlow",
+          "component": "AuthField",
+          "event": "onChangeText",
+          "handler": "{setPassword}",
+          "disabled": null,
+          "verification": "SOURCE_TRACE; hosted activation NOT VERIFIED"
+        },
+        {
+          "line": 237,
+          "owner": "AuthFlow",
+          "component": "AuthField",
+          "event": "onChangeText",
+          "handler": "{setConfirm}",
+          "disabled": null,
+          "verification": "SOURCE_TRACE; hosted activation NOT VERIFIED"
+        },
+        {
+          "line": 238,
+          "owner": "AuthFlow",
+          "component": "PrimaryButton",
+          "event": "onPress",
+          "handler": "{savePassword}",
+          "disabled": null,
+          "verification": "SOURCE_TRACE; hosted activation NOT VERIFIED"
+        },
+        {
+          "line": 242,
+          "owner": "AuthFlow",
+          "component": "AuthField",
+          "event": "onChangeText",
+          "handler": "{setPassword}",
+          "disabled": null,
+          "verification": "SOURCE_TRACE; hosted activation NOT VERIFIED"
+        },
+        {
+          "line": 244,
+          "owner": "AuthFlow",
+          "component": "AuthField",
+          "event": "onChangeText",
+          "handler": "{setConfirm}",
+          "disabled": null,
+          "verification": "SOURCE_TRACE; hosted activation NOT VERIFIED"
+        },
+        {
+          "line": 245,
+          "owner": "AuthFlow",
+          "component": "PrimaryButton",
+          "event": "onPress",
+          "handler": "{savePassword}",
+          "disabled": null,
+          "verification": "SOURCE_TRACE; hosted activation NOT VERIFIED"
+        },
+        {
+          "line": 251,
+          "owner": "AuthFlow",
+          "component": "SecondaryButton",
+          "event": "onPress",
+          "handler": "{() => setView('in')}",
+          "disabled": null,
+          "verification": "SOURCE_TRACE; hosted activation NOT VERIFIED"
+        }
+      ],
+      "rpc": [
+        {
+          "line": 173,
+          "owner": "savePassword",
+          "name": "wantiss_admin_accept_invitation"
+        }
+      ],
+      "navigation": [],
+      "markers": [
+        {
+          "line": 198,
+          "excerpt": "<AuthField label=\"Work email\" value={email} onChangeText={(value) => { setEmail(value); setPassword(''); }} error={undefined} placeholder=\"Wantiss.app",
+          "classification": "CONTEXT_REVIEW: technical comments, input examples and isolated preview fixtures are not live records"
+        }
+      ]
+    }
+  ],
+  "rootIntegratedVerification": {
+    "observedAt": "2026-11-20T06:45:47.148368+00:00",
+    "fullTestSuite": {
+      "classification": "PASS",
+      "tests": 68,
+      "failed": 0,
+      "log": "/tmp/goodies-final-admin-tests.log"
+    },
+    "typecheck": "PASS",
+    "bundleExports": [
+      "android",
+      "ios"
+    ],
+    "signedNativeBuilds": "NOT VERIFIED",
+    "previewSourceSynchronization": "PASS"
+  }
+}

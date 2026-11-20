@@ -9,7 +9,7 @@ import {T, Mut, Grad, Circ, Bar, Sh, Rail, Chip, Chips, Cta, Card, Row, Badge, T
 import {Dish, VCard, StoreCard, ItemRow} from '../components/cards';
 import {S, ST, STB, IT, DEALS, PR, money, addr, cnt, unread, first, filt, FCH, emit, save, toast, ui, refreshLiveSchedules, refreshStoreDistances} from '../store';
 import {categories, catName, label, promoCards, deals, dealEnd, coupons, modes, stripeColor, loadContent, onContent, hasContent, contentStatus} from '../content';
-import {go, tab, back, browse, setFilter, setSub, clearFilters, usePromo as applyPromo, openNotif, readAll, heart} from '../actions';
+import {go, tab, back, browse, setFilter, setSub, clearFilters, usePromo as applyPromo, openNotif, readAll, heart, openProduct} from '../actions';
 import {byoNames} from '../builders/engine';
 import {fetchGoodiesOrderForNotification} from '../serverSync';
 import {t as tr, tx} from '../i18n';
@@ -432,21 +432,37 @@ export function Notifs() {
   const serverLoadId = useRef(0);
   const serverMounted = useRef(false);
   const serverUserId = useRef<string | null>(null);
-  const loadServer = async () => {
-    const requestId = ++serverLoadId.current;
-    const {data: auth} = await supabase.auth.getUser();
-    if (!serverMounted.current || requestId !== serverLoadId.current) return;
-    if (!auth.user) { serverUserId.current = null; setServerItems([]); return; }
-    if (serverUserId.current && serverUserId.current !== auth.user.id) return;
-    serverUserId.current = auth.user.id;
-    const {data, error} = await supabase.from('notifications')
-      .select('id,title,body,read,metadata,created_at,notification_type,feature_name,destination')
-      .eq('user_id', auth.user.id).ilike('feature_name', 'goodies').or(CUSTOMER_NOTIFICATION_FILTER)
-      .order('created_at', {ascending: false}).limit(50);
-    if (!serverMounted.current || requestId !== serverLoadId.current || serverUserId.current !== auth.user.id) return;
-    if (error) { setServerError(friendlyError(error, label("lbl.cms.ce2855382c78", "Something went wrong. Please try again."))); return; }
-    setServerItems((data || []).map((n: any) => ({...n, server: true, t: n.title || label('lbl.notifDefaultTitle', 'Goodies update'), d: n.body || '', u: !n.read, r: n.notification_type === 'store_message' ? 'chat' : String(n.destination || '').toLowerCase().includes('order') ? 'track' : 'other', p: n.metadata?.order_id || n.metadata?.order_code || ''})));
-    setServerError('');
+  const [serverLoading,setServerLoading]=useState(true),[serverPaging,setServerPaging]=useState(false),[serverHasMore,setServerHasMore]=useState(false);
+  const serverRows=useRef<any[]>([]),serverBusy=useRef(false),serverRefreshQueued=useRef(false);
+  const loadServer = async (append=false) => {
+    if(serverBusy.current){if(!append)serverRefreshQueued.current=true;return;}
+    serverBusy.current=true;
+    const requestId = ++serverLoadId.current,owner=S.accountId;
+    if(append)setServerPaging(true);else setServerLoading(true);
+    try{
+      const {data: auth,error:authError} = await supabase.auth.getUser();
+      if(authError&&authError.name!=='AuthSessionMissingError')throw authError;
+      if (!serverMounted.current || requestId !== serverLoadId.current || S.accountId!==owner) return;
+      if (!auth.user) {serverRows.current=[];serverUserId.current=null;setServerItems([]);setServerHasMore(false);return;}
+      if(auth.user.id!==owner||serverUserId.current&&serverUserId.current!==auth.user.id)return;
+      serverUserId.current = auth.user.id;
+      const offset=append?serverRows.current.length:0;
+      const {data, error} = await supabase.from('notifications')
+        .select('id,title,body,read,metadata,created_at,notification_type,feature_name,destination')
+        .eq('user_id', auth.user.id).ilike('feature_name', 'goodies').or(CUSTOMER_NOTIFICATION_FILTER)
+        .order('created_at', {ascending: false}).order('id',{ascending:false}).range(offset,offset+49);
+      if (!serverMounted.current || requestId !== serverLoadId.current || serverUserId.current !== auth.user.id || S.accountId!==owner) return;
+      if(error)throw error;
+      if(!Array.isArray(data))throw new Error('Notifications unavailable');
+      const rows=data.map((n: any) => ({...n, server: true, t: n.title || label('lbl.notifDefaultTitle', 'Goodies update'), d: n.body || '', u: !n.read, r: n.notification_type === 'store_message' ? 'chat' : String(n.destination || '').toLowerCase().includes('order') ? 'track' : 'other', p: n.metadata?.order_id || n.metadata?.order_code || ''}));
+      serverRows.current=append?[...serverRows.current,...rows.filter((n:any)=>!serverRows.current.some((old:any)=>old.id===n.id))]:rows;
+      setServerItems(serverRows.current);setServerHasMore(data.length===50);setServerError('');
+    }catch(error){if(serverMounted.current&&requestId===serverLoadId.current&&S.accountId===owner)setServerError(friendlyError(error,label("lbl.cms.ce2855382c78", "Something went wrong. Please try again.")));}
+    finally{
+      serverBusy.current=false;
+      if(serverMounted.current&&S.accountId===owner){setServerLoading(false);setServerPaging(false);}
+      if(serverRefreshQueued.current&&serverMounted.current){serverRefreshQueued.current=false;void loadServer();}
+    }
   };
   useEffect(() => {
     let active = true;
@@ -459,8 +475,9 @@ export function Notifs() {
       if (channel && serverUserId.current === userId) { void loadServer(); return; }
       if (channel) { void supabase.removeChannel(channel); channel = undefined; }
       serverLoadId.current++;
+      if(serverUserId.current!==userId){serverRows.current=[];setServerItems([]);setServerHasMore(false);setServerError('');}
       serverUserId.current = userId;
-      if (!userId) { setServerItems([]); setServerError(''); return; }
+      if (!userId) { setServerItems([]); setServerError('');setServerLoading(false);setServerPaging(false);return; }
       void loadServer();
       channel = supabase.channel('goodies-notifications-' + userId)
         .on('postgres_changes', {event: '*', schema: 'public', table: 'notifications', filter: 'user_id=eq.' + userId}, () => { void loadServer(); })
@@ -475,7 +492,7 @@ export function Notifs() {
     const initialAuthEpoch = authEpoch;
     void supabase.auth.getSession().then(({data}) => {
       if (active && initialAuthEpoch === authEpoch) connect(data.session?.user?.id || null);
-    }).catch(() => {});
+    }).catch(() => {if(active){setServerLoading(false);setServerError(label("lbl.cms.ce2855382c78", "Something went wrong. Please try again."));}});
     return () => {
       active = false;
       serverMounted.current = false;
@@ -485,46 +502,55 @@ export function Notifs() {
       if (channel) void supabase.removeChannel(channel);
     };
   }, []);
-  const localItems = S.notifs.filter((n: any) => !serverItems.some((s: any) => String(s.t) === String(n.t) && String(s.d) === String(n.d)));
-  const items = [...serverItems, ...localItems];
+  const visibleServerItems=serverUserId.current===S.accountId?serverItems:[];
+  const localItems = S.notifs.filter((n: any) => !visibleServerItems.some((s: any) => String(s.t) === String(n.t) && String(s.d) === String(n.d)));
+  const items = [...visibleServerItems, ...localItems];
   const markAll = async () => {
-    readAll();
-    const {data: auth} = await supabase.auth.getUser();
-    if (auth.user) {
+    const owner=S.accountId;readAll();
+    try{
+      const {data: auth,error:authError} = await supabase.auth.getUser();if(authError)throw authError;
+      if(!auth.user||auth.user.id!==owner||S.accountId!==owner)return;
       const {error} = await supabase.from('notifications').update({read: true})
         .eq('user_id', auth.user.id).ilike('feature_name', 'goodies').or(CUSTOMER_NOTIFICATION_FILTER).eq('read', false);
-      if (error) setServerError(friendlyError(error, label("lbl.cms.ce2855382c78", "Something went wrong. Please try again.")));
-      else await loadServer();
-    }
+      if(S.accountId!==owner)return;if(error)throw error;await loadServer();
+    }catch(error){if(S.accountId===owner)setServerError(friendlyError(error,label("lbl.cms.ce2855382c78", "Something went wrong. Please try again.")));}
   };
   const open = async (n: any) => {
+    const owner=S.accountId;
+    try{
     if (!n.server) { openNotif(n.id); return; }
     if (!n.read) {
-      const {data: auth} = await supabase.auth.getUser();
+      const {data: auth,error:authError} = await supabase.auth.getUser();
+      if(authError)throw authError;
+      if(S.accountId!==owner||auth.user?.id!==owner)return;
       if (auth.user) {
         const {error} = await supabase.from('notifications').update({read: true})
           .eq('id', n.id).eq('user_id', auth.user.id);
+        if(S.accountId!==owner)return;
         if (error) setServerError(friendlyError(error, label("lbl.cms.ce2855382c78", "Something went wrong. Please try again.")));
-        else setServerItems((prev: any[]) => prev.map((x: any) => x.id === n.id ? {...x, read: true, u: false} : x));
+        else {serverRows.current=serverRows.current.map((x:any)=>x.id===n.id?{...x,read:true,u:false}:x);setServerItems(serverRows.current);}
       }
     }
+    if(S.accountId!==owner)return;
     const destination = String(n.destination || '').toLowerCase();
     const metadata = n.metadata || {};
     if (n.notification_type === 'store_message' || destination.includes('message') || destination === 'storechat') {
       let storeId = metadata.store_id || metadata.storeId;
       if (!storeId && metadata.conversation_id) {
         const {data, error} = await supabase.from('conversations').select('ref_id').eq('id', metadata.conversation_id).maybeSingle();
+        if(S.accountId!==owner)return;
         if (error) { setServerError(friendlyError(error, label("lbl.cms.5152d56536a7", "Could not open this store conversation."))); return; }
         storeId = data?.ref_id;
       }
       if (storeId) { go('storechat', String(storeId)); return; }
     }
-    if (destination.includes('ingredientrequest')) return;
+    if (destination.includes('ingredientrequest')) {go('ndetail',{server:true,t:n.t,d:n.d,r:'notifs'});return;}
     if (destination.includes('order') || metadata.order_id || metadata.order_code || n.notification_type === 'goodies_order_status' || n.notification_type === 'goodies_order_update') {
       let order = S.orders.find((o: any) => o.backendId && (o.backendId === metadata.order_id || o.id === metadata.order_code));
       if (!order) {
         try {
           const id = await fetchGoodiesOrderForNotification(metadata.order_id, metadata.order_code);
+          if(S.accountId!==owner)return;
           if (id) order = S.orders.find((o: any) => o.id === id);
         } catch (e: any) {
           toast(friendlyError(e, label("lbl.cms.6905493e11ff", "Could not load this order.")));
@@ -539,22 +565,31 @@ export function Notifs() {
     if (destination.includes('address')) { go('addresses'); return; }
     if (destination.includes('wallet') || destination.includes('payment')) { go('payments'); return; }
     if (destination.includes('store') && (metadata.store_id || metadata.storeId)) { go('store', metadata.store_id || metadata.storeId); return; }
-    if (destination.includes('product') && (metadata.product_id || metadata.productId)) { go('product', metadata.product_id || metadata.productId); return; }
+    if (destination.includes('product') && (metadata.product_id || metadata.productId)) {
+      const productId=String(metadata.product_id||metadata.productId);
+      if(!IT[productId])await refreshLiveSchedules();
+      if(S.accountId!==owner)return;
+      if(IT[productId])openProduct(productId);else toast(label('lbl.productUnavailable','This product is unavailable.'));
+      return;
+    }
     if (destination === 'goodies' || destination === 'goodieshome') { go('home'); return; }
-    go('notifs');
+    go('ndetail',{server:true,t:n.t,d:n.d,r:'notifs'});
+    }catch(error){if(S.accountId===owner)setServerError(friendlyError(error,label("lbl.cms.ce2855382c78", "Something went wrong. Please try again.")));}
   };
   return (
     <View>
       <Bar cmsKey={'lbl.notifsTitle'} title={label('lbl.notifsTitle', 'Notifications')} onBack={back} right={items.some((n: any) => n.u) ? <Pressable onPress={() => { void markAll(); }}><T cmsKey={'lbl.notifsMarkAll'} size={13.5} weight="600" color={th.br}>{label('lbl.notifsMarkAll', 'Mark all as read')}</T></Pressable> : null} />
       <View style={{paddingHorizontal: 16}}>
-        {serverError ? <T size={12} color={th.red}>{serverError}</T> : null}
+        {serverLoading?<T cmsKey={'lbl.notificationsLoading'} color={th.mut}>{label('lbl.notificationsLoading','Loading notifications…')}</T>:null}
+        {serverError ? <Card><T size={12} color={th.red}>{serverError}</T><Cta cmsKey={'lbl.retry'} ghost label={label('lbl.retry','Try again')} onPress={()=>void loadServer()}/></Card> : null}
         {items.length ? items.map((n: any) => (
           <Pressable key={(n.server ? 'server-' : 'local-') + n.id} onPress={() => { void open(n); }} style={{flexDirection: 'row', alignItems: 'center', gap: 12, paddingVertical: 14, paddingHorizontal: 4, borderBottomWidth: 1, borderBottomColor: th.line}}>
             <View style={{width: 44, height: 44, borderRadius: 16, backgroundColor: n.u ? th.brt : th.soft, alignItems: 'center', justifyContent: 'center'}}><Text style={{fontSize: 22}}>{n.r === 'chat' ? '💬' : n.r === 'track' ? '🛵' : '🎁'}</Text></View>
             <View style={{flex: 1}}><T weight={n.u ? '800' : undefined}>{n.t}</T><T size={13} color={th.mut}>{n.d}</T></View>
             {n.u ? <View style={{width: 8, height: 8, borderRadius: 4, backgroundColor: th.br}} /> : null}
           </Pressable>
-        )) : <Empty emoji="🔔" title={label('lbl.notifsEmpty', 'You’re all caught up')} text={label('lbl.notifsEmptyText', 'Order updates and offers will appear here.')} />}
+        )) : !serverLoading&&!serverError?<Empty emoji="🔔" title={label('lbl.notifsEmpty', 'You’re all caught up')} text={label('lbl.notifsEmptyText', 'Order updates and offers will appear here.')} />:null}
+        {serverHasMore?<Cta cmsKeys={['lbl.notificationsLoading','lbl.loadMore']} ghost disabled={serverLoading||serverPaging} label={serverPaging?label('lbl.notificationsLoading','Loading notifications…'):label('lbl.loadMore','Load more')} onPress={()=>void loadServer(true)}/>:null}
       </View>
     </View>
   );

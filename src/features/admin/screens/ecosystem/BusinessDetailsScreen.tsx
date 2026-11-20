@@ -14,6 +14,7 @@ import { AppIcon } from '../../ui/AppIcon';
 import { ButtonRow, OutlineBtn, Pill, StatusPill } from '../../ui/Controls';
 import { ListRows } from '../../ui/Lists';
 import { Txt } from '../../ui/Txt';
+import { AdminSnapshotBoundary } from '../../ui/AdminSnapshotBoundary';
 
 /** Business details intentionally render only fields supplied by the authorized ecosystem snapshot. */
 export function BusinessDetailsScreen() {
@@ -47,13 +48,13 @@ export function BusinessDetailsScreen() {
         await hydrateAdminState();
         toast(business.name + ': ' + next);
       } catch (error) {
-        return error instanceof Error ? error.message : 'Business verification could not be updated.';
+        return 'Business verification could not be confirmed. Refresh its status before retrying.';
       }
     },
   });
 
   return (
-    <View>
+    <AdminSnapshotBoundary domain="ecosystem"><View>
       <View style={{ flexDirection: 'row', alignItems: 'center', gap: 8, marginBottom: 4 }}>
         <OutlineBtn onPress={() => go('ecosystem')}><View style={{ flexDirection: 'row', alignItems: 'center', gap: 4 }}><AppIcon name="arrow-left" size={12} />Ecosystem</View></OutlineBtn>
         <Pill>Business details</Pill>
@@ -115,6 +116,6 @@ export function BusinessDetailsScreen() {
           </Card>
         </>
       )}
-    </View>
+    </View></AdminSnapshotBoundary>
   );
 }

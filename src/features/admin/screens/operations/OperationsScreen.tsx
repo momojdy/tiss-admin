@@ -15,6 +15,7 @@ import { Card } from '../../ui/Card';
 import { Txt } from '../../ui/Txt';
 import { useTheme } from '../../theme/ThemeContext';
 import { STATUS_TONE } from '../../theme/tokens';
+import { AdminSnapshotBoundary } from '../../ui/AdminSnapshotBoundary';
 
 const waiting = () => db.APPS.filter((a) => a.st < 3);
 const over48 = () => waiting().filter((a) => a.age >= 2);
@@ -77,7 +78,7 @@ export function OperationsScreen() {
   };
 
   return (
-    <View>
+    <AdminSnapshotBoundary domain="operations"><View>
       <Heading title="Operations Queue" kpis={[
         { icon: 'clock-alert', value: w.length, label: 'Waiting for review', onPress: () => go('operations', { ov: 'Board', o48: 0, ou: 0 }) },
         { icon: 'file-pen', value: pendingDocs(), label: 'Documents to verify', onPress: () => go('operations', { ov: 'Documents' }) },
@@ -91,6 +92,6 @@ export function OperationsScreen() {
         {ui.ou === 1 ? <Pill on onPress={() => set('ou', 0)}>Clear unassigned filter</Pill> : null}
       </Row>
       {body()}
-    </View>
+    </View></AdminSnapshotBoundary>
   );
 }

@@ -25,12 +25,13 @@ export default function WalletHelpPayScreen({requestId,onBack}:Props){
    const current=++sequence.current;
    if(!validHelpPayId(requestId)){setError(label("lbl.sharedPay.19ca27bcb4cf", "Invalid Wantiss payment link"));setLoading(false);return;}
    try{
-     const user=await helpPayAccount();owner.current=user;
+     const user=await helpPayAccount();if(!mounted.current||current!==sequence.current||scope.current!==requestId)return;owner.current=user;
      const [snapshot,wallet,enabled,recovery]=await Promise.all([
        fetchHelpPayStatus(requestId),supabase.from('wallets').select('balance').eq('user_id',user).maybeSingle(),
        GOODIES_SHARED_PAYMENTS_RELEASED?fetchHelpPayWalletEnabled():Promise.resolve(false),recoverHelpPayPayment(requestId)
      ]);
-     if(wallet.error||wallet.data&&(wallet.data.balance==null||String(wallet.data.balance).trim()===''||!Number.isFinite(Number(wallet.data.balance))||Number(wallet.data.balance)<0))throw new Error('Wallet unavailable');
+     const balance=wallet.data?.balance,numericBalance=typeof balance==='number'||typeof balance==='string'&&/^[+-]?(?:\d+(?:\.\d*)?|\.\d+)(?:e[+-]?\d+)?$/i.test(balance.trim());
+     if(wallet.error||wallet.data!=null&&(typeof wallet.data!=='object'||Array.isArray(wallet.data)||!numericBalance||!Number.isFinite(Number(balance))||Number(balance)<0))throw new Error('Wallet unavailable');
      const currentUser=await helpPayAccount();if(!mounted.current||current!==sequence.current||scope.current!==requestId||currentUser!==user)return;
      setWalletBalance(wallet.data?Number(wallet.data.balance):null);setRequest(snapshot);setWalletEnabled(enabled);setError('');
      if(recovery.result)setReceipt(receiptText(recovery.result));

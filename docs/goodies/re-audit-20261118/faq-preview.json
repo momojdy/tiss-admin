@@ -1,0 +1,157 @@
+{
+  "scope": "Actual Help/FAQ rendering in the local isolated CMS preview; no hosted publication or native device. Five FAQs in four approved locales plus reviewed-English fallback for unfinished Creole.",
+  "status": "PASS",
+  "payloadSha256": "45a84e7d87e26be86363a05db32ae165cf2b220ce2464e5b2b75357b1a6be6cd",
+  "results": [
+    {
+      "locale": "en",
+      "index": 0,
+      "status": "PASS",
+      "englishFallback": false
+    },
+    {
+      "locale": "en",
+      "index": 1,
+      "status": "PASS",
+      "englishFallback": false
+    },
+    {
+      "locale": "en",
+      "index": 2,
+      "status": "PASS",
+      "englishFallback": false
+    },
+    {
+      "locale": "en",
+      "index": 3,
+      "status": "PASS",
+      "englishFallback": false
+    },
+    {
+      "locale": "en",
+      "index": 4,
+      "status": "PASS",
+      "englishFallback": false
+    },
+    {
+      "locale": "fr",
+      "index": 0,
+      "status": "PASS",
+      "englishFallback": false
+    },
+    {
+      "locale": "fr",
+      "index": 1,
+      "status": "PASS",
+      "englishFallback": false
+    },
+    {
+      "locale": "fr",
+      "index": 2,
+      "status": "PASS",
+      "englishFallback": false
+    },
+    {
+      "locale": "fr",
+      "index": 3,
+      "status": "PASS",
+      "englishFallback": false
+    },
+    {
+      "locale": "fr",
+      "index": 4,
+      "status": "PASS",
+      "englishFallback": false
+    },
+    {
+      "locale": "es",
+      "index": 0,
+      "status": "PASS",
+      "englishFallback": false
+    },
+    {
+      "locale": "es",
+      "index": 1,
+      "status": "PASS",
+      "englishFallback": false
+    },
+    {
+      "locale": "es",
+      "index": 2,
+      "status": "PASS",
+      "englishFallback": false
+    },
+    {
+      "locale": "es",
+      "index": 3,
+      "status": "PASS",
+      "englishFallback": false
+    },
+    {
+      "locale": "es",
+      "index": 4,
+      "status": "PASS",
+      "englishFallback": false
+    },
+    {
+      "locale": "zh-Hans",
+      "index": 0,
+      "status": "PASS",
+      "englishFallback": false
+    },
+    {
+      "locale": "zh-Hans",
+      "index": 1,
+      "status": "PASS",
+      "englishFallback": false
+    },
+    {
+      "locale": "zh-Hans",
+      "index": 2,
+      "status": "PASS",
+      "englishFallback": false
+    },
+    {
+      "locale": "zh-Hans",
+      "index": 3,
+      "status": "PASS",
+      "englishFallback": false
+    },
+    {
+      "locale": "zh-Hans",
+      "index": 4,
+      "status": "PASS",
+      "englishFallback": false
+    },
+    {
+      "locale": "ht",
+      "index": 0,
+      "status": "PASS",
+      "englishFallback": true
+    },
+    {
+      "locale": "ht",
+      "index": 1,
+      "status": "PASS",
+      "englishFallback": true
+    },
+    {
+      "locale": "ht",
+      "index": 2,
+      "status": "PASS",
+      "englishFallback": true
+    },
+    {
+      "locale": "ht",
+      "index": 3,
+      "status": "PASS",
+      "englishFallback": true
+    },
+    {
+      "locale": "ht",
+      "index": 4,
+      "status": "PASS",
+      "englishFallback": true
+    }
+  ]
+}

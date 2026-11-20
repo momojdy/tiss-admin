@@ -8,7 +8,7 @@ import {T, Cta, Row, Card, Badge, Input, Radio, Seg, SheetBox, Bar, Empty, useTh
 import {Icon} from './Icon';
 import {CameraView, useCameraPermissions} from '../previewNative';
 import QRCode from 'react-native-qrcode-svg';
-import {S, STB, money, emit, save, toast, ui, addr, defAddr, done, phoneOK, fmtDay, fmtTime, alcAge, syncGroupOrderCartLine, removeGroupOrderCartLine, refreshUserAddresses, persistGoodiesContactNumber, removeGoodiesContactNumber, clearActiveGroup, validateActiveGroup} from '../store';
+import {S, STB, money, emit, save, toast, ui, addr, defAddr, done, phoneOK, fmtDay, fmtTime, alcAge, syncGroupOrderCartLine, removeGroupOrderCartLine, refreshUserAddresses, persistGoodiesContactNumber, removeGoodiesContactNumber, clearActiveGroup} from '../store';
 import * as A from '../actions';
 import {previewBackend as supabase} from '../previewRuntime';
 import {PROMO_DETAIL} from '../data/promoText';
@@ -19,6 +19,7 @@ import {BottomSheet, ConfirmDialog} from './Overlays';
 import {friendlyError} from '../friendlyError';
 import {fetchGoodiesOrderForNotification} from '../serverSync';
 import {push, reset} from '../store';
+import {wantissLocale} from '../previewLocales';
 
 export function Sheets({sheet, close}: {sheet: any; close: () => void}) {
   const th = useTheme(), insets = useSafeAreaInsets(), {height: windowHeight} = useWindowDimensions();
@@ -168,7 +169,7 @@ function ScheduleSheet({close, inline = false}: {close: () => void; inline?: boo
   /* Closed store with nothing chosen yet: pre-select the earliest valid slot so checkout can continue without an extra Apply step. */
   useEffect(()=>{if(inline&&store&&!store.open&&store.acceptScheduledOrders&&!S.sch&&earliestInstant)A.setSch(earliestInstant.getTime());},[inline,store?.id,store?.open,earliestInstant?.getTime()]);
   const reason=noFutureSlot?label('lbl.sheetClosedDayReason','This store has no remaining scheduled times on that day. Choose another day.') : !customValid?label('lbl.sheetClampEarliest','Choose the minimum available time or a later available time.'):'';
-  const formatCustomer=(ts:number,options:Intl.DateTimeFormatOptions)=>new Intl.DateTimeFormat(undefined,{...options,timeZone:customerZone}).format(new Date(ts));
+  const formatCustomer=(ts:number,options:Intl.DateTimeFormatOptions)=>new Intl.DateTimeFormat(wantissLocale(S.lang)==='ht'?'fr-HT':wantissLocale(S.lang),{...options,timeZone:customerZone}).format(new Date(ts));
   const choose=()=>{
     if(!store){toast(label('lbl.sheetChooseStore','Choose a store before scheduling.'));return;}
     if(!store.acceptScheduledOrders){toast(label('lbl.sheetNoScheduleClosed','This store does not accept scheduled orders.'));return;}
@@ -224,7 +225,7 @@ export function GroupOrderModal({close, storeId = ''}: {close: () => void; store
         <Pressable accessibilityRole="button" accessibilityLabel={label("lbl.cms.4895f0308d1a", "Close")} onPress={close} hitSlop={12} style={{width: 36, height: 36, borderRadius: 18, backgroundColor: th.soft, alignItems: 'center', justifyContent: 'center'}}><Icon name="x" size={18} color={th.ink} /></Pressable>
       </View>
       <ScrollView style={{flex: 1}} contentContainerStyle={{paddingHorizontal: 22, paddingTop: 4, paddingBottom: insets.bottom + 28}} keyboardShouldPersistTaps="handled" showsVerticalScrollIndicator={false}>
-        <GroupOrderSheet close={close} showTitle={false} showDone storeId={storeId} />
+        <GroupOrderSheet key={S.accountId || 'signed-out'} close={close} showTitle={false} showDone storeId={storeId} />
       </ScrollView>
     </View>
   </BottomSheet>;
@@ -232,6 +233,9 @@ export function GroupOrderModal({close, storeId = ''}: {close: () => void; store
 
 function GroupOrderSheet({close, showTitle = true, showDone = true, storeId = ''}: {close: () => void; showTitle?: boolean; showDone?: boolean; storeId?: string}) {
   const th = useTheme();
+  const accountId=S.accountId;
+  const mounted=useRef(true),groupActionLock=useRef(false),friendsActionLock=useRef(false);
+  useEffect(()=>{mounted.current=true;return()=>{mounted.current=false;};},[]);
   const incomingInviteCode = String((S as any).pendingGroupInviteCode || '');
   delete (S as any).pendingGroupInviteCode;
   const [inviteCode, setInviteCode] = useState(incomingInviteCode);
@@ -239,6 +243,9 @@ function GroupOrderSheet({close, showTitle = true, showDone = true, storeId = ''
   const [sharedItems, setSharedItems] = useState<any[]>([]);
   const [groupMembers, setGroupMembers] = useState<any[]>([]);
   const [membershipError, setMembershipError] = useState('');
+  const [sharedError,setSharedError]=useState(''),[statusError,setStatusError]=useState('');
+  const [sharedLoading,setSharedLoading]=useState(false),[membersLoading,setMembersLoading]=useState(false);
+  const [groupReload,setGroupReload]=useState(0);
   const [checkoutPreview, setCheckoutPreview] = useState<any>(null);
   const [checkoutEstimate, setCheckoutEstimate] = useState<any>(null);
   const [previewBusy, setPreviewBusy] = useState(false);
@@ -250,12 +257,13 @@ function GroupOrderSheet({close, showTitle = true, showDone = true, storeId = ''
   useEffect(() => {
     if(groupCheckoutType!=='delivery') return;
     let active=true;
+    const owner=accountId;
     void refreshUserAddresses().then((addresses:any[])=>{
-      if(!active||!addresses?.length) return;
+      if(!active||S.accountId!==owner||!addresses?.length) return;
       setGroupAddressId((current:any)=>addresses.some((item:any)=>String(item.id)===String(current))?current:addresses.find((item:any)=>item.def)?.id??addresses[0].id);
-    }).catch((error:any)=>{if(active)toast(friendlyError(error, label("lbl.cms.0f3e6a48b781", "Could not load saved delivery addresses.")));});
+    }).catch(()=>{if(active&&S.accountId===owner)toast(label("lbl.cms.0f3e6a48b781", "Could not load saved delivery addresses."));});
     return ()=>{active=false;};
-  },[groupCheckoutType]);
+  },[groupCheckoutType,accountId]);
   const [currentUserId, setCurrentUserId] = useState('');
   const [scannerOpen, setScannerOpen] = useState(false);
   const [cameraPermission, requestCameraPermission] = useCameraPermissions();
@@ -266,73 +274,109 @@ function GroupOrderSheet({close, showTitle = true, showDone = true, storeId = ''
     const next = {code: '', host: S.pf.n || label('lbl.groupYou', 'You'), members: [], serverBacked: false};
     S.groupOrder = next; save(); return next;
   });
-  const saveGroup = (next: any) => { setGroup(next); S.groupOrder = next; save(); emit(); };
-  /* Opening the sheet re-checks a saved group; an ended or expired one is dropped instead of lingering. */
-  useEffect(() => {
-    if (!group.serverBacked) return;
-    let alive = true;
-    void validateActiveGroup().then(ok => {if (alive && !ok) setGroup({code: '', host: S.pf.n || label('lbl.groupYou', 'You'), members: [], serverBacked: false});});
-    return () => {alive = false;};
-  }, []);
+  const groupSource=useRef(S.groupOrder);
+  const activeGroup=useRef('');activeGroup.current=String(group.groupId||'');
+  const current=(owner:any,groupId?:string)=>mounted.current&&S.accountId===owner&&S.groupOrder===groupSource.current&&(groupId===undefined||activeGroup.current===groupId);
+  const requireAccount=async(owner:any)=>{
+    if(!current(owner))return false;
+    const {data,error}=await supabase.auth.getUser();
+    if(!current(owner))return false;
+    if(error||!owner||data.user?.id!==owner)throw new Error('Group account unavailable');
+    return true;
+  };
+  const saveGroup = (next: any) => { activeGroup.current=String(next.groupId||'');groupSource.current=next;setGroup(next); S.groupOrder = next; save(); emit(); };
   const createServerGroup = async () => {
+    if(groupActionLock.current||groupCheckoutLock.current)return;
     const targetStoreId = storeId || S.cart.sid || group.storeId || '';
     if (!targetStoreId) {toast(label("lbl.cms.9ad0840772c3", "Open a store first to create its group invitation."));return;}
     if (S.cart.lines.length && S.cart.sid !== targetStoreId) {toast(label("lbl.cms.a6b2201002c6", "Your current cart belongs to another store. Clear it before creating this group."));return;}
-    setGroupBusy(true);
+    const owner=accountId,previousGroupId=String(group.groupId||''),cartLines=JSON.parse(JSON.stringify(S.cart.sid===targetStoreId?S.cart.lines:[]));
+    groupActionLock.current=true;setGroupBusy(true);let created=false;
     try {
+      if(!await requireAccount(owner)||!current(owner,previousGroupId))return;
       const {data,error}=await supabase.rpc('goodies_group_order_create',{p_store_id:targetStoreId});
+      if(!current(owner,previousGroupId))return;
       const row=Array.isArray(data)?data[0]:data;
-      if(error||!row?.invite_code) throw error || new Error(label("lbl.page.components.Sheets.a686a8f76f", "Could not create the group invitation."));
+      if(error||typeof row?.group_id!=='string'||!row.group_id||typeof row?.invite_code!=='string'||!row.invite_code) throw error || new Error(label("lbl.page.components.Sheets.a686a8f76f", "Could not create the group invitation."));
       saveGroup({...group,code:row.invite_code,groupId:row.group_id,storeId:targetStoreId,expiresAt:row.expires_at,serverBacked:true});
-      const synced=await Promise.all((S.cart.sid === targetStoreId ? S.cart.lines : []).map((line:any)=>syncGroupOrderCartLine(row.group_id,line)));
+      created=true;
+      const synced=await Promise.all(cartLines.map((line:any)=>syncGroupOrderCartLine(row.group_id,line)));
+      if(!current(owner)||S.groupOrder?.groupId!==row.group_id)return;
       const failed=synced.find((result:any)=>result.error);
-      if(failed)toast(friendlyError(failed.error, label("lbl.cms.184f5c8af282", "Group created, but one or more cart items could not be shared.")));
-      toast(label("lbl.cms.9e385df54370", "A new group invitation is ready."));
+      if(failed)toast(label("lbl.cms.184f5c8af282", "Group created, but one or more cart items could not be shared."));
+      else toast(label("lbl.cms.9e385df54370", "A new group invitation is ready."));
     } catch(error:any) {
-      toast(friendlyError(error, label("lbl.cms.a9d496a784b4", "Could not create the group invitation. Please try again.")));
+      if(current(owner))toast(created?label("lbl.cms.184f5c8af282", "Group created, but one or more cart items could not be shared."):label("lbl.cms.a9d496a784b4", "Could not create the group invitation. Please try again."));
     } finally {
-      setGroupBusy(false);
+      groupActionLock.current=false;if(current(owner))setGroupBusy(false);
     }
   };
-  const joinServerGroup = async () => {
-    const code=inviteCode.trim().toUpperCase();
+  const joinGroup = async (rawCode:string) => {
+    if(groupActionLock.current||groupCheckoutLock.current)return;
+    const code=rawCode.trim().toUpperCase();
     if(!code){toast(label("lbl.cms.949b8e0d1bea", "Enter a group invite code."));return;}
-    setGroupBusy(true);
+    const owner=accountId,previousGroupId=String(group.groupId||'');
+    groupActionLock.current=true;setGroupBusy(true);
     try {
+      if(!await requireAccount(owner)||!current(owner,previousGroupId))return;
       const {data,error}=await supabase.rpc('goodies_group_order_join',{p_invite_code:code});
+      if(!current(owner,previousGroupId))return;
       const row=Array.isArray(data)?data[0]:data;
-      if(error||!row?.group_id) throw error || new Error(label("lbl.page.components.Sheets.e947050714", "Could not join this group order."));
+      if(error||typeof row?.group_id!=='string'||!row.group_id||typeof row?.invite_code!=='string'||!row.invite_code||typeof row?.store_id!=='string'||!row.store_id) throw error || new Error(label("lbl.page.components.Sheets.e947050714", "Could not join this group order."));
       saveGroup({code:row.invite_code,groupId:row.group_id,storeId:row.store_id,expiresAt:row.expires_at,host:S.pf.n||label('lbl.groupYou', 'You'),members:group.members||[],serverBacked:true});
       toast(label("lbl.cms.9d2f3e3ff6a8", "You joined the group order."));
     } catch(error:any) {
-      toast(friendlyError(error, label("lbl.cms.b7c7f9985055", "Could not join this group order. Check the invite code and try again.")));
+      if(current(owner))toast(label("lbl.cms.b7c7f9985055", "Could not join this group order. Check the invite code and try again."));
     } finally {
-      setGroupBusy(false);
+      groupActionLock.current=false;if(current(owner))setGroupBusy(false);
     }
   };
+  const joinServerGroup=()=>joinGroup(inviteCode);
   useEffect(() => {
-    let active=true;
-    void supabase.auth.getUser().then(({data})=>{if(active)setCurrentUserId(data.user?.id||'');});
-    if (!group.serverBacked || !group.groupId) {setSharedItems([]);setGroupMembers([]);setMembershipError('');return ()=>{active=false;};}
+    let active=true,itemsRequest=0,membersRequest=0,statusRequest=0;
+    const owner=accountId,groupId=String(group.groupId||''),valid=()=>active&&current(owner,groupId);
+    void supabase.auth.getUser().then(({data,error})=>{if(valid()){setCurrentUserId(!error&&data.user?.id===owner?owner:'');if(error||data.user?.id!==owner)setMembershipError(label('lbl.groupRefreshFailed','Could not refresh this group order. Please try again.'));}},()=>{if(valid()){setCurrentUserId('');setMembershipError(label('lbl.groupRefreshFailed','Could not refresh this group order. Please try again.'));}});
+    if (!group.serverBacked || !group.groupId) {setSharedItems([]);setGroupMembers([]);setMembershipError('');setSharedError('');setStatusError('');setSharedLoading(false);setMembersLoading(false);return ()=>{active=false;};}
     const loadItems=async () => {
-      const {data,error}=await supabase.from('goodies_group_order_items')
-        .select('id,user_id,line_key,quantity,options,note,product:goodies_products(name,price,photo_url,emoji)')
-        .eq('group_id',group.groupId).order('created_at',{ascending:true});
-      if(active){if(error)toast(friendlyError(error, label("lbl.cms.725f5d75b162", "Could not refresh the shared cart.")));else {setSharedItems(data||[]);setCheckoutPreview(null);setCheckoutEstimate(null);}}
+      const request=++itemsRequest;setSharedLoading(true);setSharedError('');setCheckoutPreview(null);setCheckoutEstimate(null);
+      try{
+        if(!await requireAccount(owner)||!valid())return;
+        const {data,error}=await supabase.from('goodies_group_order_items')
+          .select('id,user_id,line_key,quantity,options,note,product:goodies_products(name,price,photo_url,emoji)')
+          .eq('group_id',groupId).order('created_at',{ascending:true});
+        if(!valid()||request!==itemsRequest)return;
+        if(error||!Array.isArray(data))throw error||new Error('Group cart unavailable');
+        setSharedItems(data);
+      }catch{if(valid()&&request===itemsRequest)setSharedError(label("lbl.cms.725f5d75b162", "Could not refresh the shared cart."));}
+      finally{if(valid()&&request===itemsRequest)setSharedLoading(false);}
     };
     const loadMembers=async () => {
-      const {data,error}=await supabase.rpc('goodies_group_order_list_members',{p_group_id:group.groupId});
-      if(active){setMembershipError(friendlyError(error, ''));if(!error)setGroupMembers(data||[]);}
+      const request=++membersRequest;setMembersLoading(true);setMembershipError('');
+      try{
+        if(!await requireAccount(owner)||!valid())return;
+        const {data,error}=await supabase.rpc('goodies_group_order_list_members',{p_group_id:groupId});
+        if(!valid()||request!==membersRequest)return;
+        if(error||!Array.isArray(data))throw error||new Error('Group members unavailable');
+        setGroupMembers(data);
+      }catch{if(valid()&&request===membersRequest){setGroupMembers([]);setMembershipError(label("lbl.cms.91ec9baa31db", "Could not load group members. Try again."));}}
+      finally{if(valid()&&request===membersRequest)setMembersLoading(false);}
     };
     const refreshGroupStatus=async () => {
-      const {data,error}=await supabase.rpc('goodies_group_order_get_status',{p_group_id:group.groupId});
-      if(!active||error)return;
-      const statusRow=Array.isArray(data)?data[0]:data;
-      if(!statusRow||statusRow.status!=='open'||new Date(statusRow.expires_at).getTime()<=Date.now()){
-        S.groupOrder=null; save(); emit(); setGroup({code:'',host:S.pf.n||label('lbl.groupYou', 'You'),members:[],serverBacked:false});
-        setSharedItems([]);setGroupMembers([]);setCheckoutPreview(null);
-        toast(statusRow?.status==='cancelled'?label("lbl.cms.7c7eb6fad354", "The group host ended this group order."):label("lbl.cms.984dfaf4f0b3", "This group order has closed or expired."));
-      }
+      const request=++statusRequest;
+      try{
+        if(!await requireAccount(owner)||!valid())return;
+        const {data,error}=await supabase.rpc('goodies_group_order_get_status',{p_group_id:groupId});
+        if(!valid()||request!==statusRequest)return;
+        if(error)throw error;
+        setStatusError('');
+        const statusRow=Array.isArray(data)?data[0]:data;
+        if(statusRow&&(statusRow.group_id!==groupId||!['open','locked','checked_out','closed','expired','cancelled'].includes(statusRow.status)||!Number.isFinite(Date.parse(statusRow.expires_at))))throw new Error('Group status unavailable');
+        if(!statusRow||statusRow.status!=='open'||new Date(statusRow.expires_at).getTime()<=Date.now()){
+          saveGroup({code:'',host:S.pf.n||label('lbl.groupYou', 'You'),members:[],serverBacked:false});
+          setSharedItems([]);setGroupMembers([]);setCheckoutPreview(null);setCheckoutEstimate(null);
+          toast(statusRow?.status==='cancelled'?label("lbl.cms.7c7eb6fad354", "The group host ended this group order."):label("lbl.cms.984dfaf4f0b3", "This group order has closed or expired."));
+        }
+      }catch{if(valid()&&request===statusRequest)setStatusError(label('lbl.groupRefreshFailed','Could not refresh this group order. Please try again.'));}
     };
     void loadItems(); void loadMembers(); void refreshGroupStatus();
     const channel=supabase.channel('goodies-group-live-'+group.groupId)
@@ -341,57 +385,78 @@ function GroupOrderSheet({close, showTitle = true, showDone = true, storeId = ''
       .on('postgres_changes',{event:'UPDATE',schema:'public',table:'goodies_group_orders',filter:'id=eq.'+group.groupId},()=>{void refreshGroupStatus();})
       .subscribe();
     return ()=>{active=false;void supabase.removeChannel(channel);};
-  },[group.serverBacked,group.groupId]);
+  },[group.serverBacked,group.groupId,accountId,groupReload]);
 
   /* Friends picker (host) and invitations from friends (guest). */
   const [friends, setFriends] = useState<any[]>([]);
   const [friendsOpen, setFriendsOpen] = useState(false);
   const [pickedFriends, setPickedFriends] = useState<string[]>([]);
   const [friendsBusy, setFriendsBusy] = useState(false);
+  const [friendsError,setFriendsError]=useState('');
   const [myInvites, setMyInvites] = useState<any[]>([]);
+  const [invitesLoading,setInvitesLoading]=useState(false),[invitesError,setInvitesError]=useState('');
+  const invitesLoadId=useRef(0);
+  const loadInvites=async()=>{
+    if(group.serverBacked)return;
+    const owner=accountId,request=++invitesLoadId.current;
+    setInvitesLoading(true);setInvitesError('');
+    try{
+      if(!await requireAccount(owner)||!current(owner,''))return;
+      const {data,error}=await supabase.rpc('goodies_group_order_my_invites');
+      if(!current(owner,'')||request!==invitesLoadId.current)return;
+      if(error||!Array.isArray(data))throw error||new Error('Invitations unavailable');
+      setMyInvites(data);
+    }catch{if(current(owner,'')&&request===invitesLoadId.current)setInvitesError(label('lbl.groupInvitesFailed','Could not load invitations. Please try again.'));}
+    finally{if(current(owner,'')&&request===invitesLoadId.current)setInvitesLoading(false);}
+  };
   useEffect(() => {
-    if (group.serverBacked) return;
-    let active = true;
-    void supabase.rpc('goodies_group_order_my_invites').then(({data, error}) => {
-      if (active && !error) setMyInvites(Array.isArray(data) ? data : []);
-      else if (error) console.warn('Group invites could not load', error.message);
-    });
-    return () => {active = false;};
-  }, [group.serverBacked]);
+    setMyInvites([]);setInvitesError('');
+    if(!group.serverBacked)void loadInvites();
+    return()=>{invitesLoadId.current++;};
+  }, [group.serverBacked,accountId]);
   const openFriends = async () => {
-    if (!group.groupId) return;
-    setFriendsOpen(true); setFriendsBusy(true);
-    const {data, error} = await supabase.rpc('goodies_group_order_list_friends', {p_group_id: group.groupId});
-    setFriendsBusy(false);
-    if (error) {setFriends([]); toast(friendlyError(error, label("lbl.cms.fee6cf252c06", "Could not load your friends. Please try again."))); return;}
-    setFriends(Array.isArray(data) ? data : []); setPickedFriends([]);
+    if (!group.groupId||friendsActionLock.current) return;
+    const owner=accountId,groupId=String(group.groupId);
+    friendsActionLock.current=true;setFriendsOpen(true);setFriendsBusy(true);setFriendsError('');
+    try{
+      if(!await requireAccount(owner)||!current(owner,groupId))return;
+      const {data,error}=await supabase.rpc('goodies_group_order_list_friends',{p_group_id:groupId});
+      if(!current(owner,groupId))return;
+      if(error||!Array.isArray(data))throw error||new Error('Friends unavailable');
+      setFriends(data);setPickedFriends([]);
+    }catch{if(current(owner,groupId)){setFriends([]);setFriendsError(label("lbl.cms.fee6cf252c06", "Could not load your friends. Please try again."));}}
+    finally{friendsActionLock.current=false;if(current(owner))setFriendsBusy(false);}
   };
   const sendFriendInvites = async () => {
-    if (!group.groupId || !pickedFriends.length) return;
-    setFriendsBusy(true);
-    const {data, error} = await supabase.rpc('goodies_group_order_invite_friends', {p_group_id: group.groupId, p_user_ids: pickedFriends});
-    setFriendsBusy(false);
-    if (error) {toast(friendlyError(error, label("lbl.cms.e1b4808b8c09", "Could not send the invitations. Please try again."))); return;}
-    toast(Number(data) > 0 ? label("lbl.cms.9cf703554060", "Invitation sent.") : label("lbl.cms.c8c0ebe1e4a9", "Nothing to send."));
-    setFriendsOpen(false); setPickedFriends([]);
+    if (!group.groupId || !pickedFriends.length||friendsActionLock.current) return;
+    const owner=accountId,groupId=String(group.groupId),users=[...pickedFriends];
+    friendsActionLock.current=true;setFriendsBusy(true);setFriendsError('');
+    try{
+      if(!await requireAccount(owner)||!current(owner,groupId))return;
+      const {data,error}=await supabase.rpc('goodies_group_order_invite_friends',{p_group_id:groupId,p_user_ids:users});
+      if(!current(owner,groupId))return;
+      if(error||typeof data!=='number'||!Number.isSafeInteger(data)||data<0||data>users.length)throw error||new Error('Invitation receipt unavailable');
+      toast(data>0?label("lbl.cms.9cf703554060", "Invitation sent."):label("lbl.cms.c8c0ebe1e4a9", "Nothing to send."));
+      setFriendsOpen(false);setPickedFriends([]);
+    }catch{if(current(owner,groupId))setFriendsError(label("lbl.cms.e1b4808b8c09", "Could not send the invitations. Please try again."));}
+    finally{friendsActionLock.current=false;if(current(owner))setFriendsBusy(false);}
   };
   const joinFromInvite = async (code: string) => {
-    setInviteCode(code);
-    setGroupBusy(true);
-    try {
-      const {data, error} = await supabase.rpc('goodies_group_order_join', {p_invite_code: code});
-      const row = Array.isArray(data) ? data[0] : data;
-      if (error || !row?.group_id) throw error || new Error("join failed");
-      saveGroup({code: row.invite_code, groupId: row.group_id, storeId: row.store_id, expiresAt: row.expires_at, host: S.pf.n || label('lbl.groupYou', 'You'), members: [], serverBacked: true});
-      toast(label("lbl.cms.9d2f3e3ff6a8", "You joined the group order."));
-    } catch (error: any) {
-      toast(friendlyError(error, label("lbl.cms.d37983f61070", "Could not join this group order. It may have closed.")));
-    } finally {setGroupBusy(false);}
+    if(groupActionLock.current)return;
+    setInviteCode(code);await joinGroup(code);
   };
   const declineInvite = async (groupId: string) => {
-    setMyInvites(list => list.filter(i => i.group_id !== groupId));
-    const {error} = await supabase.rpc('goodies_group_order_decline_invite', {p_group_id: groupId});
-    if (error) console.warn('Decline invite failed', error.message);
+    if(groupActionLock.current)return;
+    const owner=accountId;
+    groupActionLock.current=true;setGroupBusy(true);setInvitesError('');
+    try{
+      if(!await requireAccount(owner)||!current(owner,''))return;
+      const {error}=await supabase.rpc('goodies_group_order_decline_invite',{p_group_id:groupId});
+      if(!current(owner,''))return;
+      if(error)throw error;
+      setMyInvites(list=>list.filter(i=>i.group_id!==groupId));
+    }catch{if(current(owner,''))setInvitesError(label('lbl.groupDeclineFailed','Could not decline this invitation. Please try again.'));}
+    finally{groupActionLock.current=false;if(current(owner))setGroupBusy(false);}
   };
   const invite = async () => {
     if(!group.serverBacked||!group.code){toast(label("lbl.cms.e0747408b56f", "Create a group invitation first."));return;}
@@ -399,104 +464,195 @@ function GroupOrderSheet({close, showTitle = true, showDone = true, storeId = ''
     try {await Share.share({message:label("lbl.page.components.Sheets.a54b07b29c", "Join my Wantiss Goodies group order.\n\nOpen this invite in Wantiss: ")+inviteLink+label("lbl.page.components.Sheets.c4af5f55a9", "\n\nOr enter invite code: ")+group.code});}
     catch (_) {toast(label("lbl.cms.2299e372cc22", "Invite code: ")+group.code);}
   };
+  const previewLock=useRef(false),quoteLock=useRef(false),estimateVersion=useRef(0);
+  const selection=useRef('');selection.current=JSON.stringify([group.groupId,groupCheckoutType,String(groupAddressId)]);
+  const groupAmount=(value:any)=>{
+    if(typeof value!=='number'&&!(typeof value==='string'&&/^-?\d+(?:\.\d+)?$/.test(value.trim())))return null;
+    const amount=Number(value);return Number.isFinite(amount)&&amount>=0?amount:null;
+  };
+  const validEstimate=(value:any)=>!!value&&value.group_id===group.groupId&&['pickup','delivery'].includes(value.order_type)
+    &&['subtotal','delivery_fee','service_fee','estimated_total'].every(key=>groupAmount(value[key])!==null)&&Number(value.estimated_total)>0;
+  const loadGroupEstimate=async(type:'pickup'|'delivery',address:any={})=>{
+    const owner=accountId,groupId=String(group.groupId||''),request=++estimateVersion.current,selected=selection.current;
+    if(!await requireAccount(owner)||!current(owner,groupId)||request!==estimateVersion.current||selection.current!==selected)return;
+    const {data,error}=await supabase.rpc('goodies_group_order_checkout_estimate',{p_group_id:groupId,p_order_type:type,p_address:address});
+    if(!current(owner,groupId)||request!==estimateVersion.current||selection.current!==selected)return;
+    if(error||!validEstimate(data)||data.order_type!==type)throw error||new Error('Group estimate unavailable');
+    setCheckoutEstimate(data);
+  };
+  const selectGroupCheckoutType=async(value:string)=>{
+    if(groupCheckoutLock.current)return;
+    setGroupCheckoutType(value as 'pickup'|'delivery');setGroupDeliveryQuote(null);setCheckoutEstimate(null);
+    estimateVersion.current++;
+    // Selection is updated synchronously before a request can resolve.
+    selection.current=JSON.stringify([group.groupId,value,String(groupAddressId)]);
+    if(value!=='pickup')return;
+    const owner=accountId,groupId=String(group.groupId||'');
+    try{await loadGroupEstimate('pickup');}catch{if(current(owner,groupId))toast(label("lbl.cms.a8b8e5886e88", "Could not calculate the payment estimate."));}
+  };
   const calculateGroupDeliveryQuote = async () => {
-    let addresses=S.addr||[];
-    if(!addresses.length) addresses=await refreshUserAddresses();
-    const selected=addresses.find((item:any)=>String(item.id)===String(groupAddressId))||addresses.find((item:any)=>item.id===S.as)||addresses[0];
-    if(!selected?.t){toast(label("lbl.cms.0a46732ca884", "Add or select a complete delivery address first."));return;}
-    setGroupQuoteBusy(true);
+    if(quoteLock.current||groupCheckoutLock.current||groupActionLock.current||!group.groupId)return;
+    const owner=accountId,groupId=String(group.groupId),selectedScope=selection.current;
+    quoteLock.current=true;setGroupQuoteBusy(true);setCheckoutEstimate(null);
     try {
+      if(!await requireAccount(owner)||!current(owner,groupId)||selection.current!==selectedScope)return;
+      let addresses=S.addr||[];
+      if(!addresses.length)addresses=await refreshUserAddresses();
+      if(!current(owner,groupId)||selection.current!==selectedScope)return;
+      const selected=addresses.find((item:any)=>String(item.id)===String(groupAddressId))||addresses.find((item:any)=>item.id===S.as)||addresses[0];
+      if(!selected?.t){toast(label("lbl.cms.0a46732ca884", "Add or select a complete delivery address first."));return;}
       const addressPayload={l:selected.l,t:selected.t,apt:selected.apt||'',inst:selected.inst||'',city:selected.city||'',department:selected.department||'',country:selected.country||''};
       const quote=await supabase.functions.invoke('goodies-delivery-quote',{body:{store_id:group.storeId||checkoutPreview?.store_id,address:addressPayload}});
-      if(quote.error||!quote.data?.quote_id){setGroupDeliveryQuote(null);toast(friendlyError(quote.data?.error ? {message: quote.data.error} : quote.error, label("lbl.cms.9957e5f281b7", "Could not calculate delivery for this address.")));return;}
-      const quoteState={addressId:String(selected.id),quoteId:String(quote.data.quote_id),fee:Number(quote.data.fee||0),distanceKm:Number(quote.data.distance_km||0),expiresAt:Date.now()+4*60*1000};
+      if(!current(owner,groupId)||selection.current!==selectedScope)return;
+      if(quote.error||typeof quote.data?.quote_id!=='string'||!quote.data.quote_id){setGroupDeliveryQuote(null);toast(label("lbl.cms.9957e5f281b7", "Could not calculate delivery for this address."));return;}
+      if(groupAmount(quote.data.fee)===null||groupAmount(quote.data.distance_km)===null)throw new Error('Delivery estimate unavailable');
+      const quoteState={addressId:String(selected.id),quoteId:String(quote.data.quote_id),fee:Number(quote.data.fee),distanceKm:Number(quote.data.distance_km),expiresAt:Date.now()+4*60*1000};
       setGroupDeliveryQuote(quoteState);
-      const estimate=await supabase.rpc('goodies_group_order_checkout_estimate',{p_group_id:group.groupId,p_order_type:'delivery',p_address:{...addressPayload,delivery_quote_id:quoteState.quoteId}});
-      if(estimate.error) {setCheckoutEstimate(null);toast(friendlyError(estimate.error, label("lbl.cms.8e4755e555e1", "Could not calculate the final estimate.")));}
-      else setCheckoutEstimate(estimate.data);
+      await loadGroupEstimate('delivery',{...addressPayload,delivery_quote_id:quoteState.quoteId});
     } catch(e:any) {
-      setGroupDeliveryQuote(null);toast(friendlyError(e, label("lbl.cms.fa36fe77f660", "Could not calculate delivery.")));
-    } finally {setGroupQuoteBusy(false);}
+      if(current(owner,groupId)&&selection.current===selectedScope){setGroupDeliveryQuote(null);setCheckoutEstimate(null);toast(label("lbl.cms.fa36fe77f660", "Could not calculate delivery."));}
+    } finally {quoteLock.current=false;if(current(owner))setGroupQuoteBusy(false);}
   };
   const groupCheckoutLock=useRef(false);
   const checkoutGroupOrder = async () => {
-    if(groupCheckoutLock.current)return;
+    if(groupCheckoutLock.current||groupActionLock.current||quoteLock.current||previewLock.current||itemLocks.current.size)return;
     if(!group.serverBacked||!group.groupId){toast(label('lbl.groupCreateFirst','Create or join a group order first.'));return;}
     if(!groupMembers.some((member:any)=>member.user_id===currentUserId&&member.role==='host')){toast(label("lbl.cms.540c5531f480", "Only the group host can check out."));return;}
     if(!Array.isArray(checkoutPreview?.items)||!checkoutPreview.items.length){toast(label("lbl.cms.6e9eb3a9a0bb", "Review and validate the combined cart first."));return;}
-    if(!checkoutEstimate || checkoutEstimate.group_id!==group.groupId || checkoutEstimate.order_type!==groupCheckoutType){toast(label("lbl.cms.d2905bdbca8c", "Review the current group-order total before placing the order."));return;}
+    if(!validEstimate(checkoutEstimate) || checkoutEstimate.order_type!==groupCheckoutType){toast(label("lbl.cms.d2905bdbca8c", "Review the current group-order total before placing the order."));return;}
     if(!S.pf.ph||!phoneOK(S.pf.ph)){toast(label("lbl.cms.fdc79fde4a45", "Add a valid contact phone number in your profile before checkout."));return;}
+    const owner=accountId,submittedGroupId=String(group.groupId),submittedSelection=selection.current,submittedOrderType=groupCheckoutType;
+    const submittedAddress=JSON.parse(JSON.stringify((S.addr||[]).find((item:any)=>String(item.id)===String(groupAddressId))||(S.addr||[]).find((item:any)=>item.id===S.as)||(S.addr||[])[0]||null));
+    const submittedEstimate=JSON.parse(JSON.stringify(checkoutEstimate)),submittedItems=JSON.parse(JSON.stringify(checkoutPreview.items)),submittedQuote=groupDeliveryQuote?{...groupDeliveryQuote}:null,contactPhone=S.pf.ph;
     groupCheckoutLock.current=true;
-    const accountId=S.accountId;
     const paidLines=new Map(S.cart.lines.filter((line:any)=>sharedItems.some((item:any)=>item.user_id===currentUserId&&item.line_key===line.k)).map((line:any)=>[line.k,JSON.stringify(line)]));
     setGroupCheckoutBusy(true);
     try {
+      if(!await requireAccount(owner)||!current(owner,submittedGroupId))return;
       const walletVerified=await A.refreshPaymentOptions();
-      if(S.accountId!==accountId)return;
+      if(!current(owner,submittedGroupId))return;
+      if(selection.current!==submittedSelection){toast(label('lbl.groupQuoteChanged','The group cart or total changed. Review it again before paying.'));return;}
       if(!walletVerified){toast(label("lbl.cms.c21b6431da9c", "Could not verify your live Wantiss Wallet balance. Please retry."));return;}
       if(!S.hasWallet){toast(label("lbl.cms.fa32c0873181", "Your Wantiss Wallet is not available. Create a wallet before placing this group order."));return;}
-      const estimatedTotal=Number(checkoutEstimate?.estimated_total||0);
+      const estimatedTotal=Number(submittedEstimate.estimated_total);
       if(estimatedTotal>0&&S.wallet<estimatedTotal){toast(label("lbl.cms.9da7b95cc86d", "Insufficient Wantiss Wallet balance. Add ")+money(estimatedTotal-S.wallet)+label("lbl.cms.66e750d050b2", " or choose another payment method."));return;}
       if(!Number.isFinite(estimatedTotal)||estimatedTotal<=0){toast(label('lbl.groupQuoteChanged','The group cart or total changed. Review it again before paying.'));return;}
-      const reviewed={_goodies_expected_total:estimatedTotal,_goodies_expected_items:checkoutPreview.items};
+      const reviewed={_goodies_expected_total:estimatedTotal,_goodies_expected_items:submittedItems};
       let addressPayload:any={...reviewed};
-      if(groupCheckoutType==='delivery'){
-        const selected=(S.addr||[]).find((item:any)=>String(item.id)===String(groupAddressId))||(S.addr||[]).find((item:any)=>item.id===S.as)||(S.addr||[])[0];
+      if(submittedOrderType==='delivery'){
+        const selected=submittedAddress;
         if(!selected?.t){toast(label("lbl.cms.0a46732ca884", "Add or select a complete delivery address first."));return;}
-        if(!groupDeliveryQuote||groupDeliveryQuote.addressId!==String(selected.id)||groupDeliveryQuote.expiresAt<=Date.now()){
+        if(!submittedQuote||submittedQuote.addressId!==String(selected.id)||submittedQuote.expiresAt<=Date.now()){
           toast(label("lbl.cms.ce7c584db7be", "Calculate the delivery fee and review it before placing the order."));return;
         }
-        addressPayload={l:selected.l,t:selected.t,apt:selected.apt||'',inst:selected.inst||'',city:selected.city||'',department:selected.department||'',country:selected.country||'',delivery_quote_id:groupDeliveryQuote.quoteId,...reviewed};
+        addressPayload={l:selected.l,t:selected.t,apt:selected.apt||'',inst:selected.inst||'',city:selected.city||'',department:selected.department||'',country:selected.country||'',delivery_quote_id:submittedQuote.quoteId,...reviewed};
       }
       const {data,error}=await supabase.rpc('goodies_group_order_checkout',{
-        p_idempotency_key:'group-'+group.groupId+'-checkout',
-        p_group_id:group.groupId,
-        p_order_type:groupCheckoutType,
+        p_idempotency_key:'group-'+submittedGroupId+'-checkout',
+        p_group_id:submittedGroupId,
+        p_order_type:submittedOrderType,
         p_scheduled_for:null,
         p_address:addressPayload,
-        p_contact_phone:S.pf.ph,
+        p_contact_phone:contactPhone,
         p_tip:0,
         p_notes:null
       });
-      if(S.accountId!==accountId)return;
+      if(!current(owner,submittedGroupId))return;
       const order=Array.isArray(data)?data[0]:data;
-      if(error||!order?.id){if(error?.code==='P4210'){setCheckoutPreview(null);setCheckoutEstimate(null);}toast(friendlyError(error, label("lbl.cms.1be63d4ce4d0", "Group order checkout failed.")));return;}
+      if(error||typeof order?.id!=='string'||!order.id){if(error?.code==='P4210'){setCheckoutPreview(null);setCheckoutEstimate(null);}toast(error?.code==='P4210'?label('lbl.groupQuoteChanged','The group cart or total changed. Review it again before paying.'):label("lbl.cms.1be63d4ce4d0", "Group order checkout failed."));return;}
+      if(['cancelled','declined','expired'].includes(order.status)){
+        clearActiveGroup();close();toast(label('lbl.groupOrderClosed','This group order is no longer active. Check Orders for its payment status.'));reset('orders');
+        return;
+      }
+      if(!['placed','scheduled','accepted','preparing','ready','courier_assigned','picked_up','completed'].includes(order.status))throw new Error('Group order receipt unavailable');
       S.cart.lines=S.cart.lines.filter((line:any)=>paidLines.get(line.k)!==JSON.stringify(line));
       if(!S.cart.lines.length)S.cart.sid=null;
-      if(S.groupOrder?.groupId===group.groupId)clearActiveGroup();
-      save();emit();close();
+      const ownsScreen=current(owner,submittedGroupId);
+      if(S.groupOrder?.groupId===submittedGroupId)clearActiveGroup();
+      save();emit();if(ownsScreen)close();
       let orderId:string|null=null;
       try {orderId=await fetchGoodiesOrderForNotification(order.id);} catch (_) { /* The payment succeeded; order details can be retried from Orders. */ }
-      if(S.accountId!==accountId)return;
+      if(S.accountId!==owner)return;
       toast(label("lbl.cms.29fb7a3efa6b", "Group order placed. Order ")+(order.order_code||order.id)+label("lbl.cms.df836d557f92", ". Paid with Wantiss Wallet."));
-      reset(orderId?'home':'orders');
-      if(orderId)push('confirm',orderId);
-      void A.refreshPaymentOptions();
+      if(ownsScreen&&!S.groupOrder?.serverBacked){reset(orderId?'home':'orders');if(orderId)push('confirm',orderId);}
+      void A.refreshPaymentOptions().catch(()=>{});
     } catch(e:any) {
-      if(S.accountId===accountId)toast(friendlyError(e, label("lbl.cms.8eeb9fd8177f", "Could not complete group order checkout.")));
-    } finally {groupCheckoutLock.current=false;setGroupCheckoutBusy(false);}
+      if(current(owner,submittedGroupId))toast(label("lbl.cms.8eeb9fd8177f", "Could not complete group order checkout."));
+    } finally {groupCheckoutLock.current=false;if(mounted.current&&S.accountId===owner)setGroupCheckoutBusy(false);}
   };
   const reviewSharedOrder = async () => {
+    if(previewLock.current||groupActionLock.current||groupCheckoutLock.current)return;
     if(!group.serverBacked||!group.groupId){toast(label("lbl.page.components.Sheets.59297174fd", "Create or join a group order first."));return;}
-    setPreviewBusy(true); setCheckoutPreview(null);
-    const {data,error}=await supabase.rpc('goodies_group_order_checkout_preview',{p_group_id:group.groupId});
-    setPreviewBusy(false);
-    if(error){toast(friendlyError(error, label("lbl.cms.7143ec373461", "Could not validate the shared cart.")));return;}
-    setCheckoutPreview(data);
-    if(groupCheckoutType==='pickup'){
-      const estimate=await supabase.rpc('goodies_group_order_checkout_estimate',{p_group_id:group.groupId,p_order_type:'pickup',p_address:{}});
-      if(estimate.error){setCheckoutEstimate(null);toast(friendlyError(estimate.error, label("lbl.cms.a8b8e5886e88", "Could not calculate the payment estimate.")));}
-      else setCheckoutEstimate(estimate.data);
-    }
+    const owner=accountId,groupId=String(group.groupId),selected=selection.current;
+    previewLock.current=true;setPreviewBusy(true);setCheckoutPreview(null);setCheckoutEstimate(null);
+    try{
+      if(!await requireAccount(owner)||!current(owner,groupId))return;
+      const {data,error}=await supabase.rpc('goodies_group_order_checkout_preview',{p_group_id:groupId});
+      if(!current(owner,groupId)||selection.current!==selected)return;
+      if(error||!data||!Array.isArray(data.items)||groupAmount(data.subtotal)===null)throw error||new Error('Combined cart unavailable');
+      setCheckoutPreview(data);
+      if(groupCheckoutType==='pickup')await loadGroupEstimate('pickup');
+    }catch{if(current(owner,groupId)&&selection.current===selected){setCheckoutPreview(null);setCheckoutEstimate(null);toast(label("lbl.cms.7143ec373461", "Could not validate the shared cart."));}}
+    finally{previewLock.current=false;if(current(owner))setPreviewBusy(false);}
   };
+  const endGroupOrder=async()=>{
+    if(groupActionLock.current||groupCheckoutLock.current)return;
+    if(!group.serverBacked||!group.groupId){toast(label('lbl.groupInviteUnavailable','This group invitation is unavailable. Create or join a group order again.'));return;}
+    const owner=accountId,groupId=String(group.groupId);
+    groupActionLock.current=true;setGroupBusy(true);
+    try{
+      if(!await requireAccount(owner)||!current(owner,groupId))return;
+      const {data,error}=await supabase.rpc('goodies_group_order_end',{p_group_id:groupId});
+      if(!current(owner,groupId))return;
+      const row=Array.isArray(data)?data[0]:data;
+      if(error||row?.group_id!==groupId||row?.status!=='cancelled')throw error||new Error('Group end receipt unavailable');
+      clearActiveGroup();close();toast(label("lbl.cms.e12b8e635219", "Group order ended."));
+    }catch{if(current(owner,groupId))toast(label("lbl.cms.5c58c7dec596", "Could not end this group order."));}
+    finally{groupActionLock.current=false;if(current(owner))setGroupBusy(false);}
+  };
+  const itemLocks=useRef(new Set<string>());
+  useEffect(()=>{
+    if(S.groupOrder===groupSource.current)return;
+    const next=S.groupOrder;
+    groupSource.current=next;activeGroup.current=String(next?.groupId||'');
+    setGroup(next&&typeof next.code==='string'&&Array.isArray(next.members)?next:{code:'',host:S.pf.n||label('lbl.groupYou','You'),members:[],serverBacked:false});
+    setSharedItems([]);setGroupMembers([]);setCheckoutPreview(null);setCheckoutEstimate(null);setGroupDeliveryQuote(null);
+    setFriends([]);setPickedFriends([]);setFriendsOpen(false);setFriendsError('');
+    setGroupBusy(false);setFriendsBusy(false);setPreviewBusy(false);setGroupCheckoutBusy(false);setGroupQuoteBusy(false);
+    setSharedLoading(false);setMembersLoading(false);setSharedError('');setMembershipError('');setStatusError('');
+    setGroupReload(value=>value+1);
+    estimateVersion.current++;
+  },[S.groupOrder]);
+  const removeSharedItem=async(item:any)=>{
+    const owner=accountId,groupId=String(group.groupId||''),key=String(item.line_key||'');
+    if(!groupId||!key||String(item.user_id)!==currentUserId||itemLocks.current.has(key)||groupCheckoutLock.current||groupActionLock.current)return;
+    const line=S.cart.lines.find((entry:any)=>entry.k===key),snapshot=line?JSON.stringify(line):'';
+    itemLocks.current.add(key);
+    try{
+      if(!await requireAccount(owner)||!current(owner,groupId))return;
+      const {error}=await removeGroupOrderCartLine(groupId,key);
+      if(!current(owner,groupId))return;
+      if(error)throw error;
+      S.cart.lines=S.cart.lines.filter((entry:any)=>entry.k!==key||JSON.stringify(entry)!==snapshot);
+      if(!S.cart.lines.length)S.cart.sid=null;
+      setSharedItems(list=>list.filter(row=>row.id!==item.id));setCheckoutPreview(null);setCheckoutEstimate(null);save();emit();
+    }catch{if(current(owner,groupId))toast(label("lbl.cms.5954ff29d7a5", "Could not remove this shared item."));}
+    finally{itemLocks.current.delete(key);}
+  };
+  const sharedSubtotal=sharedLoading||sharedError?null:sharedItems.reduce<number|null>((sum,item:any)=>{
+    const product=Array.isArray(item.product)?item.product[0]:item.product,price=groupAmount(product?.price),quantity=groupAmount(item.quantity);
+    return sum===null||price===null||quantity===null||quantity<1||!Number.isSafeInteger(quantity)||!Number.isFinite(sum+price*quantity)?null:sum+price*quantity;
+  },0);
   return <>
     {showTitle ? <T cmsKey={'lbl.sheetGroupTitle'} size={19} weight="600">{label('lbl.sheetGroupTitle', 'Group order')}</T> : null}
     {!group.serverBacked ? <View>
+      {invitesLoading?<T cmsKey={'lbl.groupInvitesLoading'} size={13} color={th.mut}>{label('lbl.groupInvitesLoading','Loading invitations…')}</T>:null}
+      {invitesError?<View style={{marginBottom:12}}><T size={12} color={th.red}>{invitesError}</T><Cta cmsKey={'lbl.retry'} small ghost label={label('lbl.retry','Try again')} onPress={()=>void loadInvites()} disabled={invitesLoading||groupBusy}/></View>:null}
       {myInvites.length ? <View style={{marginBottom:22}}>
         <T cmsKey={"lbl.cms.48ba64bb290c"} size={16} weight="800">{label("lbl.cms.48ba64bb290c", "Invitations from friends")}</T>
         {myInvites.map((inv:any)=><Row key={inv.group_id} style={{gap:10,alignItems:'center',marginTop:12,padding:12,borderRadius:14,backgroundColor:th.soft}}>
           <View style={{flex:1}}><T weight="600">{inv.host_name}</T><T cmsKey={"lbl.cms.374da0d6b308"} size={12} color={th.mut}>{label("lbl.cms.374da0d6b308", "invited you to a group order")}</T></View>
-          <Pressable accessibilityRole="button" onPress={()=>void declineInvite(inv.group_id)} hitSlop={8}><T cmsKey={"lbl.cms.fbab10af6bec"} size={13} color={th.mut}>{label("lbl.cms.fbab10af6bec", "Decline")}</T></Pressable>
+          <Pressable accessibilityRole="button" disabled={groupBusy} onPress={()=>void declineInvite(inv.group_id)} hitSlop={8}><T cmsKey={"lbl.cms.fbab10af6bec"} size={13} color={th.mut}>{label("lbl.cms.fbab10af6bec", "Decline")}</T></Pressable>
           <Cta cmsKey={"lbl.cms.f889c94501e8"} small label={label("lbl.cms.f889c94501e8", "Join")} onPress={()=>void joinFromInvite(inv.invite_code)} disabled={groupBusy} />
         </Row>)}
       </View> : null}
@@ -527,6 +683,7 @@ function GroupOrderSheet({close, showTitle = true, showDone = true, storeId = ''
     </View> : null}
     </View> : null}
     {group.serverBacked ? <View>
+      {statusError||sharedError||membershipError?<View style={{marginBottom:12}}><T size={12} color={th.red}>{statusError||sharedError||membershipError}</T><Cta cmsKey={'lbl.retry'} small ghost label={label('lbl.retry','Try again')} onPress={()=>setGroupReload(value=>value+1)} disabled={sharedLoading||membersLoading}/></View>:null}
       <Row sp><View style={{flex:1}}><T cmsKey={'lbl.sheetInviteCode'} size={11.5} weight="600" color={th.mut}>{label('lbl.sheetInviteCode', 'GROUP INVITE CODE')}</T><T size={24} weight="800" style={{marginTop:4}}>{group.code}</T></View><Cta cmsKey={'lbl.sheetInvitePeople'} small label={label('lbl.sheetInvitePeople', 'Invite people')} onPress={invite} /></Row>
       {group.code ? <View style={{alignItems:'center',paddingVertical:20,marginTop:18,marginBottom:8,borderRadius:18,backgroundColor:th.soft}}>
         <QRCode value={'wantiss://goodies/group?code='+encodeURIComponent(group.code)} size={168} backgroundColor="#FFFFFF" color="#111111"/>
@@ -539,10 +696,11 @@ function GroupOrderSheet({close, showTitle = true, showDone = true, storeId = ''
         <Cta cmsKeys={["lbl.cms.843cf2cc36fc","lbl.cms.6bb993f5d3e9"]} small ghost label={friendsOpen?label("lbl.cms.843cf2cc36fc", "Hide friends"):label("lbl.cms.6bb993f5d3e9", "Invite friends")} onPress={()=>{if(friendsOpen)setFriendsOpen(false);else void openFriends();}} />
         {friendsOpen ? <View style={{marginTop:10}}>
           {friendsBusy&&!friends.length ? <T cmsKey={"lbl.cms.5bebcc4de709"} size={13} color={th.mut}>{label("lbl.cms.5bebcc4de709", "Loading friends…")}</T> : null}
-          {!friendsBusy&&!friends.length ? <T cmsKey={"lbl.cms.0ba8a61c181a"} size={13} color={th.mut}>{label("lbl.cms.0ba8a61c181a", "No friends to invite yet.")}</T> : null}
+          {friendsError?<View><T size={12} color={th.red}>{friendsError}</T>{!friends.length?<Cta cmsKey={'lbl.retry'} small ghost label={label('lbl.retry','Try again')} onPress={()=>void openFriends()} disabled={friendsBusy}/>:null}</View>:null}
+          {!friendsBusy&&!friendsError&&!friends.length ? <T cmsKey={"lbl.cms.0ba8a61c181a"} size={13} color={th.mut}>{label("lbl.cms.0ba8a61c181a", "No friends to invite yet.")}</T> : null}
           {friends.map((f:any)=>{
             const uid=String(f.user_id), blocked=!!f.already_member || !!f.already_invited, picked=pickedFriends.includes(uid);
-            return <Pressable key={uid} disabled={blocked} accessibilityRole="checkbox" accessibilityState={{checked:picked,disabled:blocked}} onPress={()=>setPickedFriends(list=>picked?list.filter(x=>x!==uid):[...list,uid])} style={{flexDirection:'row',alignItems:'center',gap:12,paddingVertical:9,opacity:blocked?0.5:1}}>
+            return <Pressable key={uid} disabled={blocked||friendsBusy} accessibilityRole="checkbox" accessibilityState={{checked:picked,disabled:blocked||friendsBusy}} onPress={()=>setPickedFriends(list=>picked?list.filter(x=>x!==uid):[...list,uid])} style={{flexDirection:'row',alignItems:'center',gap:12,paddingVertical:9,opacity:blocked?0.5:1}}>
               <View style={{width:38,height:38,borderRadius:19,backgroundColor:th.soft,alignItems:'center',justifyContent:'center',overflow:'hidden'}}>{f.avatar_url?<Image source={{uri:f.avatar_url}} style={{width:38,height:38}} />:<Icon name="user" color={th.mut}/>}</View>
               <View style={{flex:1}}><T weight="600">{f.display_name}</T>{f.already_member?<T cmsKey={"lbl.cms.ce694de2c6e7"} size={12} color={th.mut}>{label("lbl.cms.ce694de2c6e7", "Joined")}</T>:f.already_invited?<T cmsKey={"lbl.cms.409175174430"} size={12} color={th.mut}>{label("lbl.cms.409175174430", "Invited")}</T>:f.invite_status==='declined'?<T cmsKey={"lbl.cms.c123cfeda157"} size={12} color={th.mut}>{label("lbl.cms.c123cfeda157", "Declined")}</T>:null}</View>
               <View style={{width:22,height:22,borderRadius:7,borderWidth:1.5,borderColor:picked?th.br:th.line,backgroundColor:picked?th.br:'transparent',alignItems:'center',justifyContent:'center'}}>{picked?<Icon name="check" size={14} color="#FFF"/>:null}</View>
@@ -556,7 +714,7 @@ function GroupOrderSheet({close, showTitle = true, showDone = true, storeId = ''
     {group.serverBacked ? <>
     <T cmsKey={'lbl.sheetGroupMembers'} size={15} weight="600" style={{marginBottom:7}}>{label('lbl.sheetGroupMembers', 'Group members')}</T>
     <View>
-      {membershipError ? <T cmsKey={"lbl.cms.91ec9baa31db"} size={12} color={th.red}>{label("lbl.cms.91ec9baa31db", "Could not load group members. Try again.")}</T> : null}
+      {membersLoading?<T cmsKey={'lbl.loading'} size={12} color={th.mut}>{label('lbl.loading','Loading…')}</T>:null}
       {groupMembers.map((member:any)=>{
         const uid=String(member.user_id||'');
         const isYou=uid===currentUserId;
@@ -571,27 +729,23 @@ function GroupOrderSheet({close, showTitle = true, showDone = true, storeId = ''
     <View style={{height:12}}/>
     <T cmsKey={"lbl.cms.6e3098d0c1da"} size={15} weight="600" style={{marginBottom:7}}>{label("lbl.cms.6e3098d0c1da", "Shared items")}</T>
     <View>
+      {sharedLoading?<T cmsKey={'lbl.loading'} size={12} color={th.mut}>{label('lbl.loading','Loading…')}</T>:null}
       {sharedItems.length ? sharedItems.map((item:any)=>{
         const product=Array.isArray(item.product)?item.product[0]:item.product;
         return <Row key={item.id} sp style={{paddingVertical:8,alignItems:'flex-start'}}>
           <View style={{flex:1}}><T cmsKey={"lbl.cms.3ff260e4c8e9"} weight="600">{item.quantity}× {product?.name || label("lbl.cms.3ff260e4c8e9", "Unavailable product")}</T>{item.note ? <T size={11.5} color={th.mut}>{item.note}</T> : null}</View>
           <View style={{alignItems:'flex-end',gap:7}}>
             <T weight="600">{product?.price!=null?money(Number(product.price)*Number(item.quantity)):'—'}</T>
-            {group.serverBacked && String(item.user_id)===currentUserId ? <Pressable accessibilityRole="button" accessibilityLabel={label("lbl.cms.678971e91d3f", "Remove my shared cart item")} onPress={async()=>{
-              const {error}=await removeGroupOrderCartLine(group.groupId,item.line_key);
-              if(error){toast(friendlyError(error, label("lbl.cms.5954ff29d7a5", "Could not remove this shared item.")));return;}
-              const ownLine=S.cart.lines.find((line:any)=>line.k===item.line_key);
-              if(ownLine){S.cart.lines=S.cart.lines.filter((line:any)=>line.k!==item.line_key);if(!S.cart.lines.length)S.cart.sid=null;save();emit();}
-            }}><Icon name="trash-2" size={17} color={th.red}/></Pressable> : null}
+            {group.serverBacked && String(item.user_id)===currentUserId ? <Pressable accessibilityRole="button" accessibilityLabel={label("lbl.cms.678971e91d3f", "Remove my shared cart item")} disabled={groupCheckoutBusy} onPress={()=>void removeSharedItem(item)}><Icon name="trash-2" size={17} color={th.red}/></Pressable> : null}
           </View>
         </Row>;
       }) : null}
       <View style={{borderTopWidth: 0.5,borderTopColor:th.line,marginTop:5,paddingTop:10}}>
-        <Row sp><T cmsKey={"lbl.cms.2eb3747e6fda"} weight="600">{label("lbl.cms.2eb3747e6fda", "Items subtotal")}</T><T weight="600">{money(sharedItems.reduce((sum:number,item:any)=>{const product=Array.isArray(item.product)?item.product[0]:item.product;return sum+Number(product?.price||0)*Number(item.quantity||0);},0))}</T></Row>
+        <Row sp><T cmsKey={"lbl.cms.2eb3747e6fda"} weight="600">{label("lbl.cms.2eb3747e6fda", "Items subtotal")}</T><T weight="600">{sharedSubtotal===null?'—':money(sharedSubtotal)}</T></Row>
        </View>
       <View style={{height:10}}/>
       {groupMembers.some((member:any)=>member.user_id===currentUserId&&member.role==='host')
-        ? <Cta cmsKeys={["lbl.cms.c18a37461b0a","lbl.cms.15aa7cafd092"]} label={previewBusy?label("lbl.cms.c18a37461b0a", "Checking shared cart…"):label("lbl.cms.15aa7cafd092", "Review combined cart")} onPress={()=>void reviewSharedOrder()} disabled={previewBusy||!group.serverBacked}/>
+        ? <Cta cmsKeys={["lbl.cms.c18a37461b0a","lbl.cms.15aa7cafd092"]} label={previewBusy?label("lbl.cms.c18a37461b0a", "Checking shared cart…"):label("lbl.cms.15aa7cafd092", "Review combined cart")} onPress={()=>void reviewSharedOrder()} disabled={previewBusy||sharedLoading||membersLoading||!!sharedError||!!statusError||!!membershipError||sharedSubtotal===null||!group.serverBacked}/>
         : null}
     </View>
     </> : null}
@@ -606,10 +760,10 @@ function GroupOrderSheet({close, showTitle = true, showDone = true, storeId = ''
       <T cmsKey={"lbl.cms.365120540556"} size={15} weight="600">{label("lbl.cms.365120540556", "Checkout")}</T>
 
       <View style={{height:10}}/>
-      <Seg list={[['pickup',label('lbl.checkoutPickup','Pickup')],['delivery',label('lbl.checkoutDelivery','Delivery')]]} on={groupCheckoutType} onPick={value=>{setGroupCheckoutType(value as 'pickup'|'delivery');setGroupDeliveryQuote(null);setCheckoutEstimate(null);if(value==='pickup')void supabase.rpc('goodies_group_order_checkout_estimate',{p_group_id:group.groupId,p_order_type:'pickup',p_address:{}}).then(({data,error}:any)=>{if(error){setCheckoutEstimate(null);toast(friendlyError(error, label("lbl.cms.a8b8e5886e88", "Could not calculate the payment estimate.")));}else setCheckoutEstimate(data);});}} />
+      <Seg list={[['pickup',label('lbl.checkoutPickup','Pickup')],['delivery',label('lbl.checkoutDelivery','Delivery')]]} on={groupCheckoutType} onPick={value=>void selectGroupCheckoutType(value)} />
       {groupCheckoutType==='delivery' ? <View style={{marginTop:10}}>
         <T cmsKey={"lbl.cms.d1be960df332"} size={12} weight="600" style={{marginBottom:6}}>{label("lbl.cms.d1be960df332", "Deliver to")}</T>
-        {S.addr.map((item:any)=><Radio key={String(item.id)} on={String(groupAddressId)===String(item.id)} onPress={()=>{setGroupAddressId(item.id);setGroupDeliveryQuote(null);setCheckoutEstimate(null);}}>
+        {S.addr.map((item:any)=><Radio key={String(item.id)} on={String(groupAddressId)===String(item.id)} onPress={()=>{if(groupCheckoutLock.current)return;selection.current=JSON.stringify([group.groupId,groupCheckoutType,String(item.id)]);estimateVersion.current++;setGroupAddressId(item.id);setGroupDeliveryQuote(null);setCheckoutEstimate(null);}}>
           <View style={{flex:1}}><T cmsKey={"lbl.cms.85133da20cde"} size={13} weight="600">{item.l}{item.def?label("lbl.cms.85133da20cde", " · Default"):''}</T><T size={11.5} color={th.mut}>{item.t}</T></View>
         </Radio>)}
         {!S.addr.length ? <T cmsKey={"lbl.cms.7bb9755afe95"} size={12} color={th.mut}>{label("lbl.cms.7bb9755afe95", "No saved addresses found. Add a delivery address to your profile first.")}</T> : null}
@@ -631,21 +785,13 @@ function GroupOrderSheet({close, showTitle = true, showDone = true, storeId = ''
 
 
       </View> : null}
-      <Row sp style={{marginTop:10}}><T cmsKey={"lbl.cms.d15afce772c7"} size={12} color={th.mut}>{label("lbl.cms.d15afce772c7", "Host Wallet balance")}</T><T weight="600">{money(Number(S.wallet||0))}</T></Row>
+      <Row sp style={{marginTop:10}}><T cmsKey={"lbl.cms.d15afce772c7"} size={12} color={th.mut}>{label("lbl.cms.d15afce772c7", "Host Wallet balance")}</T><T weight="600">{S.paymentOptionsStatus==='ready'&&groupAmount(S.wallet)!==null?money(Number(S.wallet)):'—'}</T></Row>
 
       <View style={{height:9}}/>
       <Cta cmsKeys={["lbl.cms.5763c91a2cc0","lbl.cms.91e196e0db97"]} label={groupCheckoutBusy?label("lbl.cms.5763c91a2cc0", "Placing group order…"):label("lbl.cms.91e196e0db97", "Place group order · Wallet")} onPress={()=>void checkoutGroupOrder()} disabled={groupCheckoutBusy||(groupCheckoutType==='delivery'&&(!S.addr.length||!groupDeliveryQuote||groupDeliveryQuote.addressId!==String(groupAddressId)||groupDeliveryQuote.expiresAt<=Date.now()))}/>
     </View> : null}
     {showDone ? <><View style={{height:12}} /><Cta cmsKey={'lbl.sheetDone'} label={label('lbl.sheetDone', 'Done')} onPress={close} /><View style={{height:8}} /></> : null}
-    {group.serverBacked && group.groupId ? <Cta cmsKey={'lbl.sheetEndGroup'} ghost label={label('lbl.sheetEndGroup', 'End group order')} onPress={async () => {
-      if (!group.serverBacked || !group.groupId) {toast(label('lbl.groupInviteUnavailable','This group invitation is unavailable. Create or join a group order again.'));return;}
-      setGroupBusy(true);
-      const {data,error}=await supabase.rpc('goodies_group_order_end',{p_group_id:group.groupId});
-      setGroupBusy(false);
-      if(error){toast(friendlyError(error, label("lbl.cms.5c58c7dec596", "Could not end this group order.")));return;}
-      clearActiveGroup(); close();
-      toast(label("lbl.cms.e12b8e635219", "Group order ended."));
-    }} /> : null}
+    {group.serverBacked && group.groupId && groupMembers.some((member:any)=>member.user_id===currentUserId&&member.role==='host') ? <Cta cmsKey={'lbl.sheetEndGroup'} ghost label={label('lbl.sheetEndGroup', 'End group order')} disabled={groupBusy||groupCheckoutBusy} onPress={()=>void endGroupOrder()} /> : null}
     <Modal visible={scannerOpen} animationType="slide" onRequestClose={()=>setScannerOpen(false)}>
       <View style={{flex:1,backgroundColor:'#000000'}}>
         <CameraView style={{flex:1}} facing="back" barcodeScannerSettings={{barcodeTypes:['qr']}} onBarcodeScanned={({data})=>{
@@ -670,7 +816,7 @@ export function GroupOrderPage({onBack, storeId = ''}: {onBack: () => void; stor
   const th = useTheme();
   return <View style={{flex: 1, backgroundColor: th.bg}}>
     <Bar cmsKey={'lbl.sheetGroupTitle'} title={label('lbl.sheetGroupTitle', 'Group order')} onBack={onBack} />
-    <ScrollView style={{flex: 1}} contentContainerStyle={{paddingHorizontal: 16, paddingTop: 16, paddingBottom: 32}} keyboardShouldPersistTaps="handled"><GroupOrderSheet close={onBack} showTitle={false} showDone={false} storeId={storeId} /></ScrollView>
+    <ScrollView style={{flex: 1}} contentContainerStyle={{paddingHorizontal: 16, paddingTop: 16, paddingBottom: 32}} keyboardShouldPersistTaps="handled"><GroupOrderSheet key={S.accountId || 'signed-out'} close={onBack} showTitle={false} showDone={false} storeId={storeId} /></ScrollView>
   </View>;
 }
 

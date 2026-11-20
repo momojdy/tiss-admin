@@ -10,6 +10,8 @@ import { Txt } from '../../ui/Txt';
 import { PromoColorPicker } from './PromoColorPicker';
 import { chooseAndUploadIngredientImage } from './builderImages';
 import type { BuilderTarget } from '../../goodiesConsumer/editContext';
+import { selectedGoodiesBuilder } from '../../lib/goodiesBuilderSelection';
+import { loadAllGoodiesIngredientRequests } from '../../lib/goodiesIngredientRequests';
 
 type BuilderRow = { business_id: string; business_name: string; builder_id: string; config: any; enabled: boolean; updated_at: string };
 type Part = { part: 'builder' | 'group' | 'ingredient'; groupId?: string; itemId?: string; isNew?: boolean };
@@ -40,23 +42,28 @@ export function GoodiesBuilderConfigEditor({ canEdit, focus = null, imageUrls = 
   const [library, setLibrary] = useState<any[]>([]);
   const [requests, setRequests] = useState<any[]>([]);
   const handled = useRef<BuilderTarget | null>(null);
+  const saveLock = useRef(false),uploadLock = useRef(false);
+  const [buildersLoading, setBuildersLoading] = useState(true), [buildersFailed, setBuildersFailed] = useState(false);
 
   const load = useCallback(async () => {
+    setBuildersLoading(true); setBuildersFailed(false); setError('');
     try {
       const { data, error: rpcError } = await supabase.rpc('wantiss_admin_list_goodies_builder_configs');
       if (rpcError) throw rpcError;
-      setRows(Array.isArray(data) ? (data as BuilderRow[]) : []);
-    } catch (e) { setError('Builders could not be loaded. Please try again.'); }
+      if (!Array.isArray(data)) throw new Error('Builders unavailable');
+      setRows(data as BuilderRow[]);
+    } catch (e) { setBuildersFailed(true); setError('Builders could not be loaded. Please try again.'); }
+    finally { setBuildersLoading(false); }
   }, []);
   useEffect(() => { void load(); }, [load]);
   useEffect(() => {
     let active=true;setIngredientsLoading(true);setIngredientsError(false);
     (async () => {
-      const [lib, req] = await Promise.all([supabase.rpc('wantiss_admin_list_library_ingredients'), supabase.rpc('wantiss_admin_list_ingredient_requests')]);
-      if(lib.error || req.error)throw new Error('Ingredients unavailable');
+      const [lib, req] = await Promise.all([supabase.rpc('wantiss_admin_list_library_ingredients'), loadAllGoodiesIngredientRequests(supabase)]);
+      if(lib.error || !Array.isArray(lib.data))throw new Error('Ingredients unavailable');
       if(!active)return;
-      setLibrary(Array.isArray(lib.data) ? lib.data : []);
-      setRequests(Array.isArray(req.data) ? req.data : []);
+      setLibrary(lib.data);
+      setRequests(req);
     })().catch(() => {if(active)setIngredientsError(true);}).finally(()=>{if(active)setIngredientsLoading(false);});
     return()=>{active=false;};
   }, [ingredientsAttempt]);
@@ -65,16 +72,16 @@ export function GoodiesBuilderConfigEditor({ canEdit, focus = null, imageUrls = 
 
   // Open the part that was tapped in the phone. New sections / ingredients start empty and are kept only when saved.
   useEffect(() => {
-    if (!focus || handled.current === focus) return;
-    const row = rows.find((r) => r.builder_id === focus.builderId);
+    if (!focus || handled.current === focus || buildersLoading || buildersFailed || saving || busy) return;
+    const row = selectedGoodiesBuilder(rows, focus.builderId);
     if (!row) {
-      if (rows.length) { handled.current = focus; setPart(null); setError('This is a sample, not one of your saved builders, so it cannot be edited.'); }
+      handled.current = focus; setPart(null); setError('This is a sample, not one of your saved builders, so it cannot be edited.');
       return;
     }
     handled.current = focus; setError(''); setNotice('');
     const adding = focus.part === 'addGroup' || focus.part === 'addIngredient';
     if (adding && !canEdit) { setPart(null); setError('View access only: editing and saving are disabled.'); return; }
-    let base: BuilderRow = selected && selected.builder_id === focus.builderId ? selected : JSON.parse(JSON.stringify(row));
+    let base: BuilderRow = selected && selected.builder_id === row.builder_id && selected.business_id === row.business_id ? selected : JSON.parse(JSON.stringify(row));
     let next: Part = { part: focus.part === 'addGroup' ? 'group' : focus.part === 'addIngredient' ? 'ingredient' : focus.part, groupId: focus.groupId, itemId: focus.itemId };
     if (focus.part === 'addGroup') {
       const group = { id: 'group-' + Date.now().toString(36), name: '', kind: 'many', req: false, min: 0, max: 10, inc: 0, me: 1, items: [] };
@@ -87,7 +94,7 @@ export function GoodiesBuilderConfigEditor({ canEdit, focus = null, imageUrls = 
       next = { part: 'ingredient', groupId: focus.groupId, itemId: item.id, isNew: true };
     }
     setSelected(base); setPart(next);
-  }, [focus, rows]);
+  }, [focus, rows, buildersLoading, buildersFailed, saving, busy]);
 
   const patchBuilder = (p: Record<string, any>) => setSelected((cur) => cur && { ...cur, config: { ...cur.config, ...p } });
   const patchGroup = (gid: string, change: (g: any) => any) => setSelected((cur) => cur && { ...cur, config: { ...cur.config, groups: (cur.config?.groups || []).map((g: any) => g.id === gid ? change(g) : g) } });
@@ -98,9 +105,10 @@ export function GoodiesBuilderConfigEditor({ canEdit, focus = null, imageUrls = 
   const requestsHere = useMemo(() => requests.filter((r: any) => selected && r.business_id === selected.business_id && r.status === 'approved'), [requests, selected?.business_id]);
 
   const persist = async (row: BuilderRow) => {
+    if (!canEdit || saveLock.current) return false;
     const names = [row.config?.name, ...(row.config?.groups || []).flatMap((g: any) => [g.name, ...(g.items || []).map((i: any) => i.name)])];
     if (names.some((n: any) => !String(n || '').trim())) { setError('Give every title, section and ingredient a name first.'); return false; }
-    setSaving(true); setError(''); setNotice('');
+    saveLock.current = true; setSaving(true); setError(''); setNotice('');
     try {
       const config = { ...row.config, id: row.builder_id };
       const { error: rpcError } = await supabase.rpc('wantiss_admin_save_goodies_builder_config', {
@@ -109,7 +117,7 @@ export function GoodiesBuilderConfigEditor({ canEdit, focus = null, imageUrls = 
       if (rpcError) throw rpcError;
       setSelected({ ...row, config }); setNotice('Saved to the live store. These changes are separate from the page content draft.'); await load(); return true;
     } catch (e) { setError('It could not be saved. Check your access and try again.'); return false; }
-    finally { setSaving(false); }
+    finally { saveLock.current = false; setSaving(false); }
   };
   const save = () => { if (selected && canEdit && !saving) void persist(selected); };
   const close = () => { setPart(null); setSelected(null); setNotice(''); setError(''); onClose?.(); };
@@ -121,13 +129,21 @@ export function GoodiesBuilderConfigEditor({ canEdit, focus = null, imageUrls = 
     if (await persist({ ...selected, config })) close();
   };
   const upload = async (source: 'photos' | 'files') => {
-    if (!canEdit || busy || !part?.groupId || !part.itemId) return;
-    setBusy(source); setError('');
+    if (!canEdit || busy || uploadLock.current || !selected || !part?.groupId || !part.itemId) return;
+    const owner = { businessId: selected.business_id, builderId: selected.builder_id, groupId: part.groupId, itemId: part.itemId };
+    uploadLock.current = true; setBusy(source); setError('');
     try {
       const key = await chooseAndUploadIngredientImage(source, part.itemId);
-      if (key) { patchItem(part.groupId, part.itemId, { img: { assetKey: key } }); setNotice('Picture added. Tap Save to keep it.'); }
+      if (key) {
+        setSelected(cur => cur && cur.business_id === owner.businessId && cur.builder_id === owner.builderId ? {
+          ...cur, config: { ...cur.config, groups: (cur.config?.groups || []).map((g: any) => g.id === owner.groupId ? {
+            ...g, items: (g.items || []).map((it: any) => it.id === owner.itemId ? { ...it, img: { assetKey: key } } : it),
+          } : g) },
+        } : cur);
+        setNotice('Picture added. Tap Save to keep it.');
+      }
     } catch (e) { setError('The picture could not be uploaded.'); }
-    finally { setBusy(''); }
+    finally { uploadLock.current = false; setBusy(''); }
   };
   const useRequest = (request: any) => {
     if (!part?.groupId || !part.itemId) return;
@@ -153,6 +169,7 @@ export function GoodiesBuilderConfigEditor({ canEdit, focus = null, imageUrls = 
       <Txt size={9.5} weight={600} color={c.or} style={{ marginBottom: 6 }}>Selected Build Your Own field · edit below</Txt>
       <Section title={title}>
       {error ? <Txt size={10.5} color={c.or} style={{ marginBottom: 8 }}>{error}</Txt> : null}
+      {buildersFailed ? <OutlineBtn onPress={() => { void load(); }} disabled={buildersLoading}>Retry builders</OutlineBtn> : null}
       <Txt size={10} mut style={{marginBottom:8}}>Saving a builder updates the live store immediately. Page content uses the separate draft and publish controls.</Txt>
       {notice ? <Txt size={10} mut style={{ marginBottom: 8 }}>{notice}</Txt> : null}
       {!canEdit && part ? <Txt size={9.5} color={c.or} style={{ marginBottom: 8 }}>View access only: editing and saving are disabled.</Txt> : null}

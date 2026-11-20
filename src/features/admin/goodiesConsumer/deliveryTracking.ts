@@ -3,7 +3,9 @@ export type Coordinate = {latitude: number; longitude: number};
 export const GPS_MAX_AGE_MS = 120_000;
 
 export function coordinate(value: any): Coordinate | null {
-  if (value?.latitude == null || value?.longitude == null || value.latitude === '' || value.longitude === '') return null;
+  const numeric = (part: unknown) => typeof part === 'number'
+    || (typeof part === 'string' && part.trim() !== '');
+  if (!numeric(value?.latitude) || !numeric(value?.longitude)) return null;
   const latitude = Number(value.latitude), longitude = Number(value.longitude);
   return Number.isFinite(latitude) && Math.abs(latitude) <= 90 && Number.isFinite(longitude) && Math.abs(longitude) <= 180
     ? {latitude, longitude} : null;

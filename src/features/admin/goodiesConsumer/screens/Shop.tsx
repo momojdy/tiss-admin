@@ -222,7 +222,7 @@ export function Product() {
 }
 export function ProductFoot() {
   const th = useTheme(), h = S.sh, i = h && IT[h.id];
-  if (!i) return null;
+  if (!i || !STB[i.s]) return null;
   const s = STB[i.s], o = CHOOSE_SIZE_CATS.indexOf(s.c) > -1, base = h.off ? dp(i, h.off) : i.p, unit = base + (h.size > 0 ? 1.5 : 0) + (h.drink ? 1 : 0);
   const blocked = i.oos || (!s.open && !s.acceptScheduledOrders) || (o && h.size < 0), lbl = i.oos ? label('lbl.productStockOut', 'Out of stock') : !s.open && !s.acceptScheduledOrders ? label('lbl.productStoreClosed', 'Store is closed') : !s.open ? label('lbl.productScheduleOrder', 'Schedule order') + ' · ' + money(unit * h.q) : o && h.size < 0 ? label('lbl.productChooseSize', 'Choose a size') : label('lbl.productAddToCart', 'Add to cart') + ' · ' + money(unit * h.q);
   return <Row><Stepper q={h.q} onMinus={() => productQty(-1)} onPlus={() => productQty(1)} /><View style={{flex: 1}}><Cta label={lbl} disabled={!!blocked} onPress={productAdd} /></View></Row>;
@@ -325,7 +325,7 @@ const IcBox = ({icon}: {icon: string}) => {const th = useTheme(); return <View s
 export function Checkout() {
   const th = useTheme(), t = totals(), pk = isPk(), a = addr() || null, st = t.st, stp = [label('lbl.checkoutDelivery', 'Delivery'), label('lbl.checkoutTime', 'Time'), label('lbl.checkoutPaymentMethod', 'Payment method'), label('lbl.checkoutReview', 'Review')];
   const stops: string[] = (t as any).stops || [], multi = stops.length > 1;
-  const [cashEligible, setCashEligible] = useState(false), [scheduleOpen, setScheduleOpen] = useState(false);
+  const [cashEligible, setCashEligible] = useState(false), [scheduleOpen, setScheduleOpen] = useState(false),[cashError,setCashError]=useState(false),[cashRetry,setCashRetry]=useState(0);
   const checkoutAddressKey = deliveryAddressKey(a);
   useEffect(() => {
     if (!pk && st?.live && checkoutAddressKey) {
@@ -345,18 +345,19 @@ export function Checkout() {
   useEffect(() => { if (st?.id && !st.open && st.acceptScheduledOrders && !S.sch) setScheduleOpen(true); }, [st?.id, st?.open, st?.acceptScheduledOrders]);
   useEffect(() => {
     let active = true;
-    setCashEligible(false);
+    setCashEligible(false);setCashError(false);
     const storeIds = multi ? stops : st?.id ? [st.id] : [];
     if ((!pk && storeIds.length)) {
       void Promise.all(storeIds.map(async storeId => {
         const {data, error} = await supabase.rpc('goodies_cash_on_delivery_available', {p_store_id: storeId});
-        return !error && data === true;
+        if(error)throw error;if(typeof data!=='boolean')throw new Error('Cash availability unavailable');
+        return data;
       })).then(results => {
         if (active) setCashEligible(results.length === storeIds.length && results.every(Boolean));
-      });
+      }).catch(()=>{if(active)setCashError(true);});
     }
     return () => { active = false; };
-  }, [st?.id, pk, multi, stops.join(',')]);
+  }, [st?.id, pk, multi, stops.join(','),cashRetry,S.accountId]);
   const paymentReady = S.paymentOptionsStatus === 'ready';
   const paymentStatusText = S.paymentOptionsStatus === 'error' ? label('lbl.checkoutPaymentUnavailable', 'Payment details unavailable. Please try again.') : label('lbl.checkoutPaymentLoading', 'Loading payment methods…');
   const PAYON: any = fees().pay, allPays: [string, string, string, string][] = [['wallet', label('lbl.checkoutWallet', 'Wantiss Wallet'), !paymentReady ? paymentStatusText : S.hasWallet ? label('lbl.checkoutWalletBalance', 'Balance {amount}').replace('{amount}', money(S.wallet)) : label('lbl.checkoutWalletMissing', "Wallet not created"), 'wallet'], ['moncash', label('lbl.checkoutMoncash', 'MonCash'), label('lbl.checkoutUnavailablePayment', "Not available for live Goodies orders"), 'phone'], ['card', label('lbl.checkoutCard', 'Credit / debit card'), !paymentReady ? paymentStatusText : S.cards.length ? (S.cards.length === 1 ? label('lbl.checkoutSavedCardCountOne', '{count} saved card') : label('lbl.checkoutSavedCardCountMany', '{count} saved cards')).replace('{count}', String(S.cards.length)) : label('lbl.checkoutAddCard', "Add a card"), 'card'], ['cash', label('lbl.checkoutCash', 'Cash on') + ' ' + label('lbl.checkoutDelivery', 'delivery'), label('lbl.checkoutCashCondition', "Only when this store and an available courier accept cash on delivery"), 'bag']], pays = allPays.filter(p => PAYON[({wallet: 'Wallet', moncash: 'MonCash', card: 'Card', cash: 'Cash'} as any)[p[0]]] && !(multi && p[0] === 'card') && ((p[0] !== 'moncash' && (p[0] !== 'cash' || cashEligible))));
@@ -367,7 +368,7 @@ export function Checkout() {
   if (!pk && !a?.t) return <View><Bar cmsKey={'lbl.checkoutTitle'} title={label('lbl.checkoutTitle', 'Checkout')} onBack={back} /><Empty emoji="📍" title={label('lbl.checkoutAddressRequired', 'Choose a delivery address')} button={label('lbl.checkoutAddAddress', 'Add address')} onPress={() => go('addresses')} /></View>;
   let body: any = null;
   if (S.cs === 0) body = (<>
-    <Seg list={[['delivery', label('lbl.checkoutDelivery', 'Delivery')], ['pickup', label('lbl.checkoutPickup', 'Pickup')]]} on={pk ? 'pickup' : 'delivery'} onPick={k => {if (k === 'delivery' && st.far) return; setMode(k);}} />
+    <Seg list={[['delivery', label('lbl.checkoutDelivery', 'Delivery')], ['pickup', label('lbl.checkoutPickup', 'Pickup')]]} on={pk ? 'pickup' : 'delivery'} onPick={k => {if (k === 'delivery' && st.far){toast(label('lbl.deliveryOutOfRange','Delivery is unavailable for this address. Choose pickup or another address.'));return;}setMode(k);}} />
     <Ttl>{pk ? label('lbl.checkoutPickupFrom', 'Pickup from') : label('lbl.checkoutDeliverTo', 'Deliver to')}</Ttl>
     <Card><Row><IcBox icon="pin" /><View style={{flex: 1}}>
       {pk ? <><T weight="600">{st.n}</T><T cmsKeys={["lbl.cms.7c642a8ed0bc","lbl.cms.ebaf18552056","lbl.cms.f409318cbe6e",'lbl.checkoutKmFromYou','lbl.checkoutOpenHours']} size={13} color={th.mut}>{st.live ? (st.distanceReady ? (Math.round(st.km * 1000) < 1000 ? Math.round(st.km * 1000) + label("lbl.cms.7c642a8ed0bc", " m from your address") : st.km.toFixed(1) + label("lbl.cms.ebaf18552056", " km from your address")) : st.distanceError ? label("lbl.cms.f409318cbe6e", "Distance unavailable") : null) : label('lbl.checkoutKmFromYou', '{km} km from you').replace('{km}', st.km.toFixed(1))}{st.h ? ' · ' + label('lbl.checkoutOpenHours', 'open {hours}').replace('{hours}', st.h) : ''}</T></> : a ? <><T cmsKey={"lbl.cms.5f5052920c34"} weight="600">{a.l || label("lbl.cms.5f5052920c34", "Delivery address")}</T><T size={13} color={th.mut}>{a.t}{a.apt ? ', ' + a.apt : ''}</T>{a.inst ? <T cmsKey={'lbl.checkoutNote'} size={12.5} color={th.mut}>{label('lbl.checkoutNote', 'Note: {note}').replace('{note}', a.inst)}</T> : null}</> : <><T cmsKey={"lbl.cms.6795bcf3e74a"} weight="600">{label("lbl.cms.6795bcf3e74a", "Choose a delivery address")}</T><T cmsKey={"lbl.cms.2c1905767c95"} size={13} color={th.mut}>{label("lbl.cms.2c1905767c95", "Select a saved address to continue.")}</T></>}
@@ -399,6 +400,7 @@ export function Checkout() {
     <Input cmsPlaceholderKey={'lbl.checkoutOptional'} label={pk ? label('lbl.checkoutStoreNote', 'Note for the store') : label('lbl.checkoutDeliveryInstructions', 'Delivery instructions')} value={S.note} onChange={v => {S.note = v; emit();}} placeholder={label('lbl.checkoutOptional', 'Optional')} multiline />
   </>);
   if (S.cs === 2) body = (<>
+    {cashError?<Card><T cmsKey={'lbl.checkoutCashUnavailable'} color={th.red}>{label('lbl.checkoutCashUnavailable','Could not check cash-on-delivery availability. Please retry or choose another payment method.')}</T><Cta cmsKey={'lbl.retry'} small ghost label={label('lbl.retry','Try again')} onPress={()=>setCashRetry(value=>value+1)}/></Card>:null}
     {!paymentReady ? <Card><T color={S.paymentOptionsStatus === 'error' ? th.red : th.mut}>{paymentStatusText}</T>{S.paymentOptionsStatus === 'error' ? <Cta cmsKey={'lbl.retry'} small ghost label={label('lbl.retry', 'Try again')} onPress={() => void refreshPaymentOptions()} /> : null}</Card> : null}
     <T cmsKey={'lbl.checkoutPaymentMethod'} size={15} weight="600" style={{marginBottom: 8}}>{label('lbl.checkoutPaymentMethod', 'Payment method')}</T>
     {pays.map(p => <Radio key={p[0]} on={S.pay === p[0]} onPress={() => {if (p[0] !== 'card' || paymentReady) setPay(p[0]);}}><Row><Icon name={p[3]} size={20} color={th.ink} /><View style={{flex: 1}}><T size={14.5} weight="600">{p[1]}</T><T size={12.5} color={th.mut}>{p[2]}</T></View></Row></Radio>)}
@@ -482,21 +484,25 @@ export function Confirm({id}: {id: string}) {
 
 function DeliveryRouteMap({orderId, origin, destination, route}: {orderId: string; origin: any; destination: any; route: any}) {
   const th = useTheme();
+  const accountId = S.accountId, identity = `${accountId}:${orderId}`;
   const [courier, setCourier] = useState<any>(null);
   const [assignmentStatus, setAssignmentStatus] = useState('');
   const [locationStale, setLocationStale] = useState(false);
   const [trackingError, setTrackingError] = useState(false);
+  const [mapIdentity, setMapIdentity] = useState(identity);
   useEffect(() => {
     let active = true;
     let request = 0;
-    setCourier(null); setAssignmentStatus(''); setLocationStale(false);
+    const owned = () => active && S.accountId === accountId;
+    setMapIdentity(identity); setCourier(null); setAssignmentStatus(''); setLocationStale(false); setTrackingError(false);
     const load = async () => {
+      if (!owned()) return;
       const current = ++request;
       try {
         const {data, error} = await supabase.from('goodies_delivery_assignments')
           .select('latitude,longitude,status,location_updated_at')
           .eq('order_id', orderId).maybeSingle();
-        if (!active || current !== request) return;
+        if (!owned() || current !== request) return;
         if (error) throw error;
         const location = courierLocation(data);
         setAssignmentStatus(String(data?.status || ''));
@@ -504,41 +510,43 @@ function DeliveryRouteMap({orderId, origin, destination, route}: {orderId: strin
         setCourier(location);
         setTrackingError(false);
       } catch {
-        if (!active || current !== request) return;
+        if (!owned() || current !== request) return;
         setCourier(null); setTrackingError(true);
       }
     };
     void load();
     // Recheck freshness even when no realtime event arrives (for example, if GPS stops).
     const freshnessTimer = setInterval(() => {
+      if (!owned()) return;
       // Expire locally even if the network request never settles while offline.
-      setCourier((previous: any) => previous && courierLocation({...previous, status: 'accepted', location_updated_at: previous.updatedAt}));
+      setCourier((previous: any) => previous && {...previous, stale: !courierLocation({...previous, status: 'accepted', location_updated_at: previous.updatedAt})});
       void load();
     }, 30000);
     const channel = supabase.channel('goodies-courier-map-' + orderId)
       .on('postgres_changes', {event: '*', schema: 'public', table: 'goodies_delivery_assignments', filter: 'order_id=eq.' + orderId}, () => { void load(); })
       .subscribe();
     return () => { active = false; clearInterval(freshnessTimer); void supabase.removeChannel(channel); };
-  }, [orderId]);
+  }, [orderId, accountId, identity]);
   const valid = (point: any) => !!coordinate(point);
   const segments = routeSegments(route);
-  const region = trackingRegion([origin, destination, courier, ...segments.flat()]);
+  const owned = mapIdentity === identity, visibleCourier = owned && !courier?.stale ? courier : null;
+  const region = trackingRegion([origin, destination, visibleCourier, ...segments.flat()]);
   return <Card style={{padding: 12}}>
     <T cmsKey={'lbl.orderLiveTracking'} size={15} weight="600">{label('lbl.orderLiveTracking', 'Live delivery route')}</T>
     {region ? <MapView style={{height: 250, borderRadius: 14, marginTop: 10}} region={region} showsCompass>
       {valid(origin) ? <Marker coordinate={origin} title={label('lbl.orderStoreOrigin','Store')} pinColor="#2E8B57" /> : null}
       {valid(destination) ? <Marker coordinate={destination} title={label('lbl.orderDeliveryDestination','Delivery address')} pinColor="#D97706" /> : null}
-      {valid(courier) ? <Marker coordinate={courier} title={label('lbl.orderCourierLocation','Courier')} description={courier.updatedAt ? label('lbl.orderCourierUpdated','Updated {time}').replace('{time}',new Date(courier.updatedAt).toLocaleTimeString()) : ''} /> : null}
+      {valid(visibleCourier) ? <Marker coordinate={visibleCourier} title={label('lbl.orderCourierLocation','Courier')} description={visibleCourier.updatedAt ? label('lbl.orderCourierUpdated','Updated {time}').replace('{time}',fmtTime(new Date(visibleCourier.updatedAt))) : ''} /> : null}
       {segments.map((points, index) => <Polyline key={index} coordinates={points} strokeWidth={4} strokeColor={th.br} />)}
     </MapView> : <Empty title={label('lbl.orderMapPreparing','Preparing delivery map')} text={label('lbl.orderMapPreparingHint','The map appears when the delivery address has been geocoded.')} />}
     {!segments.length && region ? <T cmsKey={'lbl.orderRoadRouteUnavailable'} size={12} color={th.mut} style={{marginTop:8}}>{label('lbl.orderRoadRouteUnavailable', 'Road route unavailable. The map shows known locations only.')}</T> : null}
-    <T cmsKeys={['lbl.orderCourierRefreshFailed','lbl.orderCourierLive','lbl.orderCourierStale','lbl.orderCourierOffer','lbl.orderCourierAwaitingGps','lbl.orderCourierPending']} size={12} color={th.mut} style={{marginTop:8}}>{trackingError ? label('lbl.orderCourierRefreshFailed', 'Courier tracking is temporarily unavailable. Retrying automatically.') : valid(courier) ? label('lbl.orderCourierLive','Courier GPS location is updating live.') : locationStale ? label('lbl.orderCourierStale', 'The courier GPS signal is temporarily stale. Waiting for a fresh location update.') : assignmentStatus === 'offered' ? label('lbl.orderCourierOffer','Waiting for the courier to accept the delivery.') : assignmentStatus === 'accepted' || assignmentStatus === 'picked_up' ? label('lbl.orderCourierAwaitingGps', 'Courier accepted. Waiting for the first GPS location.') : label('lbl.orderCourierPending','Waiting for courier assignment. The map will update when a courier starts sharing GPS.')}</T>
+    <T cmsKeys={['lbl.orderCourierRefreshFailed','lbl.orderCourierLive','lbl.orderCourierStale','lbl.orderCourierOffer','lbl.orderCourierAwaitingGps','lbl.orderCourierPending']} size={12} color={th.mut} style={{marginTop:8}}>{owned && trackingError ? label('lbl.orderCourierRefreshFailed', 'Courier tracking is temporarily unavailable. Retrying automatically.') : valid(visibleCourier) ? label('lbl.orderCourierLive','Courier GPS location is updating live.') : owned && (locationStale || courier?.stale) ? label('lbl.orderCourierStale', 'The courier GPS signal is temporarily stale. Waiting for a fresh location update.') : owned && assignmentStatus === 'offered' ? label('lbl.orderCourierOffer','Waiting for the courier to accept the delivery.') : owned && (assignmentStatus === 'accepted' || assignmentStatus === 'picked_up') ? label('lbl.orderCourierAwaitingGps', 'Courier accepted. Waiting for the first GPS location.') : label('lbl.orderCourierPending','Waiting for courier assignment. The map will update when a courier starts sharing GPS.')}</T>
   </Card>;
 }
 
 function PickupLocationMap({origin}: {origin: unknown}) {
   const point = coordinate(origin);
-  return <Card style={{padding: 12}}><T cmsKey={'lbl.orderPickupLocation'} size={15} weight="600">{label('lbl.orderPickupLocation', 'Pickup location')}</T>{point ? <MapView style={{height: 200, marginTop: 8, borderRadius: 12}} initialRegion={{...point, latitudeDelta: 0.01, longitudeDelta: 0.01}}><Marker coordinate={point} title={label('lbl.orderPickupLocation', 'Pickup location')} /></MapView> : <Empty title={label('lbl.orderPickupUnavailable', 'Live location unavailable')} text={label("lbl.shopAuto1WOHU9O", "Pickup coordinates have not been provided by the store.")} />}</Card>;
+  return <Card style={{padding: 12}}><T cmsKey={'lbl.orderPickupLocation'} size={15} weight="600">{label('lbl.orderPickupLocation', 'Pickup location')}</T>{point ? <MapView style={{height: 200, marginTop: 8, borderRadius: 12}} region={{...point, latitudeDelta: 0.01, longitudeDelta: 0.01}}><Marker coordinate={point} title={label('lbl.orderPickupLocation', 'Pickup location')} /></MapView> : <Empty title={label('lbl.orderPickupUnavailable', 'Live location unavailable')} text={label("lbl.shopAuto1WOHU9O", "Pickup coordinates have not been provided by the store.")} />}</Card>;
 }
 
 export function Track({id}: {id: string}) {

@@ -1,6 +1,7 @@
 import { loadAdminDomain, listStaff, listAccountRestrictions } from './adminBackend';
 import { supabase } from './supabase';
-import { db, bump, setDataMode } from '../state/db';
+import { adminSnapshotStatus, db, bump, setDataMode, type AdminSnapshotDomain } from '../state/db';
+import { session } from '../state/access';
 import { GRANTS, REQUESTS } from '../state/grants';
 import type { Account, Application, ServiceRow, StaffMember, SupportCase, Transaction } from '../data/types';
 
@@ -35,18 +36,29 @@ function clearDemoRecords() {
   db.PSUB = []; db.CSUBS = []; db.GM = []; db.GD = []; db.GN = [];
 }
 
+let hydrationGeneration = 0;
 export async function hydrateAdminState() {
+  const request = ++hydrationGeneration, owner = session.userId;
+  const failed = new Set<AdminSnapshotDomain>();
+  const scoped = async <T,>(domain: AdminSnapshotDomain, load: () => Promise<T[]>): Promise<T[]> => {
+    try { const rows = await load(); if (!Array.isArray(rows)) throw new Error('Snapshot unavailable'); return rows; }
+    catch { failed.add(domain); return []; }
+  };
   clearDemoRecords();
+  for (const domain of Object.keys(adminSnapshotStatus) as AdminSnapshotDomain[]) adminSnapshotStatus[domain] = 'loading';
+  bump();
   const [applications, businesses, transactions, profiles, support, staff, audit, restrictions] = await Promise.all([
-    loadAdminDomain('operations').catch(() => []),
-    loadAdminDomain('ecosystem').catch(() => []),
+    scoped('operations', () => loadAdminDomain('operations')),
+    scoped('ecosystem', () => loadAdminDomain('ecosystem')),
     loadAdminDomain('finance').catch(() => []),
     loadAdminDomain('people').catch(() => []),
     loadAdminDomain('support').catch(() => []),
     listStaff().catch(() => []),
-    supabase.rpc('wantiss_admin_audit_read').then(({ data, error }) => error ? [] : (data || [])),
-    listAccountRestrictions().catch(() => []),
+    Promise.resolve(supabase.rpc('wantiss_admin_audit_read')).then(({ data, error }) => error ? [] : (data || [])).catch(() => []),
+    scoped('restrictions', listAccountRestrictions),
   ]);
+  if (request !== hydrationGeneration || owner !== session.userId) return;
+  for (const domain of Object.keys(adminSnapshotStatus) as AdminSnapshotDomain[]) adminSnapshotStatus[domain] = failed.has(domain) ? 'error' : 'ready';
 
   db.APPS = applications.map((x): Application => ({
     id: str(x.id), userId: str(x.user_id), businessId: str(x.business_id), n: str(x.business_name), s: normalizedStatus(x.status), st: applicationStage(x.status),

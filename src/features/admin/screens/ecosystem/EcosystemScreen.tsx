@@ -1,5 +1,5 @@
 import { Pressable, View } from 'react-native';
-import { bump, db, ui, useDb } from '../../state/db';
+import { adminSnapshotStatus, bump, db, ui, useDb } from '../../state/db';
 import { can } from '../../state/access';
 import { REQ } from '../../state/requirements';
 import { saveCmsVersion } from '../../lib/adminBackend';
@@ -14,6 +14,7 @@ import { AppIcon } from '../../ui/AppIcon';
 import { useToast } from '../../ui/Toast';
 import { useTheme } from '../../theme/ThemeContext';
 import { useExport } from '../../shell/useExport';
+import { AdminSnapshotBoundary } from '../../ui/AdminSnapshotBoundary';
 
 const num = (x: string) => parseInt(x) || 0;
 
@@ -80,7 +81,7 @@ export function EcosystemScreen() {
                 <View><Txt size={9.5} mut>Activity</Txt><Txt size={10.1} weight={500}>—</Txt></View>
                 <View><Txt size={9.5} mut>Queue</Txt><Txt size={10.1} weight={500}>—</Txt></View>
               </View>
-              <Txt size={9.5} mut style={{ marginTop: 8 }}>Not connected yet</Txt>
+              <Txt size={9.5} mut style={{ marginTop: 8 }}>{s[0] === 'Goodies' ? 'Open Goodies operations' : 'Not connected yet'}</Txt>
               <View style={{ flexDirection: 'row' }}><Pill>{pre ? 'Pre-order' : 'Directory status · ' + s[5]}</Pill></View>
             </View>
           </Pressable>
@@ -97,9 +98,11 @@ export function EcosystemScreen() {
     <View>
       <Heading title="Ecosystem Services" kpis={[
         { icon: 'building-2', value: db.SVC.length, label: 'Services in directory' },
-        { icon: 'users', value: db.BIZ.length, label: 'Business records', onPress: () => go('business') },
-        { icon: 'wallet', value: db.APPS.filter((app) => app.st < 3).length, label: 'Applications awaiting review', onPress: () => go('operations') },
+        { icon: 'users', value: adminSnapshotStatus.ecosystem === 'error' ? 'Unavailable' : adminSnapshotStatus.ecosystem === 'loading' ? 'Loading…' : db.BIZ.length, label: 'Business records', onPress: () => go('business') },
+        { icon: 'wallet', value: adminSnapshotStatus.operations === 'error' ? 'Unavailable' : adminSnapshotStatus.operations === 'loading' ? 'Loading…' : db.APPS.filter((app) => app.st < 3).length, label: 'Applications awaiting review', onPress: () => go('operations') },
       ]} />
+      <AdminSnapshotBoundary domain="ecosystem" />
+      <AdminSnapshotBoundary domain="operations" />
       <Row><SearchInput value={ui.eq} onChangeText={(v) => set('eq', v)} placeholder="Search services" /></Row>
       <Chips options={['All', 'Active', 'Pre-order', 'Attention', 'Favorites'] as const} value={ui.ec} onChange={(v) => set('ec', v)} />
       <Row wrap>

@@ -11,17 +11,19 @@ import { Chips, OutlineBtn, Pill, Row, SearchInput, SelectMenu, StatusPill } fro
 import { ListRows, Small } from '../../ui/Lists';
 import { Txt } from '../../ui/Txt';
 import { GOODIES_MODULES } from '../goodies/modules';
+import { useOpenModule } from '../ecosystem/useOpenModule';
 
 export function ServiceWorkspaceScreen() {
   useDb();
   const { c } = useTheme();
   const { go } = useNav();
   const open = useOpen();
+  const openModule = useOpenModule();
   const serviceName = String(ui.wsvc || 'Goodies');
   const service = db.SVC.find((row) => row[0] === serviceName) || db.SVC[0];
   const modules = (serviceName === 'Goodies' ? GOODIES_MODULES.join('|') : db.MOD[serviceName] || 'Overview|Configuration').split('|');
   const moduleName = modules.includes(String(ui.wmod)) ? String(ui.wmod) : 'Overview';
-  const setModule = (next: string) => { ui.wmod = next; ui.wf = 'All'; ui.wq = ''; bump(); };
+  const setModule = (next: string) => { if(serviceName==='Goodies'){openModule('Goodies',next);return;}ui.wmod = next; ui.wf = 'All'; ui.wq = ''; bump(); };
   const serviceApps = dataMode === 'live' ? db.APPS.filter((row) => row.s === serviceName) : [];
   const serviceCases = dataMode === 'live' ? db.CASES.filter((row) => row.svc === serviceName) : [];
   const serviceTransactions = dataMode === 'live' ? db.INV.filter((row) => row.f.toLowerCase().includes(serviceName.toLowerCase()) || (serviceName === 'Top up' && /top.?up/i.test(row.f))) : [];

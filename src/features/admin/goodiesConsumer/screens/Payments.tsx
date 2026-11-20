@@ -41,6 +41,7 @@ export function LivePayments({onOpenWallet}: {onOpenWallet?:()=>void}={}) {
   const mounted = useRef(true);
   const loaded = useRef(false); /* true once data has been shown, so later refreshes stay silent */
   const busyRef = useRef(false); /* blocks a second tap before React re-renders */
+  const loadSequence = useRef(0);
 
   useEffect(() => {
     mounted.current = true;
@@ -48,20 +49,26 @@ export function LivePayments({onOpenWallet}: {onOpenWallet?:()=>void}={}) {
   }, []);
 
   const load = useCallback(async () => {
+    const accountId=S.accountId,sequence=++loadSequence.current;
+    const current=()=>mounted.current&&S.accountId===accountId&&sequence===loadSequence.current;
     if (!loaded.current) setState('loading');
     try {
       const {data: auth, error: authError} = await supabase.auth.getUser();
       /* With no session, supabase-js v2 returns AuthSessionMissingError instead of user: null. That means signed out, not a failure. */
       if (authError && authError.name !== 'AuthSessionMissingError') throw authError;
-      if (!mounted.current) return;
+      if (!current()) return;
       if (!auth?.user) {loaded.current = false; setState('signedout'); return;}
+      if(auth.user.id!==accountId)return;
       const [wallet, methods] = await Promise.all([
         supabase.from('wallets').select('id,balance').eq('user_id', auth.user.id).maybeSingle(),
         supabase.rpc('get_my_payment_methods'),
       ]);
       if (wallet.error) throw wallet.error;
       if (methods.error) throw methods.error;
-      if (!mounted.current || S.accountId !== auth.user.id) return;
+      const balance=wallet.data?.balance;
+      const numericBalance=typeof balance==='number'||typeof balance==='string'&&/^[+-]?(?:\d+(?:\.\d*)?|\.\d+)(?:e[+-]?\d+)?$/i.test(balance.trim());
+      if(!Array.isArray(methods.data)||wallet.data!=null&&(typeof wallet.data!=='object'||Array.isArray(wallet.data)||!wallet.data.id||!numericBalance||!Number.isFinite(Number(balance))))throw new Error('Payment details unavailable');
+      if (!current()) return;
       S.hasWallet = !!wallet.data?.id;
       S.wallet = Number(wallet.data?.balance || 0);
       S.cards = (methods.data || []).map(normalizeCard);
@@ -69,7 +76,7 @@ export function LivePayments({onOpenWallet}: {onOpenWallet?:()=>void}={}) {
       save(); emit();
       loaded.current = true; setProblem(''); setState('ready');
     } catch (e: any) {
-      if (!mounted.current) return;
+      if (!current()) return;
       const msg = friendlyError(e, label("lbl.cms.cd891775350a", "Could not load your wallet and cards."));
       if (loaded.current) {toast(msg); return;} /* keep showing the last good data */
       setProblem(msg); setState('error');
@@ -81,19 +88,21 @@ export function LivePayments({onOpenWallet}: {onOpenWallet?:()=>void}={}) {
   /* Both card RPCs return a boolean. false means nothing changed, with no error. */
   const act = async (id: string, call: () => PromiseLike<{data: any; error: any}>, okMsg: string, failMsg: string) => {
     if (busyRef.current) return;
+    const accountId=S.accountId;
     busyRef.current = true; setBusyId(id); setConfirmId('');
     let ok = false;
     try {
       const {data, error} = await call();
-      if (error || data === false) toast(friendlyError(error, failMsg));
+      if(!mounted.current||S.accountId!==accountId)return;
+      if (error || data !== true) toast(friendlyError(error, failMsg));
       else {toast(okMsg); ok = true;}
     } catch (e: any) {
-      toast(friendlyError(e, failMsg));
+      if(mounted.current&&S.accountId===accountId)toast(friendlyError(e, failMsg));
     } finally {
       busyRef.current = false;
       if (mounted.current) setBusyId('');
     }
-    if (ok && mounted.current) await load();
+    if (ok && mounted.current&&S.accountId===accountId) await load();
   };
   const makeDefault = (id: string) => {
     void act(id, () => supabase.rpc('set_default_payment_method', {p_payment_method_id: id}), label("lbl.page.screens.Payments.0d5c557a94", "Default card updated"), label("lbl.page.screens.Payments.5519facea3", "Could not change your default card."));
@@ -104,10 +113,11 @@ export function LivePayments({onOpenWallet}: {onOpenWallet?:()=>void}={}) {
     void act(id, () => supabase.rpc('delete_payment_method', {p_payment_method_id: id}), label("lbl.page.screens.Payments.0e75e7b8ad", "Card removed"), label("lbl.page.screens.Payments.901ecf3e48", "Could not remove this card."));
   };
   const makeWallet = async () => {
-    if (creating) return;
-    setCreating(true);
-    try {await createWallet();} finally {if (mounted.current) setCreating(false);}
-    if (mounted.current) await load();
+    if (busyRef.current) return;
+    const accountId=S.accountId;
+    busyRef.current=true;setCreating(true);
+    try {await createWallet();} finally {busyRef.current=false;if (mounted.current) setCreating(false);}
+    if (mounted.current&&S.accountId===accountId) await load();
   };
 
   if (state === 'loading') {
