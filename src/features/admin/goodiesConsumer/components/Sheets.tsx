@@ -17,6 +17,7 @@ import {rgText, label} from '../content';
 import {useSafeAreaInsets} from 'react-native-safe-area-context';
 import {BottomSheet, ConfirmDialog} from './Overlays';
 import {friendlyError} from '../friendlyError';
+import {fetchOpenHostedGoodiesGroup} from '../groupRecovery';
 import {fetchGoodiesOrderForNotification} from '../serverSync';
 import {push, reset} from '../store';
 import {wantissLocale} from '../previewLocales';
@@ -268,6 +269,20 @@ function GroupOrderSheet({close, showTitle = true, showDone = true, storeId = ''
     return true;
   };
   const saveGroup = (next: any) => { activeGroup.current=String(next.groupId||'');groupSource.current=next;setGroup(next); S.groupOrder = next; save(); emit(); };
+  useEffect(()=>{
+    // A group belongs to the server. Recover the host's open group when this
+    // device has no local selection; do not override an incoming invite.
+    if(group.serverBacked||incomingInviteCode||inviteCode.trim())return;
+    const owner=accountId;let active=true;
+    void (async()=>{
+      if(!owner||!current(owner,''))return;
+      const recovered=await fetchOpenHostedGoodiesGroup(supabase,owner);
+      if(!active||!recovered||!current(owner,'')||groupActionLock.current)return;
+      saveGroup({...group,code:recovered.code,groupId:recovered.id,storeId:recovered.storeId,
+        expiresAt:recovered.expiresAt,serverBacked:true});
+    })().catch(()=>{/* Keep the join/create controls available while offline. */});
+    return()=>{active=false;};
+  },[accountId,group.serverBacked,inviteCode]);
   const createServerGroup = async () => {
     if(groupActionLock.current||groupCheckoutLock.current)return;
     const targetStoreId = storeId || S.cart.sid || group.storeId || '';
