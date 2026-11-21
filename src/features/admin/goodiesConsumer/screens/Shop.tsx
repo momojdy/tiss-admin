@@ -533,7 +533,7 @@ function DeliveryRouteMap({orderId, origin, destination, route}: {orderId: strin
   const region = trackingRegion([origin, destination, visibleCourier, ...segments.flat()]);
   return <Card style={{padding: 12}}>
     <T cmsKey={'lbl.orderLiveTracking'} size={15} weight="600">{label('lbl.orderLiveTracking', 'Live delivery route')}</T>
-    {region ? <MapView accessibilityLabel={false ? label('lbl.orderPickupUnavailable', 'Live location unavailable') : label('lbl.orderLiveTracking', 'Live delivery route')} style={{height: 250, borderRadius: 14, marginTop: 10}} region={region} showsCompass>
+    {region ? <MapView accessibilityLabel={false ? label('lbl.courierMapUnavailable', 'Could not open the map') : label('lbl.orderLiveTracking', 'Live delivery route')} style={{height: 250, borderRadius: 14, marginTop: 10}} region={region} showsCompass>
       {valid(origin) ? <Marker coordinate={origin} title={label('lbl.orderStoreOrigin','Store')} pinColor="#2E8B57" /> : null}
       {valid(destination) ? <Marker coordinate={destination} title={label('lbl.orderDeliveryDestination','Delivery address')} pinColor="#D97706" /> : null}
       {valid(visibleCourier) ? <Marker coordinate={visibleCourier} title={label('lbl.orderCourierLocation','Courier')} description={visibleCourier.updatedAt ? label('lbl.orderCourierUpdated','Updated {time}').replace('{time}',fmtTime(new Date(visibleCourier.updatedAt))) : ''} /> : null}
@@ -546,7 +546,7 @@ function DeliveryRouteMap({orderId, origin, destination, route}: {orderId: strin
 
 function PickupLocationMap({origin}: {origin: unknown}) {
   const point = coordinate(origin);
-  return <Card style={{padding: 12}}><T cmsKey={'lbl.orderPickupLocation'} size={15} weight="600">{label('lbl.orderPickupLocation', 'Pickup location')}</T>{point ? <MapView accessibilityLabel={false ? label('lbl.orderPickupUnavailable', 'Live location unavailable') : label('lbl.orderPickupLocation', 'Pickup location')} style={{height: 200, marginTop: 8, borderRadius: 12}} region={{...point, latitudeDelta: 0.01, longitudeDelta: 0.01}}><Marker coordinate={point} title={label('lbl.orderPickupLocation', 'Pickup location')} /></MapView> : <Empty title={label('lbl.orderPickupUnavailable', 'Live location unavailable')} text={label("lbl.shopAuto1WOHU9O", "Pickup coordinates have not been provided by the store.")} />}</Card>;
+  return <Card style={{padding: 12}}><T cmsKey={'lbl.orderPickupLocation'} size={15} weight="600">{label('lbl.orderPickupLocation', 'Pickup location')}</T>{point ? <MapView accessibilityLabel={false ? label('lbl.courierMapUnavailable', 'Could not open the map') : label('lbl.orderPickupLocation', 'Pickup location')} style={{height: 200, marginTop: 8, borderRadius: 12}} region={{...point, latitudeDelta: 0.01, longitudeDelta: 0.01}}><Marker coordinate={point} title={label('lbl.orderPickupLocation', 'Pickup location')} /></MapView> : <Empty title={label('lbl.orderPickupUnavailable', 'Live location unavailable')} text={label("lbl.shopAuto1WOHU9O", "Pickup coordinates have not been provided by the store.")} />}</Card>;
 }
 
 export function Track({id}: {id: string}) {
