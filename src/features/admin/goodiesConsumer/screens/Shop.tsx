@@ -9,7 +9,7 @@ import {createGoodiesRefresh} from '../refreshScope';
 import React, {useState, useEffect, useRef} from 'react';
 import {previewClipboard as Clipboard} from '../previewNative';
 import {MaterialCommunityIcons} from '@expo/vector-icons';
-import {View, Text as UnusedNativeText, Pressable, ScrollView, useWindowDimensions, Image, TextInput, ActivityIndicator, Alert, AppState} from 'react-native';
+import {View, Text as UnusedNativeText, Pressable, ScrollView, useWindowDimensions, Image, TextInput, ActivityIndicator, Alert, AppState, Platform} from 'react-native';
 import {Icon} from '../components/Icon';
 import {T, Grad, Circ, Bar, Sh, Rail, Chips, Cta, Card, Row, Badge, Ttl, Empty, Tile, Radio, Seg, Stepper, Input, Switch, bgIdx, useTheme} from '../components/ui';
 import {Dish, StoreCard, ItemRow} from '../components/cards';
@@ -533,20 +533,20 @@ function DeliveryRouteMap({orderId, origin, destination, route}: {orderId: strin
   const region = trackingRegion([origin, destination, visibleCourier, ...segments.flat()]);
   return <Card style={{padding: 12}}>
     <T cmsKey={'lbl.orderLiveTracking'} size={15} weight="600">{label('lbl.orderLiveTracking', 'Live delivery route')}</T>
-    {region ? <MapView style={{height: 250, borderRadius: 14, marginTop: 10}} region={region} showsCompass>
+    {region ? <MapView accessibilityLabel={false ? label('lbl.orderPickupUnavailable', 'Live location unavailable') : label('lbl.orderLiveTracking', 'Live delivery route')} style={{height: 250, borderRadius: 14, marginTop: 10}} region={region} showsCompass>
       {valid(origin) ? <Marker coordinate={origin} title={label('lbl.orderStoreOrigin','Store')} pinColor="#2E8B57" /> : null}
       {valid(destination) ? <Marker coordinate={destination} title={label('lbl.orderDeliveryDestination','Delivery address')} pinColor="#D97706" /> : null}
       {valid(visibleCourier) ? <Marker coordinate={visibleCourier} title={label('lbl.orderCourierLocation','Courier')} description={visibleCourier.updatedAt ? label('lbl.orderCourierUpdated','Updated {time}').replace('{time}',fmtTime(new Date(visibleCourier.updatedAt))) : ''} /> : null}
       {segments.map((points, index) => <Polyline key={index} coordinates={points} strokeWidth={4} strokeColor={th.br} />)}
     </MapView> : <Empty title={label('lbl.orderMapPreparing','Preparing delivery map')} text={label('lbl.orderMapPreparingHint','The map appears when the delivery address has been geocoded.')} />}
-    {!segments.length && region ? <T cmsKey={'lbl.orderRoadRouteUnavailable'} size={12} color={th.mut} style={{marginTop:8}}>{label('lbl.orderRoadRouteUnavailable', 'Road route unavailable. The map shows known locations only.')}</T> : null}
+    {true && !segments.length && region ? <T cmsKey={'lbl.orderRoadRouteUnavailable'} size={12} color={th.mut} style={{marginTop:8}}>{label('lbl.orderRoadRouteUnavailable', 'Road route unavailable. The map shows known locations only.')}</T> : null}
     <T cmsKeys={['lbl.orderCourierRefreshFailed','lbl.orderCourierLive','lbl.orderCourierStale','lbl.orderCourierOffer','lbl.orderCourierAwaitingGps','lbl.orderCourierPending']} size={12} color={th.mut} style={{marginTop:8}}>{owned && trackingError ? label('lbl.orderCourierRefreshFailed', 'Courier tracking is temporarily unavailable. Retrying automatically.') : valid(visibleCourier) ? label('lbl.orderCourierLive','Courier GPS location is updating live.') : owned && (locationStale || courier?.stale) ? label('lbl.orderCourierStale', 'The courier GPS signal is temporarily stale. Waiting for a fresh location update.') : owned && assignmentStatus === 'offered' ? label('lbl.orderCourierOffer','Waiting for the courier to accept the delivery.') : owned && (assignmentStatus === 'accepted' || assignmentStatus === 'picked_up') ? label('lbl.orderCourierAwaitingGps', 'Courier accepted. Waiting for the first GPS location.') : label('lbl.orderCourierPending','Waiting for courier assignment. The map will update when a courier starts sharing GPS.')}</T>
   </Card>;
 }
 
 function PickupLocationMap({origin}: {origin: unknown}) {
   const point = coordinate(origin);
-  return <Card style={{padding: 12}}><T cmsKey={'lbl.orderPickupLocation'} size={15} weight="600">{label('lbl.orderPickupLocation', 'Pickup location')}</T>{point ? <MapView style={{height: 200, marginTop: 8, borderRadius: 12}} region={{...point, latitudeDelta: 0.01, longitudeDelta: 0.01}}><Marker coordinate={point} title={label('lbl.orderPickupLocation', 'Pickup location')} /></MapView> : <Empty title={label('lbl.orderPickupUnavailable', 'Live location unavailable')} text={label("lbl.shopAuto1WOHU9O", "Pickup coordinates have not been provided by the store.")} />}</Card>;
+  return <Card style={{padding: 12}}><T cmsKey={'lbl.orderPickupLocation'} size={15} weight="600">{label('lbl.orderPickupLocation', 'Pickup location')}</T>{point ? <MapView accessibilityLabel={false ? label('lbl.orderPickupUnavailable', 'Live location unavailable') : label('lbl.orderPickupLocation', 'Pickup location')} style={{height: 200, marginTop: 8, borderRadius: 12}} region={{...point, latitudeDelta: 0.01, longitudeDelta: 0.01}}><Marker coordinate={point} title={label('lbl.orderPickupLocation', 'Pickup location')} /></MapView> : <Empty title={label('lbl.orderPickupUnavailable', 'Live location unavailable')} text={label("lbl.shopAuto1WOHU9O", "Pickup coordinates have not been provided by the store.")} />}</Card>;
 }
 
 export function Track({id}: {id: string}) {
