@@ -16,6 +16,7 @@ import { OutlineBtn, Pill, SelectMenu, StatusPill } from '../../ui/Controls';
 import { Txt } from '../../ui/Txt';
 import { CustomerPagePreview, type CustomerPreviewMode, type CustomerPreviewView } from './CustomerPagePreview';
 import { GoodiesEditor } from './GoodiesEditor';
+import { KonsolissEditor } from './KonsolissEditor';
 import { AuthPageEditor } from './AuthPageEditor';
 import { HomePageEditor } from './HomePageEditor';
 
@@ -57,6 +58,7 @@ export function CustomerPageEditorScreen() {
   const [pageGroup, setPageGroup] = useState<'Main' | 'Services'>('Main');
   const [pageChoice, setPageChoice] = useState('Home page');
   const [actualGoodiesPreview, setActualGoodiesPreview] = useState(false);
+  const [actualKonsolissPreview, setActualKonsolissPreview] = useState(false);
   const [actualAuthEditor, setActualAuthEditor] = useState(false);
   const [pageStack, setPageStack] = useState<string[]>([]);
   const [elementKey, setElementKey] = useState('');
@@ -97,20 +99,21 @@ export function CustomerPageEditorScreen() {
     const requested = String(requestedFeature || '').toLowerCase();
     if (requestedFeature) {
       setActualGoodiesPreview(requested === 'goodies');
+      setActualKonsolissPreview(requested === 'konsoliss');
       setActualAuthEditor(requested === 'auth' || requested === 'authentication');
-      if (requested === 'auth' || requested === 'authentication') {
+      if (requested === 'auth' || requested === 'authentication' || requested === 'konsoliss') {
         setPageGroup('Main');
         setPageChoice('Authentication pages');
-      } else if (requested === 'goodies') {
+      } else if (requested === 'goodies' || requested === 'konsoliss') {
         setPageGroup('Services');
-        setPageChoice('Goodies');
+        setPageChoice(requested === 'goodies' ? 'Goodies' : 'Konsoliss');
       } else if (requested === 'wantiss home') {
         setPageGroup('Main');
         setPageChoice('Home page');
       }
     }
     if (!requestedFeature) return;
-    if (requested === 'auth' || requested === 'authentication') {
+    if (requested === 'auth' || requested === 'authentication' || requested === 'konsoliss') {
       delete ui.editorFeature;
       return;
     }
@@ -348,10 +351,12 @@ export function CustomerPageEditorScreen() {
               setPageKey('__auth__');
               setActualAuthEditor(true);
               setActualGoodiesPreview(false);
+              setActualKonsolissPreview(false);
             } else {
               setPageKey('__actual_goodies__');
               setActualGoodiesPreview(true);
               setActualAuthEditor(false);
+              setActualKonsolissPreview(false);
             }
             setPageStack([]);
             setElementKey('');
@@ -369,6 +374,7 @@ export function CustomerPageEditorScreen() {
             setElementKey('');
             setActualAuthEditor(label === 'Authentication pages');
             setActualGoodiesPreview(label === 'Goodies');
+            setActualKonsolissPreview(label === 'Konsoliss');
             const keyByLabel: Record<string, string> = {
               'Authentication pages': '__auth__', 'Home page': 'home',
               Settings: 'settings', Me: 'me', Wallet: 'wallet', Orders: 'orders',
@@ -378,7 +384,7 @@ export function CustomerPageEditorScreen() {
             };
             const key = keyByLabel[label] || label.toLowerCase();
             setPageKey(key);
-            if (label !== 'Authentication pages' && label !== 'Goodies') {
+            if (label !== 'Authentication pages' && label !== 'Goodies' && label !== 'Konsoliss') {
               const exists = Boolean((previewPayload?.pages || {})[key]);
               if (!exists) {
                 ui.editorFeature = key;
@@ -395,10 +401,11 @@ export function CustomerPageEditorScreen() {
       {error ? <Card><Txt size={11.5} color={c.or}>{error}</Txt></Card> : null}
 
       {actualGoodiesPreview ? <GoodiesEditor canEdit={can(...REQ.content)} canPublish={can(...REQ.publish)} /> : null}
+      {actualKonsolissPreview ? <KonsolissEditor canEdit={can(...REQ.content)} canPublish={can(...REQ.publish)} /> : null}
       {actualAuthEditor ? <AuthPageEditor canEdit={can(...REQ.content)} canPublish={can(...REQ.publish)} /> : null}
       {homeEditor ? <HomePageEditor canEdit={can(...REQ.content)} canPublish={can(...REQ.publish)} /> : null}
 
-      {!actualGoodiesPreview && !actualAuthEditor && !homeEditor ? (
+      {!actualGoodiesPreview && !actualKonsolissPreview && !actualAuthEditor && !homeEditor ? (
       <Section title="Live customer phone preview" right={<View style={{ flexDirection: 'row', flexWrap: 'wrap', gap: 5 }}>
         <View style={{ width: 172 }}>
           <SelectMenu
@@ -440,7 +447,7 @@ export function CustomerPageEditorScreen() {
       </Section>
       ) : null}
 
-      {!actualGoodiesPreview && !actualAuthEditor && !homeEditor && selected && viewMode === 'Draft' && editorMode === 'Edit' ? (
+      {!actualGoodiesPreview && !actualKonsolissPreview && !actualAuthEditor && !homeEditor && selected && viewMode === 'Draft' && editorMode === 'Edit' ? (
         <>
           <Section title="Page and element structure">
             {pageKeys.length ? (
