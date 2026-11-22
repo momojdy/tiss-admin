@@ -122,7 +122,7 @@ export function KonsolissEditor({canEdit,canPublish}:{canEdit:boolean;canPublish
     const active=id===selected&&mode==='Edit';
     return <Pressable key={id} accessibilityRole="button" accessibilityLabel={'Edit '+labelFor(id)}
       onPress={()=>choose(id)} style={{borderColor:active?YELLOW:'transparent',borderWidth:2,borderStyle:'dashed',borderRadius:7,padding:3,marginVertical:1}}>
-      <Txt size={large?17:11} weight={large?700:500} color={id.endsWith('.heading')||id.endsWith('.title')?'#F0C900':'#2B1210'}>{shown[id]??DEFAULTS[id]}</Txt>
+      <Txt size={large?17:11} weight={large?600:500} color={id.endsWith('.heading')||id.endsWith('.title')?'#F0C900':'#2B1210'}>{shown[id]??DEFAULTS[id]}</Txt>
     </Pressable>;
   };
   const phone=()=> <View style={{alignSelf:'center',width:290,maxWidth:'100%',backgroundColor:CREAM,borderRadius:25,borderWidth:6,borderColor:'#242424',overflow:'hidden'}}>
@@ -131,7 +131,7 @@ export function KonsolissEditor({canEdit,canPublish}:{canEdit:boolean;canPublish
       {page==='Home'?<>
         <View style={{flexDirection:'row',justifyContent:'space-between',alignItems:'center'}}>{field('home.brand',true)}<Txt size={9} color={RED}>KS-2048 · Filling (sample)</Txt></View>
         {field('home.load.heading')}
-        <Txt size={26} color={RED} weight={700}>51.7 <Txt size={12}>/ 68 CBM</Txt></Txt>
+        <Txt size={26} color={RED} weight={600}>51.7 <Txt size={12}>/ 68 CBM</Txt></Txt>
         <View style={{height:135,borderRadius:16,backgroundColor:'#EEE2B5',alignItems:'center',justifyContent:'center'}}><Txt size={12} color="#72554C">3D container runs in consumer app</Txt><Txt size={10} color="#72554C">Preview of editable content only</Txt></View>
         <View style={{flexDirection:'row',justifyContent:'space-between'}}>{field('home.otherCargo')}{field('home.yourSpace')}{field('home.free')}</View>
         <View style={{flexDirection:'row',gap:5}}><View style={{flex:1,backgroundColor:RED,borderRadius:12,padding:8}}>{field('home.book.title')}{field('home.book.subtitle')}</View><View style={{flex:1,backgroundColor:'#FFFAE0',borderRadius:12,padding:8}}>{field('home.load.title')}{field('home.load.subtitle')}</View></View>
@@ -167,7 +167,7 @@ export function KonsolissEditor({canEdit,canPublish}:{canEdit:boolean;canPublish
       <Txt size={10} mut>Selected key: {selected}</Txt>
       <TextInput accessibilityLabel={'Edit '+selected} value={text(selected)} onChangeText={v=>change(selected,v)} multiline style={{minHeight:62,borderWidth:2,borderStyle:'dashed',borderColor:YELLOW,borderRadius:12,padding:10,backgroundColor:'#FFFDF0',color:'#2B1210',textAlignVertical:'top',marginTop:8}}/>
       <Txt size={10} mut>Tap another dotted text element in the preview, or select it below. Current editing language: {lang}.</Txt>
-      {fields[page].map(id=><Pressable key={id} onPress={()=>choose(id)} style={{padding:8,borderBottomWidth:1,borderColor:'#DFD7AA'}}><Txt size={11} weight={id===selected?700:400}>{labelFor(id)}</Txt><Txt size={9} mut>{draft[id]||'—'}</Txt></Pressable>)}
+      {fields[page].map(id=><Pressable key={id} onPress={()=>choose(id)} style={{padding:8,borderBottomWidth:1,borderColor:'#DFD7AA'}}><Txt size={11} weight={id===selected?600:400}>{labelFor(id)}</Txt><Txt size={9} mut>{draft[id]||'—'}</Txt></Pressable>)}
     </Section>:null}
     <Card><Txt size={10} mut>Only the existing Konsoliss Home page currently renders consumer content. Warehouse, Consolidated, Sourcing+ and Hub header keys are prepared for their future screens; their full layouts are not yet implemented. Preview-only sample metrics are never published as operational data.</Txt></Card>
   </View>;
