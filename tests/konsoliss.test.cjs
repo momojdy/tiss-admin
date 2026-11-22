@@ -12,11 +12,11 @@ test('Konsoliss editor and operations files have parseable TSX',()=>{
     assert.equal(source.parseDiagnostics.length,0,file+': '+source.parseDiagnostics.map(d=>d.messageText).join('; '));
   }
 });
-test('Konsoliss content editor uses yellow outlined editable copy and dedicated CMS key',()=>{
+test('Konsoliss content editor uses yellow dotted outlined editable copy and dedicated CMS key',()=>{
   const source=get('screens/content/KonsolissEditor.tsx');
   assert.match(source,/konsoliss\.content/);
   assert.match(source,/#FFD93D/);
-  assert.match(source,/borderStyle:'dashed'/);
+  assert.match(source,/borderStyle:'dotted'/);
   assert.match(source,/publishCmsVersion/);
   assert.match(source,/saveCmsVersion/);
   assert.match(source,/canEdit/);
