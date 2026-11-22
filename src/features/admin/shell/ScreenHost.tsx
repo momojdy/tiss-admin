@@ -16,6 +16,7 @@ import { ContentScreen } from '../screens/content/ContentScreen';
 import { OverviewScreen } from '../screens/overview/OverviewScreen';
 import { AnalyticsScreen } from '../screens/analytics/AnalyticsScreen';
 import { GoodiesAdminScreen } from '../screens/goodies/GoodiesAdminScreen';
+import {KonsolissAdminScreen} from '../screens/konsoliss/KonsolissAdminScreen';
 import { ServiceWorkspaceScreen } from '../screens/workspace/ServiceWorkspaceScreen';
 import { CustomerPageEditorScreen } from '../screens/content/CustomerPageEditorScreen';
 import { BusinessDetailsScreen } from '../screens/ecosystem/BusinessDetailsScreen';
@@ -28,6 +29,7 @@ const SCREENS: Partial<Record<ScreenId, () => ReactNode>> = {
   overview: () => <OverviewScreen />,
   analytics: () => <AnalyticsScreen />,
   goodies: () => <GoodiesAdminScreen />,
+  konsoliss: () => <KonsolissAdminScreen />,
   workspace: () => <ServiceWorkspaceScreen />,
   operations: () => <OperationsScreen />,
   ecosystem: () => <EcosystemScreen />,
