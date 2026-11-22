@@ -12,7 +12,7 @@ export function EditableKonsolissText({id,children}:{id?:string;children:ReactNo
  const active=ctx.selected===id;
  return <Pressable accessibilityRole="button" accessibilityLabel={'Edit '+id}
    onPress={(event)=>{event.stopPropagation();ctx.onSelect(id);}}
-   style={{borderWidth:1.5,borderStyle:'dotted',borderColor:YELLOW,borderRadius:5,padding:1,backgroundColor:active?'rgba(255,217,61,0.12)':'transparent'}}>
+   style={{borderWidth:active?1.5:0,borderStyle:'dotted',borderColor:active?YELLOW:'transparent',borderRadius:5,padding:active?1:0,backgroundColor:active?'rgba(255,217,61,0.12)':'transparent'}}>
    <View pointerEvents="none">{children}</View>
  </Pressable>;
 }
