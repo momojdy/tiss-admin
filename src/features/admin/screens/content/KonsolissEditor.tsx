@@ -84,12 +84,12 @@ const labelFor=(id:string)=>id.split('.').slice(1).join(' / ').replace(/([a-z])(
 export function KonsolissEditor({canEdit,canPublish}:{canEdit:boolean;canPublish:boolean}) {
   const {c}=useTheme();
   const [page,setPage]=useState<string>('Home');
-  const [zoom,setZoom]=useState(1);
+  const [zoom,setZoom]=useState(0.75);
   const [previewSheet,setPreviewSheet]=useState<'book'|'calc'|null>(null);
   const [lang,setLang]=useState<Lang>('en');
   const [rows,setRows]=useState<CmsRow[]>([]);
   const [draft,setDraft]=useState<Record<string,string>>({...DEFAULTS});
-  const [selected,setSelected]=useState('home.brand');
+  const [selected,setSelected]=useState('');
   const [mode,setMode]=useState<'Edit'|'Preview'|'Published'>('Edit');
   const [busy,setBusy]=useState(false);
   const [error,setError]=useState('');
@@ -108,7 +108,7 @@ export function KonsolissEditor({canEdit,canPublish}:{canEdit:boolean;canPublish
   useEffect(()=>{void load();},[load]);
   useEffect(()=>{
     const row=rows.find(r=>r.locale===lang&&r.status==='draft')||rows.find(r=>r.locale===lang&&r.status==='published')||null;
-    setVersion(row);setDraft({...DEFAULTS,...(row?.payload?.labels||{})});setDirty(false);setConfirm(false);setSelected(fields[page]?.[0]||'home.brand');
+    setVersion(row);setDraft({...DEFAULTS,...(row?.payload?.labels||{})});setDirty(false);setConfirm(false);setSelected('');
   },[lang,rows]);
   const change=(key:string,value:string)=>{if(!canEdit||mode!=='Edit')return;setDraft(d=>({...d,[key]:value}));setDirty(true);setConfirm(false);};
   const save=async()=>{
@@ -171,7 +171,7 @@ export function KonsolissEditor({canEdit,canPublish}:{canEdit:boolean;canPublish
               </Pressable>)}
           </ScrollView>
           <ScrollView horizontal showsHorizontalScrollIndicator={false} contentContainerStyle={{gap:6,paddingVertical:6}}>
-            {[0.75,1,1.25].map(z=><Pressable key={z} onPress={()=>setZoom(z)} accessibilityRole="button" accessibilityLabel={'Preview zoom '+Math.round(z*100)+'%'}
+            {[0.75,0.85,1,1.25].map(z=><Pressable key={z} onPress={()=>setZoom(z)} accessibilityRole="button" accessibilityLabel={'Preview zoom '+Math.round(z*100)+'%'}
               style={{borderRadius:18,padding:8,backgroundColor:zoom===z?YELLOW:'#F1F1F2'}}><Txt size={10} color="#2B1210">{Math.round(z*100)}%</Txt></Pressable>)}
             <Pressable accessibilityRole="button" onPress={()=>{setMode(mode==='Published'?'Preview':'Published');setSelected('');}}
               style={{borderRadius:18,padding:8,backgroundColor:mode==='Published'?YELLOW:'#F1F1F2'}}><Txt size={10} color="#2B1210">Published</Txt></Pressable>
