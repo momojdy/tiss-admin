@@ -36,12 +36,27 @@ function clearDemoRecords() {
   db.PSUB = []; db.CSUBS = []; db.GM = []; db.GD = []; db.GN = [];
 }
 
+// A slow or unavailable optional snapshot must not trap a staff member on sign-in.
+const SNAPSHOT_TIMEOUT_MS = 12000;
+async function snapshotWithDeadline<T>(task: PromiseLike<T> | Promise<T>): Promise<T> {
+  let timer: ReturnType<typeof setTimeout> | undefined;
+  try {
+    return await Promise.race([
+      Promise.resolve(task),
+      new Promise<never>((_, reject) => {
+        timer = setTimeout(() => reject(new Error('Admin snapshot timed out')), SNAPSHOT_TIMEOUT_MS);
+      }),
+    ]);
+  } finally {
+    if (timer) clearTimeout(timer);
+  }
+}
 let hydrationGeneration = 0;
 export async function hydrateAdminState() {
   const request = ++hydrationGeneration, owner = session.userId;
   const failed = new Set<AdminSnapshotDomain>();
   const scoped = async <T,>(domain: AdminSnapshotDomain, load: () => Promise<T[]>): Promise<T[]> => {
-    try { const rows = await load(); if (!Array.isArray(rows)) throw new Error('Snapshot unavailable'); return rows; }
+    try { const rows = await snapshotWithDeadline(load()); if (!Array.isArray(rows)) throw new Error('Snapshot unavailable'); return rows; }
     catch { failed.add(domain); return []; }
   };
   clearDemoRecords();
@@ -50,11 +65,11 @@ export async function hydrateAdminState() {
   const [applications, businesses, transactions, profiles, support, staff, audit, restrictions] = await Promise.all([
     scoped('operations', () => loadAdminDomain('operations')),
     scoped('ecosystem', () => loadAdminDomain('ecosystem')),
-    loadAdminDomain('finance').catch(() => []),
-    loadAdminDomain('people').catch(() => []),
-    loadAdminDomain('support').catch(() => []),
-    listStaff().catch(() => []),
-    Promise.resolve(supabase.rpc('wantiss_admin_audit_read')).then(({ data, error }) => error ? [] : (data || [])).catch(() => []),
+    snapshotWithDeadline(loadAdminDomain('finance')).catch(() => []),
+    snapshotWithDeadline(loadAdminDomain('people')).catch(() => []),
+    snapshotWithDeadline(loadAdminDomain('support')).catch(() => []),
+    snapshotWithDeadline(listStaff()).catch(() => []),
+    snapshotWithDeadline(supabase.rpc('wantiss_admin_audit_read')).then(({ data, error }) => error ? [] : (data || [])).catch(() => []),
     scoped('restrictions', listAccountRestrictions),
   ]);
   if (request !== hydrationGeneration || owner !== session.userId) return;
