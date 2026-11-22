@@ -1,6 +1,6 @@
 import { Pressable, View } from 'react-native';
 import { adminSnapshotStatus, bump, db, ui, useDb } from '../../state/db';
-import { can } from '../../state/access';
+import { can, session } from '../../state/access';
 import { REQ } from '../../state/requirements';
 import { saveCmsVersion } from '../../lib/adminBackend';
 import { useNav } from '../../shell/Nav';
@@ -20,7 +20,7 @@ const num = (x: string) => parseInt(x) || 0;
 
 export const ecoRows = () => {
   const q = String(ui.eq).toLowerCase();
-  const l = db.SVC.filter((c) => (ui.ec === 'All' || (ui.ec === 'Attention' ? false : ui.ec === 'Favorites' ? Boolean(c[6]) : c[5] === ui.ec)) && (!q || (c[0] + c[1]).toLowerCase().includes(q)));
+  const l = db.SVC.filter((c) => (c[0] !== 'Konsoliss' || (session.role === 'super_admin' && session.status === 'active')) && (ui.ec === 'All' || (ui.ec === 'Attention' ? false : ui.ec === 'Favorites' ? Boolean(c[6]) : c[5] === ui.ec)) && (!q || (c[0] + c[1]).toLowerCase().includes(q)));
   return l.sort((a, b) => (ui.es === 'Favorites' ? Number(Boolean(b[6])) - Number(Boolean(a[6])) || a[0].localeCompare(b[0]) : a[0].localeCompare(b[0])));
 };
 
