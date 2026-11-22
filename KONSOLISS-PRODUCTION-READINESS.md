@@ -92,3 +92,16 @@ Both are byte-for-byte unchanged. The existing 13.6-second loop, camera, carton 
 The live database has no Konsoliss reservation, payment, shipment or parcel tables/RPCs and no approved production tariff/provider mapping was found in the inspected feature code. An asynchronous question requests currency/rates/taxes/fees, payment method and cancellation/refund policy. The sample $550/CBM value was not used as production pricing. Payment integration cannot be configured responsibly from sample values.
 
 Missing business configuration is a blocker for payment rollout. The unimplemented lifecycle, customer/admin workflows, Saved/support/activity connections, full theme/navigation consolidation, capacity/payment concurrency testing and live integration are **unfinished engineering**, not completed work or implicit infrastructure blockers. The existing Expo connector is available; older EAS builds do not verify this branch. GitHub CLI's workspace token is invalid; repository connector access remains available. No production-readiness claim is made.
+
+## Candidate commits and native-build outcome
+
+Published draft pull requests:
+
+- Consumer [PR #36](https://github.com/momojdy/tiss_tiss_beta/pull/36), implementation commit `406df3f63fedc6763cd0b5f8c91b1033069e632d`.
+- Admin [PR #4](https://github.com/momojdy/tiss-admin/pull/4), implementation commit `a972af4b838a37d9715206ea03603a9675d32b2c`.
+
+Both use `codex/konsoliss-integrity-20261122`. Equivalent local implementation commits are consumer `03db9d3c8e9ceb7fe84a9c85dfe7d8725387ac54` and admin `19b33b9f3dc9b79cf410bbeeb34bcaf09c78606e`. GitHub connector-created commits have different metadata but exactly match local tested trees: consumer `bc40588f65a9e03443e5b33c0ba00381462fd916`, admin `8f88d44e487dbda53944ff3d4d56afa343e9bf35`. Main branches were not merged.
+
+Exact consumer revision native-build attempts used Expo project `277b862a-4581-4c6b-91b8-a7da40ced36e`, iOS profile `development-simulator` and Android profile `development`, with auto-submit disabled. Both were rejected before creating build jobs: **“No repository found for appId 277b862a-4581-4c6b-91b8-a7da40ced36e.”** The CLI fallback `eas whoami` returned **“Not logged in”**, and no `EXPO_TOKEN` is configured. Linking the repository to the Expo project or establishing an authorized local EAS session is required to run native builds. Older successful builds belong to other revisions and were not counted as acceptance evidence.
+
+Final live privilege read-back confirmed source RLS enabled, the breakdown view `security_invoker=true`, authenticated SELECT granted, anonymous SELECT denied, and direct execution of the new occupancy-touch trigger function denied to both anon and authenticated roles.
