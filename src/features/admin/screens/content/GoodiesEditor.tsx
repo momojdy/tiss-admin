@@ -396,8 +396,21 @@ export function GoodiesEditor({ canEdit, canPublish }: { canEdit: boolean; canPu
         const list: any[] = await listCmsAssets();
         const unpublished = keys.filter((key) => !list.some((a) => a.asset_key === key && a.status === 'published'));
         if (unpublished.length) {
-          setNotice({ tone: 'error', text: 'Not published. Publish these assets first (Content Studio, Assets): ' + unpublished.join(', ') });
-          return;
+          const missing = unpublished.filter((key) => !list.some((a) => a.asset_key === key));
+          if (missing.length) {
+            setNotice({ tone: 'error', text: 'Cannot publish: these images have no uploaded asset record. Re-upload them in the editor: ' + missing.join(', ') });
+            return;
+          }
+          // The user has explicitly confirmed publishing this content. Publish only
+          // assets referenced by this draft, through the existing permission-checked RPC.
+          for (const key of unpublished) {
+            const asset = list.find((a) => a.asset_key === key);
+            if (!asset?.id) throw new Error('Missing asset ID for ' + key);
+            await publishCmsAsset(asset.id);
+          }
+          const verified: any[] = await listCmsAssets();
+          const remaining = unpublished.filter((key) => !verified.some((a) => a.asset_key === key && a.status === 'published'));
+          if (remaining.length) throw new Error('Referenced assets not yet published: ' + remaining.join(', '));
         }
       }
       await publishCmsVersion(row.id);
@@ -412,7 +425,7 @@ export function GoodiesEditor({ canEdit, canPublish }: { canEdit: boolean; canPu
         setNotice({ tone: 'warn', text: 'Version ' + row.version + ' was published, but the public endpoint could not be checked. Reload shortly to verify customer delivery.' });
       }
     } catch (e) {
-      setNotice({ tone: 'error', text: 'Publication could not be confirmed. Reload its status before trying again.' });
+      setNotice({ tone: 'error', text: 'Publication could not be confirmed. ' + (e instanceof Error ? e.message : 'Reload its status before trying again.') });
     } finally { operationLock.current = false; setBusy(''); setConfirmPublish(false); }
   };
 
