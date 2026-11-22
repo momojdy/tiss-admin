@@ -6,7 +6,7 @@ import {SafeAreaProvider, useSafeAreaInsets} from 'react-native-safe-area-contex
 import {WebView} from 'react-native-webview';
 type KonsolissCopy = Record<string,string>;
 import {EditableKonsolissText, KonsolissPreviewSelectionContext} from './KonsolissPreviewSelection';
-const currentKonsolissContainerLabel = () => 'KS-2048 · Filling';
+const currentKonsolissContainerLabel = (_container: unknown) => 'KS-2048 · Filling';
 import Svg, {Path, G, Circle, Rect, Defs, LinearGradient, Stop} from 'react-native-svg';
 
 const StatusBarCompat: any = StatusBar;
