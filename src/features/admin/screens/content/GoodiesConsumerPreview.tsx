@@ -50,7 +50,7 @@ export function GoodiesConsumerPreview({ editMode = false, contentDraft, assetUr
   const [selectedBuilderId, setSelectedBuilderId] = useState('');
   const [choices,setChoices]=useState<string[]>([]);
   const [scenario,setScenario]=useState<PreviewScenario>('default');
-  const [zoom, setZoom] = useState(1);
+  const [zoom, setZoom] = useState(0.75);
   const selectedBuilder = previewBuilders.find((builder: any) => builder.id === selectedBuilderId) || previewBuilders[0];
   // Keep the preview store in step with edits and drop the old in-progress order so removed items cannot linger.
   useEffect(() => {
