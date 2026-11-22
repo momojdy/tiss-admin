@@ -57,7 +57,7 @@ function hydrationFixture(loadDomain,loadRestrictions=async()=>[]){
  const db={},status={operations:'idle',ecosystem:'idle',restrictions:'idle'},session={userId:'synthetic-admin'},modes=[];
  const filename=path.join(base,'lib/hydrateAdminState.ts'),module={exports:{}};
  const code=ts.transpileModule(fs.readFileSync(filename,'utf8'),{compilerOptions:{target:ts.ScriptTarget.ES2022,module:ts.ModuleKind.CommonJS}}).outputText;
- vm.runInNewContext(code,{module,exports:module.exports,require:name=>{
+ vm.runInNewContext(code,{module,exports:module.exports,setTimeout,clearTimeout,require:name=>{
   if(name==='./adminBackend')return{loadAdminDomain:loadDomain,listStaff:async()=>[],listAccountRestrictions:loadRestrictions};
   if(name==='./supabase')return{supabase:{rpc:async()=>({data:[]})}};
   if(name==='../state/db')return{db,adminSnapshotStatus:status,bump(){},setDataMode:value=>modes.push(value)};
@@ -175,7 +175,7 @@ test('ingredient request filtering is applied by the backend before paging and s
 });
 test('every advertised Goodies hub module opens its connected destination rather than a stale or placeholder tab',()=>{
  const ui={},calls=[],nav={go:(...args)=>calls.push(args)},open=extract('screens/ecosystem/useOpenModule.ts','useOpenModule',{ui,db:{POTMAP:{Kitchen:'Live kitchen'}},useNav:()=>nav,useOverlay:()=>({closeAll(){}})})();
- const expected={Overview:['goodies','Overview'],'Goodies assets':['goodies','Goodies assets'],Categories:['goodies','Content editor'],Merchants:['goodies','Merchants'],'Product review':['goodies','Product review'],Orders:['goodies','Orders'],Promotions:['goodies','Content editor'],Support:['goodies','Support'],Analytics:['goodies','Analytics'],Settings:['goodies','Fees']};
+ const expected={Overview:['goodies','Overview'],'Goodies assets':['goodies','Goodies assets'],Categories:['goodies','Content editor'],Merchants:['goodies','Merchants'],'Product review':['goodies','Product review'],Orders:['goodies','Orders'],Promotions:['goodies','Promotions'],Support:['goodies','Support'],Analytics:['goodies','Analytics'],Settings:['goodies','Fees']};
  for(const [name,[screen,selection]]of Object.entries(expected)){open('Goodies',name);const last=calls.at(-1);assert.equal(last[0],screen,name);assert.equal(ui.goodiesModule,selection,name);}
  open('Potssy','Kitchen');assert.equal(calls.at(-1)[0],'potssy');assert.equal(ui.pt,'Live kitchen');
  open('Unrelated service','Configuration');assert.equal(calls.at(-1)[0],'workspace');assert.equal(ui.wsvc,'Unrelated service');assert.equal(ui.wmod,'Configuration');
