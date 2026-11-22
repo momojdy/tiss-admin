@@ -123,7 +123,7 @@
       "origins": [
         {
           "file": "src/features/Goodies/content.ts",
-          "sha256": "f4e50e7af6221495dc3b13b85274d2357619abb5854a79ba6985f9098a45d2e9"
+          "sha256": "0da76fae0334fee754c94aaa4986bee3bdd9289d274f96f7fc193ea5b029662a"
         }
       ]
     },
@@ -312,7 +312,7 @@
       "origins": [
         {
           "file": "src/features/Goodies/screens/Browse.tsx",
-          "sha256": "81cf186d0c825b5d3a35dbdd07476a994df0bb187b22b779881d46b8a4285723"
+          "sha256": "cc80b8291f5f590129cfd73a036d0fe182cfe438a1d80324b4845fc1815edb33"
         }
       ]
     },

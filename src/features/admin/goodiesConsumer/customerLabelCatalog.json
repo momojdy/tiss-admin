@@ -1046,7 +1046,6 @@
     "id": "lbl.browseNoStores",
     "text": "No stores match right now",
     "pages": [
-      "Home",
       "Explore"
     ]
   },
@@ -5250,7 +5249,8 @@
     "id": "lbl.courierMapUnavailable",
     "text": "Could not open the map",
     "pages": [
-      "Courier"
+      "Courier",
+      "Shop · shared"
     ]
   },
   {

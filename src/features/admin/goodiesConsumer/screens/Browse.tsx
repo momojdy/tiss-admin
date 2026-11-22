@@ -135,11 +135,6 @@ export function Home({onExit}: {onExit?: () => void}) {
   const seen: any = {}, os = S.orders.filter((o: any) => {if (seen[o.sid]) return false; seen[o.sid] = 1; return true;}).slice(0, 6);
   const cat = (c: string) => ST.filter(s => s.c === c).flatMap(s => s.it), cats = categories();
   const rv = S.rv.filter((id: string) => IT[id]).slice(0, 6), md = modes(), pc = promoCards(), dl = deals(), activeDeals = dl.filter(d => IT[d[0]]);
-  const deliveryStores = ST.filter(store => !store.businessDeliveryModes?.length || store.businessDeliveryModes.includes('delivery'));
-  const noDeliveryToAddress = !!address?.t && !S.catalogError && (
-    ST.length === 0 || deliveryStores.length === 0 ||
-    (deliveryStores.every(store => store.distanceReady) && deliveryStores.every(store => store.far))
-  );
   return (
     <View>
       <View style={{height: 100, justifyContent: 'flex-end', paddingTop: ins.top, paddingBottom: 10, paddingHorizontal: 16}}>
@@ -154,10 +149,6 @@ export function Home({onExit}: {onExit?: () => void}) {
       {S.catalogLoading ? <View style={{paddingHorizontal:16,paddingVertical:12}}><View style={{height:72,borderRadius:14,backgroundColor:th.soft}} /><T cmsKey={'lbl.catalogLoading'} color={th.mut}>{label('lbl.catalogLoading', 'Loading stores…')}</T></View> : null}
       {contentStatus==='error'?<Empty title={label('lbl.contentLoadFailed','Goodies content is temporarily unavailable')} text={label('lbl.contentRetryHint','Check your connection and try again.')} button={label('lbl.retry','Try again')} onPress={()=>void loadContent()} />:null}
       {S.catalogError ? <Empty title={label('lbl.catalogFailed', 'Could not load stores')} text={label('lbl.catalogRetryHint', 'Check your connection and try again.')} button={label('lbl.retry', 'Try again')} onPress={() => void refreshLiveSchedules()} /> : null}
-      {noDeliveryToAddress ? <Pressable accessibilityRole="button" onPress={() => go('addresses')} style={{marginHorizontal:16,marginTop:10,paddingVertical:10,paddingHorizontal:12,borderRadius:12,backgroundColor:th.soft}}>
-        <T cmsKey={'lbl.browseNoStores'} weight="600" size={13.5}>{label('lbl.browseNoStores','No stores match right now')}</T>
-        <T cmsKey={'lbl.browseChooseLocation'} size={12} color={th.mut} style={{marginTop:3}}>{label('lbl.browseChooseLocation','Choose your location')}</T>
-      </Pressable> : null}
       <Pressable onPress={() => go('search')} style={{marginTop: 14, marginHorizontal: 16, height: 48, borderRadius: 24, backgroundColor: th.soft, flexDirection: 'row', alignItems: 'center', gap: 10, paddingHorizontal: 16}}>
         <Icon name="search" size={18} color={th.mut} /><T cmsKey={'lbl.search'} size={14.5} color={th.mut}>{label('lbl.search', tr('searchPh'))}</T>
       </Pressable>

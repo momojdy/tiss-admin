@@ -88,6 +88,13 @@ export async function clearContent() { C = null;contentStatus='idle'; setInterfa
 export const hasContent = () => !!C;
 
 /* ---------- accessors ---------- */
+/** Published home content keeps its English source when legacy field metadata says draft.
+ * Translation review flags and the stored CMS content are never changed here. */
+function homeCopy(value: Txt | string | null | undefined): string {
+  const translated = tx(value);
+  if (translated.trim()) return translated;
+  return typeof value === 'object' && value && typeof value.en?.v === 'string' ? value.en.v : '';
+}
 const categoryFallbacks: Record<string, () => string> = {
   restaurants: () => label('lbl.category.restaurants', 'Restaurant'),
   produce: () => label('lbl.category.produce', 'Fresh produce'),
@@ -100,7 +107,7 @@ const categoryFallbacks: Record<string, () => string> = {
   drugstore: () => label('lbl.category.drugstore', 'Drugstore'),
 };
 export function categoryDisplayName(id: string, text: Txt): string {
-  const translated = tx(text);
+  const translated = homeCopy(text);
   return translated.trim() ? translated : categoryFallbacks[id]?.() || label('lbl.category.fallback', 'Category');
 }
 
@@ -114,7 +121,7 @@ const live = (r: any) => {const n = new Date().toISOString().slice(0, 10); retur
 export type PromoCard = {id: string; emoji: string; image?: string | null; color: string; title: string; sub: string; btn: string; target: string; newOnly: boolean};
 export function promoCards(): PromoCard[] | null {
   if (!C) return null;
-  return C.promos.filter(live).sort((a: any, b: any) => a.ord - b.ord).map((p: any) => ({id: p.id, emoji: p.emoji, image: p.img?.data || p.img?.url || null, color: p.color, title: tx(p.title), sub: tx(p.sub), btn: tx(p.btn), target: p.target, newOnly: p.aud === 'New customers'}));
+  return C.promos.filter(live).sort((a: any, b: any) => a.ord - b.ord).map((p: any) => ({id: p.id, emoji: p.emoji, image: p.img?.data || p.img?.url || null, color: p.color, title: homeCopy(p.title), sub: homeCopy(p.sub), btn: homeCopy(p.btn), target: p.target, newOnly: p.aud === 'New customers'}));
 }
 export function deals(): [string, number, number][] {
   if (!C) return [];
@@ -141,7 +148,7 @@ export const supportTopics = (_fallback: string[]) => (C && Array.isArray(C.topi
 export function legalDoc(id: string): string | null {const d = C && C.legal && C.legal.find((x: any) => x.id === id && x.st === 'Live'); const s = d ? tx(d.t) : ''; return s || null;}
 export function modes(): {id?: string;emoji: string; image?: string | null; title: string; sub: string; cat: string}[] | null {
   if (!C || !C.modes) return [];
-  return C.modes.filter((m: any) => m.st === 'Live').map((m: any) => ({id:m.id,emoji: m.emoji, image: m.img?.data || m.img?.url || null, title: tx(m.title), sub: tx(m.sub), cat: m.cat}));
+  return C.modes.filter((m: any) => m.st === 'Live').map((m: any) => ({id:m.id,emoji: m.emoji, image: m.img?.data || m.img?.url || null, title: homeCopy(m.title), sub: homeCopy(m.sub), cat: m.cat}));
 }
 
 /* Goodies store/content is a circular module pair. Hermes can expose the imported binding before
