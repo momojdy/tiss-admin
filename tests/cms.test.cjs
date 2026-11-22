@@ -24,6 +24,20 @@ function loadModule(filename,cache=new Map()){
 }
 const editing=loadModule(path.join(root,'contentEditing.ts')),draft=loadModule(path.join(root,'draft.ts'));
 const catalog=require(path.join(root,'customerLabelCatalog.json')),pages=require(path.join(root,'customerPageCatalog.json'));
+test('the first-order campaign is selectable only in the isolated Edit preview without changing customer eligibility',()=>{
+ const filename=path.join(root,'store.ts'),ast=ts.createSourceFile(filename,fs.readFileSync(filename,'utf8'),99,true);
+ const declaration=ast.statements.filter(ts.isVariableStatement).flatMap(s=>s.declarationList.declarations).find(d=>d.name.getText(ast)==='first');assert.ok(declaration);
+ const run=(previewOnly,editLocked,S)=>{
+  const module={exports:{}},code=ts.transpileModule('module.exports='+declaration.initializer.getText(ast),{compilerOptions:{module:ts.ModuleKind.CommonJS,target:ts.ScriptTarget.ES2022}}).outputText;
+  vm.runInNewContext(code,{module,previewOnly,editLocked,S});return module.exports();
+ };
+ const returning={firstOrderEligible:false,orders:[{pk:false}]};
+ assert.equal(run(true,true,returning),true,'The campaign must be selectable in Edit mode');
+ assert.equal(run(true,false,returning),false,'View mode must retain customer eligibility');
+ assert.equal(run(false,true,returning),false,'Edit flags must never waive customer eligibility');
+ assert.equal(run(false,false,{firstOrderEligible:true,orders:[]}),true);
+ assert.equal(run(false,false,{firstOrderEligible:null,orders:[]}),false);
+});
 test('every registered source field is manually editable in all five locales and survives save serialization',()=>{
  let value=draft.buildStarterDraft();const byId=new Map(value.labels.map(row=>[row.id,row]));
  for(const field of catalog){assert.ok(byId.has(field.id),'Missing '+field.id);const row=byId.get(field.id);
