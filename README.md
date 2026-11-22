@@ -20,7 +20,13 @@ npm run typecheck
 
 ## Backend status
 
-The app is connected to Supabase, but not every workspace from the original HTML prototype has been ported. Screens that are not implemented must not be treated as production admin tools. Goodies-specific administration remains incomplete; the customer/vendor Goodies workflow is in `tiss_tiss_beta`.
+The app is connected to Supabase, but not every workspace from the original HTML prototype has been ported. Screens that are not implemented must not be treated as production admin tools. Goodies has dedicated deployed operational contracts and 14 registered modules; full installed cross-role acceptance remains open. Its customer/vendor/courier implementation lives in `tiss_tiss_beta`.
+
+## Goodies operating guide
+
+Use the [current Goodies guide](https://github.com/momojdy/tiss_tiss_beta/blob/main/src/features/Goodies/README.md) for the full business flow and the [22 November audit](https://github.com/momojdy/tiss_tiss_beta/blob/main/docs/goodies/operating-guide-audit-20261122/README.md) for evidence. They distinguish the 10% discounted-product commission, 7% delivery commission and configurable customer service fee; Wallet-only Help Pay versus host-paid Group Orders; the 5,000 HTG outstanding cash-sales cap; the 24-hour hold; rolling weekly cash-commission deadline; payout timing; CMS/locales; owner deferrals; and remaining release checks.
+
+Shared Bill Wallet funding, vendor settlement and private delivery-proof uploads are enabled in the live backend. External bank/GCash/MonCash/NatCash payout channels and device push rollout remain disabled. The CMS preview uses isolated fixture/device/backend ports; it must never execute production funding, refund or approval operations. Publishing and translation review are separate, and publishing unfinished content does not certify its translations or installed-app delivery.
 
 ## HTML parity restoration status
 
@@ -36,10 +42,10 @@ The HTML-to-React Native restoration is in progress on `main`:
 ## Remaining production/parity gaps
 
 - Service-specific workspaces are not yet individually ported pixel-for-pixel; the shared workspace is a first functional pass.
-- Goodies merchant, product-review, order, fee/rule, and analytics actions still need dedicated server-backed APIs. Several lists are based on the current seed/snapshot.
+- Goodies merchant, moderation, order, fee and analytics operations have dedicated backend APIs. Nine legacy shared RPCs are still absent and can affect mixed-feature business workspaces; this is separate from Goodies-only contract coverage. Other service workspaces may still have incomplete snapshot/parity behavior.
 - The full HTML customer-page drag-and-drop editor and standalone business-detail screen are not fully ported.
 - Settings categories beyond personal appearance/notification preferences are stored locally only. They do not change production platform settings until a server-backed settings contract is implemented.
-- Content approvals, banner/promotion lifecycle, and announcement delivery still need server-side workflow endpoints. CMS drafts must not be treated as live placements.
+- Generic content approvals, banner/promotion lifecycle and announcement delivery still have workflow gaps. Goodies has a real CMS draft/publish lifecycle, but its coupon wording editor is not an authoritative discount-code creation/activation workflow. CMS drafts must not be treated as live placements.
 - No Expo Go screenshot comparison or on-device interaction pass has been completed. A successful TypeScript check is not proof of pixel parity or production readiness.
 
 ## Validation
