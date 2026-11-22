@@ -54,3 +54,12 @@ test('Konsoliss phone preview renders the mirrored real consumer 3D engine and u
   assert.match(preview,/onTouchStart=\{\(\) => setScroll\(false\)\}/);
   assert.match(preview,/react-native-webview/);
 });
+
+test('Konsoliss preview is deferred until selected and optional admin snapshots have a deadline',()=>{
+ const editor=get('screens/content/CustomerPageEditorScreen.tsx');
+ assert.match(editor,/lazy\(\(\) => import\('\.\/KonsolissEditor'\)/);
+ assert.match(editor,/<Suspense fallback=/);
+ const snapshots=get('lib/hydrateAdminState.ts');
+ assert.match(snapshots,/SNAPSHOT_TIMEOUT_MS = 12000/);
+ assert.match(snapshots,/snapshotWithDeadline\(load\(\)\)/);
+});
