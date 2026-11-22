@@ -34,9 +34,9 @@ jobs:
         run: npm run typecheck
       - name: Konsoliss CMS and operations boundary tests
         run: npm run test:konsoliss
-      - name: Goodies permissions, CMS and settlement tests
-        run: npm run test:goodies
       - name: Bundle Android application
         run: npx expo export --platform android --output-dir dist/android
       - name: Bundle iOS application
         run: npx expo export --platform ios --output-dir dist/ios
+      - name: Goodies permissions, CMS and settlement tests
+        run: npm run test:goodies
