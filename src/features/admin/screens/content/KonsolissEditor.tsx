@@ -11,6 +11,7 @@ import {useTheme} from '../../theme/ThemeContext';
 import {CollapsibleColorField} from './CollapsibleColorField';
 import {PromoColorPicker} from './PromoColorPicker';
 import {Txt} from '../../ui/Txt';
+import {KONSOLISS_PREVIEW_GENERAL,KONSOLISS_PREVIEW_LIFECYCLE,konsolissPreviewFixture,type KonsolissPreviewScenario} from './KonsolissPreviewFixtures';
 
 const KEY = 'konsoliss.content';
 const YELLOW = '#FFD93D';
@@ -86,6 +87,7 @@ export function KonsolissEditor({canEdit,canPublish}:{canEdit:boolean;canPublish
   const [page,setPage]=useState<string>('Home');
   const [zoom,setZoom]=useState(0.75);
   const [previewSheet,setPreviewSheet]=useState<'book'|'calc'|null>(null);
+  const [scenario,setScenario]=useState<KonsolissPreviewScenario>('default');
   const [lang,setLang]=useState<Lang>('en');
   const [rows,setRows]=useState<CmsRow[]>([]);
   const [draft,setDraft]=useState<Record<string,string>>({...DEFAULTS});
@@ -127,6 +129,12 @@ export function KonsolissEditor({canEdit,canPublish}:{canEdit:boolean;canPublish
   };
   const choose=(id:string)=>{if(Object.prototype.hasOwnProperty.call(DEFAULTS,id))setSelected(id);};
   const goPage=(name:string)=>{setPage(name);setSelected('');setPreviewSheet(name==='Book Space'?'book':name==='CBM Calculator'?'calc':null);};
+  const selectScenario=(next:KonsolissPreviewScenario)=>{
+    setScenario(next);setSelected('');
+    if(next==='booking-success'||next==='booking-failed'){setPage('Book Space');setPreviewSheet('book');}
+    else{setPage('Home');setPreviewSheet(null);}
+  };
+  const activeFixture=konsolissPreviewFixture(scenario);
   const selectedText=useMemo(()=>shown[selected]??DEFAULTS[selected]??'', [shown,selected]);
   const editMode=mode==='Edit'&&canEdit;
   const navScreen=['Home','Book Space','CBM Calculator'];
@@ -179,11 +187,30 @@ export function KonsolissEditor({canEdit,canPublish}:{canEdit:boolean;canPublish
               <Txt size={10} color="#2B1210" weight={600}>{name}</Txt>
             </Pressable>)}
           </ScrollView>
+          <Txt size={10} weight={600} style={{marginTop:5,marginBottom:3}}>General preview states</Txt>
+          <ScrollView horizontal showsHorizontalScrollIndicator={false} contentContainerStyle={{gap:6,paddingVertical:6}}>
+            {KONSOLISS_PREVIEW_GENERAL.map(item=><Pressable key={item.id} accessibilityRole="button"
+              accessibilityLabel={'Konsoliss preview: '+item.label} accessibilityState={{selected:scenario===item.id}}
+              onPress={()=>selectScenario(item.id)}
+              style={{borderRadius:18,paddingHorizontal:11,paddingVertical:8,backgroundColor:scenario===item.id?YELLOW:'#F1F1F2'}}>
+              <Txt size={10} color="#2B1210">{item.label}</Txt>
+            </Pressable>)}
+          </ScrollView>
+          <Txt size={10} weight={600} style={{marginTop:5,marginBottom:3}}>Container lifecycle</Txt>
+          <ScrollView horizontal showsHorizontalScrollIndicator={false} contentContainerStyle={{gap:6,paddingVertical:6}}>
+            {KONSOLISS_PREVIEW_LIFECYCLE.map(item=><Pressable key={item.id} accessibilityRole="button"
+              accessibilityLabel={'Konsoliss preview: '+item.label} accessibilityState={{selected:scenario===item.id}}
+              onPress={()=>selectScenario(item.id)}
+              style={{borderRadius:18,paddingHorizontal:11,paddingVertical:8,backgroundColor:scenario===item.id?YELLOW:'#F1F1F2'}}>
+              <Txt size={10} color="#2B1210">{item.label}</Txt>
+            </Pressable>)}
+          </ScrollView>
+          <Txt size={10} mut style={{marginTop:5}}>Preview only: {activeFixture.message||'Normal customer container view.'} Nothing here changes real bookings or shipments.</Txt>
         </View>
         <ScrollView horizontal contentContainerStyle={{flexGrow:1,justifyContent:'center'}}>
           <PhoneFrame background="#FFFBD4" zoom={zoom}>
             <KonsolissPreviewSelectionContext.Provider value={{selected,onSelect:choose,enabled:editMode}}>
-              <KonsolissConsumerPreviewScreen copy={shown} previewSheet={previewSheet}/>
+              <KonsolissConsumerPreviewScreen copy={shown} previewSheet={previewSheet} scenario={scenario}/>
             </KonsolissPreviewSelectionContext.Provider>
           </PhoneFrame>
         </ScrollView>
