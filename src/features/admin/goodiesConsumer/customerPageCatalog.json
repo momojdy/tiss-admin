@@ -548,7 +548,7 @@
       "lbl.checkoutSavedCardCountMany",
       "lbl.checkoutAddCard",
       "lbl.checkoutCash",
-      "lbl.checkoutCashCondition",
+      "lbl.checkoutCashEligibility",
       "lbl.checkoutTitle",
       "lbl.checkoutCartUnavailable",
       "lbl.cartReviewUnavailableStore",

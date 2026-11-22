@@ -51,3 +51,5 @@ The HTML-to-React Native restoration is in progress on `main`:
 ## Validation
 
 Run `npm run typecheck` and test the actual app before releasing. A successful typecheck alone does not establish production readiness. Review Supabase security advisors, permissions and application logs after backend changes.
+
+Goodies operational promotions now use **Goodies → Promotions**, with Finance view/manage permissions. Percentage/free-delivery terms, eligibility, redemption limits and audit are server-owned. See the [confirmed-gap repair evidence](https://github.com/momojdy/tiss_tiss_beta/blob/main/docs/goodies/confirmed-gap-repairs-20261122.md). Historical mixed-workspace/promotion findings in earlier reports are superseded only within that documented scope.

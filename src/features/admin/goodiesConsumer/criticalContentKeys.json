@@ -122,7 +122,7 @@
   "lbl.checkoutCard",
   "lbl.checkoutCartUnavailable",
   "lbl.checkoutCash",
-  "lbl.checkoutCashCondition",
+  "lbl.checkoutCashEligibility",
   "lbl.checkoutCashNotice",
   "lbl.checkoutCashUnavailable",
   "lbl.checkoutChange",

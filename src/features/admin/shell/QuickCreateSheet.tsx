@@ -1,5 +1,5 @@
 import { db, ui, bump } from '../state/db';
-import { can } from '../state/access';
+import { hasServerPermission, can } from '../state/access';
 import { REQ } from '../state/requirements';
 import { inviteStaff, saveCmsVersion } from '../lib/adminBackend';
 import { useForm } from '../ui/FormSheet';
@@ -135,6 +135,7 @@ export function QuickCreateSheet({ onClose }: { onClose: () => void }) {
       <Card>
         <OutlineBtn primary onPress={() => openCmsForm('banner')}>New banner</OutlineBtn>
         <OutlineBtn onPress={() => openCmsForm('promotion')}>New promotion</OutlineBtn>
+        <OutlineBtn onPress={() => {if(!hasServerPermission('finance.view','view')){toast('Finance view access is required.');return;}ui.goodiesModule='Promotions';bump();onClose();go('goodies');}}>Goodies financial promotions</OutlineBtn>
         <OutlineBtn onPress={() => openInviteForm()}>Invite staff</OutlineBtn>
         <OutlineBtn onPress={() => openCmsForm('announcement')}>New announcement</OutlineBtn>
       </Card>

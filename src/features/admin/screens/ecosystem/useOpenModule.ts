@@ -18,7 +18,7 @@ export function useOpenModule() {
       'Products and catalog': 'Product review', Library: 'Product review',
       Categories: 'Content editor', Merchants: 'Merchants',
       'Product review': 'Product review', 'Customer reviews': 'Customer reviews',
-      Orders: 'Orders', Promotions: 'Content editor', Promos: 'Content editor',
+      Orders: 'Orders', Promotions: 'Promotions', Promos: 'Promotions',
       Support: 'Support', 'Delivery reports': 'Delivery reports',
       Couriers: 'Couriers', Settlement: 'Settlement', Analytics: 'Analytics',
       Settings: 'Fees', Fees: 'Fees', 'Delivery surcharge': 'Delivery surcharge',

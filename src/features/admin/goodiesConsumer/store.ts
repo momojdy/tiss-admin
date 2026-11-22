@@ -586,7 +586,7 @@ export function notify(t: string, d: string, r: string, p: string, k?: string) {
 export function pChk(code: string, sub: number, sid: string | null) {
   const p = coupons().filter((x: any) => x.c === code)[0];
   if (!p) return {e: label('lbl.cartPromoInvalid', 'That code is not valid')} as any;
-  if (p.st && sid && p.st !== sid) return {e: label('lbl.cartPromoStoreOnly', 'Only valid at {store}').replace('{store}', STB[p.st].n)} as any;
+  if (p.st && sid && p.st !== sid) return {e: label('lbl.cartPromoStoreOnly', 'Only valid at {store}').replace('{store}', (STB[p.st]?.n || label('lbl.storeNotFound', 'Store unavailable')))} as any;
   if (sub < p.min) return {e: label('lbl.cartPromoMinimum', 'Spend {amount} more to use {code}').replace('{amount}', money(p.min - sub)).replace('{code}', code)} as any;
   return {p} as any;
 }

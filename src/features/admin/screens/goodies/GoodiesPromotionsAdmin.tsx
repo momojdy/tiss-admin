@@ -1,0 +1,36 @@
+import React,{useEffect,useRef,useState} from 'react';
+import {View,Text,TextInput,Pressable} from 'react-native';
+import {supabase} from '../../lib/supabase';
+import {hasServerPermission,session} from '../../state/access';
+import {useDb} from '../../state/db';
+const card={backgroundColor:'#fff',borderWidth:1,borderColor:'#E1E6DE',borderRadius:14,padding:14,marginBottom:10} as const;
+const button={padding:10,borderRadius:10,backgroundColor:'#E9EEE6',marginTop:8} as const;
+const empty=()=>({id:(globalThis.crypto?.randomUUID?.() || 'xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx'.replace(/[xy]/g,c=>{const r=Math.floor(Math.random()*16);return (c==='x'?r:(r&3)|8).toString(16);})),code:'',discount_type:'percent',discount_value:'10',min_subtotal:'0',store_id:'',starts_at:'',expires_at:'',max_redemptions:'',is_active:false,updated_at:null});
+export function GoodiesPromotionsAdmin(){
+ useDb();const manage=hasServerPermission('finance.approve','manage'),read=hasServerPermission('finance.view','view');
+ const [rows,setRows]=useState<any[]>([]),[page,setPage]=useState(0),[attempt,setAttempt]=useState(0),[loading,setLoading]=useState(true),[error,setError]=useState(''),[draft,setDraft]=useState<any>(null),[reason,setReason]=useState(''),[busy,setBusy]=useState(false);
+ const lock=useRef(false),generation=useRef(0),mounted=useRef(false);
+ useEffect(()=>{mounted.current=true;return()=>{mounted.current=false;generation.current++;};},[]);
+ useEffect(()=>{const id=++generation.current,owner=session.userId;setRows([]);setLoading(true);setError('');if(!read){setLoading(false);return;}
+ void (async()=>{try{const r=await supabase.rpc('goodies_admin_promotions',{p_offset:page*50});if(r.error||!Array.isArray(r.data))throw Error();if(mounted.current&&id===generation.current&&owner===session.userId)setRows(r.data);}catch{if(mounted.current&&id===generation.current&&owner===session.userId)setError('Could not load promotions. Try again.');}finally{if(mounted.current&&id===generation.current&&owner===session.userId)setLoading(false);}})();
+ },[page,attempt,read,session.userId]);
+ const save=async()=>{if(lock.current||!manage||!draft)return;const owner=session.userId;const current=()=>mounted.current&&owner===session.userId;setError('');
+ const decimal=(v:any)=>/^\d+(\.\d{1,2})?$/.test(String(v));
+ if(!/^[A-Z0-9_-]{3,40}$/.test(draft.code)||!decimal(draft.discount_value)||!decimal(draft.min_subtotal)||Number(draft.discount_value)>100||(draft.discount_type==='percent'&&Number(draft.discount_value)<=0)||reason.trim().length<10||reason.length>500){setError('Check the code, discount, minimum and review reason.');return;}
+ for(const key of ['starts_at','expires_at'])if(draft[key]&&!/^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}(?:\.\d{3})?Z$/.test(draft[key])){setError('Enter dates in UTC, for example 2026-12-01T00:00:00Z.');return;}
+ if((draft.starts_at&&!Number.isFinite(Date.parse(draft.starts_at)))||(draft.expires_at&&!Number.isFinite(Date.parse(draft.expires_at)))||(draft.starts_at&&draft.expires_at&&Date.parse(draft.expires_at)<=Date.parse(draft.starts_at))||(draft.max_redemptions&&!/^[1-9]\d*$/.test(String(draft.max_redemptions)))){setError('Check the validity dates and redemption limit.');return;}
+ lock.current=true;setBusy(true);try{const data={code:draft.code,discount_type:draft.discount_type,discount_value:Number(draft.discount_value),min_subtotal:Number(draft.min_subtotal),store_id:draft.store_id||null,starts_at:draft.starts_at||null,expires_at:draft.expires_at||null,max_redemptions:draft.max_redemptions?Number(draft.max_redemptions):null,is_active:draft.is_active};const r=await supabase.rpc('goodies_admin_save_promotion',{p_id:draft.id,p_expected_updated_at:draft.updated_at,p_data:data,p_reason:reason.trim()});if(r.error||!r.data?.id)throw Error();if(current()){setDraft(null);setAttempt(v=>v+1);}}catch{if(current())setError('Could not save this promotion. Reload its current status before retrying.');}finally{lock.current=false;if(current())setBusy(false);}};
+ if(!read)return <Text>Finance view access is required.</Text>;
+ return <View><Text style={{fontSize:18,fontWeight:'800',marginBottom:10}}>Goodies promotions</Text>
+ {error?<View style={card}><Text>{error}</Text><Pressable style={button} disabled={busy} onPress={()=>setAttempt(v=>v+1)}><Text>Reload promotions</Text></Pressable></View>:null}
+ {loading?<Text>Loading promotions…</Text>:null}
+ <Pressable style={button} disabled={!manage||busy||loading} onPress={()=>{setDraft(empty());setReason('');}}><Text>Create promotion</Text></Pressable>
+ {draft?<View style={card}>{['code','discount_value','min_subtotal','store_id','starts_at','expires_at','max_redemptions'].map(key=><View key={key}><Text>{({code:'Code',discount_value:'Percentage discount',min_subtotal:'Minimum products subtotal (USD)',store_id:'Store ID (empty for all stores)',starts_at:'Starts at (UTC)',expires_at:'Expires at (UTC)',max_redemptions:'Maximum redemptions (empty for unlimited)'} as any)[key]}</Text><TextInput accessibilityLabel={key} value={String(draft[key]??'')} editable={manage&&!busy} onChangeText={v=>setDraft({...draft,[key]:key==='code'?v.toUpperCase():v})} style={{padding:10,borderWidth:1,borderColor:'#E1E6DE',borderRadius:10,marginVertical:6}}/></View>)}
+ <Pressable style={button} disabled={busy} onPress={()=>setDraft({...draft,discount_type:draft.discount_type==='percent'?'free_delivery':'percent',discount_value:draft.discount_type==='percent'?'0':'10'})}><Text>{draft.discount_type==='percent'?'Percentage off':'Free delivery'} · Change type</Text></Pressable>
+ <Pressable style={button} disabled={busy} onPress={()=>setDraft({...draft,is_active:!draft.is_active})}><Text>{draft.is_active?'Active':'Inactive'} · Change status</Text></Pressable>
+ <TextInput accessibilityLabel="Promotion review reason" placeholder="Review reason (at least 10 characters)" value={reason} maxLength={500} onChangeText={setReason} editable={manage&&!busy} style={{padding:10,borderWidth:1,borderColor:'#E1E6DE',marginTop:10}}/>
+ <Pressable style={button} disabled={busy||!manage} onPress={()=>void save()}><Text>{busy?'Saving…':'Save promotion'}</Text></Pressable><Pressable style={button} disabled={busy} onPress={()=>setDraft(null)}><Text>Close</Text></Pressable></View>:null}
+ {!loading&&!error&&!rows.length?<Text>No promotions.</Text>:null}
+ {rows.map(row=><View style={card} key={row.id}><Text>{row.code} · {row.discount_type==='percent'?row.discount_value+'% off':'Free delivery'}</Text><Text>{!row.is_active?'Inactive':row.expires_at&&Date.parse(row.expires_at)<=Date.now()?'Expired':row.starts_at&&Date.parse(row.starts_at)>Date.now()?'Scheduled':row.max_redemptions!==null&&row.redemption_count>=row.max_redemptions?'Exhausted':'Active'} · {row.redemption_count} redemptions</Text><Pressable style={button} disabled={!manage||busy} onPress={()=>{setDraft({...row});setReason('');}}><Text>Edit promotion</Text></Pressable></View>)}
+ <View style={{flexDirection:'row',gap:10}}><Pressable style={button} disabled={page===0||busy||loading} onPress={()=>setPage(v=>v-1)}><Text>Previous page</Text></Pressable><Pressable style={button} disabled={rows.length<50||busy||loading} onPress={()=>setPage(v=>v+1)}><Text>Next page</Text></Pressable></View></View>;
+}

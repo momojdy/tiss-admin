@@ -123,7 +123,7 @@
       "origins": [
         {
           "file": "src/features/Goodies/content.ts",
-          "sha256": "0da76fae0334fee754c94aaa4986bee3bdd9289d274f96f7fc193ea5b029662a"
+          "sha256": "508bc610c9c031dc0a8881a772a8015325e20e2ed53abeef119936bced9ed934"
         }
       ]
     },
@@ -357,7 +357,7 @@
       "origins": [
         {
           "file": "src/features/Goodies/screens/Shop.tsx",
-          "sha256": "6461a2c7246c53b95b5f5fb729c0a9759d0c9132bbf42a04fa525bbccda9df88"
+          "sha256": "546c5aeedcd9a2425dd24df7f53b72beb2d10bc6fcd0b70eebdf892049206a3d"
         }
       ]
     },
@@ -375,7 +375,7 @@
       "origins": [
         {
           "file": "src/features/Goodies/store.ts",
-          "sha256": "dc964bf474b53746b86db1d04b63b43d7eed17fd0800653e206b5b55b523df93"
+          "sha256": "f52ca0dfe29144dc901a56408bb18140c180baf97e2c055e45f3f4ae14823ffb"
         }
       ]
     },

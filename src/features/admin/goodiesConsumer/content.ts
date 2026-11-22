@@ -117,7 +117,11 @@ export function categories(): {id: string; name: Txt; emoji: string; art?: strin
 }
 export const catName = (id: string) => {const c = categories().find(x => x.id === id); return c ? tx(c.name) : id === 'all' ? label('lbl.catAllStores', 'All stores') : id;};
 export const label = (id: string, fallback: string) => {const l = C && C.labels && C.labels.find((x: any) => x.id === id); const s = l ? tx(l.t) : ''; return s || fallback;};
-const live = (r: any) => {const n = new Date().toISOString().slice(0, 10); return r.st === 'Live' && (!r.from || r.from <= n) && (!r.to || r.to >= n);};
+const live = (r: any) => {
+  const now = Date.now(), start = r.from ? Date.parse(r.from.length === 10 ? r.from + 'T00:00:00Z' : r.from) : -Infinity;
+  const end = r.to ? Date.parse(r.to.length === 10 ? r.to + 'T00:00:00Z' : r.to) + (r.to.length === 10 ? 86400000 : 0) : Infinity;
+  return r.st === 'Live' && now >= start && now < end;
+};
 export type PromoCard = {id: string; emoji: string; image?: string | null; color: string; title: string; sub: string; btn: string; target: string; newOnly: boolean};
 export function promoCards(): PromoCard[] | null {
   if (!C) return null;

@@ -1,3 +1,4 @@
+import {GoodiesPromotionsAdmin} from './GoodiesPromotionsAdmin';
 import {GoodiesSettlementAdmin} from './GoodiesSettlementAdmin';
 import {GoodiesSharedBillRefunds} from './GoodiesSharedBillRefunds';
 import {ui as adminUi,useDb} from '../../state/db';
@@ -12,7 +13,7 @@ import {GoodiesAssetLibrary} from './GoodiesAssetLibrary';
 import {resolveGoodiesDeliveryProof} from '../../lib/goodiesDeliveryProof';
 
 type Dashboard = {stats:any;merchants:any[];products:any[];orders:any[]};
-const MODULES=['Overview','Merchants','Product review','Customer reviews','Orders','Delivery reports','Couriers','Support','Settlement','Fees','Delivery surcharge','Analytics','Goodies assets','Content editor'];
+const MODULES=['Overview','Merchants','Product review','Customer reviews','Orders','Delivery reports','Couriers','Support','Settlement','Promotions','Fees','Delivery surcharge','Analytics','Goodies assets','Content editor'];
 const money=(v:any)=>{
   const amount=typeof v==='number'?v:typeof v==='string'&&v.trim()?Number(v):NaN;
   return Number.isFinite(amount)&&amount>=0?new Intl.NumberFormat('en-US',{style:'currency',currency:'USD'}).format(amount):'Unavailable';
@@ -317,6 +318,7 @@ export function GoodiesAdminScreen() {
     {rejection?<View style={cardStyle}><Text style={valueStyle}>Reject {rejection.item.name}</Text><TextInput accessibilityLabel="Rejection reason" placeholder="Explain what the vendor needs to change" value={rejection.reason} maxLength={500} multiline onChangeText={reason=>setRejection({...rejection,reason})} style={{borderWidth:1,borderColor:'#E1E6DE',padding:12,marginVertical:10,borderRadius:10}} /><View style={{flexDirection:'row',gap:8}}><Pressable disabled={!canOperate||!!busy} onPress={()=>setRejection(null)} style={btn('#E9EEE6')}><Text>Back</Text></Pressable><Pressable disabled={!canOperate||!!busy||!rejection.reason.trim()} onPress={()=>void reviewProduct(rejection.item,'rejected',rejection.reason)} style={btn('#F7EAE8')}><Text>{busy?'Saving…':'Confirm rejection'}</Text></Pressable></View></View>:null}
     {loading?<Text style={{padding:20,color:'#697466'}}>Loading live Goodies data…</Text>:null}
     {module==='Settlement'?<GoodiesSettlementAdmin/>:null}
+    {module==='Promotions'?<GoodiesPromotionsAdmin/>:null}
     {module==='Orders'||module==='Settlement'?<GoodiesSharedBillRefunds/>:null}
     {module==='Overview'&&!loading&&!loadError?<>
       <View style={{flexDirection:'row',flexWrap:'wrap',gap:8}}>

@@ -1,3 +1,4 @@
+import {mergeGoodiesPromotions} from "../_shared/goodiesPromotions.ts";
 import "jsr:@supabase/functions-js/edge-runtime.d.ts";
 import { createClient } from "npm:@supabase/supabase-js@2.117.2";
 
@@ -33,7 +34,7 @@ Deno.serve(async (req: Request) => {
     return error || !data?.signedUrl ? null : data.signedUrl;
   };
   const branding = { name: brand?.brand_name || "Wantiss", logo_url: await signBrandAsset(brand?.logo_storage_path), wordmark_url: await signBrandAsset(brand?.wordmark_storage_path), updated_at: brand?.updated_at || null };
-  return new Response(JSON.stringify({ content: content || [], assets: publishedAssets.filter(Boolean), branding }), {
+  return new Response(JSON.stringify({ content: publicContent, assets: publishedAssets.filter(Boolean), branding }), {
     status: 200, headers: { ...headers, "Content-Type": "application/json", "Cache-Control": "public, max-age=60" },
   });
 });

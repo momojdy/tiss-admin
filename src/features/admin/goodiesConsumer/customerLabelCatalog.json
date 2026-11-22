@@ -2266,8 +2266,8 @@
     ]
   },
   {
-    "id": "lbl.checkoutCashCondition",
-    "text": "Only when this store and an available courier accept cash on delivery",
+    "id": "lbl.checkoutCashEligibility",
+    "text": "Available when the store accepts cash for this order",
     "pages": [
       "Checkout"
     ]

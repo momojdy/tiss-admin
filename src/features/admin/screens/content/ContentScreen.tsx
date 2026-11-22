@@ -249,6 +249,7 @@ export function ContentScreen() {
   };
 
   const editPromotionDraft = (promotion: typeof db.PRM[number]) => {
+    if(promotion.svc==='Goodies'){ui.goodiesModule='Promotions';bump();go('goodies');return;}
     if (!can(...REQ.content)) { toast('You need Content edit access to edit promotions.'); return; }
     form({
       title: 'Edit promotion · ' + promotion.n,

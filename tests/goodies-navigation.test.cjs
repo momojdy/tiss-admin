@@ -48,7 +48,7 @@ test('Goodies support, categories, promotions and settings do not fall into the 
   const expected = {
     Support:'Support',
     Categories:'Content editor',
-    Promotions:'Content editor',
+    Promotions:'Promotions',
     Settings:'Fees',
     'Products and catalog':'Product review',
   };
