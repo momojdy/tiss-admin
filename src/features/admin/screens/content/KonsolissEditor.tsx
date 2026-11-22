@@ -210,7 +210,7 @@ export function KonsolissEditor({canEdit,canPublish}:{canEdit:boolean;canPublish
         <ScrollView horizontal contentContainerStyle={{flexGrow:1,justifyContent:'center'}}>
           <PhoneFrame background="#FFFBD4" zoom={zoom}>
             <KonsolissPreviewSelectionContext.Provider value={{selected,onSelect:choose,enabled:editMode}}>
-              <KonsolissConsumerPreviewScreen copy={shown} previewSheet={previewSheet} scenario={scenario}/>
+              <KonsolissConsumerPreviewScreen copy={shown} previewSheet={previewSheet} scenario={scenario} onRetry={()=>selectScenario('default')}/>
             </KonsolissPreviewSelectionContext.Provider>
           </PhoneFrame>
         </ScrollView>
