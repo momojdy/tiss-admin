@@ -40,3 +40,17 @@ test('Konsoliss editor is reachable independently of operational permissions',()
   assert.match(source,/can\(\.\.\.REQ\.content\)/);
   assert.match(source,/can\(\.\.\.REQ\.publish\)/);
 });
+
+test('Konsoliss phone preview renders the mirrored real consumer 3D engine and uses Goodies phone frame',()=>{
+  const editor=get('screens/content/KonsolissEditor.tsx');
+  const preview=get('screens/content/KonsolissConsumerPreviewScreen.tsx');
+  assert.match(editor,/KonsolissConsumerPreviewScreen/);
+  assert.match(editor,/<PhoneFrame/);
+  assert.match(editor,/Manual editor/);
+  assert.match(editor,/Phone preview/);
+  assert.doesNotMatch(editor,/3D container runs in consumer app/);
+  assert.match(preview,/const CONTAINER_JS = \[/);
+  assert.match(preview,/requestAnimationFrame\(draw\)/);
+  assert.match(preview,/onTouchStart=\{\(\) => setScroll\(false\)\}/);
+  assert.match(preview,/react-native-webview/);
+});
