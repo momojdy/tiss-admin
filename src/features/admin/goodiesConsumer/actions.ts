@@ -2,6 +2,7 @@
 import {fees, label} from './content';
 import {previewBackend as supabase} from './previewRuntime';
 import {friendlyError} from './friendlyError';
+import {scheduleMinimum} from './scheduling';
 import {
   canBuy, cartStoreIds, canScheduleGoodiesStore, lineStore, storeSub, maxStops, hasAlcohol, alcAge, S, IT, STB, ui, toast, emit, save, push, reset, navBack, cartAdd, qtyIn, cnt, totals, pChk, isPk, addr, ctOf, phoneOK, reorderLines, money, hooks, done, cur, refreshLiveSchedules, refreshGoodiesAccess, first, contentHooks, getGoodiesCheckoutAttempt, completeGoodiesCheckoutAttempt, syncGroupOrderCartLine, removeGroupOrderCartLine, savedPoint, deliveryAddressPayload, deliveryQuoteReady, refreshGoodiesDeliveryQuote, refreshFirstDeliveryEligibility, syncActiveGroup, validateActiveGroup, clearActiveGroup,
 } from './store';
@@ -144,8 +145,8 @@ export function goCheckout() {
 export function checkoutNext() {
   if (S.cs === 0 && !isPk()) {const a = addr(); if (!a || !a.t) {toast(label('lbl.actionChooseAddress', 'Choose a delivery address')); return;}}
   if (S.cs === 0 && !phoneOK(ctOf().ph)) {toast(label('lbl.actionValidPhone', 'Choose a valid contact number')); return;}
-  if (S.cs === 1 && S.sch && S.sch < Date.now()) {S.sch = 0; toast(label('lbl.actionTimePassed', 'That time has passed. Pick another')); emit(); return;}
-  if (S.cs === 1 && cartStoreIds().some(id => !STB[id]?.open && (!STB[id]?.acceptScheduledOrders || !S.sch || S.sch <= Date.now()))) {toast(label('lbl.actionStoreClosedSchedule', 'This store is closed. Pick a time under "Schedule" and tap Apply to continue.')); emit(); return;}
+  if (S.cs === 1 && S.sch && S.sch < scheduleMinimum(Date.now())) {toast(label('lbl.cms.54a7210b0faf', 'That scheduled time is too close or has passed. Please choose a later time.')); emit(); return;}
+  if (S.cs === 1 && cartStoreIds().some(id => S.sch ? !canScheduleGoodiesStore(id, S.sch) : !STB[id]?.open)) {toast(label('lbl.actionStoreClosedSchedule', 'This store is closed. Choose a future opening-time slot to continue.')); emit(); return;}
   if (S.cs === 2) {
     if (['wallet','card'].includes(S.pay) && S.paymentOptionsStatus !== 'ready') {toast(label('lbl.checkoutPaymentUnavailable', 'Payment details unavailable. Please try again.'));return;}
     const methodKey = ({wallet: 'Wallet', card: 'Card', cash: 'Cash'} as any)[S.pay];

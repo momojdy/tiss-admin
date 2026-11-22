@@ -1,5 +1,6 @@
 import {EditableNativeText as Text} from '../EditableNativeText';
 import {GOODIES_SHARED_PAYMENTS_RELEASED} from '../helpPayApi';
+import {scheduleMinimum} from '../scheduling';
 import {friendlyError} from '../friendlyError';
 import {loadOlderGoodiesOrders, refreshGoodiesOrders} from '../serverSync';
 import {useStoreReviews} from '../reviews';
@@ -13,7 +14,7 @@ import {View, Text as UnusedNativeText, Pressable, ScrollView, useWindowDimensio
 import {Icon} from '../components/Icon';
 import {T, Grad, Circ, Bar, Sh, Rail, Chips, Cta, Card, Row, Badge, Ttl, Empty, Tile, Radio, Seg, Stepper, Input, Switch, bgIdx, useTheme} from '../components/ui';
 import {Dish, StoreCard, ItemRow} from '../components/cards';
-import {storeSub, lineStore, fmtTime, fmtDay, fmtStoreTime, fmtStoreDay, hasAlcohol, alcAge, S, ST, STB, IT, DEALS, money, dp, addr, cnt, first, totals, isPk, ctOf, qtyIn, done, TL, TP, defAddr, emit, save, toast, refreshLiveSchedules, refreshStoreDistance, deliveryAddressKey, deliveryQuoteReady, refreshGoodiesDeliveryQuote, refreshFirstDeliveryEligibility} from '../store';
+import {storeSub, lineStore, fmtTime, fmtDay, fmtStoreTime, fmtStoreDay, hasAlcohol, alcAge, S, ST, STB, IT, DEALS, money, dp, addr, cnt, first, totals, isPk, ctOf, qtyIn, done, TL, TP, defAddr, emit, save, toast, refreshLiveSchedules, refreshStoreDistance, deliveryAddressKey, deliveryQuoteReady, refreshGoodiesDeliveryQuote, refreshFirstDeliveryEligibility, cartStoreIds, canScheduleGoodiesStore} from '../store';
 import {go, tab, back, browse, heart, favp, setSize, toggleDrink, productQty, productAdd, qty, clearAsk, promoApply, promoClear, goCheckout, checkoutNext, setMode, setTip, setSch, setPay, setCard, placeOrder, cancelAsk, reorder, setOrdersTab, refreshPaymentOptions} from '../actions';
 import {CHOOSE_SIZE_CATS, setConsent, createWallet} from '../actions';
 import {rgText, stageLabels, fees, faq as faqList, label} from '../content';
@@ -341,8 +342,6 @@ export function Checkout() {
     return () => { active = false; };
   }, [st?.id, st?.live, a?.t, a?.apt, a?.inst, a?.city, a?.department, a?.country]);
   useEffect(() => { if (st?.id && (!st.acceptScheduledOrders || stops.some(id=>!STB[id]?.acceptScheduledOrders)) && S.sch) setSch(0); }, [st?.id, st?.acceptScheduledOrders, stops.join(',')]);
-  /* A closed store can only be ordered from by scheduling: open the picker so the customer is not left on an empty "Schedule" choice. */
-  useEffect(() => { if (st?.id && !st.open && st.acceptScheduledOrders && stops.every(id=>STB[id]?.acceptScheduledOrders) && !S.sch) setScheduleOpen(true); }, [st?.id, st?.open, st?.acceptScheduledOrders, stops.join(',')]);
   useEffect(() => {
     let active = true;
     setCashEligible(false);setCashError(false);
@@ -386,16 +385,16 @@ export function Checkout() {
         <T cmsKey={"lbl.cms.40babc6bdeb6"} size={12.5} color={th.mut}>{st.eta} {label("lbl.cms.40babc6bdeb6", "min")}</T>
       </Row>
     </Radio> : null}
-    {st.acceptScheduledOrders && stops.every(id=>STB[id]?.acceptScheduledOrders) ? <Radio on={!!S.sch} onPress={() => setScheduleOpen(v => !v)}>
-      <Row sp style={{alignItems:'center',flex:1}}>
+    {st.open && st.acceptScheduledOrders && stops.every(id=>STB[id]?.acceptScheduledOrders) ? <Pressable accessibilityRole="button" onPress={() => setScheduleOpen(true)} style={{paddingVertical:10}}>
+      <Row sp style={{alignItems:'center'}}>
         <View style={{flex:1,minWidth:0}}>
           <T cmsKey={'lbl.checkoutScheduleOption'} weight="600">{label('lbl.checkoutScheduleOption','Schedule')}</T>
           {S.sch ? <T size={12.5} color={th.mut} style={{marginTop:3}}>{fmtStoreDay(st.id,S.sch)+' · '+fmtStoreTime(st.id,S.sch)}</T> : null}
         </View>
         <Icon name="edit" size={17} color={th.br}/>
       </Row>
-    </Radio> : null}
-    {scheduleOpen && st.acceptScheduledOrders && stops.every(id=>STB[id]?.acceptScheduledOrders) ? <ScheduleInline close={() => setScheduleOpen(false)} /> : null}
+    </Pressable> : null}
+    {(scheduleOpen || !st.open || !!S.sch) && st.acceptScheduledOrders && stops.every(id=>STB[id]?.acceptScheduledOrders) ? <ScheduleInline autoApply close={() => setScheduleOpen(false)} /> : null}
     {pk ? null : (<><Ttl>{label('lbl.checkoutCourierTip', 'Tip your courier')}</Ttl><View style={{flexDirection: 'row', flexWrap: 'wrap', gap: 8}}>{fees().tips.map((v: number) => <Pressable key={v} onPress={() => setTip(v)} style={{paddingVertical: 9, paddingHorizontal: 14, borderRadius: 18, backgroundColor: S.tip === v ? th.br : th.soft}}><T cmsKey={'lbl.checkoutNoTip'} size={13.5} weight="600" color={S.tip === v ? '#fff' : th.ink}>{v ? money(v) : label('lbl.checkoutNoTip', 'No tip')}</T></Pressable>)}</View></>)}
     <Input cmsPlaceholderKey={'lbl.checkoutOptional'} label={pk ? label('lbl.checkoutStoreNote', 'Note for the store') : label('lbl.checkoutDeliveryInstructions', 'Delivery instructions')} value={S.note} onChange={v => {S.note = v; emit();}} placeholder={label('lbl.checkoutOptional', 'Optional')} multiline />
   </>);
@@ -433,7 +432,7 @@ export function Checkout() {
         <Cta cmsKeys={['lbl.checkoutAddCard',"lbl.cms.7f28264e6c5c"]} label={S.hasWallet ? label('lbl.checkoutAddCard', 'Add a card') : label("lbl.cms.7f28264e6c5c", "Create wallet")} onPress={() => go('payments')} />
       </View>}
     </Card> : null}
-    {(<T cmsKeys={['lbl.checkoutCashNotice',"lbl.cms.3b2939c58c05","lbl.cms.c3f6f449738e"]} size={12} color={th.mut}>{S.pay==='cash'?label('lbl.checkoutCashNotice','Pay in cash when you receive your order.'):S.pay === 'card' ? label("lbl.cms.3b2939c58c05", "Your payment is processed securely.") : label("lbl.cms.c3f6f449738e", "Wantiss Wallet payments debit your available balance.")}</T>)}
+    {S.pay === 'cash' || S.pay === 'card' ? <T cmsKeys={['lbl.checkoutCashNotice',"lbl.cms.3b2939c58c05"]} size={12} color={th.mut}>{S.pay === 'cash' ? label('lbl.checkoutCashNotice','Pay in cash when you receive your order.') : label("lbl.cms.3b2939c58c05", "Your payment is processed securely.")}</T> : null}
   </>);
   if (S.cs === 3) body = (<>
     {!paymentReady ? <Card><T color={S.paymentOptionsStatus === 'error' ? th.red : th.mut}>{paymentStatusText}</T>{S.paymentOptionsStatus === 'error' ? <Cta cmsKey={'lbl.retry'} small ghost label={label('lbl.retry', 'Try again')} onPress={() => void refreshPaymentOptions()} /> : null}</Card> : null}
@@ -459,11 +458,12 @@ export function Checkout() {
 }
 export const CheckoutFoot = () => {
   const pricingReady = isPk() || (deliveryQuoteReady() && (!fees().firstFree || S.firstOrderEligible !== null));
+  const timeReady = S.cs !== 1 || (cartStoreIds().length > 0 && cartStoreIds().every(id => S.sch ? S.sch >= scheduleMinimum(Date.now()) && canScheduleGoodiesStore(id, S.sch) : !!STB[id]?.open));
   const insufficientWallet = (S.cs === 3) && S.pay === 'wallet' && (!S.hasWallet || S.wallet < totals().total);
   const lbl = S.busy ? label('lbl.checkoutSubmitting','Placing order…') : !pricingReady && S.cs >= 2 ? label('lbl.cms.deliveryCalculating', 'Calculating delivery…') : S.cs === 3
     ? label('lbl.checkoutPlaceOrder', 'Place order') + ' · ' + money(totals().total)
     : label('lbl.checkoutContinue', 'Continue');
-  return <Cta label={lbl} disabled={!!S.busy || (!pricingReady && S.cs >= 2) || (S.cs === 3 && hasAlcohol() && !S.alcConsent) || insufficientWallet} onPress={S.cs === 3 ? () => {void placeOrder();} : checkoutNext} />;
+  return <Cta label={lbl} disabled={!!S.busy || !timeReady || (!pricingReady && S.cs >= 2) || (S.cs === 3 && hasAlcohol() && !S.alcConsent) || insufficientWallet} onPress={S.cs === 3 ? () => {void placeOrder();} : checkoutNext} />;
 };
 
 export function Confirm({id}: {id: string}) {

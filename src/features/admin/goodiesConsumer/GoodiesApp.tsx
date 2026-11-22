@@ -54,6 +54,8 @@ export function GoodiesApp({onExit, embedded = true, onUniversalAction, unreadNo
   useEffect(()=>{setSheetRecord(null);setToastTxt('');setQuickMenuOpen(false);},[S.accountId]);
   const goodiesUnreadCount = Math.max(Number(S.serverUnread || 0), S.notifs.filter((n: any) => n.u).length);
   const [startupError, setStartupError] = useState(false), [startupAttempt, setStartupAttempt] = useState(0);
+  const [accountHydrated, setAccountHydrated] = useState(false);
+  const homeEntry = embedded && (!initialRoute || initialRoute === 'home');
 
   useEffect(() => {
     if (!goodiesLoaded) return;
@@ -88,14 +90,20 @@ export function GoodiesApp({onExit, embedded = true, onUniversalAction, unreadNo
     let active = true;
     let stopSync: (() => void) | null = null;
     void (async () => {
-      setGoodiesLoaded(false);setStartupError(false);
+      setGoodiesLoaded(false);setStartupError(false);setAccountHydrated(false);
       const contentReady = loadContent();
-      await load();
+      await load(() => {
+        if (!active) return;
+        if (homeEntry) reset('home');
+        setAccountHydrated(true);
+      });
       // Initial destination is applied synchronously before first render; never replay it after loading.
       await contentReady;
       if (active) {
         // Restore the requested destination after persistence/catalog hydration, before exposing the screen.
-        if (initialRoute?.startsWith('groupinvite:')) {
+        if (homeEntry) {
+          // Account hydration already selected Home. Preserve navigation made during background refresh.
+        } else if (initialRoute?.startsWith('groupinvite:')) {
           (S as any).pendingGroupInviteCode=initialRoute.slice(12);
           reset('grouporder');
         } else if (initialRoute?.startsWith('product:')) {
@@ -224,7 +232,8 @@ export function GoodiesApp({onExit, embedded = true, onUniversalAction, unreadNo
   }), [cartDragX]);
 
   if (!goodiesLoaded && startupError) return <View accessibilityRole="alert" style={{flex:1,backgroundColor:th.bg}}><StatusBar barStyle={th.dark?'light-content':'dark-content'} />{startupFailure}</View>;
-  if (!goodiesLoaded) return <View style={{flex:1,backgroundColor:th.bg,alignItems:'center',justifyContent:'center',paddingHorizontal:28}} accessibilityRole="progressbar" accessibilityLabel={initialRoute?.startsWith('store:')?label("lbl.cms.6bc6c58f3cfb", "Opening store"):label("lbl.cms.a256d1f083f5", "Loading Goodies")}>
+  if (!goodiesLoaded && homeEntry && !accountHydrated) return <View style={{flex:1,backgroundColor:th.bg}}><StatusBar barStyle={th.dark?'light-content':'dark-content'} /></View>;
+  if (!goodiesLoaded && !homeEntry) return <View style={{flex:1,backgroundColor:th.bg,alignItems:'center',justifyContent:'center',paddingHorizontal:28}} accessibilityRole="progressbar" accessibilityLabel={initialRoute?.startsWith('store:')?label("lbl.cms.6bc6c58f3cfb", "Opening store"):label("lbl.cms.a256d1f083f5", "Loading Goodies")}>
     <StatusBar barStyle={th.dark?'light-content':'dark-content'} />
     <View style={{alignItems:'center',gap:16}}>
       <Image source={{uri:"https://raw.githubusercontent.com/momojdy/tiss_icons_assets/refs/heads/main/Goodies.PNG"}} style={{width:112,height:112}} resizeMode="contain" accessibilityLabel={label("lbl.cms.9c6764b3fb4b", "Goodies")} />

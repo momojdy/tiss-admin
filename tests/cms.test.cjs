@@ -24,6 +24,14 @@ function loadModule(filename,cache=new Map()){
 }
 const editing=loadModule(path.join(root,'contentEditing.ts')),draft=loadModule(path.join(root,'draft.ts'));
 const catalog=require(path.join(root,'customerLabelCatalog.json')),pages=require(path.join(root,'customerPageCatalog.json'));
+test('the isolated preview completes local hydration without calling a customer account or backend',async()=>{
+ const filename=path.join(root,'store.ts'),ast=ts.createSourceFile(filename,fs.readFileSync(filename,'utf8'),99,true);
+ const declaration=ast.statements.find(n=>ts.isFunctionDeclaration(n)&&n.name?.text==='load');assert.ok(declaration);
+ const module={exports:{}},code=ts.transpileModule(declaration.getText(ast)+'\nmodule.exports=load;',{compilerOptions:{module:ts.ModuleKind.CommonJS,target:ts.ScriptTarget.ES2022}}).outputText;
+ // No account, storage or backend bindings are provided: preview must return before using any.
+ vm.runInNewContext(code,{module,exports:module.exports,previewOnly:true});
+ let hydrated=0;await module.exports(()=>hydrated++);assert.equal(hydrated,1);await module.exports();
+});
 test('the first-order campaign is selectable only in the isolated Edit preview without changing customer eligibility',()=>{
  const filename=path.join(root,'store.ts'),ast=ts.createSourceFile(filename,fs.readFileSync(filename,'utf8'),99,true);
  const declaration=ast.statements.filter(ts.isVariableStatement).flatMap(s=>s.declarationList.declarations).find(d=>d.name.getText(ast)==='first');assert.ok(declaration);

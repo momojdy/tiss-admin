@@ -1,6 +1,7 @@
 import {Modal,previewShare as Share} from '../previewNative';
 import {EditableNativeText as Text} from '../EditableNativeText';
 import {notifyStoreReviewsChanged} from '../reviews';
+import {scheduleDays, scheduleChoice, clampScheduleTime, scheduleMinimum} from '../scheduling';
 import React, {useEffect, useMemo, useRef, useState} from 'react';
 import {View, Text as UnusedNativeText, Pressable, Modal as UnusedNativeModal, ScrollView, KeyboardAvoidingView, Share as UnusedNativeShare, Image, Platform, TextInput, useWindowDimensions, PanResponder} from 'react-native';
 import {PreviewDateTimePicker as DateTimePicker} from '../previewNative';
@@ -115,74 +116,75 @@ export function Sheets({sheet, close}: {sheet: any; close: () => void}) {
   return <BottomSheet visible onClose={close} keyboardAware={k === 'contacts' || k === 'ctform'} maxHeight={k==='schedule' ? Math.max(0, windowHeight - insets.top) : k==='ctform' || k==='contacts' ? '94%' : k==='promo' ? 370 : k==='sinfo' ? '92%' : isRatingSheet ? windowHeight * 0.68 : '90%'}>{sheetBody}</BottomSheet>;
 }
 
-function ScheduleSheet({close, inline = false}: {close: () => void; inline?: boolean}) {
+function isAvailableInstant(instant: Date) {
+  const stores = cartStoreIds();
+  return stores.length > 0 && stores.every(storeId => canScheduleGoodiesStore(storeId, instant.getTime()));
+}
+
+function ScheduleSheet({close, inline = false, autoApply = false}: {close: () => void; inline?: boolean; autoApply?: boolean}) {
   const th = useTheme(), store: any = STB[S.cart.sid];
   const customerZone = Intl.DateTimeFormat().resolvedOptions().timeZone || 'Etc/GMT';
-  const customerNow = new Date();
-  const isAvailableInstant = (instant:Date) => {
-    const stores=cartStoreIds();
-    return stores.length>0&&stores.every(storeId=>canScheduleGoodiesStore(storeId,instant.getTime()));
+  const [now, setNow] = useState(Date.now());
+  useEffect(() => { const timer = setInterval(() => setNow(Date.now()), 30_000); return () => clearInterval(timer); }, []);
+  const scheduleKey = JSON.stringify(cartStoreIds().map(id => ({id, live: STB[id]?.live, enabled: STB[id]?.acceptScheduledOrders, hours: STB[id]?.scheduleHours, start: STB[id]?.scheduledOrderStartTime, zone: STB[id]?.scheduledOrderTimezone})));
+  const days = useMemo(() => scheduleDays(now, isAvailableInstant), [now, scheduleKey]);
+  const [selection, setSelection] = useState(() => scheduleChoice(days, S.sch || 0, now)?.getTime() || 0);
+  const [dayOffset, setDayOffset] = useState(() => Math.max(0, days.findIndex(day => day.slots.some(slot => slot.getTime() === selection))));
+  const [deliveryMode, setDeliveryMode] = useState(S.mode === 'pickup' || store?.far ? 'pickup' : 'delivery');
+  const [pickerRevision, setPickerRevision] = useState(0);
+  const day = days[dayOffset] || days[0], availableSlots = day.slots;
+  const selected = availableSlots.find(slot => slot.getTime() === selection && slot.getTime() >= scheduleMinimum(now)) || null;
+  const earliestInstant = availableSlots[0] || null;
+  useEffect(() => {
+    const next = scheduleChoice(days, selection, Date.now());
+    const timestamp = next?.getTime() || 0;
+    if (timestamp !== selection) setSelection(timestamp);
+    const offset = next ? days.findIndex(candidate => candidate.slots.some(slot => slot.getTime() === timestamp)) : 0;
+    if (offset !== dayOffset) setDayOffset(Math.max(0, offset));
+    if (autoApply && S.sch !== timestamp) A.setSch(timestamp);
+  }, [days, selection, dayOffset, now, autoApply]);
+  const pick = (instant: Date, offset = dayOffset) => {
+    const bounded = clampScheduleTime(days[offset], instant, Date.now());
+    if (!bounded) { setNow(Date.now()); return; }
+    setDayOffset(offset); setSelection(bounded.getTime());
+    if (autoApply && S.sch !== bounded.getTime()) A.setSch(bounded.getTime());
   };
-  const customerDayStart = (offset:number) => {const d=new Date(customerNow);d.setHours(0,0,0,0);d.setDate(d.getDate()+offset);return d;};
-  const slotsForDay = (offset:number) => {
-    const start=customerDayStart(offset), end=new Date(start);end.setDate(end.getDate()+1);
-    // Keep a five-minute safety margin so the database cannot reject a slot selected at the edge of "now".
-    let cursor=Math.max(start.getTime(),Math.ceil((Date.now()+15*60_000)/300000)*300000);
-    const slots:Date[]=[];
-    for(;cursor<end.getTime();cursor+=300000){const candidate=new Date(cursor);if(isAvailableInstant(candidate))slots.push(candidate);}
-    return slots;
-  };
-  const initialScheduled = S.sch && S.sch>Date.now() ? new Date(S.sch) : null;
-  const initialOffset = initialScheduled ? Math.max(0,Math.min(6,Math.round((new Date(initialScheduled.getFullYear(),initialScheduled.getMonth(),initialScheduled.getDate()).getTime()-new Date(customerNow.getFullYear(),customerNow.getMonth(),customerNow.getDate()).getTime())/86400000))) : 0;
-  const initialSlots=slotsForDay(initialOffset);
-  const initialChoice=initialScheduled && isAvailableInstant(initialScheduled) ? initialScheduled : initialSlots[0] || new Date(customerNow);
-  const [dayOffset,setDayOffset]=useState(initialOffset);
-  const [deliveryMode,setDeliveryMode]=useState(S.mode==='pickup'?'pickup':'delivery');
-  const [customHour,setCustomHour]=useState(String(initialChoice.getHours()).padStart(2,'0'));
-  const [customMinute,setCustomMinute]=useState(String(initialChoice.getMinutes()).padStart(2,'0'));
-  const selectedDate=customerDayStart(dayOffset);
-  const availableSlots=slotsForDay(dayOffset);
-  const earliestInstant=availableSlots[0] || null;
-  const earliestWall=earliestInstant ? new Date(earliestInstant) : selectedDate;
-  const rawHour=Number(customHour),rawMinute=Number(customMinute);
-  const validDigits=/^\d{1,2}$/.test(customHour)&&/^\d{1,2}$/.test(customMinute)&&rawHour>=0&&rawHour<=23&&rawMinute>=0&&rawMinute<=59;
-  const customDate=new Date(selectedDate);if(validDigits)customDate.setHours(rawHour,rawMinute,0,0);
-  const customInstant=validDigits?new Date(customDate):new Date(0);
-  const customValid=validDigits&&isAvailableInstant(customInstant)&&customInstant.getTime()>Date.now()+15*60_000;
-  const selected=customValid?customInstant.getTime():0;
-  const noFutureSlot=!availableSlots.length;
-  /* Closed store with nothing chosen yet: pre-select the earliest valid slot so checkout can continue without an extra Apply step. */
-  useEffect(()=>{if(inline&&store&&!store.open&&store.acceptScheduledOrders&&!S.sch&&earliestInstant)A.setSch(earliestInstant.getTime());},[inline,store?.id,store?.open,earliestInstant?.getTime()]);
-  const reason=noFutureSlot?label('lbl.sheetClosedDayReason','This store has no remaining scheduled times on that day. Choose another day.') : !customValid?label('lbl.sheetClampEarliest','Choose the minimum available time or a later available time.'):'';
-  const formatCustomer=(ts:number,options:Intl.DateTimeFormatOptions)=>new Intl.DateTimeFormat(wantissLocale(S.lang)==='ht'?'fr-HT':wantissLocale(S.lang),{...options,timeZone:customerZone}).format(new Date(ts));
-  const choose=()=>{
-    if(!store){toast(label('lbl.sheetChooseStore','Choose a store before scheduling.'));return;}
-    if(!store.acceptScheduledOrders){toast(label('lbl.sheetNoScheduleClosed','This store does not accept scheduled orders.'));return;}
-    if(!selected){toast(reason||label('lbl.sheetChooseDay','Choose an available day.'));return;}
-    A.setSch(selected);A.setMode(deliveryMode);
-    toast(label('lbl.sheetScheduledFor','Scheduled for {day}, {time}').replace('{day}',formatCustomer(selected,{weekday:'short',month:'short',day:'numeric'})).replace('{time}',formatCustomer(selected,{hour:'numeric',minute:'2-digit',timeZoneName:'short'})));
+  const formatCustomer = (timestamp: number, options: Intl.DateTimeFormatOptions) => new Intl.DateTimeFormat(wantissLocale(S.lang) === 'ht' ? 'fr-HT' : wantissLocale(S.lang), {...options, timeZone: customerZone}).format(new Date(timestamp));
+  const choose = () => {
+    if (!store) { toast(label('lbl.sheetChooseStore', 'Choose a store before scheduling.')); return; }
+    if (!store.acceptScheduledOrders) { toast(label('lbl.sheetNoScheduleClosed', 'This store does not accept scheduled orders.')); return; }
+    const bounded = selected && clampScheduleTime(day, selected, Date.now());
+    if (!bounded || !isAvailableInstant(bounded)) { setNow(Date.now()); toast(label('lbl.sheetScheduleUnavailable', 'No scheduled times are available.')); return; }
+    A.setSch(bounded.getTime()); A.setMode(deliveryMode);
+    toast(label('lbl.sheetScheduledFor','Scheduled for {day}, {time}').replace('{day}',formatCustomer(bounded.getTime(),{weekday:'short',month:'short',day:'numeric'})).replace('{time}',formatCustomer(bounded.getTime(),{hour:'numeric',minute:'2-digit',timeZoneName:'short'})));
     close();
   };
-  return <View style={inline?{paddingTop:12,paddingBottom:12,borderTopWidth:0.5,borderTopColor:th.line,marginTop:10}:undefined}>
-    {inline?null:<T cmsKey={'lbl.sheetScheduleTitle'} size={21} weight='600'>{label('lbl.sheetScheduleTitle','Schedule your order')}</T>}
-    <SegSchedule value={deliveryMode} onChange={setDeliveryMode}/>
-    <T cmsKey={'lbl.sheetChooseDay'} size={14} weight='600' style={{marginTop:12,marginBottom:8}}>{label('lbl.sheetChooseDay','Choose a day')}</T>
+  return <View style={inline ? {paddingTop:12,paddingBottom:12,borderTopWidth:0.5,borderTopColor:th.line,marginTop:10} : undefined}>
+    {inline ? null : <T cmsKey={'lbl.sheetScheduleTitle'} size={21} weight='600'>{label('lbl.sheetScheduleTitle', 'Schedule your order')}</T>}
+    <SegSchedule value={deliveryMode} onChange={value => {setDeliveryMode(value); if (autoApply) A.setMode(value);}} />
+    <T cmsKey={'lbl.sheetChooseDay'} size={14} weight='600' style={{marginTop:12,marginBottom:8}}>{label('lbl.sheetChooseDay', 'Choose a day')}</T>
     <ScrollView horizontal showsHorizontalScrollIndicator={false} contentContainerStyle={{gap:8,paddingBottom:8}}>
-      {Array.from({length:7},(_,i)=>{const d=customerDayStart(i),active=dayOffset===i;return <Pressable key={i} onPress={()=>{setDayOffset(i);const first=slotsForDay(i)[0];if(first){setCustomHour(String(first.getHours()).padStart(2,'0'));setCustomMinute(String(first.getMinutes()).padStart(2,'0'));}}} style={{minWidth:74,paddingVertical:10,paddingHorizontal:10,borderRadius:14,backgroundColor:active?th.br:th.soft,alignItems:'center',borderWidth:0.5,borderColor:active?th.br:th.line}}>
-        <T cmsKeys={["lbl.cms.acf78f33a391","lbl.cms.8548c22a9780"]} size={11.5} weight='600' color={active?'#fff':th.mut}>{i===0?label("lbl.cms.acf78f33a391", "Today"):i===1?label("lbl.cms.8548c22a9780", "Tomorrow"):d.toLocaleDateString(S.lang,{weekday:'short'})}</T><T size={15} weight='600' color={active?'#fff':th.ink}>{d.getDate()}</T><T size={10.5} color={active?'#fff':th.mut}>{d.toLocaleDateString(S.lang,{month:'short'})}</T>
+      {days.map(({date, slots}, i) => {const active = dayOffset === i; return <Pressable key={date.getTime()} disabled={!slots.length} accessibilityState={{disabled:!slots.length,selected:active}} onPress={() => {if (slots[0]) pick(slots[0], i);}} style={{minWidth:74,paddingVertical:10,paddingHorizontal:10,borderRadius:14,backgroundColor:active?th.br:th.soft,alignItems:'center',borderWidth:0.5,borderColor:active?th.br:th.line,opacity:slots.length?1:0.45}}>
+        <T cmsKeys={["lbl.cms.acf78f33a391","lbl.cms.8548c22a9780"]} size={11.5} weight='600' color={active?'#fff':th.mut}>{i===0?label("lbl.cms.acf78f33a391", "Today"):i===1?label("lbl.cms.8548c22a9780", "Tomorrow"):date.toLocaleDateString(S.lang,{weekday:'short'})}</T><T size={15} weight='600' color={active?'#fff':th.ink}>{date.getDate()}</T><T size={10.5} color={active?'#fff':th.mut}>{date.toLocaleDateString(S.lang,{month:'short'})}</T>
       </Pressable>;})}
     </ScrollView>
-    {store?.acceptScheduledOrders?<T cmsKey={'lbl.sheetScheduledMinimum'} size={12} color={th.mut} style={{marginTop:8,marginBottom:4}}>{label('lbl.sheetScheduledMinimum','Earliest available time')}: {earliestInstant?formatCustomer(earliestInstant.getTime(),{hour:'numeric',minute:'2-digit',timeZoneName:'short'}):'—'} · {customerZone}</T>:null}
-    <T cmsKey={'lbl.sheetExactTime'} size={13} weight='600' style={{marginTop:12,marginBottom:6}}>{label('lbl.sheetExactTime','Choose a time')}</T>
-    {inline?<DateTimePicker value={customValid?customDate:earliestWall} mode='time' display={Platform.OS==='ios'?'spinner':'clock'} minuteInterval={5} onChange={(_,date)=>{if(date){setCustomHour(String(date.getHours()).padStart(2,'0'));setCustomMinute(String(date.getMinutes()).padStart(2,'0'));}}}/>:<ScrollView style={{maxHeight:156,marginTop:6}} nestedScrollEnabled showsVerticalScrollIndicator={false} contentContainerStyle={{flexDirection:'row',flexWrap:'wrap',gap:8,paddingBottom:4}}>
-      {availableSlots.filter((_,i)=>i%3===0 || availableSlots.length<24).map(slot=>{const key=String(slot.getHours()).padStart(2,'0')+':'+String(slot.getMinutes()).padStart(2,'0'),active=customHour===String(slot.getHours()).padStart(2,'0')&&customMinute===String(slot.getMinutes()).padStart(2,'0');return <Pressable key={slot.getTime()} onPress={()=>{setCustomHour(String(slot.getHours()).padStart(2,'0'));setCustomMinute(String(slot.getMinutes()).padStart(2,'0'));}} style={{width:'23%',minHeight:38,borderRadius:10,alignItems:'center',justifyContent:'center',backgroundColor:active?th.br:th.soft,borderWidth:active?0.5:0,borderColor:th.br}}><T size={12.5} weight='600' color={active?'#fff':th.ink}>{key}</T></Pressable>;})}
-    </ScrollView>}
-    {reason?<T size={12.5} color={th.red} style={{marginTop:6}}>{reason}</T>:null}
-    {selected?<T cmsKey={"lbl.cms.6646922f6eaf"} size={12.5} color={th.br} style={{marginTop:8}}>{label("lbl.cms.6646922f6eaf", "Selected: ")}{formatCustomer(selected,{weekday:'short',month:'short',day:'numeric'})}, {formatCustomer(selected,{hour:'numeric',minute:'2-digit',timeZoneName:'short'})}</T>:null}
-    <View style={{height:12}}/><Cta cmsKey={'lbl.sheetApply'} label={label('lbl.sheetApply','Apply')} disabled={!selected} onPress={choose}/>
+    {earliestInstant ? <>
+      <T cmsKey={'lbl.sheetExactTime'} size={13} weight='600' style={{marginTop:12,marginBottom:6}}>{label('lbl.sheetExactTime', 'Choose a time')}</T>
+      {inline ? <DateTimePicker key={pickerRevision} value={selected || earliestInstant} minimumDate={earliestInstant} maximumDate={availableSlots[availableSlots.length - 1]} mode='time' display={Platform.OS==='ios'?'spinner':'clock'} minuteInterval={5} onChange={(event, date) => {
+        if (event.type === 'dismissed' || !date) return;
+        const bounded = clampScheduleTime(day, date, Date.now());
+        if (!bounded) return;
+        pick(bounded);
+        if (Platform.OS === 'ios' && bounded.getTime() !== date.getTime()) setPickerRevision(value => value + 1);
+      }} /> : <ScrollView style={{maxHeight:156,marginTop:6}} nestedScrollEnabled showsVerticalScrollIndicator={false} contentContainerStyle={{flexDirection:'row',flexWrap:'wrap',gap:8,paddingBottom:4}}>
+        {availableSlots.filter((_, i) => i % 3 === 0 || availableSlots.length < 24).map(slot => {const active = selection === slot.getTime(); return <Pressable key={slot.getTime()} onPress={() => pick(slot)} style={{width:'23%',minHeight:38,borderRadius:10,alignItems:'center',justifyContent:'center',backgroundColor:active?th.br:th.soft,borderWidth:active?0.5:0,borderColor:th.br}}><T size={12.5} weight='600' color={active?'#fff':th.ink}>{String(slot.getHours()).padStart(2,'0')+':'+String(slot.getMinutes()).padStart(2,'0')}</T></Pressable>;})}
+      </ScrollView>}
+    </> : <T cmsKey={'lbl.sheetScheduleUnavailable'} size={12.5} color={th.mut} style={{marginTop:8}}>{label('lbl.sheetScheduleUnavailable', 'No scheduled times are available.')}</T>}
+    {selected ? <T cmsKey={"lbl.cms.6646922f6eaf"} size={12.5} color={th.br} style={{marginTop:8}}>{label("lbl.cms.6646922f6eaf", "Selected: ")}{formatCustomer(selected.getTime(),{weekday:'short',month:'short',day:'numeric'})}, {formatCustomer(selected.getTime(),{hour:'numeric',minute:'2-digit',timeZoneName:'short'})}</T> : null}
+    {!autoApply ? <><View style={{height:12}}/><Cta cmsKey={'lbl.sheetApply'} label={label('lbl.sheetApply','Apply')} disabled={!selected} onPress={choose}/></> : null}
   </View>;
 }
-export function ScheduleInline({close}: {close: () => void}) { return <ScheduleSheet close={close} inline />; }
+export function ScheduleInline({close, autoApply = false}: {close: () => void; autoApply?: boolean}) { return <ScheduleSheet close={close} inline autoApply={autoApply} />; }
 
 function SegSchedule({value,onChange}:{value:string;onChange:(v:string)=>void}) {
   const th=useTheme();

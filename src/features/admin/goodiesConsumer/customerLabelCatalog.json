@@ -642,7 +642,7 @@
   },
   {
     "id": "lbl.actionStoreClosedSchedule",
-    "text": "This store is closed. Pick a time under \"Schedule\" and tap Apply to continue.",
+    "text": "This store is closed. Choose a future opening-time slot to continue.",
     "pages": [
       "Shared actions and validation"
     ]
@@ -4505,13 +4505,6 @@
     "text": ", selected ",
     "pages": [
       "Build Your Own"
-    ]
-  },
-  {
-    "id": "lbl.cms.c3f6f449738e",
-    "text": "Wantiss Wallet payments debit your available balance.",
-    "pages": [
-      "Checkout"
     ]
   },
   {
@@ -9615,7 +9608,7 @@
   },
   {
     "id": "lbl.sheetChooseDay",
-    "text": "Choose an available day.",
+    "text": "Choose a day",
     "pages": [
       "Scheduling"
     ]
@@ -9623,13 +9616,6 @@
   {
     "id": "lbl.sheetChooseStore",
     "text": "Choose a store before scheduling.",
-    "pages": [
-      "Scheduling"
-    ]
-  },
-  {
-    "id": "lbl.sheetClampEarliest",
-    "text": "Choose the minimum available time or a later available time.",
     "pages": [
       "Scheduling"
     ]
@@ -9646,13 +9632,6 @@
     "text": "Clear cart",
     "pages": [
       "Sheets · clear"
-    ]
-  },
-  {
-    "id": "lbl.sheetClosedDayReason",
-    "text": "This store has no remaining scheduled times on that day. Choose another day.",
-    "pages": [
-      "Scheduling"
     ]
   },
   {
@@ -10089,13 +10068,6 @@
     ]
   },
   {
-    "id": "lbl.sheetScheduledMinimum",
-    "text": "Earliest available time",
-    "pages": [
-      "Scheduling"
-    ]
-  },
-  {
     "id": "lbl.sheetScheduledOnlyOpen",
     "text": "Only while open",
     "pages": [
@@ -10105,6 +10077,13 @@
   {
     "id": "lbl.sheetScheduleTitle",
     "text": "Schedule your order",
+    "pages": [
+      "Scheduling"
+    ]
+  },
+  {
+    "id": "lbl.sheetScheduleUnavailable",
+    "text": "No scheduled times are available.",
     "pages": [
       "Scheduling"
     ]
