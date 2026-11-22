@@ -8,6 +8,8 @@ import {PhoneFrame} from './PhoneFrame';
 import KonsolissConsumerPreviewScreen from './KonsolissConsumerPreviewScreen';
 import {KonsolissPreviewSelectionContext} from './KonsolissPreviewSelection';
 import {useTheme} from '../../theme/ThemeContext';
+import {CollapsibleColorField} from './CollapsibleColorField';
+import {PromoColorPicker} from './PromoColorPicker';
 import {Txt} from '../../ui/Txt';
 
 const KEY = 'konsoliss.content';
@@ -18,6 +20,7 @@ const LANGS = ['en', 'fr', 'ht', 'es', 'zh-Hans'] as const;
 type Lang = typeof LANGS[number];
 const PAGES = ['Home', 'Warehouse', 'Consolidated', 'Sourcing+', 'Hub', 'Book Space', 'CBM Calculator', 'Shared navigation'] as const;
 const DEFAULTS: Record<string, string> = {
+  'header.stripeColor': '#FFD93D',
   'home.brand': 'Konsoliss',
   'home.load.heading': 'My current load',
   'home.available': 'available',
@@ -148,6 +151,10 @@ export function KonsolissEditor({canEdit,canPublish}:{canEdit:boolean;canPublish
         </View>
       </View>:null}
       {error?<Txt size={11} color={RED}>{error}</Txt>:null}
+      {mode==='Edit'?<CollapsibleColorField label="Header stripe color" value={draft['header.stripeColor']||YELLOW} disabled={!canEdit||busy}>
+        <Txt size={10} mut style={{marginBottom:6}}>Default yellow for upcoming Konsoliss page headers. The existing consumer Home header has no stripe, so its design remains unchanged.</Txt>
+        <PromoColorPicker value={draft['header.stripeColor']||YELLOW} onChange={hex=>change('header.stripeColor',hex)} disabled={!canEdit||busy}/>
+      </CollapsibleColorField>:null}
       {!canEdit?<Txt size={10} mut>View only: content editing requires a delegated Content Studio permission.</Txt>:null}
     </Section>
     <Section title="Konsoliss phone preview">
