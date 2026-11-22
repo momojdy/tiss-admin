@@ -16,7 +16,7 @@ import { cfg, LANGS } from '../../goodiesConsumer/i18n';
 const orange = '#FD802E';
 const ink = '#1B1B1F';
 const muted = '#74747C';
-const screens = [...pageCatalog.flatMap(page => page.routes.filter(key => key !== 'byo').map(key => ({key,label:page.name}))),{key:'__preview_wallet_help_pay__',label:'Shared Bill contribution'}];
+const screens = [...pageCatalog.flatMap(page => page.routes.filter(key => key !== 'byo' && key !== 'wantiss').map(key => ({key,label:page.name}))),{key:'__preview_wallet_help_pay__',label:'Shared Bill contribution'}];
 
 /** Renders a resolved copy of the editor-owned draft and prevents consumer loading from overwriting it. */
 export function GoodiesConsumerPreview({ editMode = false, contentDraft, assetUrls, selectedTarget, onSelectTarget, savedBuilders, builderTarget, onPickBuilder, locale, onLocaleChange }: {
@@ -163,7 +163,9 @@ export function GoodiesConsumerPreview({ editMode = false, contentDraft, assetUr
         <Text style={{ color: muted, fontSize: 10, marginTop: 6 }}>Draft preview · Sample data only · Fixtures apply to group/card pages; no order, card or payment is saved. · Unreviewed translations may appear here; customers receive reviewed translations or English.</Text>
         <ScrollView horizontal showsHorizontalScrollIndicator={false} contentContainerStyle={{ gap: 6, paddingVertical: 8 }}>
           {LANGS.map(locale => <Pressable key={locale.code} accessibilityRole="button" accessibilityLabel={'Preview in ' + locale.label} accessibilityState={{selected: S.lang === locale.code}} onPress={() => {S.lang = locale.code; onLocaleChange?.(locale.code); emit();}} style={{padding: 7, borderRadius: 12, backgroundColor: S.lang === locale.code ? orange : '#F1F1F2'}}><Text style={{fontSize: 10, color: S.lang === locale.code ? '#FFFFFF' : ink}}>{locale.label}</Text></Pressable>)}
-          {[0.75, 1, 1.25].map(value => <Pressable key={value} accessibilityRole="button" accessibilityLabel={'Preview zoom ' + Math.round(value * 100) + '%'} accessibilityState={{selected: zoom === value}} onPress={() => setZoom(value)} style={{padding: 7, borderRadius: 12, backgroundColor: zoom === value ? orange : '#F1F1F2'}}><Text style={{fontSize: 10, color: zoom === value ? '#FFFFFF' : ink}}>{Math.round(value * 100)}%</Text></Pressable>)}
+        </ScrollView>
+        <ScrollView horizontal showsHorizontalScrollIndicator={false} contentContainerStyle={{ gap: 6, paddingVertical: 8 }}>
+          {[0.75, 0.85, 1, 1.25].map(value => <Pressable key={value} accessibilityRole="button" accessibilityLabel={'Preview zoom ' + Math.round(value * 100) + '%'} accessibilityState={{selected: zoom === value}} onPress={() => setZoom(value)} style={{padding: 7, borderRadius: 12, backgroundColor: zoom === value ? orange : '#F1F1F2'}}><Text style={{fontSize: 10, color: zoom === value ? '#FFFFFF' : ink}}>{Math.round(value * 100)}%</Text></Pressable>)}
         </ScrollView>
         <ScrollView horizontal showsHorizontalScrollIndicator={false} contentContainerStyle={{gap:6,paddingVertical:8}}>
           {(['default','loading','error','host','guest','saving','success'] as PreviewScenario[]).map(value=><Pressable key={value} accessibilityRole="button" accessibilityLabel={'Preview fixture: '+value} accessibilityState={{selected:scenario===value}} onPress={()=>{setPreviewScenario(value);setScenario(value);const current=S.stack[S.stack.length-1];navigate(current.r,undefined,value);}} style={{padding:7,borderRadius:12,backgroundColor:scenario===value?orange:'#F1F1F2'}}><Text style={{fontSize:10,color:scenario===value?'white':ink}}>{value} fixture</Text></Pressable>)}
