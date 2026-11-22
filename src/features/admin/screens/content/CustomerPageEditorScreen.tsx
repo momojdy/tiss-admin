@@ -101,7 +101,7 @@ export function CustomerPageEditorScreen() {
       setActualGoodiesPreview(requested === 'goodies');
       setActualKonsolissPreview(requested === 'konsoliss');
       setActualAuthEditor(requested === 'auth' || requested === 'authentication');
-      if (requested === 'auth' || requested === 'authentication' || requested === 'konsoliss') {
+      if (requested === 'auth' || requested === 'authentication') {
         setPageGroup('Main');
         setPageChoice('Authentication pages');
       } else if (requested === 'goodies' || requested === 'konsoliss') {
