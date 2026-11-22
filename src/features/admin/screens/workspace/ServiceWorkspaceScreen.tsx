@@ -1,4 +1,5 @@
 import { useMemo } from 'react';
+import {session} from '../../state/access';
 import { View } from 'react-native';
 import { db, dataMode, ui, bump, useDb } from '../../state/db';
 import { useNav } from '../../shell/Nav';
@@ -61,6 +62,9 @@ export function ServiceWorkspaceScreen() {
   const selectedRange = analyticsRanges.includes(String(ui.AR || '30D') as typeof analyticsRanges[number])
     ? String(ui.AR || '30D') as typeof analyticsRanges[number] : '30D';
 
+  if (serviceName === 'Konsoliss' && (session.role !== 'super_admin' || session.status !== 'active')) {
+    return <Card><Txt size={12}>Konsoliss operations require Super Admin access. Content editors should use Content Studio.</Txt></Card>;
+  }
   return (
     <View>
       <Row style={{ marginBottom: 4 }}>
