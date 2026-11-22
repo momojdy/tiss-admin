@@ -4,7 +4,7 @@ import {notifyStoreReviewsChanged} from '../reviews';
 import {scheduleDays, scheduleChoice, clampScheduleTime, scheduleMinimum} from '../scheduling';
 import React, {useEffect, useMemo, useRef, useState} from 'react';
 import {View, Text as UnusedNativeText, Pressable, Modal as UnusedNativeModal, ScrollView, KeyboardAvoidingView, Share as UnusedNativeShare, Image, Platform, TextInput, useWindowDimensions, PanResponder} from 'react-native';
-import {PreviewDateTimePicker as DateTimePicker} from '../previewNative';
+import {PreviewDateTimePicker as DateTimePicker,PreviewDateTimePickerAndroid as DateTimePickerAndroid} from '../previewNative';
 import {T, Cta, Row, Card, Badge, Input, Radio, Seg, SheetBox, Bar, Empty, useTheme} from './ui';
 import {Icon} from './Icon';
 import {CameraView, useCameraPermissions} from '../previewNative';
@@ -149,6 +149,13 @@ function ScheduleSheet({close, inline = false, autoApply = false}: {close: () =>
     setDayOffset(offset); setSelection(bounded.getTime());
     if (autoApply && S.sch !== bounded.getTime()) A.setSch(bounded.getTime());
   };
+  const changeTime = (event: {type: string}, date?: Date) => {
+    if (event.type === 'dismissed' || !date) return;
+    const bounded = clampScheduleTime(day, date, Date.now());
+    if (!bounded) { setNow(Date.now()); return; }
+    pick(bounded);
+    if (Platform.OS === 'ios' && bounded.getTime() !== date.getTime()) setPickerRevision(value => value + 1);
+  };
   const formatCustomer = (timestamp: number, options: Intl.DateTimeFormatOptions) => new Intl.DateTimeFormat(wantissLocale(S.lang) === 'ht' ? 'fr-HT' : wantissLocale(S.lang), {...options, timeZone: customerZone}).format(new Date(timestamp));
   const choose = () => {
     if (!store) { toast(label('lbl.sheetChooseStore', 'Choose a store before scheduling.')); return; }
@@ -170,13 +177,9 @@ function ScheduleSheet({close, inline = false, autoApply = false}: {close: () =>
     </ScrollView>
     {earliestInstant ? <>
       <T cmsKey={'lbl.sheetExactTime'} size={13} weight='600' style={{marginTop:12,marginBottom:6}}>{label('lbl.sheetExactTime', 'Choose a time')}</T>
-      {inline ? <DateTimePicker key={pickerRevision} value={selected || earliestInstant} minimumDate={earliestInstant} maximumDate={availableSlots[availableSlots.length - 1]} mode='time' display={Platform.OS==='ios'?'spinner':'clock'} minuteInterval={5} onChange={(event, date) => {
-        if (event.type === 'dismissed' || !date) return;
-        const bounded = clampScheduleTime(day, date, Date.now());
-        if (!bounded) return;
-        pick(bounded);
-        if (Platform.OS === 'ios' && bounded.getTime() !== date.getTime()) setPickerRevision(value => value + 1);
-      }} /> : <ScrollView style={{maxHeight:156,marginTop:6}} nestedScrollEnabled showsVerticalScrollIndicator={false} contentContainerStyle={{flexDirection:'row',flexWrap:'wrap',gap:8,paddingBottom:4}}>
+      {inline ? Platform.OS === 'android' ? <Pressable accessibilityRole="button" onPress={() => DateTimePickerAndroid.open({value:selected || earliestInstant,mode:'time',display:'clock',minuteInterval:5,onChange:changeTime})} style={{paddingVertical:12}}>
+        <Row sp><T weight="600">{formatCustomer((selected || earliestInstant).getTime(),{hour:'numeric',minute:'2-digit'})}</T><Icon name="edit" size={17} color={th.br}/></Row>
+      </Pressable> : <DateTimePicker key={pickerRevision} value={selected || earliestInstant} minimumDate={earliestInstant} maximumDate={availableSlots[availableSlots.length - 1]} mode='time' display='spinner' minuteInterval={5} onChange={changeTime} /> : <ScrollView style={{maxHeight:156,marginTop:6}} nestedScrollEnabled showsVerticalScrollIndicator={false} contentContainerStyle={{flexDirection:'row',flexWrap:'wrap',gap:8,paddingBottom:4}}>
         {availableSlots.filter((_, i) => i % 3 === 0 || availableSlots.length < 24).map(slot => {const active = selection === slot.getTime(); return <Pressable key={slot.getTime()} onPress={() => pick(slot)} style={{width:'23%',minHeight:38,borderRadius:10,alignItems:'center',justifyContent:'center',backgroundColor:active?th.br:th.soft,borderWidth:active?0.5:0,borderColor:th.br}}><T size={12.5} weight='600' color={active?'#fff':th.ink}>{String(slot.getHours()).padStart(2,'0')+':'+String(slot.getMinutes()).padStart(2,'0')}</T></Pressable>;})}
       </ScrollView>}
     </> : <T cmsKey={'lbl.sheetScheduleUnavailable'} size={12.5} color={th.mut} style={{marginTop:8}}>{label('lbl.sheetScheduleUnavailable', 'No scheduled times are available.')}</T>}

@@ -55,7 +55,8 @@ export function GoodiesApp({onExit, embedded = true, onUniversalAction, unreadNo
   const goodiesUnreadCount = Math.max(Number(S.serverUnread || 0), S.notifs.filter((n: any) => n.u).length);
   const [startupError, setStartupError] = useState(false), [startupAttempt, setStartupAttempt] = useState(0);
   const [accountHydrated, setAccountHydrated] = useState(false);
-  const homeEntry = embedded && (!initialRoute || initialRoute === 'home');
+  const sharedStoreEntry = embedded && !!initialRoute?.startsWith('store:');
+  const catalogueEntry = !!initialRoute?.startsWith('store:') || !!initialRoute?.startsWith('product:');
 
   useEffect(() => {
     if (!goodiesLoaded) return;
@@ -89,32 +90,32 @@ export function GoodiesApp({onExit, embedded = true, onUniversalAction, unreadNo
     setPreviewOnly(previewMode);
     let active = true;
     let stopSync: (() => void) | null = null;
+    let destinationApplied = false;
+    const applyDestination = () => {
+      if (initialRoute?.startsWith('groupinvite:')) {
+        (S as any).pendingGroupInviteCode=initialRoute.slice(12);
+        reset('grouporder');
+      } else if (initialRoute?.startsWith('product:')) {
+        reset('home');
+        const productId=initialRoute.slice(8);
+        if(productId in require('./store').IT) A.openProduct(productId);
+        else toast(label('lbl.productUnavailable','This product is unavailable.'));
+      } else if (initialRoute?.startsWith('store:')) { reset('home'); push('store', initialRoute.slice(6)); }
+      else if (initialRoute === 'favs:stores' || initialRoute === 'favs:items') { S.ft = initialRoute.split(':')[1]; reset('favs'); }
+      else if (initialRoute) reset(initialRoute);
+      else if (embedded) reset('home');
+    };
     void (async () => {
       setGoodiesLoaded(false);setStartupError(false);setAccountHydrated(false);
       const contentReady = loadContent();
       await load(() => {
         if (!active) return;
-        if (homeEntry) reset('home');
+        if (!catalogueEntry) { applyDestination(); destinationApplied = true; }
         setAccountHydrated(true);
       });
-      // Initial destination is applied synchronously before first render; never replay it after loading.
       await contentReady;
       if (active) {
-        // Restore the requested destination after persistence/catalog hydration, before exposing the screen.
-        if (homeEntry) {
-          // Account hydration already selected Home. Preserve navigation made during background refresh.
-        } else if (initialRoute?.startsWith('groupinvite:')) {
-          (S as any).pendingGroupInviteCode=initialRoute.slice(12);
-          reset('grouporder');
-        } else if (initialRoute?.startsWith('product:')) {
-          reset('home');
-          const productId=initialRoute.slice(8);
-          if(productId in require('./store').IT) A.openProduct(productId);
-          else toast(label('lbl.productUnavailable','This product is unavailable.'));
-        } else if (initialRoute?.startsWith('store:')) { reset('home'); push('store', initialRoute.slice(6)); }
-        else if (initialRoute === 'favs:stores' || initialRoute === 'favs:items') { S.ft = initialRoute.split(':')[1]; reset('favs'); }
-        else if (initialRoute) reset(initialRoute);
-        else if (embedded) reset('home');
+        if (!destinationApplied) applyDestination();
         setGoodiesLoaded(true);
       }
       await loadBuilders();
@@ -232,14 +233,14 @@ export function GoodiesApp({onExit, embedded = true, onUniversalAction, unreadNo
   }), [cartDragX]);
 
   if (!goodiesLoaded && startupError) return <View accessibilityRole="alert" style={{flex:1,backgroundColor:th.bg}}><StatusBar barStyle={th.dark?'light-content':'dark-content'} />{startupFailure}</View>;
-  if (!goodiesLoaded && homeEntry && !accountHydrated) return <View style={{flex:1,backgroundColor:th.bg}}><StatusBar barStyle={th.dark?'light-content':'dark-content'} /></View>;
-  if (!goodiesLoaded && !homeEntry) return <View style={{flex:1,backgroundColor:th.bg,alignItems:'center',justifyContent:'center',paddingHorizontal:28}} accessibilityRole="progressbar" accessibilityLabel={initialRoute?.startsWith('store:')?label("lbl.cms.6bc6c58f3cfb", "Opening store"):label("lbl.cms.a256d1f083f5", "Loading Goodies")}>
+  if (!goodiesLoaded && !sharedStoreEntry && (!accountHydrated || catalogueEntry)) return <View style={{flex:1,backgroundColor:th.bg}}><StatusBar barStyle={th.dark?'light-content':'dark-content'} /></View>;
+  if (!goodiesLoaded && sharedStoreEntry) return <View style={{flex:1,backgroundColor:th.bg,alignItems:'center',justifyContent:'center',paddingHorizontal:28}} accessibilityRole="progressbar" accessibilityLabel={label("lbl.cms.6bc6c58f3cfb", "Opening store")}>
     <StatusBar barStyle={th.dark?'light-content':'dark-content'} />
     <View style={{alignItems:'center',gap:16}}>
       <Image source={{uri:"https://raw.githubusercontent.com/momojdy/tiss_icons_assets/refs/heads/main/Goodies.PNG"}} style={{width:112,height:112}} resizeMode="contain" accessibilityLabel={label("lbl.cms.9c6764b3fb4b", "Goodies")} />
       <Text cmsKey={"lbl.cms.9c6764b3fb4b"} style={{fontSize:20,fontWeight:'500',color:th.dark?th.ink:'#000000'}}>{label("lbl.cms.9c6764b3fb4b", "Goodies")}</Text>
       <ActivityIndicator size="small" color="#BF008E" />
-      <Text cmsKeys={["lbl.cms.e161497dcb67","lbl.cms.2da7d46cf638"]} style={{fontSize:13,color:th.mut,textAlign:'center'}}>{initialRoute?.startsWith('store:')?label("lbl.cms.e161497dcb67", "Opening store…"):label("lbl.cms.2da7d46cf638", "Getting everything ready…")}</Text>
+      <Text cmsKey={"lbl.cms.e161497dcb67"} style={{fontSize:13,color:th.mut,textAlign:'center'}}>{label("lbl.cms.e161497dcb67", "Opening store…")}</Text>
     </View>
   </View>;
 

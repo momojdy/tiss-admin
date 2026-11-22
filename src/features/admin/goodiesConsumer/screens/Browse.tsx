@@ -25,12 +25,18 @@ function CachedContentImage({uri, style, contentFit = 'contain', onFail,onTouchE
   const [reloadKey, setReloadKey] = useState(0);
   useEffect(() => { setFailed(false); setRetried(false); setReloadKey(0); }, [uri]);
   if (failed) return null;
-  return <Image onTouchEnd={onTouchEnd} {...{onClick}} key={uri + ':' + reloadKey} source={{uri}} style={style} resizeMode={contentFit}
-    onError={() => {
+  // Retry the actual image request with a fresh URL. Reloading CMS metadata
+  // does not invalidate React Native's cached failed image response.
+  const imageUri = reloadKey ? uri + (uri.includes('?') ? '&' : '?') + 'retry=' + reloadKey : uri;
+  return <Image key={imageUri} source={{uri: imageUri}} style={style} resizeMode={contentFit}
+    onError={(event) => {
       if (!retried) {
         setRetried(true);
-        void loadContent().finally(() => setReloadKey(value => value + 1));
-      } else { setFailed(true); onFail?.(); }
+        setReloadKey(value => value + 1);
+      } else {
+        console.warn('Goodies published image failed to render', event.nativeEvent?.error);
+        setFailed(true); onFail?.();
+      }
     }} />;
 }
 function Mode({contentId,title, sub, emoji, image, onPress, grad, bg, fg, small}: any) {
@@ -61,8 +67,8 @@ function CategoryTile({category, onPress}: {category: {id:string; name:any; emoj
   return (
     <Pressable onPress={onPress} style={{width:68,alignItems:'center'}}>
       {category.art && !failed
-        ? <CachedContentImage onTouchEnd={assetSelection({kind:'category',id:category.id,field:'art'})} {...{onClick:assetSelection({kind:'category',id:category.id,field:'art'})}} uri={category.art} style={{width:42,height:42}} onFail={() => setFailed(true)} />
-        : <View style={{width:42,height:42,alignItems:'center',justifyContent:'center'}}><Text onPress={assetSelection({kind:'category',id:category.id,field:'art'})} {...{onClick:assetSelection({kind:'category',id:category.id,field:'art'})}} style={{fontSize:30}}>{category.emoji}</Text></View>}
+        ? <CachedContentImage onTouchEnd={assetSelection({kind:'category',id:category.id,field:'art'})} {...{onClick:assetSelection({kind:'category',id:category.id,field:'art'})}} uri={category.art} style={{width:46,height:46}} onFail={() => setFailed(true)} />
+        : <View style={{width:46,height:46,alignItems:'center',justifyContent:'center'}}><Text onPress={assetSelection({kind:'category',id:category.id,field:'art'})} {...{onClick:assetSelection({kind:'category',id:category.id,field:'art'})}} style={{fontSize:30}}>{category.emoji}</Text></View>}
       <T contentTarget={{kind:'category',id:category.id,field:'title'}} size={11.5} weight="600" align="center" style={{marginTop:6,lineHeight:14}}>{tx(category.name)}</T>
     </Pressable>
   );
@@ -147,7 +153,7 @@ export function Home({onExit}: {onExit?: () => void}) {
       </View>
       </View>
       {S.catalogLoading ? <View style={{paddingHorizontal:16,paddingVertical:12}}><View style={{height:72,borderRadius:14,backgroundColor:th.soft}} /><T cmsKey={'lbl.catalogLoading'} color={th.mut}>{label('lbl.catalogLoading', 'Loading stores…')}</T></View> : null}
-      {contentStatus==='error'?<Empty title={label('lbl.contentLoadFailed','Goodies content is temporarily unavailable')} text={label('lbl.contentRetryHint','Check your connection and try again.')} button={label('lbl.retry','Try again')} onPress={()=>void loadContent()} />:null}
+      {contentStatus==='error' && !hasContent() ? <Empty title={label('lbl.contentLoadFailed','Goodies content is temporarily unavailable')} text={label('lbl.contentRetryHint','Check your connection and try again.')} button={label('lbl.retry','Try again')} onPress={()=>void loadContent()} /> : null}
       {S.catalogError ? <Empty title={label('lbl.catalogFailed', 'Could not load stores')} text={label('lbl.catalogRetryHint', 'Check your connection and try again.')} button={label('lbl.retry', 'Try again')} onPress={() => void refreshLiveSchedules()} /> : null}
       <Pressable onPress={() => go('search')} style={{marginTop: 14, marginHorizontal: 16, height: 48, borderRadius: 24, backgroundColor: th.soft, flexDirection: 'row', alignItems: 'center', gap: 10, paddingHorizontal: 16}}>
         <Icon name="search" size={18} color={th.mut} /><T cmsKey={'lbl.search'} size={14.5} color={th.mut}>{label('lbl.search', tr('searchPh'))}</T>
@@ -269,7 +275,7 @@ export function Cats() {
     <View style={{paddingHorizontal: 16}}><View style={{flexDirection: 'row', flexWrap: 'wrap', rowGap: 18, columnGap: 8}}>
       {all.map(c => (
         <Pressable key={c.id} onPress={() => go('catlist', c.id)} style={{width: w, alignItems: 'center'}}>
-          {c.art ? <CachedContentImage uri={c.art} style={{width: 42, height: 42}} /> : <Text style={{fontSize: 30}}>{c.e}</Text>}
+          {c.art ? <CachedContentImage uri={c.art} style={{width: 46, height: 46}} /> : <Text style={{fontSize: 30}}>{c.e}</Text>}
           <T size={11.5} weight="600" align="center" style={{marginTop: 6, lineHeight: 14}}>{c.n}</T>
         </Pressable>
       ))}

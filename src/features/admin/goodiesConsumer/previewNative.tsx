@@ -34,3 +34,4 @@ export const Marker=(_props:any)=>null;
 export const Polyline=(_props:any)=>null;
 
 export function PreviewDateTimePicker(_props:{value:Date;onChange?:(event:any,date?:Date)=>void;[key:string]:any}){return <View><Text>Date picker preview</Text></View>;}
+export const PreviewDateTimePickerAndroid={open:(_props:{value:Date;[key:string]:any})=>{}};

@@ -2995,13 +2995,6 @@
     ]
   },
   {
-    "id": "lbl.cms.2da7d46cf638",
-    "text": "Getting everything ready…",
-    "pages": [
-      "Shared navigation and access states"
-    ]
-  },
-  {
     "id": "lbl.cms.2e6f98d92bd3",
     "text": "Could not go offline",
     "pages": [
@@ -4207,13 +4200,6 @@
     "text": "Change your main Wantiss default address in Me → Settings → Saved addresses.",
     "pages": [
       "Addresses"
-    ]
-  },
-  {
-    "id": "lbl.cms.a256d1f083f5",
-    "text": "Loading Goodies",
-    "pages": [
-      "Shared navigation and access states"
     ]
   },
   {

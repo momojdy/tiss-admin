@@ -2,7 +2,7 @@ import {goodiesPublicationErrors} from '../../goodiesConsumer/publicationReview'
 import customerPageCatalog from '../../goodiesConsumer/customerPageCatalog.json';
 import {mergeMissingLabels, setLocalizedText, contentTextValues} from '../../goodiesConsumer/contentEditing';
 import {GoodiesPageContentFields} from './GoodiesPageContentFields';
-import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
+import { type ElementRef, useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { ScrollView, Image, Pressable, TextInput, View } from 'react-native';
 import * as ImagePicker from 'expo-image-picker';
 import * as DocumentPicker from 'expo-document-picker';
@@ -99,7 +99,7 @@ export function GoodiesEditor({ canEdit, canPublish }: { canEdit: boolean; canPu
   const [byoUrls, setByoUrls] = useState<Record<string, string>>({});
   const operationLock = useRef(false), assetLock = useRef(false);
   const [reviewTarget, setReviewTarget] = useState<string | null>(null);
-  const reviewInput = useRef<TextInput>(null);
+  const reviewInput = useRef<ElementRef<typeof TextInput>>(null);
 
   const clean = useMemo(() => (draft ? sanitizeForSave(draft) : null), [draft]);
   const dirty = !!clean && stable(clean) !== baseline;
