@@ -49,11 +49,11 @@ export function KonsolissAdminScreen(){
    else{setSuccess('Konsoliss container action saved and audited.');setReason('');setConfirm(null);if(kind==='create')setNumber('');if(kind==='assign')setCustomerId('');await refresh();}
    setBusy(false);
  };
- if(!authorized)return <Card><Txt size={14} weight={700}>Super Admin only</Txt><Txt size={11} mut>Konsoliss operational records and actions are not available to other staff. Authorized content editors may use Content Studio.</Txt></Card>;
+ if(!authorized)return <Card><Txt size={14} weight={600}>Super Admin only</Txt><Txt size={11} mut>Konsoliss operational records and actions are not available to other staff. Authorized content editors may use Content Studio.</Txt></Card>;
  return <View>
   <View style={{flexDirection:'row',alignItems:'center',gap:10,marginBottom:12}}>
     <OutlineBtn onPress={()=>go('hub',{hub:'Konsoliss'})}>Back to hub</OutlineBtn>
-    <Txt size={14} weight={700}>Konsoliss Operations</Txt>
+    <Txt size={14} weight={600}>Konsoliss Operations</Txt>
   </View>
   <View style={{flexDirection:'row',flexWrap:'wrap',gap:5,marginBottom:12}}>
     {MODULES.map(name=><Pill key={name} on={module===name} onPress={()=>setModule(name)}>{name}</Pill>)}
@@ -63,16 +63,16 @@ export function KonsolissAdminScreen(){
   {(module==='Overview'||module==='Container records'||module==='Shipment status')?<>
    <Section title={module==='Overview'?'Container overview':module}>
      <View style={{flexDirection:'row',gap:12,flexWrap:'wrap'}}>
-       <View><Txt size={25} weight={700}>{containers.length}</Txt><Txt size={10} mut>Containers</Txt></View>
-       <View><Txt size={25} weight={700}>{containers.filter(c=>c.status==='filling').length}</Txt><Txt size={10} mut>Filling</Txt></View>
-       <View><Txt size={25} weight={700}>{containers.filter(c=>c.status==='departed').length}</Txt><Txt size={10} mut>Departed</Txt></View>
-       <View><Txt size={25} weight={700}>{containers.filter(c=>c.status==='arrived').length}</Txt><Txt size={10} mut>Arrived</Txt></View>
+       <View><Txt size={25} weight={600}>{containers.length}</Txt><Txt size={10} mut>Containers</Txt></View>
+       <View><Txt size={25} weight={600}>{containers.filter(c=>c.status==='filling').length}</Txt><Txt size={10} mut>Filling</Txt></View>
+       <View><Txt size={25} weight={600}>{containers.filter(c=>c.status==='departed').length}</Txt><Txt size={10} mut>Departed</Txt></View>
+       <View><Txt size={25} weight={600}>{containers.filter(c=>c.status==='arrived').length}</Txt><Txt size={10} mut>Arrived</Txt></View>
      </View>
      <View style={{marginTop:10}}><OutlineBtn onPress={()=>{void refresh();}} disabled={loading}>{loading?'Loading…':'Refresh'}</OutlineBtn></View>
      {containers.length===0?<Txt size={11} mut>{loading?'Loading container records…':'No containers have been created yet.'}</Txt>:null}
      {containers.map(c=><View key={c.id} style={{borderTopWidth:1,borderColor:'#E4DDCD',paddingVertical:12,gap:5}}>
        <View style={{flexDirection:'row',justifyContent:'space-between',alignItems:'center'}}>
-         <Txt size={13} weight={700}>{c.container_number}</Txt><Pill>{c.status.toUpperCase()}</Pill>
+         <Txt size={13} weight={600}>{c.container_number}</Txt><Pill>{c.status.toUpperCase()}</Pill>
        </View>
        <Txt size={10} mut>{c.assigned_customers} assigned customer(s) · {c.id}</Txt>
        <View style={{flexDirection:'row',flexWrap:'wrap'}}>
