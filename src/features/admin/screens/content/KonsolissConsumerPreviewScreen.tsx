@@ -105,7 +105,8 @@ export default function KonsolissConsumerPreviewScreen({copy, onBack, previewShe
   return <SafeAreaProvider><Screen copy={copy} onBack={onBack} previewSheet={previewSheet} /></SafeAreaProvider>;
 }
 function Screen({copy, onBack, previewSheet}: {copy: KonsolissCopy; onBack?: () => void; previewSheet?: 'book'|'calc'|null}) {
-  const insets = useSafeAreaInsets(); const dark = false; // Admin preview defaults to the consumer light theme, independently of device appearance. const t = dark ? Dk : L; const [sh, setSh] = useState<null | 'calc' | 'book'>(null); const [scroll, setScroll] = useState(true); const currentContainer = null;
+  // The admin preview always starts in light mode, independent of the device theme.
+  const insets = useSafeAreaInsets(); const dark = false; const t = L; const [sh, setSh] = useState<null | 'calc' | 'book'>(null); const [scroll, setScroll] = useState(true); const currentContainer = null;
   useEffect(()=>{setSh(previewSheet??null);},[previewSheet]);
   const nav = [copy['nav.home'], copy['nav.warehouse'], copy['nav.consolidated'], copy['nav.sourcing'], copy['nav.hub']];
   return <View style={{flex: 1, backgroundColor: t.bg}}>
