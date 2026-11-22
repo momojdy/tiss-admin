@@ -30,9 +30,10 @@ jobs:
           cache: npm
           cache-dependency-path: tiss-admin/package-lock.json
       - run: npm ci
+      - name: TypeScript check
+        run: npm run typecheck
       - name: Goodies permissions, CMS and settlement tests
         run: npm run test:goodies
-      - run: npm run typecheck
       - name: Bundle Android application
         run: npx expo export --platform android --output-dir dist/android
       - name: Bundle iOS application
