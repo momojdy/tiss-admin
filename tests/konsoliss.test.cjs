@@ -63,3 +63,23 @@ test('Konsoliss preview is deferred until selected and optional admin snapshots 
  assert.match(snapshots,/SNAPSHOT_TIMEOUT_MS = 12000/);
  assert.match(snapshots,/snapshotWithDeadline\(load\(\)\)/);
 });
+
+test('Konsoliss editor starts at 75% and without a selected label',()=>{
+  const editor=get('screens/content/KonsolissEditor.tsx');
+  const overlay=get('screens/content/KonsolissPreviewSelection.tsx');
+  const preview=get('screens/content/KonsolissConsumerPreviewScreen.tsx');
+  assert.match(editor,/useState\(0\.75\)/);
+  assert.match(editor,/\[0\.75,0\.85,1,1\.25\]/);
+  assert.match(editor,/\[selected,setSelected\]=useState\(''\)/);
+  assert.match(overlay,/borderWidth:active\?1\.5:0/);
+  assert.match(preview,/const dark = false;/);
+});
+test('Goodies preview has one Home tab and separate zoom options row',()=>{
+  const preview=get('screens/content/GoodiesConsumerPreview.tsx');
+  assert.match(preview,/key !== 'byo' && key !== 'wantiss'/);
+  assert.match(preview,/\[0\.75, 0\.85, 1, 1\.25\]/);
+  assert.match(preview,/useState\(0\.75\)/);
+  const catalog=JSON.parse(fs.readFileSync(path.join(root,'goodiesConsumer/customerPageCatalog.json'),'utf8'));
+  const keys=catalog.flatMap(page=>page.routes.filter(key=>key !== 'byo' && key !== 'wantiss').map(key=>({key,label:page.name})));
+  assert.equal(keys.filter(item=>item.label==='Home').length,1);
+});
