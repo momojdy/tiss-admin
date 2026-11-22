@@ -101,11 +101,12 @@ const KONSOLISS_STEPS = [
   ['Container departs', 'Your orders are shipped \nand delivered to you \nor ready for pickup \nat a designated location'],
 ] as const;
 
-export default function KonsolissConsumerPreviewScreen({copy, onBack}: {copy: KonsolissCopy; onBack?: () => void}) {
-  return <SafeAreaProvider><Screen copy={copy} onBack={onBack} /></SafeAreaProvider>;
+export default function KonsolissConsumerPreviewScreen({copy, onBack, previewSheet}: {copy: KonsolissCopy; onBack?: () => void; previewSheet?: 'book'|'calc'|null}) {
+  return <SafeAreaProvider><Screen copy={copy} onBack={onBack} previewSheet={previewSheet} /></SafeAreaProvider>;
 }
-function Screen({copy, onBack}: {copy: KonsolissCopy; onBack?: () => void}) {
+function Screen({copy, onBack, previewSheet}: {copy: KonsolissCopy; onBack?: () => void; previewSheet?: 'book'|'calc'|null}) {
   const insets = useSafeAreaInsets(); const dark = useColorScheme() === 'dark'; const t = dark ? Dk : L; const [sh, setSh] = useState<null | 'calc' | 'book'>(null); const [scroll, setScroll] = useState(true); const currentContainer = null;
+  useEffect(()=>{setSh(previewSheet??null);},[previewSheet]);
   const nav = [copy['nav.home'], copy['nav.warehouse'], copy['nav.consolidated'], copy['nav.sourcing'], copy['nav.hub']];
   return <View style={{flex: 1, backgroundColor: t.bg}}><StatusBarCompat barStyle={dark ? 'light-content' : 'dark-content'} translucent backgroundColor="transparent" />
     <ScrollView scrollEnabled={scroll} contentContainerStyle={{paddingTop: Math.max(14, insets.top), paddingBottom: 110 + insets.bottom}} showsVerticalScrollIndicator={false}>
