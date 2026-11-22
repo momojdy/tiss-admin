@@ -32,6 +32,8 @@ jobs:
       - run: npm ci
       - name: TypeScript check
         run: npm run typecheck
+      - name: Konsoliss CMS and operations boundary tests
+        run: npm run test:konsoliss
       - name: Goodies permissions, CMS and settlement tests
         run: npm run test:goodies
       - name: Bundle Android application
