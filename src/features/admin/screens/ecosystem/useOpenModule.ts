@@ -1,5 +1,4 @@
 import { useCallback } from 'react';
-import {session} from '../../state/access';
 import { ui, db } from '../../state/db';
 import { useNav } from '../../shell/Nav';
 import { useOverlay } from '../../ui/Overlay';
@@ -10,7 +9,6 @@ export function useOpenModule() {
   const { closeAll } = useOverlay();
   return useCallback((svc: string, m: string) => {
     closeAll();
-    if(svc === 'Konsoliss' && (session.role !== 'super_admin' || session.status !== 'active')) return;
     if (svc === 'Potssy' && db.POTMAP[m]) { ui.pt = db.POTMAP[m]; nav.go('potssy'); return; }
     // The dedicated Goodies screen consumes ui.goodiesModule and its own exact module names.
     // Never route a Goodies module into the generic workspace's prototype records.
