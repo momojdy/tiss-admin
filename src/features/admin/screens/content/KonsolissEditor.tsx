@@ -121,7 +121,7 @@ export function KonsolissEditor({canEdit,canPublish}:{canEdit:boolean;canPublish
   const field=(id:string,large=false)=>{
     const active=id===selected&&mode==='Edit';
     return <Pressable key={id} accessibilityRole="button" accessibilityLabel={'Edit '+labelFor(id)}
-      onPress={()=>choose(id)} style={{borderColor:active?YELLOW:'transparent',borderWidth:2,borderStyle:'dashed',borderRadius:7,padding:3,marginVertical:1}}>
+      onPress={()=>choose(id)} style={{borderColor:active?YELLOW:'transparent',borderWidth:2,borderStyle:'dotted',borderRadius:7,padding:3,marginVertical:1}}>
       <Txt size={large?17:11} weight={large?600:500} color={id.endsWith('.heading')||id.endsWith('.title')?'#F0C900':'#2B1210'}>{shown[id]??DEFAULTS[id]}</Txt>
     </Pressable>;
   };
@@ -165,7 +165,7 @@ export function KonsolissEditor({canEdit,canPublish}:{canEdit:boolean;canPublish
     </Section>
     {mode==='Edit'&&canEdit?<Section title={'Selected text · '+labelFor(selected)}>
       <Txt size={10} mut>Selected key: {selected}</Txt>
-      <TextInput accessibilityLabel={'Edit '+selected} value={text(selected)} onChangeText={v=>change(selected,v)} multiline style={{minHeight:62,borderWidth:2,borderStyle:'dashed',borderColor:YELLOW,borderRadius:12,padding:10,backgroundColor:'#FFFDF0',color:'#2B1210',textAlignVertical:'top',marginTop:8}}/>
+      <TextInput accessibilityLabel={'Edit '+selected} value={text(selected)} onChangeText={v=>change(selected,v)} multiline style={{minHeight:62,borderWidth:2,borderStyle:'dotted',borderColor:YELLOW,borderRadius:12,padding:10,backgroundColor:'#FFFDF0',color:'#2B1210',textAlignVertical:'top',marginTop:8}}/>
       <Txt size={10} mut>Tap another dotted text element in the preview, or select it below. Current editing language: {lang}.</Txt>
       {fields[page].map(id=><Pressable key={id} onPress={()=>choose(id)} style={{padding:8,borderBottomWidth:1,borderColor:'#DFD7AA'}}><Txt size={11} weight={id===selected?600:400}>{labelFor(id)}</Txt><Txt size={9} mut>{draft[id]||'—'}</Txt></Pressable>)}
     </Section>:null}
