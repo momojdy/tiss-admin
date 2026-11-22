@@ -96,3 +96,13 @@ test('selected Konsoliss content editor renders directly under the phone within 
  assert.match(phoneSection,/Edit '\+selected/);
  assert.doesNotMatch(source,/<Section title=\{'Selected text/);
 });
+
+test('editor preview guidance is clear and Konsoliss zoom has no Published button',()=>{
+ const konsoliss=get('screens/content/KonsolissEditor.tsx');
+ const goodies=get('screens/content/GoodiesConsumerPreview.tsx');
+ assert.match(konsoliss,/Choose a screen, then tap the text you want to change/);
+ assert.match(goodies,/Choose a screen, then tap the content you want to change/);
+ assert.doesNotMatch(konsoliss,/>Published<\/Txt>/);
+ assert.match(konsoliss,/Publish…/);
+ assert.match(konsoliss,/\[0\.75,0\.85,1,1\.25\]/);
+});
