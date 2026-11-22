@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useState } from 'react';
+import { lazy, Suspense, useCallback, useEffect, useState } from 'react';
 import { TextInput, View } from 'react-native';
 import { supabase } from '../../lib/supabase';
 import { publishCmsVersion, saveCmsVersion } from '../../lib/adminBackend';
@@ -16,7 +16,8 @@ import { OutlineBtn, Pill, SelectMenu, StatusPill } from '../../ui/Controls';
 import { Txt } from '../../ui/Txt';
 import { CustomerPagePreview, type CustomerPreviewMode, type CustomerPreviewView } from './CustomerPagePreview';
 import { GoodiesEditor } from './GoodiesEditor';
-import { KonsolissEditor } from './KonsolissEditor';
+// Keep the WebView-based Konsoliss preview out of the admin startup module graph.
+const KonsolissEditor = lazy(() => import('./KonsolissEditor').then(m => ({default:m.KonsolissEditor})));
 import { AuthPageEditor } from './AuthPageEditor';
 import { HomePageEditor } from './HomePageEditor';
 
@@ -401,7 +402,7 @@ export function CustomerPageEditorScreen() {
       {error ? <Card><Txt size={11.5} color={c.or}>{error}</Txt></Card> : null}
 
       {actualGoodiesPreview ? <GoodiesEditor canEdit={can(...REQ.content)} canPublish={can(...REQ.publish)} /> : null}
-      {actualKonsolissPreview ? <KonsolissEditor canEdit={can(...REQ.content)} canPublish={can(...REQ.publish)} /> : null}
+      {actualKonsolissPreview ? <Suspense fallback={<Card><Txt size={11}>Loading Konsoliss editor…</Txt></Card>}><KonsolissEditor canEdit={can(...REQ.content)} canPublish={can(...REQ.publish)} /></Suspense> : null}
       {actualAuthEditor ? <AuthPageEditor canEdit={can(...REQ.content)} canPublish={can(...REQ.publish)} /> : null}
       {homeEditor ? <HomePageEditor canEdit={can(...REQ.content)} canPublish={can(...REQ.publish)} /> : null}
 
