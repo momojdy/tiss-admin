@@ -36,6 +36,7 @@ test('Konsoliss operational workspace requires active Super Admin',()=>{
 test('Konsoliss editor is reachable independently of operational permissions',()=>{
   const source=get('screens/content/CustomerPageEditorScreen.tsx');
   assert.match(source,/KonsolissEditor/);
+  assert.match(source,/setPageChoice\(requested === 'goodies' \? 'Goodies' : 'Konsoliss'\)/);
   assert.match(source,/can\(\.\.\.REQ\.content\)/);
   assert.match(source,/can\(\.\.\.REQ\.publish\)/);
 });
