@@ -83,3 +83,16 @@ test('Goodies preview has one Home tab and separate zoom options row',()=>{
   const keys=catalog.flatMap(page=>page.routes.filter(key=>key !== 'byo' && key !== 'wantiss').map(key=>({key,label:page.name})));
   assert.equal(keys.filter(item=>item.label==='Home').length,1);
 });
+
+test('selected Konsoliss content editor renders directly under the phone within the preview section',()=>{
+ const source=get('screens/content/KonsolissEditor.tsx');
+ const start=source.indexOf('<Section title="Konsoliss phone preview">');
+ const selected=source.indexOf('accessibilityLabel="Selected Konsoliss content editor"');
+ const end=source.indexOf('<Section title="Pages · Text">');
+ assert.ok(start>=0 && selected>start && end>selected,'selected content editor must be between the phone preview and Pages · Text');
+ const phoneSection=source.slice(start,end);
+ assert.match(phoneSection,/KonsolissConsumerPreviewScreen/);
+ assert.match(phoneSection,/editMode&&selected\?<View/);
+ assert.match(phoneSection,/Edit '\+selected/);
+ assert.doesNotMatch(source,/<Section title=\{'Selected text/);
+});
