@@ -1,4 +1,5 @@
 import { View } from 'react-native';
+import {session} from '../../state/access';
 import { db, ui, useDb } from '../../state/db';
 import { useNav } from '../../shell/Nav';
 import { useOpen } from '../../overlays/registry';
@@ -19,6 +20,9 @@ export function ServiceHubScreen() {
   const selectedHub = db.SVC.find((row) => row[0] === ui.hub);
   const service = selectedHub ?? db.SVC[0];
   const serviceName = service[0];
+  if (serviceName === 'Konsoliss' && (session.role !== 'super_admin' || session.status !== 'active')) {
+    return <Card><Txt size={12}>Konsoliss operations are restricted to Super Admin. Authorized content editors can edit Konsoliss under Content Studio.</Txt></Card>;
+  }
   const modules = serviceName === 'Goodies'
     ? [...GOODIES_MODULES]
     : (db.MOD[serviceName] || 'Overview|Configuration').split('|');
