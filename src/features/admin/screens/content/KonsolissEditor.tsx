@@ -90,15 +90,14 @@ export function KonsolissEditor({canEdit,canPublish}:{canEdit:boolean;canPublish
   const [rows,setRows]=useState<CmsRow[]>([]);
   const [draft,setDraft]=useState<Record<string,string>>({...DEFAULTS});
   const [selected,setSelected]=useState('');
-  const [mode,setMode]=useState<'Edit'|'Preview'|'Published'>('Edit');
+  const [mode,setMode]=useState<'Edit'|'Preview'>('Edit');
   const [busy,setBusy]=useState(false);
   const [error,setError]=useState('');
   const [dirty,setDirty]=useState(false);
   const [confirm,setConfirm]=useState(false);
   const [version,setVersion]=useState<CmsRow|null>(null);
-  const published=rows.find(r=>r.locale===lang&&r.status==='published');
   const text=(key:string)=>draft[key]??DEFAULTS[key]??'';
-  const shown=mode==='Published'?{...DEFAULTS,...(published?.payload?.labels||{})}:draft;
+  const shown=draft;
   const load=useCallback(async()=>{
     setError('');
     const {data,error:e}=await supabase.from('wantiss_cms_content').select('id,version,status,locale,payload').eq('content_key',KEY).order('version',{ascending:false}).limit(150);
@@ -161,8 +160,8 @@ export function KonsolissEditor({canEdit,canPublish}:{canEdit:boolean;canPublish
       <View style={{alignItems:'center',paddingVertical:6}}>
         <View style={{width:'100%',maxWidth:390,marginBottom:10,paddingHorizontal:4}}>
           <Txt size={12} weight={600}>{editMode?'Edit Konsoliss content preview':'Konsoliss content preview'}</Txt>
-          <Txt size={10} mut style={{marginTop:3,lineHeight:15}}>{editMode?'Use the screen tabs to open a page, then tap yellow-dotted editable text in the phone to select its matching field.':'Rendered from the current content with isolated sample values. No booking or payment is saved.'}</Txt>
-          <Txt size={10} mut style={{marginTop:6}}>Draft preview · Sample operational data only · Actual consumer homepage and interactive 3D container.</Txt>
+          <Txt size={10} mut style={{marginTop:3,lineHeight:15}}>{editMode?'Choose a screen, then tap the text you want to change in the phone preview.':'Explore how your saved content will look to customers.'}</Txt>
+          <Txt size={10} mut style={{marginTop:6}}>Your edits appear in the preview before publishing. Preview actions do not create real bookings or shipments.</Txt>
           <ScrollView horizontal showsHorizontalScrollIndicator={false} contentContainerStyle={{gap:6,paddingVertical:8}}>
             {([{id:'en',name:'English'},{id:'fr',name:'Français'},{id:'ht',name:'Kreyòl Ayisyen'},{id:'es',name:'Español'},{id:'zh-Hans',name:'简体中文'}] as const).map(l=>
               <Pressable key={l.id} onPress={()=>setLang(l.id)} accessibilityRole="button" accessibilityLabel={'Preview in '+l.name}
@@ -173,8 +172,6 @@ export function KonsolissEditor({canEdit,canPublish}:{canEdit:boolean;canPublish
           <ScrollView horizontal showsHorizontalScrollIndicator={false} contentContainerStyle={{gap:6,paddingVertical:6}}>
             {[0.75,0.85,1,1.25].map(z=><Pressable key={z} onPress={()=>setZoom(z)} accessibilityRole="button" accessibilityLabel={'Preview zoom '+Math.round(z*100)+'%'}
               style={{borderRadius:18,padding:8,backgroundColor:zoom===z?YELLOW:'#F1F1F2'}}><Txt size={10} color="#2B1210">{Math.round(z*100)}%</Txt></Pressable>)}
-            <Pressable accessibilityRole="button" onPress={()=>{setMode(mode==='Published'?'Preview':'Published');setSelected('');}}
-              style={{borderRadius:18,padding:8,backgroundColor:mode==='Published'?YELLOW:'#F1F1F2'}}><Txt size={10} color="#2B1210">Published</Txt></Pressable>
           </ScrollView>
           <ScrollView horizontal showsHorizontalScrollIndicator={false} contentContainerStyle={{gap:6,paddingVertical:10}}>
             {navScreen.map(name=><Pressable key={name} onPress={()=>goPage(name)} accessibilityRole="button" accessibilityLabel={'Preview screen: '+name}
@@ -182,7 +179,6 @@ export function KonsolissEditor({canEdit,canPublish}:{canEdit:boolean;canPublish
               <Txt size={10} color="#2B1210" weight={600}>{name}</Txt>
             </Pressable>)}
           </ScrollView>
-          {mode==='Published'&&!published?<Txt size={10} color={RED}>No published content in this language. Showing built-in defaults.</Txt>:null}
         </View>
         <ScrollView horizontal contentContainerStyle={{flexGrow:1,justifyContent:'center'}}>
           <PhoneFrame background="#FFFBD4" zoom={zoom}>
