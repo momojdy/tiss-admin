@@ -98,6 +98,8 @@ export function GoodiesEditor({ canEdit, canPublish }: { canEdit: boolean; canPu
   const [byoFocus, setByoFocus] = useState<BuilderTarget | null>(null);
   const [byoUrls, setByoUrls] = useState<Record<string, string>>({});
   const operationLock = useRef(false), assetLock = useRef(false);
+  const [reviewTarget, setReviewTarget] = useState<string | null>(null);
+  const reviewInput = useRef<TextInput>(null);
 
   const clean = useMemo(() => (draft ? sanitizeForSave(draft) : null), [draft]);
   const dirty = !!clean && stable(clean) !== baseline;
@@ -130,6 +132,23 @@ export function GoodiesEditor({ canEdit, canPublish }: { canEdit: boolean; canPu
       setLoadState('error');
     }
   }, []);
+
+  const jumpToReview = (message: string) => {
+    const match = message.match(/(lbl\.[A-Za-z0-9_.-]+) \((en|fr|ht|es|zh-Hans)\) needs review/);
+    if (!match || !draft?.labels?.some((entry: any) => entry.id === match[1])) return;
+    setMode('Edit');
+    setEditLanguage(match[2] as 'en'|'fr'|'ht'|'es'|'zh-Hans');
+    setPageChoice(labelPage(match[1]));
+    setSelection(null);
+    setReviewTarget(match[1]);
+  };
+
+  useEffect(() => {
+    if (reviewTarget && activeEntries.some((entry: any) => entry.id === reviewTarget)) {
+      const frame = requestAnimationFrame(() => reviewInput.current?.focus());
+      return () => cancelAnimationFrame(frame);
+    }
+  }, [reviewTarget, pageChoice, editLanguage]);
 
   const loadAssets = useCallback(async () => {
     try {
@@ -463,7 +482,7 @@ export function GoodiesEditor({ canEdit, canPublish }: { canEdit: boolean; canPu
         {!canEdit ? <Txt size={9.5} color={c.or} style={{ marginTop: 6 }}>View access only: editing and saving are disabled.</Txt> : null}
       </Section>
 
-      {notice ? <Card><Txt size={11} color={toneColor(notice.tone)}>{notice.text}</Txt></Card> : null}
+      {notice ? <Card>{notice.tone === 'error' && /lbl\.[A-Za-z0-9_.-]+ \((en|fr|ht|es|zh-Hans)\) needs review/.test(notice.text) ? <Pressable accessibilityRole="button" accessibilityLabel={'Go to translation requiring review: ' + notice.text} onPress={() => jumpToReview(notice.text)}><Txt size={11} color={toneColor(notice.tone)}>{notice.text} · Tap to fix</Txt></Pressable> : <Txt size={11} color={toneColor(notice.tone)}>{notice.text}</Txt>}</Card> : null}
       {loadState === 'error' ? (
         <Card>
           <Txt size={11} color={c.or}>{loadError}</Txt>
@@ -645,10 +664,10 @@ export function GoodiesEditor({ canEdit, canPublish }: { canEdit: boolean; canPu
               ))}
             </View>
             {activeEntries.map((entry: any) => (
-              <View key={entry.id} style={{ marginTop: 8, paddingTop: 6, borderTopWidth: 1, borderTopColor: c.bd }}>
+              <View key={entry.id} style={{ marginTop: 8, paddingTop: 6, borderTopWidth: reviewTarget === entry.id ? 2 : 1, borderTopColor: reviewTarget === entry.id ? c.or : c.bd }}>
                 <Txt size={10.5} mut>{entry.label || entry.id}</Txt>
                 <Txt size={9} mut>{entry.id}</Txt>
-                <TextInput value={readText(entry.t, editLanguage)} onChangeText={(value) => setLabelText(entry.id, value)} editable={editMode && !busy} multiline={readText(entry.t,editLanguage).length > 60} style={[fieldStyle, readText(entry.t,editLanguage).length > 60 ? { minHeight: 64, textAlignVertical: 'top' } : null]} placeholder={'Text customers see in ' + editLanguage.toUpperCase()} />
+                <TextInput ref={reviewTarget === entry.id ? reviewInput : undefined} value={readText(entry.t, editLanguage)} onChangeText={(value) => setLabelText(entry.id, value)} editable={editMode && !busy} multiline={readText(entry.t,editLanguage).length > 60} style={[fieldStyle, readText(entry.t,editLanguage).length > 60 ? { minHeight: 64, textAlignVertical: 'top' } : null]} placeholder={'Text customers see in ' + editLanguage.toUpperCase()} />
                 <View style={{marginTop:6,alignSelf:'flex-start'}}><OutlineBtn onPress={()=>setLabelTranslationReviewed(entry.id,entry.t?.[editLanguage]?.s!=='reviewed')} disabled={!editMode || !String(entry.t?.[editLanguage]?.v||'').trim()}>{entry.t?.[editLanguage]?.s==='reviewed'?'Reviewed':'Mark reviewed'}</OutlineBtn></View>
               </View>
             ))}
