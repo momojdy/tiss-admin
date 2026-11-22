@@ -3,16 +3,14 @@ import criticalKeys from './criticalContentKeys.json';
 /** Pre-publication review feedback; backend authorization remains authoritative. Never marks text reviewed. */
 export function goodiesPublicationErrors(draft: any): string[] {
   const errors: string[] = [], keys = new Set(criticalKeys);
+  // Publishing the English source must not depend on incomplete translations.
+  // Translation review remains visible in the editor and is enforced when a
+  // translation is selected for customer display, not as a release gate.
   const check = (text: any, name: string) => {
     if (!text || typeof text !== 'object') return;
-    for (const [locale, translation] of Object.entries(text) as [string, any][]) {
-      if (locale === 'ht' && translation?.s !== 'reviewed') {
-        const english = text.en;
-        if (typeof english?.v !== 'string' || !english.v.trim() || english.s !== 'reviewed') errors.push(`${name} needs reviewed English for Haitian Creole fallback.`);
-        continue;
-      }
-      if (String(translation?.v || '').trim() && translation.s !== 'reviewed' && (locale !== 'en' || translation.s)) errors.push(`${name} (${locale}) needs review before publishing.`);
-    }
+    const english = text.en;
+    if (english?.s && english.s !== 'reviewed' && String(english.v || '').trim())
+      errors.push(`${name} (en) needs review before publishing.`);
   };
   for (const entry of draft?.labels || []) if (keys.has(entry.id)) check(entry.t, entry.id);
   for (const entry of draft?.faq || []) {
