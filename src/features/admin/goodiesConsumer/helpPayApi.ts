@@ -3,7 +3,7 @@
  * request state from Supabase and leaves Wallet ledger writes inside RPCs.
  */
 import {previewBackend as supabase} from './previewRuntime';
-// Production remains off until the paired backend and hosted acceptance are approved.
+// The build opts in; the backend switch independently controls new funding.
 export const GOODIES_SHARED_PAYMENTS_RELEASED=true /* isolated preview only; funding RPCs are always blocked */;
 
 export type HelpPayMode='share'|'full';
