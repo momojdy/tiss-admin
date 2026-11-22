@@ -10,7 +10,8 @@
     "typecheck": "tsc --noEmit",
     "test:goodies-cms": "node tests/cms.test.cjs",
     "test:konsoliss": "node tests/konsoliss.test.cjs",
-    "test:goodies": "node tests/access.test.cjs && node tests/cms.test.cjs && node tests/cms-public-transport.test.cjs && node tests/settlement.test.cjs && node tests/shared-bill-refunds.test.cjs && node tests/goodies-navigation.test.cjs && node tests/goodies-admin-recovery.test.cjs"
+    "test:goodies": "node tests/access.test.cjs && node tests/cms.test.cjs && node tests/cms-public-transport.test.cjs && node tests/settlement.test.cjs && node tests/shared-bill-refunds.test.cjs && node tests/goodies-navigation.test.cjs && node tests/goodies-admin-recovery.test.cjs",
+    "test:konsoliss:backend": "node tests/backend/konsoliss-integrity.cjs"
   },
   "dependencies": {
     "@expo-google-fonts/manrope": "^0.4.3",
@@ -37,6 +38,7 @@
     "react-native-webview": "14.0.1"
   },
   "devDependencies": {
+    "@electric-sql/pglite": "0.3.14",
     "@types/react": "~19.3.0",
     "babel-preset-expo": "~58.0.20",
     "typescript": "~6.0.3"

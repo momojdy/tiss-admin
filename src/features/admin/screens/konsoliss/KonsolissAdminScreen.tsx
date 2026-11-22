@@ -1,4 +1,4 @@
-import React, {useCallback, useEffect, useState} from 'react';
+import React, {useCallback, useEffect, useRef, useState} from 'react';
 import {Pressable, TextInput, View} from 'react-native';
 import {supabase} from '../../lib/supabase';
 import {session} from '../../state/access';
@@ -29,16 +29,19 @@ export function KonsolissAdminScreen(){
  const [progressConfirm,setProgressConfirm]=useState(false);
  const [chosen,setChosen]=useState('');
  const [confirm,setConfirm]=useState<{id:string;next:Container['status']}|null>(null);
+ const sequence=useRef(0);
  const authorized=session.role==='super_admin'&&session.status==='active';
  const refresh=useCallback(async()=>{
-   if(!authorized)return;
+   const request=++sequence.current;
+   if(!authorized){setContainers([]);return;}
    setLoading(true);setError('');
    const {data,error:e}=await supabase.rpc('konsoliss_admin_list_containers');
-   if(e)setError('Unable to load container records. Verify your access and connection.');
+   if(request!==sequence.current)return;
+   if(e){setContainers([]);setError('Unable to load container records. Verify your access and connection.');}
    else setContainers(Array.isArray(data)?data as Container[]:[]);
    setLoading(false);
  },[authorized]);
- useEffect(()=>{void refresh();},[refresh]);
+ useEffect(()=>{void refresh();return()=>{sequence.current++;};},[refresh]);
  useEffect(()=>{if(MODULES.includes(String(ui.wmod)))setModule(String(ui.wmod));},[ui.wmod]);
  const action=async(kind:'create'|'advance'|'assign',values:{containerId?:string;status?:string;customer?:string})=>{
    if(!authorized||busy)return;
@@ -62,7 +65,7 @@ export function KonsolissAdminScreen(){
    if(e)setError('Customer load progress could not be retrieved.');
    else{
      const row=data as Record<string,unknown>|null;
-     setLoadVolumes({reserved:String(row?.reserved_cbm??0),sent:String(row?.sent_cbm??0),inbound:String(row?.inbound_to_container_cbm??0),loaded:String(row?.loaded_cbm??0)});
+     setLoadVolumes({reserved:String(row?.reserved_cbm??''),sent:String(row?.sent_cbm??''),inbound:String(row?.inbound_to_container_cbm??''),loaded:String(row?.loaded_cbm??'')});
      setProgressForUser(id);setProgressConfirm(false);
      setSuccess(row?'Existing recorded volumes loaded for review.':'No recorded volumes yet. Confirm the measured values before saving.');
    }
@@ -73,8 +76,8 @@ export function KonsolissAdminScreen(){
    const reserved=Number(loadVolumes.reserved),sent=Number(loadVolumes.sent);
    const inbound=Number(loadVolumes.inbound),loaded=Number(loadVolumes.loaded);
    if(Object.values(loadVolumes).some(value=>!value.trim())||![reserved,sent,inbound,loaded].every(Number.isFinite)
-     ||reserved<0||reserved>68||sent<0||inbound<0||loaded<0||inbound+loaded>sent||inbound+loaded>reserved){
-     setError('Enter valid measured CBM values. Inbound plus loaded must not exceed goods sent or reserved space (maximum 68 CBM).');return;
+     ||reserved<0||sent<0||inbound<0||loaded<0||inbound+loaded>sent||inbound+loaded>reserved){
+     setError('Enter valid measured CBM values. Inbound plus loaded must not exceed goods sent or reserved space. Each container has a separate 68 CBM limit.');return;
    }
    if(reason.trim().length<5){setError('A documented audit reason is required.');return;}
    setBusy(true);setError('');setSuccess('');
@@ -130,7 +133,7 @@ export function KonsolissAdminScreen(){
       <OutlineBtn primary disabled={busy} onPress={()=>{void action('create',{});}}>Create container</OutlineBtn>
     </Section>
     <Section title="Assign customer to container">
-      <Txt size={10} mut>Use a verified Wantiss customer UUID. The customer will see this container number and state on their homepage. This replaces their previous current-container assignment.</Txt>
+      <Txt size={10} mut>Use a verified Wantiss customer UUID. The customer will see this container number and state on their homepage. Other current assignments are retained when cargo spans multiple containers.</Txt>
       <View style={{flexDirection:'row',flexWrap:'wrap',gap:5,marginTop:8}}>{containers.map(c=><Pill key={c.id} on={chosen===c.id} onPress={()=>setChosen(c.id)}>{c.container_number}</Pill>)}</View>
       <TextInput accessibilityLabel="Customer user UUID" value={customerId} onChangeText={setCustomerId} placeholder="Customer UUID" placeholderTextColor="#8D817A" autoCapitalize="none" style={fieldStyle}/>
       <TextInput accessibilityLabel="Reason to assign" value={reason} onChangeText={setReason} placeholder="Audit reason" placeholderTextColor="#8D817A" style={fieldStyle}/>
