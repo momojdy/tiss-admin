@@ -37,12 +37,12 @@ const BASE:KonsolissPreviewFixture={
 };
 export function konsolissPreviewFixture(scenario:KonsolissPreviewScenario):KonsolissPreviewFixture {
   switch(scenario) {
-    case 'loading': return {...BASE,scenario,containerNumber:null,status:null,message:'Loading your container information…'};
-    case 'error': return {...BASE,scenario,containerNumber:null,status:null,message:'We could not load your container information. Please try again.'};
-    case 'no-container': return {...BASE,scenario,containerNumber:null,status:null,occupiedCbm:0,customerCbm:0,message:'No container assigned yet. Your container will appear here once assigned.'};
-    case 'filled': return {...BASE,scenario,status:'filled',occupiedCbm:59.5,customerCbm:0.5,availableForBooking:false,message:'Loading is closed. This container is being prepared for departure.'};
-    case 'departed': return {...BASE,scenario,status:'departed',occupiedCbm:59.5,customerCbm:0.5,availableForBooking:false,message:'The container has departed. Shipment updates will appear here.'};
-    case 'arrived': return {...BASE,scenario,status:'arrived',occupiedCbm:59.5,customerCbm:0.5,availableForBooking:false,message:'The container has arrived. Your packages may still require delivery or pickup.'};
+    case 'loading': return {...BASE,scenario,containerNumber:null,status:null,availableForBooking:false,message:'Loading your container information…'};
+    case 'error': return {...BASE,scenario,containerNumber:null,status:null,availableForBooking:false,message:'We could not load your container information. Please try again.'};
+    case 'no-container': return {...BASE,scenario,containerNumber:null,status:null,occupiedCbm:0,customerCbm:0,availableForBooking:false,message:'No container assigned yet. Your container will appear here once assigned.'};
+    case 'filled': return {...BASE,scenario,status:'filled',occupiedCbm:51.7,customerCbm:0.5,availableForBooking:false,message:'Loading is closed. This container is being prepared for departure.'};
+    case 'departed': return {...BASE,scenario,status:'departed',occupiedCbm:51.7,customerCbm:0.5,availableForBooking:false,message:'The container has departed. Shipment updates will appear here.'};
+    case 'arrived': return {...BASE,scenario,status:'arrived',occupiedCbm:51.7,customerCbm:0.5,availableForBooking:false,message:'The container has arrived. Your packages may still require delivery or pickup.'};
     case 'booking-success':return {...BASE,scenario,message:'Sample booking success: no actual space was reserved.'};
     case 'booking-failed':return {...BASE,scenario,message:'Sample booking failure: no reservation was submitted.'};
     default:return {...BASE,scenario};
