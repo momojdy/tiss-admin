@@ -158,9 +158,9 @@ export function GoodiesConsumerPreview({ editMode = false, contentDraft, assetUr
       <View style={{ width: '100%', maxWidth: 390, marginBottom: 10, paddingHorizontal: 4 }}>
         <Text style={{ color: ink, fontSize: 12, fontWeight: '800' }}>{editMode ? 'Edit Goodies content preview' : 'Goodies content preview'}</Text>
         <Text style={{ color: muted, fontSize: 10, lineHeight: 15, marginTop: 3 }}>
-          {editMode ? 'Use the screen tabs to open a page, then tap editable text in the phone to select its matching field.' : 'Rendered using the current draft and isolated sample data. Placing orders is disabled in this preview.'}
+          {editMode ? 'Choose a screen, then tap the content you want to change in the phone preview.' : 'Explore how your saved content will look to customers.'}
         </Text>
-        <Text style={{ color: muted, fontSize: 10, marginTop: 6 }}>Draft preview · Sample data only · Fixtures apply to group/card pages; no order, card or payment is saved. · Unreviewed translations may appear here; customers receive reviewed translations or English.</Text>
+        <Text style={{ color: muted, fontSize: 10, marginTop: 6 }}>Your edits appear in the preview before publishing. Preview actions do not place real orders or process payments.</Text>
         <ScrollView horizontal showsHorizontalScrollIndicator={false} contentContainerStyle={{ gap: 6, paddingVertical: 8 }}>
           {LANGS.map(locale => <Pressable key={locale.code} accessibilityRole="button" accessibilityLabel={'Preview in ' + locale.label} accessibilityState={{selected: S.lang === locale.code}} onPress={() => {S.lang = locale.code; onLocaleChange?.(locale.code); emit();}} style={{padding: 7, borderRadius: 12, backgroundColor: S.lang === locale.code ? orange : '#F1F1F2'}}><Text style={{fontSize: 10, color: S.lang === locale.code ? '#FFFFFF' : ink}}>{locale.label}</Text></Pressable>)}
         </ScrollView>
