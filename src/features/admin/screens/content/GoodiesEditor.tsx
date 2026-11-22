@@ -3,7 +3,7 @@ import customerPageCatalog from '../../goodiesConsumer/customerPageCatalog.json'
 import {mergeMissingLabels, setLocalizedText, contentTextValues} from '../../goodiesConsumer/contentEditing';
 import {GoodiesPageContentFields} from './GoodiesPageContentFields';
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
-import { Image, Pressable, TextInput, View } from 'react-native';
+import { ScrollView, Image, Pressable, TextInput, View } from 'react-native';
 import * as ImagePicker from 'expo-image-picker';
 import * as DocumentPicker from 'expo-document-picker';
 import { supabase } from '../../lib/supabase';
@@ -526,20 +526,16 @@ export function GoodiesEditor({ canEdit, canPublish }: { canEdit: boolean; canPu
                 <Txt size={10.5} weight={500}>Choose an existing CMS image</Txt>
                 <Txt size={9.5} mut style={{ marginTop: 2, marginBottom: 5 }}>Select an image to use it for this item. The preview updates immediately.</Txt>
                 <TextInput value={assetSearch} onChangeText={setAssetSearch} placeholder="Search all CMS images by asset key" style={fieldStyle} />
-                {assets.filter(asset => !assetSearch.trim() || asset.asset_key.toLowerCase().includes(assetSearch.trim().toLowerCase())).slice(0, 100).map((asset) => {
-                  const active = currentImage?.assetKey === asset.asset_key || currentImage?.asset_key === asset.asset_key;
-                  return (
-                    <Pressable key={asset.id} onPress={() => pickAsset(asset)} accessibilityRole="button" accessibilityLabel={'Select image ' + asset.asset_key} style={{ flexDirection: 'row', alignItems: 'center', gap: 12, flexWrap: 'wrap', paddingVertical: 8, paddingHorizontal: 7, marginBottom: 5, borderWidth: active ? 2 : 1, borderColor: active ? c.ink : c.bd, borderRadius: 10, backgroundColor: active ? c.inset : c.card }}>
-                      {assetUrls[asset.asset_key] ? <Image source={{ uri: assetUrls[asset.asset_key] }} resizeMode="contain" style={{ width: 100, height: 64, borderRadius: 8, backgroundColor: '#FFFFFF' }} /> : <View style={{ width: 100, height: 64, borderRadius: 8, backgroundColor: c.inset, alignItems: 'center', justifyContent: 'center' }}><Txt size={10} mut>No preview</Txt></View>}
-                      <View style={{ flex: 1, minWidth: 150 }}>
-                        <Txt size={10.5} weight={500}>{asset.asset_key}</Txt>
-                        <Txt size={9.5} mut>{asset.status === 'published' ? 'Published image' : 'Draft image · publish before publishing Goodies content'}</Txt>
-                        {active ? <Txt size={9.5} weight={500}>Currently selected ✓</Txt> : <Txt size={9.5} mut>Tap to select</Txt>}
-                      </View>
-                    </Pressable>
-                  );
-                })}
-                {assets.length > 100 ? <Txt size={9.5} mut>Showing up to 100 matches. Search by asset key to find any image.</Txt> : null}
+                <ScrollView nestedScrollEnabled style={{ maxHeight: 168, marginTop: 6 }} contentContainerStyle={{ flexDirection: 'row', flexWrap: 'wrap', gap: 6 }}>
+                  {assets.filter(asset => !assetSearch.trim() || asset.asset_key.toLowerCase().includes(assetSearch.trim().toLowerCase())).map((asset) => {
+                    const active = currentImage?.assetKey === asset.asset_key || currentImage?.asset_key === asset.asset_key;
+                    return (
+                      <Pressable key={asset.id} onPress={() => pickAsset(asset)} accessibilityRole="button" accessibilityLabel={'Select image ' + asset.asset_key} accessibilityState={{ selected: active }} style={{ width: '31.5%', aspectRatio: 1, borderWidth: active ? 2 : 1, borderColor: active ? c.ink : c.bd, borderRadius: 8, backgroundColor: c.card, overflow: 'hidden' }}>
+                        {assetUrls[asset.asset_key] ? <Image source={{ uri: assetUrls[asset.asset_key] }} resizeMode="contain" style={{ width: '100%', height: '100%' }} /> : <View style={{ flex: 1, backgroundColor: c.inset, alignItems: 'center', justifyContent: 'center' }}><Txt size={9} mut>No preview</Txt></View>}
+                      </Pressable>
+                    );
+                  })}
+                </ScrollView>
                 {!assets.length ? <Txt size={10} mut>No image assets found yet. Choose an image above or upload it in Content Studio.</Txt> : null}
               </View>
               <Txt size={9.5} mut style={{ marginTop: 8 }}>Or use an external https link (not managed by the CMS)</Txt>
