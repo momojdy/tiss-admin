@@ -3,7 +3,7 @@ import { useEffect, useState } from 'react';
 import { fetchPublishedWantissContent, subscribeBrandingChanged } from '../lib/wantissCms';
 import { useDb } from '../state/db';
 import { unreadCount } from '../state/notices';
-import { me, session } from '../state/access';
+import { session } from '../state/access';
 import { IconBtn } from '../ui/Controls';
 import { Txt } from '../ui/Txt';
 import { AppIcon } from '../ui/AppIcon';
@@ -29,7 +29,7 @@ export function Header({ onBell, onAccount, onSearch }: { onBell: () => void; on
           <IconBtn a11y="Notifications" onPress={onBell} size={30}><AppIcon name="bell" size={16} color={c.ink} /></IconBtn>
           {n ? <View style={{ position: 'absolute', right: -2, top: -2, minWidth: 14, height: 14, borderRadius: 7, backgroundColor: c.or, alignItems: 'center', justifyContent: 'center' }}><Txt size={8.5} color="#fff" weight={600}>{n}</Txt></View> : null}
         </View>
-        <Pressable onPress={onAccount} accessibilityLabel={'Account menu for ' + me().n} hitSlop={6}>
+        <Pressable onPress={onAccount} accessibilityLabel={'Account menu for ' + (session.who || session.email || 'signed-in staff')} hitSlop={6}>
           {session.avatarUrl ? <Image source={{ uri: session.avatarUrl }} style={{ width: 30, height: 30, borderRadius: 15, borderWidth: 1, borderColor: c.bd }} /> : <View style={{ width: 30, height: 30, borderRadius: 15, borderWidth: 1, borderColor: c.bd, backgroundColor: c.card, alignItems: "center", justifyContent: "center" }}><AppIcon name="user-round" size={17} color={c.ink} /></View>}
         </Pressable>
       </View>
