@@ -106,3 +106,49 @@ test('editor preview guidance is clear and Konsoliss zoom has no Published butto
  assert.match(konsoliss,/Publish…/);
  assert.match(konsoliss,/\[0\.75,0\.85,1,1\.25\]/);
 });
+
+test('Konsoliss preview scenarios are isolated from live operations and cover each requested state',()=>{
+ const source=get('screens/content/KonsolissPreviewFixtures.ts');
+ const preview=get('screens/content/KonsolissConsumerPreviewScreen.tsx');
+ const editor=get('screens/content/KonsolissEditor.tsx');
+ const fixtureFile=ts.transpileModule(source,{compilerOptions:{module:ts.ModuleKind.CommonJS,target:ts.ScriptTarget.ES2020}}).outputText;
+ const fake={exports:{}};
+ require('node:vm').runInNewContext(fixtureFile,{module:fake,exports:fake.exports});
+ const fixtures=fake.exports;
+ const general=fixtures.KONSOLISS_PREVIEW_GENERAL;
+ const lifecycle=fixtures.KONSOLISS_PREVIEW_LIFECYCLE;
+ assert.deepEqual(Array.from(general,x=>x.id),['default','loading','error','no-container','booking-success','booking-failed']);
+ assert.deepEqual(Array.from(lifecycle,x=>x.id),['filling','filled','departed','arrived']);
+ for(const row of [...general,...lifecycle]){
+   const data=fixtures.konsolissPreviewFixture(row.id);
+   assert.equal(data.scenario,row.id);
+   assert.equal(typeof data.availableForBooking,'boolean');
+ }
+ for(const key of ['loading','error','no-container']){
+   const state=fixtures.konsolissPreviewFixture(key);
+   assert.equal(state.containerNumber,null);
+   assert.equal(state.availableForBooking,false);
+   assert.equal(fixtures.konsolissPreviewNeedsFallback(state),true);
+ }
+ for(const key of ['filled','departed','arrived']){
+   const state=fixtures.konsolissPreviewFixture(key);
+   assert.equal(state.status,key);
+   assert.equal(state.availableForBooking,false);
+   assert.ok(state.occupiedCbm<=state.capacityCbm);
+   assert.match(fixtures.konsolissPreviewStatusLabel(state),new RegExp(key,'i'));
+ }
+ for(const key of ['booking-success','booking-failed']){
+   assert.equal(fixtures.konsolissPreviewFixture(key).status,'filling');
+ }
+ assert.match(editor,/KONSOLISS_PREVIEW_GENERAL\.map/);
+ assert.match(editor,/KONSOLISS_PREVIEW_LIFECYCLE\.map/);
+ assert.match(editor,/scenario=\{scenario\}/);
+ assert.match(preview,/konsolissPreviewFixture\(scenario\)/);
+ assert.match(preview,/scenario==='booking-success'/);
+ assert.match(preview,/scenario==='booking-failed'/);
+ assert.match(preview,/konsolissPreviewNeedsFallback\(fixture\)/);
+ assert.match(preview,/ActivityIndicator/);
+ assert.match(preview,/onRetry/);
+ assert.doesNotMatch(source,/\b(?:supabase|fetch|axios|createClient|rpc)\s*\(/);
+ assert.doesNotMatch(preview,/supabase\.(?:from|rpc|functions)|fetch\(/);
+});
