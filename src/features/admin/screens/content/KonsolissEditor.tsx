@@ -1,5 +1,5 @@
 import React, {useCallback, useEffect, useMemo, useState} from 'react';
-import {Modal, Pressable, ScrollView, TextInput, View} from 'react-native';
+import {Pressable, ScrollView, TextInput, View} from 'react-native';
 import {supabase} from '../../lib/supabase';
 import {publishCmsVersion, saveCmsVersion} from '../../lib/adminBackend';
 import {Section, Card} from '../../ui/Card';
@@ -88,7 +88,6 @@ export function KonsolissEditor({canEdit,canPublish}:{canEdit:boolean;canPublish
   const [zoom,setZoom]=useState(0.75);
   const [previewSheet,setPreviewSheet]=useState<'book'|'calc'|null>(null);
   const [scenario,setScenario]=useState<KonsolissPreviewScenario>('default');
-  const [lifecycleMenuOpen,setLifecycleMenuOpen]=useState(false);
   const [lang,setLang]=useState<Lang>('en');
   const [rows,setRows]=useState<CmsRow[]>([]);
   const [draft,setDraft]=useState<Record<string,string>>({...DEFAULTS});
@@ -131,7 +130,6 @@ export function KonsolissEditor({canEdit,canPublish}:{canEdit:boolean;canPublish
   const choose=(id:string)=>{if(Object.prototype.hasOwnProperty.call(DEFAULTS,id))setSelected(id);};
   const goPage=(name:string)=>{setPage(name);setSelected('');setPreviewSheet(name==='Book Space'?'book':name==='CBM Calculator'?'calc':null);};
   const selectScenario=(next:KonsolissPreviewScenario)=>{
-    setLifecycleMenuOpen(false);
     setScenario(next);setSelected('');
     if(next==='booking-success'||next==='booking-failed'){setPage('Book Space');setPreviewSheet('book');}
     else{setPage('Home');setPreviewSheet(null);}
@@ -198,15 +196,15 @@ export function KonsolissEditor({canEdit,canPublish}:{canEdit:boolean;canPublish
               <Txt size={10} color="#2B1210">{item.label}</Txt>
             </Pressable>)}
           </ScrollView>
-          <View style={{flexDirection:'row',alignItems:'center',justifyContent:'space-between',marginTop:8,marginBottom:5,gap:8}}>
-            <Txt size={10} weight={600}>Container lifecycle</Txt>
-            <Pressable accessibilityRole="button" accessibilityLabel="Choose a container lifecycle preview"
-              accessibilityState={{expanded:lifecycleMenuOpen}}
-              onPress={()=>setLifecycleMenuOpen(true)}
-              style={{borderRadius:18,paddingHorizontal:13,paddingVertical:9,backgroundColor:'#F1F1F2',borderWidth:1,borderColor:'#E5E5E7'}}>
-              <Txt size={10} color="#2B1210">{KONSOLISS_PREVIEW_LIFECYCLE.find(item=>item.id===scenario)?.label||'Choose status'}  ▾</Txt>
-            </Pressable>
-          </View>
+          <Txt size={10} weight={600} style={{marginTop:5,marginBottom:3}}>Container lifecycle</Txt>
+          <ScrollView horizontal showsHorizontalScrollIndicator={false} contentContainerStyle={{gap:6,paddingVertical:6}}>
+            {KONSOLISS_PREVIEW_LIFECYCLE.map(item=><Pressable key={item.id} accessibilityRole="button"
+              accessibilityLabel={'Konsoliss preview: '+item.label} accessibilityState={{selected:scenario===item.id}}
+              onPress={()=>selectScenario(item.id)}
+              style={{borderRadius:18,paddingHorizontal:11,paddingVertical:8,backgroundColor:scenario===item.id?YELLOW:'#F1F1F2'}}>
+              <Txt size={10} color="#2B1210">{item.label}</Txt>
+            </Pressable>)}
+          </ScrollView>
           <Txt size={10} mut style={{marginTop:5}}>Preview only: {activeFixture.message||'Normal customer container view.'} Nothing here changes real bookings or shipments.</Txt>
         </View>
         <ScrollView horizontal contentContainerStyle={{flexGrow:1,justifyContent:'center'}}>
@@ -227,28 +225,6 @@ export function KonsolissEditor({canEdit,canPublish}:{canEdit:boolean;canPublish
         <View style={{marginTop:8}}><OutlineBtn onPress={()=>setSelected('')}>Done editing this item</OutlineBtn></View>
       </View>:null}
     </Section>
-    <Modal visible={lifecycleMenuOpen} transparent animationType="fade" onRequestClose={()=>setLifecycleMenuOpen(false)}>
-      <View style={{flex:1,justifyContent:'center',padding:24}}>
-        <Pressable accessibilityRole="button" accessibilityLabel="Close container lifecycle preview menu"
-          onPress={()=>setLifecycleMenuOpen(false)}
-          style={{position:'absolute',top:0,bottom:0,left:0,right:0,backgroundColor:'rgba(0,0,0,0.45)'}}/>
-        <View accessibilityLabel="Container lifecycle preview choices"
-          style={{backgroundColor:c.card,borderRadius:18,padding:16,maxWidth:360,width:'100%',alignSelf:'center',gap:7}}>
-          <Txt size={13} weight={600}>Preview container lifecycle</Txt>
-          <Txt size={10} mut>Choose a shipping stage to preview how it looks to a customer. This will not update any real shipment.</Txt>
-          {KONSOLISS_PREVIEW_LIFECYCLE.map(item=><Pressable key={item.id} accessibilityRole="button"
-            accessibilityLabel={'Preview container stage: '+item.label}
-            accessibilityState={{selected:scenario===item.id}}
-            onPress={()=>selectScenario(item.id)}
-            style={{paddingVertical:12,paddingHorizontal:13,borderRadius:11,backgroundColor:scenario===item.id?YELLOW:c.inset,borderWidth:1,borderColor:scenario===item.id?YELLOW:c.bd}}>
-            <Txt size={11} weight={scenario===item.id?600:400} color={scenario===item.id?'#2B1210':c.ink}>{item.label}</Txt>
-          </Pressable>)}
-          <View style={{alignItems:'flex-end',marginTop:5}}>
-            <OutlineBtn onPress={()=>setLifecycleMenuOpen(false)}>Cancel</OutlineBtn>
-          </View>
-        </View>
-      </View>
-    </Modal>
     {editMode?<Section title="Pages · Text">
       <View style={{flexDirection:'row',flexWrap:'wrap',gap:6,marginBottom:8}}>
         {PAGES.map(name=><OutlineBtn key={name} primary={page===name} onPress={()=>goPage(name)}>{name}</OutlineBtn>)}
