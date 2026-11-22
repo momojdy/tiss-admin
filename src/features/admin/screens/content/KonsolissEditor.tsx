@@ -192,15 +192,16 @@ export function KonsolissEditor({canEdit,canPublish}:{canEdit:boolean;canPublish
           </PhoneFrame>
         </ScrollView>
       </View>
+      {editMode&&selected?<View accessibilityLabel="Selected Konsoliss content editor" style={{marginTop:10,paddingTop:12,borderTopWidth:1,borderTopColor:c.bd}}>
+        <Txt size={12} weight={600} style={{marginBottom:8}}>{'Selected text · '+labelFor(selected)}</Txt>
+        <View style={{borderWidth:2,borderStyle:'dotted',borderColor:YELLOW,borderRadius:12,padding:10}}>
+          <Txt size={10} mut>{selected}</Txt>
+          <TextInput accessibilityLabel={'Edit '+selected} value={text(selected)} onChangeText={v=>change(selected,v)} multiline
+            style={{minHeight:62,borderWidth:1,borderColor:c.bd,borderRadius:10,padding:10,marginTop:8,backgroundColor:c.card,color:c.ink,textAlignVertical:'top'}}/>
+        </View>
+        <View style={{marginTop:8}}><OutlineBtn onPress={()=>setSelected('')}>Done editing this item</OutlineBtn></View>
+      </View>:null}
     </Section>
-    {editMode&&selected?<Section title={'Selected text · '+labelFor(selected)}>
-      <View style={{borderWidth:2,borderStyle:'dotted',borderColor:YELLOW,borderRadius:12,padding:10}}>
-        <Txt size={10} mut>{selected}</Txt>
-        <TextInput accessibilityLabel={'Edit '+selected} value={text(selected)} onChangeText={v=>change(selected,v)} multiline
-          style={{minHeight:62,borderWidth:1,borderColor:c.bd,borderRadius:10,padding:10,marginTop:8,backgroundColor:c.card,color:c.ink,textAlignVertical:'top'}}/>
-      </View>
-      <View style={{marginTop:8}}><OutlineBtn onPress={()=>setSelected('')}>Done editing this item</OutlineBtn></View>
-    </Section>:null}
     {editMode?<Section title="Pages · Text">
       <View style={{flexDirection:'row',flexWrap:'wrap',gap:6,marginBottom:8}}>
         {PAGES.map(name=><OutlineBtn key={name} primary={page===name} onPress={()=>goPage(name)}>{name}</OutlineBtn>)}
