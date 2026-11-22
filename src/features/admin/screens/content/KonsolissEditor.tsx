@@ -3,7 +3,11 @@ import {Pressable, ScrollView, TextInput, View} from 'react-native';
 import {supabase} from '../../lib/supabase';
 import {publishCmsVersion, saveCmsVersion} from '../../lib/adminBackend';
 import {Section, Card} from '../../ui/Card';
-import {OutlineBtn, Pill, SelectMenu} from '../../ui/Controls';
+import {OutlineBtn} from '../../ui/Controls';
+import {PhoneFrame} from './PhoneFrame';
+import KonsolissConsumerPreviewScreen from './KonsolissConsumerPreviewScreen';
+import {KonsolissPreviewSelectionContext} from './KonsolissPreviewSelection';
+import {useTheme} from '../../theme/ThemeContext';
 import {Txt} from '../../ui/Txt';
 
 const KEY = 'konsoliss.content';
@@ -75,7 +79,10 @@ const fields: Record<string, string[]> = {
 type CmsRow = {id:string;version:number;status:'draft'|'published'|'archived';locale:string;payload:{labels?:Record<string,string>}};
 const labelFor=(id:string)=>id.split('.').slice(1).join(' / ').replace(/([a-z])([A-Z])/g,'$1 $2');
 export function KonsolissEditor({canEdit,canPublish}:{canEdit:boolean;canPublish:boolean}) {
+  const {c}=useTheme();
   const [page,setPage]=useState<string>('Home');
+  const [zoom,setZoom]=useState(1);
+  const [previewSheet,setPreviewSheet]=useState<'book'|'calc'|null>(null);
   const [lang,setLang]=useState<Lang>('en');
   const [rows,setRows]=useState<CmsRow[]>([]);
   const [draft,setDraft]=useState<Record<string,string>>({...DEFAULTS});
@@ -116,59 +123,87 @@ export function KonsolissEditor({canEdit,canPublish}:{canEdit:boolean;canPublish
     try{await publishCmsVersion(version.id);await load();setConfirm(false);}
     catch{setError('Could not publish Konsoliss content.');}finally{setBusy(false);}
   };
-  const choose=(id:string)=>{setSelected(id);if(mode!=='Published'&&canEdit)setMode('Edit');};
+  const choose=(id:string)=>{if(Object.prototype.hasOwnProperty.call(DEFAULTS,id))setSelected(id);};
+  const goPage=(name:string)=>{setPage(name);setSelected('');setPreviewSheet(name==='Book Space'?'book':name==='CBM Calculator'?'calc':null);};
   const selectedText=useMemo(()=>shown[selected]??DEFAULTS[selected]??'', [shown,selected]);
-  const field=(id:string,large=false)=>{
-    const active=id===selected&&mode==='Edit';
-    return <Pressable key={id} accessibilityRole="button" accessibilityLabel={'Edit '+labelFor(id)}
-      onPress={()=>choose(id)} style={{borderColor:active?YELLOW:'transparent',borderWidth:2,borderStyle:'dotted',borderRadius:7,padding:3,marginVertical:1}}>
-      <Txt size={large?17:11} weight={large?600:500} color={id.endsWith('.heading')||id.endsWith('.title')?'#F0C900':'#2B1210'}>{shown[id]??DEFAULTS[id]}</Txt>
-    </Pressable>;
-  };
-  const phone=()=> <View style={{alignSelf:'center',width:290,maxWidth:'100%',backgroundColor:CREAM,borderRadius:25,borderWidth:6,borderColor:'#242424',overflow:'hidden'}}>
-    <View style={{height:18,backgroundColor:CREAM,alignItems:'center',justifyContent:'center'}}><View style={{width:55,height:4,borderRadius:3,backgroundColor:'#333'}}/></View>
-    <ScrollView style={{maxHeight:510,minHeight:400}} contentContainerStyle={{padding:15,gap:8}}>
-      {page==='Home'?<>
-        <View style={{flexDirection:'row',justifyContent:'space-between',alignItems:'center'}}>{field('home.brand',true)}<Txt size={9} color={RED}>KS-2048 · Filling (sample)</Txt></View>
-        {field('home.load.heading')}
-        <Txt size={26} color={RED} weight={600}>51.7 <Txt size={12}>/ 68 CBM</Txt></Txt>
-        <View style={{height:135,borderRadius:16,backgroundColor:'#EEE2B5',alignItems:'center',justifyContent:'center'}}><Txt size={12} color="#72554C">3D container runs in consumer app</Txt><Txt size={10} color="#72554C">Preview of editable content only</Txt></View>
-        <View style={{flexDirection:'row',justifyContent:'space-between'}}>{field('home.otherCargo')}{field('home.yourSpace')}{field('home.free')}</View>
-        <View style={{flexDirection:'row',gap:5}}><View style={{flex:1,backgroundColor:RED,borderRadius:12,padding:8}}>{field('home.book.title')}{field('home.book.subtitle')}</View><View style={{flex:1,backgroundColor:'#FFFAE0',borderRadius:12,padding:8}}>{field('home.load.title')}{field('home.load.subtitle')}</View></View>
-        <View style={{backgroundColor:'#FFF7DB',padding:8,borderRadius:12}}>{field('home.calc.title')}{field('home.calc.subtitle')}</View>
-        <View style={{flexDirection:'row',gap:5}}>{['home.warehouse.title','home.consolidated.title'].map(id=><View key={id} style={{flex:1,padding:8,backgroundColor:'#FFF7DB',borderRadius:12}}>{field(id)}<Txt size={9}>Sample logistics metrics</Txt></View>)}</View>
-        <View style={{padding:8,backgroundColor:'#FFF7DB',borderRadius:12}}>{field('home.sourcing.title')}{field('home.sourcing.subtitle')}</View>
-        {field('home.how.heading',true)}
-        {[1,2,3,4,5].map(n=><View key={n} style={{backgroundColor:'#FFF8DF',borderRadius:10,padding:8}}>{field('home.how.'+n+'.title')}{field('home.how.'+n+'.body')}</View>)}
-      </>:fields[page].map(id=>field(id,true))}
-    </ScrollView>
-    <View style={{flexDirection:'row',justifyContent:'space-between',padding:6,backgroundColor:'#FFF6CB'}}>{['nav.home','nav.warehouse','nav.consolidated','nav.sourcing','nav.hub'].map(id=><Pressable key={id} onPress={()=>choose(id)} style={{flex:1}}><Txt size={8} color={id===selected?RED:'#5A3329'}>{shown[id]??DEFAULTS[id]}</Txt></Pressable>)}</View>
-  </View>;
-  return <View style={{gap:10}}>
-    <Section title="Konsoliss · Customer content">
-      <Txt size={10} mut>Goodies-style manual editor and phone selection. Yellow dashed outlines identify selected text. Yellow headings distinguish Konsoliss page titles. Operational data and container status are protected and not editable here.</Txt>
-      <View style={{marginTop:8}}><SelectMenu label="Konsoliss page" value={page} options={[...PAGES]} onChange={v=>{setPage(v);setSelected(fields[v]?.[0]||'home.brand');}}/></View>
-      <View style={{marginTop:8}}><SelectMenu label="Language" value={lang} options={[...LANGS]} onChange={v=>setLang(v as Lang)}/></View>
-      <View style={{flexDirection:'row',gap:6,flexWrap:'wrap',marginTop:10}}>
-        {(['Edit','Preview','Published'] as const).map(m=><OutlineBtn key={m} primary={mode===m} onPress={()=>setMode(m)} disabled={m==='Edit'&&!canEdit}>{m}</OutlineBtn>)}
+  const editMode=mode==='Edit'&&canEdit;
+  const navScreen=['Home','Book Space','CBM Calculator'];
+  return <View>
+    <Section title="Konsoliss content" right={<View style={{flexDirection:'row',flexWrap:'wrap',gap:5}}>
+      <OutlineBtn primary={mode==='Edit'} disabled={!canEdit} onPress={()=>{setMode('Edit');setSelected('');}}>Manual editor</OutlineBtn>
+      <OutlineBtn primary={mode==='Preview'} onPress={()=>{setMode('Preview');setSelected('');}}>Phone preview</OutlineBtn>
+    </View>}>
+      <Txt size={10.5} mut>{version?'Version '+version.version+' · '+version.status:'Starter content (not yet saved)'}{dirty?' · unsaved changes':''}</Txt>
+      <View style={{flexDirection:'row',flexWrap:'wrap',gap:6,marginTop:8}}>
         <OutlineBtn primary onPress={()=>{void save();}} disabled={!canEdit||!dirty||busy}>{busy?'Saving…':'Save draft'}</OutlineBtn>
+        <OutlineBtn onPress={()=>{void load();}} disabled={busy}>{dirty?'Discard changes & reload':'Reload'}</OutlineBtn>
         <OutlineBtn onPress={()=>setConfirm(true)} disabled={!canPublish||!version||version.status!=='draft'||dirty||busy}>Publish…</OutlineBtn>
-        <OutlineBtn onPress={()=>{void load();}} disabled={busy}>Reload</OutlineBtn>
       </View>
-      {dirty?<Txt size={10} color={RED}>Unsaved changes — save a new draft before publishing.</Txt>:null}
+      {confirm?<View style={{marginTop:6,padding:10,borderWidth:1,borderColor:YELLOW,borderRadius:12}}>
+        <Txt size={11}>Publish saved Konsoliss version {version?.version} to customers?</Txt>
+        <Txt size={10} mut>Only customer-facing copy changes. Operational data and prices remain protected.</Txt>
+        <View style={{flexDirection:'row',flexWrap:'wrap',marginTop:8}}>
+          <OutlineBtn primary onPress={()=>{void publish();}} disabled={busy}>Yes, publish</OutlineBtn>
+          <OutlineBtn onPress={()=>setConfirm(false)}>Cancel</OutlineBtn>
+        </View>
+      </View>:null}
       {error?<Txt size={11} color={RED}>{error}</Txt>:null}
-      {confirm?<View style={{padding:10,marginTop:5,borderWidth:1,borderColor:YELLOW,borderRadius:10}}><Txt size={11}>Publish the saved Konsoliss content version for {lang}? This will affect the live consumer app.</Txt><View style={{flexDirection:'row',gap:8,marginTop:8}}><OutlineBtn primary onPress={()=>{void publish();}}>Confirm publish</OutlineBtn><OutlineBtn onPress={()=>setConfirm(false)}>Cancel</OutlineBtn></View></View>:null}
-      {mode==='Published'&&!published?<Txt size={10} color={RED}>No published content in this language. Default English content is shown.</Txt>:null}
+      {!canEdit?<Txt size={10} mut>View only: content editing requires a delegated Content Studio permission.</Txt>:null}
     </Section>
-    <Section title="Konsoliss customer phone preview">
-      {phone()}
+    <Section title="Konsoliss phone preview">
+      <View style={{alignItems:'center',paddingVertical:6}}>
+        <View style={{width:'100%',maxWidth:390,marginBottom:10,paddingHorizontal:4}}>
+          <Txt size={12} weight={600}>{editMode?'Edit Konsoliss content preview':'Konsoliss content preview'}</Txt>
+          <Txt size={10} mut style={{marginTop:3,lineHeight:15}}>{editMode?'Use the screen tabs to open a page, then tap yellow-dotted editable text in the phone to select its matching field.':'Rendered from the current content with isolated sample values. No booking or payment is saved.'}</Txt>
+          <Txt size={10} mut style={{marginTop:6}}>Draft preview · Sample operational data only · Actual consumer homepage and interactive 3D container.</Txt>
+          <ScrollView horizontal showsHorizontalScrollIndicator={false} contentContainerStyle={{gap:6,paddingVertical:8}}>
+            {([{id:'en',name:'English'},{id:'fr',name:'Français'},{id:'ht',name:'Kreyòl Ayisyen'},{id:'es',name:'Español'},{id:'zh-Hans',name:'简体中文'}] as const).map(l=>
+              <Pressable key={l.id} onPress={()=>setLang(l.id)} accessibilityRole="button" accessibilityLabel={'Preview in '+l.name}
+                style={{borderRadius:18,padding:9,backgroundColor:lang===l.id?YELLOW:'#F1F1F2'}}>
+                <Txt size={10} color="#2B1210">{l.name}</Txt>
+              </Pressable>)}
+          </ScrollView>
+          <ScrollView horizontal showsHorizontalScrollIndicator={false} contentContainerStyle={{gap:6,paddingVertical:6}}>
+            {[0.75,1,1.25].map(z=><Pressable key={z} onPress={()=>setZoom(z)} accessibilityRole="button" accessibilityLabel={'Preview zoom '+Math.round(z*100)+'%'}
+              style={{borderRadius:18,padding:8,backgroundColor:zoom===z?YELLOW:'#F1F1F2'}}><Txt size={10} color="#2B1210">{Math.round(z*100)}%</Txt></Pressable>)}
+            <Pressable accessibilityRole="button" onPress={()=>{setMode(mode==='Published'?'Preview':'Published');setSelected('');}}
+              style={{borderRadius:18,padding:8,backgroundColor:mode==='Published'?YELLOW:'#F1F1F2'}}><Txt size={10} color="#2B1210">Published</Txt></Pressable>
+          </ScrollView>
+          <ScrollView horizontal showsHorizontalScrollIndicator={false} contentContainerStyle={{gap:6,paddingVertical:10}}>
+            {navScreen.map(name=><Pressable key={name} onPress={()=>goPage(name)} accessibilityRole="button" accessibilityLabel={'Preview screen: '+name}
+              style={{borderRadius:18,paddingHorizontal:12,paddingVertical:8,backgroundColor:page===name?YELLOW:'#F1F1F2',borderWidth:page===name?0:1,borderColor:'#E5E5E7'}}>
+              <Txt size={10} color="#2B1210" weight={600}>{name}</Txt>
+            </Pressable>)}
+          </ScrollView>
+          {mode==='Published'&&!published?<Txt size={10} color={RED}>No published content in this language. Showing built-in defaults.</Txt>:null}
+        </View>
+        <ScrollView horizontal contentContainerStyle={{flexGrow:1,justifyContent:'center'}}>
+          <PhoneFrame background="#FFFBD4" zoom={zoom}>
+            <KonsolissPreviewSelectionContext.Provider value={{selected,onSelect:choose,enabled:editMode}}>
+              <KonsolissConsumerPreviewScreen copy={shown} previewSheet={previewSheet}/>
+            </KonsolissPreviewSelectionContext.Provider>
+          </PhoneFrame>
+        </ScrollView>
+      </View>
     </Section>
-    {mode==='Edit'&&canEdit?<Section title={'Selected text · '+labelFor(selected)}>
-      <Txt size={10} mut>Selected key: {selected}</Txt>
-      <TextInput accessibilityLabel={'Edit '+selected} value={text(selected)} onChangeText={v=>change(selected,v)} multiline style={{minHeight:62,borderWidth:2,borderStyle:'dotted',borderColor:YELLOW,borderRadius:12,padding:10,backgroundColor:'#FFFDF0',color:'#2B1210',textAlignVertical:'top',marginTop:8}}/>
-      <Txt size={10} mut>Tap another dotted text element in the preview, or select it below. Current editing language: {lang}.</Txt>
-      {fields[page].map(id=><Pressable key={id} onPress={()=>choose(id)} style={{padding:8,borderBottomWidth:1,borderColor:'#DFD7AA'}}><Txt size={11} weight={id===selected?600:400}>{labelFor(id)}</Txt><Txt size={9} mut>{draft[id]||'—'}</Txt></Pressable>)}
+    {editMode&&selected?<Section title={'Selected text · '+labelFor(selected)}>
+      <View style={{borderWidth:2,borderStyle:'dotted',borderColor:YELLOW,borderRadius:12,padding:10}}>
+        <Txt size={10} mut>{selected}</Txt>
+        <TextInput accessibilityLabel={'Edit '+selected} value={text(selected)} onChangeText={v=>change(selected,v)} multiline
+          style={{minHeight:62,borderWidth:1,borderColor:c.bd,borderRadius:10,padding:10,marginTop:8,backgroundColor:c.card,color:c.ink,textAlignVertical:'top'}}/>
+      </View>
+      <View style={{marginTop:8}}><OutlineBtn onPress={()=>setSelected('')}>Done editing this item</OutlineBtn></View>
     </Section>:null}
-    <Card><Txt size={10} mut>Only the existing Konsoliss Home page currently renders consumer content. Warehouse, Consolidated, Sourcing+ and Hub header keys are prepared for their future screens; their full layouts are not yet implemented. Preview-only sample metrics are never published as operational data.</Txt></Card>
+    {editMode?<Section title="Pages · Text">
+      <View style={{flexDirection:'row',flexWrap:'wrap',gap:6,marginBottom:8}}>
+        {PAGES.map(name=><OutlineBtn key={name} primary={page===name} onPress={()=>goPage(name)}>{name}</OutlineBtn>)}
+      </View>
+      {(fields[page]||[]).map(id=><Pressable key={id} onPress={()=>choose(id)} accessibilityRole="button"
+        style={{borderTopWidth:1,borderTopColor:selected===id?YELLOW:c.bd,paddingVertical:8}}>
+        <Txt size={10.5} weight={500}>{labelFor(id)}</Txt>
+        <Txt size={10} mut>{draft[id]||'—'}</Txt>
+      </Pressable>)}
+      {!navScreen.includes(page)?<Txt size={10} mut style={{marginTop:8}}>This consumer page is not implemented yet. Its text keys are prepared, but the phone stays on the real homepage rather than showing an invented screen.</Txt>:null}
+    </Section>:null}
   </View>;
 }
