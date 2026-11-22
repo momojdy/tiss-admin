@@ -24,6 +24,9 @@ export function KonsolissAdminScreen(){
  const [number,setNumber]=useState('');
  const [reason,setReason]=useState('');
  const [customerId,setCustomerId]=useState('');
+ const [progressForUser,setProgressForUser]=useState('');
+ const [loadVolumes,setLoadVolumes]=useState({reserved:'',sent:'',inbound:'',loaded:''});
+ const [progressConfirm,setProgressConfirm]=useState(false);
  const [chosen,setChosen]=useState('');
  const [confirm,setConfirm]=useState<{id:string;next:Container['status']}|null>(null);
  const authorized=session.role==='super_admin'&&session.status==='active';
@@ -47,6 +50,39 @@ export function KonsolissAdminScreen(){
    });
    if(e)setError(e.code==='42501'?'Only an active Super Admin may operate Konsoliss.':'Action was rejected. Check the container, customer, lifecycle stage and audit reason.');
    else{setSuccess('Konsoliss container action saved and audited.');setReason('');setConfirm(null);if(kind==='create')setNumber('');if(kind==='assign')setCustomerId('');await refresh();}
+   setBusy(false);
+ };
+ const readLoadProgress=async()=>{
+   const id=customerId.trim();
+   if(!/^[a-f0-9]{8}-[a-f0-9]{4}-[1-8][a-f0-9]{3}-[89ab][a-f0-9]{3}-[a-f0-9]{12}$/i.test(id)){
+     setError('Enter a valid customer UUID to retrieve their load progress.');return;
+   }
+   setBusy(true);setError('');setSuccess('');setProgressForUser('');
+   const {data,error:e}=await supabase.rpc('konsoliss_admin_get_customer_load_progress',{p_user_id:id});
+   if(e)setError('Customer load progress could not be retrieved.');
+   else{
+     const row=data as Record<string,unknown>|null;
+     setLoadVolumes({reserved:String(row?.reserved_cbm??0),sent:String(row?.sent_cbm??0),inbound:String(row?.inbound_to_container_cbm??0),loaded:String(row?.loaded_cbm??0)});
+     setProgressForUser(id);setProgressConfirm(false);
+     setSuccess(row?'Existing recorded volumes loaded for review.':'No recorded volumes yet. Confirm the measured values before saving.');
+   }
+   setBusy(false);
+ };
+ const saveLoadProgress=async()=>{
+   if(!authorized||busy||progressForUser!==customerId.trim())return;
+   const reserved=Number(loadVolumes.reserved),sent=Number(loadVolumes.sent);
+   const inbound=Number(loadVolumes.inbound),loaded=Number(loadVolumes.loaded);
+   if(Object.values(loadVolumes).some(value=>!value.trim())||![reserved,sent,inbound,loaded].every(Number.isFinite)
+     ||reserved<0||reserved>68||sent<0||inbound<0||loaded<0||inbound+loaded>sent||inbound+loaded>reserved){
+     setError('Enter valid measured CBM values. Inbound plus loaded must not exceed goods sent or reserved space (maximum 68 CBM).');return;
+   }
+   if(reason.trim().length<5){setError('A documented audit reason is required.');return;}
+   setBusy(true);setError('');setSuccess('');
+   const {error:e}=await supabase.rpc('konsoliss_admin_set_customer_load_progress',{
+     p_user_id:progressForUser,p_reserved_cbm:reserved,p_sent_cbm:sent,p_inbound_cbm:inbound,p_loaded_cbm:loaded,p_reason:reason.trim()
+   });
+   if(e)setError('Could not save customer load volumes. Verify authorization, figures and audit reason.');
+   else{setSuccess('Customer load volumes saved and audited.');setReason('');setProgressConfirm(false);}
    setBusy(false);
  };
  if(!authorized)return <Card><Txt size={14} weight={600}>Super Admin only</Txt><Txt size={11} mut>Konsoliss operational records and actions are not available to other staff. Authorized content editors may use Content Studio.</Txt></Card>;
@@ -99,6 +135,33 @@ export function KonsolissAdminScreen(){
       <TextInput accessibilityLabel="Customer user UUID" value={customerId} onChangeText={setCustomerId} placeholder="Customer UUID" placeholderTextColor="#8D817A" autoCapitalize="none" style={fieldStyle}/>
       <TextInput accessibilityLabel="Reason to assign" value={reason} onChangeText={setReason} placeholder="Audit reason" placeholderTextColor="#8D817A" style={fieldStyle}/>
       <OutlineBtn primary disabled={!chosen||!customerId||busy} onPress={()=>{void action('assign',{containerId:chosen,customer:customerId.trim()});}}>Assign current container</OutlineBtn>
+    </Section>
+    <Section title="Customer CBM progress">
+      <Txt size={10} mut>Verified measurements for the customer UUID above. Reserved space, goods sent, goods staged for the container and cargo physically loaded must be recorded separately. Values are customer-visible and are not a simulation.</Txt>
+      <OutlineBtn disabled={!customerId.trim()||busy} onPress={()=>{void readLoadProgress();}}>{busy?'Loading…':'Load customer volumes'}</OutlineBtn>
+      {progressForUser===customerId.trim()&&progressForUser?<View style={{marginTop:10}}>
+        {([
+          ['reserved','Space reserved (CBM)'],
+          ['sent','Goods sent (CBM)'],
+          ['inbound','Inbound to container, not yet loaded (CBM)'],
+          ['loaded','Physically loaded in container (CBM)'],
+        ] as const).map(([key,label])=><View key={key}>
+          <Txt size={10} weight={500}>{label}</Txt>
+          <TextInput accessibilityLabel={label} keyboardType="decimal-pad" value={loadVolumes[key]}
+            onChangeText={value=>{setLoadVolumes(v=>({...v,[key]:value}));setProgressConfirm(false);}}
+            style={fieldStyle}/>
+        </View>)}
+        <Txt size={10} mut>{'Customer load commitment: '+((Number(loadVolumes.inbound)||0)+(Number(loadVolumes.loaded)||0)).toFixed(2)+' CBM of '+(Number(loadVolumes.reserved)||0).toFixed(2)+' CBM reserved'}</Txt>
+        <TextInput accessibilityLabel="Customer load audit reason" value={reason} onChangeText={setReason}
+          placeholder="Reason and evidence for measured volumes" placeholderTextColor="#8D817A" style={fieldStyle}/>
+        {!progressConfirm?<OutlineBtn disabled={busy} primary onPress={()=>setProgressConfirm(true)}>Review customer load update</OutlineBtn>:<View style={{borderWidth:2,borderColor:'#FFD93D',borderRadius:12,padding:10}}>
+          <Txt size={11}>Confirm these measured volumes for {progressForUser}. This changes what the customer sees and creates an audit record.</Txt>
+          <View style={{flexDirection:'row',gap:8,marginTop:9,flexWrap:'wrap'}}>
+            <OutlineBtn primary disabled={busy} onPress={()=>{void saveLoadProgress();}}>Confirm and save</OutlineBtn>
+            <OutlineBtn onPress={()=>setProgressConfirm(false)}>Cancel</OutlineBtn>
+          </View>
+        </View>}
+      </View>:null}
     </Section>
    </>:null}
   </>:<Card><Txt size={12} weight={600}>{module}</Txt><Txt size={11} mut>Operational module reserved for a dedicated authorized Konsoliss workflow. No demo transactions or fake shipment records are displayed.</Txt></Card>}
