@@ -11,7 +11,7 @@
     "test:goodies-cms": "node tests/cms.test.cjs",
     "test:konsoliss": "node tests/konsoliss.test.cjs",
     "test:goodies": "node tests/access.test.cjs && node tests/cms.test.cjs && node tests/cms-public-transport.test.cjs && node tests/settlement.test.cjs && node tests/shared-bill-refunds.test.cjs && node tests/goodies-navigation.test.cjs && node tests/goodies-admin-recovery.test.cjs",
-    "test:konsoliss:backend": "node tests/backend/konsoliss-integrity.cjs"
+    "test:konsoliss:backend": "node tests/backend/konsoliss-integrity.cjs && node tests/backend/konsoliss-homepage.cjs"
   },
   "dependencies": {
     "@expo-google-fonts/manrope": "^0.4.3",

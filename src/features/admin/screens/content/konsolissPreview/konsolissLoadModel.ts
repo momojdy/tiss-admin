@@ -1,0 +1,49 @@
+import {parseCbm} from './konsolissNumbers';
+
+/** Only verified, server-written cargo volumes. A missing row is not a zero balance. */
+export type KonsolissLoadProgress={
+  reservedCbm:number;
+  sentCbm:number;
+  loadedCbm:number;
+  inboundCbm:number;
+  allocatedCbm:number;
+  atWarehouseOrInTransitCbm:number;
+  sentNotLoadedCbm:number;
+  reservedNotSentCbm:number;
+  loadedPercent:number;
+};
+export type KonsolissLoadProgressState=
+  | {kind:'loading'}
+  | {kind:'unrecorded'}
+  | {kind:'unavailable'}
+  | {kind:'recorded';progress:KonsolissLoadProgress};
+
+export function parseKonsolissLoadProgress(row:unknown):KonsolissLoadProgress|null{
+  if(!row||typeof row!=='object')return null;
+  const data=row as Record<string,unknown>;
+  const parse=parseCbm;
+  const reservedCbm=parse(data.reserved_cbm);
+  const sentCbm=parse(data.sent_cbm);
+  const loadedCbm=parse(data.loaded_cbm);
+  const inboundCbm=parse(data.inbound_to_container_cbm);
+  if(![reservedCbm,sentCbm,loadedCbm,inboundCbm].every(Number.isFinite)
+    ||reservedCbm<0||sentCbm<0||loadedCbm<0||inboundCbm<0
+    ||Math.round(1000*loadedCbm)+Math.round(1000*inboundCbm)>Math.round(1000*sentCbm)||Math.round(1000*loadedCbm)+Math.round(1000*inboundCbm)>Math.round(1000*reservedCbm))return null;
+  const derived=[data.allocated_cbm,data.at_warehouse_or_in_transit_cbm,data.reserved_not_sent_cbm,data.not_allocated_cbm,data.allocated_percent];
+  if(derived.some(v=>!Number.isFinite(parseCbm(v))))return null;
+  const expected=[
+    loadedCbm+inboundCbm,
+    Math.max(0,sentCbm-loadedCbm-inboundCbm),
+    Math.max(0,reservedCbm-sentCbm),
+    Math.max(0,reservedCbm-loadedCbm-inboundCbm),
+    reservedCbm>0?Math.round((loadedCbm+inboundCbm)/reservedCbm*10000)/100:0,
+  ];
+  // Numeric database fields may be serialized as strings; tolerate rounding only.
+  if(derived.some((v,i)=>v!==undefined&&v!==null&&Math.abs(Number(v)-expected[i])>(i===4?0.011:0.0001)))return null;
+  return {reservedCbm,sentCbm,loadedCbm,inboundCbm,
+    allocatedCbm:loadedCbm+inboundCbm,
+    atWarehouseOrInTransitCbm:Math.max(0,sentCbm-loadedCbm-inboundCbm),
+    sentNotLoadedCbm:Math.max(0,sentCbm-loadedCbm),
+    reservedNotSentCbm:Math.max(0,reservedCbm-sentCbm),
+    loadedPercent:reservedCbm>0?Math.round((loadedCbm+inboundCbm)/reservedCbm*10000)/100:0};
+}

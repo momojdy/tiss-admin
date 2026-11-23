@@ -1,0 +1,34 @@
+{
+  "generator": "sync-konsoliss-preview.cjs",
+  "sources": {
+    "konsolissHomeScreen.tsx": "5a44ebff248f13503f37e3920f17f3466ced1788ffd6915f1ba610e10f6d6c88",
+    "assets/how-it-works/step1.png": "9ab2509813ab6adf290805734eb6c75b972c01a4ebfab44a780e409a8274b28d",
+    "assets/how-it-works/step2.png": "fca6862902a05b85f26a0f1989dc72768cc3c731a3fc323d32d73cb8fc0c563f",
+    "assets/how-it-works/step3.png": "cc53f84b9e50f98ac49efc8d6f6b1c4f2be3ff1f3269e18cbce316ba904311be",
+    "assets/how-it-works/step4.png": "faef831354ecba0359a080f0a8dad1d17e4ef10d203d9b2d99d11a69de7a9334",
+    "assets/how-it-works/step5.png": "2c2ba22fb68f0dec6d2b8dcb570742e5e9a961b399225b4e5fc36ba2e8a89b6f",
+    "assets/icons/homeicon.png": "4ede6e59ca6c031f926fe2c8e04edcf5cbfc7ccc9df3abffc419446e07f6bd8a",
+    "assets/icons/warehouseicon.png": "564ab5319f43a29ee85ebbbf9345302d83910d5e9bc43ba8a3fc274909da79c8",
+    "assets/icons/consolidation.png": "4a05db3866c896879016628522b366bc3deda96109b194c98a8e2cd2cb83dc80",
+    "assets/icons/sourcingicon.png": "6588c651bc6a89bb61a4ea0071aa85b21c90c76effe05676d910dafde32796e8",
+    "assets/icons/hub.png": "7f5b1a01f70b91fbd273790d623d240a09513868b82a54b25f5878a0aa1507e7",
+    "KonsolissContent.tsx": "d62cbc82df911c35dc4e01be9c6811c4e11734a5ddb867c7b62dd6ca4a884df3",
+    "cms/catalog.ts": "29e2a768f6709a6b1e1443a1bc8e79204d57fdd879ff8c3110b053a5cbd67da8",
+    "cms/model.ts": "d3c12e034dc9721930dc78b7a2905cf52e0a634fb43a38e754a67fbd3e164292",
+    "konsolissNumbers.ts": "2b2a71ea03fefd9bc8ae4eb2b7d425042572258f2b3ed69df070478acf8cbaca",
+    "konsolissLoadModel.ts": "356757be428379c56895dedf98430e85707486f4f926c1b7242a118a77bcd9a1",
+    "konsolissOccupancyModel.ts": "02dde1ec7ae8f56ca308d003e4273ae3c822fae373470c0736101cc8262a8674",
+    "KonsolissQuickMenuView.tsx": "207f82bc030bbe49752d52453e2ce694bb19cb272e33dbc6e4b06ce3a4b2a675"
+  },
+  "generated": {
+    "konsolissHomeScreen.tsx": "e140eb4798835cedfd0231420f6e396d74725734fc52d70347cca953a27f1c80",
+    "KonsolissContent.tsx": "d62cbc82df911c35dc4e01be9c6811c4e11734a5ddb867c7b62dd6ca4a884df3",
+    "cms/catalog.ts": "29e2a768f6709a6b1e1443a1bc8e79204d57fdd879ff8c3110b053a5cbd67da8",
+    "cms/model.ts": "d3c12e034dc9721930dc78b7a2905cf52e0a634fb43a38e754a67fbd3e164292",
+    "konsolissNumbers.ts": "2b2a71ea03fefd9bc8ae4eb2b7d425042572258f2b3ed69df070478acf8cbaca",
+    "konsolissLoadModel.ts": "3fb853d7795fc46c106d009985affd452dec4090e99e0d44cb5ae1281c774e70",
+    "konsolissOccupancyModel.ts": "02dde1ec7ae8f56ca308d003e4273ae3c822fae373470c0736101cc8262a8674",
+    "ThinMenuIcon.tsx": "74aeb6821fedd825fd56e713725cec6a909156ebfbf375c3db3cf76db5dd482e",
+    "KonsolissQuickMenuView.tsx": "47a46a3952aa7887d2e6035ab2400a87f7c616286a4e6e561ed40f2bb011fbfe"
+  }
+}

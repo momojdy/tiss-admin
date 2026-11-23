@@ -1,0 +1,73 @@
+# Konsoliss homepage completion evidence — 2026-11-23
+
+Scope: the six homepage tasks requested on 2026-11-23. This report supersedes older homepage descriptions in `production-readiness.md`; it does not close the original six production phases for reservations, payments, shipment lifecycle or other pages.
+
+**Verdict: homepage implementation substantially improved and connected to admin; full production acceptance remains open.** Real staff/customer publication and cargo updates have not been exercised through installed apps. Booking, shipment history and cargo execution remain unavailable beyond verified summaries and support requests. An unavailable state or request form is not a completed booking/shipment workflow.
+
+## Repositories and delivery
+
+- Consumer: `momojdy/tiss_tiss_beta`, direct `main` work based on `c7c0d9e62f5ea5da369d33b74b39cdd04f224122`.
+- Admin: verified repository `momojdy/tiss-admin`, direct `main` work based on `47345c0c118217823a607431680a971ace6a6cd2`.
+- Database: Supabase `ycbirmgppwavorwudlrv`.
+- The implementation commit is the commit introducing this report; exact published commit links are included in the delivery response. Concurrent main commit `c7c0d9e6` removed explanatory container-progress copy; that removal is preserved in the consumer, paired preview and CMS contract. No task branches or new pull requests are required. Previously completed Konsoliss PRs #36 (consumer) and #4 (admin) were merged before this pass. Unrelated Goodies pull requests are outside this homepage delivery.
+
+## Six homepage tasks
+
+| Requested work | Implemented changes and paths | Executed evidence | Status / remaining acceptance |
+| --- | --- | --- | --- |
+| 1. Synchronize admin preview | Consumer `scripts/sync-konsoliss-preview.cjs` generates admin `src/features/admin/screens/content/konsolissPreview/` from the current homepage, content components, catalog and numeric models. `KonsolissConsumerPreviewScreen.tsx` supplies isolated preview adapters. Modals stay inside the phone frame; zoom and dark preview remain available. Source and generated hashes are recorded in `source-manifest.json`. CI checks drift against consumer main. | Source/hash parity tests; parse/typechecks; 10 default remote image files downloaded and compared byte-for-byte with bundled consumer assets; logo HTTP 200. | Implemented and source-verified. Dedicated container visual/device comparison remains deferred. Admin has fixture-only screen scenarios, never production customer queries. |
+| 2. Editable copy/images; server-owned quantities | Consumer `cms/catalog.ts`, `cms/model.ts`, `KonsolissContent.tsx`; admin `KonsolissEditor.tsx`. Every intended homepage text field, accessibility label, panel/menu text and 11 image slots are listed. Preview selection and manual field/image lists expose content not directly tappable in canvas or input placeholders. Managed image upload, picker, fallback and publication are wired. Capacity, carton geometry, customer CBM and statuses are not CMS fields. | Catalog/locale/image contract tests; SQL rejects unknown/operational content and unpublished image references; preview has no live write dependency. | Implemented. Actual business copy/images still require review and publication. Carton textures and geometry remain protected visual implementation, not marketing image slots. |
+| 3. Selected language and translation review | `useKonsolissCopy.ts` reads authenticated `user_settings.language`, normalizes through shared `wantissLocale`, and resolves en/fr/ht/es/zh-Hans with per-field English/default fallback. It uses published rows only, locale-keyed public copy cache, auth/request generations, realtime/foreground/30-second refresh and cleanup. Editor tracks filled/reviewed coverage, clears review on changes, preserves placeholders and blocks incomplete publication. | Five-locale resolution + backend publication round-trip; actual hook account-switch/stale-response/offline-cache tests; exact save/read-back and public publication-verification tests. Annotation string transform tested without rendering canvas. | Implemented and isolated-test verified. No approved translated production content exists; built-in English remains the honest fallback until editors review/publish. |
+| 4. Per-container measurements | Admin `screens/konsoliss/KonsolissMeasurements.tsx` is integrated into `KonsolissAdminScreen.tsx`. Active Super Admin loads all active assignments, enters verified loaded/allocated CBM (unknown blank), supplies an audit reason and confirms. New RPC reconciles all active assignments and customer loaded/inbound totals in one transaction; reserved/sent are unchanged. Existing legacy write APIs reject inconsistent aggregate totals or delegate to reconciliation. | Isolated actual SQL verifies valid fractional updates, stale versions, foreign/partial/duplicate/invalid measurements, shared-capacity enforcement, audit and own-customer breakdown reads. Live non-staff call rejected. | Implemented and database-tested. Real operational acceptance needs genuine assignments and staff/customer sessions; no production measurements were invented. Multi-session race/load testing is not established by the embedded database tests. |
+| 5. Publishing and operational round-trip | `lib/konsolissHomepageCms.ts` uses dedicated locale-lock/version-checked save and publish RPCs, exact stored payload read-back and customer-public-endpoint confirmation. Publication committed but endpoint cache/network pending is shown separately. Measurement RPC updates the existing RLS-backed consumer view/occupancy path. | Actual generic CMS publisher/public getter definitions are snapshotted from live and exercised in isolated PostgreSQL for all five locales. Live migration catalog/permissions checked; public Edge Function returned HTTP 200 for all locales. | Isolated integration verified; live positive end-to-end verification remains open. Live has zero Konsoliss content, containers, assignments and progress records. HTTP 200 with no feature records does not prove publication delivery. |
+| 6. Resolve inactive homepage controls | Home scrolls to top; Warehouse opens recorded quantities; Consolidated opens own-container selection; Sourcing and Load Items open contextual request panels; Hub opens the existing quick menu. Help/Feedback now submit real `[Konsoliss]` tickets to `settings_support_requests`, with server ticket-code confirmation and same-ID read-back after ambiguous failures. Book Space offers a support request carrying selected requested CBM. My Orders states shipment history is unavailable and links to support. Shared destinations and dark-mode persistence remain connected. | Actual homepage callbacks and support success/failure/draft-preservation tests; actual support service authentication/payload/idempotent read-back unit test; live support table/default/ticket schema and customer policies inspected. Missing container lookup now displays unavailable; illustration requires both confirmed unassigned and successfully loaded empty assignment list. | No previously inert homepage tap targets in the tested navigation set. Booking/charging, shipment history, physical handling and sourcing execution are still deeper-workflow dependencies, not completed by opening a request panel. No real production support ticket was created for testing. |
+
+## Applied live migration and security
+
+Canonical admin SQL: `supabase/migrations/20261123050013_konsoliss_homepage_cms_and_measurements.sql`, applied live as `konsoliss_homepage_cms_and_measurements`. Migration-history read-back confirmed the exact version/name. A follow-up `20261123052456_konsoliss_retire_homepage_hint.sql` is also applied live: it removes the retired progress-bar hint from the CMS validation contract, preserving concurrent consumer main commit `c7c0d9e6`; the original applied migration is retained unchanged. Regression tests reject the retired field. It adds no customer/cargo/content rows and does not change financial records.
+
+- `konsoliss_validate_homepage_content`: validates v2 schema, allowed labels/images/locales, reviewed text, placeholder preservation and published image references. Trigger affects only `konsoliss.content`; generic Goodies behavior is unchanged.
+- `konsoliss_admin_save_homepage`: content edit permission, locale advisory transaction lock, expected-version conflict rejection and audit. Supports `zh-Hans`, unlike the generic older draft API.
+- `konsoliss_admin_publish_homepage`: publish permission, locale lock, newest-version check and existing generic publisher. Rejects stale drafts.
+- `konsoliss_admin_get_container_measurements` and `konsoliss_admin_verify_container_measurements`: authenticated active Super Admin, customer/ordered-container/progress locks, exact active-assignment set, finite nonnegative 0.001-CBM precision, per-container 68-CBM limit, loaded <= allocated and aggregate <= sent/reserved, immutable ownership and audit. Existing shared-capacity trigger remains enforced.
+- Legacy customer-total setter rejects disagreement with fully verified container totals; legacy per-container setter delegates to reconciliation.
+- New callable SECURITY DEFINER functions use empty search paths and deny anonymous EXECUTE. Trigger EXECUTE is revoked from public/anon/authenticated. Live non-staff save and measurement reads were rejected in rolled-back checks. Customer data still uses the existing own-user RLS and security-invoker breakdown view.
+
+The isolated customer-read test uses the actual secure breakdown view definition plus fixture roles/policies. It proves tested ownership boundaries, not every production policy or every authenticated actor. Security advisor reports authenticated-callable SECURITY DEFINER APIs (7 before, 11 after four new guarded APIs); these warnings are recorded, not dismissed as a clean project security report. Older global findings and historical migration drift remain in the broader production report.
+
+## Executed verification
+
+| Check | Result |
+| --- | --- |
+| Consumer `npm run test:konsoliss` | 25 passed, 0 failed: numeric/unread/hooks 11; homepage/content/support 7; language hook 2; renderer contract/lifecycle/annotation string transform 5 |
+| Admin `npm run test:konsoliss` | 8 passed, 0 failed |
+| Admin `npm run test:konsoliss:backend` | 9 reported PASS groups across existing integrity and new homepage integration scripts |
+| Consumer and admin `tsc --noEmit` | Passed |
+| Consumer `npm run lint` | Passed; configured script covers two Goodies files only |
+| Targeted `eslint src/screens/Konsoliss` | 0 errors, 6 warnings (unused legacy illustration/derived variables); not a warning-free lint claim |
+| Consumer `npm run check:konsoliss-preview` | Passed against sibling admin checkout |
+| Consumer `npm run test:goodies` | 317 passed; no Goodies business logic changed |
+| Admin `npm run test:goodies` | 71 passed, 2 existing skipped |
+| Consumer and admin iOS/Android Hermes exports | Four final-source exports passed; JavaScript/assets export only, not signed native builds |
+| Consumer web export | Passed (matching the existing CI web target) |
+| Live metadata read-back | Applied version/name, trigger, empty search paths, anonymous denial confirmed; all four relevant operational/content row counts remain zero |
+| Live public transport | HTTP 200 for en/fr/ht/es/zh-Hans; no published Konsoliss rows to deliver yet |
+| Default preview assets | 10 HTTP 200 files with matching SHA256; Home logo HTTP 200 |
+| Git diff whitespace / preview drift | Passed before commit |
+
+The old lifecycle tests asserted removed demo/source details. They were replaced with runtime homepage/service tests, actual selected-language hook tests and a pinned immutable renderer contract. No rendered 3D screenshot or device test was run. Backend tests use isolated PGlite with synthetic fixtures only; production contains no synthetic customer data. Test fixture SQL under admin `tests/backend/fixtures/` snapshots live generic CMS functions and the breakdown view, allowing actual publication and customer-view behavior to execute rather than testing only a proposed design.
+
+## Approved appearance and deferred testing
+
+`CONTAINER_JS` initializer SHA256 remains `866dd141f04027c2f80a9a97f9a3997fe8a1fec6d703a64e2902c65da21b77c1`, pinned in consumer `tests/konsoliss-renderer-contract.json`. Camera, dimensions, natural cartons, red ownership highlighting, label anchor, spacing, yellow free area, dotted red boundary and 13.6-second 4.8/3.8/5 loop source were not changed. A separate text adapter translates existing canvas annotations while preserving numeric suffixes; it does not edit the renderer. Renderer preservation is a source check, not visual approval.
+
+Arithmetic checks cover 0.02, 0, 76%, 99% and 100% occupancy. The illustration remains separate from physical fit (dimensions, orientation, weight, stacking and handling); the calculator makes this explicit. Dedicated container visual/device regression remains **deferred by the user**. No signed iOS/Android builds or device workflow execution were completed in this pass; previous EAS account/project-link blockers are still described in the broader report.
+
+## Remaining homepage release acceptance
+
+1. An authorized editor must review the actual intended copy and translations, choose any replacement images, save and publish each approved locale. The code deliberately does not auto-mark translations reviewed or publish starter content.
+2. With real assigned cargo, staff must verify per-container measurements with genuine evidence; a separate customer session must observe only its own updated totals, selected-container occupancy and statuses. Test another customer's denial, reconnect and concurrent staff updates in the real deployment. Zero production records currently prevent positive data-path verification without creating business records.
+3. Verify the real signed-in support inbox round-trip, shared navigation, persisted language/theme and nonvisual homepage controls on installed iOS/Android apps. These are unexecuted acceptance tests, separate from the explicitly deferred 3D visual tests.
+4. Configure and implement the deeper booking/payment/shipment/handling/sourcing workflows before representing these request/unavailable panels as completed logistics actions. This is unfinished engineering outside the narrowed homepage content/admin scope.
+
+The original full six-phase production verdict stays **not production ready**. Homepage CMS/admin connectivity is implemented with executed isolated evidence, but neither a preview nor an export establishes the remaining live and device acceptance.

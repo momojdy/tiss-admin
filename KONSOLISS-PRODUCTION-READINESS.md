@@ -109,3 +109,7 @@ Final live privilege read-back confirmed source RLS enabled, the breakdown view 
 ## Main integration — 2026-11-23
 
 At the user's instruction, consumer PR #36 was merged into `main` as `5facc6e9d12b505da8c9856b9670c06c20da611d` and admin PR #4 as `a28be5eb9db8fdb3f4593b58fb26f2edf3cab580`. The earlier draft-PR/non-merged descriptions above are historical. Both working checkouts now use `main`; AGENTS.md records the user's main-only workflow. These source merges do not certify homepage CMS/translation completion or production readiness. No database deployment, CMS publication or release was performed during integration.
+
+## Homepage scope follow-up — 2026-11-23
+
+A subsequent homepage-only pass synchronized the admin preview, exposed copy/images and translation review, added per-container measurement controls and connected previously inactive homepage controls to verified summaries or support requests. See the paired `homepage-completion.md` / `KONSOLISS-HOMEPAGE-COMPLETION.md` report for current paths and executed evidence. Older homepage implementation descriptions in this report are historical. The original full-feature production verdict remains unchanged; booking/payment/shipment workflows and real live/device acceptance are still open. Work is now directly on main, and the completed Konsoliss pull requests were merged.

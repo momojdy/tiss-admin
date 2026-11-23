@@ -24,6 +24,13 @@ jobs:
           ref: e294fa3df92f435580278ababaff9db129204c20
           path: tiss_tiss_beta
           persist-credentials: false
+      - name: Checkout current Konsoliss consumer source
+        uses: actions/checkout@v4
+        with:
+          repository: momojdy/tiss_tiss_beta
+          ref: main
+          path: konsoliss-consumer
+          persist-credentials: false
       - uses: actions/setup-node@v4
         with:
           node-version: 22
@@ -32,8 +39,16 @@ jobs:
       - run: npm ci
       - name: TypeScript check
         run: npm run typecheck
+      - name: Verify Konsoliss preview source synchronization
+        env:
+          KONSOLISS_ADMIN_ROOT: ${{ github.workspace }}/tiss-admin
+        run: node ../konsoliss-consumer/scripts/sync-konsoliss-preview.cjs --check
       - name: Konsoliss CMS and operations boundary tests
+        env:
+          KONSOLISS_CONSUMER_ROOT: ${{ github.workspace }}/konsoliss-consumer
         run: npm run test:konsoliss
+      - name: Konsoliss isolated CMS and measurement integration
+        run: npm run test:konsoliss:backend
       - name: Bundle Android application
         run: npx expo export --platform android --output-dir dist/android
       - name: Bundle iOS application

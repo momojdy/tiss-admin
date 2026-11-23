@@ -7,6 +7,7 @@ import {useNav} from '../../shell/Nav';
 import {Card, Section} from '../../ui/Card';
 import {OutlineBtn, Pill} from '../../ui/Controls';
 import {Txt} from '../../ui/Txt';
+import {KonsolissMeasurements} from './KonsolissMeasurements';
 
 type Container={id:string;container_number:string;status:'filling'|'filled'|'departed'|'arrived';updated_at:string;assigned_customers:number};
 const NEXT:Record<Container['status'],Container['status']|null>={filling:'filled',filled:'departed',departed:'arrived',arrived:null};
@@ -139,6 +140,7 @@ export function KonsolissAdminScreen(){
       <TextInput accessibilityLabel="Reason to assign" value={reason} onChangeText={setReason} placeholder="Audit reason" placeholderTextColor="#8D817A" style={fieldStyle}/>
       <OutlineBtn primary disabled={!chosen||!customerId||busy} onPress={()=>{void action('assign',{containerId:chosen,customer:customerId.trim()});}}>Assign current container</OutlineBtn>
     </Section>
+    <KonsolissMeasurements customerId={customerId.trim()}/>
     <Section title="Customer CBM progress">
       <Txt size={10} mut>Verified measurements for the customer UUID above. Reserved space, goods sent, goods staged for the container and cargo physically loaded must be recorded separately. Values are customer-visible and are not a simulation.</Txt>
       <OutlineBtn disabled={!customerId.trim()||busy} onPress={()=>{void readLoadProgress();}}>{busy?'Loading…':'Load customer volumes'}</OutlineBtn>
