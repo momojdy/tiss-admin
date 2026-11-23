@@ -105,3 +105,7 @@ Both use `codex/konsoliss-integrity-20261122`. Equivalent local implementation c
 Exact consumer revision native-build attempts used Expo project `277b862a-4581-4c6b-91b8-a7da40ced36e`, iOS profile `development-simulator` and Android profile `development`, with auto-submit disabled. Both were rejected before creating build jobs: **“No repository found for appId 277b862a-4581-4c6b-91b8-a7da40ced36e.”** The CLI fallback `eas whoami` returned **“Not logged in”**, and no `EXPO_TOKEN` is configured. Linking the repository to the Expo project or establishing an authorized local EAS session is required to run native builds. Older successful builds belong to other revisions and were not counted as acceptance evidence.
 
 Final live privilege read-back confirmed source RLS enabled, the breakdown view `security_invoker=true`, authenticated SELECT granted, anonymous SELECT denied, and direct execution of the new occupancy-touch trigger function denied to both anon and authenticated roles.
+
+## Main integration — 2026-11-23
+
+At the user's instruction, consumer PR #36 was merged into `main` as `5facc6e9d12b505da8c9856b9670c06c20da611d` and admin PR #4 as `a28be5eb9db8fdb3f4593b58fb26f2edf3cab580`. The earlier draft-PR/non-merged descriptions above are historical. Both working checkouts now use `main`; AGENTS.md records the user's main-only workflow. These source merges do not certify homepage CMS/translation completion or production readiness. No database deployment, CMS publication or release was performed during integration.
