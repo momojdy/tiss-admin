@@ -56,3 +56,23 @@ export function trackingCountdown(deadline:number,now:number):{seconds:number;la
   const pad=(n:number)=>String(n).padStart(2,'0');
   return {seconds,label:seconds===0?'Deadline reached':(d>0?d+'d ':'')+pad(hours)+'h '+pad(mins)+'m '+pad(secs)+'s left'};
 }
+
+/** Use only the selected container's verified committed and loaded quantities.
+ * A null allocation is unknown, not evidence of inbound cargo. */
+export function verifiedContainerInbound(occupancy:{yourAllocatedCbm:number|null;yourSpaceCbm:number}|null):number{
+  if(!occupancy||occupancy.yourAllocatedCbm===null)return 0;
+  return Math.max(0,Math.round((occupancy.yourAllocatedCbm-occupancy.yourSpaceCbm)*1000)/1000);
+}
+/** Account-wide callout uses the single-container progress only when measurements agree.
+ * An open unsent remainder is unassigned, not necessarily unused or abandoned. */
+export function liveLoadCallout(progress:KonsolissLoadProgress|null,occupancy:{yourAllocatedCbm:number|null;yourSpaceCbm:number}|null,split:boolean):string{
+  if(split)return progress?'My current loaded space '+progress.loadedCbm.toFixed(3)+' CBM':'My current loaded space —';
+  if(!progress||!occupancy||occupancy.yourAllocatedCbm===null)return '';
+  const r=(n:number)=>Math.round(n*1000)/1000;
+  const loaded=r(occupancy.yourSpaceCbm),inbound=verifiedContainerInbound(occupancy),remaining=r(Math.max(0,progress.reservedCbm-loaded-inbound));
+  if(loaded!==r(progress.loadedCbm)||inbound!==r(progress.inboundCbm)||loaded<=0)return '';
+  const parts=[String(loaded)+' CBM loaded'];
+  if(inbound>0)parts.push(String(inbound)+' CBM inbound');
+  if(remaining>0)parts.push(String(remaining)+' CBM '+(inbound>0?'remaining':'unassigned'));
+  return parts.length>1?parts.join(' • '):'';
+}

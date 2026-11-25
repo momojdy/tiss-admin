@@ -11,7 +11,7 @@ import {estimateCbm,formatCopy} from './cms/model';
 import {currentKonsolissContainerLabel, useCurrentKonsolissContainer, type KonsolissContainerStatus} from './previewData';
 import {sendKonsolissSupport,supportRequestId} from './previewData';
 import {useKonsolissLoadProgress, type KonsolissLoadProgress} from './previewData';
-import {trackingCountdown} from './konsolissLoadModel';
+import {trackingCountdown,verifiedContainerInbound,liveLoadCallout} from './konsolissLoadModel';
 import {useKonsolissContainerOccupancy, type KonsolissContainerOccupancy} from './previewData';
 import {useKonsolissAssignedContainers} from './previewData';
 import {type KonsolissSelectableContainer} from './previewData';
@@ -168,13 +168,15 @@ function Screen({onBack,onUniversalAction,unreadNotifications,unreadMessages}: {
   const selectedContainer:KonsolissSelectableContainer|null=isDemo&&demoScenario?(liveContainers.find(row=>row.id==='demo:'+demoScenario.id+':'+demoView?.id)??null):selectedContainerId==='live'?null:
     (liveContainers.find(row=>row.id===selectedContainerId)
       ??(selectedContainerId===realFallback?.id?realFallback:null)
-      ??(selectedContainerId===null?defaultContainer:null));
+      ??defaultContainer);
   const hasCurrentContainer=selectedContainer!==null;
   const isSelectedCurrent=selectedContainer!==null&&!isDemo&&currentContainer.kind==='assigned'&&currentContainer.number===selectedContainer.number;
   const containerStatusLabel=(item:KonsolissSelectableContainer)=>
     item.number+' · '+copy['status.'+item.status];
   // Rotate only when a container is selected; always start with customer progress.
   useEffect(()=>{
+    // No shared-container bar exists without a selected container.
+    if(!selectedContainer){if(progressView!=='customer')setProgressView('customer');return;}
     // A manual arrow tap changes progressView, resets this timeout and guarantees 7 full seconds.
     const timeout=setTimeout(()=>setProgressView(view=>view==='customer'?'container':'customer'),7000);
     return()=>clearTimeout(timeout);
@@ -222,7 +224,7 @@ function Screen({onBack,onUniversalAction,unreadNotifications,unreadMessages}: {
   const demoCountdown=demoScenario?.deadlineRemainingMs;
   const liveDeadline=!isDemo&&loadProgress.kind==='recorded'&&loadProgress.progress.reservedCbm>0&&loadProgress.progress.sentCbm===0?loadProgress.trackingDueAt:undefined;
   const splitShipment=liveContainers.length>1;
-  const splitCaption=splitShipment?(progress?'My current loaded space '+progress.loadedCbm.toFixed(3)+' CBM':'My current loaded space —'):'';
+  const liveCaption=liveLoadCallout(progress,containerOccupancy,splitShipment);
   const loadStatus=demoScenario?previewLoadStatus(demoScenario,demoView):splitShipment?'Split into '+liveContainers.length+' containers':showReservedPreview&&!containerOccupancy?copy['load.reserved']+' • '+(progress?.sentCbm===0?(copy['warehouse.empty']||'No goods sent yet'):(copy['load.warehouseTransit']||'At warehouse or still in transit')):'';
   const webHtml=containerHtml(dark,
     isDemo?!!demoRender?.empty:showEmptyLoadHint,
@@ -232,7 +234,7 @@ function Screen({onBack,onUniversalAction,unreadNotifications,unreadMessages}: {
     isDemo?(demoRender?.free??null):(containerOccupancy?.freeCbm??null),copy,showReservedPreview,
     isDemo?(demoRender?.sent??0):(progress?.sentCbm??0),
     demoRender&&isDemo?{here:demoRender.here,hereInbound:demoRender.hereInbound,sealed:demoRender.sealed,caption:demoRender.caption}
-      :{here:containerOccupancy?.yourAllocatedCbm??0,sealed:selectedContainer!==null&&selectedContainer.status!=='filling',caption:splitCaption});
+      :{here:containerOccupancy?.yourAllocatedCbm??0,hereInbound:verifiedContainerInbound(containerOccupancy),sealed:selectedContainer!==null&&selectedContainer.status!=='filling',caption:liveCaption});
   const nav = [copy['nav.home'], copy['nav.warehouse'], copy['nav.consolidated'], copy['nav.sourcing'], copy['nav.hub']];
   return <KonsolissContentContext.Provider value={{...editing,copy,images:content.images}}><View style={{flex: 1, backgroundColor: t.bg}}><StatusBarCompat barStyle={dark ? 'light-content' : 'dark-content'} translucent backgroundColor="transparent" />
     <ScrollView ref={scrollRef} scrollEnabled={scroll} contentContainerStyle={{paddingTop: Math.max(14, insets.top), paddingBottom: 110 + insets.bottom}} showsVerticalScrollIndicator={false}>
@@ -513,7 +515,7 @@ const REFERENCE_CONTAINER_JS = [
 "const wall=(on,q,n)=>{const near=nv(on)[2]>.02;for(let i=0;i<n;i++){let p=q(i);if(near){p=p.map(a=>[a[0],Math.min(a[1],.28),a[2]]);poly(3,p,sh(ST,lit(on)*(i%2?.75:1)))}else poly(0,p,sh(C.int,lit(on.map(c=>-c))*(i%2?.78:1)))}};",
 "for(const[zs,n]of[[HZ,[0,0,1]],[-HZ,[0,0,-1]]])wall(n,i=>[[-HX+i*.2,0,zs],[-HX+i*.2+.2,0,zs],[-HX+i*.2+.2,H,zs],[-HX+i*.2,H,zs]],60);",
 "for(const[xs,n]of[[HX,[1,0,0]],[-HX,[-1,0,0]]])wall(n,i=>{const z=-HZ+i*.2;return[[xs,0,z],[xs,0,z+.2],[xs,H,z+.2],[xs,H,z]]},12);",
-"for(const raw of cargo){if(!actual&&(raw.col>=V.nc||raw.col===9&&raw.j===1))continue;let b=raw.b;if(actual){if(b[0]>=nominalEnd-gap||loaded<=.1)continue;b=[Math.max(ix0,b[0]),Math.min(nominalEnd-gap,b[1]),b[2],b[3],b[4],b[5]];if(b[1]<=b[0])continue;}for(const piece of subtract(b,own)){const c={...raw,b:piece};if(c.pal){abox(1,c.b,c.c,1,1);continue}",
+"for(const raw of cargo){if(!actual&&(raw.col>=V.nc||raw.col===9&&raw.j===1))continue;let b=raw.b;if(actual){if(V.oth<=0||b[0]>=nominalEnd-gap||loaded<=.1)continue;b=[Math.max(ix0,b[0]),Math.min(nominalEnd-gap,b[1]),b[2],b[3],b[4],b[5]];if(b[1]<=b[0])continue;}for(const piece of subtract(b,own)){const c={...raw,b:piece};if(c.pal){abox(1,c.b,c.c,1,1);continue}",
 "abox(1,c.b,c.k?sh(c.c,c.k).replace(/rgb\\((.*)\\)/,(m,v)=>'#'+v.split(',').map(a=>(+a).toString(16).padStart(2,'0')).join('')):c.c,1,1,(l,n)=>{const[x0,x1,y0,y1,z0,z1]=c.b,xm=(x0+x1)/2,zm=(z0+z1)/2,tp=c.u?'#FFE9A8':'#EBDDBF',lb=c.u?'#FFFBD4':'#F7F3E6';",
 "if(n[1]==1){if(c.top)poly(l,[[x0,y1,zm-.035],[x0,y1,zm+.035],[x1,y1,zm+.035],[x1,y1,zm-.035]],tp,.9,0)}else if(!c.lab);else if(n[2]==1)poly(l,[[x0+.07,y0+.14,z1],[x0+.31,y0+.14,z1],[x0+.31,y0+.32,z1],[x0+.07,y0+.32,z1]],lb,.95,0);",
 "else if(n[2]==-1)poly(l,[[x1-.07,y0+.14,z0],[x1-.07,y0+.32,z0],[x1-.31,y0+.32,z0],[x1-.31,y0+.14,z0]],lb,.95,0);else if(n[0]==1)poly(l,[[x1,y0+.14,zm-.12],[x1,y0+.32,zm-.12],[x1,y0+.32,zm+.12],[x1,y0+.14,zm+.12]],lb,.95,0);else if(n[0]==-1)poly(l,[[x0,y0+.14,zm-.12],[x0,y0+.14,zm+.12],[x0,y0+.32,zm+.12],[x0,y0+.32,zm-.12]],lb,.95,0)})}",
