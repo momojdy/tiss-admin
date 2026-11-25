@@ -14,6 +14,7 @@ export function KonsolissBookingOperations(){
  const [busy,setBusy]=useState(false),[error,setError]=useState(''),[notice,setNotice]=useState('');
  const [amount,setAmount]=useState(''),[note,setNote]=useState(''),[reason,setReason]=useState(''),[routeCode,setRouteCode]=useState('');
  const [included,setIncluded]=useState(''),[excluded,setExcluded]=useState(''),[customs,setCustoms]=useState(''),[cargo,setCargo]=useState(''),[delivery,setDelivery]=useState(''),[profit,setProfit]=useState('');
+ const [newCountry,setNewCountry]=useState(''),[newRegion,setNewRegion]=useState('OTHER'),[newMode,setNewMode]=useState<'LCL'|'FCL'>('LCL'),[newDelivery,setNewDelivery]=useState<'pickup'|'door'>('pickup');
  const [scopeConfirmed,setScopeConfirmed]=useState(false);
  const chosen=quotes.find(q=>q.id===selected);
  const refresh=useCallback(async()=>{
@@ -40,6 +41,14 @@ export function KonsolissBookingOperations(){
   setBusy(true);setError('');setNotice('');
   const {error:e}=await supabase.rpc('konsoliss_admin_quote_action',{p_id:chosen.id,p_action:kind,p_amount_cents:kind==='approve'?cents:null,p_scope:scope,p_note:note.trim()});
   if(e)setError(e.message);else{setNotice('Request '+kind+' recorded and audited. Live payment remains disabled.');setSelected(null);setNote('');setScopeConfirmed(false);await refresh()}
+  setBusy(false);
+ };
+ const createRoute=async()=>{
+  const country=newCountry.trim().toUpperCase(),region=newRegion.trim().toUpperCase();
+  if(busy||!/^[A-Z]{2}$/.test(country)||!/^[A-Z0-9_-]{2,40}$/.test(region)||reason.trim().length<5){setError('Enter ISO two-letter country, region code and audit reason.');return}
+  setBusy(true);setError('');setNotice('');
+  const {error:e}=await supabase.rpc('konsoliss_admin_add_booking_route',{p_country:country,p_region:region,p_mode:newMode,p_delivery:newDelivery,p_reason:reason.trim()});
+  if(e)setError(e.message);else{setNotice('New destination is saved as quotation-only and paused. Activate request intake only after reviewing the route.');setNewCountry('');setReason('');await refresh()}
   setBusy(false);
  };
  const toggleRoute=async()=>{
@@ -105,6 +114,19 @@ export function KonsolissBookingOperations(){
    <Txt size={10} weight={600}>Audit reason</Txt>
    <TextInput style={field} value={reason} onChangeText={setReason} placeholder="Route intake decision and evidence"/>
    <OutlineBtn disabled={!routeCode||busy} onPress={()=>{void toggleRoute()}}>Update selected route intake</OutlineBtn>
+   <View style={{marginTop:15,borderTopWidth:.5,borderColor:'#D5C8A5',paddingTop:11}}>
+    <Txt size={12} weight={600}>Add future destination / region</Txt>
+    <Txt size={10} mut>New routes begin paused, unpriced, unverified and without checkout. Additional countries appear in the customer dropdown once authorized quotation intake is opened.</Txt>
+    <Txt size={10}>Country · ISO 2 letters</Txt>
+    <TextInput style={field} autoCapitalize="characters" value={newCountry} onChangeText={setNewCountry} maxLength={2} placeholder="e.g. CA"/>
+    <Txt size={10}>Destination service region code</Txt>
+    <TextInput style={field} autoCapitalize="characters" value={newRegion} onChangeText={setNewRegion} maxLength={40} placeholder="e.g. TORONTO"/>
+    <View style={{flexDirection:'row',flexWrap:'wrap',gap:6,marginVertical:8}}>
+      {(['LCL','FCL'] as const).map(x=><Pill key={x} on={newMode===x} onPress={()=>setNewMode(x)}>{x}</Pill>)}
+      {(['pickup','door'] as const).map(x=><Pill key={x} on={newDelivery===x} onPress={()=>setNewDelivery(x)}>{x==='pickup'?'Warehouse pickup':'Door delivery'}</Pill>)}
+    </View>
+    <OutlineBtn disabled={busy} onPress={()=>{void createRoute()}}>Create inactive quotation route</OutlineBtn>
+   </View>
   </Section>
  </View>
 }
