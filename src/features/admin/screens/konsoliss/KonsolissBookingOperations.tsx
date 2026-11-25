@@ -6,6 +6,7 @@ import {OutlineBtn,Pill} from '../../ui/Controls';
 import {Txt} from '../../ui/Txt';
 
 type Quote={id:string;status:string;created_at:string;country:string;region:string;shipping_mode:string;delivery:string;physical_cbm:number|null;container_count:number|null;goods_category:string;goods_description:string|null;declared_value_usd:number|null;estimated_weight_kg:number|null;base_freight_cents:number|null;weight_surcharge_cents:number|null;requested_total_cents:number|null;approved_total_cents:number|null;approved_scope:any;quote_version:number;address:string|null;review_note:string|null;customer_id:string};
+type ServiceRequest={id:string;order_id:string;customer_id:string;request_kind:string;description:string;status:string;decision_note:string|null;created_at:string};
 type Route={code:string;country:string;region:string;shipping_mode:string;delivery:string;requests_enabled:boolean;service_verified:boolean;checkout_enabled:boolean;price_published:boolean;rate_version:number};
 const field={borderWidth:1,borderColor:'#D5C8A5',backgroundColor:'#FFF9DF',borderRadius:6,padding:9,fontSize:12,color:'#2B1210',marginVertical:5} as const;
 const fmt=(n:number|null)=>(n==null?'Pending':('$'+(n/100).toFixed(2)));
@@ -16,14 +17,16 @@ export function KonsolissBookingOperations(){
  const [included,setIncluded]=useState(''),[excluded,setExcluded]=useState(''),[customs,setCustoms]=useState(''),[cargo,setCargo]=useState(''),[delivery,setDelivery]=useState(''),[profit,setProfit]=useState('');
  const [newCountry,setNewCountry]=useState(''),[newRegion,setNewRegion]=useState('OTHER'),[newMode,setNewMode]=useState<'LCL'|'FCL'>('LCL'),[newDelivery,setNewDelivery]=useState<'pickup'|'door'>('pickup');
  const [scopeConfirmed,setScopeConfirmed]=useState(false);
+ const [requests,setRequests]=useState<ServiceRequest[]>([]),[chosenRequest,setChosenRequest]=useState<string|null>(null),[requestNote,setRequestNote]=useState('');
  const chosen=quotes.find(q=>q.id===selected);
  const refresh=useCallback(async()=>{
-  const [q,r]=await Promise.all([
+  const [q,r,s]=await Promise.all([
    supabase.from('konsoliss_booking_quotes').select('id,status,created_at,country,region,shipping_mode,delivery,physical_cbm,container_count,goods_category,goods_description,declared_value_usd,estimated_weight_kg,base_freight_cents,weight_surcharge_cents,requested_total_cents,approved_total_cents,approved_scope,quote_version,address,review_note,customer_id').order('created_at',{ascending:false}).limit(100),
-   supabase.from('konsoliss_booking_routes').select('*').order('code')
+   supabase.from('konsoliss_booking_routes').select('*').order('code'),
+   supabase.from('konsoliss_customer_service_requests').select('id,order_id,customer_id,request_kind,description,status,decision_note,created_at').order('created_at',{ascending:false}).limit(100)
   ]);
-  if(q.error||r.error)setError('Could not load booking requests or route policy. Check Super Admin access.');
-  else{setQuotes(q.data as Quote[]);setRoutes(r.data as Route[]);setError('')}
+  if(q.error||r.error||s.error)setError('Could not load bookings, requests or route policy. Check Super Admin access.');
+  else{setQuotes(q.data as Quote[]);setRoutes(r.data as Route[]);setRequests((s.data||[]) as ServiceRequest[]);setError('')}
  },[]);
  useEffect(()=>{void refresh()},[refresh]);
  const act=async(kind:'review'|'info'|'reject'|'approve'|'expire')=>{
@@ -41,6 +44,15 @@ export function KonsolissBookingOperations(){
   setBusy(true);setError('');setNotice('');
   const {error:e}=await supabase.rpc('konsoliss_admin_quote_action',{p_id:chosen.id,p_action:kind,p_amount_cents:kind==='approve'?cents:null,p_scope:scope,p_note:note.trim()});
   if(e)setError(e.message);else{setNotice('Request '+kind+' recorded and audited. Live payment remains disabled.');setSelected(null);setNote('');setScopeConfirmed(false);await refresh()}
+  setBusy(false);
+ };
+ const reviewServiceRequest=async(action:'review'|'need_info'|'reject'|'approve_manual')=>{
+  if(!chosenRequest||busy||requestNote.trim().length<10){setError('Choose a request and enter at least ten characters of review evidence.');return}
+  setBusy(true);setError('');setNotice('');
+  const {error:e}=await supabase.rpc('konsoliss_admin_review_service_request',{
+   p_request_id:chosenRequest,p_action:action,p_note:requestNote.trim()
+  });
+  if(e)setError(e.message);else{setNotice('Service request review recorded. No refund or carrier return has been executed.');setChosenRequest(null);setRequestNote('');await refresh()}
   setBusy(false);
  };
  const createRoute=async()=>{
@@ -105,6 +117,28 @@ export function KonsolissBookingOperations(){
     <OutlineBtn onPress={()=>setSelected(null)}>Close</OutlineBtn>
    </View>
   </Section>:null}
+  <Section title="Customer refund, return and alternative-service requests">
+   <Txt size={11} mut>Requests are submitted from authenticated customer bookings. Approval authorizes manual operational review only; it does not move money, return cargo or override safety and customs checks.</Txt>
+   {requests.length===0?<Txt size={11} mut>No service requests recorded.</Txt>:null}
+   {requests.map(req=><View key={req.id} style={{paddingVertical:8,borderBottomWidth:.5,borderColor:'#D5C8A5'}}>
+     <Txt size={12} weight={600}>{req.request_kind.replace(/_/g,' ')} · {req.status.replace(/_/g,' ')}</Txt>
+     <Txt size={10} mut>Booking {req.order_id.slice(0,8)} · Customer {req.customer_id.slice(0,8)}</Txt>
+     <Txt size={11}>{req.description}</Txt>
+     {req.decision_note?<Txt size={10} mut>Decision: {req.decision_note}</Txt>:null}
+     <OutlineBtn disabled={busy} onPress={()=>{setChosenRequest(req.id);setRequestNote(req.decision_note||'')}}>{chosenRequest===req.id?'Selected':'Review request'}</OutlineBtn>
+   </View>)}
+   {chosenRequest?<Card>
+     <Txt size={11} weight={600}>Review note · recorded with the decision</Txt>
+     <TextInput multiline style={[field,{minHeight:55}]} value={requestNote} onChangeText={setRequestNote} placeholder="Reason, evidence and what the customer should know"/>
+     <View style={{flexDirection:'row',flexWrap:'wrap',gap:7}}>
+      <OutlineBtn disabled={busy} onPress={()=>{void reviewServiceRequest('review')}}>In review</OutlineBtn>
+      <OutlineBtn disabled={busy} onPress={()=>{void reviewServiceRequest('need_info')}}>Need information</OutlineBtn>
+      <OutlineBtn disabled={busy} onPress={()=>{void reviewServiceRequest('reject')}}>Reject</OutlineBtn>
+      <OutlineBtn disabled={busy} onPress={()=>{void reviewServiceRequest('approve_manual')}}>Approve for manual processing</OutlineBtn>
+      <OutlineBtn onPress={()=>setChosenRequest(null)}>Close</OutlineBtn>
+     </View>
+   </Card>:null}
+  </Section>
   <Section title="Destination service intake">
    <Txt size={11} mut>Disable quotation intake for an unsupported route. This is NOT an activation switch for paid bookings. Routes require independent carrier, customs and margin approval.</Txt>
    {routes.map(r=><View key={r.code} style={{paddingVertical:5,borderBottomWidth:.5,borderColor:'#E4DDCD'}}>
