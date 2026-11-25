@@ -19,7 +19,7 @@ const admin='10000000-0000-4000-8000-000000000001',editor='10000000-0000-4000-80
  create table konsoliss_customer_load_progress(user_id uuid primary key references auth.users,reserved_cbm numeric(10,3),sent_cbm numeric(10,3),loaded_cbm numeric(10,3),inbound_to_container_cbm numeric(10,3),updated_at timestamptz default clock_timestamp());
  alter table konsoliss_customer_load_progress enable row level security;grant select on konsoliss_customer_load_progress to authenticated;create policy own on konsoliss_customer_load_progress to authenticated using(user_id=auth.uid());
  alter table wantiss_cms_content enable row level security;grant select on wantiss_cms_content to anon,authenticated;create policy published on wantiss_cms_content to anon,authenticated using(status='published');`);
- for(const file of ['tests/backend/fixtures/homepage-cms-baseline.sql','tests/backend/fixtures/homepage-breakdown-baseline.sql','supabase/migrations/20261122205352_konsoliss_verified_volume_constraints.sql','supabase/migrations/20261122210202_konsoliss_occupancy_realtime_invalidation.sql','supabase/migrations/20261123050013_konsoliss_homepage_cms_and_measurements.sql','supabase/migrations/20261123052456_konsoliss_retire_homepage_hint.sql','supabase/migrations/20261125092738_konsoliss_3d_strict_container_lifecycle.sql','supabase/migrations/20261125183436_konsoliss_load_container_cms_label_contract.sql'])await db.exec(fs.readFileSync(path.join(root,file),'utf8'));
+ for(const file of ['tests/backend/fixtures/homepage-cms-baseline.sql','tests/backend/fixtures/homepage-breakdown-baseline.sql','supabase/migrations/20261122205352_konsoliss_verified_volume_constraints.sql','supabase/migrations/20261122210202_konsoliss_occupancy_realtime_invalidation.sql','supabase/migrations/20261123050013_konsoliss_homepage_cms_and_measurements.sql','supabase/migrations/20261123052456_konsoliss_retire_homepage_hint.sql','supabase/migrations/20261125092738_konsoliss_3d_strict_container_lifecycle.sql','supabase/migrations/20261125183436_konsoliss_load_container_cms_label_contract.sql','docs/konsoliss/konsoliss-fill-precision-candidate.sql'])await db.exec(fs.readFileSync(path.join(root,file),'utf8'));
  await db.query('insert into auth.users values($1),($2),($3),($4)',[admin,editor,customer,other]);await db.query("insert into wantiss_admin_staff values($1,'super_admin','active'),($2,'editor','active')",[admin,editor]);
  const session=async user=>{await db.exec('reset role');await db.query("select set_config('request.jwt.claim.sub',$1,false)",[user]);};
  const full={v:2,labels,reviewed:Object.keys(labels),images:{}};
@@ -65,6 +65,18 @@ const admin='10000000-0000-4000-8000-000000000001',editor='10000000-0000-4000-80
  console.log('PASS: customer reads only its reconciled values; direct customer writes and anonymous operational access denied');
  // Exercise the exact candidate SQL in the existing in-process test harness, never the live project.
  const occupancy=async id=>(await db.query('select public.konsoliss_container_occupancy($1) as data',[id])).rows[0].data;
+ // Exhaustive numeric SQL contract and actual owner-scoped RPC boundaries, isolated only.
+ const sweep=(await db.query(`with vals as (select i,round(i::numeric/1000/68*100,3) p from generate_series(0,68000) i), ordered as (select *,lag(p) over(order by i) previous from vals) select count(*) as n,count(*) filter(where (i=0)<>(p=0) or (i=68000)<>(p=100) or p<=previous or abs(p-i::numeric/1000/68*100)>0.0005) as failures from ordered`)).rows[0];
+ assert.equal(Number(sweep.n),68001);assert.equal(Number(sweep.failures),0);
+ const boundary='20000000-0000-4000-8000-000000000099';
+ await session(admin);await db.query("insert into konsoliss_containers(id,container_number) values($1,'PRECISION-TEST')",[boundary]);
+ await db.query("insert into konsoliss_container_assignments(container_id,user_id,loaded_cbm,allocated_cbm) values($1,$2,0,0)",[boundary,other]);
+ for(const [loaded,percent] of [[0,0],[.001,.001],[.02,.029],[34,50],[51.7,76.029],[67.32,99],[67.9,99.853],[67.999,99.999],[68,100]]){
+  await session(admin);await db.query('update konsoliss_container_assignments set loaded_cbm=$2,allocated_cbm=$2 where container_id=$1',[boundary,loaded]);
+  await session(other);await db.exec('set role authenticated');const actual=await occupancy(boundary);assert.equal(Number(actual.fill_percent),percent);assert.equal(Number(actual.free_cbm),Math.round((68-loaded)*1000)/1000);
+ }
+ await session(admin);await db.query('delete from konsoliss_container_assignments where container_id=$1',[boundary]);await db.query('delete from konsoliss_containers where id=$1',[boundary]);
+ console.log('PASS: 68,001 SQL fill percentages and actual RPC boundary values, including 67.999 / 68 CBM');
  const advance=async(id,status)=>db.query('update public.konsoliss_containers set status=$2 where id=$1',[id,status]);
  await session(customer);await db.exec('set role authenticated');
  assert.equal(await occupancy(first),null,'other member unknown: no invented occupancy');
@@ -76,7 +88,7 @@ const admin='10000000-0000-4000-8000-000000000001',editor='10000000-0000-4000-80
  const otherProgress=(await db.query('select updated_at from public.konsoliss_customer_load_progress where user_id=$1',[other])).rows[0].updated_at;
  await db.query('select konsoliss_admin_verify_container_measurements($1,$2,$3,$4)',[other,JSON.stringify([{container_id:first,loaded_cbm:51.67,allocated_cbm:51.67}]),otherProgress,'Verified actual shared cargo']);
  await session(customer);await db.exec('set role authenticated');
- const filled=await occupancy(first);assert.equal(Number(filled.loaded_cbm),51.7);assert.equal(Number(filled.free_cbm),16.3);assert.equal(Number(filled.your_loaded_cbm),.03);assert.equal(Number(filled.other_cargo_cbm),51.67);
+ const filled=await occupancy(first);assert.equal(Number(filled.loaded_cbm),51.7);assert.equal(Number(filled.free_cbm),16.3);assert.equal(Number(filled.your_loaded_cbm),.03);assert.equal(Number(filled.other_cargo_cbm),51.67);assert.equal(Number(filled.fill_percent),76.029);
  assert.equal(await occupancy('20000000-0000-4000-8000-000000000099'),null);
  await session(editor);await db.exec('set role authenticated');assert.equal(await occupancy(first),null,'nonowner cannot read container aggregate');
  await session(admin);await advance(first,'filled'); // Underfilled but actually sealed, not a fake 100% requirement.

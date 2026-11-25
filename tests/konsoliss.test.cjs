@@ -42,3 +42,22 @@ test('Goodies preview retains one Home tab and its existing zoom controls',()=>{
  test('Content Studio lists all 23 directly selectable fixture states and offers explicit review only',()=>{
  const editor=get('screens/content/KonsolissEditor.tsx'),wrapper=get('screens/content/KonsolissConsumerPreviewScreen.tsx');assert.match(editor,/PREVIEW_SCENARIOS\.map\(\(item,index\)/);assert.match(editor,/previewIndex=\{previewIndex\}/);assert.match(wrapper,/previewIndex,selected,onSelect/);assert.match(editor,/I reviewed all labels in this locale/);const contract=load('src/features/admin/screens/content/konsolissPreview/cms/catalog.ts'),S=load('src/features/admin/screens/content/konsolissPreview/konsolissPreviewScenarios.ts');assert.equal(S.PREVIEW_SCENARIOS.length,23);for(const locale of contract.KONSOLISS_LOCALES){const localized=contract.konsolissLocaleDefaults(locale);assert.equal(Object.keys(localized).length,Object.keys(contract.KONSOLISS_COPY_DEFAULTS).length);assert.ok(localized['deadline.reminder']);}
  });
+
+test('all 68,001 physical occupancy values at 0.001 CBM precision display strictly increasing accurate percentages',()=>{
+ const {formatContainerFillPercent:format,parseKonsolissOccupancy:parse}=load("src/features/admin/screens/content/konsolissPreview/konsolissOccupancyModel.ts");
+ let previous=-1;
+ for(let milli=0;milli<=68000;milli++){
+  const loaded=milli/1000,free=(68000-milli)/1000,own=Math.min(milli,20)/1000,other=(milli-Math.min(milli,20))/1000;
+  const value=parse({container_id:'verified',container_type:'40HQ',capacity_cbm:68,loaded_cbm:loaded,your_loaded_cbm:own,other_cargo_cbm:other,free_cbm:free,your_allocated_cbm:own},'verified');
+  assert.ok(value,'valid '+milli);const label=format(value.loadedCbm,value.capacityCbm),percent=Number(label.slice(0,-1));
+  const expected=Number((BigInt(milli)*100000n+34000n)/68000n)/1000;
+  assert.equal(percent,expected,'percent '+milli);assert.ok(percent>previous,'strict monotonic '+milli);
+  assert.equal(percent===0,milli===0);assert.equal(percent===100,milli===68000);
+  assert.ok(Math.abs(percent-loaded/68*100)<=.000500001);
+  assert.equal(Math.round((value.loadedCbm+value.freeCbm)*1000),68000);
+  previous=percent;
+ }
+ for(const [loaded,label] of [[0,'0%'],[.001,'0.001%'],[.02,'0.029%'],[34,'50%'],[51.7,'76.029%'],[67.32,'99%'],[67.9,'99.853%'],[67.999,'99.999%'],[68,'100%']])assert.equal(format(loaded,68),label);
+ for(const value of [-.001,68.001,NaN,Infinity,.0001])assert.equal(format(value,68),'—');
+ assert.equal(format(34,67),'—');
+});

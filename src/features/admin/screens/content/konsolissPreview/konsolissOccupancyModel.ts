@@ -26,3 +26,15 @@ export function parseKonsolissOccupancy(data:unknown,containerId:string):Konsoli
         &&(row.your_allocated_cbm==null||(Number.isFinite(allocated)&&allocated>=yourSpaceCbm&&allocated<=capacityCbm));
   return valid?{containerType:'40HQ',capacityCbm,loadedCbm,otherCargoCbm,yourSpaceCbm,yourAllocatedCbm:Number.isNaN(allocated)?null:allocated,freeCbm}:null;
 }
+
+/** Three decimal percentage places distinguish every 0.001 CBM step of a 68 CBM 40HQ.
+ * Zero and 100% are reserved for exact physical endpoints. Never use purchased or inbound CBM.
+ */
+export function formatContainerFillPercent(loadedCbm:number,capacityCbm:number):string {
+ const loaded=parseCbm(loadedCbm);
+ if(capacityCbm!==68||!Number.isFinite(loaded)||loaded>68)return '—';
+ const milliCbm=Math.round(loaded*1000);
+ // Integer inputs avoid binary floating-point tie errors. SQL uses round(numeric,3).
+ const thousandthsOfPercent=Math.floor((milliCbm*100000+34000)/68000);
+ return String(thousandthsOfPercent/1000)+'%';
+}
