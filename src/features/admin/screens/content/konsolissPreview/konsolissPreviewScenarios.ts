@@ -81,11 +81,11 @@ export const PREVIEW_SCENARIOS: readonly PreviewScenario[] = [
   {id: 'a3', code: 'A3', group: 'A', title: 'Purchased · day-25 deadline near', purchased: 1, sent: 0, containers: [],
     note: 'Same illustrative reservation as A2; nothing is physically loaded. A red deadline reminder asks the customer to send goods or upload tracking.',
     deadline: 'Purchase day 22 of 25 · 3 days left to submit carrier-accepted inbound tracking'},
-  {id: 'a4', code: 'A4', group: 'A', title: 'Tracking label created · not accepted', purchased: 1, sent: 0, containers: [],
-    caption2: 'Label created · carrier acceptance not confirmed',
+  {id: 'a4', code: 'A4', group: 'A', title: 'Label created', purchased: 1, sent: 0, containers: [],
+    caption2: 'Label created',
     note: 'A created label is not proof of dispatch. Goods sent stays 0.000 CBM until the carrier accepts / first-scans the parcel.',
-    deadline: 'Purchase day 20 of 25 · waiting for carrier acceptance',
-    milestones: [{label: 'Label created', state: 'done'}, {label: 'Carrier accepted', state: 'pending'}, {label: 'At China warehouse', state: 'pending'}]},
+    deadline: '5 days left',
+    milestones: [{label: 'Label created', state: 'done'}]},
   {id: 'a5', code: 'A5', group: 'A', title: 'Inbound to warehouse', purchased: 1, sent: 0.7, containers: [],
     caption2: 'Inbound to warehouse · 0.700 CBM',
     note: '0.700 CBM accepted by the domestic carrier and travelling to the China warehouse. Not yet received, not in a container.',
@@ -104,7 +104,7 @@ export const PREVIEW_SCENARIOS: readonly PreviewScenario[] = [
     containers: [box('a', 'KS-DEMO-A', 'filling', 30, 0, 0.3)],
     note: 'Purchased 1.000 · sent 0.700 · inbound to container 0.300 · still at warehouse 0.400 · unused 0.300. Use the container pill to see the unassigned 0.700.'},
 
-  {id: 'c1', code: 'C1', group: 'C', title: 'Partly loaded · rest unassigned', purchased: 0.5, sent: 0.3,
+  {id: 'c1', code: 'C1', group: 'C', title: 'Partial load', purchased: 0.5, sent: 0.3,
     containers: [box('a', 'KS-DEMO-A', 'filling', 51.2, 0.3)],
     note: 'Purchased 0.500 · loaded 0.300 (red) · not yet assigned 0.200. The unassigned view shows the remainder separately, outside any container.'},
   {id: 'c2', code: 'C2', group: 'C', title: 'Loaded + inbound + remaining', purchased: 0.5, sent: 0.5,
@@ -202,6 +202,34 @@ export function resolvePreviewView(s: PreviewScenario, viewId: string | null): P
   return views.find(v => v.id === viewId) ?? views[0] ?? null;
 }
 
+/** Customer-facing compact status; operational notes remain internal to the fixture. */
+const statusVolume = (n: number) => String(r3(n));
+function partialLoadStatus(s: PreviewScenario): string {
+  return statusVolume(sumOf(s, 'loaded')) + ' CBM loaded • ' + statusVolume(previewUnassignedCbm(s)) + ' CBM unassigned';
+}
+export function previewLoadStatus(s: PreviewScenario, view: PreviewView | null): string {
+  if (s.data) return s.data === 'loading' ? 'Loading…' : 'Data unavailable';
+  if (s.code === 'A1') return '';
+  if (s.code === 'A2') return 'Nothing sent';
+  if (s.code === 'A3') return 'Nothing sent • 3 days left';
+  if (s.code === 'A4') return 'Label created';
+  if (s.code === 'A5') return 'Inbound to warehouse • ' + statusVolume(s.sent) + ' CBM';
+  if (s.code === 'B1') return statusVolume(s.warehouseVerified ?? 0) + ' CBM at warehouse • ' + statusVolume(s.purchased-s.sent) + ' CBM not sent';
+  if (s.code === 'B2') return statusVolume(s.warehouseVerified ?? 0) + ' CBM at warehouse';
+  if (s.code === 'B3') return statusVolume(sumOf(s,'outlineExtra')) + ' CBM allocated • Not loaded';
+  if (s.code === 'B4') return statusVolume(sumOf(s,'inbound')) + ' CBM inbound • ' + statusVolume(previewUnassignedCbm(s)) + ' CBM unassigned';
+  if (s.code === 'C1') return partialLoadStatus(s);
+  if (s.code === 'C2') return statusVolume(Math.max(0,s.purchased-sumOf(s,'here'))) + ' CBM unassigned';
+  if (s.code === 'C3') return statusVolume(sumOf(s,'loaded')) + ' CBM loaded • ' + statusVolume(s.purchased-s.sent) + ' CBM unused';
+  if (s.code === 'C7') return 'Split into ' + s.containers.length + ' containers' + (view?.kind === 'unassigned' ? ' • ' + statusVolume(view.unassignedCbm ?? 0) + ' CBM unassigned' : '');
+  if (s.code === 'D1') return 'Preparing shipment';
+  if (s.code === 'D2') return 'Departed';
+  if (s.code === 'D3') return 'Arrived • Awaiting customs clearance';
+  if (s.code === 'D4') return 'Reservation expired';
+  if (s.code === 'D5') return 'Incident under review';
+  return '';
+}
+
 export type PreviewRender = {
   empty: boolean;
   /** Illustrative reservation animation in an empty illustrated container. */
@@ -232,7 +260,7 @@ export function previewRender(s: PreviewScenario, view: PreviewView | null): Pre
     const c = view.container, occ = previewOccupancy(c);
     return {...base, reserved: occ.capacityCbm, loaded: occ.loadedCbm, yourLoaded: c.loaded, free: occ.freeCbm,
       here: r3(c.here + (c.outlineExtra ?? 0)), hereInbound: c.inbound, sealed: isSealedStatus(c.status), occupancy: occ, container: c,
-      caption: s.code === 'C1' ? 'Partly loaded · rest unassigned' : s.code === 'C7' ? 'Split into 2 containers' : ''};
+      caption: s.code === 'C1' ? partialLoadStatus(s) : s.code === 'C7' ? 'Split into 2 containers' : ''};
   }
   if (view.kind === 'unassigned') {
     const un = view.unassignedCbm ?? 0, assigned = sumOf(s, 'here');
