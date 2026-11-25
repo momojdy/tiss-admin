@@ -93,5 +93,66 @@ const admin='10000000-0000-4000-8000-000000000001',editor='10000000-0000-4000-80
  await db.exec('reset role;set role anon');await assert.rejects(db.query('select public.konsoliss_container_occupancy($1)',[first]),/permission denied/);
  console.log('PASS: exact measured occupancy, owner isolation, underfilled seal, pending inbound/unknown rejection, immutable sealed cargo, split mixed update and valid lifecycle transitions');
 
+
+ // Candidate read model and guard: synthetic records only in the existing PGlite process.
+ await db.exec(`reset role;
+ alter table konsoliss_container_assignments add column assigned_at timestamptz not null default now();
+ create table konsoliss_booking_orders(id uuid primary key,customer_id uuid,status text,paid_at timestamptz,verified_payment_reference text);
+ create table konsoliss_entitlement_rights(id uuid primary key,order_id uuid,customer_id uuid,physical_cbm numeric,tracking_due_at timestamptz);
+ create table konsoliss_entitlement_movements(id uuid primary key default gen_random_uuid(),right_id uuid,order_id uuid,delta_cbm numeric,reason text);
+ create view konsoliss_rights_balance as select r.id right_id,r.order_id,r.customer_id,r.physical_cbm purchased_cbm,r.tracking_due_at,
+  coalesce(sum(m.delta_cbm),0) active_cbm from konsoliss_entitlement_rights r left join konsoliss_entitlement_movements m on m.right_id=r.id group by r.id;
+ create table konsoliss_consignment_pieces(id uuid primary key,order_id uuid,customer_id uuid,parent_piece_id uuid,declared_cbm numeric,measured_cbm numeric,measured_kg numeric,received_at timestamptz,receipt_identity text,verified_by uuid);
+ create table konsoliss_piece_carrier_records(piece_id uuid primary key,order_id uuid,customer_id uuid,status text,first_carrier_scan_at timestamptz,carrier_evidence text,accepted_by uuid);
+ create table konsoliss_partner_fulfillment_cases(order_id uuid,status text,quote_verified boolean,approved_by uuid,partner_name text);
+ `);
+ await db.exec(fs.readFileSync(path.join(root,'docs/konsoliss/konsoliss-3d-home-snapshot-candidate.sql'),'utf8'));
+ {
+ const newcomer='10000000-0000-4000-8000-000000000005',order='30000000-0000-4000-8000-000000000001',right='40000000-0000-4000-8000-000000000001',piece='50000000-0000-4000-8000-000000000001',third='20000000-0000-4000-8000-000000000003';
+ await db.query('insert into auth.users values($1)',[newcomer]);
+ const home=async()=>(await db.query('select public.konsoliss_homepage_snapshot() as data')).rows[0].data;
+ const homeAs=async user=>{await session(user);await db.exec('set role authenticated');return home()};
+ const reconcile=async user=>(await db.query('select public.konsoliss_admin_reconcile_home_progress($1) as data',[user])).rows[0].data;
+ assert.equal((await homeAs(newcomer)).kind,'unrecorded');
+ await assert.rejects(reconcile(newcomer),/Super Admin/);
+ await session(admin);
+ await db.query("insert into konsoliss_booking_orders values($1,$2,'awaiting_verified_payment',null,null)",[order,newcomer]);
+ assert.equal((await homeAs(newcomer)).kind,'unrecorded','quote/checkout cannot mint space');
+ await session(admin);
+ await db.query("update konsoliss_booking_orders set status='reserved',paid_at=now(),verified_payment_reference='ISOLATED-verification' where id=$1",[order]);
+ assert.equal((await homeAs(newcomer)).kind,'unavailable','paid marker without ledger is not a purchase');
+ await session(admin);
+ await db.query("insert into konsoliss_entitlement_rights values($1,$2,$3,1,'2026-12-20T00:00:00Z')",[right,order,newcomer]);
+ await db.query("insert into konsoliss_entitlement_movements(right_id,order_id,delta_cbm,reason) values($1,$2,1,'purchase')",[right,order]);
+ let s=await homeAs(newcomer);assert.equal(s.kind,'recorded');assert.equal(s.status_code,'nothing_sent');assert.equal(Number(s.progress.reserved_cbm),1);assert.equal(Number(s.progress.sent_cbm),0);assert.ok(s.tracking_due_at);
+ await session(admin);
+ const synced=await reconcile(newcomer);assert.equal(Number(synced.reserved_cbm),1);assert.equal((await reconcile(newcomer)).updated_at,synced.updated_at);
+ await assert.rejects(db.query('select konsoliss_admin_set_customer_load_progress($1,2,0,0,0,$2)',[newcomer,'Invented extra reservation']),/verified paid rights/);
+ await db.query("insert into konsoliss_consignment_pieces(id,order_id,customer_id,declared_cbm) values($1,$2,$3,.7)",[piece,order,newcomer]);
+ await db.query("insert into konsoliss_piece_carrier_records(piece_id,order_id,customer_id,status) values($1,$2,$3,'submitted')",[piece,order,newcomer]);
+ s=await homeAs(newcomer);assert.equal(s.status_code,'label_created');assert.equal(Number(s.progress.sent_cbm),0);
+ await session(admin);
+ await db.query("update konsoliss_piece_carrier_records set status='carrier_accepted',first_carrier_scan_at=now(),carrier_evidence='ISOLATED scan evidence',accepted_by=$2 where piece_id=$1",[piece,admin]);
+ s=await homeAs(newcomer);assert.equal(s.status_code,'inbound_warehouse');assert.equal(Number(s.progress.sent_cbm),.7);assert.equal(Number(s.progress.loaded_cbm),0);assert.ok(s.tracking_due_at,'single-right partial dispatch retains deadline');
+ await session(admin);
+ await db.query("update konsoliss_consignment_pieces set received_at=now(),measured_cbm=.7,measured_kg=25,receipt_identity='ISOLATED-receipt',verified_by=$2 where id=$1",[piece,admin]);
+ s=await homeAs(newcomer);assert.equal(s.status_code,'warehouse');assert.equal(Number(s.warehouse_cbm),.7);assert.equal(Number(s.progress.loaded_cbm),0);
+ await session(admin);
+ await db.query("insert into konsoliss_containers(id,container_number) values($1,'ISOLATED-C')",[third]);
+ await db.query("insert into konsoliss_container_assignments(container_id,user_id) values($1,$2)",[third,newcomer]);
+ assert.equal((await homeAs(newcomer)).kind,'unavailable','unverified assignment does not create a physical volume');
+ await session(admin);
+ const current=await reconcile(newcomer);assert.equal(Number(current.sent_cbm),.7);
+ const verifiedNew=(await db.query('select konsoliss_admin_verify_container_measurements($1,$2,$3,$4) as data',[newcomer,JSON.stringify([{container_id:third,loaded_cbm:.3,allocated_cbm:.5}]),current.updated_at,'Isolated verified cargo measurement'])).rows[0].data;
+ assert.equal(Number(verifiedNew.progress.loaded_cbm),.3);
+ s=await homeAs(newcomer);assert.equal(s.kind,'recorded');assert.equal(Number(s.progress.loaded_cbm),.3);assert.equal(Number(s.progress.inbound_to_container_cbm),.2);assert.equal(s.containers.length,1);assert.equal(Number(s.containers[0].occupancy.your_loaded_cbm),.3);assert.equal(Number(s.containers[0].occupancy.free_cbm),67.7);
+ await session(admin);
+ await assert.rejects(db.query('select konsoliss_admin_verify_container_measurements($1,$2,$3,$4)',[newcomer,JSON.stringify([{container_id:third,loaded_cbm:.7,allocated_cbm:.8}]),verifiedNew.progress.updated_at,'Allocation over sent']),/Allocation exceeds/);
+ await db.query("insert into konsoliss_partner_fulfillment_cases values($1,'incident',true,$2,'DO NOT EXPOSE PROVIDER')",[order,admin]);
+ s=await homeAs(newcomer);assert.equal(s.status_code,'incident_review');assert.ok(!JSON.stringify(s).includes('DO NOT EXPOSE PROVIDER'));assert.ok(!JSON.stringify(s).includes('ISOLATED-receipt'));
+ const otherView=await homeAs(editor);assert.equal(otherView.kind,'unrecorded');assert.equal(otherView.containers.length,0);
+ await db.exec('reset role;set role anon');await assert.rejects(home(),/permission denied/);
+ console.log('PASS: atomic authoritative home projection: paid ledger, label vs dispatch, measured receipt, partial deadline, admin reconciliation, exact container snapshot, incident privacy, stale/manual volume denial and ownership');
+ }
  await db.close();
 })().catch(error=>{console.error(error);process.exitCode=1;});
