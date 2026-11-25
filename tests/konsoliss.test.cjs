@@ -61,3 +61,31 @@ test('all 68,001 physical occupancy values at 0.001 CBM precision display strict
  for(const value of [-.001,68.001,NaN,Infinity,.0001])assert.equal(format(value,68),'—');
  assert.equal(format(34,67),'—');
 });
+
+test('exact progress bar partitions at all 68,001 container totals and diverse ownership splits',()=>{
+ const {containerBarWidths:bar}=load("src/features/admin/screens/content/konsolissPreview/konsolissLoadModel.ts");
+ const near=(a,b)=>assert.ok(Math.abs(a-b)<1e-10,a+' != '+b);
+ for(let n=0;n<=68000;n++){
+  for(const own of new Set([0,Math.min(20,n),Math.floor(n/2),n])){
+   const value={containerType:'40HQ',capacityCbm:68,loadedCbm:n/1000,otherCargoCbm:(n-own)/1000,yourSpaceCbm:own/1000,yourAllocatedCbm:own/1000,freeCbm:(68000-n)/1000};
+   for(const split of [false,true]){
+    const w=bar(value,split);assert.ok(w);
+    near(w.first,(split?n:n-own)/68000*100);near(w.second,split?0:own/68000*100);near(w.remaining,(68000-n)/68000*100);near(w.first+w.second+w.remaining,100);
+    assert.equal(w.remaining===0,n===68000);assert.equal(w.first+w.second===0,n===0);
+   }
+  }
+ }
+ assert.equal(bar(null,false),null);
+ assert.equal(bar({capacityCbm:67},false),null);
+ assert.equal(bar({capacityCbm:68,loadedCbm:2,otherCargoCbm:1,yourSpaceCbm:0,freeCbm:66},false),null);
+});
+test('customer partitions preserve every allocation combination for purchases up to .100 CBM, plus large and split boundaries',()=>{
+ const {customerBarWidths:bar}=load("src/features/admin/screens/content/konsolissPreview/konsolissLoadModel.ts");
+ let count=0;
+ const verify=(p,l,i)=>{const w=bar({reservedCbm:p/1000,loadedCbm:l/1000,inboundCbm:i/1000});assert.ok(w);for(const [x,y] of [[w.first,l/p*100],[w.second,i/p*100],[w.remaining,(p-l-i)/p*100],[w.first+w.second+w.remaining,100]])assert.ok(Math.abs(x-y)<1e-10);assert.equal(w.remaining===0,l+i===p);count++;};
+ for(let p=20;p<=100;p++)for(let l=0;l<=p;l++)for(let i=0;i<=p-l;i++)verify(p,l,i);
+ for(const p of [101,500,1000,2000,68000,136000,9999999999])for(const l of [0,1,Math.floor(p/2),p-1,p])for(const i of new Set([0,Math.floor((p-l)/2),p-l]))verify(p,l,i);
+ assert.ok(count>170000);
+ for(const bad of [null,{reservedCbm:0,loadedCbm:0,inboundCbm:0},{reservedCbm:1,loadedCbm:.8,inboundCbm:.201},{reservedCbm:1,loadedCbm:-.001,inboundCbm:0},{reservedCbm:1,loadedCbm:NaN,inboundCbm:0}])assert.equal(bar(bad),null);
+ console.log('Customer allocation combinations checked: '+count);
+});

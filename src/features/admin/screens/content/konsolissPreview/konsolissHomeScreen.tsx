@@ -11,7 +11,7 @@ import {estimateCbm,formatCopy} from './cms/model';
 import {currentKonsolissContainerLabel, useCurrentKonsolissContainer, type KonsolissContainerStatus} from './previewData';
 import {sendKonsolissSupport,supportRequestId} from './previewData';
 import {useKonsolissLoadProgress, type KonsolissLoadProgress} from './previewData';
-import {trackingCountdown,verifiedContainerInbound,liveLoadCallout,liveHomeStatus} from './konsolissLoadModel';
+import {trackingCountdown,verifiedContainerInbound,liveLoadCallout,liveHomeStatus,customerBarWidths,containerBarWidths} from './konsolissLoadModel';
 import {formatContainerFillPercent} from './konsolissOccupancyModel';
 import {useKonsolissContainerOccupancy, type KonsolissContainerOccupancy} from './previewData';
 import {useKonsolissAssignedContainers} from './previewData';
@@ -182,11 +182,9 @@ function Screen({onBack,onUniversalAction,unreadNotifications,unreadMessages}: {
   const isSelectedCurrent=selectedContainer!==null&&!isDemo&&currentContainer.kind==='assigned'&&currentContainer.number===selectedContainer.number;
   const containerStatusLabel=(item:KonsolissSelectableContainer)=>
     item.number+' · '+copy['status.'+item.status];
-  // Rotate only when a container is selected; always start with customer progress.
+  // Both views remain accessible without an assignment; unknown occupancy is never zero.
+  // Manual toggles and container changes restart the seven-second dwell.
   useEffect(()=>{
-    // No shared-container bar exists without a selected container.
-    if(!selectedContainer){if(progressView!=='customer')setProgressView('customer');return;}
-    // A manual arrow tap changes progressView, resets this timeout and guarantees 7 full seconds.
     const timeout=setTimeout(()=>setProgressView(view=>view==='customer'?'container':'customer'),7000);
     return()=>clearTimeout(timeout);
   },[selectedContainer?.id,progressView]);
@@ -210,8 +208,7 @@ function Screen({onBack,onUniversalAction,unreadNotifications,unreadMessages}: {
   const notLoadedValue=progress?fmt(progress.sentNotLoadedCbm):'—';
   const stillToSendValue=progress?fmt(progress.reservedNotSentCbm):'—';
   const notAllocatedValue=progress?fmt(Math.max(0,progress.reservedCbm-progress.allocatedCbm)):'—';
-  const physicallyLoadedRatio=progress&&progress.reservedCbm>0?progress.loadedCbm/progress.reservedCbm:0;
-  const inboundRatio=progress&&progress.reservedCbm>0?progress.inboundCbm/progress.reservedCbm:0;
+  const customerWidths=customerBarWidths(progress);
   const fillPercent=progress?progress.loadedPercent+'%':'—';
   const fillRatio=progress&&progress.reservedCbm>0?progress.allocatedCbm/progress.reservedCbm:0;
   const noCargoLoaded=!progress||progress.allocatedCbm===0;
@@ -233,6 +230,7 @@ function Screen({onBack,onUniversalAction,unreadNotifications,unreadMessages}: {
   const demoCountdown=demoScenario?.deadlineRemainingMs;
   const liveDeadline=!isDemo&&loadProgress.kind==='recorded'&&loadProgress.progress.reservedCbm>0?loadProgress.trackingDueAt:undefined;
   const splitShipment=liveContainers.length>1;
+  const containerWidths=containerBarWidths(containerOccupancy,splitShipment);
   const liveCaption=liveLoadCallout(progress,containerOccupancy,splitShipment);
   const snapshotStatus=liveHomeStatus(loadProgress.snapshot,copy);
   const splitLabel=formatCopy(copy,'load.split',{count:liveContainers.length});
@@ -287,9 +285,10 @@ function Screen({onBack,onUniversalAction,unreadNotifications,unreadMessages}: {
       <View pointerEvents={isDemo&&!editing.enabled?'none':'auto'} style={{paddingHorizontal:24,marginTop:12}}>
         {progressView==='container'?<>
           <View style={{flexDirection:'row',alignItems:'center',gap:6}}>
-            <View style={{flex:1,height:10,borderRadius:5,overflow:'hidden',backgroundColor:t.tint,flexDirection:'row'}}>
-              <View style={{width:`${containerOccupancy?Math.max(0,Math.min(100,(splitShipment?containerOccupancy.loadedCbm:containerOccupancy.otherCargoCbm)/containerOccupancy.capacityCbm*100)):0}%`,backgroundColor:'#CDAA7D'}}/>
-              {!splitShipment?<View style={{width:`${containerOccupancy?Math.max(0,Math.min(100,containerOccupancy.yourSpaceCbm/containerOccupancy.capacityCbm*100)):0}%`,backgroundColor:t.ac}}/>:null}
+            <View testID="konsoliss-container-progress" accessibilityLabel={containerWidths?undefined:copy['load.unavailable']} style={{flex:1,height:10,borderRadius:5,overflow:'hidden',flexDirection:'row',backgroundColor:containerWidths?t.tint:'transparent',borderWidth:containerWidths?0:1,borderStyle:containerWidths?'solid':'dashed',borderColor:t.mu}}>
+              {containerWidths?<><View testID="konsoliss-container-loaded" style={{width:`${containerWidths.first}%`,flexShrink:0,backgroundColor:'#CDAA7D'}}/>
+              {!splitShipment?<View testID="konsoliss-container-own" style={{width:`${containerWidths.second}%`,flexShrink:0,backgroundColor:t.ac}}/>:null}
+              <View testID="konsoliss-container-free" style={{width:`${containerWidths.remaining}%`,flexShrink:0,backgroundColor:t.tint}}/></>:null}
             </View>
             {<Pressable accessibilityRole="button" accessibilityLabel={copy['a11y.progress']} accessibilityHint={copy['a11y.progressHint']}
             onPress={()=>setProgressView(view=>view==='customer'?'container':'customer')}
@@ -306,12 +305,12 @@ function Screen({onBack,onUniversalAction,unreadNotifications,unreadMessages}: {
           </View>
         </>:<>
           <View style={{flexDirection:'row',alignItems:'center',gap:6}}>
-            <View style={{flex:1,flexDirection:'row',height:10,borderRadius:5,overflow:'hidden',gap:2}}>
-            <View style={{width:`${Math.max(0,Math.min(100,physicallyLoadedRatio*100))}%`}}>
+            <View testID="konsoliss-customer-progress" accessibilityLabel={customerWidths?undefined:copy[displayLoadState.kind==='loading'?'load.loading':displayLoadState.kind==='unrecorded'||progress?.reservedCbm===0?'status.unassigned':'load.unavailable']} style={{flex:1,flexDirection:'row',height:10,borderRadius:5,overflow:'hidden',backgroundColor:customerWidths?t.tint:'transparent',borderWidth:customerWidths?0:1,borderStyle:customerWidths?'solid':'dashed',borderColor:t.mu}}>
+            {customerWidths?<><View testID="konsoliss-customer-loaded" style={{width:`${customerWidths.first}%`,flexShrink:0}}>
               <Svg width="100%" height={10}><Defs><LinearGradient id="g" x1="0" y1="0" x2="1" y2="0"><Stop offset="0" stopColor="#CDAA7D"/><Stop offset="0.5" stopColor="#B7B1A3"/><Stop offset="1" stopColor="#D2B48A"/></LinearGradient></Defs><Rect width="100%" height={10} fill="url(#g)"/></Svg>
             </View>
-            <View style={{width:`${Math.max(0,Math.min(100,inboundRatio*100))}%`,backgroundColor:t.ac}}/>
-              <View style={{flex:1,backgroundColor:t.tint}}/>
+            <View testID="konsoliss-customer-inbound" style={{width:`${customerWidths.second}%`,flexShrink:0,backgroundColor:t.ac}}/>
+              <View testID="konsoliss-customer-remaining" style={{width:`${customerWidths.remaining}%`,flexShrink:0,backgroundColor:t.tint}}/></>:null}
             </View>
             {<Pressable accessibilityRole="button" accessibilityLabel={copy['a11y.progress']} accessibilityHint={copy['a11y.progressHint']}
             onPress={()=>setProgressView(view=>view==='customer'?'container':'customer')}

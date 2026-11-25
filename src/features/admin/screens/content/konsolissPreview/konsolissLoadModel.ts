@@ -138,3 +138,25 @@ export function liveHomeStatus(snapshot:KonsolissHomeSnapshot|null|undefined,cop
   default:return '';
  }
 }
+
+/** Exact millesimal CBM partition; no pixel gaps or rounded display percentages enter widths.
+ * Null means unknown/not applicable, never a verified empty track. */
+export type KonsolissBarWidths={first:number;second:number;remaining:number};
+function barWidths(total:number,first:number,second:number):KonsolissBarWidths|null{
+ const values=[total,first,second].map(parseCbm);
+ if(values.some(n=>!Number.isFinite(n)))return null;
+ const [den,a,b]=values.map(n=>Math.round(n*1000));
+ if(den<=0||a+b>den)return null;
+ return {first:a/den*100,second:b/den*100,remaining:(den-a-b)/den*100};
+}
+export function customerBarWidths(progress:Pick<KonsolissLoadProgress,'reservedCbm'|'loadedCbm'|'inboundCbm'>|null):KonsolissBarWidths|null{
+ return progress?barWidths(progress.reservedCbm,progress.loadedCbm,progress.inboundCbm):null;
+}
+export function containerBarWidths(occupancy:KonsolissContainerOccupancy|null,split:boolean):KonsolissBarWidths|null{
+ if(!occupancy||occupancy.capacityCbm!==68)return null;
+ const {loadedCbm,otherCargoCbm,yourSpaceCbm,freeCbm}=occupancy;
+ if([loadedCbm,otherCargoCbm,yourSpaceCbm,freeCbm].some(n=>!Number.isFinite(parseCbm(n))))return null;
+ const milli=(n:number)=>Math.round(n*1000);
+ if(milli(otherCargoCbm)+milli(yourSpaceCbm)!==milli(loadedCbm)||milli(loadedCbm)+milli(freeCbm)!==68000)return null;
+ return barWidths(68,split?loadedCbm:otherCargoCbm,split?0:yourSpaceCbm);
+}
