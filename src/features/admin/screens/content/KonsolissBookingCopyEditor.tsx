@@ -37,6 +37,15 @@ export const BOOKING_COPY:Record<string,string>={
  'bookspace.termsDetails':'Terms cover pricing, cargo eligibility, deadlines, cancellation and refund rules.',
  'bookspace.cargoChecks':'Some products need extra documents or inspection. We check your options before you send them.',
  'bookspace.quoteOnly':'A destination-specific, carrier-backed quote is needed before payment.',
+ 'bookspace.myRequests':'My shipment requests',
+ 'bookspace.requestExplanation':'Request a refund, cargo return or alternative service only for a confirmed paid booking. Requests do not automatically move funds or cargo.',
+ 'bookspace.createRequest':'Create service request',
+ 'bookspace.noPaidBookings':'No eligible paid shipping bookings yet. Quotation requests are not reservations.',
+ 'bookspace.refreshRequests':'Refresh requests',
+ 'bookspace.requestType':'Request type',
+ 'bookspace.requestDetails':'Explain your request',
+ 'bookspace.requestNotSettlement':'Admin review does not automatically issue a refund or return shipment.',
+ 'bookspace.submitRequest':'Submit request',
 };
 const field={backgroundColor:'#FFF9DF',borderColor:'#D5C8A5',borderWidth:1,borderRadius:8,padding:10,fontSize:12,minHeight:55,color:'#2B1210'} as const;
 const languages=['en','fr','ht','es','zh-Hans'];
