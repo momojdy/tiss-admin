@@ -1,7 +1,7 @@
 {
   "generator": "sync-konsoliss-preview.cjs",
   "sources": {
-    "konsolissHomeScreen.tsx": "98886b4e371239a36d1fd54b0a270f527e18ac92c7858e7133775ea59affd6aa",
+    "konsolissHomeScreen.tsx": "f81e492640d9e24f559661dd532741f05d98b6d3240719c2edd9ad9eed1cfc95",
     "assets/how-it-works/step1.png": "9ab2509813ab6adf290805734eb6c75b972c01a4ebfab44a780e409a8274b28d",
     "assets/how-it-works/step2.png": "fca6862902a05b85f26a0f1989dc72768cc3c731a3fc323d32d73cb8fc0c563f",
     "assets/how-it-works/step3.png": "cc53f84b9e50f98ac49efc8d6f6b1c4f2be3ff1f3269e18cbce316ba904311be",
