@@ -63,13 +63,13 @@ export function KonsolissAdminScreen(){
      setError('Enter a valid customer UUID to retrieve their load progress.');return;
    }
    setBusy(true);setError('');setSuccess('');setProgressForUser('');
-   const {data,error:e}=await supabase.rpc('konsoliss_admin_get_customer_load_progress',{p_user_id:id});
+   const {data,error:e}=await supabase.rpc('konsoliss_admin_reconcile_home_progress',{p_customer_id:id});
    if(e)setError('Customer load progress could not be retrieved.');
    else{
      const row=data as Record<string,unknown>|null;
      setLoadVolumes({reserved:String(row?.reserved_cbm??''),sent:String(row?.sent_cbm??''),inbound:String(row?.inbound_to_container_cbm??''),loaded:String(row?.loaded_cbm??'')});
      setProgressForUser(id);setProgressConfirm(false);
-     setSuccess(row?'Existing recorded volumes loaded for review.':'No recorded volumes yet. Confirm the measured values before saving.');
+     setSuccess(row?'Existing recorded volumes loaded for review.':'No verified paid rights or cargo recorded.');
    }
    setBusy(false);
  };
@@ -143,7 +143,7 @@ export function KonsolissAdminScreen(){
     </Section>
     <KonsolissMeasurements customerId={customerId.trim()}/>
     <Section title="Customer CBM progress">
-      <Txt size={10} mut>Verified measurements for the customer UUID above. Reserved space, goods sent, goods staged for the container and cargo physically loaded must be recorded separately. Values are customer-visible and are not a simulation.</Txt>
+      <Txt size={10} mut>Reconciled from verified paid rights, carrier evidence, warehouse receipts and container measurements. Values are customer-visible; only the exact authoritative totals can be saved.</Txt>
       <OutlineBtn disabled={!customerId.trim()||busy} onPress={()=>{void readLoadProgress();}}>{busy?'Loading…':'Load customer volumes'}</OutlineBtn>
       {progressForUser===customerId.trim()&&progressForUser?<View style={{marginTop:10}}>
         {([

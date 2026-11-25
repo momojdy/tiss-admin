@@ -1,7 +1,7 @@
 {
   "generator": "sync-konsoliss-preview.cjs",
   "sources": {
-    "konsolissHomeScreen.tsx": "9109f363f2b6d357ada63b8098fc241daf5bc512c14a66470c9d0edf372c0835",
+    "konsolissHomeScreen.tsx": "06aae30804db7220c221578867985338b7fe2e4b52d23ba33d68c7d3c1940548",
     "assets/how-it-works/step1.png": "9ab2509813ab6adf290805734eb6c75b972c01a4ebfab44a780e409a8274b28d",
     "assets/how-it-works/step2.png": "fca6862902a05b85f26a0f1989dc72768cc3c731a3fc323d32d73cb8fc0c563f",
     "assets/how-it-works/step3.png": "cc53f84b9e50f98ac49efc8d6f6b1c4f2be3ff1f3269e18cbce316ba904311be",
@@ -16,21 +16,21 @@
     "cms/catalog.ts": "29e2a768f6709a6b1e1443a1bc8e79204d57fdd879ff8c3110b053a5cbd67da8",
     "cms/model.ts": "d3c12e034dc9721930dc78b7a2905cf52e0a634fb43a38e754a67fbd3e164292",
     "konsolissNumbers.ts": "2b2a71ea03fefd9bc8ae4eb2b7d425042572258f2b3ed69df070478acf8cbaca",
-    "konsolissLoadModel.ts": "be160e2097ec7fef73109c503bb4518b81fff78fff528e4b7c8abdcfd1e67da1",
+    "konsolissLoadModel.ts": "0190b6224d9603c46db746cfb615dac14ae695864913a596793a22ce9eeaed3a",
     "konsolissOccupancyModel.ts": "02dde1ec7ae8f56ca308d003e4273ae3c822fae373470c0736101cc8262a8674",
-    "konsolissPreviewScenarios.ts": "abd4303519c7b68d07f29c8e83434c5f74738e6d5edbade765bb6c6bae909440",
+    "konsolissPreviewScenarios.ts": "5761873b20e2ebcf4aa0cb42702a5f73d3748083bb14ee72e823144d5519eecc",
     "useKonsolissPreviewController.ts": "287995d76c4abe2c2c28a55e0d90da32045b014bb339e66a2e0f6fe645fc3361",
     "KonsolissQuickMenuView.tsx": "207f82bc030bbe49752d52453e2ce694bb19cb272e33dbc6e4b06ce3a4b2a675"
   },
   "generated": {
-    "konsolissHomeScreen.tsx": "e16e12f5bac4b4d41521502532030951a9329a72a1f3e19855570efbe7c88779",
+    "konsolissHomeScreen.tsx": "1bdda254192dee0d3d236e17a58e478ea56b845a848314908583ad8c41a9624a",
     "KonsolissContent.tsx": "d62cbc82df911c35dc4e01be9c6811c4e11734a5ddb867c7b62dd6ca4a884df3",
     "cms/catalog.ts": "29e2a768f6709a6b1e1443a1bc8e79204d57fdd879ff8c3110b053a5cbd67da8",
     "cms/model.ts": "d3c12e034dc9721930dc78b7a2905cf52e0a634fb43a38e754a67fbd3e164292",
     "konsolissNumbers.ts": "2b2a71ea03fefd9bc8ae4eb2b7d425042572258f2b3ed69df070478acf8cbaca",
-    "konsolissLoadModel.ts": "be160e2097ec7fef73109c503bb4518b81fff78fff528e4b7c8abdcfd1e67da1",
+    "konsolissLoadModel.ts": "0190b6224d9603c46db746cfb615dac14ae695864913a596793a22ce9eeaed3a",
     "konsolissOccupancyModel.ts": "02dde1ec7ae8f56ca308d003e4273ae3c822fae373470c0736101cc8262a8674",
-    "konsolissPreviewScenarios.ts": "abd4303519c7b68d07f29c8e83434c5f74738e6d5edbade765bb6c6bae909440",
+    "konsolissPreviewScenarios.ts": "5761873b20e2ebcf4aa0cb42702a5f73d3748083bb14ee72e823144d5519eecc",
     "useKonsolissPreviewController.ts": "287995d76c4abe2c2c28a55e0d90da32045b014bb339e66a2e0f6fe645fc3361",
     "ThinMenuIcon.tsx": "74aeb6821fedd825fd56e713725cec6a909156ebfbf375c3db3cf76db5dd482e",
     "KonsolissQuickMenuView.tsx": "47a46a3952aa7887d2e6035ab2400a87f7c616286a4e6e561ed40f2bb011fbfe"

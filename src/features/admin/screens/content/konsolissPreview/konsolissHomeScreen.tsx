@@ -11,7 +11,7 @@ import {estimateCbm,formatCopy} from './cms/model';
 import {currentKonsolissContainerLabel, useCurrentKonsolissContainer, type KonsolissContainerStatus} from './previewData';
 import {sendKonsolissSupport,supportRequestId} from './previewData';
 import {useKonsolissLoadProgress, type KonsolissLoadProgress} from './previewData';
-import {trackingCountdown,verifiedContainerInbound,liveLoadCallout} from './konsolissLoadModel';
+import {trackingCountdown,verifiedContainerInbound,liveLoadCallout,liveHomeStatus} from './konsolissLoadModel';
 import {useKonsolissContainerOccupancy, type KonsolissContainerOccupancy} from './previewData';
 import {useKonsolissAssignedContainers} from './previewData';
 import {type KonsolissSelectableContainer} from './previewData';
@@ -105,9 +105,9 @@ function KonsolissMarker({n, top, ac}: {n: number; top: boolean; ac: string}) {
 
 
 /** TEMPORARY DEMO / PREVIEW. Fixtures live in konsolissPreviewScenarios.ts (frontend-only, never written to Supabase).
- * Review builds: on. Production builds MUST set EXPO_PUBLIC_KONSOLISS_DEMO=0 so customers can never see simulated records.
+ * Development preview; production defaults off and EAS production explicitly sets 0.
  */
-const KONSOLISS_DEMO_TOUR_ENABLED = konsolissDemoEnabled();
+const KONSOLISS_DEMO_TOUR_ENABLED = true;
 
 const KONSOLISS_STEPS=[1,2,3,4,5];
 
@@ -135,7 +135,13 @@ function DeadlineReminder({t,dueAt,remainingMs}:{t:Th;dueAt?:string;remainingMs?
 }
 
 function Screen({onBack,onUniversalAction,unreadNotifications,unreadMessages}: {onBack?: () => void;onUniversalAction?:(action:KonsolissMenuAction)=>void;unreadNotifications:number;unreadMessages:number}) {
-  const insets = useSafeAreaInsets(); const {dark,toggle:toggleKonsolissDarkMode,error:themeError}=useFeatureTheme('konsoliss.theme'); const t=dark?Dk:L; const content=useKonsolissHomepageContent(); const copy=content.copy; const editing=useContext(KonsolissContentContext); const [supportDraft,setSupportDraft]=useState({subject:'',message:''}); const [sh, setShState] = useState<null | 'calc' | 'book' | 'warehouse' | 'load' | 'sourcing' | 'orders' | 'support'>(null); const scrollRef=useRef<React.ElementRef<typeof ScrollView>>(null); const [scroll, setScroll] = useState(true); const [progressView,setProgressView]=useState<'customer'|'container'>('customer'); const [loadDetailsOpen,setLoadDetailsOpen]=useState(false); const [quickMenuOpen,setQuickMenuOpen]=useState(false); const [selectorOpen,setSelectorOpen]=useState(false); const [containerMenuOpen,setContainerMenuOpen]=useState(false); const [selectedContainerId,setSelectedContainerId]=useState<string|null>(null); const currentContainer = useCurrentKonsolissContainer(); const assignedContainers=useKonsolissAssignedContainers(); const loadProgress=useKonsolissLoadProgress(); const preview=useKonsolissPreviewController(); const demoScenario=KONSOLISS_DEMO_TOUR_ENABLED?preview.scenario:null; const isDemo=demoScenario!=null; const demoView=isDemo?preview.view:null; const demoRender=demoScenario?previewRender(demoScenario,demoView):null; const demoProgressValue=demoScenario?previewProgress(demoScenario):null;
+  const insets = useSafeAreaInsets(); const {dark,toggle:toggleKonsolissDarkMode,error:themeError}=useFeatureTheme('konsoliss.theme'); const t=dark?Dk:L; const content=useKonsolissHomepageContent(); const copy=content.copy; const editing=useContext(KonsolissContentContext); const [supportDraft,setSupportDraft]=useState({subject:'',message:''}); const [sh, setShState] = useState<null | 'calc' | 'book' | 'warehouse' | 'load' | 'sourcing' | 'orders' | 'support'>(null); const scrollRef=useRef<React.ElementRef<typeof ScrollView>>(null); const [scroll, setScroll] = useState(true); const [progressView,setProgressView]=useState<'customer'|'container'>('customer'); const [loadDetailsOpen,setLoadDetailsOpen]=useState(false); const [quickMenuOpen,setQuickMenuOpen]=useState(false); const [selectorOpen,setSelectorOpen]=useState(false); const [containerMenuOpen,setContainerMenuOpen]=useState(false); const [selectedContainerId,setSelectedContainerId]=useState<string|null>(null); const loadProgress=useKonsolissLoadProgress(); const snapshotMode=loadProgress.snapshot!==undefined; const legacyCurrent=useCurrentKonsolissContainer(!snapshotMode); const legacyAssigned=useKonsolissAssignedContainers(!snapshotMode); const preview=useKonsolissPreviewController(); const demoScenario=KONSOLISS_DEMO_TOUR_ENABLED?preview.scenario:null; const isDemo=demoScenario!=null; const demoView=isDemo?preview.view:null; const demoRender=demoScenario?previewRender(demoScenario,demoView):null; const demoProgressValue=demoScenario?previewProgress(demoScenario):null;
+  // Live production uses the one atomic snapshot; legacy hooks are disabled.
+  // Only the isolated admin preview and existing host harness omit snapshot.
+  const snapshotContainers=loadProgress.snapshot?.containers??[];
+  const latest=snapshotContainers[0];
+  const currentContainer=snapshotMode?(loadProgress.kind==='loading'?{kind:'loading' as const}:loadProgress.kind==='unavailable'?{kind:'unavailable' as const}:latest?{kind:'assigned' as const,number:latest.number,status:latest.status}:{kind:'unassigned' as const}):legacyCurrent;
+  const assignedContainers=snapshotMode?{containers:snapshotContainers,state:loadProgress.kind==='loading'?'loading' as const:loadProgress.kind==='unavailable'?'unavailable' as const:'ready' as const}:legacyAssigned;
   // Demo mode only swaps what is DISPLAYED. Live hooks keep running untouched underneath, so exiting restores genuine data.
   const setSh=(value:typeof sh)=>{if(isDemo&&value!==null)return;setShState(value);};
   useEffect(()=>{setProgressView('customer');},[preview.index]);
@@ -158,14 +164,16 @@ function Screen({onBack,onUniversalAction,unreadNotifications,unreadMessages}: {
     return () => clearTimeout(timer);
   }, [lifecycleNotice]);
   // Customer assignments remain server-owned; sample containers are local preview data only.
-  const realFallback=currentContainer.kind==='assigned'?{
+  const realFallback=!snapshotMode&&currentContainer.kind==='assigned'?{
     id:'current:'+currentContainer.number,number:currentContainer.number,status:currentContainer.status,demo:false,
   } as KonsolissSelectableContainer:null;
   const liveContainers:KonsolissSelectableContainer[]=isDemo&&demoScenario?demoScenario.containers.map(c=>({id:'demo:'+demoScenario.id+':'+c.key,number:c.number,status:c.status,demo:true} as KonsolissSelectableContainer)):(assignedContainers.containers.length?assignedContainers.containers:(realFallback?[realFallback]:[]));
   const defaultContainer=liveContainers.find(row=>row.number===realFallback?.number)
     ??liveContainers[0]??realFallback
 ;
-  const selectedContainer:KonsolissSelectableContainer|null=isDemo&&demoScenario?(liveContainers.find(row=>row.id==='demo:'+demoScenario.id+':'+demoView?.id)??null):selectedContainerId==='live'?null:
+  const unassignedCbm=loadProgress.kind==='recorded'?Math.max(0,Math.round((loadProgress.progress.reservedCbm-loadProgress.progress.allocatedCbm)*1000)/1000):0;
+  const liveUnassigned=!isDemo&&snapshotMode&&liveContainers.length>0&&unassignedCbm>0&&selectedContainerId==='live';
+  const selectedContainer:KonsolissSelectableContainer|null=isDemo&&demoScenario?(liveContainers.find(row=>row.id==='demo:'+demoScenario.id+':'+demoView?.id)??null):liveUnassigned?null:
     (liveContainers.find(row=>row.id===selectedContainerId)
       ??(selectedContainerId===realFallback?.id?realFallback:null)
       ??defaultContainer);
@@ -181,8 +189,8 @@ function Screen({onBack,onUniversalAction,unreadNotifications,unreadMessages}: {
     const timeout=setTimeout(()=>setProgressView(view=>view==='customer'?'container':'customer'),7000);
     return()=>clearTimeout(timeout);
   },[selectedContainer?.id,progressView]);
-  const verifiedOccupancy=useKonsolissContainerOccupancy(!isDemo&&selectedContainer?.id&&!selectedContainer.id.startsWith('current:')?selectedContainer.id:null);
-  const containerOccupancy=isDemo?(demoRender?.occupancy??null):verifiedOccupancy;
+  const verifiedOccupancy=useKonsolissContainerOccupancy(!snapshotMode&&!isDemo&&selectedContainer?.id&&!selectedContainer.id.startsWith('current:')?selectedContainer.id:null);
+  const containerOccupancy=isDemo?(demoRender?.occupancy??null):snapshotMode?(snapshotContainers.find(c=>c.id===selectedContainer?.id)?.occupancy??null):verifiedOccupancy;
   // "Your space" in the lower container bar is loaded cargo, not reserved allocation.
   // The aggregation RPC's yourSpaceCbm is also physically loaded cargo.
   const yourPhysicallyLoadedCbm=containerOccupancy?.yourSpaceCbm;
@@ -213,7 +221,7 @@ function Screen({onBack,onUniversalAction,unreadNotifications,unreadMessages}: {
   const containerAvailable=containerOccupancy?fmt(containerOccupancy.freeCbm):'—';
   const showEmptyLoadHint=!selectedContainer&&displayAssignmentState==='ready'&&liveContainers.length===0&&displayCurrentContainer.kind==='unassigned'&&(
     displayLoadState.kind==='unrecorded'||(progress!==null&&progress.reservedCbm===0&&progress.sentCbm===0));
-  const showReservedPreview=isDemo?!!demoRender?.preview:progress!==null&&progress.reservedCbm>0&&progress.loadedCbm===0&&((containerOccupancy!==null&&containerOccupancy.yourSpaceCbm===0)||(!selectedContainer&&displayAssignmentState==='ready'&&liveContainers.length===0&&displayCurrentContainer.kind==='unassigned'));
+  const showReservedPreview=isDemo?!!demoRender?.preview:liveUnassigned||progress!==null&&progress.reservedCbm>0&&progress.loadedCbm===0&&((containerOccupancy!==null&&containerOccupancy.yourSpaceCbm===0)||(!selectedContainer&&displayAssignmentState==='ready'&&liveContainers.length===0&&displayCurrentContainer.kind==='unassigned'));
   const loadPreviewValues={reservedValue,sentValue,loadedValue,inboundValue,committedValue,warehouseOrTransitValue,stillToSendValue,notAllocatedValue};
   const resetPreviewUi=()=>{setSelectedContainerId(null);setProgressView('customer');setLoadDetailsOpen(false);setContainerMenuOpen(false);setLifecycleNotice(null);setSelectorOpen(false);};
   const enterDemo=()=>{setShState(null);preview.start();resetPreviewUi();};
@@ -222,19 +230,20 @@ function Screen({onBack,onUniversalAction,unreadNotifications,unreadMessages}: {
   const exitDemo=()=>{preview.exit();resetPreviewUi();};
   const replayDemo=()=>{preview.replayCurrent();setProgressView('customer');setLoadDetailsOpen(false);};
   const demoCountdown=demoScenario?.deadlineRemainingMs;
-  const liveDeadline=!isDemo&&loadProgress.kind==='recorded'&&loadProgress.progress.reservedCbm>0&&loadProgress.progress.sentCbm===0?loadProgress.trackingDueAt:undefined;
+  const liveDeadline=!isDemo&&loadProgress.kind==='recorded'&&loadProgress.progress.reservedCbm>0?loadProgress.trackingDueAt:undefined;
   const splitShipment=liveContainers.length>1;
   const liveCaption=liveLoadCallout(progress,containerOccupancy,splitShipment);
-  const loadStatus=demoScenario?previewLoadStatus(demoScenario,demoView):splitShipment?'Split into '+liveContainers.length+' containers':showReservedPreview&&!containerOccupancy?copy['load.reserved']+' • '+(progress?.sentCbm===0?(copy['warehouse.empty']||'No goods sent yet'):(copy['load.warehouseTransit']||'At warehouse or still in transit')):'';
+  const snapshotStatus=liveHomeStatus(loadProgress.snapshot,copy);
+  const loadStatus=demoScenario?previewLoadStatus(demoScenario,demoView):liveUnassigned?(splitShipment?'Split into '+liveContainers.length+' containers • ':'')+fmt(unassignedCbm)+' CBM unassigned':splitShipment?'Split into '+liveContainers.length+' containers'+(snapshotStatus==='Incident under review'?' • '+snapshotStatus:''):snapshotStatus|| (showReservedPreview&&!containerOccupancy?copy['load.reserved']+' • '+(progress?.sentCbm===0?(copy['warehouse.empty']||'No goods sent yet'):(copy['load.warehouseTransit']||'At warehouse or still in transit')):'');
   const webHtml=containerHtml(dark,
     isDemo?!!demoRender?.empty:showEmptyLoadHint,
-    isDemo?(demoRender?.empty?68:(demoRender?.reserved??0)):showReservedPreview?(progress?.reservedCbm??0):(containerOccupancy?.capacityCbm??(showEmptyLoadHint?68:0)),
+    isDemo?(demoRender?.empty?68:(demoRender?.reserved??0)):showReservedPreview?(liveUnassigned?unassignedCbm:(progress?.reservedCbm??0)):(containerOccupancy?.capacityCbm??(showEmptyLoadHint?68:0)),
     isDemo?(demoRender?.loaded??0):(containerOccupancy?.loadedCbm??0),0,isDemo,
     isDemo?(demoRender?.yourLoaded??0):(yourPhysicallyLoadedCbm??0),
     isDemo?(demoRender?.free??null):(containerOccupancy?.freeCbm??null),copy,showReservedPreview,
     isDemo?(demoRender?.sent??0):(progress?.sentCbm??0),
     demoRender&&isDemo?{here:demoRender.here,hereInbound:demoRender.hereInbound,sealed:demoRender.sealed,caption:demoRender.caption}
-      :{here:containerOccupancy?.yourAllocatedCbm??0,hereInbound:verifiedContainerInbound(containerOccupancy),sealed:selectedContainer!==null&&selectedContainer.status!=='filling',caption:liveCaption});
+      :{here:containerOccupancy?.yourAllocatedCbm??0,hereInbound:verifiedContainerInbound(containerOccupancy),sealed:selectedContainer!==null&&selectedContainer.status!=='filling',caption:liveUnassigned?'Not assigned yet':liveCaption});
   const nav = [copy['nav.home'], copy['nav.warehouse'], copy['nav.consolidated'], copy['nav.sourcing'], copy['nav.hub']];
   return <KonsolissContentContext.Provider value={{...editing,copy,images:content.images}}><View style={{flex: 1, backgroundColor: t.bg}}><StatusBarCompat barStyle={dark ? 'light-content' : 'dark-content'} translucent backgroundColor="transparent" />
     <ScrollView ref={scrollRef} scrollEnabled={scroll} contentContainerStyle={{paddingTop: Math.max(14, insets.top), paddingBottom: 110 + insets.bottom}} showsVerticalScrollIndicator={false}>
@@ -242,7 +251,7 @@ function Screen({onBack,onUniversalAction,unreadNotifications,unreadMessages}: {
         onPress={() => setContainerMenuOpen(true)}
         style={[s.pill,{backgroundColor:t.tint,flexDirection:'row',alignItems:'center',gap:5,maxWidth:'72%'}]}>
         <Tx numberOfLines={1} style={{fontSize:12,lineHeight:15,fontWeight:'600',color:t.ac}}>
-          {isDemo&&demoScenario?.pill?demoScenario.pill:isDemo&&demoView?.kind==='unassigned'?'Not assigned yet':selectedContainer?containerStatusLabel(selectedContainer):
+          {isDemo&&demoScenario?.pill?demoScenario.pill:(isDemo&&demoView?.kind==='unassigned'||liveUnassigned)?'Not assigned yet':selectedContainer?containerStatusLabel(selectedContainer):
             displayCurrentContainer.kind==='unassigned'?(progress&&(progress.reservedCbm>0||progress.sentCbm>0)?copy['status.preparing']:currentKonsolissContainerLabel(displayCurrentContainer,copy)):
               currentKonsolissContainerLabel(displayCurrentContainer,copy)}
         </Tx>
@@ -425,6 +434,7 @@ function Screen({onBack,onUniversalAction,unreadNotifications,unreadMessages}: {
                 onPress={() => {setSelectedContainerId(item.id);setContainerMenuOpen(false);setLifecycleNotice(item.status);}}
                 style={{paddingHorizontal:14,paddingVertical:12}}><Tx style={{color:t.ac,fontSize:17}}>ⓘ</Tx></Pressable>
             </View>)}
+            {!isDemo&&snapshotMode&&liveContainers.length>0&&unassignedCbm>0?<Pressable accessibilityRole="button" accessibilityLabel="Show unassigned purchased space" accessibilityState={{selected:liveUnassigned}} onPress={()=>{setSelectedContainerId('live');setContainerMenuOpen(false);setProgressView('customer');}} style={{borderTopWidth:0.5,borderTopColor:t.bd,minHeight:59,paddingHorizontal:14,paddingVertical:10}}><Tx style={{fontSize:13,fontWeight:'700',color:liveUnassigned?t.ac:t.tx}}>Not assigned yet</Tx><Tx style={{fontSize:11,color:t.mu}}>{unassignedCbm.toFixed(3)+' CBM'}</Tx></Pressable>:null}
             {isDemo&&demoScenario?previewViews(demoScenario).filter(v=>v.kind==='unassigned').map(v=><Pressable key={v.id} accessibilityRole="button" accessibilityLabel="Show unassigned purchased space" onPress={()=>{preview.selectView(v.id);setContainerMenuOpen(false);setProgressView('customer');}} style={{borderTopWidth:0.5,borderTopColor:t.bd,minHeight:59,paddingHorizontal:14,paddingVertical:10}}><Tx style={{fontSize:13,fontWeight:'700',color:demoView?.id===v.id?t.ac:t.tx}}>Not assigned yet</Tx><Tx style={{fontSize:11,color:t.mu}}>{(v.unassignedCbm??0).toFixed(3)+' CBM · DEMO'}</Tx></Pressable>):null}
           </ScrollView>
         </View>

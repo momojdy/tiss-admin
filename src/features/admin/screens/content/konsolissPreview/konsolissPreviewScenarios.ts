@@ -283,9 +283,9 @@ export const autoplayDelayMs = (index: number) => (index === 0 ? 9000 : 7000);
 export const stepPreviewIndex = (index: number, delta: number) =>
   (index + delta + PREVIEW_SCENARIO_COUNT) % PREVIEW_SCENARIO_COUNT;
 
-/** Demo is on for review builds. Production builds must set EXPO_PUBLIC_KONSOLISS_DEMO=0. */
+/** Development preview only; release defaults OFF. Explicit 1 enables an internal review build. */
 export function konsolissDemoEnabled(): boolean {
-  try { return process.env.EXPO_PUBLIC_KONSOLISS_DEMO !== '0'; } catch { return true; }
+  try { const flag=process.env.EXPO_PUBLIC_KONSOLISS_DEMO; return flag==='1'||(flag!=='0'&&typeof __DEV__!=='undefined'&&__DEV__); } catch { return false; }
 }
 
 /** Self-check used by tests: fixtures must obey the same invariants as backend constraints. */

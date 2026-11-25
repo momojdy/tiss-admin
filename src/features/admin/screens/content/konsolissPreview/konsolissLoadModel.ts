@@ -1,4 +1,5 @@
 import {parseCbm} from './konsolissNumbers';
+import {parseKonsolissOccupancy,type KonsolissContainerOccupancy} from './konsolissOccupancyModel';
 
 /** Only verified, server-written cargo volumes. A missing row is not a zero balance. */
 export type KonsolissLoadProgress={
@@ -12,11 +13,14 @@ export type KonsolissLoadProgress={
   reservedNotSentCbm:number;
   loadedPercent:number;
 };
-export type KonsolissLoadProgressState=
+export type KonsolissHomeStatus='nothing_sent'|'label_created'|'inbound_warehouse'|'warehouse'|'warehouse_and_transit'|'preparing'|'incident_review'|'expired';
+export type KonsolissHomeContainer={id:string;number:string;status:'filling'|'filled'|'departed'|'arrived';demo:false;occupancy:KonsolissContainerOccupancy|null};
+export type KonsolissHomeSnapshot={containers:KonsolissHomeContainer[];statusCode:KonsolissHomeStatus|null;warehouseCbm:number;transitCbm:number};
+export type KonsolissLoadProgressState=(
   | {kind:'loading'}
   | {kind:'unrecorded'}
   | {kind:'unavailable'}
-  | {kind:'recorded';progress:KonsolissLoadProgress;trackingDueAt?:string};
+  | {kind:'recorded';progress:KonsolissLoadProgress;trackingDueAt?:string}) & {snapshot?:KonsolissHomeSnapshot|null};
 
 export function parseKonsolissLoadProgress(row:unknown):KonsolissLoadProgress|null{
   if(!row||typeof row!=='object')return null;
@@ -75,4 +79,60 @@ export function liveLoadCallout(progress:KonsolissLoadProgress|null,occupancy:{y
   if(inbound>0)parts.push(String(inbound)+' CBM inbound');
   if(remaining>0)parts.push(String(remaining)+' CBM '+(inbound>0?'remaining':'unassigned'));
   return parts.length>1?parts.join(' • '):'';
+}
+
+
+/** The live read model is all-or-nothing. No fallback to separately fetched or demo volumes. */
+export function parseKonsolissHomeSnapshot(raw:unknown):KonsolissLoadProgressState{
+ const unavailable:KonsolissLoadProgressState={kind:'unavailable',snapshot:null};
+ if(!raw||typeof raw!=='object')return unavailable;
+ const row=raw as Record<string,unknown>;
+ if(!Array.isArray(row.containers))return unavailable;
+ if(row.kind==='unavailable')return unavailable;
+ if(row.kind==='unrecorded')return row.containers.length===0?{kind:'unrecorded',snapshot:{containers:[],statusCode:null,warehouseCbm:0,transitCbm:0}}:unavailable;
+ if(row.kind!=='recorded')return unavailable;
+ const progress=parseKonsolissLoadProgress(row.progress);
+ const warehouseCbm=parseCbm(row.warehouse_cbm),transitCbm=parseCbm(row.transit_cbm);
+ if(!progress||!Number.isFinite(warehouseCbm)||!Number.isFinite(transitCbm)
+   ||Math.abs(warehouseCbm+transitCbm-progress.sentCbm)>.0011
+   ||Math.round(progress.allocatedCbm*1000)>Math.round(warehouseCbm*1000))return unavailable;
+ const validStatuses=['filling','filled','departed','arrived'];
+ const validCodes=['nothing_sent','label_created','inbound_warehouse','warehouse','warehouse_and_transit','preparing','incident_review','expired'];
+ if(row.status_code!=null&&(typeof row.status_code!=='string'||!validCodes.includes(row.status_code)))return unavailable;
+ const statusCode=(row.status_code??null) as KonsolissHomeStatus|null;
+ if(statusCode==='expired'&&(progress.reservedCbm!==0||progress.sentCbm!==0||row.containers.length>0))return unavailable;
+ if((statusCode==='label_created'||statusCode==='nothing_sent')&&progress.sentCbm!==0)return unavailable;
+ const ids=new Set<string>();const containers:KonsolissHomeContainer[]=[];
+ for(const item of row.containers){
+  if(!item||typeof item!=='object'||typeof item.id!=='string'||!item.id||ids.has(item.id)||typeof item.number!=='string'||!item.number||!validStatuses.includes(item.status))return unavailable;
+  ids.add(item.id);
+  const occupancy=item.occupancy==null?null:parseKonsolissOccupancy(item.occupancy,item.id);
+  if(item.occupancy!=null&&!occupancy)return unavailable;
+  if(occupancy&&(occupancy.yourAllocatedCbm===null||Math.round(occupancy.yourSpaceCbm*1000)>Math.round(progress.loadedCbm*1000)||Math.round(occupancy.yourAllocatedCbm*1000)>Math.round(progress.allocatedCbm*1000)))return unavailable;
+  containers.push({id:item.id,number:item.number,status:item.status,demo:false,occupancy});
+ }
+ const measured=containers.filter(c=>c.occupancy!==null);
+ const sum=(field:'yourSpaceCbm'|'yourAllocatedCbm')=>measured.reduce((n,c)=>n+(c.occupancy?.[field]??0),0);
+ const l=sum('yourSpaceCbm'),a=sum('yourAllocatedCbm'),millis=(n:number)=>Math.round(n*1000);
+ if(millis(l)>millis(progress.loadedCbm)||millis(a)>millis(progress.allocatedCbm))return unavailable;
+ if(measured.length===containers.length&&(millis(l)!==millis(progress.loadedCbm)||millis(a)!==millis(progress.allocatedCbm)))return unavailable;
+ if(row.tracking_due_at!=null&&(typeof row.tracking_due_at!=='string'||!Number.isFinite(Date.parse(row.tracking_due_at))||progress.reservedCbm<=0))return unavailable;
+ const trackingDueAt=typeof row.tracking_due_at==='string'?row.tracking_due_at:undefined;
+ return {kind:'recorded',progress,trackingDueAt,snapshot:{containers,statusCode,warehouseCbm,transitCbm}};
+}
+
+export function liveHomeStatus(snapshot:KonsolissHomeSnapshot|null|undefined,copy:Record<string,string>):string{
+ if(!snapshot)return '';
+ const fmt=(n:number)=>String(Math.round(n*1000)/1000);
+ switch(snapshot.statusCode){
+  case 'nothing_sent':return 'Nothing sent';
+  case 'label_created':return 'Label created';
+  case 'inbound_warehouse':return 'Inbound to warehouse • '+fmt(snapshot.transitCbm)+' CBM';
+  case 'warehouse':return fmt(snapshot.warehouseCbm)+' CBM at warehouse';
+  case 'warehouse_and_transit':return fmt(snapshot.warehouseCbm)+' CBM at warehouse • '+fmt(snapshot.transitCbm)+' CBM inbound to warehouse';
+  case 'preparing':return copy['status.preparing']||'Preparing shipment';
+  case 'incident_review':return 'Incident under review';
+  case 'expired':return 'Reservation expired';
+  default:return '';
+ }
 }

@@ -106,7 +106,7 @@ const admin='10000000-0000-4000-8000-000000000001',editor='10000000-0000-4000-80
  create table konsoliss_piece_carrier_records(piece_id uuid primary key,order_id uuid,customer_id uuid,status text,first_carrier_scan_at timestamptz,carrier_evidence text,accepted_by uuid);
  create table konsoliss_partner_fulfillment_cases(order_id uuid,status text,quote_verified boolean,approved_by uuid,partner_name text);
  `);
- await db.exec(fs.readFileSync(path.join(root,'docs/konsoliss/konsoliss-3d-home-snapshot-candidate.sql'),'utf8'));
+ await db.exec(fs.readFileSync(path.join(root,'supabase/migrations/20261125103112_konsoliss_3d_authoritative_home_snapshot.sql'),'utf8'));
  {
  const newcomer='10000000-0000-4000-8000-000000000005',order='30000000-0000-4000-8000-000000000001',right='40000000-0000-4000-8000-000000000001',piece='50000000-0000-4000-8000-000000000001',third='20000000-0000-4000-8000-000000000003';
  await db.query('insert into auth.users values($1)',[newcomer]);
