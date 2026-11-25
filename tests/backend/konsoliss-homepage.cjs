@@ -29,7 +29,11 @@ const admin='10000000-0000-4000-8000-000000000001',editor='10000000-0000-4000-80
  await session(admin);await assert.rejects(save('en',full,0),/changed/); // compare-and-swap prevents duplicate saves
  await db.query('select konsoliss_admin_publish_homepage($1,1)',[draft]);
  let response=await db.query("select * from wantiss_cms_published_content('en')");assert.equal(response.rows[0].payload.labels['home.brand'],labels['home.brand']);
- for(const locale of ['fr','ht','es','zh-Hans']){const translated={...full,labels:konsolissLocaleDefaults(locale)};const id=await save(locale,translated,0);await db.query('select konsoliss_admin_publish_homepage($1,1)',[id]);const published=(await db.query('select * from wantiss_cms_published_content($1)',[locale])).rows[0];assert.deepEqual(published.payload.labels,translated.labels);assert.equal(published.payload.labels['load.labelCreated'],translated.labels['load.labelCreated']);}
+ for(const locale of ['fr','ht','es','zh-Hans']){const translated={...full,labels:konsolissLocaleDefaults(locale)};const id=await save(locale,translated,0);await db.query('select konsoliss_admin_publish_homepage($1,1)',[id]);const published=(await db.query('select * from wantiss_cms_published_content($1)',[locale])).rows[0];assert.deepEqual(published.payload.labels,JSON.parse(JSON.stringify(translated.labels)));assert.equal(published.payload.labels['load.labelCreated'],translated.labels['load.labelCreated']);}
+ const zhV2={...full,labels:{...konsolissLocaleDefaults('zh-Hans'),'load.labelCreated':'运单标签已创建'}};const v2=await save('zh-Hans',zhV2,1);
+ const beforePublish=(await db.query("select * from wantiss_cms_published_content('zh-Hans')")).rows[0];assert.equal(beforePublish.version,1);assert.notEqual(beforePublish.payload.labels['load.labelCreated'],zhV2.labels['load.labelCreated']);
+ await db.query('select konsoliss_admin_publish_homepage($1,2)',[v2]);
+ const afterPublish=(await db.query("select * from wantiss_cms_published_content('zh-Hans')")).rows[0];assert.equal(afterPublish.version,2);assert.equal(afterPublish.payload.labels['load.labelCreated'],zhV2.labels['load.labelCreated']);
  console.log('PASS: actual CMS publish/read functions round-trip all five locales; permission and save concurrency guards');
  await assert.rejects(save('en',{...full,labels:{...labels,'home.containerTotalsHint':'Retired content'}},1),/unknown labels/);
  const unreviewed={...full,reviewed:[]};const noReview=await save('en',unreviewed,1);await assert.rejects(db.query('select konsoliss_admin_publish_homepage($1,2)',[noReview]),/review/);
