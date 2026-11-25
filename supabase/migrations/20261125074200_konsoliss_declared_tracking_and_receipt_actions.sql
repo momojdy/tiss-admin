@@ -1,6 +1,6 @@
 -- Controlled Konsoliss piece declaration / tracking / warehouse receipt only.
 -- These RPCs NEVER charge a card, mark customs cleared, or fake a load. All need real paid entitlements.
-create table if not exists public.konsoliss_piece_tracking (
+create table if not exists public.konsoliss_piece_carrier_records (
  piece_id uuid primary key references public.konsoliss_consignment_pieces(id),
  order_id uuid not null references public.konsoliss_booking_orders(id),
  customer_id uuid not null references auth.users(id),
@@ -12,11 +12,11 @@ create table if not exists public.konsoliss_piece_tracking (
  accepted_by uuid,
  check (status <> 'carrier_accepted' or (first_carrier_scan_at is not null and carrier_evidence is not null and accepted_by is not null))
 );
-create index if not exists konsoliss_piece_tracking_order on public.konsoliss_piece_tracking(order_id,tracking_number);
-alter table public.konsoliss_piece_tracking enable row level security;
-revoke all on public.konsoliss_piece_tracking from anon,authenticated;
-grant select on public.konsoliss_piece_tracking to authenticated;
-create policy konsoliss_tracking_owner on public.konsoliss_piece_tracking for select to authenticated
+create index if not exists konsoliss_piece_carrier_records_order on public.konsoliss_piece_carrier_records(order_id,tracking_number);
+alter table public.konsoliss_piece_carrier_records enable row level security;
+revoke all on public.konsoliss_piece_carrier_records from anon,authenticated;
+grant select on public.konsoliss_piece_carrier_records to authenticated;
+create policy konsoliss_tracking_owner on public.konsoliss_piece_carrier_records for select to authenticated
  using(customer_id=(select auth.uid()) or exists(
  select 1 from public.wantiss_admin_staff s where s.user_id=(select auth.uid()) and s.status='active' and s.role='super_admin'));
 
@@ -53,8 +53,8 @@ begin
  if active<=0 then raise exception 'No active paid entitlement in server ledger' using errcode='55000';end if;
  if coalesce((select sum(declared_cbm) from public.konsoliss_consignment_pieces where order_id=o.id),0)+p_cbm>active+0.000001 then
   raise exception 'Declared pieces exceed active paid entitlement; buy additional standalone rights first' using errcode='22023';end if;
- insert into public.konsoliss_consignment_pieces(order_id,customer_id,piece_reference,declared_category,declared_value_usd,declared_cbm)
- values(o.id,actor,trim(p_piece_reference),p_category,p_value_usd,p_cbm) returning * into p;
+ insert into public.konsoliss_consignment_pieces(order_id,customer_id,piece_reference,description,declared_category,declared_value_usd,declared_cbm)
+ values(o.id,actor,trim(p_piece_reference),trim(p_description),p_category,p_value_usd,p_cbm) returning * into p;
  insert into public.konsoliss_booking_audit(actor_id,operation,target_type,target_id,payload)
  values(actor,'piece.declared','consignment_piece',p.id::text,
  jsonb_build_object('order',o.id,'category',p_category,'declared_cbm',p_cbm,'description',trim(p_description)));
@@ -65,7 +65,7 @@ alter table public.konsoliss_consignment_pieces add column if not exists descrip
 create or replace function public.konsoliss_customer_submit_piece_tracking(p_piece_id uuid,p_tracking_number text)
 returns jsonb language plpgsql security definer set search_path='' as $function$
 declare actor uuid:=(select auth.uid());p public.konsoliss_consignment_pieces%rowtype;
-declare t public.konsoliss_piece_tracking%rowtype;
+declare t public.konsoliss_piece_carrier_records%rowtype;
 begin
  if actor is null then raise exception 'Sign in required' using errcode='28000';end if;
  if p_tracking_number is null or p_tracking_number !~ '^[A-Za-z0-9._-]{6,90}$' then
@@ -76,14 +76,14 @@ begin
  if not exists(select 1 from public.konsoliss_booking_orders b where b.id=p.order_id and b.status in ('reserved','held','fulfilling')
  and b.paid_at is not null and b.verified_payment_reference is not null) then
   raise exception 'Paid booking required' using errcode='55000';end if;
- select * into t from public.konsoliss_piece_tracking where piece_id=p.id for update;
+ select * into t from public.konsoliss_piece_carrier_records where piece_id=p.id for update;
  if found then
   if t.tracking_number<>p_tracking_number then raise exception 'Existing tracking locked; request staff review' using errcode='55000';end if;
   return jsonb_build_object('piece_id',p.id,'tracking',t.tracking_number,'status',t.status,'reused',true);
  end if;
- if exists(select 1 from public.konsoliss_piece_tracking where tracking_number=p_tracking_number and order_id<>p.order_id) then
+ if exists(select 1 from public.konsoliss_piece_carrier_records where tracking_number=p_tracking_number and order_id<>p.order_id) then
   raise exception 'Tracking already belongs to another booking' using errcode='23505';end if;
- insert into public.konsoliss_piece_tracking(piece_id,order_id,customer_id,tracking_number)
+ insert into public.konsoliss_piece_carrier_records(piece_id,order_id,customer_id,tracking_number)
  values(p.id,p.order_id,actor,p_tracking_number) returning * into t;
  insert into public.konsoliss_booking_audit(actor_id,operation,target_type,target_id,payload)
  values(actor,'piece.tracking_submitted','consignment_piece',p.id::text,jsonb_build_object('order',p.order_id,'tracking',t.tracking_number,'carrier_accepted',false));
@@ -92,20 +92,20 @@ end $function$;
 create or replace function public.konsoliss_admin_verify_piece_tracking(
  p_piece_id uuid,p_first_scan_at timestamptz,p_evidence text
 ) returns jsonb language plpgsql security definer set search_path='' as $function$
-declare actor uuid:=(select auth.uid());t public.konsoliss_piece_tracking%rowtype;
+declare actor uuid:=(select auth.uid());t public.konsoliss_piece_carrier_records%rowtype;
 begin
  if actor is null or not exists(select 1 from public.wantiss_admin_staff s
  where s.user_id=actor and s.status='active' and s.role='super_admin') then raise exception 'Active Super Admin required' using errcode='42501';end if;
  if p_first_scan_at is null or p_first_scan_at>now()+interval '1 minute' or
  length(trim(coalesce(p_evidence,'')))<10 then
   raise exception 'Document real first carrier scan time and evidence' using errcode='22023';end if;
- select * into t from public.konsoliss_piece_tracking where piece_id=p_piece_id for update;
+ select * into t from public.konsoliss_piece_carrier_records where piece_id=p_piece_id for update;
  if not found then raise exception 'Tracking submission not found' using errcode='P0002';end if;
  if t.status='carrier_accepted' then
   if t.first_carrier_scan_at is distinct from p_first_scan_at then raise exception 'Accepted timestamp is immutable' using errcode='55000';end if;
   return jsonb_build_object('piece_id',p_piece_id,'status',t.status,'reused',true);
  end if;
- update public.konsoliss_piece_tracking set status='carrier_accepted',
+ update public.konsoliss_piece_carrier_records set status='carrier_accepted',
  first_carrier_scan_at=p_first_scan_at,carrier_evidence=trim(p_evidence),accepted_by=actor
  where piece_id=p_piece_id returning * into t;
  insert into public.konsoliss_booking_audit(actor_id,operation,target_type,target_id,payload)
