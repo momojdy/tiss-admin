@@ -14,12 +14,12 @@ const admin='10000000-0000-4000-8000-000000000001',editor='10000000-0000-4000-80
  create table wantiss_admin_audit_log(actor_user_id uuid,action text,resource_type text,resource_id text,reason text,before_state jsonb,after_state jsonb);
  create table wantiss_cms_content(id uuid primary key default gen_random_uuid(),content_key text,locale text,version integer,payload jsonb,status text,created_by uuid,updated_by uuid,published_by uuid,published_at timestamptz,updated_at timestamptz default clock_timestamp());
  create table wantiss_cms_assets(id uuid default gen_random_uuid(),asset_key text,status text,content_type text);
- create table konsoliss_containers(id uuid primary key,container_number text,capacity_cbm numeric default 68,updated_at timestamptz default now());
+ create table konsoliss_containers(id uuid primary key,container_number text,capacity_cbm numeric default 68,container_type text not null default '40HQ',status text not null default 'filling',updated_at timestamptz default now());
  create table konsoliss_container_assignments(id uuid primary key default gen_random_uuid(),container_id uuid references konsoliss_containers,user_id uuid references auth.users,is_current boolean default true,loaded_cbm numeric(10,3),allocated_cbm numeric(10,3));
  create table konsoliss_customer_load_progress(user_id uuid primary key references auth.users,reserved_cbm numeric(10,3),sent_cbm numeric(10,3),loaded_cbm numeric(10,3),inbound_to_container_cbm numeric(10,3),updated_at timestamptz default clock_timestamp());
  alter table konsoliss_customer_load_progress enable row level security;grant select on konsoliss_customer_load_progress to authenticated;create policy own on konsoliss_customer_load_progress to authenticated using(user_id=auth.uid());
  alter table wantiss_cms_content enable row level security;grant select on wantiss_cms_content to anon,authenticated;create policy published on wantiss_cms_content to anon,authenticated using(status='published');`);
- for(const file of ['tests/backend/fixtures/homepage-cms-baseline.sql','tests/backend/fixtures/homepage-breakdown-baseline.sql','supabase/migrations/20261122205352_konsoliss_verified_volume_constraints.sql','supabase/migrations/20261122210202_konsoliss_occupancy_realtime_invalidation.sql','supabase/migrations/20261123050013_konsoliss_homepage_cms_and_measurements.sql','supabase/migrations/20261123052456_konsoliss_retire_homepage_hint.sql'])await db.exec(fs.readFileSync(path.join(root,file),'utf8'));
+ for(const file of ['tests/backend/fixtures/homepage-cms-baseline.sql','tests/backend/fixtures/homepage-breakdown-baseline.sql','supabase/migrations/20261122205352_konsoliss_verified_volume_constraints.sql','supabase/migrations/20261122210202_konsoliss_occupancy_realtime_invalidation.sql','supabase/migrations/20261123050013_konsoliss_homepage_cms_and_measurements.sql','supabase/migrations/20261123052456_konsoliss_retire_homepage_hint.sql','docs/konsoliss/konsoliss-3d-lifecycle-candidate.sql'])await db.exec(fs.readFileSync(path.join(root,file),'utf8'));
  await db.query('insert into auth.users values($1),($2),($3),($4)',[admin,editor,customer,other]);await db.query("insert into wantiss_admin_staff values($1,'super_admin','active'),($2,'editor','active')",[admin,editor]);
  const session=async user=>{await db.exec('reset role');await db.query("select set_config('request.jwt.claim.sub',$1,false)",[user]);};
  const full={v:2,labels,reviewed:Object.keys(labels),images:{}};
@@ -59,5 +59,39 @@ const admin='10000000-0000-4000-8000-000000000001',editor='10000000-0000-4000-80
  await assert.rejects(db.query('update konsoliss_customer_load_progress set reserved_cbm=999'),/permission denied/);
  await db.exec('reset role;set role anon');await assert.rejects(db.query("select konsoliss_admin_save_homepage('en','{}',4)"),/permission denied/);await assert.rejects(db.query('select * from konsoliss_customer_load_progress'),/permission denied/);
  console.log('PASS: customer reads only its reconciled values; direct customer writes and anonymous operational access denied');
+ // Exercise the exact candidate SQL in the existing in-process test harness, never the live project.
+ const occupancy=async id=>(await db.query('select public.konsoliss_container_occupancy($1) as data',[id])).rows[0].data;
+ const advance=async(id,status)=>db.query('update public.konsoliss_containers set status=$2 where id=$1',[id,status]);
+ await session(customer);await db.exec('set role authenticated');
+ assert.equal(await occupancy(first),null,'other member unknown: no invented occupancy');
+ assert.equal(Number((await occupancy(second)).loaded_cbm),1.2);
+ await session(admin);
+ await assert.rejects(advance(first,'filled'),/verify every active load/);
+ await assert.rejects(advance(second,'filled'),/outstanding inbound/);
+ await assert.rejects(advance(first,'departed'),/Invalid lifecycle transition/);
+ const otherProgress=(await db.query('select updated_at from public.konsoliss_customer_load_progress where user_id=$1',[other])).rows[0].updated_at;
+ await db.query('select konsoliss_admin_verify_container_measurements($1,$2,$3,$4)',[other,JSON.stringify([{container_id:first,loaded_cbm:51.67,allocated_cbm:51.67}]),otherProgress,'Verified actual shared cargo']);
+ await session(customer);await db.exec('set role authenticated');
+ const filled=await occupancy(first);assert.equal(Number(filled.loaded_cbm),51.7);assert.equal(Number(filled.free_cbm),16.3);assert.equal(Number(filled.your_loaded_cbm),.03);assert.equal(Number(filled.other_cargo_cbm),51.67);
+ assert.equal(await occupancy('20000000-0000-4000-8000-000000000099'),null);
+ await session(editor);await db.exec('set role authenticated');assert.equal(await occupancy(first),null,'nonowner cannot read container aggregate');
+ await session(admin);await advance(first,'filled'); // Underfilled but actually sealed, not a fake 100% requirement.
+ await assert.rejects(db.query('insert into konsoliss_container_assignments(container_id,user_id) values($1,$2)',[first,editor]),/immutable/);
+ await assert.rejects(db.query('update konsoliss_container_assignments set loaded_cbm=0.02 where container_id=$1 and user_id=$2',[first,customer]),/immutable/);
+ await assert.rejects(db.query('update konsoliss_container_assignments set is_current=false where container_id=$1 and user_id=$2',[first,customer]),/immutable/);
+ await assert.rejects(db.query('delete from konsoliss_container_assignments where container_id=$1 and user_id=$2',[first,customer]),/immutable/);
+ await assert.rejects(advance(first,'filling'),/Invalid lifecycle transition/);
+ let afterSeal=await read();
+ const sealedMeasurements=[{container_id:first,loaded_cbm:.03,allocated_cbm:.03},{container_id:second,loaded_cbm:1.5,allocated_cbm:1.5}];
+ await assert.rejects(verify([{...sealedMeasurements[0],loaded_cbm:.02},sealedMeasurements[1]],afterSeal.progress.updated_at),/immutable/);
+ assert.deepEqual(await read(),afterSeal);
+ const mixed=await verify(sealedMeasurements,afterSeal.progress.updated_at);assert.equal(Number(mixed.progress.loaded_cbm),1.53);assert.equal(Number(mixed.progress.inbound_to_container_cbm),0);
+ await advance(first,'departed');await advance(first,'arrived');await assert.rejects(advance(first,'departed'),/Invalid lifecycle transition/);
+ await advance(second,'filled');await advance(second,'departed');
+ await session(customer);await db.exec('set role authenticated');
+ assert.equal(Number((await occupancy(first)).loaded_cbm),51.7);assert.equal(Number((await occupancy(second)).loaded_cbm),1.5);
+ await db.exec('reset role;set role anon');await assert.rejects(db.query('select public.konsoliss_container_occupancy($1)',[first]),/permission denied/);
+ console.log('PASS: exact measured occupancy, owner isolation, underfilled seal, pending inbound/unknown rejection, immutable sealed cargo, split mixed update and valid lifecycle transitions');
+
  await db.close();
 })().catch(error=>{console.error(error);process.exitCode=1;});
