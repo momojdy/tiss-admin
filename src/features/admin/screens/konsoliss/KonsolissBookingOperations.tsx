@@ -5,7 +5,7 @@ import {Card,Section} from '../../ui/Card';
 import {OutlineBtn,Pill} from '../../ui/Controls';
 import {Txt} from '../../ui/Txt';
 
-type Quote={id:string;status:string;created_at:string;country:string;region:string;shipping_mode:string;delivery:string;physical_cbm:number|null;container_count:number|null;goods_category:string;goods_description:string|null;declared_value_usd:number|null;estimated_weight_kg:number|null;base_freight_cents:number|null;weight_surcharge_cents:number|null;requested_total_cents:number|null;approved_total_cents:number|null;approved_scope:any;quote_version:number;address:string|null;review_note:string|null;customer_id:string};
+type Quote={id:string;status:string;created_at:string;route_code:string;country:string;region:string;shipping_mode:string;delivery:string;physical_cbm:number|null;container_count:number|null;goods_category:string;goods_description:string|null;declared_value_usd:number|null;estimated_weight_kg:number|null;base_freight_cents:number|null;weight_surcharge_cents:number|null;requested_total_cents:number|null;approved_total_cents:number|null;approved_scope:any;quote_version:number;address:string|null;review_note:string|null;customer_id:string};
 type ServiceRequest={id:string;order_id:string;customer_id:string;request_kind:string;description:string;status:string;decision_note:string|null;created_at:string};
 type Route={code:string;country:string;region:string;shipping_mode:string;delivery:string;requests_enabled:boolean;service_verified:boolean;checkout_enabled:boolean;price_published:boolean;rate_version:number};
 const field={borderWidth:1,borderColor:'#D5C8A5',backgroundColor:'#FFF9DF',borderRadius:6,padding:9,fontSize:12,color:'#2B1210',marginVertical:5} as const;
@@ -21,7 +21,7 @@ export function KonsolissBookingOperations(){
  const chosen=quotes.find(q=>q.id===selected);
  const refresh=useCallback(async()=>{
   const [q,r,s]=await Promise.all([
-   supabase.from('konsoliss_booking_quotes').select('id,status,created_at,country,region,shipping_mode,delivery,physical_cbm,container_count,goods_category,goods_description,declared_value_usd,estimated_weight_kg,base_freight_cents,weight_surcharge_cents,requested_total_cents,approved_total_cents,approved_scope,quote_version,address,review_note,customer_id').order('created_at',{ascending:false}).limit(100),
+   supabase.from('konsoliss_booking_quotes').select('id,status,created_at,route_code,country,region,shipping_mode,delivery,physical_cbm,container_count,goods_category,goods_description,declared_value_usd,estimated_weight_kg,base_freight_cents,weight_surcharge_cents,requested_total_cents,approved_total_cents,approved_scope,quote_version,address,review_note,customer_id').order('created_at',{ascending:false}).limit(100),
    supabase.from('konsoliss_booking_routes').select('*').order('code'),
    supabase.from('konsoliss_customer_service_requests').select('id,order_id,customer_id,request_kind,description,status,decision_note,created_at').order('created_at',{ascending:false}).limit(100)
   ]);
@@ -38,6 +38,14 @@ export function KonsolissBookingOperations(){
   }
   const scope=kind==='approve'?{
    services_included:included.trim().split('\n').filter(Boolean),services_excluded:excluded.trim().split('\n').filter(Boolean),
+   route_code:chosen.route_code,country:chosen.country,region:chosen.region,
+   shipping_mode:chosen.shipping_mode,equipment:chosen.shipping_mode==='FCL'?chosen.container_count+' × 40HQ':'Shared LCL',
+   delivery_method:chosen.delivery,destination_address:chosen.delivery==='door'?chosen.address:null,
+   pickup_region:chosen.delivery==='pickup'?chosen.region:null,
+   goods_category:chosen.goods_category,goods_description:chosen.goods_description,
+   declared_value_usd:chosen.declared_value_usd,estimated_weight_kg:chosen.estimated_weight_kg,
+   physical_cbm:chosen.physical_cbm,container_count:chosen.container_count,
+   quote_version:chosen.quote_version+1,validity_days:7,
    customs_treatment:customs.trim(),cargo_review:cargo.trim(),delivery_commitment:delivery.trim(),
    commercial_approval:profit.trim(),currency:'USD',pricing_basis:'Admin-reviewed quotation',checkout_ready:false
   }:null;
