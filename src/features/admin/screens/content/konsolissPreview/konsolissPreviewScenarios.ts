@@ -76,18 +76,18 @@ export const PREVIEW_SCENARIOS: readonly PreviewScenario[] = [
   {id: 'a1', code: 'A1', group: 'A', title: 'New customer · nothing purchased', purchased: 0, sent: 0, containers: [], empty: true,
     note: 'Approved original empty-container animation. No purchase, no container, no cargo.'},
   {id: 'a2', code: 'A2', group: 'A', title: 'Purchased · nothing sent', purchased: 1, sent: 0, containers: [],
-    note: 'Purchased 1.000 CBM · sent 0.000 · warehouse 0.000 · assigned 0.000 · loaded 0.000. The dashed outline is an illustrative reservation, not merchandise. The 80-day clock has not started (it starts at verified China warehouse receipt).',
+    note: 'Purchased 1.000 CBM · sent 0.000 · warehouse 0.000 · assigned 0.000 · loaded 0.000. The red parcel stays in the illustrative reserved space after landing; it is not physically loaded merchandise. The 80-day clock has not started (it starts at verified China warehouse receipt).',
     deadline: 'Purchase day 6 of 25 · carrier-accepted inbound tracking is due by day 25'},
   {id: 'a3', code: 'A3', group: 'A', title: 'Purchased · day-25 deadline near', purchased: 1, sent: 0, containers: [],
-    note: 'Same physical picture as A2 (nothing sent, nothing loaded). Only the booking indicator changes.',
+    note: 'Same illustrative reservation as A2; nothing is physically loaded. A red deadline reminder asks the customer to send goods or upload tracking.',
     deadline: 'Purchase day 22 of 25 · 3 days left to submit carrier-accepted inbound tracking'},
   {id: 'a4', code: 'A4', group: 'A', title: 'Tracking label created · not accepted', purchased: 1, sent: 0, containers: [],
     caption2: 'Label created · carrier acceptance not confirmed',
     note: 'A created label is not proof of dispatch. Goods sent stays 0.000 CBM until the carrier accepts / first-scans the parcel.',
     deadline: 'Purchase day 20 of 25 · waiting for carrier acceptance',
     milestones: [{label: 'Label created', state: 'done'}, {label: 'Carrier accepted', state: 'pending'}, {label: 'At China warehouse', state: 'pending'}]},
-  {id: 'a5', code: 'A5', group: 'A', title: 'Accepted by carrier · to China warehouse', purchased: 1, sent: 0.7, containers: [],
-    caption2: 'In transit to China warehouse · Loaded 0 CBM',
+  {id: 'a5', code: 'A5', group: 'A', title: 'Inbound to warehouse', purchased: 1, sent: 0.7, containers: [],
+    caption2: 'Inbound to warehouse · 0.700 CBM',
     note: '0.700 CBM accepted by the domestic carrier and travelling to the China warehouse. Not yet received, not in a container.',
     milestones: [{label: 'Label created', state: 'done'}, {label: 'Carrier accepted', state: 'done'}, {label: 'At China warehouse', state: 'pending'}]},
 
@@ -126,10 +126,10 @@ export const PREVIEW_SCENARIOS: readonly PreviewScenario[] = [
     containers: [box('a', 'KS-DEMO-A', 'filled', 48, 0.4), box('b', 'KS-DEMO-B', 'filling', 22.5, 0.1, 0.1)],
     note: 'Pick a container from the pill: A holds 0.400 loaded, B holds 0.100 loaded + 0.100 inbound. 0.400 CBM remains unassigned and is a separate view. Containers are never merged.'},
 
-  {id: 'd1', code: 'D1', group: 'D', title: 'Third-party freight forwarder', purchased: 1, sent: 0.7, containers: [], pill: 'Partner freight',
-    caption2: 'Third-party freight · no Konsoliss container',
-    note: 'Cargo handled by an approved outside consolidator. No Konsoliss physical container is invented; only verified provider milestones are shown.',
-    milestones: [{label: 'Partner booked', state: 'done'}, {label: 'Cargo accepted', state: 'done'}, {label: 'Vessel departed', state: 'pending'}, {label: 'Arrived', state: 'pending'}]},
+  {id: 'd1', code: 'D1', group: 'D', title: 'Shipment preparation', purchased: 1, sent: 0.7, containers: [], pill: 'Preparing shipment',
+    caption2: 'Cargo accepted · preparing shipment',
+    note: 'Cargo accepted for shipment. Departure and arrival have not yet been confirmed.',
+    milestones: [{label: 'Shipment arranged', state: 'done'}, {label: 'Cargo accepted', state: 'done'}, {label: 'Vessel departed', state: 'pending'}, {label: 'Arrived', state: 'pending'}]},
   {id: 'd2', code: 'D2', group: 'D', title: 'Container departed', purchased: 1, sent: 1,
     containers: [box('a', 'KS-DEMO-A', 'departed', 57, 1)],
     note: 'Final loading picture preserved. Departure is a confirmed container event.',
@@ -231,7 +231,8 @@ export function previewRender(s: PreviewScenario, view: PreviewView | null): Pre
   if (view.kind === 'container' && view.container) {
     const c = view.container, occ = previewOccupancy(c);
     return {...base, reserved: occ.capacityCbm, loaded: occ.loadedCbm, yourLoaded: c.loaded, free: occ.freeCbm,
-      here: r3(c.here + (c.outlineExtra ?? 0)), hereInbound: c.inbound, sealed: isSealedStatus(c.status), occupancy: occ, container: c};
+      here: r3(c.here + (c.outlineExtra ?? 0)), hereInbound: c.inbound, sealed: isSealedStatus(c.status), occupancy: occ, container: c,
+      caption: s.code === 'C1' ? 'Partly loaded · rest unassigned' : s.code === 'C7' ? 'Split into 2 containers' : ''};
   }
   if (view.kind === 'unassigned') {
     const un = view.unassignedCbm ?? 0, assigned = sumOf(s, 'here');
