@@ -8,6 +8,7 @@ import {Card, Section} from '../../ui/Card';
 import {OutlineBtn, Pill} from '../../ui/Controls';
 import {Txt} from '../../ui/Txt';
 import {KonsolissMeasurements} from './KonsolissMeasurements';
+import {KonsolissBookingOperations} from './KonsolissBookingOperations';
 
 type Container={id:string;container_number:string;status:'filling'|'filled'|'departed'|'arrived';updated_at:string;assigned_customers:number};
 const NEXT:Record<Container['status'],Container['status']|null>={filling:'filled',filled:'departed',departed:'arrived',arrived:null};
@@ -169,7 +170,7 @@ export function KonsolissAdminScreen(){
       </View>:null}
     </Section>
    </>:null}
-  </>:<Card><Txt size={12} weight={600}>{module}</Txt><Txt size={11} mut>Operational module reserved for a dedicated authorized Konsoliss workflow. No demo transactions or fake shipment records are displayed.</Txt></Card>}
+  </>:module==='Quotes and bookings'?<KonsolissBookingOperations/>:<Card><Txt size={12} weight={600}>{module}</Txt><Txt size={11} mut>Operational module reserved for a dedicated authorized Konsoliss workflow. No demo transactions or fake shipment records are displayed.</Txt></Card>}
   <Card><Txt size={10} mut>Only Super Admin can create containers, assign customers and advance Filling → Filled → Departed → Arrived. Actions are validated on the server and written to the Wantiss admin audit log. Customer content changes remain in Content Studio.</Txt><OutlineBtn onPress={()=>go('editor',{editorFeature:'Konsoliss'})}>Open Konsoliss Content Editor</OutlineBtn></Card>
  </View>;
 }
