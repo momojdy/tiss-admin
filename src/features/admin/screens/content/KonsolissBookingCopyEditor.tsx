@@ -46,6 +46,17 @@ export const BOOKING_COPY:Record<string,string>={
  'bookspace.requestDetails':'Explain your request',
  'bookspace.requestNotSettlement':'Admin review does not automatically issue a refund or return shipment.',
  'bookspace.submitRequest':'Submit request',
+ 'bookspace.declarePiece':'Declare goods',
+ 'bookspace.pieceReference':'Parcel / piece reference',
+ 'bookspace.pieceDescription':'Goods description',
+ 'bookspace.pieceValue':'Declared item value (USD)',
+ 'bookspace.pieceCBM':'Physical volume (CBM)',
+ 'bookspace.pieceDocuments':'Some goods require documents or specialist review. No file is uploaded from this screen; do not send restricted cargo until approved.',
+ 'bookspace.saveDeclaration':'Save declaration',
+ 'bookspace.addTracking':'Add carrier tracking',
+ 'bookspace.carrierTracking':'Carrier tracking number',
+ 'bookspace.trackingNeedsScan':'A submitted tracking number is not carrier acceptance. Staff verifies the first carrier scan separately.',
+ 'bookspace.submitTracking':'Submit tracking',
 };
 const field={backgroundColor:'#FFF9DF',borderColor:'#D5C8A5',borderWidth:1,borderRadius:8,padding:10,fontSize:12,minHeight:55,color:'#2B1210'} as const;
 const languages=['en','fr','ht','es','zh-Hans'];
