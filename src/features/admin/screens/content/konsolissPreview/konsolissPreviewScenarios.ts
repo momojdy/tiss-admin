@@ -53,6 +53,8 @@ export type PreviewScenario = {
   data?: 'unavailable' | 'loading';
   caption2?: string;
   deadline?: string;
+  /** Demo-only initial countdown; never used for real bookings. */
+  deadlineRemainingMs?: number;
   milestones?: PreviewMilestone[];
   incident?: string;
   history?: string;
@@ -79,8 +81,8 @@ export const PREVIEW_SCENARIOS: readonly PreviewScenario[] = [
     note: 'Purchased 1.000 CBM · sent 0.000 · warehouse 0.000 · assigned 0.000 · loaded 0.000. The red parcel stays in the illustrative reserved space after landing; it is not physically loaded merchandise. The 80-day clock has not started (it starts at verified China warehouse receipt).',
     deadline: 'Purchase day 6 of 25 · carrier-accepted inbound tracking is due by day 25'},
   {id: 'a3', code: 'A3', group: 'A', title: 'Purchased · day-25 deadline near', purchased: 1, sent: 0, containers: [],
-    note: 'Same illustrative reservation as A2; nothing is physically loaded. A red deadline reminder asks the customer to send goods or upload tracking.',
-    deadline: 'Purchase day 22 of 25 · 3 days left to submit carrier-accepted inbound tracking'},
+    note: 'Same illustrative reservation as A2; nothing is physically loaded. A red deadline reminder asks the customer to send goods and upload tracking.',
+    deadline: 'Purchase day 22 of 25', deadlineRemainingMs: 3*24*60*60*1000},
   {id: 'a4', code: 'A4', group: 'A', title: 'Label created', purchased: 1, sent: 0, containers: [],
     caption2: 'Label created',
     note: 'A created label is not proof of dispatch. Goods sent stays 0.000 CBM until the carrier accepts / first-scans the parcel.',
@@ -211,16 +213,16 @@ export function previewLoadStatus(s: PreviewScenario, view: PreviewView | null):
   if (s.data) return s.data === 'loading' ? 'Loading…' : 'Data unavailable';
   if (s.code === 'A1') return '';
   if (s.code === 'A2') return 'Nothing sent';
-  if (s.code === 'A3') return 'Nothing sent • 3 days left';
+  if (s.code === 'A3') return 'Nothing sent';
   if (s.code === 'A4') return 'Label created';
   if (s.code === 'A5') return 'Inbound to warehouse • ' + statusVolume(s.sent) + ' CBM';
   if (s.code === 'B1') return statusVolume(s.warehouseVerified ?? 0) + ' CBM at warehouse • ' + statusVolume(s.purchased-s.sent) + ' CBM not sent';
   if (s.code === 'B2') return statusVolume(s.warehouseVerified ?? 0) + ' CBM at warehouse';
   if (s.code === 'B3') return statusVolume(sumOf(s,'outlineExtra')) + ' CBM allocated • Not loaded';
   if (s.code === 'B4') return statusVolume(sumOf(s,'inbound')) + ' CBM inbound • ' + statusVolume(previewUnassignedCbm(s)) + ' CBM unassigned';
-  if (s.code === 'C1') return partialLoadStatus(s);
-  if (s.code === 'C2') return statusVolume(Math.max(0,s.purchased-sumOf(s,'here'))) + ' CBM unassigned';
-  if (s.code === 'C3') return statusVolume(sumOf(s,'loaded')) + ' CBM loaded • ' + statusVolume(s.purchased-s.sent) + ' CBM unused';
+  if (s.code === 'C1') return '';
+  if (s.code === 'C2') return '';
+  if (s.code === 'C3') return '';
   if (s.code === 'C7') return 'Split into ' + s.containers.length + ' containers' + (view?.kind === 'unassigned' ? ' • ' + statusVolume(view.unassignedCbm ?? 0) + ' CBM unassigned' : '');
   if (s.code === 'D1') return 'Preparing shipment';
   if (s.code === 'D2') return 'Departed';
@@ -260,7 +262,7 @@ export function previewRender(s: PreviewScenario, view: PreviewView | null): Pre
     const c = view.container, occ = previewOccupancy(c);
     return {...base, reserved: occ.capacityCbm, loaded: occ.loadedCbm, yourLoaded: c.loaded, free: occ.freeCbm,
       here: r3(c.here + (c.outlineExtra ?? 0)), hereInbound: c.inbound, sealed: isSealedStatus(c.status), occupancy: occ, container: c,
-      caption: s.code === 'C1' ? partialLoadStatus(s) : s.code === 'C7' ? 'Split into 2 containers' : ''};
+      caption: s.code === 'C1' ? partialLoadStatus(s) : s.code === 'C2' ? statusVolume(sumOf(s,'loaded')) + ' CBM loaded • ' + statusVolume(sumOf(s,'inbound')) + ' CBM inbound • ' + statusVolume(Math.max(0,s.purchased-sumOf(s,'here'))) + ' CBM remaining' : s.code === 'C3' ? statusVolume(sumOf(s,'loaded')) + ' CBM loaded • ' + statusVolume(Math.max(0,s.purchased-s.sent)) + ' CBM unused' : ''};
   }
   if (view.kind === 'unassigned') {
     const un = view.unassignedCbm ?? 0, assigned = sumOf(s, 'here');

@@ -11,6 +11,7 @@ import {estimateCbm,formatCopy} from './cms/model';
 import {currentKonsolissContainerLabel, useCurrentKonsolissContainer, type KonsolissContainerStatus} from './previewData';
 import {sendKonsolissSupport,supportRequestId} from './previewData';
 import {useKonsolissLoadProgress, type KonsolissLoadProgress} from './previewData';
+import {trackingCountdown} from './konsolissLoadModel';
 import {useKonsolissContainerOccupancy, type KonsolissContainerOccupancy} from './previewData';
 import {useKonsolissAssignedContainers} from './previewData';
 import {type KonsolissSelectableContainer} from './previewData';
@@ -113,21 +114,24 @@ const KONSOLISS_STEPS=[1,2,3,4,5];
 export default function KonsolissHomeScreen({onBack,onUniversalAction,unreadNotifications=0,unreadMessages=0}: {onBack?: () => void;onUniversalAction?:(action:KonsolissMenuAction)=>void;unreadNotifications?:number;unreadMessages?:number}) {
   return <SafeAreaProvider><Screen onBack={onBack} onUniversalAction={onUniversalAction} unreadNotifications={unreadNotifications} unreadMessages={unreadMessages} /></SafeAreaProvider>;
 }
-function DeadlineReminder({t}:{t:Th}){
-  const [warningBright,setWarningBright]=useState(true);
+function DeadlineReminder({t,dueAt,remainingMs}:{t:Th;dueAt?:string;remainingMs?:number}){
+  // The live clock uses the server-provided absolute deadline, never purchase-day copy.
+  const [demoDue]=useState(()=>Date.now()+(remainingMs??0));
+  const deadline=dueAt?Date.parse(dueAt):demoDue;
+  const [now,setNow]=useState(()=>Date.now());
+  const [reduced,setReduced]=useState(true);
   useEffect(()=>{
-    setWarningBright(true);
-    let active=true,reduced=false,timer:ReturnType<typeof setInterval>|undefined;
-    const apply=(value:boolean)=>{
-      if(!active)return;
-      reduced=value;if(timer!==undefined)clearInterval(timer);timer=undefined;setWarningBright(true);
-      if(!reduced)timer=setInterval(()=>setWarningBright(v=>!v),650);
-    };
+    let active=true;
+    const apply=(value:boolean)=>{if(active)setReduced(value)};
     const subscription=AccessibilityInfo?.addEventListener?.('reduceMotionChanged',apply);
     if(AccessibilityInfo?.isReduceMotionEnabled)AccessibilityInfo.isReduceMotionEnabled().then(apply).catch(()=>apply(true));else apply(false);
-    return()=>{active=false;if(timer!==undefined)clearInterval(timer);subscription?.remove();};
+    const timer=setInterval(()=>setNow(Date.now()),1000);
+    return()=>{active=false;clearInterval(timer);subscription?.remove();};
   },[]);
-  return <Tx accessibilityLiveRegion="polite" style={{fontSize:10.5,lineHeight:15,fontWeight:'700',color:t.ac,opacity:warningBright?1:.48,marginTop:3}}>Send goods or upload tracking before Day 25</Tx>;
+  const countdown=trackingCountdown(deadline,now);
+  if(!countdown)return null;
+  const urgent=countdown.seconds<=3*86400,left=countdown.label;
+  return <View style={{marginTop:3,opacity:urgent&&!reduced&&Math.floor(now/1000)%2===1?.58:1}}><Tx style={{fontSize:10.5,lineHeight:15,fontWeight:'700',color:t.ac}}>Send goods and upload tracking</Tx><Tx style={{fontSize:11,lineHeight:15,fontWeight:'700',color:t.ac}}>{left}</Tx></View>;
 }
 
 function Screen({onBack,onUniversalAction,unreadNotifications,unreadMessages}: {onBack?: () => void;onUniversalAction?:(action:KonsolissMenuAction)=>void;unreadNotifications:number;unreadMessages:number}) {
@@ -215,7 +219,8 @@ function Screen({onBack,onUniversalAction,unreadNotifications,unreadMessages}: {
   const pickDemo=(index:number)=>{preview.select(index);resetPreviewUi();};
   const exitDemo=()=>{preview.exit();resetPreviewUi();};
   const replayDemo=()=>{preview.replayCurrent();setProgressView('customer');setLoadDetailsOpen(false);};
-  const demoWarning=demoScenario?.code==='A3';
+  const demoCountdown=demoScenario?.deadlineRemainingMs;
+  const liveDeadline=!isDemo&&loadProgress.kind==='recorded'&&loadProgress.progress.reservedCbm>0&&loadProgress.progress.sentCbm===0?loadProgress.trackingDueAt:undefined;
   const loadStatus=demoScenario?previewLoadStatus(demoScenario,demoView):showReservedPreview&&!containerOccupancy?copy['load.reserved']+' • '+(progress?.sentCbm===0?(copy['warehouse.empty']||'No goods sent yet'):(copy['load.warehouseTransit']||'At warehouse or still in transit')):'';
   const webHtml=containerHtml(dark,
     isDemo?!!demoRender?.empty:showEmptyLoadHint,
@@ -257,7 +262,7 @@ function Screen({onBack,onUniversalAction,unreadNotifications,unreadMessages}: {
         </>:<View style={{flexDirection:'row',justifyContent:'flex-end'}}><Pressable accessibilityRole="button" accessibilityLabel="Preview Konsoliss demo states" onPress={enterDemo} style={[s.pill,{backgroundColor:t.tint,borderWidth:1,borderColor:t.bd}]}><Tx style={{fontSize:11,color:t.ac,fontWeight:'700'}}>▶ Demo / Preview</Tx></Pressable></View>}
       </View>:null}
       {showEmptyLoadHint?<Tx style={{fontSize:11,color:t.mu,textAlign:'right',marginRight:24,marginTop:3}}>{copy['home.noAssignment']}</Tx>:null}
-      <View style={[s.row, {alignItems: 'flex-end', marginTop: 16}]}><Pressable accessibilityRole="button" accessibilityLabel={copy['a11y.loadDetails']} accessibilityState={{expanded:loadDetailsOpen}} onPress={()=>setLoadDetailsOpen(open=>!open)} style={{paddingVertical:4,paddingRight:12,flex:1,minWidth:0}}><View style={{flexDirection:'row',alignItems:'center',gap:7}}><Tx style={{fontSize: 12.5, lineHeight: 16, fontWeight: '600', color: t.mu}}>{copy['home.load.heading']}</Tx><Tx style={{fontSize:15,color:t.ac}}>{loadDetailsOpen?'⌃':'⌄'}</Tx></View><Tx style={[s.num, {color: t.ac}]}>{loadPreviewValues.committedValue}<Tx style={{fontSize: 17, letterSpacing: 0, color: t.mu, fontWeight: '600'}} > / {loadPreviewValues.reservedValue} CBM</Tx></Tx><Tx style={{fontSize:10.5,color:t.mu}}>{formatCopy(copy,'home.loadedInbound',{loaded:loadPreviewValues.loadedValue,inbound:loadPreviewValues.inboundValue})}</Tx>{loadStatus?<Tx style={{fontSize:10.5,lineHeight:15,color:t.mu,marginTop:3}}>{loadStatus}</Tx>:null}{demoWarning?<DeadlineReminder t={t}/>:null}{showReservedPreview&&!containerOccupancy?<Tx style={{fontSize:10,lineHeight:13,color:t.mu,marginTop:2}}>Illustration · not a real container</Tx>:null}</Pressable><View style={{alignItems: 'flex-end', paddingBottom: 4}}><Svg width={34} height={34} viewBox="0 0 36 36" style={{marginBottom: 8}}><Circle cx={18} cy={18} r={14} fill="none" stroke={t.tint} strokeWidth={4} /><Circle cx={18} cy={18} r={14} fill="none" stroke={t.ac} strokeWidth={4} strokeLinecap="round" strokeDasharray={`${(containerRatio*87.96).toFixed(2)} 87.96`} rotation={-90} origin="18, 18" /></Svg><Tx style={{fontSize: 20, lineHeight: 25, fontWeight: '700', color: t.tx}}>{formatCopy(copy,'home.filled',{percent:containerPercent})}</Tx>{selectedContainer&&selectedContainer.status!=='filling'?<Tx style={{fontSize: 12, lineHeight: 15, color: t.mu}}>{copy['status.'+selectedContainer.status]}</Tx>:<Tx style={{fontSize: 12, lineHeight: 15, color: t.mu}}><Tx style={{color: t.gr, fontWeight: '700'}} >{containerAvailable} CBM</Tx> {copy['home.available']}</Tx>}</View></View>
+      <View style={[s.row, {alignItems: 'flex-end', marginTop: 16}]}><Pressable accessibilityRole="button" accessibilityLabel={copy['a11y.loadDetails']} accessibilityState={{expanded:loadDetailsOpen}} onPress={()=>setLoadDetailsOpen(open=>!open)} style={{paddingVertical:4,paddingRight:12,flex:1,minWidth:0}}><View style={{flexDirection:'row',alignItems:'center',gap:7}}><Tx style={{fontSize: 12.5, lineHeight: 16, fontWeight: '600', color: t.mu}}>{copy['home.load.heading']}</Tx><Tx style={{fontSize:15,color:t.ac}}>{loadDetailsOpen?'⌃':'⌄'}</Tx></View><Tx style={[s.num, {color: t.ac}]}>{loadPreviewValues.committedValue}<Tx style={{fontSize: 17, letterSpacing: 0, color: t.mu, fontWeight: '600'}} > / {loadPreviewValues.reservedValue} CBM</Tx></Tx><Tx style={{fontSize:10.5,color:t.mu}}>{formatCopy(copy,'home.loadedInbound',{loaded:loadPreviewValues.loadedValue,inbound:loadPreviewValues.inboundValue})}</Tx>{loadStatus?<Tx style={{fontSize:10.5,lineHeight:15,color:t.mu,marginTop:3}}>{loadStatus}</Tx>:null}{demoCountdown!==undefined||liveDeadline?<DeadlineReminder key={demoScenario?.id??liveDeadline} t={t} remainingMs={demoCountdown} dueAt={liveDeadline}/>:null}{showReservedPreview&&!containerOccupancy?<Tx style={{fontSize:10,lineHeight:13,color:t.mu,marginTop:2}}>Illustration · not a real container</Tx>:null}</Pressable><View style={{alignItems: 'flex-end', paddingBottom: 4}}><Svg width={34} height={34} viewBox="0 0 36 36" style={{marginBottom: 8}}><Circle cx={18} cy={18} r={14} fill="none" stroke={t.tint} strokeWidth={4} /><Circle cx={18} cy={18} r={14} fill="none" stroke={t.ac} strokeWidth={4} strokeLinecap="round" strokeDasharray={`${(containerRatio*87.96).toFixed(2)} 87.96`} rotation={-90} origin="18, 18" /></Svg><Tx style={{fontSize: 20, lineHeight: 25, fontWeight: '700', color: t.tx}}>{formatCopy(copy,'home.filled',{percent:containerPercent})}</Tx>{selectedContainer&&selectedContainer.status!=='filling'?<Tx style={{fontSize: 12, lineHeight: 15, color: t.mu}}>{copy['status.'+selectedContainer.status]}</Tx>:<Tx style={{fontSize: 12, lineHeight: 15, color: t.mu}}><Tx style={{color: t.gr, fontWeight: '700'}} >{containerAvailable} CBM</Tx> {copy['home.available']}</Tx>}</View></View>
       {(containerOccupancy || showEmptyLoadHint || showReservedPreview) ? (
       <View style={{height: 300, marginTop: 2}} onTouchStart={() => setScroll(false)} onTouchEnd={() => setScroll(true)} onTouchCancel={() => setScroll(true)}><WebView key={(dark ? 'd' : 'l')+'-'+(isDemo?'demo-'+demoScenario?.id+'-'+(demoView?.id??'')+'-'+preview.replay:(selectedContainer?.id??(showReservedPreview?'reserved-'+reservedValue:visualMode)))+'-'+(containerOccupancy?.loadedCbm??'unverified')+'-'+(yourPhysicallyLoadedCbm??'unknown')+'-'+(showReservedPreview?'reserve-'+reservedValue:'physical')} originWhitelist={['*']} source={{html: webHtml}} style={{backgroundColor: 'transparent'}} containerStyle={{backgroundColor: 'transparent'}} scrollEnabled={false} bounces={false} overScrollMode="never" javaScriptEnabled showsVerticalScrollIndicator={false} /></View>
       ) : <View style={{height:300,alignItems:'center',justifyContent:'center',paddingHorizontal:24}}><Tx style={{color:t.mu,textAlign:'center',fontSize:13}}>{displayAssignmentState==='loading'||displayCurrentContainer.kind==='loading'?copy['home.loading']:!hasCurrentContainer&&(displayAssignmentState==='unavailable'||displayCurrentContainer.kind==='unavailable')?copy['status.unavailable']:!hasCurrentContainer?copy['home.noAccountContainer']:copy['home.measurementsUnavailable']}</Tx></View>}
@@ -540,7 +545,7 @@ const REFERENCE_CONTAINER_JS = [
 "if(t<.3&&pitch<35){const sx=proj([-HX-.5,0,0])[0]<proj([HX+.5,0,0])[0]?-HX-.5:HX+.5,zn=nv([0,0,1])[2]>0?HZ:-HZ,a=proj([sx,.02,zn]),b=proj([sx,H-.02,zn]);cx.globalAlpha=1-t/.3;cx.strokeStyle=C.tx;cx.lineWidth=1.1;cx.beginPath();cx.moveTo(a[0],a[1]);cx.lineTo(b[0],b[1]);cx.moveTo(a[0]-3,a[1]);cx.lineTo(a[0]+3,a[1]);cx.moveTo(b[0]-3,b[1]);cx.lineTo(b[0]+3,b[1]);cx.stroke();",
 "cx.fillStyle=C.tx;cx.font='700 10px -apple-system,Arial,sans-serif';cx.textAlign=sx<0?'left':'right';const e=proj([sx<0?-HX:HX,H,zn]);cx.fillText('Ceiling 2.69 m',e[0],proj([sx<0?-HX:HX,H+lift+.1,zn])[1]-7);cx.globalAlpha=1;cx.textAlign='center';cx.font='700 11px -apple-system,Arial,sans-serif'}",
 "const top=Math.min(...[-HX,HX].flatMap(x=>[0,H+1].flatMap(y=>[-HZ,HZ].map(z=>proj([x,y,z])[1])))),ly=Math.max(14,top-12);cx.globalAlpha=1;",
-"if(OW&&!data.caption){const u=OW.c;cx.strokeStyle=C.tx;cx.lineWidth=1.1;cx.beginPath();cx.moveTo(u[0],u[1]);cx.lineTo(u[0],ly+4);cx.stroke();cx.fillStyle=C.tx;cx.beginPath();cx.arc(u[0],u[1],2.3,0,7);cx.fill();cx.fillText(V.lab,Math.max(125,Math.min(w-125,u[0])),ly)}",
+"if(OW&&(actual||!data.caption)){const u=OW.c,parts=V.lab.split(' • '),widthOf=x=>{const v=cx.measureText(x);return v&&Number.isFinite(v.width)?v.width:x.length*5.8},limit=w-24,lines=[];let current='';for(const part of parts){const next=current?current+' • '+part:part;if(current&&widthOf(next)>limit){lines.push(current);current=part}else current=next}if(current)lines.push(current);const y=Math.max(13,ly-(lines.length-1)*13),last=y+(lines.length-1)*13,wide=Math.min(limit,Math.max(...lines.map(widthOf))),tx=clamp(u[0],12+wide/2,w-12-wide/2);cx.strokeStyle=C.tx;cx.lineWidth=1.1;cx.beginPath();cx.moveTo(u[0],u[1]);cx.lineTo(u[0],last+5);cx.lineTo(tx,last+5);cx.stroke();cx.fillStyle=C.tx;cx.beginPath();cx.arc(u[0],u[1],2.3,0,7);cx.fill();lines.forEach((line,i)=>cx.fillText(line,tx,y+i*13,limit))}",
 "if(actual&&!V.sealed&&V.fr>0){const f=proj([(Math.min(V.fx,ix1)+HX)/2,1.3,0]);cx.font='700 10px -apple-system,Arial,sans-serif';cx.lineWidth=3;cx.strokeStyle=C.halo;cx.strokeText(FR()+' CBM free',f[0],f[1]);cx.fillStyle=C.fl;cx.fillText(FR()+' CBM free',f[0],f[1])}",
 "fly();}",
 "const rq=()=>{if(!raf)raf=requestAnimationFrame(draw)};",
@@ -552,8 +557,8 @@ const REFERENCE_CONTAINER_JS = [
 "function lc(a,b,t){const h=x=>[1,3,5].map(i=>parseInt(x.substr(i,2),16)),A=h(a),B=h(b);return '#'+A.map((v,i)=>Math.round(v+(B[i]-v)*t).toString(16).padStart(2,'0')).join('')}",
 "function geo(h){if(!(h>0))return{sy:0,sz:0};const vol=h/68*mv,ed=Math.cbrt(vol),sy=Math.min(ih,Math.max(Math.min(ed,ih),vol/(il*id))),sz=Math.min(id,Math.max(Math.min(ed,1.05),vol/(il*sy)));return{sy,sz}}",
 "function ln(g,x){return g.sy&&g.sz?x/68*mv/(g.sy*g.sz):0}",
-"function fly(){if(RM||!OW||V.sealed||V.ld+V.inb>0||reservationLanded())return;const elapsed=(Date.now()-started)/1000,p=keepReservationParcel?Math.min(1,elapsed/4.6):(elapsed%4.6)/4.6;if(p>.56)return;const q0=Math.min(1,p/.42),k=q0<.5?2*q0*q0:1-Math.pow(-2*q0+2,2)/2,m=p>=.42?1:Math.max(0,Math.min(1,(k-.85)/.15)),a=[30,30],e=OW.c,md=[(a[0]+e[0])/2,Math.min(a[1],e[1])-36],rawX=(1-k)*(1-k)*a[0]+2*(1-k)*k*md[0]+k*k*e[0],rawY=(1-k)*(1-k)*a[1]+2*(1-k)*k*md[1]+k*k*e[1],s=34+(OW.px-34)*k,X=clamp(rawX,s*.5+3,w-s*.5-3),Y=clamp(rawY,s*.6+5,h-s*.6-5),alpha=p<.42?1:Math.max(0,1-(p-.42)/.14);",
-"cx.save();cx.globalAlpha=alpha;const sx=X+2,sy=Math.min(h-8,Y+s*.65+5),sg=cx.createRadialGradient(sx,sy,0,sx,sy,s*.65);sg.addColorStop(0,'rgba(30,12,8,.32)');sg.addColorStop(1,'rgba(30,12,8,0)');cx.save();cx.translate(sx,sy);cx.scale(1,.36);cx.translate(-sx,-sy);cx.fillStyle=sg;cx.beginPath();cx.arc(sx,sy,s*.65,0,Math.PI*2);cx.fill();cx.restore();",
+"function fly(){if(RM||!OW||V.sealed||V.ld+V.inb>0)return;const elapsed=(Date.now()-started)/1000,p=(elapsed%4.6)/4.6;if(p>.56)return;const q0=Math.min(1,p/.42),k=q0<.5?2*q0*q0:1-Math.pow(-2*q0+2,2)/2,m=p>=.42?1:Math.max(0,Math.min(1,(k-.85)/.15)),a=[30,30],e=OW.c,md=[(a[0]+e[0])/2,Math.min(a[1],e[1])-36],rawX=(1-k)*(1-k)*a[0]+2*(1-k)*k*md[0]+k*k*e[0],rawY=(1-k)*(1-k)*a[1]+2*(1-k)*k*md[1]+k*k*e[1],s=34+(OW.px-34)*k,X=clamp(rawX,s*.5+3,w-s*.5-3),Y=clamp(rawY,s*.6+5,h-s*.6-5),alpha=p<.42?1:Math.max(0,1-(p-.42)/.14);",
+"cx.save();cx.globalAlpha=alpha;cx.save();const liftShadow=1-k,sx=X+s*.10,sy=Math.min(h-s*.22-4,Y+s*.62+6+liftShadow*s*.13),sw=s*(.5+.12*liftShadow),sd=s*(.24+.06*liftShadow);cx.shadowColor='rgba(25,10,5,.32)';cx.shadowBlur=3+liftShadow*7;cx.fillStyle='rgba(30,12,8,.20)';cx.beginPath();cx.moveTo(sx,sy-sd);cx.lineTo(sx+sw,sy);cx.lineTo(sx,sy+sd);cx.lineTo(sx-sw,sy);cx.closePath();cx.fill();cx.restore();",
 "const Q=(pts,c)=>{cx.fillStyle=c;cx.beginPath();pts.forEach((q,i)=>i?cx.lineTo(X+q[0]*s,Y+q[1]*s):cx.moveTo(X+q[0]*s,Y+q[1]*s));cx.closePath();cx.fill()},LF=(u,v)=>[-.5+.5*u,-.3+.3*u+.6*v],RF=(u,v)=>[.5-.5*u,-.3+.3*u+.6*v],bx=(F,u0,u1,v0,v1)=>[F(u0,v0),F(u1,v0),F(u1,v1),F(u0,v1)],ln2=(F,u0,v0,u1,v1,c)=>{cx.strokeStyle=c;cx.lineWidth=Math.max(.6,s/45);cx.beginPath();const A=F(u0,v0),B=F(u1,v1);cx.moveTo(X+A[0]*s,Y+A[1]*s);cx.lineTo(X+B[0]*s,Y+B[1]*s);cx.stroke()};",
 "Q([[0,-.6],[.5,-.3],[0,0],[-.5,-.3]],lc('#CDA874','#E0453A',m));Q([[-.5,-.3],[0,0],[0,.6],[-.5,.3]],lc('#A97F4D','#A90E02',m));Q([[.5,-.3],[0,0],[0,.6],[.5,.3]],lc('#8A6339','#7d0a01',m));",
 "Q([[-.25,-.5],[.25,-.2],[.25,-.1],[-.25,-.4]],lc('#E6D5AA','#F0B0A8',m));",

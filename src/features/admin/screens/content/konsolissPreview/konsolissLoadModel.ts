@@ -16,7 +16,7 @@ export type KonsolissLoadProgressState=
   | {kind:'loading'}
   | {kind:'unrecorded'}
   | {kind:'unavailable'}
-  | {kind:'recorded';progress:KonsolissLoadProgress};
+  | {kind:'recorded';progress:KonsolissLoadProgress;trackingDueAt?:string};
 
 export function parseKonsolissLoadProgress(row:unknown):KonsolissLoadProgress|null{
   if(!row||typeof row!=='object')return null;
@@ -46,4 +46,13 @@ export function parseKonsolissLoadProgress(row:unknown):KonsolissLoadProgress|nu
     sentNotLoadedCbm:Math.max(0,sentCbm-loadedCbm),
     reservedNotSentCbm:Math.max(0,reservedCbm-sentCbm),
     loadedPercent:reservedCbm>0?Math.round((loadedCbm+inboundCbm)/reservedCbm*10000)/100:0};
+}
+
+/** Absolute-time countdown; the display never grants or revokes an entitlement. */
+export function trackingCountdown(deadline:number,now:number):{seconds:number;label:string}|null{
+  if(!Number.isFinite(deadline)||!Number.isFinite(now))return null;
+  const seconds=Math.max(0,Math.ceil((deadline-now)/1000));
+  const d=Math.floor(seconds/86400),hours=Math.floor(seconds/3600)%24,mins=Math.floor(seconds/60)%60,secs=seconds%60;
+  const pad=(n:number)=>String(n).padStart(2,'0');
+  return {seconds,label:seconds===0?'Deadline reached':(d>0?d+'d ':'')+pad(hours)+'h '+pad(mins)+'m '+pad(secs)+'s left'};
 }
