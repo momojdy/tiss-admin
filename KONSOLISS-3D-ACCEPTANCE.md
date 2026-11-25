@@ -213,3 +213,7 @@ Fixed all four audit findings: (1) integer millesimal CBM partition helpers feed
 No Supabase mutation or migration was necessary: both bars continue to consume the existing authenticated owner-scoped atomic homepage snapshot and verified Admin measurements. Existing live shipment/device verification, CMS publication and overall release gates remain open. No fake production records, deployment, branch creation, renderer redesign or Book Space changes.
 
 **Final CI readback:** Consumer 63/63 scoped tests passed (15+17+22+3+6), including the actual host-effect rotation and segment tests; full consumer TypeScript failed solely on the six unrelated ArtsLits `StyleSheet.absoluteFillObject` errors, so Expo web export was skipped. Admin workflow concluded success, including Android and iOS bundling and existing Goodies regression tests. The scoped acceptance above is unchanged.
+
+## Founder handoff — 2026-11-26
+
+Homepage scoped acceptance preserved; founder instructed us to proceed to Book Space. Active implementation scope is Section B in the consumer master README, including tariff, quote, verified paid-right acquisition and booking CMS. Overall live/commercial release HOLD and authenticated device/CMS publication gates remain. Do not reopen approved homepage visuals or change operational data to manufacture acceptance.
