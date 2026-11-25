@@ -221,7 +221,9 @@ function Screen({onBack,onUniversalAction,unreadNotifications,unreadMessages}: {
   const replayDemo=()=>{preview.replayCurrent();setProgressView('customer');setLoadDetailsOpen(false);};
   const demoCountdown=demoScenario?.deadlineRemainingMs;
   const liveDeadline=!isDemo&&loadProgress.kind==='recorded'&&loadProgress.progress.reservedCbm>0&&loadProgress.progress.sentCbm===0?loadProgress.trackingDueAt:undefined;
-  const loadStatus=demoScenario?previewLoadStatus(demoScenario,demoView):showReservedPreview&&!containerOccupancy?copy['load.reserved']+' • '+(progress?.sentCbm===0?(copy['warehouse.empty']||'No goods sent yet'):(copy['load.warehouseTransit']||'At warehouse or still in transit')):'';
+  const splitShipment=liveContainers.length>1;
+  const splitCaption=splitShipment?(progress?'My current loaded space '+progress.loadedCbm.toFixed(3)+' CBM':'My current loaded space —'):'';
+  const loadStatus=demoScenario?previewLoadStatus(demoScenario,demoView):splitShipment?'Split into '+liveContainers.length+' containers':showReservedPreview&&!containerOccupancy?copy['load.reserved']+' • '+(progress?.sentCbm===0?(copy['warehouse.empty']||'No goods sent yet'):(copy['load.warehouseTransit']||'At warehouse or still in transit')):'';
   const webHtml=containerHtml(dark,
     isDemo?!!demoRender?.empty:showEmptyLoadHint,
     isDemo?(demoRender?.empty?68:(demoRender?.reserved??0)):showReservedPreview?(progress?.reservedCbm??0):(containerOccupancy?.capacityCbm??(showEmptyLoadHint?68:0)),
@@ -230,7 +232,7 @@ function Screen({onBack,onUniversalAction,unreadNotifications,unreadMessages}: {
     isDemo?(demoRender?.free??null):(containerOccupancy?.freeCbm??null),copy,showReservedPreview,
     isDemo?(demoRender?.sent??0):(progress?.sentCbm??0),
     demoRender&&isDemo?{here:demoRender.here,hereInbound:demoRender.hereInbound,sealed:demoRender.sealed,caption:demoRender.caption}
-      :{here:containerOccupancy?.yourAllocatedCbm??0,sealed:selectedContainer!==null&&selectedContainer.status!=='filling'});
+      :{here:containerOccupancy?.yourAllocatedCbm??0,sealed:selectedContainer!==null&&selectedContainer.status!=='filling',caption:splitCaption});
   const nav = [copy['nav.home'], copy['nav.warehouse'], copy['nav.consolidated'], copy['nav.sourcing'], copy['nav.hub']];
   return <KonsolissContentContext.Provider value={{...editing,copy,images:content.images}}><View style={{flex: 1, backgroundColor: t.bg}}><StatusBarCompat barStyle={dark ? 'light-content' : 'dark-content'} translucent backgroundColor="transparent" />
     <ScrollView ref={scrollRef} scrollEnabled={scroll} contentContainerStyle={{paddingTop: Math.max(14, insets.top), paddingBottom: 110 + insets.bottom}} showsVerticalScrollIndicator={false}>
@@ -273,8 +275,8 @@ function Screen({onBack,onUniversalAction,unreadNotifications,unreadMessages}: {
         {progressView==='container'?<>
           <View style={{flexDirection:'row',alignItems:'center',gap:6}}>
             <View style={{flex:1,height:10,borderRadius:5,overflow:'hidden',backgroundColor:t.tint,flexDirection:'row'}}>
-              <View style={{width:`${containerOccupancy?Math.max(0,Math.min(100,containerOccupancy.otherCargoCbm/containerOccupancy.capacityCbm*100)):0}%`,backgroundColor:'#CDAA7D'}}/>
-              <View style={{width:`${containerOccupancy?Math.max(0,Math.min(100,containerOccupancy.yourSpaceCbm/containerOccupancy.capacityCbm*100)):0}%`,backgroundColor:t.ac}}/>
+              <View style={{width:`${containerOccupancy?Math.max(0,Math.min(100,(splitShipment?containerOccupancy.loadedCbm:containerOccupancy.otherCargoCbm)/containerOccupancy.capacityCbm*100)):0}%`,backgroundColor:'#CDAA7D'}}/>
+              {!splitShipment?<View style={{width:`${containerOccupancy?Math.max(0,Math.min(100,containerOccupancy.yourSpaceCbm/containerOccupancy.capacityCbm*100)):0}%`,backgroundColor:t.ac}}/>:null}
             </View>
             {<Pressable accessibilityRole="button" accessibilityLabel={copy['a11y.progress']} accessibilityHint={copy['a11y.progressHint']}
             onPress={()=>setProgressView(view=>view==='customer'?'container':'customer')}
@@ -285,8 +287,8 @@ function Screen({onBack,onUniversalAction,unreadNotifications,unreadMessages}: {
           </Pressable>}
           </View>
           <View style={{flexDirection:'row',justifyContent:'space-between',marginTop:7}}>
-            <Tx style={s.leg}>{copy['home.otherCargo']} <Tx style={{color:t.tx}}>{containerOccupancy?fmt(containerOccupancy.otherCargoCbm):'—'}</Tx></Tx>
-            <Tx style={[s.leg,{color:t.ac}]}>{copy['home.yourSpace']} <Tx style={{color:t.tx}}>{containerOccupancy?fmt(containerOccupancy.yourSpaceCbm):'—'}</Tx></Tx>
+            <Tx style={s.leg}>{splitShipment?copy['load.loaded']:copy['home.otherCargo']} <Tx style={{color:t.tx}}>{containerOccupancy?fmt(splitShipment?containerOccupancy.loadedCbm:containerOccupancy.otherCargoCbm):'—'}</Tx></Tx>
+            {!splitShipment?<Tx style={[s.leg,{color:t.ac}]}>{copy['home.yourSpace']} <Tx style={{color:t.tx}}>{containerOccupancy?fmt(containerOccupancy.yourSpaceCbm):'—'}</Tx></Tx>:null}
             <Tx style={s.leg}>{copy['home.free']} <Tx style={{color:t.tx}}>{containerOccupancy?fmt(containerOccupancy.freeCbm):'—'}</Tx></Tx>
           </View>
         </>:<>
@@ -477,8 +479,9 @@ const REFERENCE_CONTAINER_JS = [
 "const $=s=>document.querySelector(s),cv=$('#cv'),cx=cv.getContext('2d'),D=document.documentElement.dataset.theme==='dark';",
 "const C=D?{int:'#2b2724',gr:'#FF7A68',spot:'rgba(169,14,2,.32)',shd:'rgba(0,0,0,.6)',tx:'#FFFBD4',fl:'#FFF3A0',halo:'rgba(23,16,15,.92)',fv:.16,ac:'#FF5B4A'}:{int:'#6a6455',gr:'#A90E02',spot:'rgba(241,228,138,.55)',shd:'rgba(43,18,16,.25)',tx:'#2B1210',fl:'#5c4a00',halo:'#FFF3A0',fv:.26,ac:'#A90E02'};",
 "const data=document.documentElement.dataset,RM=typeof matchMedia==='function'&&matchMedia('(prefers-reduced-motion: reduce)').matches,started=Date.now(),num=k=>Number(data[k])||0,free=Number(data.free),actual=Number.isFinite(free),loaded=Math.max(0,Math.min(68,num('loaded'))),ld=actual?Math.max(0,Math.min(loaded,num('yourLoaded'))):0,sealed=data.sealed==='true',here=actual?(sealed?ld:Math.max(ld,Math.min(num('here'),ld+Math.max(0,68-loaded)))):(num('reserved')<=68?Math.max(0,num('reserved')):0),inb=actual&&!sealed?Math.max(0,Math.min(here-ld,num('hereInbound'))):0;",
-"const keepReservationParcel=!actual&&num('reserved')>0&&num('sent')===0;",
-"const reservationLanded=()=>keepReservationParcel&&(RM||Date.now()-started>=1932);",
+"const flightCycleMs=4600,flightPhase=()=>((Date.now()-started)%flightCycleMs)/flightCycleMs;",
+"const keepReservationParcel=here>0&&!sealed&&ld+inb===0;",
+"const reservationLanded=(phase=flightPhase())=>keepReservationParcel&&(RM||phase>=.42);",
 "const V={k:actual?'c':'u',oth:Math.max(0,loaded-ld),here,ld,inb,sealed,nc:10,fr:actual?Math.max(0,free):0,x0:2.2,z0:.1,fx:0,lab:''};let OW=null;const FR=()=>V.fr.toFixed(1);const L=12,W=2.35,H=2.7,HX=6,HZ=W/2,ST='#A90E02',LG=[-.45,.85,.5].map((v,_,a)=>v/Math.hypot(...a)),DEF=10;",
 "let yaw=0,pitch=DEF,w=0,h=300,raf=0;",
 "const rgb=x=>[1,3,5].map(i=>parseInt(x.substr(i,2),16)),sh=(x,k)=>`rgb(${rgb(x).map(v=>Math.max(0,Math.min(255,v*k|0)))})`;",
@@ -495,7 +498,7 @@ const REFERENCE_CONTAINER_JS = [
 "const own=V.here>0?[V.x0,V.x0+span,.15,.15+g0.sy,V.z0,V.z0+g0.sz]:null;",
 "function subtract(b,o){if(!o)return[b];const i=[Math.max(b[0],o[0]),Math.min(b[1],o[1]),Math.max(b[2],o[2]),Math.min(b[3],o[3]),Math.max(b[4],o[4]),Math.min(b[5],o[5])];if(i[1]<=i[0]||i[3]<=i[2]||i[5]<=i[4])return[b];return[[b[0],i[0],b[2],b[3],b[4],b[5]],[i[1],b[1],b[2],b[3],b[4],b[5]],[i[0],i[1],b[2],i[2],b[4],b[5]],[i[0],i[1],i[3],b[3],b[4],b[5]],[i[0],i[1],i[2],i[3],b[4],i[4]],[i[0],i[1],i[2],i[3],i[5],b[5]]].filter(q=>q[1]-q[0]>.012&&q[3]-q[2]>.012&&q[5]-q[4]>.012)}",
 "const CE=3.1,wrap=a=>((a+180)%360+360)%360-180;",
-"function draw(){raf=0;const th=yaw*Math.PI/180,ph=pitch*Math.PI/180,ct=Math.cos(th),st=Math.sin(th),cp=Math.cos(ph),sp=Math.sin(ph),sc=w/13.6,ox=w/2;let oy=0;",
+"function draw(){raf=0;const phase=flightPhase(),th=yaw*Math.PI/180,ph=pitch*Math.PI/180,ct=Math.cos(th),st=Math.sin(th),cp=Math.cos(ph),sp=Math.sin(ph),sc=w/13.6,ox=w/2;let oy=0;",
 "const t=Math.max(0,Math.min(1,Math.max(Math.abs(wrap(yaw))/35,(pitch-DEF)/30))),lift=.9*t,lop=1-.86*t;",
 "const proj=([x,y,z])=>{y-=H/2;const X=x*ct+z*st,Z=-x*st+z*ct;return[ox+X*sc,oy-(y*cp-Z*sp)*sc,Z*cp+y*sp]};",
 "{const ys=[0,H+lift+.1].flatMap(y=>[-HX,HX].flatMap(x=>[-HZ,HZ].map(z=>proj([x,y,z])[1])));oy=h/2+16-(Math.min(...ys)+Math.max(...ys))/2}",
@@ -518,13 +521,13 @@ const REFERENCE_CONTAINER_JS = [
 "if(actual&&loaded<=.1&&V.oth>0){const g=geo(V.oth),l=ln(g,V.oth);abox(1,[ix0,ix0+l,.15,.15+g.sy,-iz,-iz+g.sz],'#CDAA7D',1,1)}",
 "const fz=[Math.min(V.fx,ix1),ix1,.15,H-.15,-iz,iz],SF=actual&&!V.sealed&&V.fr>0&&V.fx<ix1;if(SF)abox(2,fz,'#FFF1A0',C.fv);const cs=[];for(const x of[fz[0],fz[1]])for(const y of[fz[2],fz[3]])for(const z of[fz[4],fz[5]])cs.push([x,y,z]);",
 "if(SF)for(const a of cs)for(const b of cs)if(a<b&&a.filter((v,i)=>v!=b[i]).length==1)line(2.5,a,b,C.ac,.55,.9,[3,2.5]);",
-"OW=null;if(V.here>0){const g=geo(V.here),sy=g.sy,sz=g.sz,sxl=ln(g,V.here),x0=V.x0,z0=V.z0,y0=.15,xL=x0+ln(g,V.ld),xI=xL+ln(g,V.inb),nx=Math.max(1,Math.round(sxl/.45)),ny=Math.max(1,Math.round(sy/.45)),nz=Math.max(1,Math.round(sz/.45)),cw=sxl/nx,ch=sy/ny,cd=sz/nz,now=(Date.now()-started)/1000,pul=RM?.5:.5+.5*Math.sin(now*2.6),p=RM?1:(now%4.6)/4.6,fl=V.ld+V.inb>0||p<.42?0:Math.max(0,1-(p-.42)*5);",
+"OW=null;if(V.here>0){const g=geo(V.here),sy=g.sy,sz=g.sz,sxl=ln(g,V.here),x0=V.x0,z0=V.z0,y0=.15,xL=x0+ln(g,V.ld),xI=xL+ln(g,V.inb),nx=Math.max(1,Math.round(sxl/.45)),ny=Math.max(1,Math.round(sy/.45)),nz=Math.max(1,Math.round(sz/.45)),cw=sxl/nx,ch=sy/ny,cd=sz/nz,now=(Date.now()-started)/1000,pul=RM?.5:.5+.5*Math.sin(now*2.6),p=RM?1:phase,fl=V.ld+V.inb>0||p<.42?0:Math.max(0,1-(p-.42)*5);",
 "OW={c:proj([x0+sxl/2,y0+sy/2,z0+sz/2]),px:Math.max(16,Math.min(52,sxl*sc*1.1))};",
 "const hx=q=>'#'+q.map(n=>Math.max(0,Math.min(255,n|0)).toString(16).padStart(2,'0')).join(''),col=hx([169+30*pul,14+8*pul,2+4*pul]);",
 "for(let i=0;i<nx;i++){const a0=x0+i*cw,b1=Math.min(a0+cw,xL);if(b1<=a0)continue;for(let j=0;j<ny;j++)for(let k=0;k<nz;k++){const gx=Math.min(.006,(b1-a0)*.03),gy=Math.min(.006,ch*.03),gz=Math.min(.006,cd*.03),bb=[a0+gx,b1-gx,y0+j*ch+gy,y0+(j+1)*ch-gy,z0+k*cd+gz,z0+(k+1)*cd-gz];abox(1.2,bb,col,1,1,(l,n)=>{if(n[1]==1&&j==ny-1){const zm=(bb[4]+bb[5])/2;poly(l,[[bb[0],bb[3],zm-.03],[bb[0],bb[3],zm+.03],[bb[1],bb[3],zm+.03],[bb[1],bb[3],zm-.03]],'#FFE9A8',.9,0)}})}}",
 "if(V.inb>0)abox(1.18,[xL,xI,y0,y0+sy,z0,z0+sz],'#A90E02',.38,0);",
-"if(reservationLanded()){const bb=[x0+.008,x0+sxl-.008,y0+.008,y0+sy-.008,z0+.008,z0+sz-.008];abox(1.2,bb,'#A90E02',1,1,(l,n)=>{const [a,b,c,d,e,f]=bb,zm=(e+f)/2,tw=Math.min(.035,(f-e)*.12);if(n[1]===1)poly(l,[[a,d,zm-tw],[a,d,zm+tw],[b,d,zm+tw],[b,d,zm-tw]],'#F0B0A8',.95,0);else if(n[2]===1){const x=a+(b-a)*.18,y=c+(d-c)*.28;poly(l,[[x,y,f],[x+(b-a)*.36,y,f],[x+(b-a)*.36,y+(d-c)*.24,f],[x,y+(d-c)*.24,f]],'#FFF8E8',.95,0)}});}",
-"if(!reservationLanded()&&xI<x0+sxl-.0001){abox(1.15,[xI,x0+sxl,y0,y0+sy,z0,z0+sz],'#A90E02',.08+.12*fl,0);const c2=[];for(const x of[x0,x0+sxl])for(const y of[y0,y0+sy])for(const z of[z0,z0+sz])c2.push([x,y,z]);for(const a of c2)for(const b of c2)if(a<b&&a.filter((q,i)=>q!=b[i]).length==1)line(1.3,a,b,C.ac,.8+.2*fl,1.3,[4,3])}}",
+"if(reservationLanded(phase)){const inset=Math.min(.008,sxl*.06,sy*.06,sz*.06),bb=[x0+inset,x0+sxl-inset,y0+inset,y0+sy-inset,z0+inset,z0+sz-inset],opacity=actual?.46:1;abox(1.2,bb,'#A90E02',opacity,1,(l,n)=>{const [a,b,c,d,e,f]=bb,zm=(e+f)/2,tw=Math.min(.035,(f-e)*.12);if(n[1]===1)poly(l,[[a,d,zm-tw],[a,d,zm+tw],[b,d,zm+tw],[b,d,zm-tw]],'#F0B0A8',actual?.45:.95,0);else if(n[2]===1){const x=a+(b-a)*.18,y=c+(d-c)*.28;poly(l,[[x,y,f],[x+(b-a)*.36,y,f],[x+(b-a)*.36,y+(d-c)*.24,f],[x,y+(d-c)*.24,f]],'#FFF8E8',actual?.45:.95,0)}});}",
+"if((actual||!reservationLanded(phase))&&xI<x0+sxl-.0001){abox(1.15,[xI,x0+sxl,y0,y0+sy,z0,z0+sz],'#A90E02',.08+.12*fl,0);const c2=[];for(const x of[x0,x0+sxl])for(const y of[y0,y0+sy])for(const z of[z0,z0+sz])c2.push([x,y,z]);for(const a of c2)for(const b of c2)if(a<b&&a.filter((q,i)=>q!=b[i]).length==1)line(1.3,a,b,C.ac,.8+.2*fl,1.3,[4,3])}}",
 "const tp=a=>t>.02&&pitch>=0&&proj(a)[2]>proj([0,H/2,0])[2]+.05;const bm=[];",
 "for(const zs of[-HZ,HZ])bm.push([-HX,HX,H-.14,H,zs-.07,zs+.07],[-HX,HX,0,.15,zs-.07,zs+.07]);",
 "for(const xs of[-HX,HX]){bm.push([xs-.07,xs+.07,H-.14,H,-HZ,HZ],[xs-.07,xs+.07,0,.15,-HZ,HZ]);for(const zs of[-HZ,HZ])bm.push([xs-.07,xs+.07,0,H,zs-.07,zs+.07])}",
@@ -547,7 +550,7 @@ const REFERENCE_CONTAINER_JS = [
 "const top=Math.min(...[-HX,HX].flatMap(x=>[0,H+1].flatMap(y=>[-HZ,HZ].map(z=>proj([x,y,z])[1])))),ly=Math.max(14,top-12);cx.globalAlpha=1;",
 "if(OW&&(actual||!data.caption)){const u=OW.c,parts=V.lab.split(' • '),widthOf=x=>{const v=cx.measureText(x);return v&&Number.isFinite(v.width)?v.width:x.length*5.8},limit=w-24,lines=[];let current='';for(const part of parts){const next=current?current+' • '+part:part;if(current&&widthOf(next)>limit){lines.push(current);current=part}else current=next}if(current)lines.push(current);const y=Math.max(13,ly-(lines.length-1)*13),last=y+(lines.length-1)*13,wide=Math.min(limit,Math.max(...lines.map(widthOf))),tx=clamp(u[0],12+wide/2,w-12-wide/2);cx.strokeStyle=C.tx;cx.lineWidth=1.1;cx.beginPath();cx.moveTo(u[0],u[1]);cx.lineTo(u[0],last+5);cx.lineTo(tx,last+5);cx.stroke();cx.fillStyle=C.tx;cx.beginPath();cx.arc(u[0],u[1],2.3,0,7);cx.fill();lines.forEach((line,i)=>cx.fillText(line,tx,y+i*13,limit))}",
 "if(actual&&!V.sealed&&V.fr>0){const f=proj([(Math.min(V.fx,ix1)+HX)/2,1.3,0]);cx.font='700 10px -apple-system,Arial,sans-serif';cx.lineWidth=3;cx.strokeStyle=C.halo;cx.strokeText(FR()+' CBM free',f[0],f[1]);cx.fillStyle=C.fl;cx.fillText(FR()+' CBM free',f[0],f[1])}",
-"fly();}",
+"fly(phase);}",
 "const rq=()=>{if(!raf)raf=requestAnimationFrame(draw)};",
 "function fit(){const r=cv.getBoundingClientRect();w=r.width;h=r.height;cv.width=w*devicePixelRatio;cv.height=h*devicePixelRatio;rq()}",
 "addEventListener('resize',fit);fit();if(!RM&&V.here>0){const timer=setInterval(rq,45);addEventListener('pagehide',()=>clearInterval(timer),{once:true});}",
@@ -557,7 +560,7 @@ const REFERENCE_CONTAINER_JS = [
 "function lc(a,b,t){const h=x=>[1,3,5].map(i=>parseInt(x.substr(i,2),16)),A=h(a),B=h(b);return '#'+A.map((v,i)=>Math.round(v+(B[i]-v)*t).toString(16).padStart(2,'0')).join('')}",
 "function geo(h){if(!(h>0))return{sy:0,sz:0};const vol=h/68*mv,ed=Math.cbrt(vol),sy=Math.min(ih,Math.max(Math.min(ed,ih),vol/(il*id))),sz=Math.min(id,Math.max(Math.min(ed,1.05),vol/(il*sy)));return{sy,sz}}",
 "function ln(g,x){return g.sy&&g.sz?x/68*mv/(g.sy*g.sz):0}",
-"function fly(){if(RM||!OW||V.sealed||V.ld+V.inb>0)return;const elapsed=(Date.now()-started)/1000,p=(elapsed%4.6)/4.6;if(p>.56)return;const q0=Math.min(1,p/.42),k=q0<.5?2*q0*q0:1-Math.pow(-2*q0+2,2)/2,m=p>=.42?1:Math.max(0,Math.min(1,(k-.85)/.15)),a=[30,30],e=OW.c,md=[(a[0]+e[0])/2,Math.min(a[1],e[1])-36],rawX=(1-k)*(1-k)*a[0]+2*(1-k)*k*md[0]+k*k*e[0],rawY=(1-k)*(1-k)*a[1]+2*(1-k)*k*md[1]+k*k*e[1],s=34+(OW.px-34)*k,X=clamp(rawX,s*.5+3,w-s*.5-3),Y=clamp(rawY,s*.6+5,h-s*.6-5),alpha=p<.42?1:Math.max(0,1-(p-.42)/.14);",
+"function fly(p){if(RM||!OW||V.sealed||V.ld+V.inb>0)return;if(p>=.42)return;const q0=Math.min(1,p/.42),k=q0<.5?2*q0*q0:1-Math.pow(-2*q0+2,2)/2,m=p>=.42?1:Math.max(0,Math.min(1,(k-.85)/.15)),a=[30,30],e=OW.c,md=[(a[0]+e[0])/2,Math.min(a[1],e[1])-36],rawX=(1-k)*(1-k)*a[0]+2*(1-k)*k*md[0]+k*k*e[0],rawY=(1-k)*(1-k)*a[1]+2*(1-k)*k*md[1]+k*k*e[1],s=34+(OW.px-34)*k,X=clamp(rawX,s*.5+3,w-s*.5-3),Y=clamp(rawY,s*.6+5,h-s*.6-5),alpha=1;",
 "cx.save();cx.globalAlpha=alpha;cx.save();const liftShadow=1-k,sx=X+s*.10,sy=Math.min(h-s*.22-4,Y+s*.62+6+liftShadow*s*.13),sw=s*(.5+.12*liftShadow),sd=s*(.24+.06*liftShadow);cx.shadowColor='rgba(25,10,5,.16)';cx.shadowBlur=5+liftShadow*5;for(let j=0;j<12;j++){const f=1.30-j*.052,rx=sw*f,ry=sd*f,r=.24;cx.fillStyle='rgba(30,12,8,'+(j===0?.004:.012)+')';cx.beginPath();cx.moveTo(sx-rx*r,sy-ry*(1-r));cx.quadraticCurveTo(sx,sy-ry,sx+rx*r,sy-ry*(1-r));cx.lineTo(sx+rx*(1-r),sy-ry*r);cx.quadraticCurveTo(sx+rx,sy,sx+rx*(1-r),sy+ry*r);cx.lineTo(sx+rx*r,sy+ry*(1-r));cx.quadraticCurveTo(sx,sy+ry,sx-rx*r,sy+ry*(1-r));cx.lineTo(sx-rx*(1-r),sy+ry*r);cx.quadraticCurveTo(sx-rx,sy,sx-rx*(1-r),sy-ry*r);cx.closePath();cx.fill();}cx.restore();",
 "const Q=(pts,c)=>{cx.fillStyle=c;cx.beginPath();pts.forEach((q,i)=>i?cx.lineTo(X+q[0]*s,Y+q[1]*s):cx.moveTo(X+q[0]*s,Y+q[1]*s));cx.closePath();cx.fill()},LF=(u,v)=>[-.5+.5*u,-.3+.3*u+.6*v],RF=(u,v)=>[.5-.5*u,-.3+.3*u+.6*v],bx=(F,u0,u1,v0,v1)=>[F(u0,v0),F(u1,v0),F(u1,v1),F(u0,v1)],ln2=(F,u0,v0,u1,v1,c)=>{cx.strokeStyle=c;cx.lineWidth=Math.max(.6,s/45);cx.beginPath();const A=F(u0,v0),B=F(u1,v1);cx.moveTo(X+A[0]*s,Y+A[1]*s);cx.lineTo(X+B[0]*s,Y+B[1]*s);cx.stroke()};",
 "Q([[0,-.6],[.5,-.3],[0,0],[-.5,-.3]],lc('#CDA874','#E0453A',m));Q([[-.5,-.3],[0,0],[0,.6],[-.5,.3]],lc('#A97F4D','#A90E02',m));Q([[.5,-.3],[0,0],[0,.6],[.5,.3]],lc('#8A6339','#7d0a01',m));",

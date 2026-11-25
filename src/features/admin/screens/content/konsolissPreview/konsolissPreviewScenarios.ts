@@ -262,7 +262,7 @@ export function previewRender(s: PreviewScenario, view: PreviewView | null): Pre
     const c = view.container, occ = previewOccupancy(c);
     return {...base, reserved: occ.capacityCbm, loaded: occ.loadedCbm, yourLoaded: c.loaded, free: occ.freeCbm,
       here: r3(c.here + (c.outlineExtra ?? 0)), hereInbound: c.inbound, sealed: isSealedStatus(c.status), occupancy: occ, container: c,
-      caption: s.code === 'C1' ? partialLoadStatus(s) : s.code === 'C2' ? statusVolume(sumOf(s,'loaded')) + ' CBM loaded • ' + statusVolume(sumOf(s,'inbound')) + ' CBM inbound • ' + statusVolume(Math.max(0,s.purchased-sumOf(s,'here'))) + ' CBM remaining' : s.code === 'C3' ? statusVolume(sumOf(s,'loaded')) + ' CBM loaded • ' + statusVolume(Math.max(0,s.purchased-s.sent)) + ' CBM unused' : ''};
+      caption: s.containers.length > 1 ? 'My current loaded space '+f3(sumOf(s,'loaded'))+' CBM' : s.code === 'C1' ? partialLoadStatus(s) : s.code === 'C2' ? statusVolume(sumOf(s,'loaded')) + ' CBM loaded • ' + statusVolume(sumOf(s,'inbound')) + ' CBM inbound • ' + statusVolume(Math.max(0,s.purchased-sumOf(s,'here'))) + ' CBM remaining' : s.code === 'C3' ? statusVolume(sumOf(s,'loaded')) + ' CBM loaded • ' + statusVolume(Math.max(0,s.purchased-s.sent)) + ' CBM unused' : ''};
   }
   if (view.kind === 'unassigned') {
     const un = view.unassignedCbm ?? 0, assigned = sumOf(s, 'here');
