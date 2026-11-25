@@ -53,3 +53,20 @@ The HTML-to-React Native restoration is in progress on `main`:
 Run `npm run typecheck` and test the actual app before releasing. A successful typecheck alone does not establish production readiness. Review Supabase security advisors, permissions and application logs after backend changes.
 
 Goodies operational promotions now use **Goodies → Promotions**, with Finance view/manage permissions. Percentage/free-delivery terms, eligibility, redemption limits and audit are server-owned. See the [confirmed-gap repair evidence](https://github.com/momojdy/tiss_tiss_beta/blob/main/docs/goodies/confirmed-gap-repairs-20261122.md). Historical mixed-workspace/promotion findings in earlier reports are superseded only within that documented scope.
+
+## Konsoliss integration checkpoint — 2026-11-25
+
+The [consumer's master Konsoliss business README](https://github.com/momojdy/tiss_tiss_beta/blob/main/src/screens/Konsoliss/README.md) is authoritative for the latest 0A–0E decisions, including Haiti's verified-receipt-to-pickup Day-80 obligation, three-country architecture, source-of-truth reservation/loading distinction and approved 3D interface.
+
+**Connected and applied in shared Supabase project `ycbirmgppwavorwudlrv`:** `20261125071000_konsoliss_reconciliation_and_custody_foundation.sql` (GitHub Admin commit `ebcb1c62`) and `20261125071700_konsoliss_service_request_manual_triage.sql` (`889e3fde`). These add RLS-protected entitlement-right/movement records, immutable itemized adjustment version snapshots, consignment/piece identity, per-piece customs decisions, service-specific lot commitments, partner cases and customer service-request statuses; the manual request RPC authorizes only active Super Admin staff.
+
+**Admin UI:** `src/features/admin/screens/konsoliss/KonsolissBookingOperations.tsx` commits `b44e9b4a` and `76394b36` add customer refund/return/alternative/claim request review and bind approved quote scopes to route, destination, equipment and cargo. This is a real database connection, not a demo local store. Approval is **not** a refund capture, actual cargo return, or shipping fulfillment.
+
+**CMS:** `src/features/admin/screens/content/KonsolissBookingCopyEditor.tsx` commit `c5b880b7` adds new service-request labels to the existing localized booking-copy draft/publish process. Operational prices, entitlements, live shipping status and profit cannot be authored in copy CMS.
+
+**Preserved:** existing homepage and 3D renderer, consumer/admin homepage preview sync, original CMS editor, feature theme and approved Book Space layout. No customer billing route was enabled; the hard `checkout_enabled=false` protection remains in place.
+
+**Verified now:** Both migrations applied successfully; read-only SQL confirmed eight new public tables have RLS and read policies; live financial, rights, quoted-payment, request and partner tables contained zero data at verification. Separate standalone HTML simulator: 11 targeted engine checks and 5 Chromium journey groups passed, including 320/390/1280 responsive smoke checks. These tests do **not** establish native React Native pixel parity, successful Expo device build, Supabase authenticated cross-role runtime flow or provider settlement.
+
+**Still blocking production:** verified payment provider signatures and atomic order/capacity ledger; backend-owned parcel/warehouse status transitions with actual staff scans; enforceable financial settlement and refund implementation; actual partner rate cards/custody evidence and cross-border guarantees; operational margin/customs underwriting; security/TypeScript/native device integration suite; remove/disable demo selectors for public builds. There is no valid claim that Konsoliss is production ready. Do not turn simulated HTML financial events into live financial records or add fictitious shipments.
+
