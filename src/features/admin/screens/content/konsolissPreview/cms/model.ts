@@ -1,4 +1,4 @@
-import {KONSOLISS_COPY_DEFAULTS as DEFAULTS,KONSOLISS_IMAGE_SLOTS,KONSOLISS_LOCALES,type KonsolissCopy} from './catalog';
+import {KONSOLISS_COPY_DEFAULTS as DEFAULTS,KONSOLISS_IMAGE_SLOTS,KONSOLISS_LOCALES,type KonsolissCopy,konsolissLocaleDefaults} from './catalog';
 export type HomepagePayload={v:2;labels:Record<string,string>;reviewed:string[];images:Record<string,string>};
 export const placeholders=(value:string)=>[...value.matchAll(/\{([a-zA-Z][a-zA-Z0-9]*)\}/g)].map(match=>match[1]).sort();
 export function formatCopy(copy:KonsolissCopy,key:string,values:Record<string,string|number>={}){return (copy[key]??DEFAULTS[key]??key).replace(/\{(\w+)\}/g,(token,name)=>values[name]===undefined?token:String(values[name]));}
@@ -18,13 +18,13 @@ export function publicationErrors(payload:HomepagePayload):string[]{
 }
 export function resolveHomepage(records:{content_key:string;locale:string;version:number;payload:Record<string,unknown>;status?:string}[],locale:string){
  const select=(lang:string)=>records.filter(row=>row.content_key==='konsoliss.content'&&row.locale===lang&&(!row.status||row.status==='published')).sort((a,b)=>b.version-a.version)[0];
- const copy={...DEFAULTS};const images:Record<string,string>={};
+ const bundled=konsolissLocaleDefaults(locale);const copy={...bundled};const images:Record<string,string>={};
  for(const row of [select('en'),locale==='en'?undefined:select(locale)]){
   if(!row)continue;
   const labels=row.payload.labels;
   if(!labels||typeof labels!=='object'||Array.isArray(labels))continue;
   const reviewed=Array.isArray(row.payload.reviewed)?row.payload.reviewed:[];
-  for(const [key,value] of Object.entries(labels))if(Object.hasOwn(DEFAULTS,key)&&typeof value==='string'&&value.trim()&&JSON.stringify(placeholders(value))===JSON.stringify(placeholders(DEFAULTS[key]))&&(row.payload.v!==2||reviewed.includes(key)))copy[key]=value;
+  for(const [key,value] of Object.entries(labels))if(Object.hasOwn(DEFAULTS,key)&&typeof value==='string'&&value.trim()&&JSON.stringify(placeholders(value))===JSON.stringify(placeholders(DEFAULTS[key]))&&(row.payload.v!==2||reviewed.includes(key)))if(row.locale!=='en'||locale==='en'||bundled[key]===DEFAULTS[key])copy[key]=value;
   if(row.payload.images&&typeof row.payload.images==='object')for(const [slot,key] of Object.entries(row.payload.images))if((KONSOLISS_IMAGE_SLOTS as readonly string[]).includes(slot)&&typeof key==='string')images[slot]=key;
  }
  return {copy,images};

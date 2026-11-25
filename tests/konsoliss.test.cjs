@@ -38,3 +38,7 @@ test('publication distinguishes confirmed customer endpoint from committed-but-u
 test('Goodies preview retains one Home tab and its existing zoom controls',()=>{
  const source=get('screens/content/GoodiesConsumerPreview.tsx');assert.match(source,/key !== 'byo' && key !== 'wantiss'/);assert.match(source,/\[0\.75, 0\.85, 1, 1\.25\]/);
 });
+
+ test('Content Studio lists all 23 directly selectable fixture states and offers explicit review only',()=>{
+ const editor=get('screens/content/KonsolissEditor.tsx'),wrapper=get('screens/content/KonsolissConsumerPreviewScreen.tsx');assert.match(editor,/PREVIEW_SCENARIOS\.map\(\(item,index\)/);assert.match(editor,/previewIndex=\{previewIndex\}/);assert.match(wrapper,/previewIndex,selected,onSelect/);assert.match(editor,/I reviewed all labels in this locale/);const contract=load('src/features/admin/screens/content/konsolissPreview/cms/catalog.ts'),S=load('src/features/admin/screens/content/konsolissPreview/konsolissPreviewScenarios.ts');assert.equal(S.PREVIEW_SCENARIOS.length,23);for(const locale of contract.KONSOLISS_LOCALES){const localized=contract.konsolissLocaleDefaults(locale);assert.equal(Object.keys(localized).length,Object.keys(contract.KONSOLISS_COPY_DEFAULTS).length);assert.ok(localized['deadline.reminder']);}
+ });

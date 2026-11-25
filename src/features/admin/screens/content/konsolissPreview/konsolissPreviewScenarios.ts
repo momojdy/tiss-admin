@@ -12,6 +12,7 @@
  *  inbound    = allocated / staged for a physical container
  *  loaded     = scanned into a real physical container
  */
+import {formatCopy} from './cms/model';
 import type {KonsolissLoadProgress} from './konsolissLoadModel';
 import type {KonsolissContainerOccupancy} from './konsolissOccupancyModel';
 
@@ -209,26 +210,22 @@ const statusVolume = (n: number) => String(r3(n));
 function partialLoadStatus(s: PreviewScenario): string {
   return statusVolume(sumOf(s, 'loaded')) + ' CBM loaded • ' + statusVolume(previewUnassignedCbm(s)) + ' CBM unassigned';
 }
-export function previewLoadStatus(s: PreviewScenario, view: PreviewView | null): string {
-  if (s.data) return s.data === 'loading' ? 'Loading…' : 'Data unavailable';
-  if (s.code === 'A1') return '';
-  if (s.code === 'A2') return 'Nothing sent';
-  if (s.code === 'A3') return 'Nothing sent';
-  if (s.code === 'A4') return 'Label created';
-  if (s.code === 'A5') return 'Inbound to warehouse • ' + statusVolume(s.sent) + ' CBM';
-  if (s.code === 'B1') return statusVolume(s.warehouseVerified ?? 0) + ' CBM at warehouse • ' + statusVolume(s.purchased-s.sent) + ' CBM not sent';
-  if (s.code === 'B2') return statusVolume(s.warehouseVerified ?? 0) + ' CBM at warehouse';
-  if (s.code === 'B3') return statusVolume(sumOf(s,'outlineExtra')) + ' CBM allocated • Not loaded';
-  if (s.code === 'B4') return statusVolume(sumOf(s,'inbound')) + ' CBM inbound • ' + statusVolume(previewUnassignedCbm(s)) + ' CBM unassigned';
-  if (s.code === 'C1') return '';
-  if (s.code === 'C2') return '';
-  if (s.code === 'C3') return '';
-  if (s.code === 'C7') return 'Split into ' + s.containers.length + ' containers' + (view?.kind === 'unassigned' ? ' • ' + statusVolume(view.unassignedCbm ?? 0) + ' CBM unassigned' : '');
-  if (s.code === 'D1') return 'Preparing shipment';
-  if (s.code === 'D2') return 'Departed';
-  if (s.code === 'D3') return 'Arrived • Awaiting customs clearance';
-  if (s.code === 'D4') return 'Reservation expired';
-  if (s.code === 'D5') return 'Incident under review';
+export function previewLoadStatus(s: PreviewScenario, view: PreviewView | null, copy:Record<string,string>={}): string {
+  const l=(key:string,values:Record<string,string|number>={})=>formatCopy(copy,key,values);
+  if (s.data) return l(s.data === 'loading' ? 'load.loading' : 'load.unavailable');
+  if (s.code === 'A2'||s.code === 'A3') return l('load.nothingSent');
+  if (s.code === 'A4') return l('load.labelCreated');
+  if (s.code === 'A5') return l('load.warehouseInbound',{volume:statusVolume(s.sent)});
+  if (s.code === 'B1') return l('load.atWarehouse',{volume:statusVolume(s.warehouseVerified??0)})+' • '+l('load.notSentVolume',{volume:statusVolume(s.purchased-s.sent)});
+  if (s.code === 'B2') return l('load.atWarehouse',{volume:statusVolume(s.warehouseVerified??0)});
+  if (s.code === 'B3') return l('load.allocatedNotLoaded',{volume:statusVolume(sumOf(s,'outlineExtra'))});
+  if (s.code === 'B4') return l('load.inboundVolume',{volume:statusVolume(sumOf(s,'inbound'))})+' • '+l('load.unassignedVolume',{volume:statusVolume(previewUnassignedCbm(s))});
+  if (s.code === 'C7') return l('load.split',{count:s.containers.length})+(view?.kind==='unassigned'?' • '+l('load.unassignedVolume',{volume:statusVolume(view.unassignedCbm??0)}):'');
+  if (s.code === 'D1') return l('load.preparingShipment');
+  if (s.code === 'D2') return l('status.departed');
+  if (s.code === 'D3') return l('load.awaitingCustoms');
+  if (s.code === 'D4') return l('load.expired');
+  if (s.code === 'D5') return l('load.incident');
   return '';
 }
 

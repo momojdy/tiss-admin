@@ -9,8 +9,8 @@ import {
  * no fixture data is stored, fetched or written anywhere. Exiting restores the live hooks untouched
  * because the live hooks keep running underneath and are never mutated.
  */
-export function useKonsolissPreviewController() {
-  const [index, setIndex] = useState<number | null>(null);
+export function useKonsolissPreviewController(initialIndex?:number) {
+  const [index, setIndex] = useState<number | null>(initialIndex!==undefined&&Number.isInteger(initialIndex)&&initialIndex>=0&&initialIndex<PREVIEW_SCENARIOS.length?initialIndex:null);
   const [autoplay, setAutoplay] = useState(false);
   const [replay, setReplay] = useState(0);
   const [viewId, setViewId] = useState<string | null>(null);

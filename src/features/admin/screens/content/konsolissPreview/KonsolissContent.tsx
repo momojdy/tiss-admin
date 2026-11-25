@@ -2,7 +2,7 @@ import React,{createContext,useContext,useState} from 'react';
 import {Text,Pressable,Image,type TextProps,type ImageProps} from 'react-native';
 import {contentKeyForText} from './cms/model';
 import {KONSOLISS_COPY_DEFAULTS,type KonsolissCopy} from './cms/catalog';
-export const KonsolissContentContext=createContext<{copy:KonsolissCopy;images:Record<string,string>;enabled?:boolean;selected?:string;onSelect?:(key:string)=>void}>({copy:KONSOLISS_COPY_DEFAULTS,images:{}});
+export const KonsolissContentContext=createContext<{copy:KonsolissCopy;images:Record<string,string>;enabled?:boolean;previewIndex?:number;selected?:string;onSelect?:(key:string)=>void}>({copy:KONSOLISS_COPY_DEFAULTS,images:{}});
 
 export function Tx({contentKey,...props}:TextProps&{contentKey?:string}){
  const ctx=useContext(KonsolissContentContext);const key=contentKey??contentKeyForText(ctx.copy,props.children);

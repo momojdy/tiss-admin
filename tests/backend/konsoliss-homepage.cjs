@@ -2,7 +2,7 @@ const assert=require('node:assert/strict'),fs=require('node:fs'),path=require('n
 const {PGlite}=require('@electric-sql/pglite');
 const root=path.resolve(__dirname,'../..');
 function moduleTs(file){const m={exports:{}};vm.runInNewContext(ts.transpileModule(fs.readFileSync(path.join(root,file),'utf8'),{compilerOptions:{module:ts.ModuleKind.CommonJS}}).outputText,{module:m,exports:m.exports});return m.exports;}
-const {KONSOLISS_COPY_DEFAULTS:labels}=moduleTs('src/features/admin/screens/content/konsolissPreview/cms/catalog.ts');
+const {KONSOLISS_COPY_DEFAULTS:labels,konsolissLocaleDefaults}=moduleTs('src/features/admin/screens/content/konsolissPreview/cms/catalog.ts');
 const admin='10000000-0000-4000-8000-000000000001',editor='10000000-0000-4000-8000-000000000002',customer='10000000-0000-4000-8000-000000000003',other='10000000-0000-4000-8000-000000000004',first='20000000-0000-4000-8000-000000000001',second='20000000-0000-4000-8000-000000000002';
 (async()=>{
  const db=new PGlite();
@@ -19,7 +19,7 @@ const admin='10000000-0000-4000-8000-000000000001',editor='10000000-0000-4000-80
  create table konsoliss_customer_load_progress(user_id uuid primary key references auth.users,reserved_cbm numeric(10,3),sent_cbm numeric(10,3),loaded_cbm numeric(10,3),inbound_to_container_cbm numeric(10,3),updated_at timestamptz default clock_timestamp());
  alter table konsoliss_customer_load_progress enable row level security;grant select on konsoliss_customer_load_progress to authenticated;create policy own on konsoliss_customer_load_progress to authenticated using(user_id=auth.uid());
  alter table wantiss_cms_content enable row level security;grant select on wantiss_cms_content to anon,authenticated;create policy published on wantiss_cms_content to anon,authenticated using(status='published');`);
- for(const file of ['tests/backend/fixtures/homepage-cms-baseline.sql','tests/backend/fixtures/homepage-breakdown-baseline.sql','supabase/migrations/20261122205352_konsoliss_verified_volume_constraints.sql','supabase/migrations/20261122210202_konsoliss_occupancy_realtime_invalidation.sql','supabase/migrations/20261123050013_konsoliss_homepage_cms_and_measurements.sql','supabase/migrations/20261123052456_konsoliss_retire_homepage_hint.sql','supabase/migrations/20261125092738_konsoliss_3d_strict_container_lifecycle.sql'])await db.exec(fs.readFileSync(path.join(root,file),'utf8'));
+ for(const file of ['tests/backend/fixtures/homepage-cms-baseline.sql','tests/backend/fixtures/homepage-breakdown-baseline.sql','supabase/migrations/20261122205352_konsoliss_verified_volume_constraints.sql','supabase/migrations/20261122210202_konsoliss_occupancy_realtime_invalidation.sql','supabase/migrations/20261123050013_konsoliss_homepage_cms_and_measurements.sql','supabase/migrations/20261123052456_konsoliss_retire_homepage_hint.sql','supabase/migrations/20261125092738_konsoliss_3d_strict_container_lifecycle.sql','docs/konsoliss/konsoliss-load-cms-candidate.sql'])await db.exec(fs.readFileSync(path.join(root,file),'utf8'));
  await db.query('insert into auth.users values($1),($2),($3),($4)',[admin,editor,customer,other]);await db.query("insert into wantiss_admin_staff values($1,'super_admin','active'),($2,'editor','active')",[admin,editor]);
  const session=async user=>{await db.exec('reset role');await db.query("select set_config('request.jwt.claim.sub',$1,false)",[user]);};
  const full={v:2,labels,reviewed:Object.keys(labels),images:{}};
@@ -29,11 +29,11 @@ const admin='10000000-0000-4000-8000-000000000001',editor='10000000-0000-4000-80
  await session(admin);await assert.rejects(save('en',full,0),/changed/); // compare-and-swap prevents duplicate saves
  await db.query('select konsoliss_admin_publish_homepage($1,1)',[draft]);
  let response=await db.query("select * from wantiss_cms_published_content('en')");assert.equal(response.rows[0].payload.labels['home.brand'],labels['home.brand']);
- for(const locale of ['fr','ht','es','zh-Hans']){const translated={...full,labels:{...labels,'home.brand':'Reviewed '+locale}};const id=await save(locale,translated,0);await db.query('select konsoliss_admin_publish_homepage($1,1)',[id]);const published=(await db.query('select * from wantiss_cms_published_content($1)',[locale])).rows[0];assert.equal(published.payload.labels['home.brand'],'Reviewed '+locale);}
+ for(const locale of ['fr','ht','es','zh-Hans']){const translated={...full,labels:konsolissLocaleDefaults(locale)};const id=await save(locale,translated,0);await db.query('select konsoliss_admin_publish_homepage($1,1)',[id]);const published=(await db.query('select * from wantiss_cms_published_content($1)',[locale])).rows[0];assert.deepEqual(published.payload.labels,translated.labels);assert.equal(published.payload.labels['load.labelCreated'],translated.labels['load.labelCreated']);}
  console.log('PASS: actual CMS publish/read functions round-trip all five locales; permission and save concurrency guards');
  await assert.rejects(save('en',{...full,labels:{...labels,'home.containerTotalsHint':'Retired content'}},1),/unknown labels/);
  const unreviewed={...full,reviewed:[]};const noReview=await save('en',unreviewed,1);await assert.rejects(db.query('select konsoliss_admin_publish_homepage($1,2)',[noReview]),/review/);
- const broken={...full,labels:{...labels,'home.filled':'No placeholder'}};const bad=await save('en',broken,2);await assert.rejects(db.query('select konsoliss_admin_publish_homepage($1,3)',[bad]),/placeholders/);
+ const broken={...full,labels:{...labels,'load.split':'No placeholder'}};const bad=await save('en',broken,2);await assert.rejects(db.query('select konsoliss_admin_publish_homepage($1,3)',[bad]),/placeholders/);
  await assert.rejects(save('en',{...full,reserved_cbm:999},3),/operational fields/);
  const missingAsset=await save('en',{...full,images:{'how.1':'konsoliss.how.1.asset'}},3);await assert.rejects(db.query('select konsoliss_admin_publish_homepage($1,4)',[missingAsset]),/assets first/);
  await db.exec("insert into wantiss_cms_assets(asset_key,status,content_type) values('konsoliss.how.1.asset','published','image/png')");await db.query('select konsoliss_admin_publish_homepage($1,4)',[missingAsset]);

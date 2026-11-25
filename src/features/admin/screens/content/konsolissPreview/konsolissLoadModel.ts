@@ -1,3 +1,4 @@
+import {formatCopy} from './cms/model';
 import {parseCbm} from './konsolissNumbers';
 import {parseKonsolissOccupancy,type KonsolissContainerOccupancy} from './konsolissOccupancyModel';
 
@@ -53,12 +54,13 @@ export function parseKonsolissLoadProgress(row:unknown):KonsolissLoadProgress|nu
 }
 
 /** Absolute-time countdown; the display never grants or revokes an entitlement. */
-export function trackingCountdown(deadline:number,now:number):{seconds:number;label:string}|null{
+export function trackingCountdown(deadline:number,now:number,copy:Record<string,string>={}):{seconds:number;label:string}|null{
   if(!Number.isFinite(deadline)||!Number.isFinite(now))return null;
   const seconds=Math.max(0,Math.ceil((deadline-now)/1000));
   const d=Math.floor(seconds/86400),hours=Math.floor(seconds/3600)%24,mins=Math.floor(seconds/60)%60,secs=seconds%60;
   const pad=(n:number)=>String(n).padStart(2,'0');
-  return {seconds,label:seconds===0?'Deadline reached':(d>0?d+'d ':'')+pad(hours)+'h '+pad(mins)+'m '+pad(secs)+'s left'};
+  const values={hours:pad(hours),minutes:pad(mins),seconds:pad(secs)};
+  return {seconds,label:seconds===0?formatCopy(copy,'deadline.reached'):d>0?formatCopy(copy,'deadline.clockDays',{...values,days:formatCopy(copy,'deadline.days',{days:d})}):formatCopy(copy,'deadline.clock',values)};
 }
 
 /** Use only the selected container's verified committed and loaded quantities.
@@ -123,16 +125,16 @@ export function parseKonsolissHomeSnapshot(raw:unknown):KonsolissLoadProgressSta
 
 export function liveHomeStatus(snapshot:KonsolissHomeSnapshot|null|undefined,copy:Record<string,string>):string{
  if(!snapshot)return '';
- const fmt=(n:number)=>String(Math.round(n*1000)/1000);
+ const fmt=(n:number)=>String(Math.round(n*1000)/1000),label=(key:string,values:Record<string,string|number>={})=>formatCopy(copy,key,values);
  switch(snapshot.statusCode){
-  case 'nothing_sent':return 'Nothing sent';
-  case 'label_created':return 'Label created';
-  case 'inbound_warehouse':return 'Inbound to warehouse • '+fmt(snapshot.transitCbm)+' CBM';
-  case 'warehouse':return fmt(snapshot.warehouseCbm)+' CBM at warehouse';
-  case 'warehouse_and_transit':return fmt(snapshot.warehouseCbm)+' CBM at warehouse • '+fmt(snapshot.transitCbm)+' CBM inbound to warehouse';
-  case 'preparing':return copy['status.preparing']||'Preparing shipment';
-  case 'incident_review':return 'Incident under review';
-  case 'expired':return 'Reservation expired';
+  case 'nothing_sent':return label('load.nothingSent');
+  case 'label_created':return label('load.labelCreated');
+  case 'inbound_warehouse':return label('load.warehouseInbound',{volume:fmt(snapshot.transitCbm)});
+  case 'warehouse':return label('load.atWarehouse',{volume:fmt(snapshot.warehouseCbm)});
+  case 'warehouse_and_transit':return label('load.atWarehouse',{volume:fmt(snapshot.warehouseCbm)})+' • '+label('load.inboundWarehousePart',{volume:fmt(snapshot.transitCbm)});
+  case 'preparing':return copy['status.preparing']||label('load.preparingShipment');
+  case 'incident_review':return label('load.incident');
+  case 'expired':return label('load.expired');
   default:return '';
  }
 }
