@@ -6,6 +6,9 @@ import {OutlineBtn,Pill} from '../../ui/Controls';
 import {Txt} from '../../ui/Txt';
 
 type Quote={id:string;status:string;created_at:string;route_code:string;country:string;region:string;shipping_mode:string;delivery:string;physical_cbm:number|null;container_count:number|null;goods_category:string;goods_description:string|null;declared_value_usd:number|null;estimated_weight_kg:number|null;base_freight_cents:number|null;weight_surcharge_cents:number|null;requested_total_cents:number|null;approved_total_cents:number|null;approved_scope:any;quote_version:number;address:string|null;review_note:string|null;customer_id:string};
+type CargoPiece={id:string;order_id:string;customer_id:string;piece_reference:string;description:string|null;declared_category:string|null;declared_value_usd:number|null;declared_cbm:number;measured_cbm:number|null;measured_kg:number|null;received_at:string|null;receipt_identity:string|null};
+type PieceCarrier={piece_id:string;order_id:string;tracking_number:string;status:string;first_carrier_scan_at:string|null;carrier_evidence:string|null};
+type DeliveryCommitment={piece_id:string;basis:string;original_due_at:string|null};
 type ServiceRequest={id:string;order_id:string;customer_id:string;request_kind:string;description:string;status:string;decision_note:string|null;created_at:string};
 type Route={code:string;country:string;region:string;shipping_mode:string;delivery:string;requests_enabled:boolean;service_verified:boolean;checkout_enabled:boolean;price_published:boolean;rate_version:number};
 const field={borderWidth:1,borderColor:'#D5C8A5',backgroundColor:'#FFF9DF',borderRadius:6,padding:9,fontSize:12,color:'#2B1210',marginVertical:5} as const;
@@ -17,16 +20,22 @@ export function KonsolissBookingOperations(){
  const [included,setIncluded]=useState(''),[excluded,setExcluded]=useState(''),[customs,setCustoms]=useState(''),[cargo,setCargo]=useState(''),[delivery,setDelivery]=useState(''),[profit,setProfit]=useState('');
  const [newCountry,setNewCountry]=useState(''),[newRegion,setNewRegion]=useState('OTHER'),[newMode,setNewMode]=useState<'LCL'|'FCL'>('LCL'),[newDelivery,setNewDelivery]=useState<'pickup'|'door'>('pickup');
  const [scopeConfirmed,setScopeConfirmed]=useState(false);
+ const [cargoPieces,setCargoPieces]=useState<CargoPiece[]>([]),[carriers,setCarriers]=useState<PieceCarrier[]>([]),[commitments,setCommitments]=useState<DeliveryCommitment[]>([]);
+ const [selectedPiece,setSelectedPiece]=useState<string|null>(null),[carrierScanAt,setCarrierScanAt]=useState(''),[carrierEvidence,setCarrierEvidence]=useState('');
+ const [receiptRef,setReceiptRef]=useState(''),[receiptVolume,setReceiptVolume]=useState(''),[receiptWeight,setReceiptWeight]=useState('');
  const [requests,setRequests]=useState<ServiceRequest[]>([]),[chosenRequest,setChosenRequest]=useState<string|null>(null),[requestNote,setRequestNote]=useState('');
  const chosen=quotes.find(q=>q.id===selected);
  const refresh=useCallback(async()=>{
-  const [q,r,s]=await Promise.all([
+  const [q,r,s,p,t,d]=await Promise.all([
    supabase.from('konsoliss_booking_quotes').select('id,status,created_at,route_code,country,region,shipping_mode,delivery,physical_cbm,container_count,goods_category,goods_description,declared_value_usd,estimated_weight_kg,base_freight_cents,weight_surcharge_cents,requested_total_cents,approved_total_cents,approved_scope,quote_version,address,review_note,customer_id').order('created_at',{ascending:false}).limit(100),
    supabase.from('konsoliss_booking_routes').select('*').order('code'),
-   supabase.from('konsoliss_customer_service_requests').select('id,order_id,customer_id,request_kind,description,status,decision_note,created_at').order('created_at',{ascending:false}).limit(100)
+   supabase.from('konsoliss_customer_service_requests').select('id,order_id,customer_id,request_kind,description,status,decision_note,created_at').order('created_at',{ascending:false}).limit(100),
+   supabase.from('konsoliss_consignment_pieces').select('id,order_id,customer_id,piece_reference,description,declared_category,declared_value_usd,declared_cbm,measured_cbm,measured_kg,received_at,receipt_identity').order('created_at',{ascending:false}).limit(100),
+   supabase.from('konsoliss_piece_carrier_records').select('piece_id,order_id,tracking_number,status,first_carrier_scan_at,carrier_evidence').limit(100),
+   supabase.from('konsoliss_lot_delivery_commitments').select('piece_id,basis,original_due_at').limit(100)
   ]);
-  if(q.error||r.error||s.error)setError('Could not load bookings, requests or route policy. Check Super Admin access.');
-  else{setQuotes(q.data as Quote[]);setRoutes(r.data as Route[]);setRequests((s.data||[]) as ServiceRequest[]);setError('')}
+  if(q.error||r.error||s.error||p.error||t.error||d.error)setError('Could not load booked goods, requests or route policy. Check Super Admin access.');
+  else{setQuotes(q.data as Quote[]);setRoutes(r.data as Route[]);setRequests((s.data||[]) as ServiceRequest[]);setCargoPieces((p.data||[]) as CargoPiece[]);setCarriers((t.data||[]) as PieceCarrier[]);setCommitments((d.data||[]) as DeliveryCommitment[]);setError('')}
  },[]);
  useEffect(()=>{void refresh()},[refresh]);
  const act=async(kind:'review'|'info'|'reject'|'approve'|'expire')=>{
@@ -61,6 +70,31 @@ export function KonsolissBookingOperations(){
    p_request_id:chosenRequest,p_action:action,p_note:requestNote.trim()
   });
   if(e)setError(e.message);else{setNotice('Service request review recorded. No refund or carrier return has been executed.');setChosenRequest(null);setRequestNote('');await refresh()}
+  setBusy(false);
+ };
+ const verifyCarrierPiece=async()=>{
+  if(busy||!selectedPiece||carrierEvidence.trim().length<10||!carrierScanAt.trim()){
+   setError('Select a piece and provide documented carrier scan time and evidence.');return;
+  }
+  const ms=Date.parse(carrierScanAt);if(!Number.isFinite(ms)||ms>Date.now()+60000){setError('Enter a valid scan date/time not in the future.');return}
+  setBusy(true);setError('');setNotice('');
+  const {error:e}=await supabase.rpc('konsoliss_admin_verify_piece_tracking',{
+   p_piece_id:selectedPiece,p_first_scan_at:new Date(ms).toISOString(),p_evidence:carrierEvidence.trim()
+  });
+  if(e)setError(e.message);else{setNotice('Real carrier first scan recorded, not a vessel departure or warehouse receipt.');setCarrierEvidence('');await refresh()}
+  setBusy(false);
+ };
+ const receiveCargoPiece=async()=>{
+  if(busy||!selectedPiece||receiptRef.trim().length<10||!Number.isFinite(Number(receiptVolume))||
+    Number(receiptVolume)<=0||!Number.isFinite(Number(receiptWeight))||Number(receiptWeight)<=0){
+   setError('A real scan reference, measured CBM and gross kilograms are required.');return;
+  }
+  setBusy(true);setError('');setNotice('');
+  const {error:e}=await supabase.rpc('konsoliss_admin_receive_piece',{
+   p_piece_id:selectedPiece,p_receipt_reference:receiptRef.trim(),p_measured_cbm:Number(receiptVolume),
+   p_measured_kg:Number(receiptWeight),p_receipt_at:new Date().toISOString()
+  });
+  if(e)setError(e.message);else{setNotice('Warehouse receipt recorded; cargo is NOT customs-cleared or physically loaded.');setReceiptRef('');setReceiptVolume('');setReceiptWeight('');await refresh()}
   setBusy(false);
  };
  const createRoute=async()=>{
@@ -125,6 +159,31 @@ export function KonsolissBookingOperations(){
     <OutlineBtn onPress={()=>setSelected(null)}>Close</OutlineBtn>
    </View>
   </Section>:null}
+  <Section title="China warehouse · declared pieces and carrier evidence">
+   <Txt size={11} mut>Read-only until a staff member verifies the evidence. A customer tracking label is not carrier acceptance. Receipt requires a real, unique physical scan and measured dimensions; it does not approve customs or create loaded cargo.</Txt>
+   {cargoPieces.length===0?<Txt size={11} mut>No verified paid-booking piece declarations yet.</Txt>:null}
+   {cargoPieces.map(p=><View key={p.id} style={{paddingVertical:7,borderBottomWidth:.5,borderColor:'#D5C8A5'}}>
+     <Txt size={12} weight={600}>{p.piece_reference} · {p.declared_category||'unknown'} · {p.declared_cbm} CBM</Txt>
+     <Txt size={10} mut>Booking {p.order_id.slice(0,8)} · Customer {p.customer_id.slice(0,8)} · {p.description||'No description'}</Txt>
+     <Txt size={11}>{p.received_at?'Received '+p.received_at:'Not physically received'} · {p.received_at?(p.measured_cbm+' CBM / '+p.measured_kg+' kg'):'Awaiting measured receipt'}</Txt>
+     {carriers.find(c=>c.piece_id===p.id)?<Txt size={11} mut>Carrier: {carriers.find(c=>c.piece_id===p.id)?.tracking_number} · {carriers.find(c=>c.piece_id===p.id)?.status}</Txt>:null}
+     {commitments.find(c=>c.piece_id===p.id)?<Txt size={11} mut>Delivery: {commitments.find(c=>c.piece_id===p.id)?.basis} · {commitments.find(c=>c.piece_id===p.id)?.original_due_at||'Service-specific terms only'}</Txt>:null}
+     <OutlineBtn disabled={busy} onPress={()=>{setSelectedPiece(p.id);setCarrierScanAt('');setCarrierEvidence('');setReceiptRef('');setReceiptVolume('');setReceiptWeight('')}}>{selectedPiece===p.id?'Selected piece':'Select piece for verified operation'}</OutlineBtn>
+   </View>)}
+   {selectedPiece?<Card>
+     <Txt size={12} weight={600}>Carrier acceptance · real evidence only</Txt>
+     <Txt size={10} mut>ISO date/time of the first carrier acceptance scan (UTC or with timezone), and a documented carrier proof reference.</Txt>
+     <TextInput style={field} value={carrierScanAt} onChangeText={setCarrierScanAt} placeholder="2026-11-25T13:30:00+08:00"/>
+     <TextInput multiline style={[field,{minHeight:50}]} value={carrierEvidence} onChangeText={setCarrierEvidence} placeholder="Carrier scan source / signed consignment reference"/>
+     <OutlineBtn disabled={busy||!carrierScanAt||carrierEvidence.trim().length<10} onPress={()=>{void verifyCarrierPiece()}}>Verify carrier acceptance</OutlineBtn>
+     <Txt size={12} weight={600}>China warehouse physical receipt</Txt>
+     <TextInput style={field} value={receiptRef} onChangeText={setReceiptRef} placeholder="Unique warehouse intake / scan receipt reference"/>
+     <TextInput style={field} keyboardType="decimal-pad" value={receiptVolume} onChangeText={setReceiptVolume} placeholder="Measured CBM"/>
+     <TextInput style={field} keyboardType="decimal-pad" value={receiptWeight} onChangeText={setReceiptWeight} placeholder="Gross kg"/>
+     <OutlineBtn disabled={busy||receiptRef.trim().length<10||!receiptVolume||!receiptWeight} onPress={()=>{void receiveCargoPiece()}}>Record verified warehouse receipt</OutlineBtn>
+     <OutlineBtn onPress={()=>setSelectedPiece(null)}>Close intake</OutlineBtn>
+   </Card>:null}
+  </Section>
   <Section title="Customer refund, return and alternative-service requests">
    <Txt size={11} mut>Requests are submitted from authenticated customer bookings. Approval authorizes manual operational review only; it does not move money, return cargo or override safety and customs checks.</Txt>
    {requests.length===0?<Txt size={11} mut>No service requests recorded.</Txt>:null}
