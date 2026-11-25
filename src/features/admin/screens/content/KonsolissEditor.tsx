@@ -10,6 +10,7 @@ import {OutlineBtn} from '../../ui/Controls';
 import {Txt} from '../../ui/Txt';
 import {PhoneFrame} from './PhoneFrame';
 import KonsolissConsumerPreviewScreen from './KonsolissConsumerPreviewScreen';
+import KonsolissBookingCopyEditor from './KonsolissBookingCopyEditor';
 import {KONSOLISS_COPY_DEFAULTS as DEFAULTS,KONSOLISS_LOCALES,KONSOLISS_IMAGE_SLOTS,type KonsolissLocale} from './konsolissPreview/cms/catalog';
 import {publicationErrors,placeholders,type HomepagePayload} from './konsolissPreview/cms/model';
 import type {Scenario} from './konsolissPreview/previewData';
@@ -101,5 +102,6 @@ export function KonsolissEditor({canEdit,canPublish}:{canEdit:boolean;canPublish
    <Txt size={12} weight={600} style={{marginTop:14}}>Editable images</Txt>{KONSOLISS_IMAGE_SLOTS.map(slot=><OutlineBtn key={slot} onPress={()=>choose('image:'+slot)}>{slot}</OutlineBtn>)}
    <Txt size={10} mut>The container camera, geometry, carton colors, capacity and customer measurements are protected from CMS editing.</Txt>
   </Section>:null}
+  <KonsolissBookingCopyEditor canEdit={canEdit} canPublish={canPublish}/>
  </View>;
 }
