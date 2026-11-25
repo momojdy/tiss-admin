@@ -1,7 +1,7 @@
 {
   "generator": "sync-konsoliss-preview.cjs",
   "sources": {
-    "konsolissHomeScreen.tsx": "54fe720b3db58ac8243d77c8cabf8451291c60840570849c0e1e7ed8a9c2332c",
+    "konsolissHomeScreen.tsx": "dcd94261f89fa7911f8d3b06c004ee5187fe6d917d6ac6cf2605ce30a3c61060",
     "assets/how-it-works/step1.png": "9ab2509813ab6adf290805734eb6c75b972c01a4ebfab44a780e409a8274b28d",
     "assets/how-it-works/step2.png": "fca6862902a05b85f26a0f1989dc72768cc3c731a3fc323d32d73cb8fc0c563f",
     "assets/how-it-works/step3.png": "cc53f84b9e50f98ac49efc8d6f6b1c4f2be3ff1f3269e18cbce316ba904311be",
@@ -23,7 +23,7 @@
     "KonsolissQuickMenuView.tsx": "207f82bc030bbe49752d52453e2ce694bb19cb272e33dbc6e4b06ce3a4b2a675"
   },
   "generated": {
-    "konsolissHomeScreen.tsx": "215b89824c9e4db16f877893288a0d2ccd286a997b1969adf02b6d94969ac064",
+    "konsolissHomeScreen.tsx": "875878ace0e17c2bd9d7b74ee80159f2bbea1c09e8975fcc63fdff2d9db3e548",
     "KonsolissContent.tsx": "d62cbc82df911c35dc4e01be9c6811c4e11734a5ddb867c7b62dd6ca4a884df3",
     "cms/catalog.ts": "29e2a768f6709a6b1e1443a1bc8e79204d57fdd879ff8c3110b053a5cbd67da8",
     "cms/model.ts": "d3c12e034dc9721930dc78b7a2905cf52e0a634fb43a38e754a67fbd3e164292",
