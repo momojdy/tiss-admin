@@ -130,6 +130,8 @@ export const DEFAULT_COPY:Record<string,string>={
   "Satellite map · sample pins": "Satellite map · sample pins",
   "Clear": "Clear",
   "Draw": "Draw",
+  "Move map": "Move map",
+  "Undo": "Undo",
   "Apply": "Apply",
   "Trace or tap the boundary": "Trace or tap the boundary",
   "The map could not convert this boundary. Try again.": "The map could not convert this boundary. Try again.",
