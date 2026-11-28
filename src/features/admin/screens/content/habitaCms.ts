@@ -52,6 +52,8 @@ export const DEFAULT_COPY:Record<string,string>={
   "Explore remotely · sample tour entry points": "Explore remotely · sample tour entry points",
   "View all": "View all",
   "List your property": "List your property",
+  "Give your property the visibility it deserves. Reach local and international buyers and renters, wherever they are.": "Give your property the visibility it deserves. Reach local and international buyers and renters, wherever they are.",
+  "List now": "List now",
   "Listings are provided by owners and agents; this doesn't certify title.": "Listings are provided by owners and agents; this doesn't certify title.",
   "Explore": "Explore",
   "Saved": "Saved",
