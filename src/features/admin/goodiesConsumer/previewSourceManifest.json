@@ -15,7 +15,7 @@
       "origins": [
         {
           "file": "src/features/Goodies/GoodiesQuickMenu.tsx",
-          "sha256": "5f776bd3bffa59c72b5d1d472d66b11f7024f8150d26cd3c437cce571752c18c"
+          "sha256": "14999042acf32bd9357d1f8877a0c139f1f6e9fd9c5df5f05aad9da828248f66"
         }
       ]
     },
@@ -410,8 +410,8 @@
       "target": "previewMenu.tsx",
       "origins": [
         {
-          "file": "src/features/gatherz/GatherzQuickMenu.tsx",
-          "sha256": "a8355e2ed2b826a9e3711d7539991d9326acdc70e2badd626c7b57409bb70eda"
+          "file": "src/shared/quickMenu/ThinMenuIcon.tsx",
+          "sha256": "36f88ba0c174e9794b2ee4704b83026af0ed31f4c4a504b23b286cc82f2f603b"
         }
       ]
     },

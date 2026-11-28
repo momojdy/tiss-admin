@@ -235,3 +235,20 @@ test('Shared Bill preview fixtures can read their own sample status but every fu
  const status=await previewBackend.rpc('help_pay_status',{p_request_id:previewSharedBillId});assert.equal(status.data.id,previewSharedBillId);assert.equal(status.data.service,'goodies');
  for(const name of ['help_pay_create_request','help_pay_create_for_account','help_pay_contribute_wallet','help_pay_contribute_for_account','help_pay_cancel_request','help_pay_admin_retry_refund','help_pay_set_wallet_enabled','help_pay_share_to_friend','place_goodies_order_with_payment_once']){const result=await previewBackend.rpc(name,{});assert.equal(result.data,null);assert.equal(result.error.code,'PREVIEW_ONLY');assert.equal(previewRequests.at(-1).blocked,true);}
 });
+
+test('quick-menu preview uses an isolated unread hook and retry without live inbox access',()=>{
+ const source=fs.readFileSync(path.join(root,'GoodiesQuickMenu.tsx'),'utf8');
+ assert.match(source,/from '\.\/previewUnread'/);assert.doesNotMatch(source,/shared\/inbox|useUnreadSummary.*from.*supabase/);
+ const code=ts.transpileModule(fs.readFileSync(path.join(root,'previewUnread.ts'),'utf8'),{compilerOptions:{module:ts.ModuleKind.CommonJS}}).outputText;
+ for(const scenario of ['loading','error','ready']){
+  let retried=false;const module={exports:{}};
+  vm.runInNewContext(code,{module,exports:module.exports,require:id=>{
+   if(id==='react')return{useState:()=>[retried,value=>{retried=value;}],useEffect(){}};
+   if(id==='./previewNative')return{usePreviewScenario:()=>scenario};
+   throw Error('Preview must not import live dependency '+id);
+  }});
+  let value=module.exports.useUnreadSummary();assert.equal(value.notifications,0);assert.equal(value.messages,0);
+  assert.equal(value.status,scenario==='error'?'unavailable':scenario==='loading'?'loading':'ready');
+  if(scenario==='error'){value.retry();assert.equal(module.exports.useUnreadSummary().status,'ready');}
+ }
+});
