@@ -1,0 +1,26 @@
+name: Habita admin validation
+on:
+  push:
+    branches: [habita/homepage-cms-v17]
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  validation:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+      - run: npm ci
+      - name: Application TypeScript check
+        run: npm run typecheck
+      - name: Existing CMS and access regressions
+        run: npm run test:goodies-cms
+      - name: Android export
+        run: npx expo export --platform android --output-dir dist/android
+      - name: iOS export
+        run: npx expo export --platform ios --output-dir dist/ios
