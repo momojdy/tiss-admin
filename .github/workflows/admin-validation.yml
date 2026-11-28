@@ -41,6 +41,10 @@ jobs:
         run: npm run typecheck
       - name: Goodies permissions, CMS and settlement tests
         run: npm run test:goodies
+      - name: Bundle Android application
+        run: npx expo export --platform android --output-dir dist/android
+      - name: Bundle iOS application
+        run: npx expo export --platform ios --output-dir dist/ios
       - name: Verify Konsoliss preview source synchronization
         env:
           KONSOLISS_ADMIN_ROOT: ${{ github.workspace }}/tiss-admin
@@ -51,7 +55,3 @@ jobs:
         run: npm run test:konsoliss
       - name: Konsoliss isolated CMS and measurement integration
         run: npm run test:konsoliss:backend
-      - name: Bundle Android application
-        run: npx expo export --platform android --output-dir dist/android
-      - name: Bundle iOS application
-        run: npx expo export --platform ios --output-dir dist/ios
