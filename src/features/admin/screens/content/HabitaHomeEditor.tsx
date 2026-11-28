@@ -1,0 +1,33 @@
+import {useCallback,useEffect,useRef,useState} from 'react';
+import {Alert,TextInput,View} from 'react-native';
+import {supabase} from '../../lib/supabase';
+import {saveCmsVersion,publishCmsVersion,listCmsAssets} from '../../lib/adminBackend';
+import {useTheme} from '../../theme/ThemeContext';
+import {Card,Section} from '../../ui/Card';
+import {OutlineBtn,SelectMenu} from '../../ui/Controls';
+import {Txt} from '../../ui/Txt';
+import {HABITA_HOME_KEY,HABITA_LOCALES,DEFAULT_COPY,IMAGE_SLOTS,emptyHome,mergeHome,validateHome,type HomePayload} from './habitaCms';
+
+type Row={id:string;version:number;status:'draft'|'published'|'archived';payload:Record<string,unknown>};
+type Asset={asset_key:string;status:string;content_type:string};
+export function HabitaHomeEditor({canEdit,canPublish}:{canEdit:boolean;canPublish:boolean}){
+ const {c}=useTheme();
+ const [locale,setLocale]=useState<string>('en'),[draft,setDraft]=useState<HomePayload>(emptyHome),[published,setPublished]=useState<Row|null>(null),[row,setRow]=useState<Row|null>(null),[baseline,setBaseline]=useState(''),[busy,setBusy]=useState(''),[error,setError]=useState(''),[notice,setNotice]=useState(''),[assets,setAssets]=useState<Asset[]>([]),[view,setView]=useState<'Edit'|'Draft copy preview'|'Published copy preview'>('Edit');
+ const request=useRef(0),dirty=JSON.stringify(draft)!==baseline;
+ const load=useCallback(async(lang:string)=>{
+  const ticket=++request.current;setBusy('load');setError('');setNotice('');
+  try{const [result,media]=await Promise.all([supabase.from('wantiss_cms_content').select('id,version,status,payload').eq('content_key',HABITA_HOME_KEY).eq('locale',lang).in('status',['draft','published']).order('version',{ascending:false}).limit(100),listCmsAssets()]);
+   if(result.error)throw result.error;if(ticket!==request.current)return;const rows=(result.data??[]) as Row[];const next=mergeHome(rows[0]?.payload);setDraft(next);setBaseline(JSON.stringify(next));setRow(rows[0]??null);setPublished(rows.find(x=>x.status==='published')??null);setAssets((Array.isArray(media)?media:[]).filter((a:Asset)=>a.status==='published'&&a.asset_key.startsWith('habita.home.')&&a.content_type.startsWith('image/')));setView('Edit');
+  }catch(e){if(ticket===request.current)setError(e instanceof Error?e.message:'Habita content could not be loaded.');}finally{if(ticket===request.current)setBusy('');}
+ },[]);
+ useEffect(()=>{void load(locale);return()=>{request.current++}},[locale,load]);
+ const changeLocale=(next:string)=>{if(busy||next===locale)return;if(dirty)Alert.alert('Unsaved changes','Discard unsaved edits and switch locale?',[{text:'Cancel',style:'cancel'},{text:'Discard',onPress:()=>setLocale(next)}]);else setLocale(next)};
+ const save=async()=>{if(!canEdit||busy)return;const errors=validateHome(draft);if(errors.length){setError(errors.join('; '));return;}setBusy('save');setError('');try{const id=await saveCmsVersion({key:HABITA_HOME_KEY,locale,payload:draft,status:'draft'});await load(locale);setNotice('Private draft saved: '+id);}catch(e){setError(e instanceof Error?e.message:'Draft could not be saved.');}finally{setBusy('')}};
+ const publish=async()=>{if(!canPublish||busy||dirty||row?.status!=='draft')return;const errors=validateHome(row.payload);if(errors.length){setError(errors.join('; '));return;}if(Object.values(draft.images).some(key=>!assets.some(a=>a.asset_key===key))){setError('All selected images must be published first.');return;}setBusy('publish');setError('');try{await publishCmsVersion(row.id);await load(locale);setNotice('Published Habita homepage content. Consumer reads it on next entry.');}catch(e){setError(e instanceof Error?e.message:'Publication failed.');}finally{setBusy('')}};
+ const preview=view==='Published copy preview'?mergeHome(published?.payload):draft;
+ const field={borderWidth:.5,borderColor:c.bd,borderRadius:8,padding:10,color:c.ink,backgroundColor:c.card,fontSize:12,marginTop:5} as const;
+ return <View>
+  <Section title="Habita · Homepage content"><Card><Txt size={12}>Homepage only. Use the existing Wantiss language settings and CMS publication pipeline. Property facts, asking prices and search results are not editable CMS copy.</Txt><SelectMenu label="Language" options={HABITA_LOCALES} value={locale as typeof HABITA_LOCALES[number]} onChange={changeLocale}/><SelectMenu label="Mode" options={['Edit','Draft copy preview','Published copy preview'] as const} value={view} onChange={setView}/><Txt size={11}>Latest: {row?row.status+' v'+row.version:'No saved version'} · Published: {published?'v'+published.version:'None'}</Txt><View style={{flexDirection:'row',flexWrap:'wrap',gap:8,marginTop:10}}><OutlineBtn disabled={!!busy} onPress={()=>{if(dirty)Alert.alert('Discard unsaved changes?','Refresh from saved content.',[{text:'Cancel',style:'cancel'},{text:'Refresh',onPress:()=>void load(locale)}]);else void load(locale)}}>Refresh</OutlineBtn><OutlineBtn disabled={!canEdit||!!busy} onPress={()=>void save()}>Save private draft</OutlineBtn><OutlineBtn disabled={!canPublish||!!busy||dirty||row?.status!=='draft'} onPress={()=>Alert.alert('Publish Habita homepage?','This replaces the current published content for '+locale+'.',[{text:'Cancel',style:'cancel'},{text:'Publish',onPress:()=>void publish()}])}>Publish saved draft</OutlineBtn></View>{busy?<Txt size={11}>Working: {busy}</Txt>:null}{error?<Txt size={12} color={c.or}>{error}</Txt>:null}{notice?<Txt size={12}>{notice}</Txt>:null}</Card></Section>
+  {view==='Edit'?<><Section title="Editable homepage labels">{Object.keys(DEFAULT_COPY).map(key=><Card key={key}><Txt size={11}>{key}</Txt><TextInput accessibilityLabel={key} editable={canEdit&&!busy} value={draft.copy[key]} multiline={key.length>50} style={field} onChangeText={v=>setDraft(x=>({...x,copy:{...x.copy,[key]:v}}))}/></Card>)}</Section><Section title="Category and location images">{IMAGE_SLOTS.map(slot=><Card key={slot}><SelectMenu label={slot} value={draft.images[slot]??'Bundled V17 image'} options={['Bundled V17 image',...assets.map(a=>a.asset_key),...(draft.images[slot]&&!assets.some(a=>a.asset_key===draft.images[slot])?[draft.images[slot]]:[])]} onChange={key=>{if(!canEdit||busy)return;setDraft(x=>{const images={...x.images};if(key==='Bundled V17 image')delete images[slot];else images[slot]=key;return {...x,images}})}}/></Card>)}</Section></>:<Section title={view}><Card><Txt size={11}>Copy preview only — full native screen and image parity must be validated against the consumer build.</Txt>{Object.keys(DEFAULT_COPY).map(key=><View key={key} style={{paddingVertical:7,borderBottomWidth:.5,borderBottomColor:c.bd}}><Txt size={10}>{key}</Txt><Txt size={13}>{preview.copy[key]}</Txt></View>)}</Card></Section>}
+ </View>;
+}

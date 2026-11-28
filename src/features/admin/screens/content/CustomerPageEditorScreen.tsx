@@ -20,6 +20,7 @@ import { GoodiesEditor } from './GoodiesEditor';
 const KonsolissEditor = lazy(() => import('./KonsolissEditor').then(m => ({default:m.KonsolissEditor})));
 import { AuthPageEditor } from './AuthPageEditor';
 import { HomePageEditor } from './HomePageEditor';
+import { HabitaHomeEditor } from './HabitaHomeEditor';
 
 type ContentRow = {
   id: string;
@@ -105,16 +106,16 @@ export function CustomerPageEditorScreen() {
       if (requested === 'auth' || requested === 'authentication') {
         setPageGroup('Main');
         setPageChoice('Authentication pages');
-      } else if (requested === 'goodies' || requested === 'konsoliss') {
+      } else if (requested === 'goodies' || requested === 'konsoliss' || requested === 'habita') {
         setPageGroup('Services');
-        setPageChoice(requested === 'goodies' ? 'Goodies' : 'Konsoliss');
+        setPageChoice(requested === 'goodies' ? 'Goodies' : requested === 'habita' ? 'Habita' : 'Konsoliss');
       } else if (requested === 'wantiss home') {
         setPageGroup('Main');
         setPageChoice('Home page');
       }
     }
     if (!requestedFeature) return;
-    if (requested === 'auth' || requested === 'authentication' || requested === 'konsoliss') {
+    if (requested === 'auth' || requested === 'authentication' || requested === 'konsoliss' || requested === 'habita') {
       delete ui.editorFeature;
       return;
     }
@@ -328,6 +329,7 @@ export function CustomerPageEditorScreen() {
   };
 
   const homeEditor = pageGroup === 'Main' && pageChoice === 'Home page';
+  const habitaEditor = pageGroup === 'Services' && pageChoice === 'Habita';
   const fieldStyle = { borderWidth: 1, borderColor: c.bd, borderRadius: 10, paddingHorizontal: 9, paddingVertical: 8, marginTop: 5, marginBottom: 8, color: c.ink, backgroundColor: c.card, fontSize: 11 } as const;
 
   return (
@@ -367,7 +369,7 @@ export function CustomerPageEditorScreen() {
           label="Page"
           options={pageGroup === 'Main'
             ? ['Authentication pages', 'Home page', 'Settings', 'Me', 'Wallet', 'Orders', 'Addresses', 'Notifications']
-            : ['Goodies', 'Stayz', 'Flyz', 'Konsoliss', 'Woulib', 'Frenzies']}
+            : ['Goodies', 'Stayz', 'Flyz', 'Konsoliss', 'Woulib', 'Frenzies', 'Habita']}
           value={pageChoice}
           onChange={(label) => {
             setPageChoice(label);
@@ -385,7 +387,7 @@ export function CustomerPageEditorScreen() {
             };
             const key = keyByLabel[label] || label.toLowerCase();
             setPageKey(key);
-            if (label !== 'Authentication pages' && label !== 'Goodies' && label !== 'Konsoliss') {
+            if (label !== 'Authentication pages' && label !== 'Goodies' && label !== 'Konsoliss' && label !== 'Habita') {
               const exists = Boolean((previewPayload?.pages || {})[key]);
               if (!exists) {
                 ui.editorFeature = key;
@@ -405,8 +407,9 @@ export function CustomerPageEditorScreen() {
       {actualKonsolissPreview ? <Suspense fallback={<Card><Txt size={11}>Loading Konsoliss editor…</Txt></Card>}><KonsolissEditor canEdit={can(...REQ.content)} canPublish={can(...REQ.publish)} /></Suspense> : null}
       {actualAuthEditor ? <AuthPageEditor canEdit={can(...REQ.content)} canPublish={can(...REQ.publish)} /> : null}
       {homeEditor ? <HomePageEditor canEdit={can(...REQ.content)} canPublish={can(...REQ.publish)} /> : null}
+      {habitaEditor ? <HabitaHomeEditor canEdit={can(...REQ.content)} canPublish={can(...REQ.publish)} /> : null}
 
-      {!actualGoodiesPreview && !actualKonsolissPreview && !actualAuthEditor && !homeEditor ? (
+      {!actualGoodiesPreview && !actualKonsolissPreview && !actualAuthEditor && !homeEditor && !habitaEditor ? (
       <Section title="Live customer phone preview" right={<View style={{ flexDirection: 'row', flexWrap: 'wrap', gap: 5 }}>
         <View style={{ width: 172 }}>
           <SelectMenu
@@ -448,7 +451,7 @@ export function CustomerPageEditorScreen() {
       </Section>
       ) : null}
 
-      {!actualGoodiesPreview && !actualKonsolissPreview && !actualAuthEditor && !homeEditor && selected && viewMode === 'Draft' && editorMode === 'Edit' ? (
+      {!actualGoodiesPreview && !actualKonsolissPreview && !actualAuthEditor && !homeEditor && !habitaEditor && selected && viewMode === 'Draft' && editorMode === 'Edit' ? (
         <>
           <Section title="Page and element structure">
             {pageKeys.length ? (

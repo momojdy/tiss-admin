@@ -26,7 +26,7 @@ type ContentRow = {
   id: string; content_key: string; locale: string; version: number; status: 'draft' | 'published' | 'archived';
   payload: Record<string, unknown>; updated_at: string;
 };
-const customerFeatures = ['Goodies', 'Stayz', 'Flyz', 'Konsoliss', 'Woulib', 'Frenzies'] as const;
+const customerFeatures = ['Goodies', 'Stayz', 'Flyz', 'Konsoliss', 'Woulib', 'Frenzies', 'Habita'] as const;
 const editorPagesByGroup: Record<string, string[]> = {
   Main: ['Authentication pages', 'Home page', 'Settings', 'Me', 'Wallet', 'Orders', 'Addresses', 'Notifications'],
   Services: [...customerFeatures],
