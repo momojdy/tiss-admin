@@ -1990,13 +1990,6 @@
     ]
   },
   {
-    "id": "lbl.catalogLoading",
-    "text": "Loading stores…",
-    "pages": [
-      "Home"
-    ]
-  },
-  {
     "id": "lbl.catalogRetryHint",
     "text": "Check your connection and try again.",
     "pages": [

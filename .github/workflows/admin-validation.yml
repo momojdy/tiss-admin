@@ -21,7 +21,7 @@ jobs:
         uses: actions/checkout@v4
         with:
           repository: momojdy/tiss_tiss_beta
-          ref: c035799823d64b2a5e09a569aba79feb32356aa2
+          ref: 5d70f5173236f0e0638d669f7bbbf61b48b8a69d
           path: tiss_tiss_beta
           persist-credentials: false
       - name: Checkout current Konsoliss consumer source

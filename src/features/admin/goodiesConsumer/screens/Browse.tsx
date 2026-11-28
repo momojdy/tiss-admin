@@ -152,7 +152,6 @@ export function Home({onExit}: {onExit?: () => void}) {
         </Pressable>
       </View>
       </View>
-      {S.catalogLoading ? <View style={{paddingHorizontal:16,paddingVertical:12}}><View style={{height:72,borderRadius:14,backgroundColor:th.soft}} /><T cmsKey={'lbl.catalogLoading'} color={th.mut}>{label('lbl.catalogLoading', 'Loading stores…')}</T></View> : null}
       {contentStatus==='error' && !hasContent() ? <Empty title={label('lbl.contentLoadFailed','Goodies content is temporarily unavailable')} text={label('lbl.contentRetryHint','Check your connection and try again.')} button={label('lbl.retry','Try again')} onPress={()=>void loadContent()} /> : null}
       {S.catalogError ? <Empty title={label('lbl.catalogFailed', 'Could not load stores')} text={label('lbl.catalogRetryHint', 'Check your connection and try again.')} button={label('lbl.retry', 'Try again')} onPress={() => void refreshLiveSchedules()} /> : null}
       <Pressable onPress={() => go('search')} style={{marginTop: 14, marginHorizontal: 16, height: 48, borderRadius: 24, backgroundColor: th.soft, flexDirection: 'row', alignItems: 'center', gap: 10, paddingHorizontal: 16}}>
