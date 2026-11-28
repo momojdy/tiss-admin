@@ -117,7 +117,32 @@ export const DEFAULT_COPY:Record<string,string>={
   "Reference photo pending": "Reference photo pending",
   "Properties": "Properties",
   "Saved preferences are unavailable.": "Saved preferences are unavailable.",
-  "Changes could not be saved.": "Changes could not be saved."
+  "Changes could not be saved.": "Changes could not be saved.",
+  "Filter by country": "Filter by country",
+  "Custom boundary": "Custom boundary",
+  "Reference overview": "Reference overview",
+  "Offline overview · Natural Earth · sample pins": "Offline overview · Natural Earth · sample pins",
+  "Road map": "Road map",
+  "Road map · sample pins": "Road map · sample pins",
+  "Satellite map": "Satellite map",
+  "Satellite map · sample pins": "Satellite map · sample pins",
+  "Clear": "Clear",
+  "Draw": "Draw",
+  "Apply": "Apply",
+  "Trace or tap the boundary": "Trace or tap the boundary",
+  "The map could not convert this boundary. Try again.": "The map could not convert this boundary. Try again.",
+  "Home": "Home",
+  "Messages": "Messages",
+  "Notifications": "Notifications",
+  "Wallet": "Wallet",
+  "My Orders": "My Orders",
+  "Recent Activity": "Recent Activity",
+  "Help Center": "Help Center",
+  "Feedback": "Feedback",
+  "Business Space": "Business Space",
+  "Close menu": "Close menu",
+  "Unread counts unavailable · Retry": "Unread counts unavailable · Retry",
+  "Loading unread counts…": "Loading unread counts…"
 };
 export const IMAGE_SLOTS=["category.house","category.apt","category.villa","category.land","category.commercial","place.0","place.1","place.2","place.3","place.4","place.5"] as const;
 export type HomeCopy=Record<string,string>;
