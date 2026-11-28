@@ -1,7 +1,12 @@
 name: Habita admin validation
 on:
   push:
-    branches: [habita/homepage-cms-v17]
+    branches: [main]
+    paths:
+      - 'src/features/admin/screens/content/**'
+      - 'src/features/admin/lib/adminBackend.ts'
+      - 'package*.json'
+      - '.github/workflows/habita-admin-validation.yml'
   workflow_dispatch:
 permissions:
   contents: read
